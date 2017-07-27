@@ -1,0 +1,159 @@
+PROGRAM TestLagrangeClass_CUDA
+
+ USE ModelPrecision
+ USE ConstantsDictionary
+ USE CommonRoutines
+ USE Lagrange_Class
+ USE Lagrange_Cuda_Class
+ USE Quadrature
+ USE Timing
+ USE cudafor
+ 
+ IMPLICIT NONE
+ 
+
+ REAL(prec), PARAMETER :: dx = 0.01_prec
+ 
+ TYPE( MultiTimers ) :: timers
+ 
+ REAL(prec), ALLOCATABLE         :: s(:), w(:), sPlot(:), wp(:)
+ REAL(prec), ALLOCATABLE         :: f3D(:,:,:,:), df3d(:,:,:,:,:), df3dEx(:,:,:,:,:)
+ REAL(prec), ALLOCATABLE, DEVICE :: f3D_dev(:,:,:,:), df3d_dev(:,:,:,:,:)
+ REAL(prec)                      :: fErr, x, y, z, x1, y1, z1, memlim
+ 
+ INTEGER :: N, M, nXel, nEl, narg, istat, nXelMax
+ INTEGER :: i, j, k, kEl, jEl, iEl, eID, fUnit, iTest, errID
+ INTEGER, MANAGED :: nEl_dev
+ TYPE( Lagrange_Cuda ) :: interp
+ TYPE(dim3) :: grid, tBlock
+ TYPE(cudadeviceprop) :: prop
+ CHARACTER(len=32) :: arg
+
+
+    ! Default command line arguments !
+    N    = 7 
+    nXel = 50
+    narg = COMMAND_ARGUMENT_COUNT( )
+    
+    ! Get the CUDA device properties of device 0
+    istat = cudaGetDeviceProperties(prop, 0)
+    memlim = REAL(prop%totalGlobalMem,prec) ! Get the memory limit in Bytes
+
+
+    IF( narg==2 )THEN
+    !//////////////////////////// Read Command Line Arguments ////////////////////////////////////!
+    CALL GetArg(1, arg)
+    READ( arg, * ) N
+    M = 2*N
+    CALL GetArg(2, arg)
+    READ( arg, * ) nXel
+    
+    nXelMax = 55 !FLOOR( (1.0_prec/N) *(0.50_prec*memlim/(4*prec))**(1.0_prec/3.0_prec) )
+    IF( nXel > nXelMax )THEN
+       PRINT*,' Requesting too many elements '
+       PRINT*,' Global Memory on GPU ', TRIM(prop % name),' is ',memlim/1.0D9, 'GB'
+       PRINT*,' Using nXel = ', nXelMax
+       nXel = nXelMax
+    ENDIF
+    nEl = nXEl*nXEl*nXEl
+  
+    PRINT*, 'N     =',N
+    PRINT*, 'nElem =', nEl
+    
+    !/////////////////////////////////////////////////////////////////////////////////////////////!
+    ENDIF
+    
+    ALLOCATE( s(0:N), w(0:N), sPlot(0:M), wp(0:M), &
+              f3D(0:N,0:N,0:N,1:nEl), df3d(1:3,0:N,0:N,0:N,1:nEl), &
+              df3dEx(1:3,0:N,0:N,0:N,1:nEl) )
+    ALLOCATE( f3D_dev(0:N,0:N,0:N,1:nEl), df3d_dev(1:3,0:N,0:N,0:N,1:nEl) )
+    
+
+    nEl_dev = nEl
+    CALL timers % Build( )
+    CALL timers % AddTimer( 'ApplyDerivativeMatrix_3D_CUDA', 1 )
+    CALL timers % AddTimer( 'ApplyDerivativeMatrix_3D_Serial', 2 )
+ 
+    PRINT*, 'Program TestLagrangeClass_CUDA.f90 : Generating Legendre-Gauss Quadrature'
+    CALL LegendreQuadrature( N, s, w, GAUSS )
+    PRINT*, 'Program TestLagrangeClass_CUDA.f90 : Generating High Order Legendre-Gauss Quadrature'
+    CALL LegendreQuadrature( M, sPlot, wp, GAUSS )
+    CALL interp % Build( N, M, s, sPlot )
+    PRINT*,'--------------------------------------------------------------------------------------'
+    
+    ! Set up the functions to be tested 
+    
+
+    ! ////////////////// 3-D ////////////////////// !
+    ! Nodal values at the low order quadrature points
+    DO kEl = 1, nXel
+       z1 = REAL(kEl-1,prec)*dx
+       DO jEl = 1, nXel
+          y1 = REAL(jEl-1,prec)*dx
+          DO iEl = 1, nXel
+             x1 = REAL(iEl-1,prec)*dx
+             eID = iEl + ( (jEl-1) + (kEl-1)*nXel )*nXel
+             DO k = 0, N
+                z = z1 + dx/2.0_prec*s(k)
+                DO j = 0, N
+                   y = y1 + dx/2.0_prec*s(j)
+                   DO i = 0, N
+                      x = x1 + dx/2.0_prec*s(i)
+                      f3D(i,j,k,eID) = (x**2)*(y**2)*(z**2)
+             !         df3dEx(i,j,k,1,eID) = 2.0_prec*x*(y**2)*(z**2)
+             !         df3dEx(i,j,k,2,eID) = 2.0_prec*y*(x**2)*(z**2)
+             !         df3dEx(i,j,k,3,eID) = 2.0_prec*z*(x**2)*(y**2)
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
+    ENDDO
+    ! Copy f3D to the device
+    f3D_dev = f3D
+
+    ! Here we estimate derivatives of the of the function by calculating the derivative of the 
+    ! interpolant using the CUDA kernels to apply the matrix derivative.
+    CALL timers % StartTimer( 2 )
+    df3dEx     = interp % ApplyDerivativeMatrix_3D_Serial( f3D, nEl )
+    CALL timers % StopTimer( 2 ) 
+    !DO iTest = 1, nTests
+    CALL timers % StartTimer( 1 )
+    df3D_dev = interp % ApplyDerivativeMatrix_3D_Cuda( f3D_dev, nEl_dev )  
+    istat = cudaStreamSynchronize( )
+    CALL timers % StopTimer( 1 )
+    
+    CALL timers % Write_MultiTimers( ) 
+    !ENDDO
+
+    ! Copy back to host
+    df3d = df3d_dev
+    
+    ! Check for errors
+    fErr = 0.0_prec
+          DO iEl = 1, nEl
+             DO k = 0, N
+                DO j = 0, N
+                   DO i = 0, N
+                      fErr = fErr + &
+                           ( df3dEx(1,i,j,k,iEl) - df3d(1,i,j,k,iEl) )**2 +&
+                           ( df3dEx(2,i,j,k,iEl) - df3d(2,i,j,k,iEl) )**2 +&
+                           ( df3dEx(3,i,j,k,iEl) - df3d(3,i,j,k,iEl) )**2
+                   ENDDO
+                ENDDO
+             ENDDO
+          ENDDO
+      
+    
+    print*, 'Error :', sqrt(fErr)
+    CALL timers % PointToTimer( 1 )
+    print*, 'Speedup', timers % current % next % accumulatedTime/timers % current % accumulatedTime
+    
+    CALL interp % Trash( )
+
+    CALL timers % Trash( )
+    
+    DEALLOCATE( s, w, sPlot, wp, f3D, df3d, df3dEx )
+    DEALLOCATE( f3D_dev, df3d_dev )
+    
+END PROGRAM TestLagrangeClass_CUDA

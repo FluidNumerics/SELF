@@ -1,0 +1,127 @@
+! RollOffFilter_Cuda_Class.f90
+! 
+! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
+! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
+!
+! The SELF and accompanying documentation were produced in part under the 
+! support of Florida State University and the National Science Foundation 
+! through Grant OCE-1049131 during 2015 and in part under the support of the 
+! Center for Nonlinear Studies and the Department of Energy through the 
+! LANL/LDRD program in 2016.
+!
+! RollOffFilter_Cuda_Class.f90 is part of the Spectral Element Libraries in Fortran (SELF).
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
+
+MODULE RollOffFilter_Cuda_Class
+
+! src/common/
+USE ModelPrecision
+USE ConstantsDictionary
+USE CommonRoutines
+! src/spectralops/
+USE Quadrature
+! src/filters/
+USE RollOffFilter_Class
+
+IMPLICIT NONE
+
+
+   TYPE, EXTENDS( RollOffFilter ) :: RollOffFilter_Cuda
+      REAL(prec), DEVICE, ALLOCATABLE :: filterMat_dev(:,:)
+      
+      CONTAINS
+  
+      PROCEDURE :: Build => Build_RollOffFilter_Cuda
+      PROCEDURE :: Trash => Trash_RollOffFilter_Cuda
+
+   END TYPE RollOffFilter_Cuda
+
+ INTEGER, CONSTANT :: nCutoff_dev
+
+CONTAINS
+!
+!
+!==================================================================================================!
+!------------------------------- Manual Constructors/Destructors ----------------------------------!
+!==================================================================================================!
+!
+!
+ SUBROUTINE Build_RollOffFilter_Cuda( thisFilter, s, w, N, nCutoff )
+
+   IMPLICIT NONE
+   CLASS(RollOffFilter_Cuda), INTENT(inout) :: thisFilter
+   INTEGER, INTENT(in)                 :: N, nCutoff
+   REAL(prec), INTENT(in)              :: s(0:N)
+   REAL(prec), INTENT(in)              :: w(0:N)
+   ! Local
+   REAL(prec)              :: Lnorm, Li, Ls, sc, alpha, r
+   REAL(prec), ALLOCATABLE :: Pfilt(:,:), V(:,:), VInv(:,:)
+   INTEGER                 :: row, col 
+   
+      thisFilter % N       = N
+      thisFilter % nCutoff = nCutoff
+      thisFilter % nPacked = (N+1)*(N+1)-1
+
+      ALLOCATE( thisFilter % filterMat(0:N,0:N) )
+
+      ALLOCATE( Pfilt(0:N,0:N), V(0:N,0:N), VInv(0:N,0:N) )
+
+      thisFilter % filterMat = ZERO
+
+      Pfilt = ZERO
+      V     = ZERO
+      VInv  = ZERO
+
+      sc = real(nCutoff,prec)
+      alpha = 1.0_prec
+      DO row = 0, N 
+ 
+         r = real(row,prec)
+         Pfilt(row,row) = 0.5_prec*( 1.0_prec-tanh( (r-nCutoff)/alpha ) )
+         Lnorm = ZERO
+
+         DO col = 0, N
+
+            CALL LegendrePolynomial( row, s(col), Li, Ls)
+
+            Lnorm = Lnorm + Li*Li*w(col)
+            V(row,col) = Li*w(col)
+            ! The inverse of the modal projection matrix is easy to build since the Legendre basis
+            ! is an orthogonal basis
+            VInv(col,row) = Li
+              
+         ENDDO
+            V(row,0:N) = V(row,0:N)/Lnorm
+      ENDDO
+
+      Pfilt = MATMUL( Pfilt, V )
+      V = MATMUL( VInv, Pfilt )
+      thisFilter % filterMat = TRANSPOSE( V )
+      
+      DEALLOCATE( V, Pfilt, Vinv )
+
+      ! Device array
+      ALLOCATE( thisFilter % filterMat_dev(0:N,0:N) )
+      thisFilter % filterMat_dev = thisFilter % filterMat
+      
+ END SUBROUTINE Build_RollOffFilter_Cuda
+!
+ SUBROUTINE Trash_RollOffFilter_Cuda( thisFilter )
+
+   IMPLICIT NONE
+   CLASS(RollOffFilter_Cuda), INTENT(inout) :: thisFilter
+   
+      DEALLOCATE( thisFilter % filterMat )
+      DEALLOCATE( thisFilter % filterMat_dev )
+
+ END SUBROUTINE Trash_RollOffFilter_Cuda
+!
+!
+!==================================================================================================!
+!------------------------------------- Type Specific ----------------------------------------------!
+!==================================================================================================!
+!
+! 
+END MODULE RollOffFilter_Cuda_Class

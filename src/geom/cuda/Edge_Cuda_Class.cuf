@@ -1,0 +1,119 @@
+! Edge_Cuda_Class.f90
+! 
+! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
+! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
+!
+! The SELF and accompanying documentation were produced in part under the 
+! support of Florida State University and the National Science Foundation 
+! through Grant OCE-1049131 during 2015 and in part under the support of the 
+! Center for Nonlinear Studies and the Department of Energy through the 
+! LANL/LDRD program in 2016.
+!
+! Edge_Cuda_Class.f90 is part of the Spectral Element Libraries in Fortran (SELF).
+! 
+! Licensed under the Apache License, Version 2.0 (the "License"); 
+! You may obtain a copy of the License at 
+!
+! http://www.apache.org/licenses/LICENSE-2.0 
+!
+! Unless required by applicable law or agreed to in writing, software 
+! distributed under the License is distributed on an "AS IS" BASIS, 
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+! See the License for the specific language governing permissions and  
+! limitations under the License.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
+
+
+MODULE Edge_Cuda_Class
+
+! src/common/
+USE ModelPrecision
+! src/geom/
+USE Edge_Class
+
+IMPLICIT NONE
+
+   TYPE Edge_Cuda
+
+      INTEGER, DEVICE, ALLOCATABLE :: edgeID(:)            ! The Edge ID
+      INTEGER, DEVICE, ALLOCATABLE :: boundaryID(:)        ! If the Edge_Cuda is part of the mesh boundary, the Edge_Cuda gets assigned a boundary Edge_Cuda ID
+      INTEGER, DEVICE, ALLOCATABLE :: nodeIDs(:,:)         ! Node IDs which start and terminate this Edge_Cuda
+      INTEGER, DEVICE, ALLOCATABLE :: elementIDs(:,:)      ! Neighboring elements IDs across the Edge_Cuda
+      INTEGER, DEVICE, ALLOCATABLE :: elementSides(:,:)    ! Local side IDs for the neighboring elements
+      INTEGER, DEVICE, ALLOCATABLE :: start(:), inc(:)     ! Loop start and increment for the secondary element side (1st computational direction)
+
+      CONTAINS
+      
+      PROCEDURE :: Build => Build_Edge_Cuda
+      PROCEDURE :: Trash => Trash_Edge_Cuda
+      
+      PROCEDURE :: UpdateDevice => UpdateDevice_Edge_Cuda
+      
+   END TYPE Edge_Cuda
+
+   INTEGER, CONSTANT :: nEdges_dev
+
+
+ CONTAINS
+!
+!
+!==================================================================================================!
+!------------------------------- Manual Constructors/Destructors ----------------------------------!
+!==================================================================================================!
+!
+!
+ ATTRIBUTES(Host)SUBROUTINE Build_Edge_Cuda( myEdge, N, nEdges )
+
+   IMPLICIT NONE
+   CLASS( Edge_Cuda ), INTENT(out) :: myEdge
+   INTEGER, INTENT(in)             :: N, nEdges
+   
+      ALLOCATE( myEdge % edgeID(1:nEdges), &
+                myEdge % boundaryID(1:nEdges), &
+                myEdge % nodeIDs(1:2,1:nEdges), &
+                myEdge % elementIDs(1:2,1:nEdges), &
+                myEdge % elementSides(1:2,1:nEdges),&
+                myEdge % start(1:nEdges), &
+                myEdge % inc(1:nEdges) )
+     
+      nEdges_dev = nEdges
+      
+ END SUBROUTINE Build_Edge_Cuda
+!
+ ATTRIBUTES(Host) SUBROUTINE Trash_Edge_Cuda( myEdge )
+
+   IMPLICIT NONE
+   CLASS( Edge_Cuda ) :: myEdge
+
+      DEALLOCATE( myEdge % edgeID, &
+                  myEdge % boundaryID, &
+                  myEdge % nodeIDs, &
+                  myEdge % elementIDs, &
+                  myEdge % elementSides,&
+                  myEdge % start, &
+                  myEdge % inc )
+  
+ END SUBROUTINE Trash_Edge_Cuda
+!
+ ATTRIBUTES(Host) SUBROUTINE UpdateDevice_Edge_Cuda( myEdge, cpuEdgeArray, N, nEdges )
+ 
+   IMPLICIT NONE
+   CLASS( Edge_Cuda ), INTENT(inout) :: myEdge
+   INTEGER, INTENT(in)               :: N, nEdges
+   TYPE( Edge ), INTENT(in)          :: cpuEdgeArray(1:nEdges)
+   ! Local
+   INTEGER :: k
+   
+      DO k = 1, nEdges
+         myEdge % edgeID(k)         = cpuEdgeArray(k) % edgeID
+         myEdge % boundaryID(k)     = cpuEdgeArray(k) % boundaryID
+         myEdge % nodeIDs(1:2,k)    = cpuEdgeArray(k) % nodeIDs
+         myEdge % elementIDs(1:2,k) = cpuEdgeArray(k) % elementIDs
+         myEdge % start(k)          = cpuEdgeArray(k) % start
+         myEdge % inc(k)            = cpuEdgeArray(k) % inc
+      ENDDO
+
+ END SUBROUTINE UpdateDevice_Edge_Cuda
+END MODULE Edge_Cuda_Class

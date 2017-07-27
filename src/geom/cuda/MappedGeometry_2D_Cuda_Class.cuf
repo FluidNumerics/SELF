@@ -1,0 +1,134 @@
+! MappedGeometry_2D_Cuda_Class.f90
+! 
+! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
+! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
+!
+! The SELF and accompanying documentation were produced in part under the 
+! support of Florida State University and the National Science Foundation 
+! through Grant OCE-1049131 during 2015 and in part  the support of the 
+! Center for Nonlinear Studies and the Department of Energy through the 
+! LANL/LDRD program in 2016.
+!
+! MappedGeometry_2D_Cuda_Class.f90 is part of the Spectral Element Libraries in Fortran (SELF).
+! 
+! Licensed under the Apache License, Version 2.0 (the "License"); 
+! You may obtain a copy of the License at 
+!
+! http://www.apache.org/licenses/LICENSE-2.0 
+!
+! Unless required by applicable law or agreed to in writing, software 
+! distributed under the License is distributed on an "AS IS" BASIS, 
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+! See the License for the specific language governing permissions and  
+! limitations under the License.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
+!> \file MappedGeometry_2D_Cuda_Class.f90
+!! Contains the \ref MappedGeometry_2D_Cuda_Class module, and <BR>
+!! defines the \ref MappedGeometry_2D_Cuda data-structure.
+
+!> \defgroup MappedGeometry_2D_Cuda_Class MappedGeometry_2D_Cuda_Class 
+!! This module defines the MappedGeometry_2D_Cuda data-structure and its associated routines.
+
+MODULE MappedGeometry_2D_Cuda_Class
+
+! src/common/
+USE ModelPrecision
+! src/geom/
+USE MappedGeometry_2D_Class
+
+IMPLICIT NONE
+
+   TYPE MappedGeometry_2D_Cuda
+      REAL(prec), DEVICE, ALLOCATABLE    :: nHat_dev(:,:,:,:) 
+      REAL(prec), DEVICE, ALLOCATABLE    :: x_dev(:,:,:,:)
+      REAL(prec), DEVICE, ALLOCATABLE    :: J_dev(:,:,:)    
+      REAL(prec), DEVICE, ALLOCATABLE    :: dxds_dev(:,:,:), dxdp_dev(:,:,:)
+      REAL(prec), DEVICE, ALLOCATABLE    :: dyds_dev(:,:,:), dydp_dev(:,:,:)
+
+      CONTAINS
+
+      PROCEDURE :: Build => Build_MappedGeometry_2D_Cuda
+      PROCEDURE :: Trash => Trash_MappedGeometry_2D_Cuda
+      
+      PROCEDURE :: UpdateDevice => UpdateDevice_MappedGeometry_2D_Cuda
+
+
+   END TYPE MappedGeometry_2D_Cuda
+
+
+ 
+ CONTAINS
+!
+!
+!==================================================================================================!
+!------------------------------- Manual Constructors/Destructors ----------------------------------!
+!==================================================================================================!
+!
+!
+ ATTRIBUTES(Host) SUBROUTINE Build_MappedGeometry_2D_Cuda( myGeom, N, nElems )
+
+  IMPLICIT NONE
+  CLASS(MappedGeometry_2D_Cuda), INTENT(out) :: myGeom
+  INTEGER, INTENT(in)                        :: N, nElems
+
+      ALLOCATE( myGeom % dxds_dev(0:N,0:N,1:nElems), myGeom % dxdp_dev(0:N,0:N,1:nElems) )
+      ALLOCATE( myGeom % dyds_dev(0:N,0:N,1:nElems), myGeom % dydp_dev(0:N,0:N,1:nElems) )
+      ALLOCATE( myGeom % J_dev(0:N,0:N,1:nElems) )
+      ALLOCATE( myGeom % x_dev(1:2,0:N,0:N,1:nElems) )
+      ALLOCATE( myGeom % nHat_dev(1:2,0:N,1:4,1:nElems) )
+      
+      myGeom % dxds_dev = 0.0_prec
+      myGeom % dxdp_dev = 0.0_prec
+      myGeom % dyds_dev = 0.0_prec
+      myGeom % dydp_dev = 0.0_prec
+      myGeom % J_dev    = 0.0_prec
+      myGeom % x_dev    = 0.0_prec
+      myGeom % nHat_dev = 0.0_prec
+      
+ END SUBROUTINE Build_MappedGeometry_2D_Cuda
+!
+ ATTRIBUTES(Host) SUBROUTINE Trash_MappedGeometry_2D_Cuda( myGeom )
+
+   IMPLICIT NONE
+   CLASS(MappedGeometry_2D_Cuda), INTENT(inout)  :: myGeom
+
+      DEALLOCATE( myGeom % dxds_dev, myGeom % dxdp_dev )
+      DEALLOCATE( myGeom % dyds_dev, myGeom % dydp_dev )
+      DEALLOCATE( myGeom % J_dev )
+      DEALLOCATE( myGeom % x_dev )
+      DEALLOCATE( myGeom % nHat_dev )
+ 
+ END SUBROUTINE Trash_MappedGeometry_2D_Cuda
+!
+!
+!==================================================================================================!
+!--------------------------------- Type Specific Routines -----------------------------------------!
+!==================================================================================================!
+!
+!
+ ATTRIBUTES(Host) SUBROUTINE UpdateDevice_MappedGeometry_2D_Cuda( myGeom, cpuGeomArray, nElems )
+ 
+   IMPLICIT NONE
+   CLASS(MappedGeometry_2D_Cuda), INTENT(inout) :: myGeom
+   INTEGER, INTENT(in)                          :: nElems
+   TYPE(MappedGeometry_2D), INTENT(in)          :: cpuGeomArray(1:nElems)
+   ! Local
+   INTEGER :: i
+ !  REAL(prec) :: dxds(0:
+   
+      DO i = 1, nElems
+         myGeom % dxds_dev(:,:,i)    = cpuGeomArray(i) % dxds
+         myGeom % dxdp_dev(:,:,i)    = cpuGeomArray(i) % dxdp
+         myGeom % dyds_dev(:,:,i)    = cpuGeomArray(i) % dyds
+         myGeom % dydp_dev(:,:,i)    = cpuGeomArray(i) % dydp
+         myGeom % J_dev(:,:,i)       = cpuGeomArray(i) % J
+         myGeom % x_dev(1,:,:,i)     = cpuGeomArray(i) % x
+         myGeom % x_dev(2,:,:,i)     = cpuGeomArray(i) % y
+         myGeom % nHat_dev(:,:,:,i)  = cpuGeomArray(i) % nHat
+      ENDDO
+      
+ END SUBROUTINE UpdateDevice_MappedGeometry_2D_Cuda
+
+END MODULE MappedGeometry_2D_Cuda_Class

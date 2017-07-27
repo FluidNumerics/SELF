@@ -1,0 +1,287 @@
+! Lagrange_Cuda_Class.f90
+! 
+! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
+! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
+!
+! The SELF and accompanying documentation were produced in part under the 
+! support of Florida State University and the National Science Foundation 
+! through Grant OCE-1049131 during 2015 and in part  the support of the 
+! Center for Nonlinear Studies and the Department of Energy through the 
+! LANL/LDRD program in 2016.
+!
+! Lagrange_Cuda_Class.f90 is part of the Spectral Element Libraries in Fortran (SELF).
+! 
+! Licensed under the Apache License, Version 2.0 (the "License"); 
+! You may obtain a copy of the License at 
+!
+! http://www.apache.org/licenses/LICENSE-2.0 
+!
+! Unless required by applicable law or agreed to in writing, software 
+! distributed under the License is distributed on an "AS IS" BASIS, 
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+! See the License for the specific language governing permissions and  
+! limitations under the License.
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
+!> \file Lagrange_Cuda_Class.f90
+!! Contains the \ref Lagrange_Cuda_Class module, and <BR>
+!! defines the \ref Lagrange data-structure.
+
+
+!> \defgroup Lagrange_Cuda_Class Lagrange_Cuda_Class 
+!! This module defines the Lagrange data-structure and its associated routines.
+
+MODULE Lagrange_Cuda_Class
+
+!src/common
+USE ModelPrecision
+USE ConstantsDictionary
+USE CommonRoutines
+! src/interp
+USE InterpolationSupportRoutines
+
+IMPLICIT NONE
+
+!> \addtogroup Lagrange_Cuda_Class 
+!! @{
+
+!> \struct Lagrange
+!! A data-structure for handling Lagrange interpolation in one, two, or three dimensions
+!!
+!! The Lagrange data-structure stores the information necessary to interpolate between two
+!! sets of grid-points and to estimate the derivative of data at native grid points. Routines for
+!! multidimensional interpolation are based on the tensor product on two 1-D interpolants. It is 
+!! assumed that the polynomial degree (and the interpolation nodes) are the same in each direction.
+!! This assumption permits the storage of only one array of interpolation nodes and barycentric 
+!! weights and is what allows this data structure to be flexible.
+!!
+!! <H2> Lagrange </H2>
+!! <H3> Attributes </H3>
+!!    <table>
+!!       <tr> <th> N <td> INTEGER  <td> Number of native grid points
+!!       <tr> <th> M <td> INTEGER <td> Number of target grid points
+!!       <tr> <th> s(0:N) <td> REAL(prec) <td> Locations where we have observations (native grid points)
+!!       <tr> <th> bWs(0:N) <td> REAL(prec) <td> Barycentric interpolation weights 
+!!       <tr> <th> so(0:M) <td> REAL(prec) <td> Locations where we want observations (target grid points)
+!!       <tr> <th> Ts(0:M,0:N) <td> REAL(prec) <td> Interpolation matrix to help map an 
+!!                                    array of data given at the native nodes to the target nodes.
+!!       <tr> <th> Tp(0:M,0:N) <td> REAL(prec) <td> Transpose of the interpolation matrix to help
+!!                                     map an array of data given at the native nodes to the 
+!!                                     target nodes.
+!!       <tr> <th> D(0:N,0:N) <td> REAL(prec) <td> Derivative matrix to estimate the 
+!!                                    derivative of an interpolant at the native grid points in the 
+!!                                    first computational direction.
+!!       <tr> <th> DTr(0:N,0:N) <td> REAL(prec) <td> Derivative matrix to estimate the 
+!!                                    derivative of an interpolant at the native grid points in the 
+!!                                    second computational direction.
+!!    </table>
+!!
+!! <H3> Procedures </H3>
+!!    See \ref Lagrange_Cuda_Class for more information. The first column lists the "call-name" and 
+!!    the second column lists the name of routine that is aliased onto the call-name.
+!!    <table>
+!!       <tr> <th> Build <td> Build_Lagrange
+!!       <tr> <th> Trash <td> Trash_Lagrange
+!!       <tr> <th> CalculateLagrangePolynomials <td> CalculateLagrangePolynomials_Lagrange
+!!       <tr> <th> Interpolate_1D <td> Interpolate_1D_Lagrange
+!!       <tr> <th> Interpolate_2D <td> Interpolate_2D_Lagrange
+!!       <tr> <th> Interpolate_3D <td> Interpolate_3D_Lagrange
+!!       <tr> <th> Differentiate_1D <td> Differentiate_1D_Lagrange
+!!       <tr> <th> Differentiate_2D <td> Differentiate_2D_Lagrange
+!!       <tr> <th> Differentiate_3D <td> Differentiate_3D_Lagrange
+!!       <tr> <th> ApplyInterpolationMatrix_1D <td> ApplyInterpolationMatrix_1D_Lagrange
+!!       <tr> <th> ApplyInterpolationMatrix_2D <td> ApplyInterpolationMatrix_2D_Lagrange
+!!       <tr> <th> ApplyInterpolationMatrix_3D <td> ApplyInterpolationMatrix_3D_Lagrange
+!!       <tr> <th> ApplyDerivativeMatrix_1D <td> ApplyDerivativeMatrix_1D_Lagrange
+!!       <tr> <th> ApplyDerivativeMatrix_2D <td> ApplyDerivativeMatrix_2D_Lagrange
+!!       <tr> <th> ApplyDerivativeMatrix_3D <td> ApplyDerivativeMatrix_3D_Lagrange
+!!       <tr> <th> WriteTecplot_1D <td> WriteTecplot_1D_Lagrange
+!!       <tr> <th> WriteTecplot_2D <td> WriteTecplot_2D_Lagrange
+!!       <tr> <th> WriteTecplot_3D <td> WriteTecplot_3D_Lagrange
+!!    </table>
+!!
+
+!>@}
+
+   TYPE, EXTENDS( Lagrange ) :: Lagrange_Cuda
+    
+      REAL(prec) DEVICE, ALLOCATABLE :: DTr_dev(:,:) 
+      CONTAINS
+      
+      !-------------!
+      ! Constructors/Destructors
+      PROCEDURE :: Build => Build_Lagrange
+      PROCEDURE :: Trash => Trash_Lagrange
+
+      ! Type-Specific
+      
+      
+      PROCEDURE :: ApplyDerivativeMatrices_3D_ACC   => ApplyDerivativeMatrices_3D_Lagrange_OpenACC
+      
+      
+    END TYPE Lagrange_Cuda
+
+ CONTAINS
+!
+!
+!==================================================================================================!
+!------------------------------- Manual Constructors/Destructors ----------------------------------!
+!==================================================================================================!
+!
+!> \addtogroup Lagrange_Cuda_Class 
+!! @{ 
+! ================================================================================================ !
+! S/R Build
+!
+!>  \fn Build_Lagrange
+!!  A manual constructor for the Lagrange class that allocates memory and fills in data 
+!!  for the attributes of the Lagrange class.
+!! 
+!!  The Build subroutine allocates memory for the native and non-native grid points, barycentric
+!!  weights interpolation matrix, and derivative matrix. The native and non-native grid points are
+!!  filled in using the REAL(prec) input arrays "s" and "so". The barycentric weights are then 
+!!  calculated and stored. Once the barycentric weights are calculated, the interpolation and
+!!  derivative matrices are calculated and stored.
+!!
+!!  <H2> Usage : </H2>
+!!     <B>TYPE</B>(Lagrange) :: this <BR>
+!!         .... <BR>
+!!     <B>CALL</B> this % Build( N, M, s, so ) <BR>
+!!
+!!  <table>
+!!       <tr> <td> in/out <th> myPoly <td> TYPE(Lagrange) <td> The Lagrange data structure to 
+!!                                                                be constructed
+!!       <tr> <td> in <th> N <td> INTEGER <td> The number of native grid points
+!!       <tr> <td> in <th> M <td> INTEGER <td> The number of target grid points
+!!       <tr> <td> in <th> s(0:N) <td> REAL(prec) <td> The native grid points
+!!       <tr> <td> in <th> so(0:N) <td> REAL(prec) <td> The target grid points
+!!  </table>
+!!
+! =============================================================================================== !
+!>@}
+ SUBROUTINE Build_Lagrange( myPoly, N, M, s, so )
+
+   IMPLICIT NONE
+   CLASS(Lagrange_Cuda), INTENT(out)   :: myPoly
+   INTEGER, INTENT(in)            :: N, M
+   REAL(prec), INTENT(in)         :: s(0:N), so(0:M)
+   
+      ! Set the number of observations (those we have and those we want)
+      myPoly % N  = N
+      myPoly % Nc = N*(N+2)
+      myPoly % M  = M
+      myPoly % Mc = M*(M+2)
+      
+      ! Allocate storage
+      ALLOCATE( myPoly % s(0:N), myPoly % bWs(0:N) )
+      ALLOCATE( myPoly % so(0:M), myPoly % Ts(0:M,0:N), myPoly % Tp(0:N,0:M) )
+      ALLOCATE( myPoly % D(0:N,0:N), myPoly % DTr(0:N,0:N) )
+      myPoly % s   = 0.0_prec
+      myPoly % bWs = 0.0_prec
+      myPoly % so  = 0.0_prec
+      myPoly % Ts  = 0.0_prec
+      myPoly % Tp  = 0.0_prec
+      myPoly % D   = 0.0_prec
+      myPoly % DTr = 0.0_prec
+      
+      ! Fill in the nodal locations
+      myPoly % s(0:N)  = s(0:N)
+      myPoly % so(0:M) = so(0:M)
+
+      ! and calculate the barycentric weights for quick interpolation.
+      CALL myPoly % CalculateBarycentricWeights( )
+
+      ! Using the two nodal locations, we can construct the interpolation matrix. The interpolation
+      ! matrix enables quick interpolation.
+      CALL myPoly % CalculateInterpolationMatrix( )
+
+      CALL myPoly % CalculateDerivativeMatrix( )
+      
+      ALLOCATE( myPoly % DTr_dev(0:N,0:N) )
+      ! Copy the host derivative matrix to the device derivative matrix
+      myPoly % DTr_dev = myPoly % DTr
+ 
+ END SUBROUTINE Build_Lagrange
+!
+!
+!> \addtogroup Lagrange_Cuda_Class 
+!! @{ 
+! ================================================================================================ !
+! S/R Trash 
+! 
+!> \fn Trash_Lagrange
+!! A manual destructor for the Lagrange class that deallocates the memory held by its 
+!!  attributes. 
+!! 
+!! <H2> Usage : </H2> 
+!! <B>TYPE</B>(Lagrange) :: this <BR>
+!!         .... <BR>
+!!     <B>CALL</B> this % Trash( ) <BR>
+!!  
+!!  <H2> Parameters : </H2>
+!!  <table> 
+!!   <tr> <td> in/out <th> myPoly <td> TYPE(Lagrange) <td> 
+!!                       On <B>input</B>, the Lagrange data structure with attributes filled in. <BR>
+!!                       On <B>output</B>,the memory associated with this data-structure is freed.
+!!  </table>  
+!!   
+! ================================================================================================ ! 
+!>@}
+SUBROUTINE Trash_Lagrange(myPoly)
+
+   IMPLICIT NONE
+   CLASS(Lagrange_Cuda), INTENT(inout) :: myPoly
+
+      DEALLOCATE( myPoly % s, myPoly % bWs )
+      DEALLOCATE( myPoly % so, myPoly % Ts, myPoly % Tp )
+      DEALLOCATE( myPoly % D, myPoly % DTr )
+      
+      
+      DEALLOCATE( myPoly % DTr_dev )
+
+ END SUBROUTINE Trash_Lagrange
+!
+!
+!==================================================================================================!
+!--------------------------------- Type Specific Routines -----------------------------------------!
+!==================================================================================================!
+!
+!
+!
+ FUNCTION ApplyDerivativeMatrices_3D_Lagrange_OpenACC( myPoly, f, nElems ) RESULT( derF )  
+
+   IMPLICIT NONE
+   CLASS(Lagrange_Cuda)    :: myPoly
+   INTEGER                 :: nElems
+   REAL(prec), DEVICE      :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElems)
+   REAL(prec), DEVICE      :: derF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nElems)
+  ! Local
+  INTEGER :: i, j, k, iEl, ii
+  
+      ! Typically, N will vary between 4 and 10
+      ! and nElems can range up to 150,000 or more
+      
+      !$acc paralllel loop collapse(4) present( f, derf, myPoly % DTr_dev )
+      DO iEl = 1, nElems  ! << Largest Loop O( 100,000 )
+         DO k = 0, myPoly % N ! << O( 10 )
+            DO j = 0, myPoly % N ! << O( 10 )
+               DO i = 0, myPoly % N ! << O( 10 )
+               
+                  derf(1:3,i,j,k,iEl) = 0.0_prec
+                  DO ii = 0, myPoly % N ! << O( 10 ), Reduction loop ( vector-vector operation 
+                                        ! for a single i,j,k )
+                     derf(1,i,j,k,iEl) = derf(1,i,j,k,iEl) + myPoly % DTr_dev(ii,i)*f(ii,j,k,iEl)
+                     derf(2,i,j,k,iEl) = derf(2,i,j,k,iEl) + myPoly % DTr_dev(ii,j)*f(i,ii,k,iEl)
+                     derf(3,i,j,k,iEl) = derf(3,i,j,k,iEl) + myPoly % DTr_dev(ii,k)*f(i,j,ii,iEl)
+                  ENDDO
+               ENDDO
+               
+            ENDDO
+         ENDDO
+      ENDDO
+      
+ END FUNCTION ApplyDerivativeMatrices_3D_Lagrange_OpenACC
+!
+ 
+END MODULE Lagrange_Cuda_Class
