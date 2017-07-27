@@ -6,5 +6,6 @@ SELF-Fluids can be accelerated with CUDA Fortran and also supports multi-threadi
  
  
  ## Documentation
-  Documentation is in progress and will be posted here soon. Source code is kept private, but interested researchers should contact Joe at schoonover.numerics@gmail.com for precompiled libraries and executables.
+ 
+Documentation is in progress and will be posted here soon. Source code is kept private, but interested researchers should contact Joe at schoonover.numerics@gmail.com for precompiled libraries and executables.
  
