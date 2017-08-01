@@ -73,7 +73,7 @@ INCLUDE 'mpif.h'
 
     TYPE Fluid
       INTEGER                                     :: nEq, N, nBoundaryFaces, nNeighbors
-      TYPE( FluidParams )      :: params
+      TYPE( FluidParams )                         :: params
       REAL(prec), ALLOCATABLE                     :: dragProfile(:,:,:,:)
 #ifdef NEW_MPI
       TYPE( PairWiseMPIPacket ), ALLOCATABLE      :: mpiPackets(:)
