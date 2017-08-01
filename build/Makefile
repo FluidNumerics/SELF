@@ -18,7 +18,7 @@ MPILIB=
 MPIINC=
 FMACRO=
 # determine the main directory for this experiment
-SELFDIR=$(shell pwd | sed 's/\SELF.*/SELF/')
+SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 SRCDIR=${SELFDIR}/src/
 
 
@@ -222,7 +222,7 @@ GOBJ3 = ModelPrecision.o \
         HexElement_Class.o \
         HexMesh_Class.o \
         TopographicShapes.o \
-        Params_Class.o \
+        FluidParams_Class.o \
         BoundaryCommunicator_Class.o
 
 DecomposeHexMesh : ${GOBJ3} DecomposeHexMesh.o
@@ -257,7 +257,7 @@ EQMOBJ = ModelPrecision.o \
          HexElement_Class.o \
          QuadMesh_Class.o \
          HexMesh_Class.o \
-         Params_Class.o \
+         FluidParams_Class.o \
          BoundaryCommunicator_Class.o
 
 ExtrudeQuadMesh : ${EQMOBJ} ExtrudeQuadMesh.o 
@@ -265,28 +265,28 @@ ExtrudeQuadMesh : ${EQMOBJ} ExtrudeQuadMesh.o
 
 ## Programs
 GenerateMeshFiles_2D.o : ModelPrecision.o NodalStorage_Class.o QuadMesh_Class.o \
-                         BoundaryCommunicator_Class.o Params_Class.o ${SRCDIR}geom/GenerateMeshFiles_2D.f90
+                         BoundaryCommunicator_Class.o FluidParams_Class.o ${SRCDIR}geom/GenerateMeshFiles_2D.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/GenerateMeshFiles_2D.f90 -o $@
 
 GenerateMeshFiles_3D.o : ModelPrecision.o NodalStorage_Class.o HexMesh_Class.o \
-                         BoundaryCommunicator_Class.o TopographicShapes.o Params_Class.o ${SRCDIR}geom/GenerateMeshFiles_3D.f90
+                         BoundaryCommunicator_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/GenerateMeshFiles_3D.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/GenerateMeshFiles_3D.f90 -o $@
 
 ExtrudeQuadMesh.o : ModelPrecision.o NodalStorage_Class.o QuadMesh_Class.o HexMesh_Class.o \
-                    BoundaryCommunicator_Class.o Params_Class.o ${SRCDIR}geom/ExtrudeQuadMesh.f90
+                    BoundaryCommunicator_Class.o FluidParams_Class.o ${SRCDIR}geom/ExtrudeQuadMesh.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/ExtrudeQuadMesh.f90 -o $@
 
 DecomposeQuadMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
-                      NodalStorage_Class.o QuadMesh_Class.o Params_Class.o ${SRCDIR}geom/DecomposeQuadMesh.f90
+                      NodalStorage_Class.o QuadMesh_Class.o FluidParams_Class.o ${SRCDIR}geom/DecomposeQuadMesh.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/DecomposeQuadMesh.f90 -o $@
 
 
 DecomposeHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
-                      NodalStorage_Class.o HexMesh_Class.o TopographicShapes.o Params_Class.o ${SRCDIR}geom/DecomposeHexMesh.f90
+                      NodalStorage_Class.o HexMesh_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/DecomposeHexMesh.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/DecomposeHexMesh.f90 -o $@
 
 DecomposeStructuredHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
-                      NodalStorage_Class.o HexMesh_Class.o TopographicShapes.o Params_Class.o ${SRCDIR}geom/DecomposeStructuredHexMesh.f90
+                      NodalStorage_Class.o HexMesh_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/DecomposeStructuredHexMesh.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/DecomposeStructuredHexMesh.f90 -o $@
 	
 ## Modules 
@@ -379,14 +379,14 @@ TestQuadMesh_Cuda : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Link
                    InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Edge_Class.o QuadElement_Class.o Curve_Class.o MappedGeometry_2D_Class.o  QuadMesh_Class.o\
                    Node_Cuda_Class.o Edge_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_2D_Cuda_Class.o \
-                   QuadMesh_Cuda_Class.o Params_Class.o TestQuadMesh_Cuda.o
+                   QuadMesh_Cuda_Class.o FluidParams_Class.o TestQuadMesh_Cuda.o
 	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o HashTable_Class.o \
                    InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Edge_Class.o QuadElement_Class.o Curve_Class.o MappedGeometry_2D_Class.o  QuadMesh_Class.o\
                    Node_Cuda_Class.o Edge_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_2D_Cuda_Class.o \
-                   QuadMesh_Cuda_Class.o Params_Class.o TestQuadMesh_Cuda.o -o $@
+                   QuadMesh_Cuda_Class.o FluidParams_Class.o TestQuadMesh_Cuda.o -o $@
 
-TestQuadMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o Params_Class.o QuadMesh_Cuda_Class.o ${SRCDIR}geom/tests/QuadMesh_Cuda/IOandDataTransfers/TestQuadMesh_Cuda.f90
+TestQuadMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Class.o QuadMesh_Cuda_Class.o ${SRCDIR}geom/tests/QuadMesh_Cuda/IOandDataTransfers/TestQuadMesh_Cuda.f90
 	${FC} ${OPT} -c ${SELFDIR}/tests/QuadMesh_Cuda/IOandDataTransfers/TestQuadMesh_Cuda.f90 -o $@
 
 # --------- HexMesh ----------- #
@@ -394,27 +394,27 @@ TestHexMesh_Cuda : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Linke
                    InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Face_Class.o HexElement_Class.o Surface_Class.o MappedGeometry_3D_Class.o  HexMesh_Class.o\
                    Node_Cuda_Class.o Face_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_3D_Cuda_Class.o \
-                   HexMesh_Cuda_Class.o Params_Class.o TestHexMesh_Cuda.o
+                   HexMesh_Cuda_Class.o FluidParams_Class.o TestHexMesh_Cuda.o
 	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o KeyRing_Class.o \
                    InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Face_Class.o HexElement_Class.o Surface_Class.o MappedGeometry_3D_Class.o  HexMesh_Class.o\
                    Node_Cuda_Class.o Face_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_3D_Cuda_Class.o \
-                   HexMesh_Cuda_Class.o Params_Class.o TestHexMesh_Cuda.o -o $@
+                   HexMesh_Cuda_Class.o FluidParams_Class.o TestHexMesh_Cuda.o -o $@
 
-TestHexMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o Params_Class.o HexMesh_Cuda_Class.o ${SRCDIR}geom/tests/HexMesh_Cuda/IOandDataTransfers/TestHexMesh_Cuda.f90
+TestHexMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Class.o HexMesh_Cuda_Class.o ${SRCDIR}geom/tests/HexMesh_Cuda/IOandDataTransfers/TestHexMesh_Cuda.f90
 	${FC} ${OPT} -c ${SELFDIR}/tests/HexMesh_Cuda/IOandDataTransfers/TestHexMesh_Cuda.f90 -o $@
 
 
 # ---------------------------------------------------------------------- #
-#                            ~/src/templates/                            #
+#                             ~/src/viz                                  #
 # ---------------------------------------------------------------------- #
 
-Params_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SELFDIR}/src/templates/Params_Class.f90
-	${FC} ${OPT} -c ${SELFDIR}/src/templates/Params_Class.f90 -o $@
-
+Ray_Class.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o BoundaryCommunicator_Class.o \
+              MappedGeometry_3D_Class.o HexMesh_Class.o ${SRCDIR}viz/Ray_Class.f90
+	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}viz/Ray_Class.f90 -o $@
 
 # ---------------------------------------------------------------------- #
-#                          ~/src/template/Fluid                          #
+#                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
 	
 
@@ -495,30 +495,32 @@ EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 
 endif
 
-FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}Fluid/FluidParams_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}Fluid/FluidParams_Class.f90 -o $@
+FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}fluid/FluidParams_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
-Fluid_Class.o : ${EUDEP} ${SRCDIR}Fluid/Fluid_Class.f90
-	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}Fluid/Fluid_Class.f90 -o $@
+Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90
+	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
 	${FC} ${OPT} ${FMACRO} -c ${MODDIR}/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
 else
-Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/Fluid/
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}Fluid/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
+	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
 endif
 
-Fluid_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}Fluid/Fluid_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+Fluid_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
+	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${MPILIB} ${MPIINC} -o $@
 
 TestMPIStateExchange_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${MPILIB} ${MPIINC} -o $@
 	
 Fluid_PickupToTecplot.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${MPILIB} ${MPIINC} -o $@
 	
-	
+SampleAlongRays.o : ModelPrecision.o Fluid_Class.o Ray_Class.o ${SRCDIR}fluid/SampleAlongRays.f90
+	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
+
 initialize: ${CNOBJ} Fluid_InitialConditions.o
 	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${MPILIB} ${MPIINC} -o $@
  
@@ -532,6 +534,32 @@ test_stateExchange: ${CNOBJ} TestMPIStateExchange_Driver.o
 	${FC} ${OPT} ${CNOBJ} TestMPIStateExchange_Driver.o ${MPILIB} ${MPIINC} -o $@
 	
 	
+SOBJ = ModelPrecision.o \
+       ConstantsDictionary.o \
+       CommonRoutines.o \
+       InterpolationSupportRoutines.o \
+       Lagrange_Class.o \
+       Quadrature.o \
+       NodalStorage_Class.o \
+       RollOffFilter_Class.o \
+       DGSEMSolutionStorage_3D_Class.o \
+       LinkedList_Class.o \
+       KeyRing_Class.o \
+       Surface_Class.o \
+       MappedGeometry_3D_Class.o \
+       HexElement_Class.o \
+       Face_Class.o \
+       Node_Class.o \
+       HexMesh_Class.o \
+       BoundaryCommunicator_Class.o \
+       FluidParams_Class.o \
+       Fluid_Class.o \
+       Ray_Class.o \
+       SampleAlongRays.o
+
+sars: ${SOBJ}
+	${FC} ${OPT} ${FMACRO} ${SOBJ} -o $@ 	
+
 .PHONY : clean
 
 clean :

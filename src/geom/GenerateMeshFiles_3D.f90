@@ -19,11 +19,11 @@ USE TopographicShapes
 ! src/boundary/
 USE BoundaryCommunicator_Class
 ! src/templates
-USE Params_Class
+USE FluidParams_Class
 
  IMPLICIT NONE
  
-   TYPE( RunParams )            :: params
+   TYPE( FluidParams )            :: params
    TYPE( HexMesh )              :: mesh
    TYPE( BoundaryCommunicator ) :: extComm
    TYPE( NodalStorage )         :: dgStorage
