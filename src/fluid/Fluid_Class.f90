@@ -665,7 +665,7 @@ INCLUDE 'mpif.h'
 
 
       IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
-         CALL myDGSEM % CalculateSmoothedState( )
+         CALL myDGSEM % CalculateSmoothedState( .TRUE. )
       ENDIF
 
       CALL myDGSEM % CalculateBoundarySolution( )      ! 
@@ -680,7 +680,7 @@ INCLUDE 'mpif.h'
           myDGSEM % params % SubGridModel == Laplacian ) THEN
           
          IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN ! 
-            CALL myDGSEM % CalculateSmoothedState( )              ! No dependence; can start at same time as CalculateBoundarySolution
+            CALL myDGSEM % CalculateSmoothedState( .FALSE. )              ! No dependence; can start at same time as CalculateBoundarySolution
             CALL myDGSEM % CalculateSGSCoefficients( )            ! Depends on result of CalculateSmoothedState
             CALL myDGSEM % CalculateBoundarySGS( )                ! Depends on result of CalculateSGSCoefficients
             CALL myDGSEM % UpdateExternalSGS( myRank )            ! Depends on result of CalculateBoundarySGS
@@ -707,10 +707,11 @@ INCLUDE 'mpif.h'
       
  END SUBROUTINE GlobalTimeDerivative_Fluid
 !
-  SUBROUTINE CalculateSmoothedState_Fluid( myDGSEM )
+  SUBROUTINE CalculateSmoothedState_Fluid( myDGSEM, overwriteState )
  
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM 
+   LOGICAL, INTENT(in)         :: overWriteState
 #ifdef HAVE_CUDA
    ! Local
    TYPE(dim3) :: grid, tBlock
@@ -719,49 +720,97 @@ INCLUDE 'mpif.h'
                     4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
                     4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) )
       grid = dim3(myDGSEM % mesh % nElems, nEq-1, 1)
-   
-      CALL CalculateSmoothedState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-                                                               myDGSEM % filter % filterMat_dev, &
-                                                               myDGSEM % smoothState % solution_dev )
+  
+      IF( overWriteState )THEN 
+         CALL CalculateSmoothedState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+                                                                  myDGSEM % filter % filterMat_dev, &
+                                                                  myDGSEM % state % solution_dev )
+      ELSE
+         CALL CalculateSmoothedState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+                                                                  myDGSEM % filter % filterMat_dev, &
+                                                                  myDGSEM % smoothState % solution_dev )
+      ENDIF
+
 #else
    ! Local
    INTEGER :: iEl, iEq, i, j, k, ii, jj, kk
    REAL(prec) :: uijk, uij, ui
    
-      !$OMP DO
-      DO iEl = 1, myDGSEM % mesh % nElems
-         DO iEq = 1, nEq-1
-            DO k = 0, myDGSEM % N
-               DO j = 0, myDGSEM % N
-                  DO i = 0, myDGSEM % N
-                  
-                     uijk = 0.0_prec
-                     DO kk = 0, myDGSEM % N
+      IF( overWriteState )THEN
+
+         !$OMP DO
+         DO iEl = 1, myDGSEM % mesh % nElems
+            DO iEq = 1, nEq-1
+               DO k = 0, myDGSEM % N
+                  DO j = 0, myDGSEM % N
+                     DO i = 0, myDGSEM % N
                      
-                        uij = 0.0_prec
-                        DO jj = 0, myDGSEM % N
-                           
-                           ui = 0.0_prec
-                           DO ii = 0, myDGSEM % N
-                              ui = ui + myDGSEM % filter % filterMat(ii,i)*&
-                                        myDGSEM % state % solution(ii,jj,kk,iEq,iEl)
+                        uijk = 0.0_prec
+                        DO kk = 0, myDGSEM % N
+                        
+                           uij = 0.0_prec
+                           DO jj = 0, myDGSEM % N
+                              
+                              ui = 0.0_prec
+                              DO ii = 0, myDGSEM % N
+                                 ui = ui + myDGSEM % filter % filterMat(ii,i)*&
+                                           myDGSEM % state % solution(ii,jj,kk,iEq,iEl)
+                              ENDDO
+                              
+                              uij = uij + myDGSEM % filter % filterMat(jj,j)*ui
                            ENDDO
                            
-                           uij = uij + myDGSEM % filter % filterMat(jj,j)*ui
+                           uijk = uijk + myDGSEM % filter % filterMat(kk,k)*uij
+                           
                         ENDDO
                         
-                        uijk = uijk + myDGSEM % filter % filterMat(kk,k)*uij
+                        myDGSEM % state % solution(i,j,k,iEq,iEl) = uijk
                         
                      ENDDO
-                     
-                     myDGSEM % smoothState % solution(i,j,k,iEq,iEl) = uijk
-                     
                   ENDDO
                ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      !$OMP ENDDO
+        !$OMP ENDDO
+ 
+     ELSE
+
+         !$OMP DO
+         DO iEl = 1, myDGSEM % mesh % nElems
+            DO iEq = 1, nEq-1
+               DO k = 0, myDGSEM % N
+                  DO j = 0, myDGSEM % N
+                     DO i = 0, myDGSEM % N
+                     
+                        uijk = 0.0_prec
+                        DO kk = 0, myDGSEM % N
+                        
+                           uij = 0.0_prec
+                           DO jj = 0, myDGSEM % N
+                              
+                              ui = 0.0_prec
+                              DO ii = 0, myDGSEM % N
+                                 ui = ui + myDGSEM % filter % filterMat(ii,i)*&
+                                           myDGSEM % state % solution(ii,jj,kk,iEq,iEl)
+                              ENDDO
+                              
+                              uij = uij + myDGSEM % filter % filterMat(jj,j)*ui
+                           ENDDO
+                           
+                           uijk = uijk + myDGSEM % filter % filterMat(kk,k)*uij
+                           
+                        ENDDO
+                        
+                        myDGSEM % smoothState % solution(i,j,k,iEq,iEl) = uijk
+                        
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+        !$OMP ENDDO
+
+     ENDIF
       
 #endif
 
