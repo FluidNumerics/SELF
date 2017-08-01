@@ -254,10 +254,12 @@ USE ConstantsDictionary
       thisParam % SubGridModel = Laplacian ! convert to the integer flag
       ELSEIF( TRIM(UpperCase( SubGridModel) )=='SPECTRALEKE' )THEN
          thisParam % SubGridModel = SpectralEKE
+      ELSEIF( TRIM(UpperCase( SubGridModel) )=='SPECTRALFILTERING' )THEN
+         thisParam % SubGridModel = SpectralFiltering
       ELSE
          PRINT*, 'Module FluidParams_Class.f90 : S/R Build '
          PRINT*, '   Invalid SubGridModel : '//UpperCase(SubGridModel)
-         PRINT*, '   Valid options are "Laplacian" or "SpectralEKE"'
+         PRINT*, '   Valid options are "Laplacian", "SpectralEKE", or "SpectralFiltering"'
          STOP 'STOPPING!'
       ENDIF
       !thisParam % subGridModel = subGridModel
