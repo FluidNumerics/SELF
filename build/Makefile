@@ -54,9 +54,6 @@ else
     FMACRO+=-DHAVE_OPENMP
   endif
   
-  ifeq (${TESTING},yes)
-    FMACRO+=-DTESTING
-  endif
   
   ifeq (${MPI},yes)
     $(info 'Compiling with GNU Fortran OpenMPI')
@@ -74,6 +71,10 @@ endif
 
 ifeq (${TIMING},yes)
   FMACRO+=-DTIMING
+endif
+
+ifeq (${TESTING},yes)
+  FMACRO+=-DTESTING
 endif
 
 # ---------------------------------------------------------------------- #
@@ -436,10 +437,15 @@ ifeq (${CUDA},yes)
 
 CNOBJ = ModelPrecision.o \
         ConstantsDictionary.o \
-        CommonRoutines.o \
-        Timing.o \
-        LinkedList_Class.o \
-        HashTable_Class.o \
+        CommonRoutines.o
+
+ifeq (${TESTING},yes)
+CNOBJ += ModelDataInstances_Class.o
+endif
+
+CNOBJ += Timing.o \
+         LinkedList_Class.o \
+         HashTable_Class.o \
          KeyRing_Class.o \
          Quadrature.o \
          InterpolationSupportRoutines.o \
@@ -467,7 +473,7 @@ CNOBJ = ModelPrecision.o \
          BoundaryCommunicator_Class.o \
          BoundaryCommunicator_Cuda_Class.o \
          Fluid_Class.o
-         
+ 
 EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 Lagrange_Class.o Lagrange_Cuda_Class.o NodalStorage_Class.o NodalStorage_Cuda_Class.o\
                 RollOffFilter_Cuda_Class.o DGSEMSolutionStorage_3D_Cuda_Class.o \
