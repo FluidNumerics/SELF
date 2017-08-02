@@ -41,7 +41,7 @@ ifeq (${CUDA},yes)
 
 else
 
-  FMACRO=-cpp 
+  FMACRO=-Mpreprocess 
   FC=pgfortran
   ifeq (${DEBUG},yes)
     OPT=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
@@ -54,10 +54,6 @@ else
     FMACRO+=-DHAVE_OPENMP
   endif
   
-  ifeq (${LOOP_LEVEL},yes)
-    FMACRO+=-DLOOP_LEVEL
-  endif
-
   ifeq (${TESTING},yes)
     FMACRO+=-DTESTING
   endif
@@ -180,10 +176,10 @@ RollOffFilter_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutin
 #                        ~/src/integration_testing/                      #
 # ---------------------------------------------------------------------- #
 
-cmdi : ModelPrecision.o ModelDataInstances_Class.o CompareModelDataInstances.o
-        ${FC} ${OPT} ModelPrecision.o ModelDataInstances_Class.o CompareModelDataInstances.o -o $@
+cmdi : ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o
+	${FC} ${OPT} ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o -o $@
 
-ModelDataInstances_Class.o : ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 ModelPrecision.o
+ModelDataInstances_Class.o : ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 ModelPrecision.o CommonRoutines.o
 	${FC} ${OPT} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
 
 CompareModelDataInstances.o : ${SRCDIR}integration_testing/CompareModelDataInstances.f90 ModelDataInstances_Class.o ModelPrecision.o
@@ -545,8 +541,8 @@ endif
 FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}fluid/FluidParams_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
-Fluid_Class.o : ${EUDEP} ${SRCDIR}Fluid/Fluid_Class.f90 ModelDataInstances_Class.o
-	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}Fluid/Fluid_Class.f90 -o $@
+Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
+	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90

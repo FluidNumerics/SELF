@@ -9,6 +9,7 @@ MODULE ModelDataInstances_Class
 
 !src/common/
 USE ModelPrecision
+USE CommonRoutines
 
 IMPLICIT NONE
 
@@ -21,7 +22,6 @@ IMPLICIT NONE
       CHARACTER(strLen)               :: moduleName
       CHARACTER(strLen)               :: subroutineName
       CHARACTER(strLen)               :: statusCheckName
-      INTEGER                         :: lineNumber
       INTEGER                         :: instanceID
       INTEGER                         :: nObs
       INTEGER                         :: arraySize
@@ -147,7 +147,6 @@ IMPLICIT NONE
                                        moduleName, &
                                        subroutineName, &
                                        statusCheckName, &
-                                       lineNumber, &
                                        arraySize, &
                                        array )
    IMPLICIT NONE
@@ -155,8 +154,8 @@ IMPLICIT NONE
    CHARACTER(*), INTENT(in)                   :: moduleName
    CHARACTER(*), INTENT(in)                   :: subroutineName
    CHARACTER(*), INTENT(in)                   :: statusCheckName
-   INTEGER, INTENT(in)                        :: lineNumber, arraySize
-   REAL(prec), INTENT(in)                :: array(1:arraySize)
+   INTEGER, INTENT(in)                        :: arraySize
+   REAL(prec), INTENT(in)                     :: array(1:arraySize)
    ! Local
    LOGICAL :: success
 
@@ -168,7 +167,6 @@ IMPLICIT NONE
          CALL theInstances % AddInstance( moduleName, &
                                           subroutineName, &
                                           statusCheckName, &
-                                          lineNumber, &
                                           arraySize, &
                                           array )
         ! PRINT*, 'ModelDataInstances_Class.f90 : Update_ModelDataInstances '
@@ -195,7 +193,6 @@ IMPLICIT NONE
                                             moduleName, &
                                             subroutineName, &
                                             statusCheckName, &
-                                            lineNumber,& 
                                             arraySize, &
                                             array )
  
@@ -204,7 +201,7 @@ IMPLICIT NONE
    CHARACTER(*)                               :: moduleName
    CHARACTER(*)                               :: subroutineName
    CHARACTER(*)                               :: statusCheckName
-   INTEGER                                    :: lineNumber, arraySize
+   INTEGER                                    :: arraySize
    REAL(prec), OPTIONAL                  :: array(1:arraySize)
    ! LOCAL
    INTEGER :: allocationStatus
@@ -417,7 +414,6 @@ IMPLICIT NONE
          WRITE(fUnit,*) TRIM( theInstances % current % moduleName )
          WRITE(fUnit,*) TRIM( theInstances % current % subroutineName )
          WRITE(fUnit,*) TRIM( theInstances % current % statusCheckName )
-         WRITE(fUnit,*) theInstances % current % lineNumber
          WRITE(fUnit,*) theInstances % current % arraySize
          WRITE(fUnit,*) theInstances % current % instanceID
          WRITE(fUnit,*) '------------------------------------------------------------'
@@ -461,7 +457,7 @@ IMPLICIT NONE
    INTEGER           :: k, fUnit, fUnit2, recID, i, ioErr, rStart, chunkSizeUsed, nChunks
    CHARACTER(3)      :: countChar 
    CHARACTER(strLen) :: moduleName, subroutineName, statusCheckName, dummyChar
-   INTEGER           :: lineNumber, arraySize, instanceID
+   INTEGER           :: arraySize, instanceID
    REAL(prec)   :: bufferArray(1:ioChunkSize)
 
       WRITE( countChar, '(I3.3)' ) obsCount
@@ -500,7 +496,6 @@ IMPLICIT NONE
          IF( ioErr < 0 ) EXIT
          READ(fUnit,strFMT) subroutineName
          READ(fUnit,strFMT) statusCheckName
-         READ(fUnit,*) lineNumber
          READ(fUnit,*) arraySize
          READ(fUnit,*) instanceID
          READ(fUnit,strFMT) dummyChar
@@ -509,7 +504,6 @@ IMPLICIT NONE
            CALL theInstances % AddInstance( moduleName, &
                                             subroutineName, &
                                             statusCheckName, &
-                                            lineNumber, &
                                             arraySize )
          ELSE
             CALL theInstances % PointToInstance( CharToIntHashFunction(statusCheckName) )
@@ -558,49 +552,4 @@ IMPLICIT NONE
 
  END FUNCTION CharToIntHashFunction
 !
- FUNCTION UpperCase( str ) RESULT( upper )
-
-    IMPLICIT NONE
-    CHARACTER(strLen), INTENT(IN) :: str
-    CHARACTER(strLen)           :: Upper
-
-    INTEGER :: ic, i
-
-    CHARACTER(27), PARAMETER :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ '
-    CHARACTER(27), PARAMETER :: low = 'abcdefghijklmnopqrstuvwxyz '
-
-    DO i = 1, LEN_TRIM(str)
-        ic = INDEX(low, str(i:i))
-        IF (ic > 0)THEN
-         Upper(i:i) = cap(ic:ic)
-        ELSE
-         Upper(i:i) = str(i:i)
-        ENDIF
-    ENDDO
-
- END FUNCTION UpperCase
-!
- INTEGER FUNCTION NewUnit(thisunit)
- 
-   IMPLICIT NONE
-   INTEGER, INTENT(out), OPTIONAL :: thisunit
-   ! Local
-   INTEGER, PARAMETER :: unitMin=100, unitMax=1000
-   LOGICAL :: isopened
-   INTEGER :: iUnit
-
-     newunit=-1
-
-     DO iUnit=unitMin, unitMax
-        ! Check to see IF this UNIT is opened
-        INQUIRE(UNIT=iUnit,opened=isopened)
-        IF( .not. isopened )THEN
-           newunit=iUnit
-           EXIT
-        ENDIF
-     ENDDO
-
-     IF (PRESENT(thisunit)) thisunit = newunit
- 
-END FUNCTION NewUnit
 END MODULE ModelDataInstances_Class
