@@ -1,26 +1,8 @@
 ! RollOffFilter_Class.f90
 ! 
-! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
-! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
+! Copyright 2017,2018 Joseph Schoonover <schoonover.numerics@gmail.com>
 !
-! The SELF and accompanying documentation were produced in part under the 
-! support of Florida State University and the National Science Foundation 
-! through Grant OCE-1049131 during 2015 and in part under the support of the 
-! Center for Nonlinear Studies and the Department of Energy through the 
-! LANL/LDRD program in 2016.
-!
-! RollOffFilter_Class.f90 is part of the Spectral Element Libraries in Fortran (SELF).
-! 
-! Licensed under the Apache License, Version 2.0 (the "License"); 
-! You may obtain a copy of the License at 
-!
-! http://www.apache.org/licenses/LICENSE-2.0 
-!
-! Unless required by applicable law or agreed to in writing, software 
-! distributed under the License is distributed on an "AS IS" BASIS, 
-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-! See the License for the specific language governing permissions and  
-! limitations under the License.
+! RollOffFilter_Class.f90 is part of the SELF-Fluids.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -177,7 +159,8 @@ CONTAINS
       DO row = 0, N 
  
          r = real(row,prec)
-         Pfilt(row,row) = exp( -alpha*r**2 )
+         !Pfilt(row,row) = exp( -alpha*r**2 )
+         Pfilt(row,row) = 0.5_prec*(1.0_prec - tanh( (r-nCutoff) ) )
          Lnorm = ZERO
 
          DO col = 0, N
