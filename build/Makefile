@@ -75,8 +75,8 @@ endif
 
 ifeq (${TESTING},yes)
   ifeq (${MPI},yes)
-    @echo '>>> Testing is currently not a functional or supported feature in SELF-Fluids'
-    @echo '>>> Disabling Testing.'
+    $(info '>>> Testing with MPI is currently not a functional or supported feature in SELF-Fluids')
+    $(info '>>> Disabling Testing.')
     TESTING=no
   else
     FMACRO+=-DTESTING
