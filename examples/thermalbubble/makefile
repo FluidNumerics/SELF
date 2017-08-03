@@ -1,6 +1,6 @@
 
 SHELL=/bin/bash
-SELFDIR=$(shell pwd | sed 's/\SELF.*/SELF/')
+SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 INITDIR=$(shell pwd)
 
 .PHONY: DecomposeStructuredHexMesh \

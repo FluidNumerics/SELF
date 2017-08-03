@@ -7,7 +7,7 @@
 
 SHELL=/bin/bash
 
-FC=gfortran
+FC=pgfortran
 OPT=
 METISLIB=-L/usr/local/lib/ -lmetis
 LIB=
@@ -41,12 +41,12 @@ ifeq (${CUDA},yes)
 
 else
 
-  FMACRO=-cpp 
-  FC=gfortran
+  FMACRO=-Mpreprocess 
+  FC=pgfortran
   ifeq (${DEBUG},yes)
     OPT=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
   else
-    OPT=-O2 -ffree-line-length-none
+    OPT=-fast
   endif
   
   ifeq (${OPENMP},yes)
@@ -54,9 +54,6 @@ else
     FMACRO+=-DHAVE_OPENMP
   endif
   
-  ifeq (${LOOP_LEVEL},yes)
-    FMACRO+=-DLOOP_LEVEL
-  endif
   
   ifeq (${MPI},yes)
     $(info 'Compiling with GNU Fortran OpenMPI')
@@ -74,6 +71,10 @@ endif
 
 ifeq (${TIMING},yes)
   FMACRO+=-DTIMING
+endif
+
+ifeq (${TESTING},yes)
+  FMACRO+=-DTESTING
 endif
 
 # ---------------------------------------------------------------------- #
@@ -170,6 +171,20 @@ RollOffFilter_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o 
 
 RollOffFilter_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o RollOffFilter_Class.o ${SRCDIR}filters/cuda/RollOffFilter_Cuda_Class.cuf
 	${FC} ${OPT} -c ${SRCDIR}filters/cuda/RollOffFilter_Cuda_Class.cuf -o $@
+
+   
+# ---------------------------------------------------------------------- #
+#                        ~/src/integration_testing/                      #
+# ---------------------------------------------------------------------- #
+
+cmdi : ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o
+	${FC} ${OPT} ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o -o $@
+
+ModelDataInstances_Class.o : ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 ModelPrecision.o CommonRoutines.o
+	${FC} ${OPT} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
+
+CompareModelDataInstances.o : ${SRCDIR}integration_testing/CompareModelDataInstances.f90 ModelDataInstances_Class.o ModelPrecision.o
+	${FC} ${OPT} -c ${SRCDIR}integration_testing/CompareModelDataInstances.f90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #
@@ -422,10 +437,15 @@ ifeq (${CUDA},yes)
 
 CNOBJ = ModelPrecision.o \
         ConstantsDictionary.o \
-        CommonRoutines.o \
-        Timing.o \
-        LinkedList_Class.o \
-        HashTable_Class.o \
+        CommonRoutines.o
+
+ifeq (${TESTING},yes)
+CNOBJ += ModelDataInstances_Class.o
+endif
+
+CNOBJ += Timing.o \
+         LinkedList_Class.o \
+         HashTable_Class.o \
          KeyRing_Class.o \
          Quadrature.o \
          InterpolationSupportRoutines.o \
@@ -453,7 +473,7 @@ CNOBJ = ModelPrecision.o \
          BoundaryCommunicator_Class.o \
          BoundaryCommunicator_Cuda_Class.o \
          Fluid_Class.o
-         
+ 
 EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 Lagrange_Class.o Lagrange_Cuda_Class.o NodalStorage_Class.o NodalStorage_Cuda_Class.o\
                 RollOffFilter_Cuda_Class.o DGSEMSolutionStorage_3D_Cuda_Class.o \
@@ -461,6 +481,33 @@ EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 Face_Cuda_Class.o Element_Cuda_Class.o HexMesh_Cuda_Class.o BoundaryCommunicator_Cuda_Class.o \
                 FluidParams_Class.o
                 
+else
+
+ifeq ($(TESTING),yes)
+CNOBJ = ModelPrecision.o \
+        ConstantsDictionary.o \
+        CommonRoutines.o \
+        Timing.o \
+        LinkedList_Class.o \
+        HashTable_Class.o \
+         KeyRing_Class.o \
+         ModelDataInstances_Class.o \
+         Quadrature.o \
+         InterpolationSupportRoutines.o \
+         Lagrange_Class.o \
+         NodalStorage_Class.o \
+         RollOffFilter_Class.o \
+         DGSEMSolutionStorage_3D_Class.o \
+         Node_Class.o \
+         Face_Class.o \
+         Curve_Class.o \
+         Surface_Class.o \
+         MappedGeometry_3D_Class.o \
+         HexElement_Class.o \
+         HexMesh_Class.o \
+         FluidParams_Class.o \
+         BoundaryCommunicator_Class.o \
+         Fluid_Class.o
 else
 CNOBJ = ModelPrecision.o \
         ConstantsDictionary.o \
@@ -485,6 +532,8 @@ CNOBJ = ModelPrecision.o \
          FluidParams_Class.o \
          BoundaryCommunicator_Class.o \
          Fluid_Class.o
+
+endif
          
 EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 Lagrange_Class.o NodalStorage_Class.o \
@@ -498,7 +547,7 @@ endif
 FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}fluid/FluidParams_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
-Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90
+Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
 	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
 
 ifdef MODDIR
