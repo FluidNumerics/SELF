@@ -226,7 +226,7 @@ INCLUDE 'mpif.h'
       IF( prec == sp )THEN
          MPI_PREC = MPI_FLOAT
       ELSE
-         MPI_PREC = MPI_PREC
+         MPI_PREC = MPI_DOUBLE
       ENDIF
 #endif
       callid = 0
@@ -337,6 +337,7 @@ INCLUDE 'mpif.h'
 
 #ifdef HAVE_MPI
       CALL myDGSEM % ConstructCommTables( myRank, nProc )
+      PRINT*, ' ConstructCommTables Finished'
 #endif
 
  END SUBROUTINE Build_Fluid
@@ -1815,12 +1816,14 @@ INCLUDE 'mpif.h'
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2
    INTEGER    :: iNeighbor, iUnpacked
+   INTEGER    :: nmsg(1:myDGSEM % nNeighbors)
    INTEGER    :: recvReq(1:myDGSEM % nNeighbors), sendRecvReq(1:myDGSEM % nNeighbors*2)
    INTEGER    :: theStats(MPI_STATUS_SIZE,2*myDGSEM % nNeighbors)
 
 
      
       ! On this first pass through the boundary cells, we need to load up the send buffer
+      nmsg = 0
       DO bID = 1, myDGSEM % extComm % nBoundaries
      
          iFace = myDGSEM % extComm % boundaryIDs( bID )
@@ -1833,7 +1836,7 @@ INCLUDE 'mpif.h'
          ! message exchange
          IF( p2 /= myRank )THEN 
         
-            nmsg( myDGSEM % rankTable(p2) )= nmsg( myDGSEM % rankTable(p2) ) + 1
+            nmsg(myDGSEM % rankTable(p2)) = nmsg(myDGSEM % rankTable(p2)) + 1
             myDGSEM % mpiPackets( myDGSEM % rankTable(p2) ) % &
               sendStateBuffer(:,:,:,nmsg(myDGSEM % rankTable(p2)) ) = myDGSEM % state % boundarySolution(:,:,:,e1,s1)
            
@@ -1845,6 +1848,7 @@ INCLUDE 'mpif.h'
      
       DO iNeighbor = 1, myDGSEM % nNeighbors
            
+            PRINT*, myRank, myDGSEM % mpiPackets(iNeighbor) % neighborRank
             CALL MPI_IRECV( myDGSEM % mpiPackets( iNeighbor ) % recvStateBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &
                            MPI_PREC,   & 
@@ -1862,7 +1866,7 @@ INCLUDE 'mpif.h'
                           
       ENDDO
 
-      CALL MPI_WaitAll( myDGSEM % nNeighbors*2, sendRecvReq,theStat,iError)
+      CALL MPI_WaitAll( myDGSEM % nNeighbors*2, sendRecvReq,theStats,iError)
 
       ! Reorganize the recvBuffer into the boundarysolution
       DO bID = 1, myDGSEM % extComm % nBoundaries
