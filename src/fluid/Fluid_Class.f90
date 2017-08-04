@@ -233,7 +233,7 @@ INCLUDE 'mpif.h'
       IF( prec == sp )THEN
          MPI_PREC = MPI_FLOAT
       ELSE
-         MPI_PREC = MPI_PREC
+         MPI_PREC = MPI_DOUBLE
       ENDIF
 #endif
       callid = 0
