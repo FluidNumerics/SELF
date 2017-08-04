@@ -683,6 +683,7 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % CalculateSmoothedState( .TRUE. )
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % state % solution = myDGSEM % state % solution_dev
 #endif
@@ -691,6 +692,7 @@ INCLUDE 'mpif.h'
                             'Smooth State for Spectral Filtering', &
                              SIZE(myDGSEM % state % solution), &
                              PACK(myDGSEM % state % solution,.TRUE.) )
+      ENDIF
 #endif
       ENDIF
 
@@ -706,6 +708,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % CalculateBoundarySolution( ) 
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
 #endif
@@ -714,6 +717,7 @@ INCLUDE 'mpif.h'
                             'Interpolation to element boundaries', &
                              SIZE(myDGSEM % state % boundarySolution), &
                              PACK(myDGSEM % state % boundarySolution,.TRUE.) )
+     ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -726,6 +730,7 @@ INCLUDE 'mpif.h'
 
       CALL myDGSEM % UpdateExternalState( tn, myRank ) 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % state % externalState = myDGSEM % state % externalState_dev
 #endif
@@ -734,6 +739,7 @@ INCLUDE 'mpif.h'
                             'Update of Boundary Conditions', &
                              SIZE(myDGSEM % externalState), &
                              PACK(myDGSEM % externalState,.TRUE.) )
+     ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -749,6 +755,18 @@ INCLUDE 'mpif.h'
 
 #ifdef HAVE_MPI
       CALL myDGSEM % MPI_StateExchange( myRank ) 
+#ifdef TESTING
+      IF( myRank == 0 )THEN
+#ifdef CUDA
+         myDGSEM % state % externalState = myDGSEM % state % externalState_dev
+#endif
+         CALL mdi % Update( 'Fluid_Class.f90', &
+                            'MPI_StateExchange', &
+                            'Update of MPI Boundaries', &
+                             SIZE(myDGSEM % externalState), &
+                             PACK(myDGSEM % externalState,.TRUE.) )
+     ENDIF
+#endif
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -771,6 +789,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % FaceFlux( )
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % state % boundaryFlux = myDGSEM % state % boundaryFlux_dev
 #endif
@@ -779,6 +798,7 @@ INCLUDE 'mpif.h'
                             'Update of boundary fluxes', &
                              SIZE(myDGSEM % state % boundaryFlux), &
                              PACK(myDGSEM % state % boundaryFlux,.TRUE.) )
+      ENDIF
 #endif
       
 ! ----------------------------------------------------------------------------- ! 
@@ -810,6 +830,7 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % CalculateSmoothedState( .FALSE. )              
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % smoothState % solution = myDGSEM % smoothState % solution_dev
 #endif
@@ -818,6 +839,7 @@ INCLUDE 'mpif.h'
                             'Smooth State for Spectral EKE', &
                              SIZE(myDGSEM % smoothState % solution), &
                              PACK(myDGSEM % smoothState % solution,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -837,6 +859,7 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % CalculateSGSCoefficients( ) 
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % sgsCoeffs % solution = myDGSEM % sgsCoeffs % solution
 #endif
@@ -845,6 +868,7 @@ INCLUDE 'mpif.h'
                             'Estimate viscosity and diffusivity', &
                              SIZE(myDGSEM % sgsCoeffs % solution), &
                              PACK(myDGSEM % sgsCoeffs % solution,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -857,6 +881,7 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % CalculateBoundarySGS( ) 
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % sgsCoeffs % boundarySolution_dev
 #endif
@@ -865,6 +890,7 @@ INCLUDE 'mpif.h'
                             'Interpolate viscosity to element faces', &
                              SIZE(myDGSEM % sgsCoeffs % boundarySolution), &
                              PACK(myDGSEM % sgsCoeffs % boundarySolution,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -918,6 +944,7 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % CalculateStressTensor( )                  
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % stressTensor % solution = myDGSEM % stressTensor % solution_dev
 #endif
@@ -926,6 +953,7 @@ INCLUDE 'mpif.h'
                             'Gradients of velocity and temperature', &
                              SIZE(myDGSEM % stressTensor % solution), &
                              PACK(myDGSEM % stressTensor % solution,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -939,6 +967,7 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % CalculateBoundaryStress( )
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % stressTensor % boundarySolution = myDGSEM % stressTensor % boundarySolution_dev
 #endif
@@ -947,6 +976,7 @@ INCLUDE 'mpif.h'
                             'Interpolate stress tensor to element faces', &
                              SIZE(myDGSEM % stressTensor % boundarySolution), &
                              PACK(myDGSEM % stressTensor % boundarySolution,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -961,6 +991,7 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % UpdateExternalStress( tn, myRank ) 
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % externalStress = myDGSEM % externalStress_dev
 #endif
@@ -969,6 +1000,7 @@ INCLUDE 'mpif.h'
                             'Apply Stress Boundary Conditions', &
                              SIZE(myDGSEM % externalStress), &
                              PACK(myDGSEM % externalStress,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -1000,6 +1032,7 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % StressFlux( )
  
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % stressTensor % boundaryFlux = myDGSEM % stressTensor % boundaryFlux_dev
 #endif
@@ -1008,6 +1041,7 @@ INCLUDE 'mpif.h'
                             'Estimate Viscous Stress Flux', &
                              SIZE(myDGSEM % stressTensor % boundaryFlux), &
                              PACK(myDGSEM % stressTensor % boundaryFlux,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -1023,6 +1057,7 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % StressDivergence( ) 
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % stressTensor % tendency = myDGSEM % stressTensor % tendency_dev
 #endif
@@ -1031,6 +1066,7 @@ INCLUDE 'mpif.h'
                             'Tendency due to viscous terms', &
                              SIZE(myDGSEM % stressTensor % tendency), &
                              PACK(myDGSEM % stressTensor % tendency,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -1051,6 +1087,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % MappedTimeDerivative( )
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
 #ifdef CUDA
          myDGSEM % state % tendency = myDGSEM % state % tendency_dev
 #endif
@@ -1059,6 +1096,7 @@ INCLUDE 'mpif.h'
                             'Tendency due to inviscid and source terms', &
                              SIZE(myDGSEM % state % tendency), &
                              PACK(myDGSEM % state % tendency,.TRUE.) )
+      ENDIF
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -1066,7 +1104,9 @@ INCLUDE 'mpif.h'
 ! ----------------------------------------------------------------------------- ! 
 
 #ifdef TESTING
+      IF( myRank == 0 )THEN
          CALL mdi % Write_ModelDataInstances( 'SELF-Fluid' ) 
+      ENDIF
 #endif
       
       
@@ -1775,12 +1815,10 @@ INCLUDE 'mpif.h'
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2
    INTEGER    :: iNeighbor, iUnpacked
-   INTEGER    :: nmsg(1:myDGSEM % nNeighbors)
    INTEGER    :: recvReq(1:myDGSEM % nNeighbors), sendRecvReq(1:myDGSEM % nNeighbors*2)
    INTEGER    :: theStats(MPI_STATUS_SIZE,2*myDGSEM % nNeighbors)
 
 
-      nmsg = 0
      
       ! On this first pass through the boundary cells, we need to load up the send buffer
       DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -1827,7 +1865,6 @@ INCLUDE 'mpif.h'
       CALL MPI_WaitAll( myDGSEM % nNeighbors*2, sendRecvReq,theStat,iError)
 
       ! Reorganize the recvBuffer into the boundarysolution
-      nmsg = 0 
       DO bID = 1, myDGSEM % extComm % nBoundaries
      
          p2    = myDGSEM % extComm % extProcIDs(bID)
@@ -1838,8 +1875,6 @@ INCLUDE 'mpif.h'
          IF( p2 /= myRank )THEN 
         
             iNeighbor = myDGSEM % rankTable(p2)
-            nmsg( iNeighbor ) = nmsg( iNeighbor ) + 1
-        !    iUnpacked = myDGSEM % mpiPackets(iNeighbor) % unPackMap( nmsg(iNeighbor) )
             iUnpacked = myDGSEM % unPackMap( 2, bID )
             myDGSEM % externalState(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer(:,:,:, iUnpacked)
         

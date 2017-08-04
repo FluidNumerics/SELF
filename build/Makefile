@@ -75,12 +75,9 @@ endif
 
 ifeq (${TESTING},yes)
   ifeq (${MPI},yes)
-    $(info '>>> Testing with MPI is currently not a functional or supported feature in SELF-Fluids')
-    $(info '>>> Disabling Testing.')
-    TESTING=no
-  else
-    FMACRO+=-DTESTING
+    $(info '>>> Testing with MPI only reports instance checks from rank 0.')
   endif
+    FMACRO+=-DTESTING
 endif
 
 # ---------------------------------------------------------------------- #
