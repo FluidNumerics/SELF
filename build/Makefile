@@ -27,13 +27,13 @@ ifeq (${CUDA},yes)
 
   $(info 'Compiling with PGI CUDA-Fortran')
   FC=pgfortran
-  OPT=-fast -Mcuda=cc60,ptxinfo
+  OPT=-fast -Mcuda=cc35,ptxinfo
   FMACRO=-Mpreprocess -DHAVE_CUDA
 
   ifeq (${MPI},yes)
     $(info 'Compiling with PGI MPI')
     FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
-    OPT=-fast -Mcuda=cc60,ptxinfo
+    OPT=-fast -Mcuda=cc35,ptxinfo
     FMACRO=-Mpreprocess -DHAVE_CUDA -DHAVE_MPI
     MPILIB=-L/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/lib/ -lmpi
     MPIINC=-I/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/include/
@@ -75,12 +75,9 @@ endif
 
 ifeq (${TESTING},yes)
   ifeq (${MPI},yes)
-    $(info '>>> Testing with MPI is currently not a functional or supported feature in SELF-Fluids')
-    $(info '>>> Disabling Testing.')
-    TESTING=no
-  else
-    FMACRO+=-DTESTING
+    $(info '>>> Testing with MPI only reports instance checks from rank 0.')
   endif
+    FMACRO+=-DTESTING
 endif
 
 # ---------------------------------------------------------------------- #
