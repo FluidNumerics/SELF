@@ -13,7 +13,7 @@ USE CommonRoutines
 
 IMPLICIT NONE
 
-   INTEGER, PARAMETER      :: strLen = 30
+   INTEGER, PARAMETER      :: strLen = 40
    INTEGER, PARAMETER      :: ioChunkSize=100000 ! The number of array elements to write in a single binary file record
 
    CHARACTER(6), PARAMETER :: strFMT = "(A30)"
@@ -159,11 +159,14 @@ IMPLICIT NONE
    ! Local
    LOGICAL :: success
 
-      CALL theInstances % PointToInstance( CharToIntHashFunction(statusCheckName), success )
+      CALL theInstances % PointToInstance( CharToIntHashFunction(TRIM(statusCheckName)), success )
       IF( success ) THEN
          theInstances % current % array = array
          theInstances % current % nObs  = theInstances % current % nObs + 1  
+         PRINT*, ' Instance found for '//TRIM(statusCheckName)
+         PRINT*, theInstances % current % nObs 
       ELSE
+         PRINT*, ' New Instance for '//TRIM(statusCheckName)
          CALL theInstances % AddInstance( moduleName, &
                                           subroutineName, &
                                           statusCheckName, &
@@ -222,7 +225,7 @@ IMPLICIT NONE
         ! Set the data
         CALL theInstances % SetNames( moduleName, subroutineName, statusCheckName  )
         
-        theInstances % current % instanceID = CharToIntHashFunction( theInstances % current % statusCheckName )
+        theInstances % current % instanceID = CharToIntHashFunction( TRIM(theInstances % current % statusCheckName) )
         theInstances % current % nObs       = 1
         theInstances % current % arraySize  = arraySize
         ALLOCATE( theInstances % current % array(1:arraySize) )
@@ -291,7 +294,7 @@ IMPLICIT NONE
             IF( PRESENT( instanceFound ) )THEN
               instanceFound = .TRUE.
             ENDIF
-            EXIT
+            RETURN
          ENDIF
          theInstances % current => theInstances % current % next
        
@@ -545,7 +548,7 @@ IMPLICIT NONE
 
       ! localChar = UpperCase( inputChar )
       
-       hash = 5381
+       hash = 0
        DO i = 1, LEN_TRIM(inputChar)
           hash = ( ISHFT(hash,5)+hash ) + ICHAR( inputChar(i:i) )
        ENDDO

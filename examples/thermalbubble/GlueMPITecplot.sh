@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Obtain the number of MPI processes
-nP=4
+nP=2
 #$( grep nProc runtime.params | awk '{gsub(/,$/,""); print $3}' )
 iter0=$( grep iterInit runtime.params | awk '{gsub(/,$/,""); print $3}' )
 dFreq=$( grep dumpFreq runtime.params | awk '{gsub(/,$/,""); print $3}' )
@@ -19,12 +19,12 @@ echo 'Last Iterate    : iterEnd     =' ${iterEnd}
 for i in $( seq -f "%010g" $iter0 $dFreq $iterEnd )
 do 
    tname='mastertemp.tec'
-   fpname='Euler.0000.'$i'.tec'
+   fpname='State.0000.'$i'.tec'
    cat $fpname > $tname
    #rm $fpname
    for j in $( seq -f "%04g" 1 $nPu )
    do
-      fpname='Euler.'$j'.'$i'.tec'
+      fpname='State.'$j'.'$i'.tec'
       echo $fpname
       # Temporarily copy the "master" file
       cat $tname > temp1.tec
@@ -34,7 +34,7 @@ do
       cat temp1.tec temp2.tec > $tname
       #rm $fpname
    done
-   fname='Euler.'$i'.tec'
+   fname='State.'$i'.tec'
    cat mastertemp.tec > $fname
 done
 

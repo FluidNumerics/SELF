@@ -41,13 +41,6 @@ USE Fluid_Class
 #endif
       CALL myeu % Build( myRank, nProcs )
       
-      !$OMP PARALLEL
-      CALL myeu % GlobalTimeDerivative( 0.0_prec, myRank )
-      !$OMP END PARALLEL
-      
-#ifdef HAVE_CUDA
-      myeu % stressTensor % solution = myeu % stressTensor % solution_dev
-#endif
      ! CALL myeu % WriteStressTensorTecplot( 0, myeu % params % nPlot, myRank )
     ! ////////////////////////////////// Time Stepping /////////////////////////////////////////// !
       iter0  = myeu % params % iterInit

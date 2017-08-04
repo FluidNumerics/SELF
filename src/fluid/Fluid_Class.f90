@@ -888,7 +888,7 @@ INCLUDE 'mpif.h'
 #endif
          CALL mdi % Update( 'Fluid_Class.f90', &
                             'CalculateBoundarySGS', &
-                            'Interpolate viscosity to element faces', &
+                            'Interpolate viscosity to faces', &
                              SIZE(myDGSEM % sgsCoeffs % boundarySolution), &
                              PACK(myDGSEM % sgsCoeffs % boundarySolution,.TRUE.) )
       ENDIF
@@ -951,7 +951,7 @@ INCLUDE 'mpif.h'
 #endif
          CALL mdi % Update( 'Fluid_Class.f90', &
                             'CalculateStressTensor', &
-                            'Gradients of velocity and temperature', &
+                            'Gradients of velocity temperature', &
                              SIZE(myDGSEM % stressTensor % solution), &
                              PACK(myDGSEM % stressTensor % solution,.TRUE.) )
       ENDIF
@@ -974,7 +974,7 @@ INCLUDE 'mpif.h'
 #endif
          CALL mdi % Update( 'Fluid_Class.f90', &
                             'CalculateBoundaryStress', &
-                            'Interpolate stress tensor to element faces', &
+                            'Interpolate stress tensor to faces', &
                              SIZE(myDGSEM % stressTensor % boundarySolution), &
                              PACK(myDGSEM % stressTensor % boundarySolution,.TRUE.) )
       ENDIF
@@ -1094,7 +1094,7 @@ INCLUDE 'mpif.h'
 #endif
          CALL mdi % Update( 'Fluid_Class.f90', &
                             'MappedTimeDerivative', &
-                            'Tendency due to inviscid and source terms', &
+                            'State tendency', &
                              SIZE(myDGSEM % state % tendency), &
                              PACK(myDGSEM % state % tendency,.TRUE.) )
       ENDIF
@@ -1848,7 +1848,6 @@ INCLUDE 'mpif.h'
      
       DO iNeighbor = 1, myDGSEM % nNeighbors
            
-            PRINT*, myRank, myDGSEM % mpiPackets(iNeighbor) % neighborRank
             CALL MPI_IRECV( myDGSEM % mpiPackets( iNeighbor ) % recvStateBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &
                            MPI_PREC,   & 
