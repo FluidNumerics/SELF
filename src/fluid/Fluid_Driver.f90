@@ -99,6 +99,7 @@ CONTAINS
 #ifdef INSITU_VIZ
   SUBROUTINE SetupLibSim( )
      IMPLICIT NONE
+     INCLUDE "visitfortransimV2interface.inc"
      INTEGER :: vizErr
 
        vizErr = visitSetupEnv( ) 
@@ -132,6 +133,7 @@ CONTAINS
   SUBROUTINE MainLoop( )
      IMPLICIT NONE
 #ifdef INSITU_VIZ
+     INCLUDE "visitfortransimV2interface.inc"
      INTEGER    :: visitState, visitResult, runFlag, blocking, iterate     
      REAL(prec) :: x(0:myeu % params % nPlot, &
                      0:myeu % params % nPlot, &
@@ -157,7 +159,7 @@ CONTAINS
                      0:myeu % params % nPlot, &
                      0:myeu % params % nPlot, &
                      1:myeu % mesh % nElems )
-     REAL(prec) :: rho(0:myeu % params % nPlot, &
+     REAL(prec) :: density(0:myeu % params % nPlot, &
                      0:myeu % params % nPlot, &
                      0:myeu % params % nPlot, &
                      1:myeu % mesh % nElems )
@@ -194,7 +196,7 @@ CONTAINS
 #ifdef HAVE_CUDA
             myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
-            CALL myeu % FluidStateAtPlottingPoints( u, v, w, potentialTemp, pressure )
+            CALL myeu % FluidStateAtPlottingPoints( u, v, w, density, potentialTemp, pressure )
 
           ELSEIF( visitState == 1 )THEN
  
@@ -220,7 +222,7 @@ CONTAINS
 
           ENDIF
 
-         IF( MOD( iterate, dumpFreq ) == 0 )THEN
+         IF( MOD( iterate, dFreq ) == 0 )THEN
            !$OMP MASTER
            CALL myeu % WritePickup( iterate, myRank )
            !$OMP END MASTER
@@ -267,6 +269,50 @@ CONTAINS
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
 #ifdef INSITU_VIZ
+  SUBROUTINE VisitCommandCallBack (cmd, lcmd, intdata,   &
+                                   floatdata, stringdata,&
+                                   lstringdata )
+     IMPLICIT NONE
+     INCLUDE "visitfortransimV2interface.inc"
+     CHARACTER(8) :: cmd, stringdata
+     INTEGER      :: lcmd, lstringdata, intdata
+     REAL(prec)   :: floatdata
+     INTEGER      :: runflag, simcycle
+     REAL(prec)   :: simtime
+
+     ! IF( visitstrcmp(cmd, lcmd, "halt", 4) == 0)THEN
+     !     runflag = 0
+     ! ELSEIF(visitstrcmp(cmd, lcmd, "step", 4).eq.0) then
+     !     
+     ! ELSEIF(visitstrcmp(cmd, lcmd, "run", 3).eq.0) then
+     !     runflag = 1
+     ! elseif(visitstrcmp(cmd, lcmd, "testcommand", 11).eq.0) then
+     !     write (6,*) 'Received testcommand'
+     ! endif
+
+  END SUBROUTINE VisitCommandCallBack
+!
+  INTEGER FUNCTION VisitBroadCastIntFunction(value, sender)
+     IMPLICIT NONE
+     INTEGER :: value, sender
+        
+        VisitBroadCastIntFunction = 0
+
+  END FUNCTION VisitBroadCastIntFunction
+!
+  INTEGER FUNCTION VisitBroadCastStringFunction(str, lstr, sender)
+     IMPLICIT NONE
+     CHARACTER(8) :: str
+     INTEGER      :: lstr, sender
+
+        VisitBroadCastStringFunction = 0
+
+  END FUNCTION VisitBroadCastStringFunction
+!
+  SUBROUTINE VisitSlaveProcessCallBack( )
+     IMPLICIT NONE
+  END SUBROUTINE VisitSlaveProcessCallBack
+!
   INTEGER FUNCTION VisitGetMetaData( handle )
      IMPLICIT NONE
      INTEGER :: handle

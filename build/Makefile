@@ -16,7 +16,7 @@ WFLAGS=
 
 MPILIB=
 MPIINC=
-FMACRO=
+CPPFLAGS=
 # determine the main directory for this experiment
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 SRCDIR=${SELFDIR}/src/
@@ -28,20 +28,20 @@ ifeq (${CUDA},yes)
   $(info 'Compiling with PGI CUDA-Fortran')
   FC=pgfortran
   OPT=-fast -Mcuda=cc35,ptxinfo
-  FMACRO=-Mpreprocess -DHAVE_CUDA
+  CPPFLAGS=-Mpreprocess -DHAVE_CUDA
 
   ifeq (${MPI},yes)
     $(info 'Compiling with PGI MPI')
     FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
     OPT=-fast -Mcuda=cc35,ptxinfo
-    FMACRO=-Mpreprocess -DHAVE_CUDA -DHAVE_MPI
+    CPPFLAGS=-Mpreprocess -DHAVE_CUDA -DHAVE_MPI
     MPILIB=-L/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/lib/ -lmpi
     MPIINC=-I/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/include/
   endif
 
 else
 
-  FMACRO=-Mpreprocess 
+  CPPFLAGS=-Mpreprocess 
   FC=pgfortran
   ifeq (${DEBUG},yes)
     OPT=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
@@ -51,7 +51,7 @@ else
   
   ifeq (${OPENMP},yes)
     OPT+=-fopenmp
-    FMACRO+=-DHAVE_OPENMP
+    CPPFLAGS+=-DHAVE_OPENMP
   endif
   
   
@@ -59,10 +59,10 @@ else
     $(info 'Compiling with GNU Fortran OpenMPI')
     FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
     OPT=-O2
-    FMACRO=-Mpreprocess
-    FMACRO+=-DHAVE_MPI
+    CPPFLAGS=-Mpreprocess
+    CPPFLAGS+=-DHAVE_MPI
     ifeq (${NEW_MPI},yes)
-      FMACRO+=-DNEW_MPI
+      CPPFLAGS+=-DNEW_MPI
     endif
   endif
 # OPT=-O0 -g
@@ -70,14 +70,20 @@ else
 endif
 
 ifeq (${TIMING},yes)
-  FMACRO+=-DTIMING
+  CPPFLAGS+=-DTIMING
 endif
 
 ifeq (${TESTING},yes)
   ifeq (${MPI},yes)
     $(info '>>> Testing with MPI only reports instance checks from rank 0.')
   endif
-    FMACRO+=-DTESTING
+    CPPFLAGS+=-DTESTING
+endif
+
+ifeq (${INSITU_VIZ},yes)
+  CPPFLAGS+=-DINSITU_VIZ
+  INC+=-I/home/joe/Software/visit/visit2.12.0/src/sim/V2/lib/
+  LIB+=-L/home/joe/Software/visit/visit2.12.0/src/lib/ -lsimV2 -lsimV2f
 endif
 
 # ---------------------------------------------------------------------- #
@@ -104,7 +110,7 @@ CommonRoutines.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/Common
 	${FC} ${OPT} -c ${SRCDIR}common/CommonRoutines.f90 -o $@
 
 Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}common/Timing.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}common/Timing.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/Timing.f90 -o $@
 
 # Test programs
    
@@ -342,7 +348,7 @@ MappedGeometry_2D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutin
 	
 MappedGeometry_3D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                             Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/MappedGeometry_3D_Class.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}geom/MappedGeometry_3D_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MappedGeometry_3D_Class.f90 -o $@
 
 QuadMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o HashTable_Class.o \
                    Quadrature.o Curve_Class.o MappedGeometry_2D_Class.o QuadElement_Class.o \
@@ -352,7 +358,7 @@ QuadMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o Ha
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surface_Class.o MappedGeometry_3D_Class.o HexElement_Class.o \
                   Face_Class.o Node_Class.o ${SRCDIR}geom/HexMesh_Class.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
@@ -429,7 +435,7 @@ TestHexMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Clas
 
 Ray_Class.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o BoundaryCommunicator_Class.o \
               MappedGeometry_3D_Class.o HexMesh_Class.o ${SRCDIR}viz/Ray_Class.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}viz/Ray_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}viz/Ray_Class.f90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
@@ -551,33 +557,33 @@ FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${
 	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
 Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
-	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
+	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${FMACRO} -c ${MODDIR}/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
 else
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
 endif
 
 Fluid_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
 
 TestMPIStateExchange_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${MPILIB} ${MPIINC} -o $@
 	
 Fluid_PickupToTecplot.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${MPILIB} ${MPIINC} -o $@
 	
 SampleAlongRays.o : ModelPrecision.o Fluid_Class.o Ray_Class.o ${SRCDIR}fluid/SampleAlongRays.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
 
 initialize: ${CNOBJ} Fluid_InitialConditions.o
 	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${MPILIB} ${MPIINC} -o $@
  
 integrate: ${CNOBJ} Fluid_Driver.o
-	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
 	
 pickuptoptecplot : ${CNOBJ} Fluid_PickupToTecplot.o
 	${FC} ${OPT} ${CNOBJ} Fluid_PickupToTecplot.o ${MPILIB} ${MPIINC} -o $@
@@ -610,7 +616,7 @@ SOBJ = ModelPrecision.o \
        SampleAlongRays.o
 
 sars: ${SOBJ}
-	${FC} ${OPT} ${FMACRO} ${SOBJ} -o $@ 	
+	${FC} ${OPT} ${CPPFLAGS} ${SOBJ} -o $@ 	
 
 .PHONY : clean
 

@@ -1317,9 +1317,8 @@ INCLUDE 'mpif.h'
             !         IF( m == 4 )THEN
             !         myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
             !         ELSE
-                     myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = ABS( 0.09_prec*&
+                     myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.09_prec*&
                                     myDGSEM % params % viscLengthScale*sqrt( KE(i,j,k) )
-                     ENDIF
                                       
                   ENDDO
                ENDDO
@@ -3413,9 +3412,14 @@ INCLUDE 'mpif.h'
                                      0:myDGSEM % params % nPlot, &
                                      1:myDGSEM % mesh % nElems)
   ! Local
-  REAL(prec)  :: sol(0:nPlot,0:nPlot,0:nPlot,1:nEq)
-  REAL(prec)  :: bsol(0:nPlot,0:nPlot,0:nPlot,1:nEq)
-
+  REAL(prec) :: sol(0:myDGSEM % params % nPlot, &
+                    0:myDGSEM % params % nPlot, &
+                    0:myDGSEM % params % nPlot, &
+                    1:nEq )
+  REAL(prec) :: bsol(0:myDGSEM % params % nPlot, &
+                     0:myDGSEM % params % nPlot, &
+                     0:myDGSEM % params % nPlot, &
+                     1:nEq )
   INTEGER       :: i, j, k, iEl, iEq
   
 
@@ -3432,9 +3436,9 @@ INCLUDE 'mpif.h'
          ENDDO
          
 
-         DO k = 0, nPlot
-            DO j = 0, nPlot
-               DO i = 0, nPlot
+         DO k = 0, myDGSEM % params % nPlot
+            DO j = 0, myDGSEM % params % nPlot
+               DO i = 0, myDGSEM % params % nPlot
                           
                   u(i,j,k,iEl)             = sol(i,j,k,1)/( sol(i,j,k,4) + bsol(i,j,k,4) )
                   v(i,j,k,iEl)             = sol(i,j,k,2)/( sol(i,j,k,4) + bsol(i,j,k,4) )
