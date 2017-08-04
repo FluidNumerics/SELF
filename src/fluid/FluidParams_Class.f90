@@ -285,10 +285,10 @@ USE ConstantsDictionary
       
       
             ! Sanity check - PRINT the results of the namelist READ to screen
-      WRITE( UNIT = *, NML = TimeManagement )
-      WRITE( UNIT = *, NML = SpaceManagement )
-      WRITE( UNIT = *, NML = SubgridScale )
-      WRITE( UNIT = *, NML = PhysicalConstants )
+!      WRITE( UNIT = *, NML = TimeManagement )
+!      WRITE( UNIT = *, NML = SpaceManagement )
+!      WRITE( UNIT = *, NML = SubgridScale )
+!      WRITE( UNIT = *, NML = PhysicalConstants )
       
  END SUBROUTINE Build_FluidParams
 
