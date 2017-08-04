@@ -1271,7 +1271,8 @@ INCLUDE 'mpif.h'
                ENDDO
             ENDDO
          ENDDO
-         
+
+#ifdef VIZ         
          ! Smooth the subgrid scale Kinetic energy
          DO k = 0, myDGSEM % N
             DO j = 0, myDGSEM % N
@@ -1303,7 +1304,7 @@ INCLUDE 'mpif.h'
                ENDDO
             ENDDO
          ENDDO
-         
+#endif         
          
          ! Now we calculate the viscosity and diffusivities (currently assumes isotropic and low mach number)
          DO k = 0, myDGSEM % N
@@ -1311,12 +1312,11 @@ INCLUDE 'mpif.h'
                DO i = 0, myDGSEM % N
                   DO m = 1, nEq-1
                   
-                     IF( m == 4 )THEN
-                     myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
-                     ELSE
+            !         IF( m == 4 )THEN
+            !         myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
+            !         ELSE
                      myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = ABS( 0.09_prec*&
-                                    myDGSEM % params % viscLengthScale*sqrt(& 
-                                      myDGSEM % smoothState % solution(i,j,k,6,iEl)) )
+                                    myDGSEM % params % viscLengthScale*sqrt( KE(i,j,k) )
                      ENDIF
                                       
                   ENDDO
@@ -3857,62 +3857,67 @@ INCLUDE 'mpif.h'
    ! Local
    INTEGER :: iEl, i, j, k, m, ii, jj, kk
    REAL(prec) :: sgsKE, uijk, uij, ui
+#ifdef VIZ
    REAL(prec), SHARED :: KE(0:7,0:7,0:7) 
-   
+#endif
+
       iEl = blockIDx % x
       
       i = threadIdx % x-1
       j = threadIdx % y-1
       k = threadIdx % z-1
       
-	 ! Here, the SGS Kinetic energy is calculated using the 
-	 ! "high wavenumber" component of the velocity field.
-	 ! This component is defined (here) as the difference
-	 ! between the full solution and the smoothed solution.
+      ! Here, the SGS Kinetic energy is calculated using the 
+      ! "high wavenumber" component of the velocity field.
+      ! This component is defined (here) as the difference
+      ! between the full solution and the smoothed solution.
      
-	  sgsKE = 0.0_prec
-	  DO m = 1, 3  
-		 sgsKE = sgsKE + &
-				 ( solution(i,j,k,m,iEl)/( solution(i,j,k,4,iEl) + static(i,j,k,4,iEl))- &
-				   smoothState(i,j,k,m,iEl)/(smoothState(i,j,k,4,iEl)+static(i,j,k,4,iEl)) )**2
-	  ENDDO
-	  KE(i,j,k) = 0.5_prec*sgsKE
+      sgsKE = 0.0_prec
+      DO m = 1, 3  
+         sgsKE = sgsKE + &
+        ( solution(i,j,k,m,iEl)/( solution(i,j,k,4,iEl) + static(i,j,k,4,iEl))- &
+        smoothState(i,j,k,m,iEl)/(smoothState(i,j,k,4,iEl)+static(i,j,k,4,iEl)) )**2
+      ENDDO
+
+#ifdef VIZ
+      KE(i,j,k) = 0.5_prec*sgsKE
                   
       CALL syncthreads( )
       
       ! Smooth the subgrid scale Kinetic energy
-	  uijk = 0.0_prec
-	  DO kk = 0, polydeg_dev
-	  
-		 uij = 0.0_prec
-		 DO jj = 0, polydeg_dev
-			
-			ui = 0.0_prec
-			DO ii = 0, polydeg_dev
-			   ui = ui + filterMat(ii,i)*KE(ii,jj,kk)
-			ENDDO
-			
-			uij = uij + filterMat(jj,j)*ui
-		 ENDDO
-		 
-		 uijk = uijk + filterMat(kk,k)*uij
-		 
-	  ENDDO
+      uijk = 0.0_prec
+      DO kk = 0, polydeg_dev
+ 
+         uij = 0.0_prec
+         DO jj = 0, polydeg_dev
+
+            ui = 0.0_prec
+            DO ii = 0, polydeg_dev
+               ui = ui + filterMat(ii,i)*KE(ii,jj,kk)
+            ENDDO
+
+            uij = uij + filterMat(jj,j)*ui
+         ENDDO
+ 
+         uijk = uijk + filterMat(kk,k)*uij
+ 
+      ENDDO
                   
-	  ! Here, we store the smoothed SGS kinetic energy, in
-	  ! case we would like to visualize the data later
-	  smoothState(i,j,k,6,iEl) = ABS(uijk)
-         
+      ! Here, we store the smoothed SGS kinetic energy, in
+      ! case we would like to visualize the data later
+      smoothState(i,j,k,6,iEl) = ABS(uijk)
+#endif
+ 
          ! Now we calculate the viscosity and diffusivities (currently assumes isotropic and low mach number)
       DO m = 1, nEq_dev-1
-		 IF( m == 4 )THEN
-		    sgsCoeffs(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
-		 ELSE
-		    ! This is the parameterization used in Jeremy Sauer's dissertation ... citation ?!
-          !** Note that the filtering process may not preserve positivity of the EKE.. hence 
-          !   we need to take the absolute value of uijk
-		    sgsCoeffs(i,j,k,m,iEl) = ABS( 0.09_prec*viscLengthScale_dev*sqrt( ABS(uijk) ) )
-		 ENDIF
+         !IF( m == 4 )THEN
+         !   sgsCoeffs(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
+         !ELSE
+            ! This is the parameterization used in Jeremy Sauer's dissertation ... citation ?!
+            !** Note that the filtering process may not preserve positivity of the EKE.. hence 
+            !   we need to take the absolute value of uijk
+            sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale_dev*sqrt( sgsKE )
+         ! ENDIF
       ENDDO
  
  END SUBROUTINE CalculateSGSCoefficients_CUDAKernel
