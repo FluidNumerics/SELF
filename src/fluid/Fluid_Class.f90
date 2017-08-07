@@ -248,7 +248,7 @@ INCLUDE 'mpif.h'
       PRINT*, '    Testing is enabled. Restricting number of time steps to 1.'
       myDGSEM % params % nTimeSteps = 1
       myDGSEM % params % dumpFreq   = 1
-#endif TESTING
+#endif
       
       ! Construct the data structure that holds the derivative and interpolation matrices
       ! and the quadrature weights. This call will also perform the device copies.

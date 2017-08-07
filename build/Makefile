@@ -7,67 +7,71 @@
 
 SHELL=/bin/bash
 
-FC=pgfortran
-OPT=
+#FC=gfortran
 METISLIB=-L/usr/local/lib/ -lmetis
-LIB=
-INC=
-WFLAGS= 
 
-MPILIB=
-MPIINC=
-CPPFLAGS=
 # determine the main directory for this experiment
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 SRCDIR=${SELFDIR}/src/
 
 
+ifeq (${FC},gfortran)
 
-ifeq (${CUDA},yes)
+  $(info 'Compiling with GNU Compilers')
 
-  $(info 'Compiling with PGI CUDA-Fortran')
-  FC=pgfortran
-  OPT=-fast -Mcuda=cc35,ptxinfo
-  CPPFLAGS=-Mpreprocess -DHAVE_CUDA
+  CPPFLAGS=-cpp 
 
-  ifeq (${MPI},yes)
-    $(info 'Compiling with PGI MPI')
-    FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
-    OPT=-fast -Mcuda=cc35,ptxinfo
-    CPPFLAGS=-Mpreprocess -DHAVE_CUDA -DHAVE_MPI
-    MPILIB=-L/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/lib/ -lmpi
-    MPIINC=-I/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/include/
-  endif
-
-else
-
-  CPPFLAGS=-Mpreprocess 
-  FC=pgfortran
   ifeq (${DEBUG},yes)
-    OPT=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
+    OPT+=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
   else
-    OPT=-fast
+    OPT+=-Ofast -ffree-line-length-none
   endif
-  
+
   ifeq (${OPENMP},yes)
+    $(info '+OpenMP')
     OPT+=-fopenmp
     CPPFLAGS+=-DHAVE_OPENMP
   endif
+
+  ifeq (${MPI},yes)
+    $(info '+MPI')
+    CPPFLAGS+=-DHAVE_MPI
+    LIB+=-lmpi
+    INC+=
+  endif
+ 
+    
+
+else ifeq (${FC},pgfortran)
+
+  $(info 'Compiling with PGI Compilers')
+  CPPFLAGS=-Mpreprocess 
+
+  ifeq (${DEBUG},yes)
+    OPT+=-O0 -g -Kieee
+    CPPFLAGS+=-DDEBUG
+  else
+    OPT+=-fast
+  endif
+
+  ifeq (${CUDA},yes)
   
+    $(info '+CUDA-Fortran')
+    OPT+=-Mcuda=${GPU_ARCH},ptxinfo
+    CPPFLAGS+=-DHAVE_CUDA
+
+  endif
   
   ifeq (${MPI},yes)
-    $(info 'Compiling with GNU Fortran OpenMPI')
-    FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
-    OPT=-O2
-    CPPFLAGS=-Mpreprocess
+    $(info '+MPI')
+    FC=mpif90
     CPPFLAGS+=-DHAVE_MPI
-    ifeq (${NEW_MPI},yes)
-      CPPFLAGS+=-DNEW_MPI
-    endif
+    LIB+=-L/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/lib/ -lmpi
+    INC+=-I/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/include/
   endif
-# OPT=-O0 -g
-
+  
 endif
+  
 
 ifeq (${TIMING},yes)
   CPPFLAGS+=-DTIMING
@@ -82,8 +86,8 @@ endif
 
 ifeq (${INSITU_VIZ},yes)
   CPPFLAGS+=-DINSITU_VIZ
-  INC+=-I/home/joe/Software/visit/visit2.12.0/src/sim/V2/lib/
-  LIB+=-L/home/joe/Software/visit/visit2.12.0/src/lib/ -lsimV2 -lsimV2f
+  INC+=-I/home/joe/Software/visit2.12.3/src/sim/V2/lib/
+  LIB+=-L/home/joe/Software/visit2.12.3/src/lib/ -lsimV2f -lsimV2 -ldl
 endif
 
 # ---------------------------------------------------------------------- #
@@ -190,7 +194,7 @@ cmdi : ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModel
 	${FC} ${OPT} ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o -o $@
 
 ModelDataInstances_Class.o : ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 ModelPrecision.o CommonRoutines.o
-	${FC} ${OPT} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
 
 CompareModelDataInstances.o : ${SRCDIR}integration_testing/CompareModelDataInstances.f90 ModelDataInstances_Class.o ModelPrecision.o
 	${FC} ${OPT} -c ${SRCDIR}integration_testing/CompareModelDataInstances.f90 -o $@
@@ -561,35 +565,35 @@ Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 else
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 endif
 
 Fluid_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
 
 TestMPIStateExchange_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${LIB} ${INC} -o $@
 	
 Fluid_PickupToTecplot.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${LIB} ${INC} -o $@
 	
 SampleAlongRays.o : ModelPrecision.o Fluid_Class.o Ray_Class.o ${SRCDIR}fluid/SampleAlongRays.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
 
 initialize: ${CNOBJ} Fluid_InitialConditions.o
-	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${MPILIB} ${MPIINC} -o $@
- 
+	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
+
 integrate: ${CNOBJ} Fluid_Driver.o
 	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
 	
 pickuptoptecplot : ${CNOBJ} Fluid_PickupToTecplot.o
-	${FC} ${OPT} ${CNOBJ} Fluid_PickupToTecplot.o ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CNOBJ} Fluid_PickupToTecplot.o ${LIB} ${INC} -o $@
 	
 test_stateExchange: ${CNOBJ} TestMPIStateExchange_Driver.o
-	${FC} ${OPT} ${CNOBJ} TestMPIStateExchange_Driver.o ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CNOBJ} TestMPIStateExchange_Driver.o ${LIB} ${INC} -o $@
 	
 	
 SOBJ = ModelPrecision.o \

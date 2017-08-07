@@ -35,7 +35,7 @@ INCLUDE "visitfortransimV2interface.inc"
 
 #ifdef INSITU_VIZ
       CALL SetupLibSim( )
-#endif INSITU_VIZ
+#endif
 
 #ifdef TIMING
       !$OMP MASTER
@@ -58,7 +58,6 @@ INCLUDE "visitfortransimV2interface.inc"
 #endif
 
       CALL Cleanup( )
-
 
 CONTAINS
 
@@ -264,6 +263,7 @@ CONTAINS
 #endif
      
   END SUBROUTINE MainLoop
+END PROGRAM Fluid_Driver
 
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
@@ -276,19 +276,19 @@ CONTAINS
      INCLUDE "visitfortransimV2interface.inc"
      CHARACTER(8) :: cmd, stringdata
      INTEGER      :: lcmd, lstringdata, intdata
-     REAL(prec)   :: floatdata
+     REAL         :: floatdata
      INTEGER      :: runflag, simcycle
-     REAL(prec)   :: simtime
+     REAL         :: simtime
 
-     ! IF( visitstrcmp(cmd, lcmd, "halt", 4) == 0)THEN
-     !     runflag = 0
-     ! ELSEIF(visitstrcmp(cmd, lcmd, "step", 4).eq.0) then
-     !     
-     ! ELSEIF(visitstrcmp(cmd, lcmd, "run", 3).eq.0) then
-     !     runflag = 1
-     ! elseif(visitstrcmp(cmd, lcmd, "testcommand", 11).eq.0) then
-     !     write (6,*) 'Received testcommand'
-     ! endif
+      IF( visitstrcmp(cmd, lcmd, "halt", 4) == 0)THEN
+          runflag = 0
+      ELSEIF(visitstrcmp(cmd, lcmd, "step", 4).eq.0) then
+          
+      ELSEIF(visitstrcmp(cmd, lcmd, "run", 3).eq.0) then
+          runflag = 1
+      elseif(visitstrcmp(cmd, lcmd, "testcommand", 11).eq.0) then
+          write (6,*) 'Received testcommand'
+      endif
 
   END SUBROUTINE VisitCommandCallBack
 !
@@ -316,9 +316,33 @@ CONTAINS
   INTEGER FUNCTION VisitGetMetaData( handle )
      IMPLICIT NONE
      INTEGER :: handle
+     INCLUDE "visitfortransimV2interface.inc"
      
         VisitGetMetaData = VISIT_INVALID_HANDLE
 
   END FUNCTION VisitGetMetaData
+!
+  INTEGER FUNCTION VisitGetMesh(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      ::  handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetMesh = VISIT_ERROR
+
+  END FUNCTION VisitGetMesh
+!
+  INTEGER FUNCTION VisitGetMaterial(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      ::  handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetMaterial = VISIT_ERROR
+
+  END FUNCTION VisitGetMaterial
+!
+
+
 #endif
-END PROGRAM Fluid_Driver
+!END PROGRAM Fluid_Driver
