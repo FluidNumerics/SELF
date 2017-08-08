@@ -7,7 +7,6 @@
 
 SHELL=/bin/bash
 
-#FC=gfortran
 METISLIB=-L/usr/local/lib/ -lmetis
 
 # determine the main directory for this experiment
@@ -36,8 +35,8 @@ ifeq (${FC},gfortran)
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI
-    LIB+=-lmpi
-    INC+=
+    LIB+=${MPI_LIB}
+    INC+=${MPI_INC}
   endif
  
     
@@ -64,10 +63,9 @@ else ifeq (${FC},pgfortran)
   
   ifeq (${MPI},yes)
     $(info '+MPI')
-    FC=mpif90
     CPPFLAGS+=-DHAVE_MPI
-    LIB+=-L/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/lib/ -lmpi
-    INC+=-I/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/include/
+    LIB+=${MPI_LIB}
+    INC+=${MPI_INC}
   endif
   
 endif
@@ -86,8 +84,8 @@ endif
 
 ifeq (${INSITU_VIZ},yes)
   CPPFLAGS+=-DINSITU_VIZ
-  INC+=-I/home/joe/Software/visit2.12.3/src/sim/V2/lib/
-  LIB+=-L/home/joe/Software/visit2.12.3/src/lib/ -lsimV2f -lsimV2 -ldl
+  INC+=${LIBSIM_INC}
+  LIB+=${LIBSIM_LIB}
 endif
 
 # ---------------------------------------------------------------------- #
