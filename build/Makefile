@@ -83,9 +83,13 @@ ifeq (${TESTING},yes)
 endif
 
 ifeq (${INSITU_VIZ},yes)
-  CPPFLAGS+=-DINSITU_VIZ
-  INC+=${LIBSIM_INC}
-  LIB+=${LIBSIM_LIB}
+  ifeq (${MPI},yes)
+    $(info '>>> MPI with in-situ graphics is currently not supported.')
+  else
+    CPPFLAGS+=-DINSITU_VIZ
+    INC+=${LIBSIM_INC}
+    LIB+=${LIBSIM_LIB}
+  endif
 endif
 
 # ---------------------------------------------------------------------- #
