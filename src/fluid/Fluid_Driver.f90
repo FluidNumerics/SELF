@@ -325,7 +325,7 @@ END PROGRAM Fluid_Driver
   INTEGER FUNCTION VisitGetMesh(handle, domain, name, lname)
      IMPLICIT NONE
      CHARACTER(8) :: name
-     INTEGER      ::  handle, domain, lname
+     INTEGER      :: handle, domain, lname
      INCLUDE "visitfortransimV2interface.inc"
 
        VisitGetMesh = VISIT_ERROR
@@ -335,14 +335,84 @@ END PROGRAM Fluid_Driver
   INTEGER FUNCTION VisitGetMaterial(handle, domain, name, lname)
      IMPLICIT NONE
      CHARACTER(8) :: name
-     INTEGER      ::  handle, domain, lname
+     INTEGER      :: handle, domain, lname
      INCLUDE "visitfortransimV2interface.inc"
 
        VisitGetMaterial = VISIT_ERROR
 
   END FUNCTION VisitGetMaterial
 !
+  INTEGER FUNCTION VisitGetDomainNesting(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      :: handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
 
+       VisitGetDomainNesting = VISIT_ERROR
+
+  END FUNCTION VisitGetDomainNesting
+!
+  INTEGER FUNCTION VisitGetDomainBounds(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      :: handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetDomainBounds = VISIT_ERROR
+
+  END FUNCTION VisitGetDomainBounds
+!
+  INTEGER FUNCTION VisitGetDomainList(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      :: handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetDomainList = VISIT_ERROR
+
+  END FUNCTION VisitGetDomainList
+!
+  INTEGER FUNCTION VisitGetCurve(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      :: handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetCurve = VISIT_ERROR
+
+  END FUNCTION VisitGetCurve
+!
+  INTEGER FUNCTION VisitGetMixedVariable(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      :: handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetMixedVariable = VISIT_ERROR
+
+  END FUNCTION VisitGetMixedVariable
+!
+  INTEGER FUNCTION VisitGetVariable(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      :: handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitGetVariable = VISIT_ERROR
+
+  END FUNCTION VisitGetVariable
+!
+  INTEGER FUNCTION VisitActivateTimeStep(handle, domain, name, lname)
+     IMPLICIT NONE
+     CHARACTER(8) :: name
+     INTEGER      ::  handle, domain, lname
+     INCLUDE "visitfortransimV2interface.inc"
+
+       VisitActivateTimeStep = VISIT_ERROR
+
+  END FUNCTION VisitActivateTimeStep
+!
 
 #endif
+
 !END PROGRAM Fluid_Driver
