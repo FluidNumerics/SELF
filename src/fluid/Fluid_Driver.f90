@@ -189,8 +189,7 @@ CONTAINS
 
          IF( visitState == 0 )THEN
 
-            tn = real( iT, prec )*deltaT ! time at the beginning of this timestep          
-            CALL myeu % ForwardStepRK3( tn, 1, myRank ) ! Forward Step
+            CALL myeu % ForwardStepRK3( 1, myRank ) ! Forward Step
             iterate = iterate + 1
 #ifdef HAVE_CUDA
             myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
@@ -241,8 +240,7 @@ CONTAINS
       !$OMP PARALLEL
       DO iT = iter0, iter0+nT-1, dFreq ! Loop over time-steps
 
-         tn = real( iT, prec )*deltaT ! time at the beginning of this timestep          
-         CALL myeu % ForwardStepRK3( tn, dFreq, myRank ) ! Forward Step
+         CALL myeu % ForwardStepRK3( dFreq, myRank ) ! Forward Step
 #ifdef HAVE_CUDA
          myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
@@ -263,6 +261,8 @@ CONTAINS
 #endif
      
   END SUBROUTINE MainLoop
+
+
 END PROGRAM Fluid_Driver
 
 ! ------------------------------------------------------------------------------ !
@@ -282,11 +282,11 @@ END PROGRAM Fluid_Driver
 
       IF( visitstrcmp(cmd, lcmd, "halt", 4) == 0)THEN
           runflag = 0
-      ELSEIF(visitstrcmp(cmd, lcmd, "step", 4).eq.0) then
-          
+     ! ELSEIF(visitstrcmp(cmd, lcmd, "step", 4).eq.0) then
+     !     CALL SimulateOneTimeStep( )
       ELSEIF(visitstrcmp(cmd, lcmd, "run", 3).eq.0) then
           runflag = 1
-      elseif(visitstrcmp(cmd, lcmd, "testcommand", 11).eq.0) then
+      ELSEIF(visitstrcmp(cmd, lcmd, "testcommand", 11).eq.0) then
           write (6,*) 'Received testcommand'
       endif
 
@@ -317,8 +317,48 @@ END PROGRAM Fluid_Driver
      IMPLICIT NONE
      INTEGER :: handle
      INCLUDE "visitfortransimV2interface.inc"
+     INTEGER :: visitRunFlag, simulationCycle, simulationTime
+     INTEGER :: err, md, m1, cmd
      
-        VisitGetMetaData = VISIT_INVALID_HANDLE
+        IF( VisitMDSimAlloc( md ) == VISIT_OKAY )THEN
+           err = VisitMDSimSetCycleTime( handle, simulationCycle, simulationTime )
+           IF( visitRunFlag == 1 )THEN
+              err = VisitMDSimSetMode( md, VISIT_SIMMODE_RUNNING )
+           ELSE
+              err = VisitMDSimSetMode( md, VISIT_SIMMODE_STOPPED )
+           ENDIF
+        ENDIF
+
+        VisitGetMetaData = md
+
+        ! Set the Mesh Meta-Data
+        IF( VisitMDMeshAlloc(m1) == VISIT_OKAY )THEN
+           err = VisitMDMeshSetName( m1, "Mesh", 4 )
+           err = VisitMDMeshSetMeshType( m1, VISIT_MESHTYPE_UNSTRUCTURED )
+           err = VisitMDMeshSetTopologicalDim( m1, 3 )
+           err = VisitMDMeshSetSpatialDim( m1, 3 )
+           err = VisitMDMeshSetXUnits( m1, "m", 1 )
+           err = VisitMDMeshSetYUnits( m1, "m", 1 )
+           err = VisitMDMeshSetZUnits( m1, "m", 1 )
+           err = VisitMDMeshSetXLabel( m1, "x", 1 )
+           err = VisitMDMeshSetYLabel( m1, "y", 1 )
+           err = VisitMDMeshSetZLabel( m1, "z", 1 )
+
+           err = VisitMDSimAddMesh( md, m1 )
+        ENDIF
+
+        ! Add meta-data for simulation control commands
+        IF( VisitMDcmdAlloc( cmd ) == VISIT_OKAY )THEN
+           err = VisitMDcmdSetName( cmd, "halt", 4 )
+           err = VisitMDSimAddGenericCommand( md, cmd )
+        ENDIF
+        IF( VisitMDcmdAlloc( cmd ) == VISIT_OKAY )THEN
+           err = VisitMDcmdSetName( cmd, "run", 3 )
+           err = VisitMDSimAddGenericCommand( md, cmd )
+        ENDIF
+
+       
+
 
   END FUNCTION VisitGetMetaData
 !

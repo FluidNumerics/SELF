@@ -76,6 +76,7 @@ INCLUDE 'mpif.h'
 
     TYPE Fluid
       INTEGER                                :: nEq, N, nBoundaryFaces, nNeighbors
+      REAL(prec)                             :: simulationTime
       TYPE( FluidParams )                    :: params
       REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
 #ifdef NEW_MPI
@@ -242,6 +243,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % params % Build( )
       myDGSEM % N   = myDGSEM % params % polyDeg
       myDGSEM % nEq = nEq
+      myDGSEM % simulationTime = myDGSEM % params % iterInit*myDGSEM % params % dt
 
 #ifdef TESTING
       PRINT*, '  Module Fluid_Class.f90 : S/R Build_Fluid :'
@@ -561,11 +563,10 @@ INCLUDE 'mpif.h'
 !==================================================================================================!
 !
 !
-  SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, tn, nT, myRank )
+  SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT, myRank )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
-   REAL(prec), INTENT(in)      :: tn
    INTEGER, INTENT(in)         :: nT
    INTEGER, INTENT(in)         :: myRank
 #ifdef HAVE_CUDA
@@ -597,7 +598,7 @@ INCLUDE 'mpif.h'
          G3D  = 0.0_prec
          DO m = 1,3 ! Loop over RK3 steps
             
-            t = tn + rk3_b(m)*dt
+            t = myDGSEM % simulationTime + rk3_b(m)*dt
             CALL myDGSEM % GlobalTimeDerivative( t, myRank )
             
             !
@@ -612,6 +613,7 @@ INCLUDE 'mpif.h'
          ENDDO ! m, loop over the RK3 steps
       
       ENDDO
+      myDGSEM % simulationTime = myDGSEM % simulationTime + nT*dt
 #else
    REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
    REAL(prec) :: G3D(0:myDGSEM % N,&
@@ -642,7 +644,7 @@ INCLUDE 'mpif.h'
          
          DO m = 1,3 ! Loop over RK3 steps
             
-            t = tn + rk3_b(m)*dt
+            t = myDGSEM % simulationTime + rk3_b(m)*dt
             CALL myDGSEM % GlobalTimeDerivative( t, myRank )
             
             rk3_a_local = rk3_a(m)
@@ -669,8 +671,9 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % EquationOfState( )
             
          ENDDO ! m, loop over the RK3 steps
-      
+            
       ENDDO
+      myDGSEM % simulationTime = myDGSEM % simulationTime + nT*myDGSEM % params % dt 
 #endif          
 
 
