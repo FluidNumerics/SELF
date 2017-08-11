@@ -27,9 +27,13 @@ INCLUDE "visitfortransimV2interface.inc"
 #ifdef TIMING
  TYPE( MultiTimers ) :: timers
 #endif
- INTEGER :: mpiErr, myRank, nProcs
- INTEGER :: iter0, nT, dFreq, iT, nDumps
+ INTEGER    :: mpiErr, myRank, nProcs
+ INTEGER    :: iter0, nT, dFreq, iT, nDumps
  REAL(prec) :: tn, deltaT
+#ifdef INSITU_VIZ
+ INTEGER    :: simulationCycle, simulationTime, runFlag
+ COMMON/SIMSTATE/ runFlag, simulationCycle, simulationTime
+#endif
  
       CALL Setup( )
 
@@ -133,7 +137,8 @@ CONTAINS
      IMPLICIT NONE
 #ifdef INSITU_VIZ
      INCLUDE "visitfortransimV2interface.inc"
-     INTEGER    :: visitState, visitResult, runFlag, blocking, iterate     
+     INTEGER    :: visitState, visitResult, blocking, iterate     
+
      REAL(prec) :: x(0:myeu % params % nPlot, &
                      0:myeu % params % nPlot, &
                      0:myeu % params % nPlot, &
@@ -175,7 +180,8 @@ CONTAINS
       CALL myeu % ObtainPlottingMesh( x, y, z )
 
       runFlag = 1
-      iterate = iter0
+      simulationCycle = iter0
+      simulationTime = myeu % simulationTime
       !$OMP PARALLEL
       DO ! Loop indefinitely; really breaks when visitState < 0
 
@@ -190,7 +196,8 @@ CONTAINS
          IF( visitState == 0 )THEN
 
             CALL myeu % ForwardStepRK3( 1, myRank ) ! Forward Step
-            iterate = iterate + 1
+            simulationCycle = simulationCycle + 1
+            simulationTime = myeu % simulationTime
 #ifdef HAVE_CUDA
             myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
@@ -222,7 +229,7 @@ CONTAINS
 
          IF( MOD( iterate, dFreq ) == 0 )THEN
            !$OMP MASTER
-           CALL myeu % WritePickup( iterate, myRank )
+           CALL myeu % WritePickup( simulationCycle, myRank )
            !$OMP END MASTER
          ENDIF
 
@@ -317,12 +324,14 @@ END PROGRAM Fluid_Driver
      IMPLICIT NONE
      INTEGER :: handle
      INCLUDE "visitfortransimV2interface.inc"
-     INTEGER :: visitRunFlag, simulationCycle, simulationTime
+     INTEGER :: runFlag, simulationCycle, simulationTime
+     COMMON /SIMSTATE/ runFlag, simulationCycle, simulationTime 
      INTEGER :: err, md, m1, cmd
-     
+
+
         IF( VisitMDSimAlloc( md ) == VISIT_OKAY )THEN
-           err = VisitMDSimSetCycleTime( handle, simulationCycle, simulationTime )
-           IF( visitRunFlag == 1 )THEN
+!           err = VisitMDSimSetCycleTime( handle, simulationCycle, simulationTime )
+           IF( runFlag == 1 )THEN
               err = VisitMDSimSetMode( md, VISIT_SIMMODE_RUNNING )
            ELSE
               err = VisitMDSimSetMode( md, VISIT_SIMMODE_STOPPED )
