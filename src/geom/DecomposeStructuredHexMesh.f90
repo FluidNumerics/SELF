@@ -10,7 +10,7 @@ PROGRAM DecomposeStructuredHexMesh
  ! src/geom/
  USE HexMesh_Class
  USE TopographicShapes
- USE Params_Class
+ USE FluidParams_Class
  ! src/boundary/
  USE BoundaryCommunicator_Class
  
@@ -18,13 +18,13 @@ PROGRAM DecomposeStructuredHexMesh
  IMPLICIT NONE
 
  TYPE( NodalStorage )                      :: nodal
- TYPE( HexMesh )                           :: mesh,
+ TYPE( HexMesh )                           :: mesh
  TYPE( HexMesh ), ALLOCATABLE              :: procMesh(:)
- TYPE( RunParams )                         :: params
+ TYPE( FluidParams )                       :: params
  TYPE( MultiTimers )                       :: timers
  TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
  INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
- INTEGER(KIND=8)               :: procID
+ INTEGER                      :: procID
  INTEGER                      :: pfnodes(1:nQuadNodes), gfNodes(1:nQuadNodes), nIDs(1:nQuadNodes)
  INTEGER                      :: nElems, nProc, pID, i
  INTEGER                      :: iEl, jEl, iSide, iNode, nAdj, nID, elID, nBe, nMPI
@@ -36,6 +36,8 @@ PROGRAM DecomposeStructuredHexMesh
  
 
       CALL Setup( )
+
+      CALL timers % StartTimer( 1 )
 
       CALL PartitionElementsAndNodes_Structured( )
       
@@ -58,6 +60,8 @@ PROGRAM DecomposeStructuredHexMesh
       ENDDO
 
       CALL SetupCommTables( )
+
+      CALL timers % StopTimer( 1 )
       
       CALL Cleanup( )
 
@@ -70,7 +74,7 @@ PROGRAM DecomposeStructuredHexMesh
       CALL params % Build( )
       CALL timers % Build( )
       
-      CALL timers % AddTimer( 'Spectral Partition Time', 1 )
+      CALL timers % AddTimer( 'Total Time', 1 )
       ! Build an interpolant
       CALL nodal % Build( N = params % polyDeg, &
                           nPlot = params % nPlot, &
@@ -118,7 +122,7 @@ PROGRAM DecomposeStructuredHexMesh
       
       ALLOCATE( partitions(1:nElems) )
       partitions = 0
-      ALLOCATE( bcom(0:nProcs-1), procMesh(0:nProcs-1) ) 
+      ALLOCATE( bcom(0:nProc-1), procMesh(0:nProc-1) ) 
       ALLOCATE( faceProcCount(1:mesh % nFaces), &
                 faceProcOwners(1:mesh % nFaces,1:2), &
                 faceBoundaryIDs(1:mesh % nFaces,1:2) )
@@ -170,11 +174,10 @@ PROGRAM DecomposeStructuredHexMesh
          CALL procmesh(procID) % WritePeaceMeshFile( TRIM(params % PeaceMeshFile)//'.'//pIDChar )
          !CALL bCom(procID) % WritePickup( 'ExtComm.'//pIDChar )
          
-         CALL procMesh(procID) % Trash( )
  
  END SUBROUTINE FileIO
 !
- SUBROUTINE PartionElementsAndNodes_Structured( )
+ SUBROUTINE PartitionElementsAndNodes_Structured( )
     IMPLICIT NONE
     
 
@@ -354,10 +357,11 @@ PROGRAM DecomposeStructuredHexMesh
 
       ENDDO
 
+      PRINT*, '========================================================================='
       PRINT*, 'Process ID :',procID, ', nFaces :', procMesh(procID) % nFaces
       PRINT*, 'Process ID :',procID, ', nBFace :', nBe
       DEALLOCATE( procMesh(procID) % faces )
-      ALLOCATE( procMesh(procID) % faces(1:proceMesh % nFaces) ) 
+      ALLOCATE( procMesh(procID) % faces(1:procMesh(procID) % nFaces) ) 
       CALL bCom(procID) % Initialize( nBe )
 
       iFaceLocal = 0
@@ -473,6 +477,7 @@ PROGRAM DecomposeStructuredHexMesh
 
                faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
 
+            ENDIF
          ENDIF
 
       ENDDO
@@ -483,15 +488,17 @@ PROGRAM DecomposeStructuredHexMesh
  SUBROUTINE SetupCommTables( )
    IMPLICIT NONE
    ! Local
-   INTEGER :: procID, bID, extProc
+   INTEGER :: procID, bID, extProc, extBID
+   INTEGER :: globalFaceID, localFaceID
    INTEGER :: nMPI(0:nProc-1)
+   CHARACTER(4) :: pIDChar
 
 
       
       DO procID = 0, nProc-1
 
          nMPI = 0
-         DO bID = 1, bCom(jProc) % nBoundaries
+         DO bID = 1, bCom(procID) % nBoundaries
 
             extProc = bCom(procID) % extProcIDs(bID)
             IF( extProc /= procID )THEN
@@ -501,6 +508,9 @@ PROGRAM DecomposeStructuredHexMesh
                nMPI(procID) = nMPI(procID) + 1
 
                localFaceID  = bCom(procID) % boundaryIDs(bID)
+! PRINT*, procID, localFaceID
+! PRINT*, UBOUND(procMesh), LBOUND(procMesh)
+! PRINT*, UBOUND(procMesh(procID) % faces ), LBOUND(procMesh(procID) % faces)
                globalFaceID = procMesh(procID) % faces(localFaceID) % faceID
 
                IF( faceProcOwners(globalFaceID, 1) == procID )THEN
@@ -522,6 +532,12 @@ PROGRAM DecomposeStructuredHexMesh
          ENDDO
 
       ENDDO   
+
+      DO procID = 0, nProc-1
+         WRITE( pIDChar, '(I4.4)' ) procID
+         CALL bCom(procID) % WritePickup( 'ExtComm.'//pIDChar )
+      ENDDO
+     
 
 
  END SUBROUTINE SetupCommTables
