@@ -425,7 +425,7 @@ PROGRAM DecomposeStructuredHexMesh
                ! communication.
                procMesh(procID) % faces(iFaceLocal) % boundaryID = -nBe
 
-            ELSEIF( p2 /= p1 .AND. p1 == procID )THEN ! MPI Boundary
+            ELSEIF( p2 /= p1 .AND. procID == p1 )THEN ! MPI Boundary
  
                nMPI = nMPI + 1 
           
@@ -451,15 +451,15 @@ PROGRAM DecomposeStructuredHexMesh
 
                faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
 
-            ELSEIF( p2 /= p1 .AND. p2 == procID )THEN ! MPI Boundary
+            ELSEIF( p2 /= p1 .AND. procID == p2 )THEN ! MPI Boundary
             
                nMPI = nMPI + 1 
             
                procMesh(procID) % faces(iFaceLocal) % faceID          = iFace
                procMesh(procID) % faces(iFaceLocal) % elementIDs(1)   = globalToLocal( e2, 1 ) 
                procMesh(procID) % faces(iFaceLocal) % elementIDs(2)   = -e1 
-               procMesh(procID) % faces(iFaceLocal) % elementSides(1) = mesh % faces(iFace) % elementSides(1) 
-               procMesh(procID) % faces(iFaceLocal) % elementSides(2) = mesh % faces(iFace) % elementSides(2)
+               procMesh(procID) % faces(iFaceLocal) % elementSides(1) = mesh % faces(iFace) % elementSides(2) 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(2) = mesh % faces(iFace) % elementSides(1)
                procMesh(procID) % faces(iFaceLocal) % iStart          = mesh % faces(iFace) % iStart
                procMesh(procID) % faces(iFaceLocal) % iInc            = mesh % faces(iFace) % iInc
                procMesh(procID) % faces(iFaceLocal) % jStart          = mesh % faces(iFace) % jStart
@@ -506,11 +506,7 @@ PROGRAM DecomposeStructuredHexMesh
                ! nMPI is an array that keeps track of the order in which MPI messages will be sent
                ! to procID's neighbors
                nMPI(procID) = nMPI(procID) + 1
-
                localFaceID  = bCom(procID) % boundaryIDs(bID)
-! PRINT*, procID, localFaceID
-! PRINT*, UBOUND(procMesh), LBOUND(procMesh)
-! PRINT*, UBOUND(procMesh(procID) % faces ), LBOUND(procMesh(procID) % faces)
                globalFaceID = procMesh(procID) % faces(localFaceID) % faceID
 
                IF( faceProcOwners(globalFaceID, 1) == procID )THEN
