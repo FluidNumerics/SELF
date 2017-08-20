@@ -1779,14 +1779,14 @@ INCLUDE 'mpif.h'
             CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
                            MPI_PREC,   &                      
-                           p2, 0,  &                        
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
                            MPI_COMM_WORLD,   &                
                            reqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
                            MPI_PREC, &      
-                           p2, 0, &       
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
                            MPI_COMM_WORLD, &
                            reqHandle(iNeighbor*2), iError)  
                            
@@ -1876,14 +1876,14 @@ INCLUDE 'mpif.h'
             CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
                            MPI_PREC,   &                      
-                           p2, 0,  &                        
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
                            MPI_COMM_WORLD,   &                
                            reqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
                            MPI_PREC, &      
-                           p2, 0, &       
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
                            MPI_COMM_WORLD, &
                            reqHandle(iNeighbor*2), iError)  
                            
@@ -1909,13 +1909,6 @@ INCLUDE 'mpif.h'
               CALL myDGSEM % Trash( )
               STOP
             ENDIF
-!IF( myRank == 1 )THEN
-!PRINT*, iNeighbor, jUnpack, bID
-!PRINT*, LBOUND( myDGSEM % extComm % unPackMap ), UBOUND( myDGSEM % extComm % unPackMap )
-!PRINT*, LBOUND( myDGSEM % mpiPackets ), UBOUND( myDGSEM % mpiPackets )
-!PRINT*, SHAPE( myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer )
-!PRINT*,'============================================================================'
-!ENDIF
             myDGSEM % externalStress(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer(:,:,:,jUnpack)
 
          ENDIF
@@ -1979,14 +1972,14 @@ INCLUDE 'mpif.h'
             CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
                            MPI_PREC,   &                      
-                           p2, 0,  &                        
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
                            MPI_COMM_WORLD,   &                
                            reqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
                            MPI_PREC, &      
-                           p2, 0, &       
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
                            MPI_COMM_WORLD, &
                            reqHandle(iNeighbor*2), iError)  
                            
@@ -2197,7 +2190,7 @@ INCLUDE 'mpif.h'
              
                ELSE
  
-                  bID  = myDGSEM % mesh % faces(iFace) % boundaryID
+                  bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
                   DO iEq = 1, nEq-1                 
                   jump(iEq)  = myDGSEM % externalState(ii,jj,iEq,bID) - &
                                myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) !outState - inState
@@ -2870,7 +2863,7 @@ INCLUDE 'mpif.h'
              
                ELSE 
  
-                  bID  = myDGSEM % mesh % faces(iFace) % boundaryID
+                  bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
                   DO iEq = 1, nEq-1
                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
                              0.5_prec*myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*&
@@ -4164,7 +4157,7 @@ INCLUDE 'mpif.h'
          s1 = elementSides(1,iFace)
          e2 = elementIDs(2,iFace)
          s2 = ABS(elementSides(2,iFace))
-         bID  = boundaryIDs(iFace)
+         bID  = ABS(boundaryIDs(iFace))
 
                ii = iMap(i,j,iFace)
                jj = jMap(i,j,iFace)
@@ -4609,7 +4602,7 @@ INCLUDE 'mpif.h'
       s1 = elementSides(1,iFace)
       e2 = elementIDs(2,iFace)
       s2 = ABS(elementSides(2,iFace))
-      bID  = boundaryIDs(iFace)
+      bID  = ABS(boundaryIDs(iFace))
 
       ii = iMap(i,j,iFace)
       jj = jMap(i,j,iFace)
