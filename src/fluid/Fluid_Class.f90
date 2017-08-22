@@ -76,7 +76,9 @@ INCLUDE 'mpif.h'
       INTEGER                                :: nEq, N, nBoundaryFaces, nNeighbors
       TYPE( FluidParams )                    :: params
       REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
+#ifdef HAVE_MPI
       TYPE( PairWiseMPIPacket ), ALLOCATABLE :: mpiPackets(:)
+#endif
 
 #ifdef HAVE_CUDA
       REAL(prec), DEVICE, ALLOCATABLE        :: dragProfile_dev(:,:,:,:)
@@ -421,6 +423,7 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE BuildHexMesh_Fluid
 !
+#ifdef HAVE_MPI
  SUBROUTINE ConstructCommTables_Fluid( myDGSEM, myRank, nProc )
    IMPLICIT NONE
    CLASS( Fluid ), INTENT(inout) :: myDGSEM
@@ -476,6 +479,7 @@ INCLUDE 'mpif.h'
       
    
  END SUBROUTINE ConstructCommTables_Fluid
+#endif
 !
 !
 !==================================================================================================!
@@ -2046,7 +2050,7 @@ INCLUDE 'mpif.h'
                     1 )
       grid = dim3(myDGSEM % mesh % nFaces,1,1)  
       
-      CALL FaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+      CALL InternalFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
                                                   myDGSEM % mesh % faces_dev % elementSides, &
                                                   myDGSEM % mesh % faces_dev % boundaryID, &
                                                   myDGSEM % mesh % faces_dev % iMap, &
@@ -2234,7 +2238,7 @@ INCLUDE 'mpif.h'
                     1 )
       grid = dim3(myDGSEM % mesh % nFaces,1,1)  
       
-      CALL FaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+      CALL BoundaryFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
                                                   myDGSEM % mesh % faces_dev % elementSides, &
                                                   myDGSEM % mesh % faces_dev % boundaryID, &
                                                   myDGSEM % mesh % faces_dev % iMap, &
@@ -2882,7 +2886,7 @@ INCLUDE 'mpif.h'
                     1 )
       grid = dim3(myDGSEM % mesh % nFaces,nEq-1,1)  
       
-      CALL StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+      CALL InternalStressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
                                                   myDGSEM % mesh % faces_dev % elementSides, &
                                                   myDGSEM % mesh % faces_dev % boundaryID, &
                                                   myDGSEM % mesh % faces_dev % iMap, &
@@ -3007,7 +3011,7 @@ INCLUDE 'mpif.h'
                     1 )
       grid = dim3(myDGSEM % mesh % nFaces,nEq-1,1)  
       
-      CALL StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+      CALL BoundaryStressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
                                                   myDGSEM % mesh % faces_dev % elementSides, &
                                                   myDGSEM % mesh % faces_dev % boundaryID, &
                                                   myDGSEM % mesh % faces_dev % iMap, &
@@ -4336,7 +4340,7 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE UpdateExternalState_CUDAKernel
 !
- ATTRIBUTES(Global) SUBROUTINE FaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+ ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                  nHat, boundarySolution, boundarySolution_static, &
                                                  externalState, boundaryFlux, stressFlux )
 
@@ -4460,8 +4464,57 @@ INCLUDE 'mpif.h'
                      
                   ENDDO
              
-               ELSE ! ////////////////////////////////////////////////////////////////////////// !
- 
+               ENDIF 
+
+
+ END SUBROUTINE InternalFaceFlux_CUDAKernel
+!
+ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                 nHat, boundarySolution, boundarySolution_static, &
+                                                 externalState, boundaryFlux, stressFlux )
+
+   IMPLICIT NONE
+   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: iMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: jMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+   ! Local
+   INTEGER    :: iEl, iFace, jEq
+   INTEGER    :: i, j, k, iEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+   REAL(prec) :: jump(1:5), aS(1:5)
+   REAL(prec) :: fac
+
+
+      iFace = blockIdx % x
+      j     = threadIdx % y - 1
+      i     = threadIdx % x -1
+     
+         e1 = elementIDs(1,iFace)
+         s1 = elementSides(1,iFace)
+         e2 = elementIDs(2,iFace)
+         s2 = ABS(elementSides(2,iFace))
+         bID  = ABS(boundaryIDs(iFace))
+
+               ii = iMap(i,j,iFace)
+               jj = jMap(i,j,iFace)
+               
+               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+
+               
+               IF( e2 < 0 )THEN
+               
                   
                   DO iEq = 1, nEq_dev-1              
                   jump(iEq)  = externalState(ii,jj,iEq,bID) - &
@@ -4533,7 +4586,8 @@ INCLUDE 'mpif.h'
                ENDIF 
 
 
- END SUBROUTINE FaceFlux_CUDAKernel
+ END SUBROUTINE BoundaryFaceFlux_CUDAKernel
+
 !
  ATTRIBUTES(Global) SUBROUTINE MappedTimeDerivative_CUDAKernel( solution, static, boundaryFlux, drag, &
                                                                 Ja, Jac, bMat, qWeight, dMatP, tendency )
@@ -4780,7 +4834,7 @@ INCLUDE 'mpif.h'
                   
  END SUBROUTINE UpdateExternalStress_CUDAKernel 
 !
- ATTRIBUTES(Global) SUBROUTINE StressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+ ATTRIBUTES(Global) SUBROUTINE InternalStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                       nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
                                                       externalState, externalStress, boundaryFlux )
 
@@ -4853,7 +4907,53 @@ INCLUDE 'mpif.h'
 			 
          boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
              
-      ELSE
+      ENDIF
+
+ END SUBROUTINE InternalStressFlux_CUDAKernel
+!
+ ATTRIBUTES(Global) SUBROUTINE BoundaryStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                      nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
+                                                      externalState, externalStress, boundaryFlux )
+
+   IMPLICIT NONE
+   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: iMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: jMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:polydeg_dev,0:polydeg_dev,1:5,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:polydeg_dev,0:polydeg_dev,1:15,1:nBoundaryFaces_dev)
+   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+   ! Local
+   INTEGER    :: iEl, iFace
+   INTEGER    :: i, j, iEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   INTEGER    :: m, jEq
+   REAL(prec) :: norm, rhoOut, rhoIn
+
+      iFace = blockIdx % x
+      iEq   = blockIdx % y
+      j     = threadIdx % y-1
+      i     = threadIdx % x-1
+     
+      e1 = elementIDs(1,iFace)
+      s1 = elementSides(1,iFace)
+      e2 = elementIDs(2,iFace)
+      s2 = ABS(elementSides(2,iFace))
+      bID  = ABS(boundaryIDs(iFace))
+
+      ii = iMap(i,j,iFace)
+      jj = jMap(i,j,iFace)
+               
+      norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
+      
+      IF( e2 < 0 )THEN
       
          boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
                                      (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
@@ -4883,7 +4983,7 @@ INCLUDE 'mpif.h'
 		   ENDIF
       ENDIF
 
- END SUBROUTINE StressFlux_CUDAKernel
+ END SUBROUTINE BoundaryStressFlux_CUDAKernel
 !
  ATTRIBUTES(Global) SUBROUTINE StressDivergence_CUDAKernel( stress, stressFlux, state, static, sgsCoeffs, &
                                                              Ja, Jac, bMat, qWeight, dMatP, tendency ) ! ///////////////////// !
