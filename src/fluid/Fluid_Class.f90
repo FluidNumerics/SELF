@@ -153,7 +153,9 @@ INCLUDE 'mpif.h'
       PROCEDURE :: MPI_StateExchange               => MPI_StateExchange_Fluid
       PROCEDURE :: FinalizeMPI_StateExchange       => FinalizeMPI_StateExchange_Fluid
       PROCEDURE :: MPI_StressExchange              => MPI_StressExchange_Fluid
+      PROCEDURE :: FinalizeMPI_StressExchange      => MPI_StressExchange_Fluid
       PROCEDURE :: MPI_SGSExchange                 => MPI_SGSExchange_Fluid
+      PROCEDURE :: FinalizeMPI_SGSExchange         => MPI_SGSExchange_Fluid
 #endif
       ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
       ! Routines for the fluid-stress model and
@@ -198,8 +200,8 @@ INCLUDE 'mpif.h'
  
 #ifdef HAVE_MPI
  INTEGER :: MPI_PREC
- INTEGER, ALLOCATABLE :: stateReqHandle(:)
- INTEGER, ALLOCATABLE :: stateStats(:,:)
+ INTEGER, ALLOCATABLE :: stateReqHandle(:), stressReqHandle(:), SGSReqHandle(:)
+ INTEGER, ALLOCATABLE :: stateStats(:,:), stressStats(:,:), SGSStats(:,:)
 #endif
 
  INTEGER :: callID
@@ -343,7 +345,11 @@ INCLUDE 'mpif.h'
 #ifdef HAVE_MPI
       CALL myDGSEM % ConstructCommTables( myRank, nProc )
       ALLOCATE( stateReqHandle(1:myDGSEM % nNeighbors*2), &
-                stateStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2) )
+                stressReqHandle(1:myDGSEM % nNeighbors*2), &
+                SGSReqHandle(1:myDGSEM % nNeighbors*2), &
+                stateStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
+                stressStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
+                SGSStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2) )
 #endif
 
  END SUBROUTINE Build_Fluid
@@ -372,7 +378,11 @@ INCLUDE 'mpif.h'
       ENDDO
       DEALLOCATE( myDGSEM % mpiPackets )
       DEALLOCATE( stateReqHandle, &
-                  stateStats )
+                  stressReqHandle, &
+                  SGSReqHandle, &
+                  stateStats, &
+                  stressStats, &
+                  SGSStats )
 #endif
       CALL myDGSEM % dGStorage % Trash( )
       CALL myDGSEM % mesh % Trash( )
@@ -869,6 +879,7 @@ INCLUDE 'mpif.h'
 
 #ifdef HAVE_MPI
             CALL myDGSEM % MPI_SGSExchange( myRank )  
+            CALL myDGSEM % FinalizeMPI_SGSExchange( myRank )  
 #endif
          ENDIF
 ! ----------------------------------------------------------------------------- ! 
@@ -956,6 +967,7 @@ INCLUDE 'mpif.h'
 
 #ifdef HAVE_MPI
          CALL myDGSEM % MPI_StressExchange( myRank )
+         CALL myDGSEM % FinalizeMPI_StressExchange( myRank )
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -1867,8 +1879,6 @@ INCLUDE 'mpif.h'
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
-   INTEGER    :: reqHandle(1:myDGSEM % nNeighbors*2)
-   INTEGER    :: theStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2)
 
 #ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
@@ -1911,18 +1921,31 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           reqHandle((iNeighbor-1)*2+1), iError )           
+                           stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
                            MPI_COMM_WORLD, &
-                           reqHandle(iNeighbor*2), iError)  
+                           stressReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 
-      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,reqHandle,theStats,iError)
+ END SUBROUTINE MPI_StressExchange_Fluid
+!
+ SUBROUTINE FinalizeMPI_StressExchange_Fluid( myDGSEM, myRank ) 
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)         :: myRank
+   ! Local
+   INTEGER    :: iFace, bID
+   INTEGER    :: tag, ierror
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+
+
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stressReqHandle,stressStats,iError)
 
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -1952,7 +1975,7 @@ INCLUDE 'mpif.h'
       myDGSEM % externalStress_dev = myDGSEM % externalStress
 #endif
 
- END SUBROUTINE MPI_StressExchange_Fluid
+ END SUBROUTINE FinalizeMPI_StressExchange_Fluid
 !
  SUBROUTINE MPI_SGSExchange_Fluid( myDGSEM, myRank ) 
 
@@ -2007,18 +2030,32 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           reqHandle((iNeighbor-1)*2+1), iError )           
+                           SGSReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer, & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
                            MPI_COMM_WORLD, &
-                           reqHandle(iNeighbor*2), iError)  
+                           SGSReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 
-      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,reqHandle,theStats,iError)
+   
+ END SUBROUTINE MPI_SGSExchange_Fluid
+!
+ SUBROUTINE FinalizeMPI_SGSExchange_Fluid( myDGSEM, myRank ) 
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)         :: myRank
+   ! Local
+   INTEGER    :: iFace, bID
+   INTEGER    :: tag, ierror
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+
+
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,SGSReqHandle,SGSStats,iError)
 
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -2048,7 +2085,8 @@ INCLUDE 'mpif.h'
       myDGSEM % externalSGS_dev = myDGSEM % externalSGS
 #endif
    
- END SUBROUTINE MPI_SGSExchange_Fluid
+ END SUBROUTINE FinalizeMPI_SGSExchange_Fluid
+
 #endif
 !
 ! /////////////////////////////////////////////////////////////////////////////////////////////// !
