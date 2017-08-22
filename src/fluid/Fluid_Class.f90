@@ -2071,47 +2071,48 @@ INCLUDE 'mpif.h'
          e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
          s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
 
-         DO j = 0, myDGSEM % N  
-            DO i = 0, myDGSEM % N
+         IF( e2 > 0 )THEN
 
-               IF( i == 0 )THEN
-                  IF( j == 0 )THEN
-                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart)
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart)
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+   
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
                   ELSE
-                     ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
-                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          myDGSEM % mesh % faces(iFace) % iStart
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
-                          myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          myDGSEM % mesh % faces(iFace) % jStart
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
                   ENDIF
-               ELSE
-                  ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                       (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
-                       myDGSEM % mesh % faces(iFace) % swapDimensions*ii
-                  jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                       (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
-                       (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
-               ENDIF
-
-               norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
-                            myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
-                            myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1) )
-
-               DO k = 1, 3
-                  nHat(k) = myDGSEM % mesh % geom(e1) % nHat(k,i,j,s1)/norm
-               ENDDO
+   
+                  norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1) )
+   
+                  DO k = 1, 3
+                     nHat(k) = myDGSEM % mesh % geom(e1) % nHat(k,i,j,s1)/norm
+                  ENDDO
                
-               IF( e2 > 0 )THEN
                   DO iEq = 1, nEq-1
                   jump(iEq)  = myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) - &
                                myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) !outState - inState
@@ -2122,33 +2123,44 @@ INCLUDE 'mpif.h'
                           
                   ! Sound speed estimate for the external and internal states
                   cOut = sqrt( myDGSEM % params % R *T* &
-                              ( (myDGSEM % state % boundarySolution(ii,jj,6,s2,e2)+myDGSEM % static % boundarySolution(ii,jj,6,s2,e2))/ myDGSEM % params % P0 )**rC   )
+                              ( (myDGSEM % state % boundarySolution(ii,jj,6,s2,e2)+&
+                                 myDGSEM % static % boundarySolution(ii,jj,6,s2,e2))/&
+                                 myDGSEM % params % P0 )**rC   )
                         
-                  T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
-                        (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + myDGSEM % state % boundarySolution(i,j,4,s1,e1) )        
+                  T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + &
+                         myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
+                        (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + &
+                         myDGSEM % state % boundarySolution(i,j,4,s1,e1) )        
                              
                   cIn  = sqrt( myDGSEM % params % R*T* &
-                              ( (myDGSEM % state % boundarySolution(i,j,6,s1,e1)+myDGSEM % static % boundarySolution(i,j,6,s1,e1))/myDGSEM % params % P0 )**rC  )
+                              ( (myDGSEM % state % boundarySolution(i,j,6,s1,e1)+&
+                                 myDGSEM % static % boundarySolution(i,j,6,s1,e1))/&
+                                 myDGSEM % params % P0 )**rC  )
                                
                   ! External normal velocity component
+
                   uOut = ( myDGSEM % state % boundarySolution(ii,jj,1,s2,e2)*nHat(1) + &
                            myDGSEM % state % boundarySolution(ii,jj,2,s2,e2)*nHat(2) + &
                            myDGSEM % state % boundarySolution(ii,jj,3,s2,e2)*nHat(3) )/& 
-                         ( myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) + myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) )
+                         ( myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) + &
+                           myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) )
                            
                   ! Internal normal velocity component
                   uIn  = ( myDGSEM % state % boundarySolution(i,j,1,s1,e1)*nHat(1) + &
                            myDGSEM % state % boundarySolution(i,j,2,s1,e1)*nHat(2) + &
                            myDGSEM % state % boundarySolution(i,j,3,s1,e1)*nHat(3) )/& 
-                         ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) 
+                         ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + &
+                           myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) 
                          
                   ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
                   fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
 
                   ! Advective flux
                   DO iEq = 1, nEq-1
-                        aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
-                                 uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + myDGSEM % static % boundarySolution(ii,jj,iEq,s2,e2) )
+                        aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + &
+                                        myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
+                                 uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + &
+                                        myDGSEM % static % boundarySolution(ii,jj,iEq,s2,e2) )
                   ENDDO
                   
                   DO k = 1, 3
@@ -2187,8 +2199,50 @@ INCLUDE 'mpif.h'
                         ENDDO
                      ENDIF
                   ENDDO
+               ENDDO
+            ENDDO
              
-               ELSE
+          ELSE
+
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+   
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
+                  ELSE
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
+                  ENDIF
+   
+                  norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1) )
+   
+                  DO k = 1, 3
+                     nHat(k) = myDGSEM % mesh % geom(e1) % nHat(k,i,j,s1)/norm
+                  ENDDO
  
                   bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
                   DO iEq = 1, nEq-1                 
@@ -2268,10 +2322,10 @@ INCLUDE 'mpif.h'
                      ENDIF
                   ENDDO
                   
-               ENDIF 
+               ENDDO
+            ENDDO 
 
-            ENDDO
-         ENDDO 
+         ENDIF 
          
       ENDDO 
       !$OMP ENDDO
