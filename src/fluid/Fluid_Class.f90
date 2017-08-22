@@ -163,7 +163,8 @@ INCLUDE 'mpif.h'
       PROCEDURE :: CalculateStressTensor   => CalculateStressTensor_Fluid
       PROCEDURE :: CalculateBoundaryStress => CalculateBoundaryStress_Fluid
       PROCEDURE :: UpdateExternalStress    => UpdateExternalStress_Fluid
-      PROCEDURE :: StressFlux              => StressFlux_Fluid
+      PROCEDURE :: InternalStressFlux      => InternalStressFlux_Fluid
+      PROCEDURE :: BoundaryStressFlux      => BoundaryStressFlux_Fluid
       PROCEDURE :: StressDivergence        => StressDivergence_Fluid
       
       !
@@ -959,7 +960,8 @@ INCLUDE 'mpif.h'
 ! Calculating only myRank-owned fluxes, and (3) Calculating fluxes over faces
 ! shared with neighboring ranks.
 
-         CALL myDGSEM % StressFlux( )
+         CALL myDGSEM % InternalStressFlux( )
+         CALL myDGSEM % BoundaryStressFlux( )
  
 #ifdef TESTING
       IF( myRank == 0 )THEN
@@ -2867,7 +2869,7 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE UpdateExternalStress_Fluid
 !
- SUBROUTINE StressFlux_Fluid( myDGSEM )
+ SUBROUTINE InternalStressFlux_Fluid( myDGSEM )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
@@ -2983,7 +2985,59 @@ INCLUDE 'mpif.h'
                 ENDDO
              ENDDO     
 
-         ELSE 
+         ENDIF 
+         
+      ENDDO 
+      !$OMP ENDDO
+      
+#endif
+
+ END SUBROUTINE InternalStressFlux_Fluid
+!
+ SUBROUTINE BoundaryStressFlux_Fluid( myDGSEM )
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+#ifdef HAVE_CUDA
+   ! Local
+   TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+                    1 )
+      grid = dim3(myDGSEM % mesh % nFaces,nEq-1,1)  
+      
+      CALL StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+                                                  myDGSEM % mesh % faces_dev % elementSides, &
+                                                  myDGSEM % mesh % faces_dev % boundaryID, &
+                                                  myDGSEM % mesh % faces_dev % iMap, &
+                                                  myDGSEM % mesh % faces_dev % jMap, &
+                                                  myDGSEM % mesh % geom_dev % nHat_dev, &
+                                                  myDGSEM % state % boundarySolution_dev, &
+                                                  myDGSEM % static % boundarySolution_dev, &
+                                                  myDGSEM % stressTensor % boundarySolution_dev, &
+                                                  myDGSEM % sgsCoeffs % boundarySolution_dev, &
+                                                  myDGSEM % externalState_dev, &
+                                                  myDGSEM % externalStress_dev, &
+                                                  myDGSEM % stressTensor % boundaryFlux_dev )
+#else
+   ! Local
+   REAL(prec) :: norm, rhoIn, rhoOut
+   INTEGER :: iEl, iFace
+   INTEGER    :: i, j, k, m, iEq, jEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+
+      !$OMP DO
+      DO iFace = 1, myDGSEM % mesh % nFaces
+
+         
+         e1 = myDGSEM % mesh % faces(iFace) % elementIDs(1)
+         s1 = myDGSEM % mesh % faces(iFace) % elementSides(1)
+         e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
+         s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
+
+         IF( e2 < 0 )THEN
 
             DO j = 0, myDGSEM % N  
                DO i = 0, myDGSEM % N
@@ -3065,7 +3119,7 @@ INCLUDE 'mpif.h'
       
 #endif
 
- END SUBROUTINE StressFlux_Fluid
+ END SUBROUTINE BoundaryStressFlux_Fluid
 !
  SUBROUTINE StressDivergence_Fluid( myDGSEM )
 
