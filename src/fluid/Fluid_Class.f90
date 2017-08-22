@@ -142,7 +142,8 @@ INCLUDE 'mpif.h'
       PROCEDURE :: CalculateStaticBoundarySolution => CalculateStaticBoundarySolution_Fluid
       PROCEDURE :: CalculateBoundarySolution       => CalculateBoundarySolution_Fluid
       PROCEDURE :: UpdateExternalState             => UpdateExternalState_Fluid
-      PROCEDURE :: FaceFlux                        => FaceFlux_Fluid
+      PROCEDURE :: InternalFaceFlux                => InternalFaceFlux_Fluid
+      PROCEDURE :: BoundaryFaceFlux                => BoundaryFaceFlux_Fluid
       PROCEDURE :: MappedTimeDerivative            => MappedTimeDerivative_Fluid
       
 #ifdef HAVE_MPI
@@ -707,7 +708,8 @@ INCLUDE 'mpif.h'
 ! Calculating only myRank-owned fluxes, and (3) Calculating fluxes over faces
 ! shared with neighboring ranks.
 
-      CALL myDGSEM % FaceFlux( )
+      CALL myDGSEM % InternalFaceFlux( )
+      CALL myDGSEM % BoundaryFaceFlux( )
 
 #ifdef TESTING
       IF( myRank == 0 )THEN
@@ -879,6 +881,8 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
+! Can probably place the wait for the MPI_SGSExchange here
+
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -901,6 +905,9 @@ INCLUDE 'mpif.h'
                              PACK(myDGSEM % stressTensor % boundarySolution,.TRUE.) )
       ENDIF
 #endif
+
+! The StressExchange can be placed here with the finallize/wait call placed
+! after UpdateExternalStress
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -2024,7 +2031,7 @@ INCLUDE 'mpif.h'
 !                                                                                                 !
 ! /////////////////////////////////////////////////////////////////////////////////////////////// !
 !
- SUBROUTINE FaceFlux_Fluid( myDGSEM )
+ SUBROUTINE InternalFaceFlux_Fluid( myDGSEM )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
@@ -2202,7 +2209,64 @@ INCLUDE 'mpif.h'
                ENDDO
             ENDDO
              
-          ELSE
+         ENDIF 
+         
+      ENDDO 
+      !$OMP ENDDO
+      
+
+#endif
+
+ END SUBROUTINE InternalFaceFlux_Fluid
+!
+ SUBROUTINE BoundaryFaceFlux_Fluid( myDGSEM )
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+#ifdef HAVE_CUDA
+   ! Local
+   TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+                    1 )
+      grid = dim3(myDGSEM % mesh % nFaces,1,1)  
+      
+      CALL FaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+                                                  myDGSEM % mesh % faces_dev % elementSides, &
+                                                  myDGSEM % mesh % faces_dev % boundaryID, &
+                                                  myDGSEM % mesh % faces_dev % iMap, &
+                                                  myDGSEM % mesh % faces_dev % jMap, &
+                                                  myDGSEM % mesh % geom_dev % nHat_dev, &
+                                                  myDGSEM % state % boundarySolution_dev, &
+                                                  myDGSEM % static % boundarySolution_dev, &
+                                                  myDGSEM % externalState_dev, &
+                                                  myDGSEM % state % boundaryFlux_dev, &
+                                                  myDGSEM % stressTensor % boundaryFlux_dev )
+#else
+   ! Local
+   INTEGER :: iEl, iFace
+   INTEGER    :: i, j, k, m, iEq, jEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   REAL(prec) :: nHat(1:3), norm
+   REAL(prec) :: uOut, uIn, cIn, cOut, T
+   REAL(prec) :: jump(1:nEq-1), aS(1:nEq-1)
+   REAL(prec) :: fac, hCapRatio, rC
+
+      hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
+      rC        =   myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
+
+      !$OMP DO PRIVATE( jump, aS )
+      DO iFace = 1, myDGSEM % mesh % nFaces
+
+         
+         e1 = myDGSEM % mesh % faces(iFace) % elementIDs(1)
+         s1 = myDGSEM % mesh % faces(iFace) % elementSides(1)
+         e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
+         s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
+
+         IF( e2 < 0 )THEN
 
             DO j = 0, myDGSEM % N  
                DO i = 0, myDGSEM % N
@@ -2333,7 +2397,8 @@ INCLUDE 'mpif.h'
 
 #endif
 
- END SUBROUTINE FaceFlux_Fluid
+ END SUBROUTINE BoundaryFaceFlux_Fluid
+
 !
 ! /////////////////////////////////////////////////////////////////////////////////////////////// !
 !                                                                                                 !
