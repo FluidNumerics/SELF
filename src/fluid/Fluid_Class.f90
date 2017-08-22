@@ -2845,78 +2845,117 @@ INCLUDE 'mpif.h'
          e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
          s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
 
-         DO j = 0, myDGSEM % N  
-            DO i = 0, myDGSEM % N
+         IF( e2 > 0 )THEN
 
-               IF( i == 0 )THEN
-                  IF( j == 0 )THEN
-                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart)
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart)
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
                   ELSE
-                     ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
-                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          myDGSEM % mesh % faces(iFace) % iStart
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
-                          myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          myDGSEM % mesh % faces(iFace) % jStart
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
                   ENDIF
-               ELSE
-                  ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                       (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
-                       myDGSEM % mesh % faces(iFace) % swapDimensions*ii
-                  jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                       (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
-                       (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
-               ENDIF
 
-                norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)**2 + &
-                            myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
-                            myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
-               IF( e2 > 0 )THEN
+                   norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
                
-                  DO iEq = 1, nEq-1
-                  
-                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-	                         0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)-&
-                                       myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
-	                           myDGSEM % params % viscLengthScale*norm
-                              
-                     IF( iEq == 4 )THEN
-	                     DO m = 1, 3    
-	                        jEq = m + (iEq-1)*3  
-	                        myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
-	                          0.5_prec*(myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-	                                 myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
-	                         myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
-	                     ENDDO
-	                     
-	                  ELSE
-                     
-	                     rhoOut = (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)+myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) )
-	                     rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
-	                  
-	                     DO m = 1, 3    
-	                        jEq = m + (iEq-1)*3  
-	                        myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
-                             0.5_prec*( rhoIn*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-	                                      rhoOut*myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
-	                         myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
-	                     ENDDO
-	                  ENDIF
-	                     
-                     myDGSEM % stressTensor % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1)
-                  ENDDO
-             
-               ELSE 
- 
+                   DO iEq = 1, nEq-1
+                   
+                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+	                          0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)-&
+                                        myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
+	                            myDGSEM % params % viscLengthScale*norm
+                               
+                      IF( iEq == 4 )THEN
+	                      DO m = 1, 3    
+	                         jEq = m + (iEq-1)*3  
+	                         myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+	                           0.5_prec*(myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
+	                                  myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
+	                          myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+	                      ENDDO
+	                      
+	                   ELSE
+                      
+	                      rhoOut = (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)+myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) )
+	                      rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
+	                   
+	                      DO m = 1, 3    
+	                         jEq = m + (iEq-1)*3  
+	                         myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+                              0.5_prec*( rhoIn*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
+	                                       rhoOut*myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
+	                          myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+	                      ENDDO
+	                   ENDIF
+	                      
+                      myDGSEM % stressTensor % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1)
+                   ENDDO
+                ENDDO
+             ENDDO     
+
+         ELSE 
+
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
+                  ELSE
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
+                  ENDIF
+
+                   norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
+               
                   bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
                   DO iEq = 1, nEq-1
                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
@@ -2950,10 +2989,11 @@ INCLUDE 'mpif.h'
                         ENDDO
                      ENDIF
                   ENDDO
-               ENDIF 
 
-            ENDDO
-         ENDDO 
+               ENDDO
+            ENDDO 
+
+         ENDIF 
          
       ENDDO 
       !$OMP ENDDO
