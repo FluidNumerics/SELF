@@ -78,8 +78,9 @@ IMPLICIT NONE
 !>@}
    TYPE BoundaryCommunicator
       INTEGER                               :: nBoundaries
-      INTEGER, ALLOCATABLE                  :: extElemIDs(:), extProcIDs(:)
+      INTEGER, ALLOCATABLE                  :: extProcIDs(:)
       INTEGER, ALLOCATABLE                  :: boundaryIDs(:)
+      INTEGER, ALLOCATABLE                  :: unPackMap(:)
 
       CONTAINS
 
@@ -130,12 +131,13 @@ IMPLICIT NONE
 
       myBC % nBoundaries = nBe
 
-      ALLOCATE( myBC % extElemIDS(1:nBe), myBC % extProcIDs(1:nBe) )
+      ALLOCATE( myBC % extProcIDs(1:nBe) )
       ALLOCATE( myBC % boundaryIDs(1:nBe) )
+      ALLOCATE( myBC % unPackMap(1:nBe) )
 
-      myBC % extElemIDs  = 0
       myBC % extProcIDs  = 0
       myBC % boundaryIDs = 0
+      myBC % unPackMap   = 0
 
  END SUBROUTINE Initialize_BoundaryCommunicator
 !
@@ -164,7 +166,8 @@ IMPLICIT NONE
    IMPLICIT NONE
    CLASS(BoundaryCommunicator), INTENT(inout) :: myBC
 
-      DEALLOCATE( myBC % extElemIDS, myBC % extProcIDs, myBC % boundaryIDs )
+      DEALLOCATE( myBC % unPackMap, myBC % extProcIDs, myBC % boundaryIDs )
+
 
  END SUBROUTINE Trash_BoundaryCommunicator
 !
@@ -222,8 +225,8 @@ IMPLICIT NONE
       DO i = 1, myBC % nBoundaries
 
          WRITE( fUnit, * ) myBC % boundaryIDs(i), &
-                           myBC % extElemIDs(i), &
-                           myBC % extProcIDs(i)
+                           myBC % extProcIDs(i), &
+                           myBC % unPackMap(i)
 
       ENDDO 
 
@@ -286,8 +289,8 @@ IMPLICIT NONE
       DO i = 1, myBC % nBoundaries
 
          READ( fUnit, * ) myBC % boundaryIDs(i), &
-                          myBC % extElemIDs(i), &
-                          myBC % extProcIDs(i)
+                          myBC % extProcIDs(i), &
+                          myBC % unPackMap(i)
 
       ENDDO 
 

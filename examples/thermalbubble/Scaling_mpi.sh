@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the command used to invoke mpirun
-mpirunner='mpirun_pgi'
+mpirunner='/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpirun'
 
 # Obtain the polynomial degree
 pDeg=$( grep polyDeg runtime.params | awk '{gsub(/,$/,""); print $3}' )

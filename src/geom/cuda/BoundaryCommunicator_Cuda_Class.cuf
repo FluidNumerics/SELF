@@ -38,7 +38,7 @@ IMPLICIT NONE
 
    TYPE, EXTENDS( BoundaryCommunicator ) :: BoundaryCommunicator_Cuda
    
-      INTEGER, DEVICE, ALLOCATABLE :: extElemIDs_dev(:), extProcIDs_dev(:)
+      INTEGER, DEVICE, ALLOCATABLE :: unPackMap_dev(:), extProcIDs_dev(:)
       INTEGER, DEVICE, ALLOCATABLE :: boundaryIDs_dev(:)
 
       CONTAINS
@@ -73,19 +73,19 @@ IMPLICIT NONE
       PRINT*, 'Initializing boundary communicator on cpu'
       myBC % nBoundaries = nBe
 
-      ALLOCATE( myBC % extElemIDS(1:nBe), myBC % extProcIDs(1:nBe) )
+      ALLOCATE( myBC % unPackMap(1:nBe), myBC % extProcIDs(1:nBe) )
       ALLOCATE( myBC % boundaryIDs(1:nBe) )
 
-      myBC % extElemIDs  = 0
+      myBC % unPackMap   = 0
       myBC % extProcIDs  = 0
       myBC % boundaryIDs = 0
       
       PRINT*, 'Initializing boundary communicator on gpu'
-      ALLOCATE( myBC % extElemIDS_dev(1:nBe), &
+      ALLOCATE( myBC % unPackMap_dev(1:nBe), &
                 myBC % extProcIDs_dev(1:nBe), &
                 myBC % boundaryIDs_dev(1:nBe) )
 
-      myBC % extElemIDs_dev  = 0
+      myBC % unPackMap_dev   = 0
       myBC % extProcIDs_dev  = 0
       myBC % boundaryIDs_dev = 0
       
@@ -98,8 +98,8 @@ IMPLICIT NONE
    IMPLICIT NONE
    CLASS(BoundaryCommunicator_Cuda), INTENT(inout) :: myBC
 
-      DEALLOCATE( myBC % extElemIDS, myBC % extProcIDs, myBC % boundaryIDs )
-      DEALLOCATE( myBC % extElemIDS_dev, myBC % extProcIDs_dev, myBC % boundaryIDs_dev )
+      DEALLOCATE( myBC % unPackMap, myBC % extProcIDs, myBC % boundaryIDs )
+      DEALLOCATE( myBC % unPackMap_dev, myBC % extProcIDs_dev, myBC % boundaryIDs_dev )
 
  END SUBROUTINE Trash_BoundaryCommunicator_Cuda
 !
@@ -114,7 +114,7 @@ IMPLICIT NONE
    CLASS(BoundaryCommunicator_Cuda), INTENT(inout) :: myBC
    
       PRINT*, 'Updating boundary communicator on gpu'
-      myBC % extElemIDs_dev  = myBC % extElemIDs
+      myBC % unPackMap_dev   = myBC % unPackMap
       myBC % extProcIDs_dev  = myBC % extProcIDs
       myBC % boundaryIDs_dev = myBC % boundaryIDs
       
@@ -147,8 +147,8 @@ IMPLICIT NONE
       DO i = 1, myBC % nBoundaries
 
          READ( fUnit, * ) myBC % boundaryIDs(i), &
-                          myBC % extElemIDs(i), &
-                          myBC % extProcIDs(i)
+                          myBC % extProcIDs(i), &
+                          myBC % unPackMap(i)
 
       ENDDO 
 

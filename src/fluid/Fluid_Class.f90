@@ -50,9 +50,7 @@ IMPLICIT NONE
 
 #ifdef HAVE_MPI
 INCLUDE 'mpif.h'
-#endif
 
-#ifdef NEW_MPI     
     TYPE PairWiseMPIPacket
        ! For the unstructured mesh, I opt for building my own data structure that bundles messages between neighboring
        ! ranks, rather than attempting to build an MPI data structure. If a structured mesh is used, one optimization 
@@ -79,7 +77,7 @@ INCLUDE 'mpif.h'
       REAL(prec)                             :: simulationTime
       TYPE( FluidParams )                    :: params
       REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
-#ifdef NEW_MPI
+#ifdef HAVE_MPI
       TYPE( PairWiseMPIPacket ), ALLOCATABLE :: mpiPackets(:)
 #endif
 
@@ -110,10 +108,7 @@ INCLUDE 'mpif.h'
       TYPE( BoundaryCommunicator )            :: extComm
 #endif
 
-#ifdef NEW_MPI
       INTEGER, ALLOCATABLE                    :: rankTable(:)
-      INTEGER, ALLOCATABLE                    :: unPackMap(:,:)
-#endif
       
       REAL(prec), ALLOCATABLE                 :: prescribedState(:,:,:,:)
       REAL(prec), ALLOCATABLE                 :: externalState(:,:,:,:)
@@ -150,16 +145,18 @@ INCLUDE 'mpif.h'
       PROCEDURE :: CalculateStaticBoundarySolution => CalculateStaticBoundarySolution_Fluid
       PROCEDURE :: CalculateBoundarySolution       => CalculateBoundarySolution_Fluid
       PROCEDURE :: UpdateExternalState             => UpdateExternalState_Fluid
-      PROCEDURE :: FaceFlux                        => FaceFlux_Fluid
+      PROCEDURE :: InternalFaceFlux                => InternalFaceFlux_Fluid
+      PROCEDURE :: BoundaryFaceFlux                => BoundaryFaceFlux_Fluid
       PROCEDURE :: MappedTimeDerivative            => MappedTimeDerivative_Fluid
       
 #ifdef HAVE_MPI
-#ifdef NEW_MPI
       PROCEDURE :: ConstructCommTables             => ConstructCommTables_Fluid
-#endif
       PROCEDURE :: MPI_StateExchange               => MPI_StateExchange_Fluid
+      PROCEDURE :: FinalizeMPI_StateExchange       => FinalizeMPI_StateExchange_Fluid
       PROCEDURE :: MPI_StressExchange              => MPI_StressExchange_Fluid
+      PROCEDURE :: FinalizeMPI_StressExchange      => MPI_StressExchange_Fluid
       PROCEDURE :: MPI_SGSExchange                 => MPI_SGSExchange_Fluid
+      PROCEDURE :: FinalizeMPI_SGSExchange         => MPI_SGSExchange_Fluid
 #endif
       ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
       ! Routines for the fluid-stress model and
@@ -172,7 +169,8 @@ INCLUDE 'mpif.h'
       PROCEDURE :: CalculateStressTensor   => CalculateStressTensor_Fluid
       PROCEDURE :: CalculateBoundaryStress => CalculateBoundaryStress_Fluid
       PROCEDURE :: UpdateExternalStress    => UpdateExternalStress_Fluid
-      PROCEDURE :: StressFlux              => StressFlux_Fluid
+      PROCEDURE :: InternalStressFlux      => InternalStressFlux_Fluid
+      PROCEDURE :: BoundaryStressFlux      => BoundaryStressFlux_Fluid
       PROCEDURE :: StressDivergence        => StressDivergence_Fluid
       
       !
@@ -205,6 +203,8 @@ INCLUDE 'mpif.h'
  
 #ifdef HAVE_MPI
  INTEGER :: MPI_PREC
+ INTEGER, ALLOCATABLE :: stateReqHandle(:), stressReqHandle(:), SGSReqHandle(:)
+ INTEGER, ALLOCATABLE :: stateStats(:,:), stressStats(:,:), SGSStats(:,:)
 #endif
 
  INTEGER :: callID
@@ -346,8 +346,14 @@ INCLUDE 'mpif.h'
       PRINT*, '                                                         '
 #endif
 
-#ifdef NEW_MPI
+#ifdef HAVE_MPI
       CALL myDGSEM % ConstructCommTables( myRank, nProc )
+      ALLOCATE( stateReqHandle(1:myDGSEM % nNeighbors*2), &
+                stressReqHandle(1:myDGSEM % nNeighbors*2), &
+                SGSReqHandle(1:myDGSEM % nNeighbors*2), &
+                stateStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
+                stressStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
+                SGSStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2) )
 #endif
 
  END SUBROUTINE Build_Fluid
@@ -365,8 +371,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % sgsCoeffs % Trash( )
       CALL myDGSEM % static % Trash( )
       CALL myDGSEM % stressTensor % Trash( )
-      
-#ifdef NEW_MPI
+#ifdef HAVE_MPI      
       DO i = 1, myDGSEM % nNeighbors
          DEALLOCATE( myDGSEM % mpiPackets(i) % sendStateBuffer )
          DEALLOCATE( myDGSEM % mpiPackets(i) % recvStateBuffer )
@@ -374,10 +379,14 @@ INCLUDE 'mpif.h'
          DEALLOCATE( myDGSEM % mpiPackets(i) % recvStressBuffer )
          DEALLOCATE( myDGSEM % mpiPackets(i) % sendSGSBuffer )
          DEALLOCATE( myDGSEM % mpiPackets(i) % recvSGSBuffer )
-      !   DEALLOCATE( myDGSEM % mpiPackets(i) % unPackMap )
       ENDDO
       DEALLOCATE( myDGSEM % mpiPackets )
-      DEALLOCATE( myDGSEM % unPackMap )
+      DEALLOCATE( stateReqHandle, &
+                  stressReqHandle, &
+                  SGSReqHandle, &
+                  stateStats, &
+                  stressStats, &
+                  SGSStats )
 #endif
       CALL myDGSEM % dGStorage % Trash( )
       CALL myDGSEM % mesh % Trash( )
@@ -435,18 +444,16 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE BuildHexMesh_Fluid
 !
-#ifdef NEW_MPI
+#ifdef HAVE_MPI
  SUBROUTINE ConstructCommTables_Fluid( myDGSEM, myRank, nProc )
    IMPLICIT NONE
    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-   INTEGER, INTENT(in)                              :: myRank, nProc
+   INTEGER, INTENT(in)           :: myRank, nProc
    ! Local
    INTEGER    :: sharedFaceCount(0:nProc-1)
    INTEGER    :: iFace, bID, iNeighbor
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, nmsg
-   INTEGER    :: theStat(MPI_STATUS_SIZE)
-   INTEGER    :: recvReq(1:myDGSEM % extComm % nBoundaries), sendReq(1:myDGSEM % extComm % nBoundaries)
    
 
       ! Count up the number of neighboring ranks
@@ -483,74 +490,12 @@ INCLUDE 'mpif.h'
          
          ALLOCATE( myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
                    myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % unPackMap(1:2,1:myDGSEM % extComm % nBoundaries)  )
-                   !myDGSEM % mpiPackets(iNeighbor) % unPackMap(1:sharedFaceCount(p2)) )
+                   myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:sharedFaceCount(p2)), &
+                   myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:sharedFaceCount(p2)), &
+                   myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:sharedFaceCount(p2)), &
+                   myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:sharedFaceCount(p2)) )
                    
          myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
-         myDGSEM % unPackMap = 0
-      ENDDO
-      
-      ! On this pass through the boundary faces, we perform an initial set of message passing
-      ! where the boundary ID is passed as the message and is sent to the "unPackMap" attribute
-      ! of the mpiPacket structure. Passing the boundary ID with the global face ID as the tag
-      ! determines how a bundled message should be unpacked on the receiving side.
-      nmsg = 0
-      DO bID = 1, myDGSEM % extComm % nBoundaries
-      
-         iFace = myDGSEM % extComm % boundaryIDs( bID )
-         p2    = myDGSEM % extComm % extProcIDs(bID)
-         
-         
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
-         IF( p2 /= myRank )THEN 
-            iNeighbor = myDGSEM % rankTable(p2)
-            
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
-            tag = myDGSEM % mesh % faces(iFace) % faceID
-            nmsg = nmsg + 1
-            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
-            
-!            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % unPackMap(myDGSEM % mpiPackets(iNeighbor) % bufferCounter), & 
-!                            1, &                                 
-!                            MPI_INTEGER,   &                      
-!                            p2, tag,  &                           
-!                            MPI_COMM_WORLD,   &                   
-!                            recvReq(nmsg), iError )               
-            myDGSEM % unPackMap(1,bID) = p2
-            
-            CALL MPI_IRECV( myDGSEM % unPackMap(2,bID), & 
-                            1, &                                 
-                            MPI_INTEGER,   &                      
-                            p2, tag,  &                           
-                            MPI_COMM_WORLD,   &                   
-                            recvReq(nmsg), iError ) 
-
-            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % bufferCounter, &      
-                            1, &       
-                            MPI_INTEGER, &             
-                            p2, tag, &                
-                            MPI_COMM_WORLD, &      
-                            sendReq(nmsg), iError)  
-                            
-                            
-                           
-         ENDIF
-         
-      ENDDO
-
-      DO bID = 1, nmsg
-         CALL MPI_Wait(sendReq(bID),theStat,iError)
-         CALL MPI_Wait(recvReq(bID),theStat,iError)
       ENDDO
       
    
@@ -740,6 +685,20 @@ INCLUDE 'mpif.h'
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
 !
+! When MPI is used, the boundary solutions that are stored on faces shared with
+! a neighboring rank are passed to that neighboring rank. Additionally, the
+! perceived "external state" is received from the neighboring rank. Calling this
+! routine is dependent on the result of CalculateBoundarySolutio, but can be
+! done at the same time as UpdateExternalState; doing so should hide some
+! communication costs.
+
+#ifdef HAVE_MPI
+      CALL myDGSEM % MPI_StateExchange( myRank ) 
+#endif
+! ----------------------------------------------------------------------------- ! 
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- ! 
+!
 ! The boundary solutions are used to calculate the external states that, when
 ! accompanied with a Riemann Solver, enforce boundary conditions. Calling this
 ! routine is dependent on the result of CalculateBoundarySolution
@@ -758,20 +717,6 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
-! ----------------------------------------------------------------------------- ! 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- ! 
-!
-! When MPI is used, the boundary solutions that are stored on faces shared with
-! a neighboring rank are passed to that neighboring rank. Additionally, the
-! perceived "external state" is received from the neighboring rank. Calling this
-! routine is dependent on the result of CalculateBoundarySolutio, but can be
-! done at the same time as UpdateExternalState; doing so should hide some
-! communication costs.
-
-#ifdef HAVE_MPI
-      CALL myDGSEM % MPI_StateExchange( myRank ) 
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -781,16 +726,14 @@ INCLUDE 'mpif.h'
 ! are estimated here using a (linear) Lax-Friedrich's upwind solver. In order to
 ! call this routine, CalculateBoundarySolution, UpdateExternalState, and
 ! MPI_StateExchange must have been completed.
-!
-! ** Need to separate FaceFlux into two routines, one that handles inviscid only
-! flux, and the other that updates the stress tensor boundary flux. This will
-! permit additional asynchronous MPI
-!
-! **This routine should have a switch for (1) calculating all fluxes, (2)
-! Calculating only myRank-owned fluxes, and (3) Calculating fluxes over faces
-! shared with neighboring ranks.
 
-      CALL myDGSEM % FaceFlux( )
+      CALL myDGSEM % InternalFaceFlux( )
+
+#ifdef HAVE_MPI
+      CALL myDGSEM % FinalizeMPI_StateExchange( myRank ) 
+#endif
+
+      CALL myDGSEM % BoundaryFaceFlux( )
 
 #ifdef TESTING
       IF( myRank == 0 )THEN
@@ -901,34 +844,6 @@ INCLUDE 'mpif.h'
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
 !
-! Once the boundary viscosisty coefficients are known, these values are
-! prolonged onto the external state, unless the boundary is a shared face with
-! a neighboring rank. This routine depends on the result of
-! CalculateBoundarySGS, but can be run at the same time as the MPI_SGSExchange
-!
-! * This call has been commented out and within the StressFlux routine, the
-! internal state of the SGS coefficients are used as the external state on
-! physical boundaries.
-
-!            CALL myDGSEM % UpdateExternalSGS( myRank )
-!
-!#ifdef TESTING
-!      IF( myRank == 0 )THEN
-!#ifdef CUDA
-!         myDGSEM % externalSGS = myDGSEM % externalSGS_dev
-!#endif
-!         CALL mdi % Update( 'Fluid_Class.f90', &
-!                            'UpdateExternalSGS', &
-!                            'Prolong viscosity to external state', &
-!                             SIZE(myDGSEM % sgsCoeffs % boundarySolution), &
-!                             PACK(myDGSEM % sgsCoeffs % boundarySolution) )
-!      ENDIF
-!#endif
-
-! ----------------------------------------------------------------------------- ! 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- ! 
-!
 ! The viscosity coefficients are exchanged with neighboring ranks that share
 ! common faces. MPI_SGSExchange can be run simulataneously with
 ! CalculateStressTensor, CalculateBoundaryStress, UpdateExternalStress, and the
@@ -962,6 +877,13 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
+
+#ifdef HAVE_MPI
+      IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN ! 
+         CALL myDGSEM % FinalizeMPI_SGSExchange( myRank )  
+      ENDIF
+#endif
+
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -989,6 +911,18 @@ INCLUDE 'mpif.h'
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
 !
+! Stress tensor values are exchanged with neighboring ranks along shared faces.
+! This routine depends on the result of CalculateBoundaryStress, but can be run
+! at the same time as UpdateExternalStress.
+
+#ifdef HAVE_MPI
+         CALL myDGSEM % MPI_StressExchange( myRank )
+#endif
+
+! ----------------------------------------------------------------------------- ! 
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- ! 
+!
 ! Now that the stress tensor is available on element faces, boundary conditions
 ! can be applied by setting the external stress tensor state. This routine
 ! depends on the result of CalculateBoundaryStress. Note that this routine can
@@ -1009,17 +943,6 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
-! ----------------------------------------------------------------------------- ! 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- ! 
-!
-! Stress tensor values are exchanged with neighboring ranks along shared faces.
-! This routine depends on the result of CalculateBoundaryStress, but can be run
-! at the same time as UpdateExternalStress.
-
-#ifdef HAVE_MPI
-         CALL myDGSEM % MPI_StressExchange( myRank )
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1030,12 +953,12 @@ INCLUDE 'mpif.h'
 ! of the stress tensor plus the jump in the solution weighted by a spatial
 ! wave-number. This routine depends on the result of the UpdateExternalStress
 ! and the MPI_StressExchange.
-!
-! **This routine should have a switch for (1) calculating all fluxes, (2)
-! Calculating only myRank-owned fluxes, and (3) Calculating fluxes over faces
-! shared with neighboring ranks.
 
-         CALL myDGSEM % StressFlux( )
+         CALL myDGSEM % InternalStressFlux( )
+#ifdef HAVE_MPI
+         CALL myDGSEM % FinalizeMPI_StressExchange( myRank )
+#endif
+         CALL myDGSEM % BoundaryStressFlux( )
  
 #ifdef TESTING
       IF( myRank == 0 )THEN
@@ -1317,9 +1240,6 @@ INCLUDE 'mpif.h'
                DO i = 0, myDGSEM % N
                   DO m = 1, nEq-1
                   
-            !         IF( m == 4 )THEN
-            !         myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
-            !         ELSE
                      myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.09_prec*&
                                     myDGSEM % params % viscLengthScale*sqrt( KE(i,j,k) )
                                       
@@ -1814,160 +1734,110 @@ INCLUDE 'mpif.h'
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
-   INTEGER, INTENT(in)                            :: myRank
+   INTEGER, INTENT(in)         :: myRank
    ! Local
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
-   INTEGER    :: e1, e2, s1, p2
-!#ifdef NEW_MPI
-!   INTEGER    :: iNeighbor, iUnpacked
-!   INTEGER    :: nmsg(1:myDGSEM % nNeighbors)
-!   INTEGER    :: recvReq(1:myDGSEM % nNeighbors), sendReq(1:myDGSEM % nNeighbors)
-!#else
-   INTEGER    :: nmsg
-   INTEGER    :: reqHandle(1:myDGSEM % extComm % nBoundaries*2)
-   INTEGER    :: theStats(MPI_STATUS_SIZE,1:myDGSEM % extComm % nBoundaries*2)
-!#endif
-
-!#ifdef NEW_MPI
-
-!      nmsg = 0
-      
-!      ! On this first pass through the boundary cells, we need to load up the send buffer
-!      DO bID = 1, myDGSEM % extComm % nBoundaries
-      
-!         iFace = myDGSEM % extComm % boundaryIDs( bID )
-!         e1    = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
-!         s1    = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-!         p2    = myDGSEM % extComm % extProcIDs(bID)
-         
-!         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-!         ! then this boundary edge involves a physical boundary condition and does not require a 
-!         ! message exchange
-!         IF( p2 /= myRank )THEN 
-         
-!            nmsg( myDGSEM % rankTable(p2) )= nmsg( myDGSEM % rankTable(p2) ) + 1
-!            myDGSEM % mpiPackets( myDGSEM % rankTable(p2) ) % sendStateBuffer(:,:,:,nmsg(myDGSEM % rankTable(p2)) ) = myDGSEM % state % boundarySolution(:,:,:,e1,s1)
-            
-!         ENDIF
-         
-!      ENDDO
-      
-!      ! Now that the send buffer is loaded for each neighbor, pass the messages
-      
-!      DO iNeighbor = 1, myDGSEM % nNeighbors
-            
-!            CALL MPI_IRECV( myDGSEM % mpiPackets( iNeighbor ) % recvStateBuffer, & ! where to store data
-!                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                    ! how much data
-!                           MPI_PREC,   &                       ! type of data
-!                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                           ! source Process, message tag
-!                           MPI_COMM_WORLD,   &                   ! communicator
-!                           recvReq(iNeighbor), iError )                     ! status and error 
-
-
-!            CALL MPI_ISEND( myDGSEM % mpiPackets( iNeighbor ) % sendStateBuffer, &      ! Where the data is stored
-!                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &        ! How much data there is => assuming the message is small enough, it will buffer
-!                           MPI_PREC, &             ! type of data
-!                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &                ! target process, message tag
-!                           MPI_COMM_WORLD, &         ! the MPI communicator
-!                           sendReq(iNeighbor), iError) ! 
-                           
-!      ENDDO
-
-!      DO iNeighbor = 1, myDGSEM % nNeighbors
-!         CALL MPI_Wait(sendReq(iNeighbor),theStat,iError)
-!         CALL MPI_Wait(recvReq(iNeighbor),theStat,iError)
-!      ENDDO
-
-!      ! Reorganize the recvBuffer into the boundarysolution
-!      nmsg = 0 
-!      DO bID = 1, myDGSEM % extComm % nBoundaries
-      
-!         p2    = myDGSEM % extComm % extProcIDs(bID)
-         
-!         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-!         ! then this boundary edge involves a physical boundary condition and does not require a 
-!         ! message exchange
-!         IF( p2 /= myRank )THEN 
-         
-!            iNeighbor = myDGSEM % rankTable(p2)
-!            nmsg( iNeighbor ) = nmsg( iNeighbor ) + 1
-!        !    iUnpacked = myDGSEM % mpiPackets(iNeighbor) % unPackMap( nmsg(iNeighbor) )
-!            iUnpacked = myDGSEM % unPackMap( 2, bID )
-!            myDGSEM % externalState(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer(:,:,:, iUnpacked)
-         
-!         ENDIF
-      
-!      ENDDO
-
-!#ifdef HAVE_CUDA
-!      ! For now, we update the device with data received from message passing
-!      myDGSEM % externalState_dev = myDGSEM % externalState
-!#endif
-
-
-
-!#else
-!!!!!! OLD MPI !!!!!
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 
 #ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
 #endif
-
-      nmsg = 0
-      
+      DO iNeighbor = 1, myDGSEM % nNeighbors
+         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+      ENDDO
+ 
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
-         iFace = myDGSEM % extComm % boundaryIDs( bID )
-         e1    = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
-         s1    = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-         p2 = myDGSEM % extComm % extProcIDs(bID)
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
          
          ! In the event that the external process ID (p2) is identical to the current rank (p1),
          ! then this boundary edge involves a physical boundary condition and does not require a 
          ! message exchange
          IF( p2 /= myRank )THEN 
+
+            e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
+            s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
+            iNeighbor = myDGSEM % rankTable(p2)
          
-            e2 = myDGSEM % mesh % Faces(iFace) % elementIDs(2)
-   
+            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
+            myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+               myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
+
+         ENDIF
+      ENDDO
+
+      DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
             ! then this boundary requires a message exchange between ranks p1 and p2.
          
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
-            tag = myDGSEM % mesh % faces(iFace) % faceID
-            nmsg = nmsg + 1
-            CALL MPI_IRECV( myDGSEM % externalState(:,:,:,bID), & ! where to store data
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq, &                    ! how much data
-                           MPI_PREC,   &                       ! type of data
-                           p2, tag,  &                           ! source Process, message tag
-                           MPI_COMM_WORLD,   &                   ! communicator
-                           reqHandle(nmsg), iError )                     ! status and error 
+            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer, & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
+                           MPI_PREC,   &                      
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
+                           MPI_COMM_WORLD,   &                
+                           stateReqHandle((iNeighbor-1)*2+1), iError )           
 
-            nmsg = nmsg + 1
-            CALL MPI_ISEND( myDGSEM % state % boundarySolution(:,:,:,s1,e1), &      ! Where the data is stored
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq, &        ! How much data there is => assuming the message is small enough, it will buffer
-                           MPI_PREC, &             ! type of data
-                           p2, tag, &                ! target process, message tag
-                           MPI_COMM_WORLD, &         ! the MPI communicator
-                           reqHandle(nmsg), iError) ! 
+            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer, & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
+                           MPI_PREC, &      
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
+                           MPI_COMM_WORLD, &
+                           stateReqHandle(iNeighbor*2), iError)  
                            
-         ENDIF
-         
       ENDDO
 
-      CALL MPI_WaitAll(nmsg,reqHandle,theStats,iError)
 
+ END SUBROUTINE MPI_StateExchange_Fluid
+!
+ SUBROUTINE FinalizeMPI_StateExchange_Fluid( myDGSEM, myRank ) 
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)         :: myRank
+   ! Local
+   INTEGER    :: iFace, bID
+   INTEGER    :: tag, ierror
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+
+
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
+
+
+      DO bID = 1, myDGSEM % extComm % nBoundaries
+
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
+         
+         ! In the event that the external process ID (p2) is identical to the current rank (p1),
+         ! then this boundary edge involves a physical boundary condition and does not require a 
+         ! message exchange
+         IF( p2 /= myRank )THEN 
+      
+            iNeighbor = myDGSEM % rankTable(p2)
+            jUnpack   = myDGSEM % extComm % unpackMap(bID)
+            IF( jUnpack == 0 )THEN
+              PRINT*, 'Something catastrophic happenend!'
+              CALL myDGSEM % Trash( )
+              STOP
+            ENDIF
+            myDGSEM % externalState(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer(:,:,:,jUnpack)
+
+         ENDIF
+
+      ENDDO
 #ifdef HAVE_CUDA
       ! For now, we update the device with data received from message passing
       myDGSEM % externalState_dev = myDGSEM % externalState
 #endif
 
-!#endif
 
- END SUBROUTINE MPI_StateExchange_Fluid
+ END SUBROUTINE FinalizeMPI_StateExchange_Fluid
 !
  SUBROUTINE MPI_StressExchange_Fluid( myDGSEM, myRank ) 
 
@@ -1977,68 +1847,104 @@ INCLUDE 'mpif.h'
    ! Local
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
-   INTEGER    :: e1, e2, s1, p2, nmsg
-   INTEGER    :: theStats(MPI_STATUS_SIZE,1:myDGSEM % extComm % nBoundaries*2)
-   INTEGER    :: reqHandle(1:myDGSEM % extComm % nBoundaries*2)
-
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 
 #ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % stressTensor % boundarySolution = myDGSEM % stressTensor % boundarySolution_dev
 #endif
-
-      nmsg = 0
+      DO iNeighbor = 1, myDGSEM % nNeighbors
+         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+      ENDDO
+ 
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
-         iFace = myDGSEM % extComm % boundaryIDs( bID )
-         e1    = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
-         s1    = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-         p2 = myDGSEM % extComm % extProcIDs(bID)
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
          
          ! In the event that the external process ID (p2) is identical to the current rank (p1),
          ! then this boundary edge involves a physical boundary condition and does not require a 
          ! message exchange
          IF( p2 /= myRank )THEN 
+
+            e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
+            s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
+            iNeighbor = myDGSEM % rankTable(p2)
          
-            e2 = myDGSEM % mesh % Faces(iFace) % elementIDs(2)
-   
+            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
+            myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+               myDGSEM % stressTensor % boundarySolution(:,:,:,s1,e1) 
+
+         ENDIF
+      ENDDO
+
+      DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
             ! then this boundary requires a message exchange between ranks p1 and p2.
          
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
-            tag = myDGSEM % mesh % faces(iFace) % faceID
-            nmsg = nmsg + 1
-            CALL MPI_IRECV( myDGSEM % externalStress(:,:,:,bID), & ! where to store data
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3, &                    ! how much data
-                           MPI_PREC,   &                       ! type of data
-                           p2, tag,  &                           ! source Process, message tag
-                           MPI_COMM_WORLD,   &                   ! communicator
-                           reqHandle(nmsg), iError )                     ! status and error 
+            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer, & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
+                           MPI_PREC,   &                      
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
+                           MPI_COMM_WORLD,   &                
+                           stressReqHandle((iNeighbor-1)*2+1), iError )           
 
-
-            nmsg = nmsg + 1
-            CALL MPI_ISEND( myDGSEM % stressTensor % boundarySolution(:,:,:,s1,e1), &      ! Where the data is stored
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3, &        ! How much data there is => assuming the message is small enough, it will buffer
-                           MPI_PREC, &             ! type of data
-                           p2, tag, &                ! target process, message tag
-                           MPI_COMM_WORLD, &         ! the MPI communicator
-                           reqHandle(nmsg), iError) ! 
+            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer, & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
+                           MPI_PREC, &      
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
+                           MPI_COMM_WORLD, &
+                           stressReqHandle(iNeighbor*2), iError)  
                            
-            
-         ENDIF
-         
       ENDDO
 
-      CALL MPI_WaitAll(nmsg,reqHandle,theStats,iError)
+ END SUBROUTINE MPI_StressExchange_Fluid
+!
+ SUBROUTINE FinalizeMPI_StressExchange_Fluid( myDGSEM, myRank ) 
 
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)         :: myRank
+   ! Local
+   INTEGER    :: iFace, bID
+   INTEGER    :: tag, ierror
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+
+
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stressReqHandle,stressStats,iError)
+
+
+      DO bID = 1, myDGSEM % extComm % nBoundaries
+
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
+         
+         ! In the event that the external process ID (p2) is identical to the current rank (p1),
+         ! then this boundary edge involves a physical boundary condition and does not require a 
+         ! message exchange
+         IF( p2 /= myRank )THEN 
+      
+            iNeighbor = myDGSEM % rankTable(p2)
+            jUnpack   = myDGSEM % extComm % unpackMap(bID)
+            IF( jUnpack == 0 )THEN
+              PRINT*, 'Something catastrophic happenend!'
+              CALL myDGSEM % Trash( )
+              STOP
+            ENDIF
+            myDGSEM % externalStress(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer(:,:,:,jUnpack)
+
+         ENDIF
+
+      ENDDO
 #ifdef HAVE_CUDA
-      ! For now, we update the CPU with the device boundary solution data before message passing
+      ! For now, we update the device with data received from message passing
       myDGSEM % externalStress_dev = myDGSEM % externalStress
 #endif
 
- END SUBROUTINE MPI_StressExchange_Fluid
+ END SUBROUTINE FinalizeMPI_StressExchange_Fluid
 !
  SUBROUTINE MPI_SGSExchange_Fluid( myDGSEM, myRank ) 
 
@@ -2048,76 +1954,117 @@ INCLUDE 'mpif.h'
    ! Local
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
-   INTEGER    :: e1, e2, s1, p2, nmsg
-   INTEGER    :: theStats(MPI_STATUS_SIZE,1:myDGSEM % extComm % nBoundaries*2)
-   INTEGER    :: reqHandle(1:myDGSEM % extComm % nBoundaries*2)
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+   INTEGER    :: reqHandle(1:myDGSEM % nNeighbors*2)
+   INTEGER    :: theStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2)
 
 #ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % sgsCoeffs % boundarySolution_dev
 #endif
-
-      nmsg = 0
+      DO iNeighbor = 1, myDGSEM % nNeighbors
+         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+      ENDDO
+ 
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
-         iFace = myDGSEM % extComm % boundaryIDs( bID )
-         e1    = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
-         s1    = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-         p2 = myDGSEM % extComm % extProcIDs(bID)
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
          
          ! In the event that the external process ID (p2) is identical to the current rank (p1),
          ! then this boundary edge involves a physical boundary condition and does not require a 
          ! message exchange
          IF( p2 /= myRank )THEN 
+
+            e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
+            s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
+            iNeighbor = myDGSEM % rankTable(p2)
          
-            e2 = myDGSEM % mesh % Faces(iFace) % elementIDs(2)
-   
+            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
+            myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+               myDGSEM % sgsCoeffs % boundarySolution(:,:,:,s1,e1) 
+
+         ENDIF
+      ENDDO
+
+      DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
             ! then this boundary requires a message exchange between ranks p1 and p2.
          
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
-            tag = myDGSEM % mesh % faces(iFace) % faceID
+            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer, & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
+                           MPI_PREC,   &                      
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
+                           MPI_COMM_WORLD,   &                
+                           SGSReqHandle((iNeighbor-1)*2+1), iError )           
 
-            nmsg = nmsg + 1
-            CALL MPI_IRECV( myDGSEM % externalSGS(:,:,:,bID), & ! where to store data
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1), &                    ! how much data
-                           MPI_PREC,   &                       ! type of data
-                           p2, tag,  &                           ! source Process, message tag
-                           MPI_COMM_WORLD,   &                   ! communicator
-                           reqHandle(nmsg), iError )                     ! status and error 
-
-            nmsg = nmsg + 1
-            CALL MPI_ISEND( myDGSEM % sgsCoeffs % boundarySolution(:,:,:,s1,e1), &      ! Where the data is stored
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1), &        ! How much data there is => assuming the message is small enough, it will buffer
-                           MPI_PREC, &             ! type of data
-                           p2, tag, &                ! target process, message tag
-                           MPI_COMM_WORLD, &         ! the MPI communicator
-                           reqHandle(nmsg), iError) ! 
+            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer, & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
+                           MPI_PREC, &      
+                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
+                           MPI_COMM_WORLD, &
+                           SGSReqHandle(iNeighbor*2), iError)  
                            
-            
-         ENDIF
-         
       ENDDO
-      
-      CALL MPI_WaitAll(nmsg,reqHandle,theStats,iError)
 
-#ifdef HAVE_CUDA
-      ! For now, we update the CPU with the device boundary solution data before message passing
-      myDGSEM % externalSGS_dev = myDGSEM % externalSGS
-#endif  
    
  END SUBROUTINE MPI_SGSExchange_Fluid
+!
+ SUBROUTINE FinalizeMPI_SGSExchange_Fluid( myDGSEM, myRank ) 
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)         :: myRank
+   ! Local
+   INTEGER    :: iFace, bID
+   INTEGER    :: tag, ierror
+   INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+
+
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,SGSReqHandle,SGSStats,iError)
+
+
+      DO bID = 1, myDGSEM % extComm % nBoundaries
+
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
+         
+         ! In the event that the external process ID (p2) is identical to the current rank (p1),
+         ! then this boundary edge involves a physical boundary condition and does not require a 
+         ! message exchange
+         IF( p2 /= myRank )THEN 
+      
+            iNeighbor = myDGSEM % rankTable(p2)
+            jUnpack   = myDGSEM % extComm % unpackMap(bID)
+            IF( jUnpack == 0 )THEN
+              PRINT*, 'Something catastrophic happenend!'
+              CALL myDGSEM % Trash( )
+              STOP
+            ENDIF
+            myDGSEM % externalSGS(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer(:,:,:,jUnpack)
+
+         ENDIF
+
+      ENDDO
+#ifdef HAVE_CUDA
+      ! For now, we update the device with data received from message passing
+      myDGSEM % externalSGS_dev = myDGSEM % externalSGS
+#endif
+   
+ END SUBROUTINE FinalizeMPI_SGSExchange_Fluid
+
 #endif
 !
 ! /////////////////////////////////////////////////////////////////////////////////////////////// !
 !                                                                                                 !
-!  This section of code contains routines for computing the fluxes through the element faces      !                                                                                   !                                                                  !
+!  This section of code contains routines for computing the fluxes through the element faces      !
 !                                                                                                 !
 ! /////////////////////////////////////////////////////////////////////////////////////////////// !
 !
- SUBROUTINE FaceFlux_Fluid( myDGSEM )
+ SUBROUTINE InternalFaceFlux_Fluid( myDGSEM )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
@@ -2130,7 +2077,7 @@ INCLUDE 'mpif.h'
                     1 )
       grid = dim3(myDGSEM % mesh % nFaces,1,1)  
       
-      CALL FaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+      CALL InternalFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
                                                   myDGSEM % mesh % faces_dev % elementSides, &
                                                   myDGSEM % mesh % faces_dev % boundaryID, &
                                                   myDGSEM % mesh % faces_dev % iMap, &
@@ -2164,47 +2111,48 @@ INCLUDE 'mpif.h'
          e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
          s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
 
-         DO j = 0, myDGSEM % N  
-            DO i = 0, myDGSEM % N
+         IF( e2 > 0 )THEN
 
-               IF( i == 0 )THEN
-                  IF( j == 0 )THEN
-                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart)
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart)
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+   
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
                   ELSE
-                     ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
-                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          myDGSEM % mesh % faces(iFace) % iStart
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
-                          myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          myDGSEM % mesh % faces(iFace) % jStart
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
                   ENDIF
-               ELSE
-                  ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                       (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
-                       myDGSEM % mesh % faces(iFace) % swapDimensions*ii
-                  jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                       (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
-                       (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
-               ENDIF
-
-               norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
-                            myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
-                            myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1) )
-
-               DO k = 1, 3
-                  nHat(k) = myDGSEM % mesh % geom(e1) % nHat(k,i,j,s1)/norm
-               ENDDO
+   
+                  norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1) )
+   
+                  DO k = 1, 3
+                     nHat(k) = myDGSEM % mesh % geom(e1) % nHat(k,i,j,s1)/norm
+                  ENDDO
                
-               IF( e2 > 0 )THEN
                   DO iEq = 1, nEq-1
                   jump(iEq)  = myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) - &
                                myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) !outState - inState
@@ -2215,33 +2163,44 @@ INCLUDE 'mpif.h'
                           
                   ! Sound speed estimate for the external and internal states
                   cOut = sqrt( myDGSEM % params % R *T* &
-                              ( (myDGSEM % state % boundarySolution(ii,jj,6,s2,e2)+myDGSEM % static % boundarySolution(ii,jj,6,s2,e2))/ myDGSEM % params % P0 )**rC   )
+                              ( (myDGSEM % state % boundarySolution(ii,jj,6,s2,e2)+&
+                                 myDGSEM % static % boundarySolution(ii,jj,6,s2,e2))/&
+                                 myDGSEM % params % P0 )**rC   )
                         
-                  T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
-                        (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + myDGSEM % state % boundarySolution(i,j,4,s1,e1) )        
+                  T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + &
+                         myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
+                        (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + &
+                         myDGSEM % state % boundarySolution(i,j,4,s1,e1) )        
                              
                   cIn  = sqrt( myDGSEM % params % R*T* &
-                              ( (myDGSEM % state % boundarySolution(i,j,6,s1,e1)+myDGSEM % static % boundarySolution(i,j,6,s1,e1))/myDGSEM % params % P0 )**rC  )
+                              ( (myDGSEM % state % boundarySolution(i,j,6,s1,e1)+&
+                                 myDGSEM % static % boundarySolution(i,j,6,s1,e1))/&
+                                 myDGSEM % params % P0 )**rC  )
                                
                   ! External normal velocity component
+
                   uOut = ( myDGSEM % state % boundarySolution(ii,jj,1,s2,e2)*nHat(1) + &
                            myDGSEM % state % boundarySolution(ii,jj,2,s2,e2)*nHat(2) + &
                            myDGSEM % state % boundarySolution(ii,jj,3,s2,e2)*nHat(3) )/& 
-                         ( myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) + myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) )
+                         ( myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) + &
+                           myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) )
                            
                   ! Internal normal velocity component
                   uIn  = ( myDGSEM % state % boundarySolution(i,j,1,s1,e1)*nHat(1) + &
                            myDGSEM % state % boundarySolution(i,j,2,s1,e1)*nHat(2) + &
                            myDGSEM % state % boundarySolution(i,j,3,s1,e1)*nHat(3) )/& 
-                         ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) 
+                         ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + &
+                           myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) 
                          
                   ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
                   fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
 
                   ! Advective flux
                   DO iEq = 1, nEq-1
-                        aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
-                                 uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + myDGSEM % static % boundarySolution(ii,jj,iEq,s2,e2) )
+                        aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + &
+                                        myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
+                                 uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + &
+                                        myDGSEM % static % boundarySolution(ii,jj,iEq,s2,e2) )
                   ENDDO
                   
                   DO k = 1, 3
@@ -2280,10 +2239,109 @@ INCLUDE 'mpif.h'
                         ENDDO
                      ENDIF
                   ENDDO
+               ENDDO
+            ENDDO
              
-               ELSE
+         ENDIF 
+         
+      ENDDO 
+      !$OMP ENDDO
+      
+
+#endif
+
+ END SUBROUTINE InternalFaceFlux_Fluid
+!
+ SUBROUTINE BoundaryFaceFlux_Fluid( myDGSEM )
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+#ifdef HAVE_CUDA
+   ! Local
+   TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+                    1 )
+      grid = dim3(myDGSEM % mesh % nFaces,1,1)  
+      
+      CALL BoundaryFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+                                                  myDGSEM % mesh % faces_dev % elementSides, &
+                                                  myDGSEM % mesh % faces_dev % boundaryID, &
+                                                  myDGSEM % mesh % faces_dev % iMap, &
+                                                  myDGSEM % mesh % faces_dev % jMap, &
+                                                  myDGSEM % mesh % geom_dev % nHat_dev, &
+                                                  myDGSEM % state % boundarySolution_dev, &
+                                                  myDGSEM % static % boundarySolution_dev, &
+                                                  myDGSEM % externalState_dev, &
+                                                  myDGSEM % state % boundaryFlux_dev, &
+                                                  myDGSEM % stressTensor % boundaryFlux_dev )
+#else
+   ! Local
+   INTEGER :: iEl, iFace
+   INTEGER    :: i, j, k, m, iEq, jEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   REAL(prec) :: nHat(1:3), norm
+   REAL(prec) :: uOut, uIn, cIn, cOut, T
+   REAL(prec) :: jump(1:nEq-1), aS(1:nEq-1)
+   REAL(prec) :: fac, hCapRatio, rC
+
+      hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
+      rC        =   myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
+
+      !$OMP DO PRIVATE( jump, aS )
+      DO iFace = 1, myDGSEM % mesh % nFaces
+
+         
+         e1 = myDGSEM % mesh % faces(iFace) % elementIDs(1)
+         s1 = myDGSEM % mesh % faces(iFace) % elementSides(1)
+         e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
+         s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
+
+         IF( e2 < 0 )THEN
+
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+   
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
+                  ELSE
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
+                  ENDIF
+   
+                  norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1) )
+   
+                  DO k = 1, 3
+                     nHat(k) = myDGSEM % mesh % geom(e1) % nHat(k,i,j,s1)/norm
+                  ENDDO
  
-                  bID  = myDGSEM % mesh % faces(iFace) % boundaryID
+                  bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
                   DO iEq = 1, nEq-1                 
                   jump(iEq)  = myDGSEM % externalState(ii,jj,iEq,bID) - &
                                myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) !outState - inState
@@ -2361,10 +2419,10 @@ INCLUDE 'mpif.h'
                      ENDIF
                   ENDDO
                   
-               ENDIF 
+               ENDDO
+            ENDDO 
 
-            ENDDO
-         ENDDO 
+         ENDIF 
          
       ENDDO 
       !$OMP ENDDO
@@ -2372,7 +2430,8 @@ INCLUDE 'mpif.h'
 
 #endif
 
- END SUBROUTINE FaceFlux_Fluid
+ END SUBROUTINE BoundaryFaceFlux_Fluid
+
 !
 ! /////////////////////////////////////////////////////////////////////////////////////////////// !
 !                                                                                                 !
@@ -2841,7 +2900,7 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE UpdateExternalStress_Fluid
 !
- SUBROUTINE StressFlux_Fluid( myDGSEM )
+ SUBROUTINE InternalStressFlux_Fluid( myDGSEM )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
@@ -2854,7 +2913,7 @@ INCLUDE 'mpif.h'
                     1 )
       grid = dim3(myDGSEM % mesh % nFaces,nEq-1,1)  
       
-      CALL StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+      CALL InternalStressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
                                                   myDGSEM % mesh % faces_dev % elementSides, &
                                                   myDGSEM % mesh % faces_dev % boundaryID, &
                                                   myDGSEM % mesh % faces_dev % iMap, &
@@ -2884,79 +2943,170 @@ INCLUDE 'mpif.h'
          e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
          s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
 
-         DO j = 0, myDGSEM % N  
-            DO i = 0, myDGSEM % N
+         IF( e2 > 0 )THEN
 
-               IF( i == 0 )THEN
-                  IF( j == 0 )THEN
-                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart)
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % jStart) + &
-                          (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (myDGSEM % mesh % faces(iFace) % iStart)
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
                   ELSE
-                     ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
-                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          myDGSEM % mesh % faces(iFace) % iStart
-                     jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                          (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
-                          myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                          myDGSEM % mesh % faces(iFace) % jStart
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
                   ENDIF
-               ELSE
-                  ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
-                       (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
-                       myDGSEM % mesh % faces(iFace) % swapDimensions*ii
-                  jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
-                       (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
-                       (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
-               ENDIF
 
-                norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)**2 + &
-                            myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
-                            myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
-               IF( e2 > 0 )THEN
+                   norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
                
-                  DO iEq = 1, nEq-1
-                  
-                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-	                         0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)-&
-                                       myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
-	                           myDGSEM % params % viscLengthScale*norm
-                              
-                     IF( iEq == 4 )THEN
-	                     DO m = 1, 3    
-	                        jEq = m + (iEq-1)*3  
-	                        myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
-	                          0.5_prec*(myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-	                                 myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
-	                         myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
-	                     ENDDO
-	                     
-	                  ELSE
-                     
-	                     rhoOut = (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)+myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) )
-	                     rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
-	                  
-	                     DO m = 1, 3    
-	                        jEq = m + (iEq-1)*3  
-	                        myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
-                             0.5_prec*( rhoIn*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-	                                      rhoOut*myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
-	                         myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
-	                     ENDDO
-	                  ENDIF
-	                     
-                     myDGSEM % stressTensor % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1)
-                  ENDDO
-             
-               ELSE 
- 
-                  bID  = myDGSEM % mesh % faces(iFace) % boundaryID
+                   DO iEq = 1, nEq-1
+                   
+                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+	                          0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)-&
+                                        myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
+	                            myDGSEM % params % viscLengthScale*norm
+                               
+                      IF( iEq == 4 )THEN
+	                      DO m = 1, 3    
+	                         jEq = m + (iEq-1)*3  
+	                         myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+	                           0.5_prec*(myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
+	                                  myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
+	                          myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+	                      ENDDO
+	                      
+	                   ELSE
+                      
+	                      rhoOut = (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)+myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) )
+	                      rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
+	                   
+	                      DO m = 1, 3    
+	                         jEq = m + (iEq-1)*3  
+	                         myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+                              0.5_prec*( rhoIn*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
+	                                       rhoOut*myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % stressTensor % boundarysolution(ii,jj,jEq,s2,e2))*&
+	                          myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+	                      ENDDO
+	                   ENDIF
+	                      
+                      myDGSEM % stressTensor % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1)
+                   ENDDO
+                ENDDO
+             ENDDO     
+
+         ENDIF 
+         
+      ENDDO 
+      !$OMP ENDDO
+      
+#endif
+
+ END SUBROUTINE InternalStressFlux_Fluid
+!
+ SUBROUTINE BoundaryStressFlux_Fluid( myDGSEM )
+
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+#ifdef HAVE_CUDA
+   ! Local
+   TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+                    1 )
+      grid = dim3(myDGSEM % mesh % nFaces,nEq-1,1)  
+      
+      CALL BoundaryStressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
+                                                  myDGSEM % mesh % faces_dev % elementSides, &
+                                                  myDGSEM % mesh % faces_dev % boundaryID, &
+                                                  myDGSEM % mesh % faces_dev % iMap, &
+                                                  myDGSEM % mesh % faces_dev % jMap, &
+                                                  myDGSEM % mesh % geom_dev % nHat_dev, &
+                                                  myDGSEM % state % boundarySolution_dev, &
+                                                  myDGSEM % static % boundarySolution_dev, &
+                                                  myDGSEM % stressTensor % boundarySolution_dev, &
+                                                  myDGSEM % sgsCoeffs % boundarySolution_dev, &
+                                                  myDGSEM % externalState_dev, &
+                                                  myDGSEM % externalStress_dev, &
+                                                  myDGSEM % stressTensor % boundaryFlux_dev )
+#else
+   ! Local
+   REAL(prec) :: norm, rhoIn, rhoOut
+   INTEGER :: iEl, iFace
+   INTEGER    :: i, j, k, m, iEq, jEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+
+      !$OMP DO
+      DO iFace = 1, myDGSEM % mesh % nFaces
+
+         
+         e1 = myDGSEM % mesh % faces(iFace) % elementIDs(1)
+         s1 = myDGSEM % mesh % faces(iFace) % elementSides(1)
+         e2 = myDGSEM % mesh % faces(iFace) % elementIDs(2)
+         s2 = ABS(myDGSEM % mesh % faces(iFace) % elementSides(2))
+
+         IF( e2 < 0 )THEN
+
+            DO j = 0, myDGSEM % N  
+               DO i = 0, myDGSEM % N
+
+                  IF( i == 0 )THEN
+                     IF( j == 0 )THEN
+                        ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart)
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % jStart) + &
+                             (myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (myDGSEM % mesh % faces(iFace) % iStart)
+                     ELSE
+                        ii = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             (ii+myDGSEM % mesh % faces(iFace) % jInc) + &
+                             (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             myDGSEM % mesh % faces(iFace) % iStart
+                        jj = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                             (jj+myDGSEM % mesh % faces(iFace) % jInc) +&
+                             myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                             myDGSEM % mesh % faces(iFace) % jStart
+                     ENDIF
+                  ELSE
+                     ii = (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*&
+                          (ii + myDGSEM % mesh % faces(iFace) % iInc) +&
+                          myDGSEM % mesh % faces(iFace) % swapDimensions*ii
+                     jj = myDGSEM % mesh % faces(iFace) % swapDimensions*&
+                          (jj+myDGSEM % mesh % faces(iFace) % iInc) + &
+                          (1-myDGSEM % mesh % faces(iFace) % swapDimensions)*jj
+                  ENDIF
+
+                   norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
+                               myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
+               
+                  bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
                   DO iEq = 1, nEq-1
                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
                              0.5_prec*myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*&
@@ -2989,17 +3139,18 @@ INCLUDE 'mpif.h'
                         ENDDO
                      ENDIF
                   ENDDO
-               ENDIF 
 
-            ENDDO
-         ENDDO 
+               ENDDO
+            ENDDO 
+
+         ENDIF 
          
       ENDDO 
       !$OMP ENDDO
       
 #endif
 
- END SUBROUTINE StressFlux_Fluid
+ END SUBROUTINE BoundaryStressFlux_Fluid
 !
  SUBROUTINE StressDivergence_Fluid( myDGSEM )
 
@@ -4322,7 +4473,7 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE UpdateExternalState_CUDAKernel
 !
- ATTRIBUTES(Global) SUBROUTINE FaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+ ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                  nHat, boundarySolution, boundarySolution_static, &
                                                  externalState, boundaryFlux, stressFlux )
 
@@ -4356,7 +4507,7 @@ INCLUDE 'mpif.h'
          s1 = elementSides(1,iFace)
          e2 = elementIDs(2,iFace)
          s2 = ABS(elementSides(2,iFace))
-         bID  = boundaryIDs(iFace)
+         bID  = ABS(boundaryIDs(iFace))
 
                ii = iMap(i,j,iFace)
                jj = jMap(i,j,iFace)
@@ -4446,8 +4597,57 @@ INCLUDE 'mpif.h'
                      
                   ENDDO
              
-               ELSE ! ////////////////////////////////////////////////////////////////////////// !
- 
+               ENDIF 
+
+
+ END SUBROUTINE InternalFaceFlux_CUDAKernel
+!
+ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                 nHat, boundarySolution, boundarySolution_static, &
+                                                 externalState, boundaryFlux, stressFlux )
+
+   IMPLICIT NONE
+   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: iMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: jMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+   ! Local
+   INTEGER    :: iEl, iFace, jEq
+   INTEGER    :: i, j, k, iEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+   REAL(prec) :: jump(1:5), aS(1:5)
+   REAL(prec) :: fac
+
+
+      iFace = blockIdx % x
+      j     = threadIdx % y - 1
+      i     = threadIdx % x -1
+     
+         e1 = elementIDs(1,iFace)
+         s1 = elementSides(1,iFace)
+         e2 = elementIDs(2,iFace)
+         s2 = ABS(elementSides(2,iFace))
+         bID  = ABS(boundaryIDs(iFace))
+
+               ii = iMap(i,j,iFace)
+               jj = jMap(i,j,iFace)
+               
+               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+
+               
+               IF( e2 < 0 )THEN
+               
                   
                   DO iEq = 1, nEq_dev-1              
                   jump(iEq)  = externalState(ii,jj,iEq,bID) - &
@@ -4519,7 +4719,8 @@ INCLUDE 'mpif.h'
                ENDIF 
 
 
- END SUBROUTINE FaceFlux_CUDAKernel
+ END SUBROUTINE BoundaryFaceFlux_CUDAKernel
+
 !
  ATTRIBUTES(Global) SUBROUTINE MappedTimeDerivative_CUDAKernel( solution, static, boundaryFlux, drag, &
                                                                 Ja, Jac, bMat, qWeight, dMatP, tendency )
@@ -4766,7 +4967,7 @@ INCLUDE 'mpif.h'
                   
  END SUBROUTINE UpdateExternalStress_CUDAKernel 
 !
- ATTRIBUTES(Global) SUBROUTINE StressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+ ATTRIBUTES(Global) SUBROUTINE InternalStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                       nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
                                                       externalState, externalStress, boundaryFlux )
 
@@ -4801,7 +5002,7 @@ INCLUDE 'mpif.h'
       s1 = elementSides(1,iFace)
       e2 = elementIDs(2,iFace)
       s2 = ABS(elementSides(2,iFace))
-      bID  = boundaryIDs(iFace)
+      bID  = ABS(boundaryIDs(iFace))
 
       ii = iMap(i,j,iFace)
       jj = jMap(i,j,iFace)
@@ -4839,7 +5040,53 @@ INCLUDE 'mpif.h'
 			 
          boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
              
-      ELSE
+      ENDIF
+
+ END SUBROUTINE InternalStressFlux_CUDAKernel
+!
+ ATTRIBUTES(Global) SUBROUTINE BoundaryStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                      nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
+                                                      externalState, externalStress, boundaryFlux )
+
+   IMPLICIT NONE
+   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: iMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   INTEGER, DEVICE, INTENT(in)     :: jMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:polydeg_dev,0:polydeg_dev,1:5,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:polydeg_dev,0:polydeg_dev,1:15,1:nBoundaryFaces_dev)
+   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+   ! Local
+   INTEGER    :: iEl, iFace
+   INTEGER    :: i, j, iEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   INTEGER    :: m, jEq
+   REAL(prec) :: norm, rhoOut, rhoIn
+
+      iFace = blockIdx % x
+      iEq   = blockIdx % y
+      j     = threadIdx % y-1
+      i     = threadIdx % x-1
+     
+      e1 = elementIDs(1,iFace)
+      s1 = elementSides(1,iFace)
+      e2 = elementIDs(2,iFace)
+      s2 = ABS(elementSides(2,iFace))
+      bID  = ABS(boundaryIDs(iFace))
+
+      ii = iMap(i,j,iFace)
+      jj = jMap(i,j,iFace)
+               
+      norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
+      
+      IF( e2 < 0 )THEN
       
          boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
                                      (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
@@ -4869,7 +5116,7 @@ INCLUDE 'mpif.h'
 		   ENDIF
       ENDIF
 
- END SUBROUTINE StressFlux_CUDAKernel
+ END SUBROUTINE BoundaryStressFlux_CUDAKernel
 !
  ATTRIBUTES(Global) SUBROUTINE StressDivergence_CUDAKernel( stress, stressFlux, state, static, sgsCoeffs, &
                                                              Ja, Jac, bMat, qWeight, dMatP, tendency ) ! ///////////////////// !
