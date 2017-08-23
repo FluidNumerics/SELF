@@ -227,7 +227,7 @@ CONTAINS
 
           ENDIF
 
-         IF( MOD( iterate, dFreq ) == 0 )THEN
+         IF( MOD( simulationCycle, dFreq ) == 0 )THEN
            !$OMP MASTER
            CALL myeu % WritePickup( simulationCycle, myRank )
            !$OMP END MASTER
@@ -320,17 +320,17 @@ END PROGRAM Fluid_Driver
      IMPLICIT NONE
   END SUBROUTINE VisitSlaveProcessCallBack
 !
-  INTEGER FUNCTION VisitGetMetaData( handle )
+  INTEGER FUNCTION VisitGetMetaData( )
      IMPLICIT NONE
-     INTEGER :: handle
+     !INTEGER :: handle
      INCLUDE "visitfortransimV2interface.inc"
      INTEGER :: runFlag, simulationCycle, simulationTime
      COMMON /SIMSTATE/ runFlag, simulationCycle, simulationTime 
-     INTEGER :: err, md, m1, cmd
+     INTEGER :: err, md, m1, cmd, vmd
 
 
         IF( VisitMDSimAlloc( md ) == VISIT_OKAY )THEN
-!           err = VisitMDSimSetCycleTime( handle, simulationCycle, simulationTime )
+           err = VisitMDSimSetCycleTime( md, simulationCycle, simulationTime )
            IF( runFlag == 1 )THEN
               err = VisitMDSimSetMode( md, VISIT_SIMMODE_RUNNING )
            ELSE
@@ -356,6 +356,15 @@ END PROGRAM Fluid_Driver
            err = VisitMDSimAddMesh( md, m1 )
         ENDIF
 
+        ! Add the density variable
+        IF( VisitMDvarAlloc( vmd ) == VISIT_OKAY )THEN
+           err = VisitMDvarSetName( vmd, "density", 7 )
+           err = VisitMDvarSetMeshName( vmd, "Mesh", 4 )
+           err = VisitMDvarSetType( vmd, VISIT_VARTYPE_SCALAR )
+           err = VisitMDvarSetCentering( vmd, VISIT_VARCENTERING_NODE)
+           err = VisitMDSimAddVariable( md, vmd )
+        ENDIF
+
         ! Add meta-data for simulation control commands
         IF( VisitMDcmdAlloc( cmd ) == VISIT_OKAY )THEN
            err = VisitMDcmdSetName( cmd, "halt", 4 )
@@ -365,6 +374,11 @@ END PROGRAM Fluid_Driver
            err = VisitMDcmdSetName( cmd, "run", 3 )
            err = VisitMDSimAddGenericCommand( md, cmd )
         ENDIF
+      !  IF( VisitMDcmdAlloc( cmd ) == VISIT_OKAY )THEN
+      !     err = VisitMDcmdSetName( cmd, "step", 4 )
+      !     err = VisitMDSimAddGenericCommand( md, cmd )
+      !  ENDIF
+
 
        
 
