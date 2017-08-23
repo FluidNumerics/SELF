@@ -154,9 +154,6 @@ NodalStorage_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutin
 # ---------------------------------------------------------------------- #
 
 # MODULE list #
-DGSEMSolutionStorage_1D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o ${SRCDIR}solutionstorage/DGSEMSolutionStorage_1D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}solutionstorage/DGSEMSolutionStorage_1D_Class.f90 -o $@
-
 DGSEMSolutionStorage_2D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o ${SRCDIR}solutionstorage/DGSEMSolutionStorage_2D_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}solutionstorage/DGSEMSolutionStorage_2D_Class.f90 -o $@
 	
@@ -322,9 +319,6 @@ DecomposeStructuredHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 	
 ## Modules 
 #
-GeometryParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/GeometryParams_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/GeometryParams_Class.f90 -o $@
-
 BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/BoundaryCommunicator_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
