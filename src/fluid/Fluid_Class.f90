@@ -680,6 +680,20 @@ INCLUDE 'mpif.h'
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
 !
+! When MPI is used, the boundary solutions that are stored on faces shared with
+! a neighboring rank are passed to that neighboring rank. Additionally, the
+! perceived "external state" is received from the neighboring rank. Calling this
+! routine is dependent on the result of CalculateBoundarySolutio, but can be
+! done at the same time as UpdateExternalState; doing so should hide some
+! communication costs.
+
+#ifdef HAVE_MPI
+      CALL myDGSEM % MPI_StateExchange( myRank ) 
+#endif
+! ----------------------------------------------------------------------------- ! 
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- ! 
+!
 ! The boundary solutions are used to calculate the external states that, when
 ! accompanied with a Riemann Solver, enforce boundary conditions. Calling this
 ! routine is dependent on the result of CalculateBoundarySolution
@@ -698,21 +712,6 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
-! ----------------------------------------------------------------------------- ! 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- ! 
-!
-! When MPI is used, the boundary solutions that are stored on faces shared with
-! a neighboring rank are passed to that neighboring rank. Additionally, the
-! perceived "external state" is received from the neighboring rank. Calling this
-! routine is dependent on the result of CalculateBoundarySolutio, but can be
-! done at the same time as UpdateExternalState; doing so should hide some
-! communication costs.
-
-#ifdef HAVE_MPI
-      CALL myDGSEM % MPI_StateExchange( myRank ) 
-      CALL myDGSEM % FinalizeMPI_StateExchange( myRank ) 
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -722,16 +721,13 @@ INCLUDE 'mpif.h'
 ! are estimated here using a (linear) Lax-Friedrich's upwind solver. In order to
 ! call this routine, CalculateBoundarySolution, UpdateExternalState, and
 ! MPI_StateExchange must have been completed.
-!
-! ** Need to separate FaceFlux into two routines, one that handles inviscid only
-! flux, and the other that updates the stress tensor boundary flux. This will
-! permit additional asynchronous MPI
-!
-! **This routine should have a switch for (1) calculating all fluxes, (2)
-! Calculating only myRank-owned fluxes, and (3) Calculating fluxes over faces
-! shared with neighboring ranks.
 
       CALL myDGSEM % InternalFaceFlux( )
+
+#ifdef HAVE_MPI
+      CALL myDGSEM % FinalizeMPI_StateExchange( myRank ) 
+#endif
+
       CALL myDGSEM % BoundaryFaceFlux( )
 
 #ifdef TESTING
@@ -843,34 +839,6 @@ INCLUDE 'mpif.h'
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
 !
-! Once the boundary viscosisty coefficients are known, these values are
-! prolonged onto the external state, unless the boundary is a shared face with
-! a neighboring rank. This routine depends on the result of
-! CalculateBoundarySGS, but can be run at the same time as the MPI_SGSExchange
-!
-! * This call has been commented out and within the StressFlux routine, the
-! internal state of the SGS coefficients are used as the external state on
-! physical boundaries.
-
-!            CALL myDGSEM % UpdateExternalSGS( myRank )
-!
-!#ifdef TESTING
-!      IF( myRank == 0 )THEN
-!#ifdef CUDA
-!         myDGSEM % externalSGS = myDGSEM % externalSGS_dev
-!#endif
-!         CALL mdi % Update( 'Fluid_Class.f90', &
-!                            'UpdateExternalSGS', &
-!                            'Prolong viscosity to external state', &
-!                             SIZE(myDGSEM % sgsCoeffs % boundarySolution), &
-!                             PACK(myDGSEM % sgsCoeffs % boundarySolution) )
-!      ENDIF
-!#endif
-
-! ----------------------------------------------------------------------------- ! 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- ! 
-!
 ! The viscosity coefficients are exchanged with neighboring ranks that share
 ! common faces. MPI_SGSExchange can be run simulataneously with
 ! CalculateStressTensor, CalculateBoundaryStress, UpdateExternalStress, and the
@@ -879,7 +847,6 @@ INCLUDE 'mpif.h'
 
 #ifdef HAVE_MPI
             CALL myDGSEM % MPI_SGSExchange( myRank )  
-            CALL myDGSEM % FinalizeMPI_SGSExchange( myRank )  
 #endif
          ENDIF
 ! ----------------------------------------------------------------------------- ! 
@@ -905,7 +872,12 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
-! Can probably place the wait for the MPI_SGSExchange here
+
+#ifdef HAVE_MPI
+      IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN ! 
+         CALL myDGSEM % FinalizeMPI_SGSExchange( myRank )  
+      ENDIF
+#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -930,8 +902,17 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
-! The StressExchange can be placed here with the finallize/wait call placed
-! after UpdateExternalStress
+! ----------------------------------------------------------------------------- ! 
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- ! 
+!
+! Stress tensor values are exchanged with neighboring ranks along shared faces.
+! This routine depends on the result of CalculateBoundaryStress, but can be run
+! at the same time as UpdateExternalStress.
+
+#ifdef HAVE_MPI
+         CALL myDGSEM % MPI_StressExchange( myRank )
+#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -957,18 +938,6 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
 
-! ----------------------------------------------------------------------------- ! 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- ! 
-!
-! Stress tensor values are exchanged with neighboring ranks along shared faces.
-! This routine depends on the result of CalculateBoundaryStress, but can be run
-! at the same time as UpdateExternalStress.
-
-#ifdef HAVE_MPI
-         CALL myDGSEM % MPI_StressExchange( myRank )
-         CALL myDGSEM % FinalizeMPI_StressExchange( myRank )
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -979,12 +948,11 @@ INCLUDE 'mpif.h'
 ! of the stress tensor plus the jump in the solution weighted by a spatial
 ! wave-number. This routine depends on the result of the UpdateExternalStress
 ! and the MPI_StressExchange.
-!
-! **This routine should have a switch for (1) calculating all fluxes, (2)
-! Calculating only myRank-owned fluxes, and (3) Calculating fluxes over faces
-! shared with neighboring ranks.
 
          CALL myDGSEM % InternalStressFlux( )
+#ifdef HAVE_MPI
+         CALL myDGSEM % FinalizeMPI_StressExchange( myRank )
+#endif
          CALL myDGSEM % BoundaryStressFlux( )
  
 #ifdef TESTING
