@@ -1,8 +1,7 @@
 ! RollOffFilter_Class.f90
 ! 
-! Copyright 2017,2018 Joseph Schoonover <schoonover.numerics@gmail.com>
-!
-! RollOffFilter_Class.f90 is part of the SELF-Fluids.
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 

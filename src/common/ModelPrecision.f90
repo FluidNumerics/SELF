@@ -1,7 +1,7 @@
 ! ModelPrecision.f90
 ! 
-! Copyright 2017 Joseph Schoonover < schoonover.numerics@gmail.com > 
-!
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! ModelPrecision.f90 is part of the Spectral Element Libraries in Fortran for Fluids (SELF-Fluids).
 !
