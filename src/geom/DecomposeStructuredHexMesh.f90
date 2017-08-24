@@ -1,3 +1,7 @@
+
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
+
 PROGRAM DecomposeStructuredHexMesh
 
  ! src/common/

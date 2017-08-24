@@ -35,6 +35,7 @@ MODULE Particles_Class
       INTEGER                 :: nActive
       LOGICAL, ALLOCATABLE    :: activeStatus(:)
       INTEGER, ALLOCATABLE    :: element(:)
+      REAL(prec), ALLOCATABLE :: volume(:)
       REAL(prec), ALLOCATABLE :: mass(:)
       REAL(prec), ALLOCATABLE :: x(:,:)
       REAL(prec), ALLOCATABLE :: s(:,:)
