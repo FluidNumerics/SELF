@@ -530,7 +530,6 @@ INCLUDE 'mpif.h'
                     4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) )
       grid = dim3(myDGSEM % mesh % nElems, nEq-1, 1) ! Because nElems can reach a rather large size, it must remain the first dimension of the grid (see pgaccelinfo for MAximum Grid Size)
      
-
       dt = myDGSEM % params % dt
       
       rk3_a_dev = rk3_a
@@ -1584,7 +1583,8 @@ INCLUDE 'mpif.h'
                      IF( e2 == PRESCRIBED .AND. p2 == myRank )THEN
                      !   PRINT*,'PRESCRIBED',myDGSEM % prescribedState(i,j,1,iFace)
                         DO iEq = 1, myDGSEM % nEq
-                           myDGSEM % externalState(i,j,iEq,iFace) = myDGSEM % prescribedState(i,j,iEq,iFace)
+                           myDGSEM % externalState(i,j,iEq,iFace) = myDGSEM % prescribedState(i,j,iEq,iFace) - &
+                                                                    myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)
                         ENDDO
                      ELSEIF( e2 == RADIATION .AND. p2 == myRank )THEN
                         
@@ -2192,7 +2192,8 @@ INCLUDE 'mpif.h'
                            myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) 
                          
                   ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
-                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  !fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  fac = max( abs(uIn), abs(uOut) )
 
                   ! Advective flux
                   DO iEq = 1, nEq-1
@@ -2378,7 +2379,8 @@ INCLUDE 'mpif.h'
                            (myDGSEM % state % boundarySolution(i,j,4,s1,e1)+&
                             myDGSEM % static % boundarySolution(i,j,4,s1,e1) )
                             
-                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  !fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  fac = max( abs(uIn), abs(uOut) )
                   
                   ! Advective flux
                   DO iEq = 1, nEq-1
@@ -3047,6 +3049,7 @@ INCLUDE 'mpif.h'
                                                   myDGSEM % static % boundarySolution_dev, &
                                                   myDGSEM % stressTensor % boundarySolution_dev, &
                                                   myDGSEM % sgsCoeffs % boundarySolution_dev, &
+                                                  myDGSEM % externalSGS_dev, &
                                                   myDGSEM % externalState_dev, &
                                                   myDGSEM % externalStress_dev, &
                                                   myDGSEM % stressTensor % boundaryFlux_dev )
@@ -3105,40 +3108,78 @@ INCLUDE 'mpif.h'
                                myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)**2 + &
                                myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)**2 )
                
-                  bID  = ABS(myDGSEM % mesh % faces(iFace) % boundaryID)
-                  DO iEq = 1, nEq-1
-                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-                             0.5_prec*myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*&
-                             ( myDGSEM % externalState(ii,jj,iEq,bID) - myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
-                             myDGSEM % params % viscLengthScale*norm
-                              
-                     IF( iEq == 4 )THEN
-                        DO m = 1, 3    
-                           jEq = m + (iEq-1)*3  
-                           myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-                                   myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
-                                   0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
-                                   ( myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+ myDGSEM % externalStress(ii,jj,jEq,bID) )*&
-                                   myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
-                        ENDDO
+                  bID  = myDGSEM % mesh % faces(iFace) % boundaryID
+                  IF( bID < 0 )THEN ! Physical Boundary
+                     bID = ABS(bID)
+                     DO iEq = 1, nEq-1
+                        myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+                                0.5_prec*myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*&
+                                ( myDGSEM % externalState(ii,jj,iEq,bID) - myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
+                                myDGSEM % params % viscLengthScale*norm
+                                 
+                        IF( iEq == 4 )THEN
+                           DO m = 1, 3    
+                              jEq = m + (iEq-1)*3  
+                              myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+                                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+                                      0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
+                                      ( myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+ myDGSEM % externalStress(ii,jj,jEq,bID) )*&
+                                      myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+                           ENDDO
+                        
+                        ELSE
+                        
+                           rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % externalState(ii,jj,4,bID) )
+                           rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
                      
-                     ELSE
+                           DO m = 1, 3    
+                              jEq = m + (iEq-1)*3  
+                              myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+                                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+                                      0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
+                                      ( rhoIn*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
+                                        rhoOut*myDGSEM % externalStress(ii,jj,jEq,bID) )*&
+                                      myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+                           ENDDO
+                        ENDIF
+                     ENDDO
+                  ELSE ! Neighboring process
+                     DO iEq = 1, nEq-1
+                        myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+                                0.5_prec*(myDGSEM % externalSGS(ii,jj,iEq,bID)*myDGSEM % externalState(ii,jj,iEq,bID) -&
+                                          myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
+                                myDGSEM % params % viscLengthScale*norm
+                                 
+                        IF( iEq == 4 )THEN
+                           DO m = 1, 3    
+                              jEq = m + (iEq-1)*3  
+                              myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+                                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+                                      0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
+                                                 myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+ &
+                                                 myDGSEM % externalSGS(ii,jj,iEq,bID )*myDGSEM % externalStress(ii,jj,jEq,bID) )*&
+                                      myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+                           ENDDO
+                        
+                        ELSE
+                        
+                           rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % externalState(ii,jj,4,bID) )
+                           rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
                      
-                        rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % externalState(ii,jj,4,bID) )
-                        rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
-                  
-                        DO m = 1, 3    
-                           jEq = m + (iEq-1)*3  
-                           myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-                                   myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
-                                   0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
-                                   ( rhoIn*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-                                     rhoOut*myDGSEM % externalStress(ii,jj,jEq,bID) )*&
-                                   myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
-                        ENDDO
-                     ENDIF
-                  ENDDO
+                           DO m = 1, 3    
+                              jEq = m + (iEq-1)*3  
+                              myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
+                                      myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
+                                      0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
+                                                 rhoIn*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
+                                                 myDGSEM % externalSGS(ii,jj,iEq,bID)*&
+                                                 rhoOut*myDGSEM % externalStress(ii,jj,jEq,bID) )*&
+                                      myDGSEM % mesh % geom(e1) % nHat(m,i,j,s1)
+                           ENDDO
+                        ENDIF
+                     ENDDO
 
+                  ENDIF
                ENDDO
             ENDDO 
 
@@ -4232,7 +4273,8 @@ INCLUDE 'mpif.h'
             IF( e2 == PRESCRIBED .AND. p2 == myRank_dev )THEN
                
                DO iEq = 1, nEq_dev
-                  externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)
+                  externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)-&
+                                                 stateBsols(i,j,iEq,s1,e1) 
                ENDDO
                   
             ELSEIF( e2 == RADIATION .AND. p2 == myRank_dev )THEN
@@ -4444,7 +4486,8 @@ INCLUDE 'mpif.h'
                          ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) ) 
                            
                   ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
-                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  !fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  fac = max( abs(uIn),  abs(uOut) )
 
                   ! Advective flux
                   DO iEq = 1, nEq_dev-1
@@ -4571,7 +4614,8 @@ INCLUDE 'mpif.h'
                          ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
 
 
-                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                 ! fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  fac = max( abs(uIn), abs(uOut) )
                   DO iEq = 1, nEq_dev-1
                         aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
                                  uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
@@ -4585,6 +4629,7 @@ INCLUDE 'mpif.h'
                           
                   DO iEq = 1, nEq_dev-1
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+                     !boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) )*norm
                      IF( iEq == 4 )THEN
                         DO k = 1, 3
                            jEq = k+(iEq-1)*3
@@ -4652,12 +4697,12 @@ INCLUDE 'mpif.h'
                                      Ja(i,j,k,row,col,iEl)*&
                                      solution(i,j,k,row,iEl)*&
                                       (solution(i,j,k,iEq,iEl) + static(i,j,k,iEq,iEl))/&    ! Density weighted variable being advected
-	     	                             (solution(i,j,k,4,iEl) + static(i,j,k,4,iEl) )      
-	      ENDDO
-	     ! //////////////////// Pressure (Momentum only) /////////////////////////// !
-	     IF( iEq <= 3 )THEN
+                                  (solution(i,j,k,4,iEl) + static(i,j,k,4,iEl) )      
+         ENDDO
+     ! //////////////////// Pressure (Momentum only) /////////////////////////// !
+         IF( iEq <= 3 )THEN
             contFlux(i,j,k,col) = contFlux(i,j,k,col) + Ja(i,j,k,iEq,col,iEl)*solution(i,j,k,6,iEl)
-        ENDIF
+         ENDIF
          
       ENDDO                                  
             
@@ -4938,7 +4983,7 @@ INCLUDE 'mpif.h'
  END SUBROUTINE InternalStressFlux_CUDAKernel
 !
  ATTRIBUTES(Global) SUBROUTINE BoundaryStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
-                                                      nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
+                                                      nHat, boundaryState, static, boundaryStress, sgsCoeffs, externalSGS, &
                                                       externalState, externalStress, boundaryFlux )
 
    IMPLICIT NONE
@@ -4951,6 +4996,7 @@ INCLUDE 'mpif.h'
    REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:polydeg_dev,0:polydeg_dev,1:5,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: externalSGS(0:polydeg_dev,0:polydeg_dev,1:5,nBoundaryFaces_dev)
    REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
    REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:polydeg_dev,0:polydeg_dev,1:15,1:nBoundaryFaces_dev)
@@ -4972,41 +5018,71 @@ INCLUDE 'mpif.h'
       s1 = elementSides(1,iFace)
       e2 = elementIDs(2,iFace)
       s2 = ABS(elementSides(2,iFace))
-      bID  = ABS(boundaryIDs(iFace))
+      bID  = boundaryIDs(iFace)
 
       ii = iMap(i,j,iFace)
       jj = jMap(i,j,iFace)
                
       norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
-      
-      IF( e2 < 0 )THEN
-      
-         boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
-                                     (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+      IF( e2 < 0 )THEN !Physical boundary
+         IF( bID < 0 )THEN
+         
+            bID = ABS(bID)
+            boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
+                                        (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
 
-		   IF( iEq == 4 )THEN
-       
-            
-			   DO m = 1, 3    
-				   jEq = m + (iEq-1)*3  
-				   boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-				     0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*(boundaryStress(i,j,jEq,s1,e1)+&
-					    	                        externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
-			 ENDDO
-          
-		   ELSE
-                        
-          rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
-          rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
-          
-            DO m = 1, 3    
-				  jEq = m + (iEq-1)*3  
-				  boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-				    0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*( rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
-                                                                        rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
-			   ENDDO
-          
-		   ENDIF
+           IF( iEq == 4 )THEN
+             
+             DO m = 1, 3    
+               jEq = m + (iEq-1)*3  
+               boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+                                             0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*(boundaryStress(i,j,jEq,s1,e1)+&
+                                             externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+             ENDDO
+             
+           ELSE
+                           
+             rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
+             rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
+             
+             DO m = 1, 3    
+               jEq = m + (iEq-1)*3  
+               boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+                                             0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*( rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
+                                                                           rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+             ENDDO
+             
+           ENDIF
+
+         ELSE
+         
+            boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( externalSGS(ii,jj,iEq,bID)*externalState(ii,jj,iEq,bID)-&
+                                                     sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+
+           IF( iEq == 4 )THEN
+             
+             DO m = 1, 3    
+               jEq = m + (iEq-1)*3  
+               boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+                                             0.5_prec*( sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
+                                                        externalSGS(ii,jj,iEq,bID)*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+             ENDDO
+             
+           ELSE
+                           
+             rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
+             rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
+             
+             DO m = 1, 3    
+               jEq = m + (iEq-1)*3  
+               boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+                                             0.5_prec*( sgsCoeffs(i,j,iEq,s1,e1)*rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
+                                                        externalSGS(ii,jj,iEq,bID)*rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+             ENDDO
+             
+           ENDIF
+         ENDIF
+
       ENDIF
 
  END SUBROUTINE BoundaryStressFlux_CUDAKernel

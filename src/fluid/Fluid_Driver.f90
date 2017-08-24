@@ -60,6 +60,7 @@ USE Fluid_Class
       !$OMP PARALLEL
 #endif
 
+      CALL myeu % EquationOfState( )
 #ifdef TIMING
       !$OMP MASTER
       IF( myRank == 0 )THEN
