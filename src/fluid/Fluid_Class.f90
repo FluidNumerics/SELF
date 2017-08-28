@@ -1584,8 +1584,7 @@ INCLUDE 'mpif.h'
                      IF( e2 == PRESCRIBED .AND. p2 == myRank )THEN
                      !   PRINT*,'PRESCRIBED',myDGSEM % prescribedState(i,j,1,iFace)
                         DO iEq = 1, myDGSEM % nEq
-                           myDGSEM % externalState(i,j,iEq,iFace) = myDGSEM % prescribedState(i,j,iEq,iFace) - &
-                                                                    myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)
+                           myDGSEM % externalState(i,j,iEq,iFace) = myDGSEM % prescribedState(i,j,iEq,iFace)
                         ENDDO
                      ELSEIF( e2 == RADIATION .AND. p2 == myRank )THEN
                         
@@ -1740,10 +1739,17 @@ INCLUDE 'mpif.h'
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 
+#ifndef CUDA_DIRECT
 #ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
 #endif
+#endif
+
+#ifdef CUDA_DIRECT
+      CALL BoundaryStateToBuffer_CUDA_Kernel<<< >>>>( ) 
+#else
+
       DO iNeighbor = 1, myDGSEM % nNeighbors
          myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
       ENDDO
@@ -1768,7 +1774,7 @@ INCLUDE 'mpif.h'
 
          ENDIF
       ENDDO
-
+#endif
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -4274,8 +4280,7 @@ INCLUDE 'mpif.h'
             IF( e2 == PRESCRIBED .AND. p2 == myRank_dev )THEN
                
                DO iEq = 1, nEq_dev
-                  externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)-&
-                                                 stateBsols(i,j,iEq,s1,e1) 
+                  externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)
                ENDDO
                   
             ELSEIF( e2 == RADIATION .AND. p2 == myRank_dev )THEN
@@ -4487,8 +4492,8 @@ INCLUDE 'mpif.h'
                          ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) ) 
                            
                   ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
-                  !fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-                  fac = max( abs(uIn),  abs(uOut) )
+                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  !fac = max( abs(uIn),  abs(uOut) )
 
                   ! Advective flux
                   DO iEq = 1, nEq_dev-1
@@ -4615,8 +4620,8 @@ INCLUDE 'mpif.h'
                          ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
 
 
-                 ! fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-                  fac = max( abs(uIn), abs(uOut) )
+                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                 ! fac = max( abs(uIn), abs(uOut) )
                   DO iEq = 1, nEq_dev-1
                         aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
                                  uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
