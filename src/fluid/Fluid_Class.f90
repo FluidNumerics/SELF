@@ -1738,10 +1738,17 @@ INCLUDE 'mpif.h'
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 
+#ifndef CUDA_DIRECT
 #ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
 #endif
+#endif
+
+#ifdef CUDA_DIRECT
+      CALL BoundaryStateToBuffer_CUDA_Kernel<<< >>>>( ) 
+#else
+
       DO iNeighbor = 1, myDGSEM % nNeighbors
          myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
       ENDDO
@@ -1766,7 +1773,7 @@ INCLUDE 'mpif.h'
 
          ENDIF
       ENDDO
-
+#endif
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -4613,7 +4620,7 @@ INCLUDE 'mpif.h'
 
 
                   fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-                  !fac = max( abs(uIn), abs(uOut) )
+
                   DO iEq = 1, nEq_dev-1
                         aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
                                  uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
