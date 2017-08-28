@@ -93,8 +93,8 @@ ifeq (${INSITU_VIZ},yes)
   endif
 endif
 
-LIB+=LAPACK_LIB
-INC+=LAPACK_INC
+LIB+=${LAPACK_LIB}
+INC+=${LAPACK_INC}
 
 # ---------------------------------------------------------------------- #
 #                           ~/src/common/                                #

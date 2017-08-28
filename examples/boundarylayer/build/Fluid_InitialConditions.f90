@@ -88,8 +88,8 @@ CONTAINS
                       myDGSEM % mesh % geom(e1) % nHat(2, 0, 0, s1)**2 ) ) THEN ! Top or bottom surface
 
                IF( myDGSEM % mesh % geom(e1) % nHat(3, 0, 0, s1) > 0.0_prec ) THEN ! Top
-                  myDGSEM % mesh % faces(iFace2) % elementIDs(2) =NO_NORMAL_FLOW
-                  !myDGSEM % prescribedState(:,:,:,iFace) = myDGSEM % state % boundarySolution(:,:,:,s1,e1)
+                  myDGSEM % mesh % faces(iFace2) % elementIDs(2) =PRESCRIBED
+                  myDGSEM % prescribedState(:,:,:,iFace2) = myDGSEM % state % boundarySolution(:,:,:,s1,e1)
                ELSE ! Top
                   myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
                ENDIF
