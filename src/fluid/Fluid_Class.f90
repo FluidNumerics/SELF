@@ -362,6 +362,10 @@ INCLUDE 'mpif.h'
    ! LOCAL
    INTEGER :: i
    
+#ifdef HAVE_MPI
+      CALL MPI_BARRIER( MPI_COMM_WORLD )
+#endif
+
       PRINT*, 'S/R Trash_Fluid : Clearing memory.'
       CALL myDGSEM % state % Trash( )
       CALL myDGSEM % smoothState % Trash( )
@@ -468,7 +472,6 @@ INCLUDE 'mpif.h'
       PRINT*, '  S/R ConstructCommTables : Found', myDGSEM % nNeighbors, 'neighbors for Rank', myRank
       
       ALLOCATE( myDGSEM % mpiPackets(1:myDGSEM % nNeighbors) )
-      
       ! For each neighbor, set the neighbor's rank
       iNeighbor = 0
       DO p2 = 0, nProc-1
@@ -637,7 +640,6 @@ INCLUDE 'mpif.h'
 
       IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
          CALL myDGSEM % CalculateSmoothedState( .TRUE. )
-
 #ifdef TESTING
       IF( myRank == 0 )THEN
 #ifdef CUDA
@@ -998,7 +1000,6 @@ INCLUDE 'mpif.h'
 ! ----------------------------------------------------------------------------- ! 
 
       ENDIF
-      
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -1813,6 +1814,7 @@ INCLUDE 'mpif.h'
 
 
       CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
+
 
 
       DO bID = 1, myDGSEM % extComm % nBoundaries

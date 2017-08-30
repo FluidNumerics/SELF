@@ -47,7 +47,7 @@ else ifeq (${FC},pgfortran)
   CPPFLAGS=-Mpreprocess 
 
   ifeq (${DEBUG},yes)
-    OPT+=-O0 -g -Kieee
+    OPT+=-O0 -g -Kieee -traceback -Minfo=all -Mbounds
     CPPFLAGS+=-DDEBUG
   else
     OPT+=-fast
