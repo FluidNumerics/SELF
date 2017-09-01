@@ -1580,7 +1580,6 @@ INCLUDE 'mpif.h'
                DO i = 0, myDGSEM % N
                
                      IF( e2 == PRESCRIBED .AND. p2 == myRank )THEN
-                     !   PRINT*,'PRESCRIBED',myDGSEM % prescribedState(i,j,1,iFace)
                         DO iEq = 1, myDGSEM % nEq
                            myDGSEM % externalState(i,j,iEq,iFace) = myDGSEM % prescribedState(i,j,iEq,iFace)
                         ENDDO
@@ -2198,8 +2197,8 @@ INCLUDE 'mpif.h'
                            myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) 
                          
                   ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
-                  !fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-                  fac = max( abs(uIn), abs(uOut) )
+                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                  !fac = max( abs(uIn), abs(uOut) )
 
                   ! Advective flux
                   DO iEq = 1, nEq-1
@@ -2352,7 +2351,7 @@ INCLUDE 'mpif.h'
                   jump(iEq)  = myDGSEM % externalState(ii,jj,iEq,bID) - &
                                myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) !outState - inState
                   ENDDO
-                 
+
                   ! Sound speed estimate for the external and internal states
                   
                   T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % externalState(ii,jj,5,bID))/&
@@ -2385,8 +2384,8 @@ INCLUDE 'mpif.h'
                            (myDGSEM % state % boundarySolution(i,j,4,s1,e1)+&
                             myDGSEM % static % boundarySolution(i,j,4,s1,e1) )
                             
-                  !fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-                  fac = max( abs(uIn), abs(uOut) )
+                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+                 ! fac = max( abs(uIn), abs(uOut) )
                   
                   ! Advective flux
                   DO iEq = 1, nEq-1
@@ -4776,7 +4775,7 @@ INCLUDE 'mpif.h'
 
 
                   fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-                 ! fac = max( abs(uIn), abs(uOut) )
+
                   DO iEq = 1, nEq_dev-1
                         aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
                                  uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
@@ -4790,7 +4789,6 @@ INCLUDE 'mpif.h'
                           
                   DO iEq = 1, nEq_dev-1
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-                     !boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) )*norm
                      IF( iEq == 4 )THEN
                         DO k = 1, 3
                            jEq = k+(iEq-1)*3

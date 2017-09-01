@@ -93,6 +93,9 @@ ifeq (${INSITU_VIZ},yes)
   endif
 endif
 
+LIB+=${LAPACK_LIB}
+INC+=${LAPACK_INC}
+
 # ---------------------------------------------------------------------- #
 #                           ~/src/common/                                #
 # ---------------------------------------------------------------------- #
@@ -139,6 +142,10 @@ NodalStorage_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o 
                        Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalStorage_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}spectralops/NodalStorage_Class.f90 -o $@
 
+DGITIntegrator_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
+                       Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/DGITIntegrator_Class.f90 
+	${FC} ${OPT} -c ${SRCDIR}spectralops/DGITIntegrator_Class.f90 -o $@
+
 # Cuda Extensions
 
 Lagrange_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}spectralops/cuda/Lagrange_Cuda_Class.cuf
@@ -148,6 +155,9 @@ NodalStorage_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutin
                        Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf
 	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf -o $@
 
+DGITIntegrator_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
+                       Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/DGITIntegrator_Cuda_Class.cuf
+	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/DGITIntegrator_Cuda_Class.cuf -o $@
 
 # ---------------------------------------------------------------------- #
 #                       ~/src/solutionstorage/                           #
