@@ -154,9 +154,9 @@ INCLUDE 'mpif.h'
       PROCEDURE :: MPI_StateExchange               => MPI_StateExchange_Fluid
       PROCEDURE :: FinalizeMPI_StateExchange       => FinalizeMPI_StateExchange_Fluid
       PROCEDURE :: MPI_StressExchange              => MPI_StressExchange_Fluid
-      PROCEDURE :: FinalizeMPI_StressExchange      => MPI_StressExchange_Fluid
+      PROCEDURE :: FinalizeMPI_StressExchange      => FinalizeMPI_StressExchange_Fluid
       PROCEDURE :: MPI_SGSExchange                 => MPI_SGSExchange_Fluid
-      PROCEDURE :: FinalizeMPI_SGSExchange         => MPI_SGSExchange_Fluid
+      PROCEDURE :: FinalizeMPI_SGSExchange         => FinalizeMPI_SGSExchange_Fluid
 #endif
       ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
       ! Routines for the fluid-stress model and
@@ -362,10 +362,6 @@ INCLUDE 'mpif.h'
    ! LOCAL
    INTEGER :: i
    
-#ifdef HAVE_MPI
-      CALL MPI_BARRIER( MPI_COMM_WORLD )
-#endif
-
       PRINT*, 'S/R Trash_Fluid : Clearing memory.'
       CALL myDGSEM % state % Trash( )
       CALL myDGSEM % smoothState % Trash( )
