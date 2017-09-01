@@ -47,7 +47,7 @@ else ifeq (${FC},pgfortran)
   CPPFLAGS=-Mpreprocess 
 
   ifeq (${DEBUG},yes)
-    OPT+=-O0 -g -Kieee
+    OPT+=-O0 -g -Kieee -traceback -Minfo=all -Mbounds
     CPPFLAGS+=-DDEBUG
   else
     OPT+=-fast
@@ -64,7 +64,7 @@ else ifeq (${FC},pgfortran)
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI
-    FC=/usr/local/pgi/linux86-64/16.10/mpi/openmpi-1.10.2/bin/mpif90
+    FC=mpif90
     LIB+=${MPI_LIB}
     INC+=${MPI_INC}
   endif
