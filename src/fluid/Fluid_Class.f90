@@ -75,6 +75,7 @@ INCLUDE 'mpif.h'
 
     TYPE Fluid
       INTEGER                                :: nEq, N, nBoundaryFaces, nNeighbors
+      REAL(prec)                             :: simulationTime
       TYPE( FluidParams )                    :: params
       REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
 #ifdef HAVE_MPI
@@ -183,6 +184,8 @@ INCLUDE 'mpif.h'
       PROCEDURE :: WritePickup => WritePickup_Fluid
       PROCEDURE :: ReadPickup => ReadPickup_Fluid
   !    PROCEDURE :: QuickDiagnostics => QuickDiagnostics_Fluid
+      PROCEDURE :: FluidStateAtPlottingPoints => FluidStateAtPlottingPoints_Fluid
+      PROCEDURE :: ObtainPlottingMesh         => ObtainPlottingMesh_Fluid
 
     END TYPE Fluid
 
@@ -241,13 +244,14 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % params % Build( )
       myDGSEM % N   = myDGSEM % params % polyDeg
       myDGSEM % nEq = nEq
+      myDGSEM % simulationTime = myDGSEM % params % iterInit*myDGSEM % params % dt
 
 #ifdef TESTING
       PRINT*, '  Module Fluid_Class.f90 : S/R Build_Fluid :'
       PRINT*, '    Testing is enabled. Restricting number of time steps to 1.'
       myDGSEM % params % nTimeSteps = 1
       myDGSEM % params % dumpFreq   = 1
-#endif TESTING
+#endif
       
       ! Construct the data structure that holds the derivative and interpolation matrices
       ! and the quadrature weights. This call will also perform the device copies.
@@ -504,11 +508,10 @@ INCLUDE 'mpif.h'
 !==================================================================================================!
 !
 !
-  SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, tn, nT, myRank )
+  SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT, myRank )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
-   REAL(prec), INTENT(in)      :: tn
    INTEGER, INTENT(in)         :: nT
    INTEGER, INTENT(in)         :: myRank
 #ifdef HAVE_CUDA
@@ -539,7 +542,7 @@ INCLUDE 'mpif.h'
          G3D  = 0.0_prec
          DO m = 1,3 ! Loop over RK3 steps
             
-            t = tn + rk3_b(m)*dt
+            t = myDGSEM % simulationTime + rk3_b(m)*dt
             CALL myDGSEM % GlobalTimeDerivative( t, myRank )
             
             !
@@ -554,6 +557,7 @@ INCLUDE 'mpif.h'
          ENDDO ! m, loop over the RK3 steps
       
       ENDDO
+      myDGSEM % simulationTime = myDGSEM % simulationTime + nT*dt
 #else
    REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
    REAL(prec) :: G3D(0:myDGSEM % N,&
@@ -584,7 +588,7 @@ INCLUDE 'mpif.h'
          
          DO m = 1,3 ! Loop over RK3 steps
             
-            t = tn + rk3_b(m)*dt
+            t = myDGSEM % simulationTime + rk3_b(m)*dt
             CALL myDGSEM % GlobalTimeDerivative( t, myRank )
             
             rk3_a_local = rk3_a(m)
@@ -611,8 +615,9 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % EquationOfState( )
             
          ENDDO ! m, loop over the RK3 steps
-      
+            
       ENDDO
+      myDGSEM % simulationTime = myDGSEM % simulationTime + nT*myDGSEM % params % dt 
 #endif          
 
 
@@ -1232,12 +1237,8 @@ INCLUDE 'mpif.h'
                DO i = 0, myDGSEM % N
                   DO m = 1, nEq-1
                   
-            !         IF( m == 4 )THEN
-            !         myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.0_prec ! No density diffusion
-            !         ELSE
                      myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.09_prec*&
                                     myDGSEM % params % viscLengthScale*sqrt( KE(i,j,k) )
-            !         ENDIF
                                       
                   ENDDO
                ENDDO
@@ -3599,6 +3600,111 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE Diagnostics_Fluid
 #endif
+ SUBROUTINE ObtainPlottingMesh_Fluid( myDGSEM, x, y, z )
+
+  IMPLICIT NONE
+ 
+  CLASS( Fluid ), INTENT(inout) :: myDGsem
+  REAL(prec), INTENT(out)       :: x(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: y(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: z(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+
+  INTEGER       :: i, j, k, iEl
+  
+
+      
+      DO iEl = 1, myDGsem % mesh % nElems
+
+         x(:,:,:,iEl) = myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % geom(iEl) % x )
+         y(:,:,:,iEl) = myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % geom(iEl) % y )
+         z(:,:,:,iEl) = myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % geom(iEl) % z )
+           
+      ENDDO
+
+ END SUBROUTINE ObtainPlottingMesh_Fluid
+!
+ SUBROUTINE FluidStateAtPlottingPoints_Fluid( myDGSEM, u, v, w, density, potentialTemp, pressure )
+
+  IMPLICIT NONE
+ 
+  CLASS( Fluid ), INTENT(inout) :: myDGsem
+  REAL(prec), INTENT(out)       :: u(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: v(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: w(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: density(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: potentialTemp(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  REAL(prec), INTENT(out)       :: pressure(0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     0:myDGSEM % params % nPlot, &
+                                     1:myDGSEM % mesh % nElems)
+  ! Local
+  REAL(prec) :: sol(0:myDGSEM % params % nPlot, &
+                    0:myDGSEM % params % nPlot, &
+                    0:myDGSEM % params % nPlot, &
+                    1:nEq )
+  REAL(prec) :: bsol(0:myDGSEM % params % nPlot, &
+                     0:myDGSEM % params % nPlot, &
+                     0:myDGSEM % params % nPlot, &
+                     1:nEq )
+  INTEGER       :: i, j, k, iEl, iEq
+  
+
+ 
+      DO iEl = 1, myDGsem % mesh % nElems
+
+           
+         DO iEq = 1, nEq
+            sol(:,:,:,iEq) = myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution(:,:,:,iEq,iEl) )
+         ENDDO
+      
+         DO iEq = 1, nEq
+            bsol(:,:,:,iEq) = myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution(:,:,:,iEq,iEl) )
+         ENDDO
+         
+
+         DO k = 0, myDGSEM % params % nPlot
+            DO j = 0, myDGSEM % params % nPlot
+               DO i = 0, myDGSEM % params % nPlot
+                          
+                  u(i,j,k,iEl)             = sol(i,j,k,1)/( sol(i,j,k,4) + bsol(i,j,k,4) )
+                  v(i,j,k,iEl)             = sol(i,j,k,2)/( sol(i,j,k,4) + bsol(i,j,k,4) )
+                  w(i,j,k,iEl)             = sol(i,j,k,3)/( sol(i,j,k,4) + bsol(i,j,k,4) )
+                  density(i,j,k,iEl)       = sol(i,j,k,4)
+                  potentialTemp(i,j,k,iEl) = (sol(i,j,k,5) + bsol(i,j,k,5))/( sol(i,j,k,4) + bsol(i,j,k,4) )
+                  pressure(i,j,k,iEl)      = sol(i,j,k,6)
+
+               ENDDO
+            ENDDO
+         ENDDO
+        
+      ENDDO
+
+
+ END SUBROUTINE FluidStateAtPlottingPoints_Fluid
 !
  SUBROUTINE WriteSmoothedTecplot_Fluid( myDGSEM, iter, nPlot, myRank )
 

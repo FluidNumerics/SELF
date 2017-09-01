@@ -400,13 +400,23 @@ IMPLICIT NONE
             STATUS = 'REPLACE', &
             ACTION = 'WRITE' )
             
+#ifdef __GFORTRAN__
+      OPEN( UNIT = NewUnit(fUnit2), &
+            FILE = TRIM(baseFileName)//'.'//countChar//'.mdi', &
+            FORM = 'UNFORMATTED', &
+            ACCESS = 'DIRECT', &
+            ACTION = 'WRITE', &
+            STATUS = 'REPLACE', &
+            CONVERT = 'BIG_ENDIAN' )
+#else
       OPEN( UNIT = NewUnit(fUnit2), &
             FILE = TRIM(baseFileName)//'.'//countChar//'.mdi', &
             FORM = 'BINARY', &
             ACCESS = 'STREAM', &
             ACTION = 'WRITE', &
             STATUS = 'REPLACE', &
-            CONVERT = 'BIG_ENDIAN')
+            CONVERT = 'BIG_ENDIAN' )
+#endif
 
       k     = 0
       recID = 0
@@ -479,7 +489,16 @@ IMPLICIT NONE
             ACCESS = 'SEQUENTIAL', &
             STATUS = 'OLD', &
             ACTION = 'READ' )
-            
+
+#ifdef __GFORTRAN__            
+      OPEN( UNIT = NewUnit(fUnit2), &
+            FILE = TRIM(baseFileName)//'.'//countChar//'.mdi', &
+            FORM = 'UNFORMATTED', &
+            ACCESS = 'DIRECT', &
+            ACTION = 'READ', &
+            STATUS = 'OLD', &
+            CONVERT = 'BIG_ENDIAN' )
+#else
       OPEN( UNIT = NewUnit(fUnit2), &
             FILE = TRIM(baseFileName)//'.'//countChar//'.mdi', &
             FORM = 'BINARY', &
@@ -487,6 +506,7 @@ IMPLICIT NONE
             ACTION = 'READ', &
             STATUS = 'OLD', &
             CONVERT = 'BIG_ENDIAN' )
+#endif
 
       k     = 0
       recID = 0
