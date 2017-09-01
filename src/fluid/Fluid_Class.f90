@@ -3549,6 +3549,57 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE WriteTecplot_Fluid
 !
+#ifdef DIAGNOSTICS
+ SUBROUTINE Diagnostics_Fluid( myDGSEM )
+  IMPLICIT NONE
+  CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+  ! Local
+  INTEGER    :: iEl, i, j, k 
+  REAL(prec) :: volume
+
+
+     volume = 0.0_prec
+     myDGSEM % mass = 0.0_prec
+     myDGSEM % KE   = 0.0_prec
+     myDGSEM % PE   = 0.0_prec
+     myDGSEM % avgT = 0.0_prec
+
+     DO iEl = 1, myDGSEM % mesh % nElems
+        DO k = 0, myDGSEM % N
+           DO j = 0, myDGSEM % N
+              DO i = 0, myDGSEM % N
+
+                 volume = volume + myDGSEM % mesh % geom(iEl) % J(i,j,k)
+
+                 myDGSEM % mass = myDGSEM % mass + myDGSEM % state % solution(i,j,k,4,iEl)*&
+                                                   myDGSEM % mesh % geom(iEl) % J(i,j,k)
+
+                 myDGSEM % KE   = myDGSEM % KE + ( myDGSEM % state % solution(i,j,k,1,iEl)**2 +&
+                                                   myDGSEM % state % solution(i,j,k,2,iEl)**2 +&
+                                                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
+                                                 myDGSEM % state % solution(i,j,k,4,iEl)*&
+                                                 myDGSEM % mesh % geom(iEl) % J(i,j,k)
+
+                 myDGSEM % PE   = myDGSEM % PE + myDGSEM % state % solution(i,j,k,4,iEl)*&
+                                                 myDGSEM % params % g*&
+                                                 myDGSEM % mesh % geom(iEl) % z(i,j,k)*&
+                                                 myDGSEM % mesh % geom(iEl) % J(i,j,k)
+
+                 myDGSEM % avgT = myDGSEM % avgT + myDGSEM % state % solution(i,j,k,5,iEl)/&
+                                                   myDGSEM % state % solution(i,j,k,4,iEl)*&
+                                                   myDGSEM % mesh % geom(iEl) % J(i,j,k) 
+
+              ENDDO
+           ENDDO
+        ENDDO
+     ENDDO
+
+     myDGSEM % avgT = myDGSEM % avgT/volume
+
+
+ END SUBROUTINE Diagnostics_Fluid
+#endif
+!
  SUBROUTINE WriteSmoothedTecplot_Fluid( myDGSEM, iter, nPlot, myRank )
 
   IMPLICIT NONE
