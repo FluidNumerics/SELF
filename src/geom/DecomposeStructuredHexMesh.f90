@@ -1,3 +1,7 @@
+
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
+
 PROGRAM DecomposeStructuredHexMesh
 
  ! src/common/
@@ -505,7 +509,7 @@ PROGRAM DecomposeStructuredHexMesh
 
                ! nMPI is an array that keeps track of the order in which MPI messages will be sent
                ! to procID's neighbors
-               nMPI(procID) = nMPI(procID) + 1
+               nMPI(extProc) = nMPI(extProc) + 1
                localFaceID  = bCom(procID) % boundaryIDs(bID)
                globalFaceID = procMesh(procID) % faces(localFaceID) % faceID
 
@@ -520,7 +524,7 @@ PROGRAM DecomposeStructuredHexMesh
                ENDIF
 
 
-               bCom(extProc) % unPackMap(extBID) = nMPI(procID)
+               bCom(extProc) % unPackMap(extBID) = nMPI(extProc)
                   
 
             ENDIF

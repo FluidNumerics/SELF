@@ -1,6 +1,7 @@
 ! FluidParams_Class.f90
 ! 
-! Copyright 2017 Joseph Schoonover <schoonover.numerics@gmail.com>
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 

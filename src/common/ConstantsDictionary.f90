@@ -1,13 +1,7 @@
 ! ConstantsDictionary.f90
 ! 
-! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
-! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
-!
-! The SELF and accompanying documentation were produced in part under the 
-! support of Florida State University and the National Science Foundation 
-! through Grant OCE-1049131 during 2015 and in part  the support of the 
-! Center for Nonlinear Studies and the Department of Energy through the 
-! LANL/LDRD program in 2016.
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! ConstantsDictionary.f90 is part of the Spectral Element Libraries in Fortran (SELF).
 !

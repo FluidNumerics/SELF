@@ -1,7 +1,7 @@
 ! Fluid_InitialConditions.f90
 ! 
-! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
-! All rights reserved.
+! Copyright 2017 Joseph Schoonover <schoonover.numerics@gmail.com>
+!
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -11,10 +11,10 @@ PROGRAM Fluid_InitialConditions
 ! src/common/
 USE ModelPrecision
 ! src/geom/
-!USE HexMesh_Class
+USE HexMesh_Class
 ! src/highend/euler/
 USE FluidParams_Class
-! src/highend/euler/mpi-cuda
+! src/highend/euler/
 USE Fluid_Class
 
  IMPLICIT NONE
@@ -34,18 +34,19 @@ USE Fluid_Class
       myRank = 0
       nProcs = 1
 #endif
+      
       CALL myeu % Build( myRank, nProcs )
- 
-      CALL InitialCondition( myeu )
       
-      PRINT*, "Reset Boundary conditions"
+      CALL InitialCondition( myeu, myRank )
+
       CALL ResetBoundaryConditions( myeu, myRank )
-      PRINT*, "DONE!"
-      
-      CALL myeu % WritePickup( 0, myRank ) 
-      
+
+      CALL myeu % WritePickup( 0, myRank )
+
       CALL myeu % WriteTecplot( 0, myeu % params % nPlot, myRank )
-      
+
+      CALL myeu % mesh % WriteTecplot( 'mesh.'//rankChar )
+     
       ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the 
       ! integrator, the mesh scaling is not applied a second time 
       CALL myeu % mesh % ScaleTheMesh( myeu % dgStorage % interp, &
@@ -55,25 +56,23 @@ USE Fluid_Class
       WRITE( rankChar, '(I4.4)' )myRank
       CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
       
-#ifdef HAVE_MPI
-      CALL MPI_BARRIER( )
-#endif
       
       CALL myeu % Trash( )
-
+      
 #ifdef HAVE_MPI
       CALL MPI_FINALIZE( mpiErr )
 #endif
 
- CONTAINS
+CONTAINS
+!
  SUBROUTINE ResetBoundaryConditions( myDGSEM, myRank )
-  
+
    TYPE( Fluid ), INTENT(inout) :: myDGSEM
    INTEGER, INTENT(in)          :: myRank
    ! Local
    INTEGER :: iFace, iFace2, e1, e2, s1, p2
-   
-   
+   INTEGER :: iEl, i, j, k
+
       DO iFace = 1, myDGSEM % nBoundaryFaces
 
          iFace2 = myDGSEM % extComm % boundaryIDs( iFace )
@@ -81,36 +80,49 @@ USE Fluid_Class
          s1    = myDGSEM % mesh % Faces(iFace2) % elementSides(1)
          e2    = myDGSEM % mesh % Faces(iFace2) % elementIDs(2)
          p2    = myDGSEM % extComm % extProcIDs( iFace )
-         
+
          IF( e2 < 0 .AND. p2 == myRank )THEN
-         
-            myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
-               
+
+            IF( ABS(myDGSEM % mesh % geom(e1) % nHat(3, 0, 0, s1) ) >&
+                SQRT( myDGSEM % mesh % geom(e1) % nHat(1, 0, 0, s1)**2 + &
+                      myDGSEM % mesh % geom(e1) % nHat(2, 0, 0, s1)**2 ) ) THEN ! Top or bottom surface
+
+               IF( myDGSEM % mesh % geom(e1) % nHat(3, 0, 0, s1) > 0.0_prec ) THEN ! Top
+                  myDGSEM % mesh % faces(iFace2) % elementIDs(2) =NO_NORMAL_FLOW
+                  !myDGSEM % prescribedState(:,:,:,iFace) = myDGSEM % state % boundarySolution(:,:,:,s1,e1)
+               ELSE ! Top
+                  myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
+               ENDIF
+
+            ENDIF
+
          ENDIF
- 
+
       ENDDO
-      
-      
+
+
  END SUBROUTINE ResetBoundaryConditions
 !
- SUBROUTINE InitialCondition( myDGSEM )
-
+ SUBROUTINE InitialCondition( myDGSEM, myRank )
+   IMPLICIT NONE
    TYPE( Fluid ), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)                             :: myRank
    ! Local
    INTEGER    :: i, j, k, iEl, iFace
-   REAL(prec) :: x, y, z, r, hScale, Lx, Ly, H, T, Tbar
+   REAL(prec) :: x, y, z, Lx, Ly, r
 
    
-      Lx = myDGSEM % params % xScale
-      Ly = myDGSEM % params % yScale
-      H  = myDGSEM % params % zScale
-      
-      myDGSEM % state % solution = 0.0_prec
-      
+      Lx = myDGSEM % params % xScale   
+      Ly = myDGSEM % params % yScale   
+
       !$OMP PARALLEL
       CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
       !$OMP END PARALLEL
-
+      
+      !$OMP PARALLEL
+      CALL myDGSEM % CalculateStaticBoundarySolution( )
+      !$OMP END PARALLEL
+     
       ! ////////////////////////////////////////////////////////////////////////////////// !
       DO iEl = 1, myDGSEM % mesh % nElems
          DO k = 0, myDGSEM % N
@@ -121,33 +133,33 @@ USE Fluid_Class
                   y = myDGSEM % mesh % geom(iEl) % y(i,j,k)
                   z = myDGSEM % mesh % geom(iEl) % z(i,j,k)
                   
-                  r = sqrt( ( x-0.5_prec*Lx )**2 + ( y-0.5_prec*Ly )**2 + ( z-0.25_prec*H )**2 )
-                
-                  IF( r <= 250.0_prec )THEN
-                     T = 0.25_prec*(1.0_prec + cos( pi*r/250.0_prec ) ) ! Potential temperature anomaly
-                     Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
-                     myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
-                  ENDIF
-                  
+                 
+                  myDGSEM % state % solution(i,j,k,1,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*myDGSEM % params % v0
                   ! Drag profile
-                  !myDGSEM % dragProfile(i,j,k,iEl) = myDGSEM % params % Cd*exp( -z/myDGSEM % params % dragScale )
-
+!                  CALL RANDOM_NUMBER( r )
+                  r = sin( 40.0_prec*pi*x/Lx )
+                  myDGSEM % dragProfile(i,j,k,iEl) = myDGSEM % params % Cd*exp( -z/myDGSEM % params % dragScale )*(1.0_prec+0.1_prec*r)
+                  
                ENDDO
             ENDDO
          ENDDO
       ENDDO
-      
-#ifdef HAVE_CUDA
-     myDGSEM % state % solution_dev = myDGSEM % state % solution 
+
+#ifdef HAVE_CUDA     
+           ! Copy the static solution from host to device
+           myDGSEM % state % solution_dev  = myDGSEM % state % solution
 #endif
-     !$OMP PARALLEL
-     CALL myDGSEM % EquationOfState( )
-     !$OMP END PARALLEL
+           !$OMP PARALLEL
+           CALL myDGSEM % CalculateBoundarySolution( )
+           !$OMP END PARALLEL
+#ifdef HAVE_CUDA
+           ! Copy the boundary solution from the device to the host
+           myDGSEM % state % boundarySolution  = myDGSEM % state % boundarySolution_dev
+#endif
+           
+      
+
      
-#ifdef HAVE_CUDA
-     myDGSEM % state % solution = myDGSEM % state % solution_dev
-#endif
-      
  END SUBROUTINE InitialCondition
 !
-END PROGRAM Fluid_InitialConditions
+ END PROGRAM Fluid_InitialConditions
