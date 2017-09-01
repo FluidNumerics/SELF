@@ -154,9 +154,9 @@ INCLUDE 'mpif.h'
       PROCEDURE :: MPI_StateExchange               => MPI_StateExchange_Fluid
       PROCEDURE :: FinalizeMPI_StateExchange       => FinalizeMPI_StateExchange_Fluid
       PROCEDURE :: MPI_StressExchange              => MPI_StressExchange_Fluid
-      PROCEDURE :: FinalizeMPI_StressExchange      => MPI_StressExchange_Fluid
+      PROCEDURE :: FinalizeMPI_StressExchange      => FinalizeMPI_StressExchange_Fluid
       PROCEDURE :: MPI_SGSExchange                 => MPI_SGSExchange_Fluid
-      PROCEDURE :: FinalizeMPI_SGSExchange         => MPI_SGSExchange_Fluid
+      PROCEDURE :: FinalizeMPI_SGSExchange         => FinalizeMPI_SGSExchange_Fluid
 #endif
       ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
       ! Routines for the fluid-stress model and
@@ -468,7 +468,6 @@ INCLUDE 'mpif.h'
       PRINT*, '  S/R ConstructCommTables : Found', myDGSEM % nNeighbors, 'neighbors for Rank', myRank
       
       ALLOCATE( myDGSEM % mpiPackets(1:myDGSEM % nNeighbors) )
-      
       ! For each neighbor, set the neighbor's rank
       iNeighbor = 0
       DO p2 = 0, nProc-1
@@ -637,7 +636,6 @@ INCLUDE 'mpif.h'
 
       IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
          CALL myDGSEM % CalculateSmoothedState( .TRUE. )
-
 #ifdef TESTING
       IF( myRank == 0 )THEN
 #ifdef CUDA
@@ -998,7 +996,6 @@ INCLUDE 'mpif.h'
 ! ----------------------------------------------------------------------------- ! 
 
       ENDIF
-      
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -1812,6 +1809,7 @@ INCLUDE 'mpif.h'
 
 
       CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
+
 
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
