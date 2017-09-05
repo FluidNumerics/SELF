@@ -31,6 +31,9 @@ INCLUDE "visitfortransimV2interface.inc"
  INTEGER    :: mpiErr, myRank, nProcs
  INTEGER    :: iter0, nT, dFreq, iT, nDumps
  REAL(prec) :: tn, deltaT
+#ifdef DIAGNOSTICS
+ INTEGER    :: diagUnits(1:nDiagnostics)
+#endif
 #ifdef INSITU_VIZ
  INTEGER    :: simulationCycle, simulationTime, runFlag
  COMMON/SIMSTATE/ runFlag, simulationCycle, simulationTime
@@ -95,6 +98,14 @@ CONTAINS
 #ifdef HAVE_MPI
       CALL MPI_BARRIER( MPI_COMM_WORLD, mpiErr )
 #endif
+
+#ifdef DIAGNOSTICS
+      CALL myeu % OpenDiagnosticsFiles( diagUnits )
+      CALL myeu % CalculateDiagnostics( )
+      CALL myeu % WriteDiagnostics( diagUnits )
+#endif
+
+
   END SUBROUTINE Setup
 
 ! ------------------------------------------------------------------------------ !
@@ -128,6 +139,11 @@ CONTAINS
 #ifdef HAVE_MPI      
       CALL MPI_FINALIZE( mpiErr )
 #endif
+
+#ifdef DIAGNOSTICS
+      CALL myeu % CloseDiagnosticsFiles( diagUnits )
+#endif
+
   END SUBROUTINE Cleanup
 
 ! ------------------------------------------------------------------------------ !
@@ -231,6 +247,10 @@ CONTAINS
          IF( MOD( simulationCycle, dFreq ) == 0 )THEN
            !$OMP MASTER
            CALL myeu % WritePickup( simulationCycle, myRank )
+#ifdef DIAGNOSTICS
+           CALL myeu % Diagnostics( ) 
+           CALL myeu % WriteDiagnosticsFiles( diagUnits )
+#endif
            !$OMP END MASTER
          ENDIF
 
@@ -257,6 +277,10 @@ CONTAINS
           ! In here, we will do the LIBSIM calls
 ! Turn off file I/O if timing is turned on
 #ifndef TIMING
+#ifdef DIAGNOSTICS
+         CALL myeu % Diagnostics( ) 
+         CALL myeu % WriteDiagnostics( diagUnits )
+#endif
          !$OMP MASTER
          CALL myeu % WritePickup( iT+dFreq, myRank )
          CALL myeu % WriteTecplot( iT+dFreq, myeu % params % nPlot, myRank )

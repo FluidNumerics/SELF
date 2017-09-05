@@ -123,6 +123,10 @@ INCLUDE 'mpif.h'
       REAL(prec), DEVICE, ALLOCATABLE         :: externalStress_dev(:,:,:,:)
       REAL(prec), DEVICE, ALLOCATABLE         :: externalSGS_dev(:,:,:,:)
 #endif
+
+#ifdef DIAGNOSTICS
+      REAL(prec) :: volume, mass, KE, PE, heat
+#endif
       ! ////////////////////////////////////////////////////////////// !
 
       CONTAINS
@@ -134,6 +138,9 @@ INCLUDE 'mpif.h'
       PROCEDURE :: CalculateStaticState => CalculateStaticState_Fluid
       ! Time integrators
       PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
+#ifdef DIAGNOSTICS
+      PROCEDURE :: Diagnostics => Diagnostics_Fluid
+#endif
 
       ! ////////////////////////// Equation Of State ////////////////////////////////////////////////////// !
       PROCEDURE :: EquationOfState        => EquationOfState_Fluid
@@ -177,13 +184,17 @@ INCLUDE 'mpif.h'
       !
       
       ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
+#ifdef DIAGNOSTICS
+      PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
+      PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
+      PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
+#endif
       PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
       PROCEDURE :: WriteSmoothedTecplot => WriteSmoothedTecplot_Fluid
       PROCEDURE :: WriteSGSTecplot      => WriteSGSTecplot_Fluid
       PROCEDURE :: WriteStressTensorTecplot => WriteStressTensorTecplot_Fluid
       PROCEDURE :: WritePickup => WritePickup_Fluid
       PROCEDURE :: ReadPickup => ReadPickup_Fluid
-  !    PROCEDURE :: QuickDiagnostics => QuickDiagnostics_Fluid
       PROCEDURE :: FluidStateAtPlottingPoints => FluidStateAtPlottingPoints_Fluid
       PROCEDURE :: ObtainPlottingMesh         => ObtainPlottingMesh_Fluid
 
@@ -212,6 +223,10 @@ INCLUDE 'mpif.h'
 
 #ifdef TESTING
  TYPE( ModelDataInstances ) :: mdi
+#endif
+
+#ifdef DIAGNOSTICS
+ INTEGER, PARAMETER :: nDiagnostics = 5
 #endif
 
  CONTAINS
@@ -621,6 +636,7 @@ INCLUDE 'mpif.h'
 #endif          
 
 
+
  END SUBROUTINE ForwardStepRK3_Fluid
 !
  SUBROUTINE GlobalTimeDerivative_Fluid( myDGSEM, tn, myRank ) 
@@ -641,18 +657,6 @@ INCLUDE 'mpif.h'
 
       IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
          CALL myDGSEM % CalculateSmoothedState( .TRUE. )
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % state % solution = myDGSEM % state % solution_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateSmoothedState', &
-                            'Smooth State for Spectral Filtering', &
-                             SIZE(myDGSEM % state % solution), &
-                             PACK(myDGSEM % state % solution,.TRUE.) )
-      ENDIF
-#endif
       ENDIF
 
 ! ----------------------------------------------------------------------------- ! 
@@ -665,19 +669,6 @@ INCLUDE 'mpif.h'
 !  occur.
 
       CALL myDGSEM % CalculateBoundarySolution( ) 
-
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateBoundarySolution', &
-                            'Interpolation to element boundaries', &
-                             SIZE(myDGSEM % state % boundarySolution), &
-                             PACK(myDGSEM % state % boundarySolution,.TRUE.) )
-      ENDIF
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -702,18 +693,6 @@ INCLUDE 'mpif.h'
 ! routine is dependent on the result of CalculateBoundarySolution
 
       CALL myDGSEM % UpdateExternalState( tn, myRank ) 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % state % externalState = myDGSEM % state % externalState_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'UpdateExternalState', &
-                            'Update of Boundary Conditions', &
-                             SIZE(myDGSEM % externalState), &
-                             PACK(myDGSEM % externalState,.TRUE.) )
-      ENDIF
-#endif
 
 
 ! ----------------------------------------------------------------------------- ! 
@@ -733,19 +712,6 @@ INCLUDE 'mpif.h'
 
       CALL myDGSEM % BoundaryFaceFlux( )
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % state % boundaryFlux = myDGSEM % state % boundaryFlux_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'FaceFlux', &
-                            'Update of boundary fluxes', &
-                             SIZE(myDGSEM % state % boundaryFlux), &
-                             PACK(myDGSEM % state % boundaryFlux,.TRUE.) )
-      ENDIF
-#endif
-      
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -774,19 +740,6 @@ INCLUDE 'mpif.h'
 
             CALL myDGSEM % CalculateSmoothedState( .FALSE. )              
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % smoothState % solution = myDGSEM % smoothState % solution_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateSmoothedState', &
-                            'Smooth State for Spectral EKE', &
-                             SIZE(myDGSEM % smoothState % solution), &
-                             PACK(myDGSEM % smoothState % solution,.TRUE.) )
-      ENDIF
-#endif
-
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -803,19 +756,6 @@ INCLUDE 'mpif.h'
 
             CALL myDGSEM % CalculateSGSCoefficients( ) 
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % sgsCoeffs % solution = myDGSEM % sgsCoeffs % solution
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateSGSCoefficients', &
-                            'Estimate viscosity and diffusivity', &
-                             SIZE(myDGSEM % sgsCoeffs % solution), &
-                             PACK(myDGSEM % sgsCoeffs % solution,.TRUE.) )
-      ENDIF
-#endif
-
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
@@ -824,19 +764,6 @@ INCLUDE 'mpif.h'
 ! depends on the result of CalculateSGSCoefficients.
 
             CALL myDGSEM % CalculateBoundarySGS( ) 
-
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % sgsCoeffs % boundarySolution_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateBoundarySGS', &
-                            'Interpolate viscosity to element faces', &
-                             SIZE(myDGSEM % sgsCoeffs % boundarySolution), &
-                             PACK(myDGSEM % sgsCoeffs % boundarySolution,.TRUE.) )
-      ENDIF
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -862,20 +789,6 @@ INCLUDE 'mpif.h'
 
          CALL myDGSEM % CalculateStressTensor( )                  
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % stressTensor % solution = myDGSEM % stressTensor % solution_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateStressTensor', &
-                            'Gradients of velocity and temperature', &
-                             SIZE(myDGSEM % stressTensor % solution), &
-                             PACK(myDGSEM % stressTensor % solution,.TRUE.) )
-      ENDIF
-#endif
-
-
 #ifdef HAVE_MPI
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN ! 
          CALL myDGSEM % FinalizeMPI_SGSExchange( myRank )  
@@ -891,19 +804,6 @@ INCLUDE 'mpif.h'
 ! routine depends on the result of CalculateStressTensor.
 
          CALL myDGSEM % CalculateBoundaryStress( )
-
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % stressTensor % boundarySolution = myDGSEM % stressTensor % boundarySolution_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'CalculateBoundaryStress', &
-                            'Interpolate stress tensor to element faces', &
-                             SIZE(myDGSEM % stressTensor % boundarySolution), &
-                             PACK(myDGSEM % stressTensor % boundarySolution,.TRUE.) )
-      ENDIF
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -928,19 +828,6 @@ INCLUDE 'mpif.h'
 
          CALL myDGSEM % UpdateExternalStress( tn, myRank ) 
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % externalStress = myDGSEM % externalStress_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'UpdateExternalStress', &
-                            'Apply Stress Boundary Conditions', &
-                             SIZE(myDGSEM % externalStress), &
-                             PACK(myDGSEM % externalStress,.TRUE.) )
-      ENDIF
-#endif
-
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -957,19 +844,6 @@ INCLUDE 'mpif.h'
          CALL myDGSEM % FinalizeMPI_StressExchange( myRank )
 #endif
          CALL myDGSEM % BoundaryStressFlux( )
- 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % stressTensor % boundaryFlux = myDGSEM % stressTensor % boundaryFlux_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'StressFlux', &
-                            'Estimate Viscous Stress Flux', &
-                             SIZE(myDGSEM % stressTensor % boundaryFlux), &
-                             PACK(myDGSEM % stressTensor % boundaryFlux,.TRUE.) )
-      ENDIF
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -982,19 +856,6 @@ INCLUDE 'mpif.h'
 ! simultaneously with the MappedTimeDerivative.
 
          CALL myDGSEM % StressDivergence( ) 
-
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % stressTensor % tendency = myDGSEM % stressTensor % tendency_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'StressDivergence', &
-                            'Tendency due to viscous terms', &
-                             SIZE(myDGSEM % stressTensor % tendency), &
-                             PACK(myDGSEM % stressTensor % tendency,.TRUE.) )
-      ENDIF
-#endif
 
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1012,28 +873,10 @@ INCLUDE 'mpif.h'
       
       CALL myDGSEM % MappedTimeDerivative( )
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-#ifdef CUDA
-         myDGSEM % state % tendency = myDGSEM % state % tendency_dev
-#endif
-         CALL mdi % Update( 'Fluid_Class.f90', &
-                            'MappedTimeDerivative', &
-                            'Tendency due to inviscid and source terms', &
-                             SIZE(myDGSEM % state % tendency), &
-                             PACK(myDGSEM % state % tendency,.TRUE.) )
-      ENDIF
-#endif
-
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- ! 
 
-#ifdef TESTING
-      IF( myRank == 0 )THEN
-         CALL mdi % Write_ModelDataInstances( 'SELF-Fluid' ) 
-      ENDIF
-#endif
       
       
  END SUBROUTINE GlobalTimeDerivative_Fluid
@@ -1810,8 +1653,6 @@ INCLUDE 'mpif.h'
 
 
       CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
-
-
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
 
@@ -3550,51 +3391,134 @@ INCLUDE 'mpif.h'
  END SUBROUTINE WriteTecplot_Fluid
 !
 #ifdef DIAGNOSTICS
+ SUBROUTINE OpenDiagnosticsFiles_Fluid( myDGSEM, fileUnits )
+   IMPLICIT NONE
+   CLASS( Fluid  ), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(out)           :: fileUnits(1:nDiagnostics) 
+   
+
+      OPEN( UNIT=NewUnit(fileUnits(1)), &
+            FILE='Mass.curve', &
+            FORM='FORMATTED', &
+            STATUS='REPLACE' )
+      WRITE(fileUnits(1),*) '#TotalMass'
+
+      OPEN( UNIT=NewUnit(fileUnits(2)), &
+            FILE='KineticEnergy.curve', &
+            FORM='FORMATTED', &
+            STATUS='REPLACE' )
+      WRITE(fileUnits(2),*) '#TotalKineticEnergy'
+
+      OPEN( UNIT=NewUnit(fileUnits(3)), &
+            FILE='PotentialEnergy.curve', &
+            FORM='FORMATTED', &
+            STATUS='REPLACE' )
+      WRITE(fileUnits(3),*) '#TotalPotentialEnergy'
+
+      OPEN( UNIT=NewUnit(fileUnits(4)), &
+            FILE='AverageTemperature.curve', &
+            FORM='FORMATTED', &
+            STATUS='REPLACE' )
+      WRITE(fileUnits(4),*) '#TotalHeat'
+
+      OPEN( UNIT=NewUnit(fileUnits(5)), &
+            FILE='Volume.curve', &
+            FORM='FORMATTED', &
+            STATUS='REPLACE' )
+      WRITE(fileUnits(5),*) '#TotalVolume'
+
+
+ END SUBROUTINE OpenDiagnosticsFiles_Fluid
+!
+ SUBROUTINE WriteDiagnostics_Fluid( myDGSEM, fileUnits )
+   IMPLICIT NONE
+   CLASS( Fluid ), INTENT(in) :: myDGSEM
+   INTEGER, INTENT(in)        :: fileUnits(1:nDiagnostics)
+
+      WRITE(fileUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
+      WRITE(fileUnits(2),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % KE
+      WRITE(fileUnits(3),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % PE
+      WRITE(fileUnits(4),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % heat
+      WRITE(fileUnits(5),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % volume
+
+ END SUBROUTINE WriteDiagnostics_Fluid
+!
+ SUBROUTINE CloseDiagnosticsFiles_Fluid( myDGSEM, fileUnits )
+   IMPLICIT NONE
+   CLASS( Fluid  ), INTENT(inout) :: myDGSEM
+   INTEGER, INTENT(in)            :: fileUnits(1:nDiagnostics) 
+   
+
+      CLOSE( UNIT=NewUnit(fileUnits(1)) )
+      CLOSE( UNIT=NewUnit(fileUnits(2)) )
+      CLOSE( UNIT=NewUnit(fileUnits(3)) )
+      CLOSE( UNIT=NewUnit(fileUnits(4)) )
+      CLOSE( UNIT=NewUnit(fileUnits(5)) )
+
+
+ END SUBROUTINE CloseDiagnosticsFiles_Fluid
+!
  SUBROUTINE Diagnostics_Fluid( myDGSEM )
   IMPLICIT NONE
   CLASS( Fluid ), INTENT(inout) :: myDGSEM 
   ! Local
   INTEGER    :: iEl, i, j, k 
-  REAL(prec) :: volume
 
 
-     volume = 0.0_prec
-     myDGSEM % mass = 0.0_prec
-     myDGSEM % KE   = 0.0_prec
-     myDGSEM % PE   = 0.0_prec
-     myDGSEM % avgT = 0.0_prec
+     myDGSEM % volume = 0.0_prec
+     myDGSEM % mass   = 0.0_prec
+     myDGSEM % KE     = 0.0_prec
+     myDGSEM % PE     = 0.0_prec
+     myDGSEM % heat   = 0.0_prec
 
      DO iEl = 1, myDGSEM % mesh % nElems
         DO k = 0, myDGSEM % N
            DO j = 0, myDGSEM % N
               DO i = 0, myDGSEM % N
 
-                 volume = volume + myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                 myDGSEM % volume = myDGSEM % volume + myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
+                                                       myDGSEM % dgStorage % qWeight(i)*&
+                                                       myDGSEM % dgStorage % qWeight(j)*&
+                                                       myDGSEM % dgStorage % qWeight(k)
 
-                 myDGSEM % mass = myDGSEM % mass + myDGSEM % state % solution(i,j,k,4,iEl)*&
-                                                   myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                 myDGSEM % mass = myDGSEM % mass + ( myDGSEM % state % solution(i,j,k,4,iEl)+&
+                                                     myDGSEM % static % solution(i,j,k,4,iEl) )*&
+                                                   myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
+                                                       myDGSEM % dgStorage % qWeight(i)*&
+                                                       myDGSEM % dgStorage % qWeight(j)*&
+                                                       myDGSEM % dgStorage % qWeight(k)
 
                  myDGSEM % KE   = myDGSEM % KE + ( myDGSEM % state % solution(i,j,k,1,iEl)**2 +&
                                                    myDGSEM % state % solution(i,j,k,2,iEl)**2 +&
                                                    myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
-                                                 myDGSEM % state % solution(i,j,k,4,iEl)*&
-                                                 myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                                                 ( myDGSEM % state % solution(i,j,k,4,iEl)+&
+                                                   myDGSEM % static % solution(i,j,k,4,iEl) )*&
+                                                 myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
+                                                       myDGSEM % dgStorage % qWeight(i)*&
+                                                       myDGSEM % dgStorage % qWeight(j)*&
+                                                       myDGSEM % dgStorage % qWeight(k)
 
-                 myDGSEM % PE   = myDGSEM % PE + myDGSEM % state % solution(i,j,k,4,iEl)*&
+                 myDGSEM % PE   = myDGSEM % PE - myDGSEM % state % solution(i,j,k,4,iEl)*&
                                                  myDGSEM % params % g*&
                                                  myDGSEM % mesh % geom(iEl) % z(i,j,k)*&
-                                                 myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                                                 myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
+                                                       myDGSEM % dgStorage % qWeight(i)*&
+                                                       myDGSEM % dgStorage % qWeight(j)*&
+                                                       myDGSEM % dgStorage % qWeight(k)
 
-                 myDGSEM % avgT = myDGSEM % avgT + myDGSEM % state % solution(i,j,k,5,iEl)/&
+                 myDGSEM % heat = myDGSEM % heat + myDGSEM % state % solution(i,j,k,5,iEl)/&
                                                    myDGSEM % state % solution(i,j,k,4,iEl)*&
-                                                   myDGSEM % mesh % geom(iEl) % J(i,j,k) 
+                                                   myDGSEM % mesh % geom(iEl) % J(i,j,k)*& 
+                                                       myDGSEM % dgStorage % qWeight(i)*&
+                                                       myDGSEM % dgStorage % qWeight(j)*&
+                                                       myDGSEM % dgStorage % qWeight(k)
 
               ENDDO
            ENDDO
         ENDDO
      ENDDO
 
-     myDGSEM % avgT = myDGSEM % avgT/volume
+     myDGSEM % heat = myDGSEM % heat*myDGSEM % params % Cv
 
 
  END SUBROUTINE Diagnostics_Fluid
@@ -4057,85 +3981,6 @@ INCLUDE 'mpif.h'
       
  END SUBROUTINE ReadPickup_Fluid
 !
-! SUBROUTINE QuickDiagnostics_Fluid( myDGSEM, tn )
-!   IMPLICIT NONE
-!   CLASS( Fluid ), INTENT(in) :: myDGSEM 
-!   REAL(prec), INTENT(in)     :: tn
-!   ! Local
-!   INTEGER :: fUnit, i, j, k, iEl
-!   LOGICAL :: itExists
-!   REAL(prec) :: U(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: V(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: W(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: P(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: c(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: theta(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: rho(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems)
-!   REAL(prec) :: hCapRatio, rC
-   
-!      INQUIRE( FILE = "QuickDiagnostics.txt", EXIST = itExists )
-!      IF( itExists )THEN
-!          OPEN( UNIT = NewUnit(fUnit), &
-!                FILE = "QuickDiagnostics.txt", &
-!                STATUS ="OLD", &
-!                POSITION = "APPEND", &
-!                ACTION = "WRITE" )
-!      ELSE
-!         OPEN( UNIT = NewUnit(fUnit), &
-!               FILE = "QuickDiagnostics.txt", &
-!               STATUS = "NEW", &
-!               ACTION = "WRITE" )
-               
-
-!      ENDIF
-!      ! Sound speed estimate for the external and internal states
-!      hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
-!      rC        =   myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
-                  
-      
-!      DO iEl = 1, myDGSEM % mesh % nElems
-!         DO k = 0, myDGSEM % N
-!            DO j = 0, myDGSEM % N
-!               DO i = 0, myDGSEM % N
-               
-!                  U(i,j,k,iEl) = myDGSEM % state(iEl) % solution(i,j,k,1)/&
-!                               ( myDGSEM % state(iEl) % solution(i,j,k,4) )
-                                 
-!                  V(i,j,k,iEl) = myDGSEM % state(iEl) % solution(i,j,k,2)/&
-!                               ( myDGSEM % state(iEl) % solution(i,j,k,4) )
-                                 
-!                  W(i,j,k,iEl) = myDGSEM % state(iEl) % solution(i,j,k,3)/&
-!                               ( myDGSEM % state(iEl) % solution(i,j,k,4) )
-                                 
-!                  P(i,j,k,iEl) = myDGSEM % state(iEl) % solution(i,j,k,6)
-                  
-!                  rho(i,j,k,iEl) = myDGSEM % state(iEl) % solution(i,j,k,4)
-                  
-!                  theta(i,j,k,iEl) = myDGSEM % state(iEl) % solution(i,j,k,5)/ &
-!                                    (myDGSEM % state(iEl) % solution(i,j,k,4))
-                       
-!                  c(i,j,k,iEl)  = sqrt(  myDGSEM % params % R*theta(i,j,k,iEl)*( &
-!                                        ( P(i,j,k,iEl) + myDGSEM % static(iEl) % solution(i,j,k,3) )/ &
-!                                          myDGSEM % params % P0 )**rC  ) 
-
-!               ENDDO
-!            ENDDO
-!         ENDDO
-!      ENDDO
-      
-!      WRITE(fUnit, *) "==============================================================="                
-!      WRITE(fUnit,*) "time : ", tn
-!      WRITE(fUnit,*) "Max/Min (U)          : ", MAXVAL(U), MINVAL(U)
-!      WRITE(fUnit,*) "Max/Min (V)          : ", MAXVAL(V), MINVAL(V)
-!      WRITE(fUnit,*) "Max/Min (W)          : ", MAXVAL(W), MINVAL(W)
-!      WRITE(fUnit,*) "Max/Min (rho)        : ", MAXVAL(rho), MINVAL(rho)
-!      WRITE(fUnit,*) "Max/Min (P)          : ", MAXVAL(P), MINVAL(P)
-!      WRITE(fUnit,*) "Max/Min (c)          : ", MAXVAL(c), MINVAL(c)
-!      WRITE(fUnit,*) "Max/Min (Pot. Temp.) : ", MAXVAL(theta), MINVAL(theta)
-      
-!      CLOSE(fUnit)
-   
-! END SUBROUTINE QuickDiagnostics_Fluid
 #ifdef HAVE_CUDA
 ! ============================================================================================================================ !
 !------------------------------------------- CUDA Kernels Below -------------------------------------------------------------- !
@@ -5352,8 +5197,8 @@ INCLUDE 'mpif.h'
       solution(i,j,k,6,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,6,iEl)
 
  END SUBROUTINE EquationOfState_CUDAKernel
+!
 #endif
-
  END MODULE Fluid_Class
 
 

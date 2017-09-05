@@ -93,6 +93,10 @@ ifeq (${INSITU_VIZ},yes)
   endif
 endif
 
+ifeq (${DIAGNOSTICS},yes)
+  CPPFLAGS+=-DDIAGNOSTICS
+endif
+
 LIB+=${LAPACK_LIB}
 INC+=${LAPACK_INC}
 
