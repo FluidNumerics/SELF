@@ -101,7 +101,7 @@ CONTAINS
 
 #ifdef DIAGNOSTICS
       CALL myeu % OpenDiagnosticsFiles( diagUnits )
-      CALL myeu % CalculateDiagnostics( )
+      CALL myeu % Diagnostics( )
       CALL myeu % WriteDiagnostics( diagUnits )
 #endif
 

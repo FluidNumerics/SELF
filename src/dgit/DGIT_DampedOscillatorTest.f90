@@ -13,12 +13,14 @@ PROGRAM DGIT_DampedOscillatorTest
  REAL(prec), PARAMETER :: dt = 1.0_prec
 
 
- TYPE( NodalStorage ) :: dgStorage
- REAL(prec)           :: solution(1:2)
- REAL(prec)           :: rhs(1:2,0:N), subStates(1:2,0:N), dsdt(1:2,0:N)
+ TYPE( DGITIntegrator ) :: integrator
+ REAL(prec)             :: solution(1:2)
+ REAL(prec)             :: rhs(1:2,0:N), subStates(1:2,0:N), dsdt(1:2,0:N)
 
-  CALL dGStorage % Build( N, N, GAUSS, DG )
+  CALL integrator % Build( N, dt, GAUSS )
 
+
+  CALL integrator % Trash( )
 
 
 CONTAINS

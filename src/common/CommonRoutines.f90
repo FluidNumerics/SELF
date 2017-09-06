@@ -710,6 +710,54 @@ CONTAINS
 
  END FUNCTION Invert_3x3 
 !
+ FUNCTION InvertSpectralOpMatrix( A, N ) RESULT( Ainv )
+ ! Inverts an (N+1)x(N+1) matrix using a polynomial representation of the
+ ! inverse
+   IMPLICIT NONE
+   INTEGER :: N
+   REAL(prec) :: A(0:N,0:N)
+   REAL(prec) :: Ainv(0:N,0:N)
+   ! Local
+   INTEGER    :: row, col, j, iter
+   REAL(prec) :: I(0:N,0:N)
+   REAL(prec) :: Ainv_ij, maxChange
+
+      Ainv = 0.0_prec
+      I    = 0.0_prec
+      DO row = 0, N
+         Ainv(row,row) = 1.0_prec
+         I(row,row)    = 1.0_prec
+      ENDDO
+
+      DO iter = 1, maxInverseIters
+
+         maxChange = 0.0_prec
+         DO col = 0, N
+            DO row = 0, N
+   
+               Ainv_ij = 0.0_prec
+               DO j = 0, N
+                  Ainv_ij = Ainv_ij + Ainv(j,col)*(I(row,j) - A(row,j))
+               ENDDO
+               maxChange = MAX( ABS(Ainv(row,col) - Ainv_ij), maxChange )
+               Ainv(row,col) = Ainv_ij
+   
+            ENDDO
+         ENDDO
+         
+         IF( maxChange <= tolerance )THEN
+           PRINT*, ' InvertSpectralOpMatrix : Converged in ',iter,' iterations.'
+           EXIT
+         ENDIF
+      
+      ENDDO
+
+      IF( maxChange > tolerance )THEN
+         PRINT*, 'InvertSpectralOpMatrix : Did not converge.', maxChange
+      ENDIF
+
+ END FUNCTION InvertSpectralOpMatrix
+!
  FUNCTION UpperCase( str ) RESULT( upper )
 
     Implicit None

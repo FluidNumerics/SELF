@@ -106,14 +106,15 @@ IMPLICIT NONE
       
 
       ! Invert the integrator matrix
-      CALL DGETRF( N+1, N+1, tempMat, N+1, IPIV, INFO )
-      CALL DGETRI( N+1, tempMat, N+1, IPIV, WORK, N+1, INFO )
+     ! CALL DGETRF( N+1, N+1, tempMat, N+1, IPIV, INFO )
+     ! CALL DGETRI( N+1, tempMat, N+1, IPIV, WORK, N+1, INFO )
 
+      myNodal % integratorMat = InvertSpectralOpMatrix( tempMat, N )
       myNodal % integratorMat = tempMat
 
 
       DEALLOCATE( tempS, tempQ, tempL, tempR, tempMat )
-      ALLOCATE( IPIV(1:N+1), WORK(1:N+1) )
+      DEALLOCATE( IPIV, WORK )
 
  END SUBROUTINE Build_DGITIntegrator
 !
