@@ -535,8 +535,9 @@ INCLUDE 'mpif.h'
    CLASS(Fluid), INTENT(inout) :: myDGSEM
    INTEGER, INTENT(in)         :: nT
    INTEGER, INTENT(in)         :: myRank
-#ifdef HAVE_CUDA
    ! LOCAL
+   REAL(prec)                  :: t0
+#ifdef HAVE_CUDA
    REAL(prec) :: t, dt
    REAL(prec),DEVICE :: G3D(0:myDGSEM % N,&
                             0:myDGSEM % N,&
@@ -544,8 +545,8 @@ INCLUDE 'mpif.h'
                             1:nEq,&
                             1:myDGSEM % mesh % nElems) 
    REAL(prec), DEVICE :: rk3_a_dev(1:3), rk3_g_dev(1:3)
-   INTEGER    :: iT, m, iStat
-   TYPE(dim3) :: grid, tBlock
+   INTEGER            :: iT, m, iStat
+   TYPE(dim3)         :: grid, tBlock
   
      ! How should we pick the thread and block size
 
@@ -554,6 +555,7 @@ INCLUDE 'mpif.h'
                     4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) )
       grid = dim3(myDGSEM % mesh % nElems, nEq-1, 1) ! Because nElems can reach a rather large size, it must remain the first dimension of the grid (see pgaccelinfo for MAximum Grid Size)
      
+      t0 = myDGSEM % simulationTime
       dt = myDGSEM % params % dt
       
       rk3_a_dev = rk3_a
@@ -576,9 +578,33 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % EquationOfState( )
             
          ENDDO ! m, loop over the RK3 steps
+
+         myDGSEM % simulationTime = myDGSEM % simulationTime + dt
       
       ENDDO
-      myDGSEM % simulationTime = myDGSEM % simulationTime + nT*dt
+
+      ! Determine if we need to take another step with reduced time step to get the solution
+      ! at exactly t0+outputFrequency
+      IF( .NOT. AlmostEqual( myDGSEM % simulationTime, t0+myDGSEM % params % outputFrequency ) )THEN
+         dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
+         G3D  = 0.0_prec
+         DO m = 1,3 ! Loop over RK3 steps
+            
+            t = myDGSEM % simulationTime + rk3_b(m)*dt
+            CALL myDGSEM % GlobalTimeDerivative( t, myRank )
+            
+            !
+            CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
+                                                        myDGSEM % state % solution_dev, &
+                                                        myDGSEM % state % tendency_dev, &
+                                                        myDGSEM % stressTensor % tendency_dev )
+            
+            ! Calculate the pressure
+            CALL myDGSEM % EquationOfState( )
+            
+         ENDDO ! m, loop over the RK3 steps
+
+      ENDIF
 #else
    REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
    REAL(prec) :: G3D(0:myDGSEM % N,&
@@ -588,6 +614,7 @@ INCLUDE 'mpif.h'
                      1:myDGSEM % mesh % nElems) 
    INTEGER    :: m, iEl, iT, i, j, k, iEq
 
+      t0 = myDGSEM % simulationTime
       dt = myDGSEM % params % dt
       
 
@@ -599,7 +626,7 @@ INCLUDE 'mpif.h'
               DO k = 0, myDGSEM % N
                  DO j = 0, myDGSEM % N
                     DO i = 0, myDGSEM % N
-                       G3D(i,j,k,iEq,iEl) = ZERO
+                       G3D(i,j,k,iEq,iEl) = 0.0_prec
                     ENDDO
                  ENDDO
               ENDDO
@@ -636,9 +663,63 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % EquationOfState( )
             
          ENDDO ! m, loop over the RK3 steps
+       
+         myDGSEM % simulationTime = myDGSEM % simulationTime + myDGSEM % params % dt 
             
       ENDDO
-      myDGSEM % simulationTime = myDGSEM % simulationTime + nT*myDGSEM % params % dt 
+
+      ! Determine if we need to take another step with reduced time step to get the solution
+      ! at exactly t0+outputFrequency
+      IF( .NOT. AlmostEqual( myDGSEM % simulationTime, t0+myDGSEM % params % outputFrequency ) )THEN
+
+         dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
+
+         !$OMP DO
+         DO iEl = 1, myDGSEM % mesh % nElems
+            DO iEq = 1, nEq-1
+              DO k = 0, myDGSEM % N
+                 DO j = 0, myDGSEM % N
+                    DO i = 0, myDGSEM % N
+                       G3D(i,j,k,iEq,iEl) = 0.0_prec
+                    ENDDO
+                 ENDDO
+              ENDDO
+            ENDDO
+         ENDDO
+         !$OMP ENDDO
+         
+         DO m = 1,3 ! Loop over RK3 steps
+            
+            t = myDGSEM % simulationTime + rk3_b(m)*dt
+            CALL myDGSEM % GlobalTimeDerivative( t, myRank )
+            
+            rk3_a_local = rk3_a(m)
+            rk3_g_local = rk3_g(m)
+
+            !$OMP DO
+            DO iEl = 1, myDGSEM % mesh % nElems
+               DO iEq = 1, nEq-1
+                  DO k = 0, myDGSEM % N
+                     DO j = 0, myDGSEM % N
+                        DO i = 0, myDGSEM % N
+                           G3D(i,j,k,iEq,iEl) = rk3_a_local*G3D(i,j,k,iEq,iEl) + myDGSEM % state % tendency(i,j,k,iEq,iEl) +&
+                                                                                 myDGSEM % stressTensor % tendency(i,j,k,iEq,iEl)
+                           myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
+                                                    rk3_g_local*dt*G3D(i,j,k,iEq,iEl)
+                        ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO ! iEl, loop over all of the elements
+            !$OMP ENDDO
+            
+            ! Calculate the internal energy and the pressure
+            CALL myDGSEM % EquationOfState( )
+            
+         ENDDO ! m, loop over the RK3 steps
+       
+         myDGSEM % simulationTime = myDGSEM % simulationTime + myDGSEM % params % dt 
+      ENDIF
 #endif          
 
 
