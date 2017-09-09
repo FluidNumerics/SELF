@@ -237,16 +237,23 @@ INCLUDE 'mpif.h'
 !==================================================================================================!
 !
 !
-  SUBROUTINE Build_Fluid( myDGSEM, myRank, nProc )
+  SUBROUTINE Build_Fluid( myDGSEM, myRank, nProc, setupSuccess )
 
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
    INTEGER, INTENT(in)         :: myRank, nProc
+   LOGICAL, INTENT(out)        :: setupSuccess
    !
-   integer :: istat
+   INTEGER :: istat
 #ifdef HAVE_CUDA
-   integer(kind=cuda_count_kind) :: freebytes, totalbytes
+   INTEGER(kind=cuda_count_kind) :: freebytes, totalbytes
 #endif   
+
+      CALL myDGSEM % params % Build( setupSuccess )
+      IF( .NOT. SetupSuccess ) THEN
+         PRINT(MsgFMT), 'S/R Build_Fluid : Halting before building,'
+         RETURN
+      ENDIF
 
 #ifdef HAVE_MPI
       IF( prec == sp )THEN
@@ -256,10 +263,9 @@ INCLUDE 'mpif.h'
       ENDIF
 #endif
       callid = 0
-      CALL myDGSEM % params % Build( )
       myDGSEM % N   = myDGSEM % params % polyDeg
       myDGSEM % nEq = nEq
-      myDGSEM % simulationTime = myDGSEM % params % iterInit*myDGSEM % params % dt
+      myDGSEM % simulationTime = myDGSEM % params % startTime
 
 #ifdef TESTING
       PRINT*, '  Module Fluid_Class.f90 : S/R Build_Fluid :'
@@ -345,7 +351,7 @@ INCLUDE 'mpif.h'
 #endif
 
       ! Read the initial conditions, static state, and the boundary communicator
-      CALL myDGSEM % ReadPickup( myDGSEM % params % iterInit, myRank )
+      CALL myDGSEM % ReadPickup( myRank )
       
       
 #ifdef HAVE_CUDA
@@ -3307,33 +3313,33 @@ INCLUDE 'mpif.h'
 !==================================================================================================!
 !
 !
- SUBROUTINE WriteTecplot_Fluid( myDGSEM, iter, nPlot, myRank )
+ SUBROUTINE WriteTecplot_Fluid( myDGSEM,  myRank )
 
   IMPLICIT NONE
  
   CLASS( Fluid ), INTENT(inout) :: myDGsem
-  INTEGER, INTENT(in)           :: iter, nPlot
   INTEGER, INTENT(in)           :: myRank
   !LOCAL
-  REAL(prec)  :: x(0:nPlot,0:nPlot,0:nPlot)
-  REAL(prec)  :: y(0:nPlot,0:nPlot,0:nPlot)
-  REAL(prec)  :: z(0:nPlot,0:nPlot,0:nPlot)
-  REAL(prec)  :: sol(0:nPlot,0:nPlot,0:nPlot,1:nEq)
-  REAL(prec)  :: bsol(0:nPlot,0:nPlot,0:nPlot,1:nEq)
+  REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot)
+  REAL(prec)  :: y(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot)
+  REAL(prec)  :: z(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot)
+  REAL(prec)  ::  sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:nEq)
+  REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:nEq)
 
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
-  CHARACTER(10) :: iterchar
   CHARACTER(4)  :: rankChar
-  REAL(prec) :: hCapRatio, c, T
+  REAL(prec)    :: hCapRatio, c, T
+  CHARACTER(10) :: timeStampString
+   
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
   
-  hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
+      hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
 
-      WRITE(iterChar,'(I10.10)') iter
       WRITE(rankChar,'(I4.4)') myRank
       
       OPEN( UNIT=NEWUNIT(fUnit), &
-            FILE= 'State.'//rankChar//'.'//iterChar//'.tec', &
+            FILE= 'State.'//rankChar//'.'//timeStampString//'.tec', &
             FORM='formatted', &
             STATUS='replace')  
     
@@ -3355,13 +3361,13 @@ INCLUDE 'mpif.h'
          ENDDO
          
          WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements(iEl) % elementID
-         WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',nPlot+1,&
-                                                     ', J=',nPlot+1,&
-                                                     ', K=',nPlot+1,',F=POINT'
+         WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % nPlot+1,&
+                                                     ', J=',myDGSEM % params % nPlot+1,&
+                                                     ', K=',myDGSEM % params % nPlot+1,',F=POINT'
 
-         DO k = 0, nPlot
-            DO j = 0, nPlot
-               DO i = 0, nPlot
+         DO k = 0, myDGSEM % params % nPlot
+            DO j = 0, myDGSEM % params % nPlot
+               DO i = 0, myDGSEM % params % nPlot
                   T =   (bsol(i,j,k,5) + sol(i,j,k,5))/(bsol(i,j,k,4)+sol(i,j,k,4) )
                           
                   ! Sound speed estimate for the external and internal states
@@ -3395,34 +3401,40 @@ INCLUDE 'mpif.h'
    IMPLICIT NONE
    CLASS( Fluid  ), INTENT(inout) :: myDGSEM
    INTEGER, INTENT(out)           :: fileUnits(1:nDiagnostics) 
+   ! Local
+   CHARACTER(10) :: timeStampString
    
+      myDGSEM % simulationTime = 86469.0_prec
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+      PRINT*, timeStampString
+
 
       OPEN( UNIT=NewUnit(fileUnits(1)), &
-            FILE='Mass.curve', &
+            FILE='Mass.'//timeStampString//'.curve', &
             FORM='FORMATTED', &
             STATUS='REPLACE' )
       WRITE(fileUnits(1),*) '#TotalMass'
 
       OPEN( UNIT=NewUnit(fileUnits(2)), &
-            FILE='KineticEnergy.curve', &
+            FILE='KineticEnergy.'//timeStampString//'.curve', &
             FORM='FORMATTED', &
             STATUS='REPLACE' )
       WRITE(fileUnits(2),*) '#TotalKineticEnergy'
 
       OPEN( UNIT=NewUnit(fileUnits(3)), &
-            FILE='PotentialEnergy.curve', &
+            FILE='PotentialEnergy.'//timeStampString//'.curve', &
             FORM='FORMATTED', &
             STATUS='REPLACE' )
       WRITE(fileUnits(3),*) '#TotalPotentialEnergy'
 
       OPEN( UNIT=NewUnit(fileUnits(4)), &
-            FILE='AverageTemperature.curve', &
+            FILE='AverageTemperature.'//timeStampString//'.curve', &
             FORM='FORMATTED', &
             STATUS='REPLACE' )
       WRITE(fileUnits(4),*) '#TotalHeat'
 
       OPEN( UNIT=NewUnit(fileUnits(5)), &
-            FILE='Volume.curve', &
+            FILE='Volume.'//timeStampString//'.curve', &
             FORM='FORMATTED', &
             STATUS='REPLACE' )
       WRITE(fileUnits(5),*) '#TotalVolume'
@@ -3645,14 +3657,15 @@ INCLUDE 'mpif.h'
 
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
-  CHARACTER(10) :: iterchar
   CHARACTER(4)  :: rankChar
+  CHARACTER(10) :: timeStampString
+   
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
-      WRITE(iterChar,'(I10.10)') iter
       WRITE(rankChar,'(I4.4)') myRank
       
       OPEN( UNIT=NEWUNIT(fUnit), &
-            FILE= 'State-smoothed.'//rankChar//'.'//iterChar//'.tec', &
+            FILE= 'State-smoothed.'//rankChar//'.'//timeStampString//'.tec', &
             FORM='formatted', &
             STATUS='replace')  
     
@@ -3706,14 +3719,15 @@ INCLUDE 'mpif.h'
   !LOCAL
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
-  CHARACTER(10) :: iterchar
   CHARACTER(4)  :: rankChar
+  CHARACTER(10) :: timeStampString
+   
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
-      WRITE(iterChar,'(I10.10)') iter
       WRITE(rankChar,'(I4.4)') myRank
       
       OPEN( UNIT=NEWUNIT(fUnit), &
-            FILE= 'State-SGS.'//rankChar//'.'//iterChar//'.tec', &
+            FILE= 'State-SGS.'//rankChar//'.'//timeStampString//'.tec', &
             FORM='formatted', &
             STATUS='replace')  
     
@@ -3758,14 +3772,15 @@ INCLUDE 'mpif.h'
 
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
-  CHARACTER(10) :: iterchar
   CHARACTER(4)  :: rankChar
+  CHARACTER(10) :: timeStampString
+   
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
-      WRITE(iterChar,'(I10.10)') iter
       WRITE(rankChar,'(I4.4)') myRank
       
       OPEN( UNIT=NEWUNIT(fUnit), &
-            FILE= 'Stress.'//rankChar//'.'//iterChar//'.tec', &
+            FILE= 'Stress.'//rankChar//'.'//timeStampString//'.tec', &
             FORM='formatted', &
             STATUS='replace')  
     
@@ -3804,26 +3819,26 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE WriteStressTensorTecplot_Fluid
 !
- SUBROUTINE WritePickup_Fluid( myDGSEM, iter, myRank )
+ SUBROUTINE WritePickup_Fluid( myDGSEM, myRank )
 
    IMPLICIT NONE
    CLASS( Fluid ), INTENT(in) :: myDGSEM
-   INTEGER, INTENT(in)        :: iter
    INTEGER, INTENT(in)        :: myRank
   ! LOCAL
-   CHARACTER(10) :: iterChar
    CHARACTER(4)  :: rankChar
    INTEGER       :: iEl
    INTEGER       :: thisRec, fUnit
    INTEGER       :: iEq, N
+   CHARACTER(10) :: timeStampString
+   
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
       N = myDGSEM % N
      
-      WRITE(iterChar,'(I10.10)') iter
       WRITE(rankChar,'(I4.4)') myRank
 
       OPEN( UNIT=NEWUNIT(fUnit), &
-            FILE='State.'//rankChar//'.'//iterChar//'.pickup', &
+            FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
             FORM='UNFORMATTED',&
             ACCESS='DIRECT',&
             STATUS='REPLACE',&
@@ -3851,7 +3866,7 @@ INCLUDE 'mpif.h'
       CLOSE(UNIT=fUnit)
      
       OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'State.'//rankChar//'.'//iterChar//'.exs', &
+            FILE   = 'State.'//rankChar//'.'//timeStampString//'.exs', &
             FORM   ='UNFORMATTED',&
             ACCESS ='DIRECT',&
             STATUS ='REPLACE',&
@@ -3865,30 +3880,30 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE WritePickup_Fluid
 !
- SUBROUTINE ReadPickup_Fluid( myDGSEM, iter, myRank )
+ SUBROUTINE ReadPickup_Fluid( myDGSEM, myRank )
 
    IMPLICIT NONE
    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-   INTEGER, INTENT(in)           :: iter
    INTEGER, INTENT(in)           :: myRank
   ! LOCAL
-   CHARACTER(10) :: iterChar
    CHARACTER(4)  :: rankChar
    INTEGER       :: iEl, istat
    INTEGER       :: thisRec, fUnit
    INTEGER       :: iEq, N
    LOGICAL       :: itExists
+   CHARACTER(10) :: timeStampString
+   
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
    
       N = myDGSEM % N
       
-      WRITE(iterChar,'(I10.10)') iter
       WRITE(rankChar,'(I4.4)') myRank
-      INQUIRE( FILE='State.'//rankChar//'.'//iterChar//'.pickup', EXIST = itExists )
+      INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
      
       IF( itExists )THEN
      
          OPEN( UNIT=NEWUNIT(fUnit), &
-               FILE='State.'//rankChar//'.'//iterChar//'.pickup', &
+               FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
                FORM='unformatted',&
                ACCESS='direct',&
                STATUS='old',&
@@ -3950,12 +3965,12 @@ INCLUDE 'mpif.h'
 	  myDGSEM % prescribedStress_dev = 0.0_prec
 #endif	  
      
-      INQUIRE( FILE='State.'//rankChar//'.'//iterChar//'.exs', EXIST = itExists )
+      INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
      
       IF( itExists )THEN
       
          OPEN( UNIT   = NEWUNIT(fUnit), &
-                FILE   = 'State.'//rankChar//'.'//iterChar//'.exs', &
+                FILE   = 'State.'//rankChar//'.'//timeStampString//'.exs', &
                 FORM   ='UNFORMATTED',&
                 ACCESS ='DIRECT',&
                 STATUS ='OLD',&

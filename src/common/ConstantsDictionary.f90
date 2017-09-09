@@ -186,4 +186,6 @@
   INTEGER, PARAMETER      :: NONE = 0
   CHARACTER(1), PARAMETER :: nada = ' '
 
+  CHARACTER(6), PARAMETER :: MsgFmt = '(4x,A)'
+
  END MODULE ConstantsDictionary
