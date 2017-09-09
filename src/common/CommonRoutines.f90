@@ -778,5 +778,42 @@ CONTAINS
         ENDIF
     ENDDO
 
-END FUNCTION UpperCase
+ END FUNCTION UpperCase
+!
+ FUNCTION TimeStamp( time, units ) RESULT( timeStampString ) 
+   IMPLICIT NONE
+   REAL(prec)    :: time 
+   CHARACTER(1)  :: units
+   CHARACTER(10) :: timeStampString
+   ! Local 
+   INTEGER      :: day, minute, hour, second
+   CHARACTER(4) :: dayStamp
+   CHARACTER(2) :: hourStamp, minuteStamp, secondStamp
+
+
+      ! Units in "seconds"
+      IF( units(1:1) == 's' ) THEN 
+   
+         ! Obtain the day
+         day    = INT( time/86400.0_prec )
+         hour   = INT( (time-86400.0_prec*day)/3600.0_prec )
+         minute = INT( (time-3600.0_prec*hour-86400.0_prec*day)/60.0_prec )
+         second = INT( (time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day) )
+
+         WRITE( dayStamp,'(I4.4)' ) day 
+         WRITE( hourStamp,'(I2.2)' ) hour
+         WRITE( minuteStamp,'(I2.2)' ) minute
+         WRITE( secondStamp,'(I2.2)' ) second
+         timeStampString = dayStamp//hourStamp//minuteStamp//secondStamp 
+         
+      ! minutes
+      ELSEIF( units(1:1) == 'm' )THEN
+
+      ! hours
+      ELSEIF( units(1:1) == 'h' )THEN
+
+      
+      ENDIF
+
+ END FUNCTION TimeStamp
 END MODULE CommonRoutines

@@ -23,49 +23,58 @@ USE Fluid_Class
 INCLUDE "visitfortransimV2interface.inc"
 #endif
 
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> ! 
 
- TYPE( Fluid ) :: myeu
+ TYPE( Fluid )       :: myeu
+ INTEGER             :: mpiErr, myRank, nProcs
+ LOGICAL             :: setupSuccess
+
 #ifdef TIMING
  TYPE( MultiTimers ) :: timers
 #endif
- INTEGER    :: mpiErr, myRank, nProcs
- INTEGER    :: iter0, nT, dFreq, iT, nDumps
- REAL(prec) :: tn, deltaT
+
 #ifdef DIAGNOSTICS
- INTEGER    :: diagUnits(1:nDiagnostics)
+ INTEGER             :: diagUnits(1:nDiagnostics)
 #endif
+
 #ifdef INSITU_VIZ
- INTEGER    :: simulationCycle, simulationTime, runFlag
+ INTEGER             :: simulationCycle, simulationTime, runFlag
  COMMON/SIMSTATE/ runFlag, simulationCycle, simulationTime
 #endif
- 
+
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> ! 
+
+
       CALL Setup( )
 
+      IF( setupSuccess )THEN
 #ifdef INSITU_VIZ
-      CALL SetupLibSim( )
+         CALL SetupLibSim( )
 #endif
 
 #ifdef TIMING
-      !$OMP MASTER
-      IF( myRank == 0 )THEN
-         CALL timers % Build( )
-         CALL timers % AddTimer( 'MainLoop', 1 )
-         CALL timers % StartTimer( 1 )
-      ENDIF
-      !$OMP END MASTER
+         !$OMP MASTER
+         IF( myRank == 0 )THEN
+            CALL timers % Build( )
+            CALL timers % AddTimer( 'MainLoop', 1 )
+            CALL timers % StartTimer( 1 )
+         ENDIF
+         !$OMP END MASTER
 #endif
-      CALL MainLoop( )
+         CALL MainLoop( )
 #ifdef TIMING
-      !$OMP MASTER
-      IF( myRank == 0 )THEN
-         CALL timers % StopTimer( 1 )
-         CALL timers % Write_MultiTimers( )
-         CALL timers % Trash( )
-      ENDIF
-      !$OMP END MASTER
+         !$OMP MASTER
+         IF( myRank == 0 )THEN
+            CALL timers % StopTimer( 1 )
+            CALL timers % Write_MultiTimers( )
+            CALL timers % Trash( )
+         ENDIF
+         !$OMP END MASTER
 #endif
 
-      CALL Cleanup( )
+         CALL Cleanup( )
+
+      ENDIF
 
 CONTAINS
 
@@ -87,17 +96,13 @@ CONTAINS
       myRank = 0
       nProcs = 1
 #endif
-      CALL myeu % Build( myRank, nProcs )
-
-      iter0  = myeu % params % iterInit
-      nT     = myeu % params % nTimeSteps
-      dFreq  = myeu % params % dumpFreq
-      deltaT = myeu % params % dt
-      nDumps = (nT)/dFreq
-
+      CALL myeu % Build( myRank, nProcs, setupSuccess )
+      IF( .NOT. setupSuccess )THEN
 #ifdef HAVE_MPI
-      CALL MPI_BARRIER( MPI_COMM_WORLD, mpiErr )
+         CALL MPI_FINALIZE( mpiErr )
 #endif
+         RETURN
+      ENDIF
 
 #ifdef DIAGNOSTICS
       CALL myeu % OpenDiagnosticsFiles( diagUnits )
@@ -152,6 +157,7 @@ CONTAINS
 
   SUBROUTINE MainLoop( )
      IMPLICIT NONE
+     INTEGER    :: iT
 #ifdef INSITU_VIZ
      INCLUDE "visitfortransimV2interface.inc"
      INTEGER    :: visitState, visitResult, blocking, iterate     
@@ -197,8 +203,8 @@ CONTAINS
       CALL myeu % ObtainPlottingMesh( x, y, z )
 
       runFlag = 1
-      simulationCycle = iter0
-      simulationTime = myeu % simulationTime
+      simulationCycle = 0
+      simulationTime  = myeu % simulationTime
       !$OMP PARALLEL
       DO ! Loop indefinitely; really breaks when visitState < 0
 
@@ -246,7 +252,7 @@ CONTAINS
 
          IF( MOD( simulationCycle, dFreq ) == 0 )THEN
            !$OMP MASTER
-           CALL myeu % WritePickup( simulationCycle, myRank )
+           CALL myeu % WritePickup( myRank )
 #ifdef DIAGNOSTICS
            CALL myeu % Diagnostics( ) 
            CALL myeu % WriteDiagnosticsFiles( diagUnits )
@@ -266,24 +272,22 @@ CONTAINS
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
       !$OMP PARALLEL
-      DO iT = iter0, iter0+nT-1, dFreq ! Loop over time-steps
+      DO iT = 1, myeu % params % nDumps ! Loop over time-steps
 
-         CALL myeu % ForwardStepRK3( dFreq, myRank ) ! Forward Step
+         CALL myeu % ForwardStepRK3( myeu % params % nStepsPerDump, myRank ) ! Forward Step
 #ifdef HAVE_CUDA
          myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
 
 
-          ! In here, we will do the LIBSIM calls
-! Turn off file I/O if timing is turned on
 #ifndef TIMING
 #ifdef DIAGNOSTICS
          CALL myeu % Diagnostics( ) 
          CALL myeu % WriteDiagnostics( diagUnits )
 #endif
          !$OMP MASTER
-         CALL myeu % WritePickup( iT+dFreq, myRank )
-         CALL myeu % WriteTecplot( iT+dFreq, myeu % params % nPlot, myRank )
+         CALL myeu % WritePickup( myRank )
+         CALL myeu % WriteTecplot( myRank )
          !$OMP END MASTER
 #endif
 

@@ -22,6 +22,7 @@ USE Fluid_Class
  TYPE( Fluid ) :: myeu
  INTEGER       :: myRank, mpiErr, nProcs
  CHARACTER(4)  :: rankChar
+ LOGICAL       :: setupSuccess
 
 #ifdef HAVE_MPI
       ! MPI Initialization
@@ -34,32 +35,35 @@ USE Fluid_Class
       myRank = 0
       nProcs = 1
 #endif
-      CALL myeu % Build( myRank, nProcs )
+      CALL myeu % Build( myRank, nProcs, setupSuccess )
  
-      CALL InitialCondition( myeu )
-      
-      PRINT*, "Reset Boundary conditions"
-      CALL ResetBoundaryConditions( myeu, myRank )
-      PRINT*, "DONE!"
-      
-      CALL myeu % WritePickup( 0, myRank ) 
-      
-      CALL myeu % WriteTecplot( 0, myeu % params % nPlot, myRank )
-      
-      ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the 
-      ! integrator, the mesh scaling is not applied a second time 
-      CALL myeu % mesh % ScaleTheMesh( myeu % dgStorage % interp, &
-                                          1.0_prec/myeu % params % xScale, &
-                                          1.0_prec/myeu % params % yScale, &
-                                          1.0_prec/myeu % params % zScale )
-      WRITE( rankChar, '(I4.4)' )myRank
-      CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
+      IF( SetupSuccess )THEN
+         CALL InitialCondition( myeu )
+         
+         PRINT*, "Reset Boundary conditions"
+         CALL ResetBoundaryConditions( myeu, myRank )
+         PRINT*, "DONE!"
+         
+         CALL myeu % WritePickup( myRank ) 
+         
+         CALL myeu % WriteTecplot( myRank )
+         
+         ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the 
+         ! integrator, the mesh scaling is not applied a second time 
+         CALL myeu % mesh % ScaleTheMesh( myeu % dgStorage % interp, &
+                                             1.0_prec/myeu % params % xScale, &
+                                             1.0_prec/myeu % params % yScale, &
+                                             1.0_prec/myeu % params % zScale )
+         WRITE( rankChar, '(I4.4)' )myRank
+         CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
       
 #ifdef HAVE_MPI
-      CALL MPI_BARRIER( )
+         CALL MPI_BARRIER( )
 #endif
       
-      CALL myeu % Trash( )
+         CALL myeu % Trash( )
+
+      ENDIF
 
 #ifdef HAVE_MPI
       CALL MPI_FINALIZE( mpiErr )
