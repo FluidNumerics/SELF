@@ -603,6 +603,7 @@ INCLUDE 'mpif.h'
             CALL myDGSEM % EquationOfState( )
             
          ENDDO ! m, loop over the RK3 steps
+         myDGSEM % simulationTime = myDGSEM % simulationTime + dt
 
       ENDIF
 #else
@@ -664,7 +665,7 @@ INCLUDE 'mpif.h'
             
          ENDDO ! m, loop over the RK3 steps
        
-         myDGSEM % simulationTime = myDGSEM % simulationTime + myDGSEM % params % dt 
+         myDGSEM % simulationTime = myDGSEM % simulationTime + dt 
             
       ENDDO
 
@@ -718,7 +719,7 @@ INCLUDE 'mpif.h'
             
          ENDDO ! m, loop over the RK3 steps
        
-         myDGSEM % simulationTime = myDGSEM % simulationTime + myDGSEM % params % dt 
+         myDGSEM % simulationTime = myDGSEM % simulationTime +  dt 
       ENDIF
 #endif          
 
@@ -3485,9 +3486,7 @@ INCLUDE 'mpif.h'
    ! Local
    CHARACTER(10) :: timeStampString
    
-      myDGSEM % simulationTime = 86469.0_prec
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-      PRINT*, timeStampString
 
 
       OPEN( UNIT=NewUnit(fileUnits(1)), &
@@ -3917,6 +3916,8 @@ INCLUDE 'mpif.h'
       N = myDGSEM % N
      
       WRITE(rankChar,'(I4.4)') myRank
+      PRINT(MsgFMT), ' S/R WritePickup_Fluid : Writing output file :  State.'//&
+                       rankChar//'.'//timeStampString//'.pickup' 
 
       OPEN( UNIT=NEWUNIT(fUnit), &
             FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &

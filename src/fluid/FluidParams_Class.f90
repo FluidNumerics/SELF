@@ -228,11 +228,22 @@ USE ConstantsDictionary
             thisParam % startTime = startTime
             thisParam % endTime   = endTime
             thisParam % outputFrequency = outputFrequency
+ 
+         ELSE
+
+            PRINT(MsgFMT), 'S/R Build_Params : Unknown units specified.'
+            readSuccess = .FALSE.
+            RETURN
 
          ENDIF
 
          thisParam % nStepsPerDump = INT( thisParam % outputFrequency/thisParam % dt )
          thisParam % nDumps        = INT( (thisParam % endTime-thisParam % startTime)/thisParam % outputFrequency )
+         
+         PRINT(MsgFMT), 'S/R Build_Params : Estimated Number of Time Steps :'
+         PRINT('(4x,I10)'), thisParam % nStepsPerDump, &
+                            thisParam % nDumps, &
+                            thisParam % nStepsPerDump*thisParam % nDumps 
         
          ! SpaceManagement 
          thisParam % SpecMeshFile = SpecMeshFile
