@@ -52,25 +52,7 @@ INCLUDE "visitfortransimV2interface.inc"
          CALL SetupLibSim( )
 #endif
 
-#ifdef TIMING
-         !$OMP MASTER
-         IF( myRank == 0 )THEN
-            CALL timers % Build( )
-            CALL timers % AddTimer( 'MainLoop', 1 )
-            CALL timers % StartTimer( 1 )
-         ENDIF
-         !$OMP END MASTER
-#endif
          CALL MainLoop( )
-#ifdef TIMING
-         !$OMP MASTER
-         IF( myRank == 0 )THEN
-            CALL timers % StopTimer( 1 )
-            CALL timers % Write_MultiTimers( )
-            CALL timers % Trash( )
-         ENDIF
-         !$OMP END MASTER
-#endif
 
          CALL Cleanup( )
 
@@ -111,6 +93,15 @@ CONTAINS
 #endif
 
 
+#ifdef TIMING
+      IF( myRank == 0 )THEN
+         CALL timers % Build( )
+         CALL timers % AddTimer( 'ForwardStepRK3', 1 )
+      ENDIF
+#endif
+
+
+
   END SUBROUTINE Setup
 
 ! ------------------------------------------------------------------------------ !
@@ -147,6 +138,12 @@ CONTAINS
 
 #ifdef DIAGNOSTICS
       CALL myeu % CloseDiagnosticsFiles( diagUnits )
+#endif
+
+#ifdef TIMING
+       IF( myRank == 0 )THEN
+            CALL timers % Trash( )
+       ENDIF
 #endif
 
   END SUBROUTINE Cleanup
@@ -274,13 +271,32 @@ CONTAINS
       !$OMP PARALLEL
       DO iT = 1, myeu % params % nDumps ! Loop over time-steps
 
+
+#ifdef TIMING
+         !$OMP MASTER
+         IF( myRank == 0 )THEN
+            CALL timers % StartTimer( 1 )
+         ENDIF
+         !$OMP END MASTER
+#endif
+
+
          CALL myeu % ForwardStepRK3( myeu % params % nStepsPerDump, myRank ) ! Forward Step
+
+#ifdef TIMING
+         !$OMP MASTER
+         IF( myRank == 0 )THEN
+            CALL timers % StopTimer( 1 )
+         ENDIF
+         !$OMP END MASTER
+#endif
+
+
 #ifdef HAVE_CUDA
          myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
 
 
-#ifndef TIMING
 #ifdef DIAGNOSTICS
          CALL myeu % Diagnostics( ) 
          CALL myeu % WriteDiagnostics( diagUnits )
@@ -294,7 +310,6 @@ CONTAINS
       ENDDO
       !$OMP END PARALLEL
 
-#endif
      
   END SUBROUTINE MainLoop
 
