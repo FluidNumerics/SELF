@@ -37,37 +37,41 @@ PROGRAM DecomposeStructuredHexMesh
  INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
  INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:)
  REAL(prec), ALLOCATABLE      :: materials(:)
+ LOGICAL                      :: setupSuccess
  
 
       CALL Setup( )
 
-      CALL timers % StartTimer( 1 )
+      IF( setupSuccess )THEN
 
-      CALL PartitionElementsAndNodes_Structured( )
-      
+         CALL timers % StartTimer( 1 )
+   
+         CALL PartitionElementsAndNodes_Structured( )
          
-      ! Now we generate the local mesh for each process
-      DO procID = 0, nProc-1
-      
-         CALL procMesh(procID) % Initialize(  nNodePerProc(procID), &
-                                      nElPerProc(procID), &
-                                      1, params % polyDeg )
-          
-         CALL DecomposeNodes( procID )
-
-         CALL DecomposeElements( procID )                            
-
-         CALL DecomposeFaces( procID ) 
+            
+         ! Now we generate the local mesh for each process
+         DO procID = 0, nProc-1
          
-         CALL FileIO( procID ) 
+            CALL procMesh(procID) % Initialize(  nNodePerProc(procID), &
+                                         nElPerProc(procID), &
+                                         1, params % polyDeg )
+             
+            CALL DecomposeNodes( procID )
+   
+            CALL DecomposeElements( procID )                            
+   
+            CALL DecomposeFaces( procID ) 
+            
+            CALL FileIO( procID ) 
+            
+         ENDDO
+   
+         CALL SetupCommTables( )
+   
+         CALL timers % StopTimer( 1 )
          
-      ENDDO
-
-      CALL SetupCommTables( )
-
-      CALL timers % StopTimer( 1 )
-      
-      CALL Cleanup( )
+         CALL Cleanup( )
+      ENDIF
 
  CONTAINS
 
@@ -75,7 +79,10 @@ PROGRAM DecomposeStructuredHexMesh
     IMPLICIT NONE
 
       ! Read in the parameters
-      CALL params % Build( )
+      CALL params % Build( setupSuccess )
+      IF( .NOT. setupSuccess )THEN
+         RETURN
+      ENDIF
       CALL timers % Build( )
       
       CALL timers % AddTimer( 'Total Time', 1 )
