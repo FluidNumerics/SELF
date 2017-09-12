@@ -733,61 +733,61 @@ INCLUDE 'mpif.h'
 ! ============================================================================= !
 !
 ! Crank Nicholson time integrator routines
- SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, myRank, snk, explicitTendency )
-   IMPLICIT NONE
-   CLASS(Fluid), INTENT(inout) :: myDGSEM 
-   INTEGER, INTENT(in)         :: myRank
-   REAL(prec), INTENT(in)      :: snk(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec), INTENT(in)      :: explicitTendency(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   ! Local
-   REAL(prec)   :: r(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: ds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: v(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: p(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: t(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: rho, alpha, omega, beta
-
-      ! Calculate the initial residual 
-      ! Assumes an initial guess of ds=0
-      r = explicitTendency + myDGSEM % CrankNicholsonRHS( myRank, snk )
-      
-
-      
- END SUBROUTINE CrankNicholsonBiCGStab_Fluid
+! SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, myRank, snk, explicitTendency )
+!   IMPLICIT NONE
+!   CLASS(Fluid), INTENT(inout) :: myDGSEM 
+!   INTEGER, INTENT(in)         :: myRank
+!   REAL(prec), INTENT(in)      :: snk(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec), INTENT(in)      :: explicitTendency(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   ! Local
+!   REAL(prec)   :: r(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: ds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: v(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: p(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: t(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: rho, alpha, omega, beta
 !
- FUNCTION CrankNicholsonRHS_Fluid( myDGSEM, myRank, snk ) RESULT( b )
-   ! Given
-   IMPLICIT NONE
-   CLASS(Fluid) :: myDGSEM 
-   INTEGER      :: myRank
-   REAL(prec)   :: snk(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: b(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-
-      
-      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
-      b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
-      
-
- END FUNCTION CrankNicholsonRHS_Fluid
+!      ! Calculate the initial residual 
+!      ! Assumes an initial guess of ds=0
+!      r = explicitTendency + myDGSEM % CrankNicholsonRHS( myRank, snk )
+!      
 !
- FUNCTION CrankNicholsonJacobianAction_Fluid( myDGSEM, s, ds, Fs, myRank ) RESULT( Jds )
-   IMPLICIT NONE
-   CLASS(Fluid) :: myDGSEM 
-   REAL(prec)   :: s(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: ds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: Fs(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   REAL(prec)   :: Jds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
-   INTEGER      :: myRank
-   
-
-      myDGSEM % solution % state = s + jacobianStepSize*ds
-      
-      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
-
-      ! J*ds = (I - (dt/2)* dF/ds )*ds
-      Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % tendency - Fs )/jacobianStepSize
- 
- END FUNCTION CrankNicholsonJacobianAction_Fluid
+!      
+! END SUBROUTINE CrankNicholsonBiCGStab_Fluid
+!!
+! FUNCTION CrankNicholsonRHS_Fluid( myDGSEM, myRank, snk ) RESULT( b )
+!   ! Given
+!   IMPLICIT NONE
+!   CLASS(Fluid) :: myDGSEM 
+!   INTEGER      :: myRank
+!   REAL(prec)   :: snk(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: b(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!
+!      
+!      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
+!      b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
+!      
+!
+! END FUNCTION CrankNicholsonRHS_Fluid
+!!
+! FUNCTION CrankNicholsonJacobianAction_Fluid( myDGSEM, s, ds, Fs, myRank ) RESULT( Jds )
+!   IMPLICIT NONE
+!   CLASS(Fluid) :: myDGSEM 
+!   REAL(prec)   :: s(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: ds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: Fs(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   REAL(prec)   :: Jds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+!   INTEGER      :: myRank
+!   
+!
+!      myDGSEM % solution % state = s + jacobianStepSize*ds
+!      
+!      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
+!
+!      ! J*ds = (I - (dt/2)* dF/ds )*ds
+!      Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % tendency - Fs )/jacobianStepSize
+! 
+! END FUNCTION CrankNicholsonJacobianAction_Fluid
 !
 ! ============================================================================= !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !

@@ -142,6 +142,7 @@ CONTAINS
 
 #ifdef TIMING
        IF( myRank == 0 )THEN
+            CALL timers % Write_MultiTimers( )
             CALL timers % Trash( )
        ENDIF
 #endif
@@ -305,11 +306,11 @@ CONTAINS
          CALL myeu % WritePickup( myRank )
          CALL myeu % WriteTecplot( myRank )
          !$OMP END MASTER
-#endif
 
       ENDDO
       !$OMP END PARALLEL
 
+#endif
      
   END SUBROUTINE MainLoop
 
