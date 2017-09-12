@@ -733,8 +733,28 @@ INCLUDE 'mpif.h'
 ! ============================================================================= !
 !
 ! Crank Nicholson time integrator routines
- SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, snk
+ SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, myRank, snk, explicitTendency )
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM 
+   INTEGER, INTENT(in)         :: myRank
+   REAL(prec), INTENT(in)      :: snk(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec), INTENT(in)      :: explicitTendency(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   ! Local
+   REAL(prec)   :: r(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: ds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: v(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: p(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: t(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: rho, alpha, omega, beta
 
+      ! Calculate the initial residual 
+      ! Assumes an initial guess of ds=0
+      r = explicitTendency + myDGSEM % CrankNicholsonRHS( myRank, snk )
+      
+
+      
+ END SUBROUTINE CrankNicholsonBiCGStab_Fluid
+!
  FUNCTION CrankNicholsonRHS_Fluid( myDGSEM, myRank, snk ) RESULT( b )
    ! Given
    IMPLICIT NONE
@@ -745,13 +765,7 @@ INCLUDE 'mpif.h'
 
       
       CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
-
-      b = myDGSEM % state % solution + &
-          0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency
-
-      myDGSEM % state % solution = snk
-      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
-      b = b - ( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
+      b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
       
 
  END FUNCTION CrankNicholsonRHS_Fluid
