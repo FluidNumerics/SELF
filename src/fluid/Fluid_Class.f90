@@ -200,7 +200,8 @@ INCLUDE 'mpif.h'
 
     END TYPE Fluid
 
- INTEGER, PARAMETER   :: nEq = 6
+ INTEGER, PARAMETER    :: nEq = 6
+ REAL(prec), PARAMETER :: jacobianStepSize = 10.0_prec**(-6) 
 
 #ifdef HAVE_CUDA
  INTEGER, CONSTANT    :: nEq_dev
@@ -726,6 +727,57 @@ INCLUDE 'mpif.h'
 
 
  END SUBROUTINE ForwardStepRK3_Fluid
+!
+! ============================================================================= !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ============================================================================= !
+!
+! Crank Nicholson time integrator routines
+ SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, snk
+
+ FUNCTION CrankNicholsonRHS_Fluid( myDGSEM, myRank, snk ) RESULT( b )
+   ! Given
+   IMPLICIT NONE
+   CLASS(Fluid) :: myDGSEM 
+   INTEGER      :: myRank
+   REAL(prec)   :: snk(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: b(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+
+      
+      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
+
+      b = myDGSEM % state % solution + &
+          0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency
+
+      myDGSEM % state % solution = snk
+      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
+      b = b - ( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
+      
+
+ END FUNCTION CrankNicholsonRHS_Fluid
+!
+ FUNCTION CrankNicholsonJacobianAction_Fluid( myDGSEM, s, ds, Fs, myRank ) RESULT( Jds )
+   IMPLICIT NONE
+   CLASS(Fluid) :: myDGSEM 
+   REAL(prec)   :: s(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: ds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: Fs(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   REAL(prec)   :: Jds(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:nEq, 1:myDGSEM % mesh % nElems) 
+   INTEGER      :: myRank
+   
+
+      myDGSEM % solution % state = s + jacobianStepSize*ds
+      
+      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime, myRank )
+
+      ! J*ds = (I - (dt/2)* dF/ds )*ds
+      Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % tendency - Fs )/jacobianStepSize
+ 
+ END FUNCTION CrankNicholsonJacobianAction_Fluid
+!
+! ============================================================================= !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ============================================================================= !
 !
  SUBROUTINE GlobalTimeDerivative_Fluid( myDGSEM, tn, myRank ) 
 
@@ -3508,7 +3560,7 @@ INCLUDE 'mpif.h'
       WRITE(fileUnits(3),*) '#TotalPotentialEnergy'
 
       OPEN( UNIT=NewUnit(fileUnits(4)), &
-            FILE='AverageTemperature.'//timeStampString//'.curve', &
+            FILE='Heat.'//timeStampString//'.curve', &
             FORM='FORMATTED', &
             STATUS='REPLACE' )
       WRITE(fileUnits(4),*) '#TotalHeat'
