@@ -61,6 +61,10 @@ else ifeq (${FC},pgfortran)
 
   endif
   
+  ifeq (${DUAL_GPU},yes)
+    CPPFLAGS+=-DDUAL_GPU
+  endif
+
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI

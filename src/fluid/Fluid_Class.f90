@@ -59,17 +59,25 @@ INCLUDE 'mpif.h'
        !
        ! :: Attributes ::  
        ! unPackMap(1:nSharedFaces)   >> Maps the local shared boundary face ID in the message to the correct boundaryID
-        
-       INTEGER :: neighborRank
-       INTEGER :: bufferSize
-       INTEGER :: nSharedFaces
-       REAL(prec), ALLOCATABLE :: sendStateBuffer(:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
-       REAL(prec), ALLOCATABLE :: recvStateBuffer(:,:,:,:)
-       REAL(prec), ALLOCATABLE :: sendStressBuffer(:,:,:,:)
-       REAL(prec), ALLOCATABLE :: recvStressBuffer(:,:,:,:)
-       REAL(prec), ALLOCATABLE :: sendSGSBuffer(:,:,:,:)
-       REAL(prec), ALLOCATABLE :: recvSGSBuffer(:,:,:,:)
-       INTEGER                 :: bufferCounter
+#ifdef CUDA_DIRECT
+       REAL(prec), DEVICE, ALLOCATABLE :: sendStateBuffer(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
+       REAL(prec), DEVICE, ALLOCATABLE :: recvStateBuffer(:,:,:,:,:)
+       REAL(prec), DEVICE, ALLOCATABLE :: sendStressBuffer(:,:,:,:,:)
+       REAL(prec), DEVICE, ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
+       REAL(prec), DEVICE, ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
+       REAL(prec), DEVICE, ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
+#else
+       REAL(prec), ALLOCATABLE :: sendStateBuffer(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
+       REAL(prec), ALLOCATABLE :: recvStateBuffer(:,:,:,:,:)
+       REAL(prec), ALLOCATABLE :: sendStressBuffer(:,:,:,:,:)
+       REAL(prec), ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
+       REAL(prec), ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
+       REAL(prec), ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
+       INTEGER, ALLOCATABLE    :: bufferCounter(:)
+       INTEGER, ALLOCATABLE    :: neighborRank(:)
+       INTEGER, ALLOCATABLE    :: bufferSize(:)
+       INTEGER, ALLOCATABLE    :: rankTable(:)
+#endif
     END TYPE PairWiseMPIPacket
 #endif
 
@@ -79,7 +87,7 @@ INCLUDE 'mpif.h'
       TYPE( FluidParams )                    :: params
       REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
 #ifdef HAVE_MPI
-      TYPE( PairWiseMPIPacket ), ALLOCATABLE :: mpiPackets(:)
+      TYPE( PairWiseMPIPacket )              :: mpiPackets
 #endif
 
 #ifdef HAVE_CUDA
@@ -109,7 +117,6 @@ INCLUDE 'mpif.h'
       TYPE( BoundaryCommunicator )            :: extComm
 #endif
 
-      INTEGER, ALLOCATABLE                    :: rankTable(:)
       
       REAL(prec), ALLOCATABLE                 :: prescribedState(:,:,:,:)
       REAL(prec), ALLOCATABLE                 :: externalState(:,:,:,:)
@@ -248,6 +255,7 @@ INCLUDE 'mpif.h'
    INTEGER :: istat
 #ifdef HAVE_CUDA
    INTEGER(kind=cuda_count_kind) :: freebytes, totalbytes
+   INTEGER                       :: iStat, cudaDeviceNumber
 #endif   
 
       CALL myDGSEM % params % Build( setupSuccess )
@@ -255,6 +263,20 @@ INCLUDE 'mpif.h'
          PRINT(MsgFMT), 'S/R Build_Fluid : Halting before building,'
          RETURN
       ENDIF
+#ifdef HAVE_CUDA
+
+#ifdef DUAL_GPU
+      cudaDeviceNumber = MOD( myRank, 2 )
+      PRINT*, '    S/R Build_Fluid : Rank :', myRank, ': Getting Device # ', cudaDeviceNumber
+      iStat = cudaSetDevice( cudaDeviceNumber )
+#else
+      cudaDeviceNumber = 0
+      PRINT*, '    S/R Build_Fluid : Rank :', myRank, ': Getting Device # ', cudaDeviceNumber
+      iStat = cudaSetDevice( cudaDeviceNumber )
+#endif
+
+#endif
+
 
 #ifdef HAVE_MPI
       IF( prec == sp )THEN
@@ -268,12 +290,6 @@ INCLUDE 'mpif.h'
       myDGSEM % nEq = nEq
       myDGSEM % simulationTime = myDGSEM % params % startTime
 
-#ifdef TESTING
-      PRINT*, '  Module Fluid_Class.f90 : S/R Build_Fluid :'
-      PRINT*, '    Testing is enabled. Restricting number of time steps to 1.'
-      myDGSEM % params % nTimeSteps = 1
-      myDGSEM % params % dumpFreq   = 1
-#endif
       
       ! Construct the data structure that holds the derivative and interpolation matrices
       ! and the quadrature weights. This call will also perform the device copies.
@@ -395,15 +411,17 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % static % Trash( )
       CALL myDGSEM % stressTensor % Trash( )
 #ifdef HAVE_MPI      
-      DO i = 1, myDGSEM % nNeighbors
-         DEALLOCATE( myDGSEM % mpiPackets(i) % sendStateBuffer )
-         DEALLOCATE( myDGSEM % mpiPackets(i) % recvStateBuffer )
-         DEALLOCATE( myDGSEM % mpiPackets(i) % sendStressBuffer )
-         DEALLOCATE( myDGSEM % mpiPackets(i) % recvStressBuffer )
-         DEALLOCATE( myDGSEM % mpiPackets(i) % sendSGSBuffer )
-         DEALLOCATE( myDGSEM % mpiPackets(i) % recvSGSBuffer )
-      ENDDO
-      DEALLOCATE( myDGSEM % mpiPackets )
+      DEALLOCATE( myDGSEM % mpiPackets % neighborRank )
+      DEALLOCATE( myDGSEM % mpiPackets % bufferSize )
+      DEALLOCATE( myDGSEM % mpiPackets % bufferCounter )
+      DEALLOCATE( myDGSEM % mpiPackets % sendStateBuffer )
+      DEALLOCATE( myDGSEM % mpiPackets % recvStateBuffer )
+      DEALLOCATE( myDGSEM % mpiPackets % sendStressBuffer )
+      DEALLOCATE( myDGSEM % mpiPackets % recvStressBuffer )
+      DEALLOCATE( myDGSEM % mpiPackets % sendSGSBuffer )
+      DEALLOCATE( myDGSEM % mpiPackets % recvSGSBuffer )
+      DEALLOCATE( myDGSEM % mpiPackets % rankTable )
+
       DEALLOCATE( stateReqHandle, &
                   stressReqHandle, &
                   SGSReqHandle, &
@@ -432,9 +450,6 @@ INCLUDE 'mpif.h'
       DEALLOCATE( myDGSEM % externalSGS_dev )
 #endif
 
-#ifdef TESTING
-      CALL mdi % Trash( )
-#endif
 
  END SUBROUTINE Trash_Fluid
 !
@@ -476,50 +491,70 @@ INCLUDE 'mpif.h'
    INTEGER    :: sharedFaceCount(0:nProc-1)
    INTEGER    :: iFace, bID, iNeighbor
    INTEGER    :: tag, ierror
-   INTEGER    :: e1, e2, s1, p2, nmsg
+   INTEGER    :: e1, e2, s1, p2, nmsg, maxFaceCount
    
 
       ! Count up the number of neighboring ranks
-      ALLOCATE( myDGSEM % rankTable(0:nProc-1) )
-      myDGSEM % rankTable = 0
+      ALLOCATE( myDGSEM % mpiPackets % rankTable(0:nProc-1) )
+      myDGSEM % mpiPackets % rankTable = 0
       sharedFaceCount     = 0
       DO bID = 1, myDGSEM % extComm % nBoundaries
          p2 = myDGSEM % extComm % extProcIDS(bID)
          IF( p2 /= myRank )THEN
-            myDGSEM % rankTable(p2) = 1
+            myDGSEM % mpiPackets % rankTable(p2) = 1
             sharedFaceCount(p2) = sharedFaceCount(p2)+1
          ENDIF
       ENDDO
-      myDGSEM % nNeighbors = SUM( myDGSEM % rankTable )
+      myDGSEM % nNeighbors = SUM( myDGSEM % mpiPackets % rankTable )
       PRINT*, '  S/R ConstructCommTables : Found', myDGSEM % nNeighbors, 'neighbors for Rank', myRank
       
-      ALLOCATE( myDGSEM % mpiPackets(1:myDGSEM % nNeighbors) )
+       ALLOCATE( myDGSEM % mpiPackets % neighborRank(1:myDGSEM % nNeighbors), &
+                 myDGSEM % mpiPackets % bufferSize(1:myDGSEM % nNeighbors), &
+                 myDGSEM % mpiPackets % bufferCounter(1:myDGSEM % nNeighbors) )
       ! For each neighbor, set the neighbor's rank
       iNeighbor = 0
       DO p2 = 0, nProc-1
          IF( myDGSEM % rankTable(p2) == 1 )THEN
             iNeighbor = iNeighbor + 1
-            myDGSEM % mpiPackets(iNeighbor) % neighborRank = p2
-            myDGSEM % rankTable(p2) = iNeighbor
+            myDGSEM % mpiPackets % neighborRank(iNeighbor) = p2
+            myDGSEM % mpiPackets % rankTable(p2) = iNeighbor
          ENDIF
       ENDDO
       
+      maxFaceCount = MAXVAL( sharedFaceCount )
       DO iNeighbor = 1, myDGSEM % nNeighbors
-      
          p2 = myDGSEM % mpiPackets(iNeighbor) % neighborRank
-
-         myDGSEM % mpiPackets(iNeighbor) % bufferSize = sharedFaceCount(p2)
-         
-         ALLOCATE( myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:sharedFaceCount(p2)), &
-                   myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:sharedFaceCount(p2)) )
-                   
-         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+         myDGSEM % mpiPackets % bufferSize(iNeighbor) = sharedFaceCount(p2)
       ENDDO
-      
+
+         
+      ALLOCATE( myDGSEM % mpiPackets % recvStateBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:maxFaceCount,1:myDGSEM % nNeighbors), &
+                myDGSEM % mpiPackets % sendStateBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:maxFaceCount,1:myDGSEM % nNeighbors), &
+                myDGSEM % mpiPackets % recvStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:maxFaceCount,1:myDGSEM % nNeighbors), &
+                myDGSEM % mpiPackets % sendStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:maxFaceCount,1:myDGSEM % nNeighbors), &
+                myDGSEM % mpiPackets % sendSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors), &
+                myDGSEM % mpiPackets % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors)) )
+                
+      myDGSEM % mpiPackets % bufferCounter = 0
+       
+!      ALLOCATE( myDGSEM % boundaryToBuffer(1:myDGSEM % extComm % nBoundaries) )
+!      myDGSEM % boundaryToBuffer = 0
+
+!      DO bID = 1, myDGSEM % extComm % nBoundaries
+!      
+!         p2        = myDGSEM % extComm % extProcIDs(bID)
+!         ! In the event that the external process ID (p2) is identical to the current rank (p1),
+!         ! then this boundary edge involves a physical boundary condition and does not require a 
+!         ! message exchange
+!         IF( p2 /= myRank )THEN 
+!
+!            iNeighbor = myDGSEM % rankTable(p2)
+!
+!            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
+!            myDGSEM % boundaryToBuffer(bID) = myDGSEM % mpiPackets(iNeighbor) % bufferCounter   
+!
+!         ENDIF
+!      ENDDO
    
  END SUBROUTINE ConstructCommTables_Fluid
 #endif
@@ -1734,10 +1769,8 @@ INCLUDE 'mpif.h'
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 
 #ifndef CUDA_DIRECT
-#ifdef HAVE_CUDA
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
-#endif
 #endif
 
 #ifdef CUDA_DIRECT
@@ -1745,7 +1778,7 @@ INCLUDE 'mpif.h'
 #else
 
       DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+         myDGSEM % mpiPackets % bufferCounter(iNeighbor) = 0
       ENDDO
  
       DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -1760,10 +1793,10 @@ INCLUDE 'mpif.h'
 
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-            iNeighbor = myDGSEM % rankTable(p2)
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
-            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
-            myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
+            myDGSEM % mpiPackets % sendStateBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor) ) =&
                myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -1776,17 +1809,17 @@ INCLUDE 'mpif.h'
          
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
-            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer, & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
+            CALL MPI_IRECV( myDGSEM % mpiPackets % recvStateBuffer(:,:,:,:,iNeighbor), & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
-                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
+                           myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stateReqHandle((iNeighbor-1)*2+1), iError )           
 
-            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer, & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
+            CALL MPI_ISEND( myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor), & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
-                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
+                           myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
                            stateReqHandle(iNeighbor*2), iError)  
                            
@@ -5361,6 +5394,37 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE EquationOfState_CUDAKernel
 !
+#ifdef CUDA_DIRECT
+ ATTRIBUTES(Global) SUBROUTINE BoundaryStateToBuffer_CUDAKernel( )
+   IMPLICIT NONE
+
+
+      DO iNeighbor = 1, myDGSEM % nNeighbors
+         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+      ENDDO
+ 
+      DO bID = 1, myDGSEM % extComm % nBoundaries
+      
+         iFace     = myDGSEM % extComm % boundaryIDs( bID )
+         p2        = myDGSEM % extComm % extProcIDs(bID)
+         
+         ! In the event that the external process ID (p2) is identical to the current rank (p1),
+         ! then this boundary edge involves a physical boundary condition and does not require a 
+         ! message exchange
+         IF( p2 /= myRank )THEN 
+
+            e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
+            s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
+            iNeighbor = myDGSEM % rankTable(p2)
+         
+            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
+            myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+               myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
+
+         ENDIF
+      ENDDO
+ END SUBROUTINE BoundaryStateToBuffer_CUDAKernel
+#endif
 #endif
  END MODULE Fluid_Class
 
