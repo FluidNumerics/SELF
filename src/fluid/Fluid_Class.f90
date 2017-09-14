@@ -73,11 +73,12 @@ INCLUDE 'mpif.h'
        REAL(prec), ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
        REAL(prec), ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
        REAL(prec), ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
+#endif
        INTEGER, ALLOCATABLE    :: bufferCounter(:)
+       INTEGER, ALLOCATABLE    :: bufferMap(:)
        INTEGER, ALLOCATABLE    :: neighborRank(:)
        INTEGER, ALLOCATABLE    :: bufferSize(:)
        INTEGER, ALLOCATABLE    :: rankTable(:)
-#endif
     END TYPE PairWiseMPIPacket
 #endif
 
@@ -252,7 +253,6 @@ INCLUDE 'mpif.h'
    INTEGER, INTENT(in)         :: myRank, nProc
    LOGICAL, INTENT(out)        :: setupSuccess
    !
-   INTEGER :: istat
 #ifdef HAVE_CUDA
    INTEGER(kind=cuda_count_kind) :: freebytes, totalbytes
    INTEGER                       :: iStat, cudaDeviceNumber
@@ -537,24 +537,24 @@ INCLUDE 'mpif.h'
                 
       myDGSEM % mpiPackets % bufferCounter = 0
        
-!      ALLOCATE( myDGSEM % boundaryToBuffer(1:myDGSEM % extComm % nBoundaries) )
-!      myDGSEM % boundaryToBuffer = 0
+      ALLOCATE( myDGSEM % mpiPackets % bufferMap(1:myDGSEM % extComm % nBoundaries) )
+      myDGSEM % mpiPackets % bufferMap = 0
 
-!      DO bID = 1, myDGSEM % extComm % nBoundaries
-!      
-!         p2        = myDGSEM % extComm % extProcIDs(bID)
-!         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-!         ! then this boundary edge involves a physical boundary condition and does not require a 
-!         ! message exchange
-!         IF( p2 /= myRank )THEN 
-!
-!            iNeighbor = myDGSEM % rankTable(p2)
-!
-!            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
-!            myDGSEM % boundaryToBuffer(bID) = myDGSEM % mpiPackets(iNeighbor) % bufferCounter   
-!
-!         ENDIF
-!      ENDDO
+      DO bID = 1, myDGSEM % extComm % nBoundaries
+      
+         p2        = myDGSEM % extComm % extProcIDs(bID)
+         ! In the event that the external process ID (p2) is identical to the current rank (p1),
+         ! then this boundary edge involves a physical boundary condition and does not require a 
+         ! message exchange
+         IF( p2 /= myRank )THEN 
+
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
+
+            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
+            myDGSEM % mpiPackets % bufferMap(bID) = myDGSEM % mpiPackets % bufferCounter(iNeighbor)   
+
+         ENDIF
+      ENDDO
    
  END SUBROUTINE ConstructCommTables_Fluid
 #endif
@@ -1779,10 +1779,6 @@ INCLUDE 'mpif.h'
       CALL BoundaryStateToBuffer_CUDA_Kernel<<< >>>>( ) 
 #else
 
-      DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets % bufferCounter(iNeighbor) = 0
-      ENDDO
- 
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
          iFace     = myDGSEM % extComm % boundaryIDs( bID )
@@ -1797,8 +1793,7 @@ INCLUDE 'mpif.h'
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
-            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
-            myDGSEM % mpiPackets % sendStateBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor), iNeighbor ) =&
+            myDGSEM % mpiPackets % sendStateBuffer(:,:,:,myDGSEM % mpiPackets % bufferMap(bID), iNeighbor ) =&
                myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -1887,9 +1882,6 @@ INCLUDE 'mpif.h'
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % stressTensor % boundarySolution = myDGSEM % stressTensor % boundarySolution_dev
 #endif
-      DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets % bufferCounter(iNeighbor) = 0
-      ENDDO
  
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
@@ -1905,8 +1897,7 @@ INCLUDE 'mpif.h'
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
-            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
-            myDGSEM % mpiPackets % sendStressBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor), iNeighbor ) =&
+            myDGSEM % mpiPackets % sendStressBuffer(:,:,:,myDGSEM % mpiPackets % bufferMap(bID), iNeighbor ) =&
                myDGSEM % stressTensor % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -1996,9 +1987,6 @@ INCLUDE 'mpif.h'
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % sgsCoeffs % boundarySolution_dev
 #endif
-      DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets % bufferCounter(iNeighbor) = 0
-      ENDDO
  
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
@@ -2014,8 +2002,7 @@ INCLUDE 'mpif.h'
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
-            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
-            myDGSEM % mpiPackets % sendSGSBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor),iNeighbor ) =&
+            myDGSEM % mpiPackets % sendSGSBuffer(:,:,:,myDGSEM % mpiPackets % bufferMap(bID),iNeighbor ) =&
                myDGSEM % sgsCoeffs % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -5401,10 +5388,6 @@ INCLUDE 'mpif.h'
    IMPLICIT NONE
 
 
-      DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
-      ENDDO
- 
       DO bID = 1, myDGSEM % extComm % nBoundaries
       
          iFace     = myDGSEM % extComm % boundaryIDs( bID )
@@ -5419,8 +5402,7 @@ INCLUDE 'mpif.h'
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
             iNeighbor = myDGSEM % rankTable(p2)
          
-            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
-            myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+            myDGSEM % mpiPackets(iNeighbor) % sendStateBuffer(:,:,:,bufferMap(bID),iNeighbor ) =&
                myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF

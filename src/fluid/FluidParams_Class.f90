@@ -241,9 +241,7 @@ USE ConstantsDictionary
          thisParam % nDumps        = INT( (thisParam % endTime-thisParam % startTime)/thisParam % outputFrequency )
          
          PRINT(MsgFMT), 'S/R Build_Params : Estimated Number of Time Steps :'
-         PRINT('(4x,I10)'), thisParam % nStepsPerDump, &
-                            thisParam % nDumps, &
-                            thisParam % nStepsPerDump*thisParam % nDumps 
+         PRINT('(4x,I10)'), thisParam % nStepsPerDump*thisParam % nDumps 
         
          ! SpaceManagement 
          thisParam % SpecMeshFile = SpecMeshFile
