@@ -514,7 +514,7 @@ INCLUDE 'mpif.h'
       ! For each neighbor, set the neighbor's rank
       iNeighbor = 0
       DO p2 = 0, nProc-1
-         IF( myDGSEM % rankTable(p2) == 1 )THEN
+         IF( myDGSEM % mpiPackets % rankTable(p2) == 1 )THEN
             iNeighbor = iNeighbor + 1
             myDGSEM % mpiPackets % neighborRank(iNeighbor) = p2
             myDGSEM % mpiPackets % rankTable(p2) = iNeighbor
@@ -523,7 +523,7 @@ INCLUDE 'mpif.h'
       
       maxFaceCount = MAXVAL( sharedFaceCount )
       DO iNeighbor = 1, myDGSEM % nNeighbors
-         p2 = myDGSEM % mpiPackets(iNeighbor) % neighborRank
+         p2 = myDGSEM % mpiPackets % neighborRank(iNeighbor)
          myDGSEM % mpiPackets % bufferSize(iNeighbor) = sharedFaceCount(p2)
       ENDDO
 
@@ -533,7 +533,7 @@ INCLUDE 'mpif.h'
                 myDGSEM % mpiPackets % recvStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:maxFaceCount,1:myDGSEM % nNeighbors), &
                 myDGSEM % mpiPackets % sendStressBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1)*3,1:maxFaceCount,1:myDGSEM % nNeighbors), &
                 myDGSEM % mpiPackets % sendSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors), &
-                myDGSEM % mpiPackets % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors)) )
+                myDGSEM % mpiPackets % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors) )
                 
       myDGSEM % mpiPackets % bufferCounter = 0
        
@@ -1768,9 +1768,11 @@ INCLUDE 'mpif.h'
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 
+#ifdef HAVE_CUDA
 #ifndef CUDA_DIRECT
       ! For now, we update the CPU with the device boundary solution data before message passing
       myDGSEM % state % boundarySolution = myDGSEM % state % boundarySolution_dev
+#endif
 #endif
 
 #ifdef CUDA_DIRECT
@@ -1796,7 +1798,7 @@ INCLUDE 'mpif.h'
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
             myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
-            myDGSEM % mpiPackets % sendStateBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor) ) =&
+            myDGSEM % mpiPackets % sendStateBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor), iNeighbor ) =&
                myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -1851,14 +1853,14 @@ INCLUDE 'mpif.h'
          ! message exchange
          IF( p2 /= myRank )THEN 
       
-            iNeighbor = myDGSEM % rankTable(p2)
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
             jUnpack   = myDGSEM % extComm % unpackMap(bID)
             IF( jUnpack == 0 )THEN
               PRINT*, 'Something catastrophic happenend!'
               CALL myDGSEM % Trash( )
               STOP
             ENDIF
-            myDGSEM % externalState(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStateBuffer(:,:,:,jUnpack)
+            myDGSEM % externalState(:,:,:,bID) = myDGSEM % mpiPackets % recvStateBuffer(:,:,:,jUnpack,iNeighbor)
 
          ENDIF
 
@@ -1886,7 +1888,7 @@ INCLUDE 'mpif.h'
       myDGSEM % stressTensor % boundarySolution = myDGSEM % stressTensor % boundarySolution_dev
 #endif
       DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+         myDGSEM % mpiPackets % bufferCounter(iNeighbor) = 0
       ENDDO
  
       DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -1901,10 +1903,10 @@ INCLUDE 'mpif.h'
 
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-            iNeighbor = myDGSEM % rankTable(p2)
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
-            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
-            myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
+            myDGSEM % mpiPackets % sendStressBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor), iNeighbor ) =&
                myDGSEM % stressTensor % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -1917,17 +1919,17 @@ INCLUDE 'mpif.h'
          
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
-            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer, & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
+            CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer(:,:,:,:,iNeighbor), & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
-                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
+                           myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stressReqHandle((iNeighbor-1)*2+1), iError )           
 
-            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendStressBuffer, & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
+            CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer(:,:,:,:,iNeighbor), & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
-                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
+                           myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
                            stressReqHandle(iNeighbor*2), iError)  
                            
@@ -1959,14 +1961,14 @@ INCLUDE 'mpif.h'
          ! message exchange
          IF( p2 /= myRank )THEN 
       
-            iNeighbor = myDGSEM % rankTable(p2)
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
             jUnpack   = myDGSEM % extComm % unpackMap(bID)
             IF( jUnpack == 0 )THEN
               PRINT*, 'Something catastrophic happenend!'
               CALL myDGSEM % Trash( )
               STOP
             ENDIF
-            myDGSEM % externalStress(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvStressBuffer(:,:,:,jUnpack)
+            myDGSEM % externalStress(:,:,:,bID) = myDGSEM % mpiPackets % recvStressBuffer(:,:,:,jUnpack,iNeighbor)
 
          ENDIF
 
@@ -1995,7 +1997,7 @@ INCLUDE 'mpif.h'
       myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % sgsCoeffs % boundarySolution_dev
 #endif
       DO iNeighbor = 1, myDGSEM % nNeighbors
-         myDGSEM % mpiPackets(iNeighbor) % bufferCounter = 0
+         myDGSEM % mpiPackets % bufferCounter(iNeighbor) = 0
       ENDDO
  
       DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -2010,10 +2012,10 @@ INCLUDE 'mpif.h'
 
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
-            iNeighbor = myDGSEM % rankTable(p2)
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
-            myDGSEM % mpiPackets(iNeighbor) % bufferCounter = myDGSEM % mpiPackets(iNeighbor) % bufferCounter + 1
-            myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer(:,:,:,myDGSEM % mpiPackets(iNeighbor) % bufferCounter ) =&
+            myDGSEM % mpiPackets % bufferCounter(iNeighbor) = myDGSEM % mpiPackets % bufferCounter(iNeighbor) + 1
+            myDGSEM % mpiPackets % sendSGSBuffer(:,:,:,myDGSEM % mpiPackets % bufferCounter(iNeighbor),iNeighbor ) =&
                myDGSEM % sgsCoeffs % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
@@ -2026,17 +2028,17 @@ INCLUDE 'mpif.h'
          
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
-            CALL MPI_IRECV( myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer, & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &                
+            CALL MPI_IRECV( myDGSEM % mpiPackets % recvSGSBuffer(:,:,:,:,iNeighbor), & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
-                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0,  &                        
+                           myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            SGSReqHandle((iNeighbor-1)*2+1), iError )           
 
-            CALL MPI_ISEND( myDGSEM % mpiPackets(iNeighbor) % sendSGSBuffer, & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets(iNeighbor) % bufferSize, &       
+            CALL MPI_ISEND( myDGSEM % mpiPackets % sendSGSBuffer(:,:,:,:,iNeighbor), & 
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
-                           myDGSEM % mpiPackets(iNeighbor) % neighborRank, 0, &       
+                           myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
                            SGSReqHandle(iNeighbor*2), iError)  
                            
@@ -2069,14 +2071,14 @@ INCLUDE 'mpif.h'
          ! message exchange
          IF( p2 /= myRank )THEN 
       
-            iNeighbor = myDGSEM % rankTable(p2)
+            iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
             jUnpack   = myDGSEM % extComm % unpackMap(bID)
             IF( jUnpack == 0 )THEN
               PRINT*, 'Something catastrophic happenend!'
               CALL myDGSEM % Trash( )
               STOP
             ENDIF
-            myDGSEM % externalSGS(:,:,:,bID) = myDGSEM % mpiPackets(iNeighbor) % recvSGSBuffer(:,:,:,jUnpack)
+            myDGSEM % externalSGS(:,:,:,bID) = myDGSEM % mpiPackets % recvSGSBuffer(:,:,:,jUnpack,iNeighbor)
 
          ENDIF
 
