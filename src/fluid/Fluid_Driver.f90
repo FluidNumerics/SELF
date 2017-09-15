@@ -26,7 +26,7 @@ INCLUDE "visitfortransimV2interface.inc"
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> ! 
 
  TYPE( Fluid )       :: myeu
- INTEGER             :: mpiErr, myRank, nProcs
+ INTEGER             :: mpiErr
  LOGICAL             :: setupSuccess
 
 #ifdef TIMING
@@ -70,15 +70,15 @@ CONTAINS
 #ifdef HAVE_MPI
       ! MPI Initialization
       CALL MPI_INIT( mpiErr )
-      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myRank, mpiErr )
-      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, nProcs, mpiErr )
+      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myeu % myRank, mpiErr )
+      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myeu % nProc, mpiErr )
       ! Sanity check
 !      PRINT*, 'Fluid_Driver : Greetings from Process ', myRank, ' of ',nProcs
 #else
-      myRank = 0
-      nProcs = 1
+      myeu % myRank = 0
+      myeu % nProc  = 1
 #endif
-      CALL myeu % Build( myRank, nProcs, setupSuccess )
+      CALL myeu % Build( setupSuccess )
       IF( .NOT. setupSuccess )THEN
 #ifdef HAVE_MPI
          CALL MPI_FINALIZE( mpiErr )
@@ -94,14 +94,14 @@ CONTAINS
 
 
 #ifdef TIMING
-      IF( myRank == 0 )THEN
+      IF( myeu % myRank == 0 )THEN
          CALL timers % Build( )
          CALL timers % AddTimer( 'ForwardStepRK3', 1 )
       ENDIF
 #endif
 
 
-
+    PRINT(MsgFMT), 'Setup Complete'
   END SUBROUTINE Setup
 
 ! ------------------------------------------------------------------------------ !
@@ -141,7 +141,7 @@ CONTAINS
 #endif
 
 #ifdef TIMING
-       IF( myRank == 0 )THEN
+       IF( myeu % myRank == 0 )THEN
             CALL timers % Write_MultiTimers( )
             CALL timers % Trash( )
        ENDIF
@@ -216,7 +216,7 @@ CONTAINS
 
          IF( visitState == 0 )THEN
 
-            CALL myeu % ForwardStepRK3( 1, myRank ) ! Forward Step
+            CALL myeu % ForwardStepRK3( 1 ) ! Forward Step
             simulationCycle = simulationCycle + 1
             simulationTime = myeu % simulationTime
 #ifdef HAVE_CUDA
@@ -250,7 +250,7 @@ CONTAINS
 
          IF( MOD( simulationCycle, dFreq ) == 0 )THEN
            !$OMP MASTER
-           CALL myeu % WritePickup( myRank )
+           CALL myeu % WritePickup(  )
 #ifdef DIAGNOSTICS
            CALL myeu % Diagnostics( ) 
            CALL myeu % WriteDiagnosticsFiles( diagUnits )
@@ -275,18 +275,18 @@ CONTAINS
 
 #ifdef TIMING
          !$OMP MASTER
-         IF( myRank == 0 )THEN
+         IF( myeu % myRank == 0 )THEN
             CALL timers % StartTimer( 1 )
          ENDIF
          !$OMP END MASTER
 #endif
 
 
-         CALL myeu % ForwardStepRK3( myeu % params % nStepsPerDump, myRank ) ! Forward Step
+         CALL myeu % ForwardStepRK3( myeu % params % nStepsPerDump ) ! Forward Step
 
 #ifdef TIMING
          !$OMP MASTER
-         IF( myRank == 0 )THEN
+         IF( myeu % myRank == 0 )THEN
             CALL timers % StopTimer( 1 )
          ENDIF
          !$OMP END MASTER
@@ -303,8 +303,8 @@ CONTAINS
          CALL myeu % WriteDiagnostics( diagUnits )
 #endif
          !$OMP MASTER
-         CALL myeu % WritePickup( myRank )
-         CALL myeu % WriteTecplot( myRank )
+         CALL myeu % WritePickup( )
+         CALL myeu % WriteTecplot( )
          !$OMP END MASTER
 
       ENDDO

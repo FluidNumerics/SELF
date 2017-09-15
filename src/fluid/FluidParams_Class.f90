@@ -148,6 +148,8 @@ USE ConstantsDictionary
       NAMELIST / SubgridScale / SubGridModel, viscosity, viscLengthScale, nCutoff
       NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, dTdx, dTdy, rho0, P0, v0
       
+      readSuccess = .FALSE.
+
       ! TimeManagement
       units           = 's'
       dt              = 0.1_prec
@@ -232,7 +234,6 @@ USE ConstantsDictionary
          ELSE
 
             PRINT(MsgFMT), 'S/R Build_Params : Unknown units specified.'
-            readSuccess = .FALSE.
             RETURN
 
          ENDIF
