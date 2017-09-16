@@ -47,6 +47,11 @@ USE HexMesh_Class
 USE BoundaryCommunicator_Class
 
 #endif
+
+!#ifdef HAVE_MPI
+!USE mpi
+!#endif
+
 IMPLICIT NONE
 
 #ifdef HAVE_MPI
@@ -409,6 +414,7 @@ INCLUDE 'mpif.h'
       DEALLOCATE( myDGSEM % mpiPackets % neighborRank )
       DEALLOCATE( myDGSEM % mpiPackets % bufferSize )
       DEALLOCATE( myDGSEM % mpiPackets % bufferCounter )
+      DEALLOCATE( myDGSEM % mpiPackets % bufferMap )
       DEALLOCATE( myDGSEM % mpiPackets % sendStateBuffer )
       DEALLOCATE( myDGSEM % mpiPackets % recvStateBuffer )
       DEALLOCATE( myDGSEM % mpiPackets % sendStressBuffer )
@@ -427,6 +433,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % dGStorage % Trash( )
       CALL myDGSEM % mesh % Trash( )
       CALL myDGSEM % extComm % Trash( )
+      CALL myDGSEM % filter % Trash( ) 
 
       DEALLOCATE( myDGSEM % dragProfile )
       
@@ -720,7 +727,7 @@ INCLUDE 'mpif.h'
          DO m = 1,3 ! Loop over RK3 steps
             
             t = myDGSEM % simulationTime + rk3_b(m)*dt
-            CALL myDGSEM % GlobalTimeDerivative( t, myDGSEM % myRank )
+            CALL myDGSEM % GlobalTimeDerivative( t )
             
             rk3_a_local = rk3_a(m)
             rk3_g_local = rk3_g(m)
@@ -3551,6 +3558,12 @@ INCLUDE 'mpif.h'
    CHARACTER(10) :: timeStampString
    
 
+      myDGSEM % volume = 0.0_prec
+      myDGSEM % mass   = 0.0_prec
+      myDGSEM % KE     = 0.0_prec
+      myDGSEM % PE     = 0.0_prec
+      myDGSEM % heat   = 0.0_prec
+
       IF( myDGSEM % myRank == 0 )THEN
         timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
@@ -3690,11 +3703,11 @@ INCLUDE 'mpif.h'
 
      PRINT*, myDGSEM % myRank, "Doing Reduction"
 #ifdef HAVE_MPI
-    ! CALL MPI_REDUCE( volume, myDGSEM % volume, 1, MPI_PREC, MPI_SUM, 0, MPI_COMM_WORLD ) 
-    ! CALL MPI_REDUCE( mass, myDGSEM % mass, 1, MPI_PREC, MPI_SUM, 0, MPI_COMM_WORLD ) 
-    ! CALL MPI_REDUCE( KE, myDGSEM % KE, 1, MPI_PREC, MPI_SUM, 0, MPI_COMM_WORLD ) 
-    ! CALL MPI_REDUCE( PE, myDGSEM % PE, 1, MPI_PREC, MPI_SUM, 0, MPI_COMM_WORLD ) 
-    ! CALL MPI_REDUCE( heat, myDGSEM % heat, 1, MPI_PREC, MPI_SUM, 0, MPI_COMM_WORLD ) 
+     CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
+     CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
+     CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
+     CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
+     CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
 #endif
      PRINT*, myDGSEM % myRank, "Done with Reduction"
 

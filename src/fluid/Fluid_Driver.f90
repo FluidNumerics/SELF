@@ -67,18 +67,17 @@ CONTAINS
   SUBROUTINE Setup( )
      IMPLICIT NONE
 
+      myeu % myRank = 0
+      myeu % nProc  = 1
 #ifdef HAVE_MPI
       ! MPI Initialization
       CALL MPI_INIT( mpiErr )
       CALL MPI_COMM_RANK( MPI_COMM_WORLD, myeu % myRank, mpiErr )
       CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myeu % nProc, mpiErr )
-      ! Sanity check
-!      PRINT*, 'Fluid_Driver : Greetings from Process ', myRank, ' of ',nProcs
-#else
-      myeu % myRank = 0
-      myeu % nProc  = 1
+      PRINT*, 'Fluid_Driver : Greetings from Process ', myeu % myRank, ' of ', myeu % nProc
 #endif
       CALL myeu % Build( setupSuccess )
+
       IF( .NOT. setupSuccess )THEN
 #ifdef HAVE_MPI
          CALL MPI_FINALIZE( mpiErr )
@@ -132,9 +131,6 @@ CONTAINS
 
       CALL myeu % Trash( )
 
-#ifdef HAVE_MPI      
-      CALL MPI_FINALIZE( mpiErr )
-#endif
 
 #ifdef DIAGNOSTICS
       CALL myeu % CloseDiagnosticsFiles( diagUnits )
@@ -145,6 +141,10 @@ CONTAINS
             CALL timers % Write_MultiTimers( )
             CALL timers % Trash( )
        ENDIF
+#endif
+
+#ifdef HAVE_MPI      
+      CALL MPI_FINALIZE( mpiErr )
 #endif
 
   END SUBROUTINE Cleanup
