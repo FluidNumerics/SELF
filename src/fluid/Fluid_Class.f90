@@ -3638,6 +3638,9 @@ INCLUDE 'mpif.h'
   ! Local
   INTEGER    :: iEl, i, j, k 
   REAL(prec) :: volume, mass, KE, PE, heat
+#ifdef HAVE_MPI
+  INTEGER    :: mpiErr
+#endif
 
 
      volume = 0.0_prec
@@ -3703,11 +3706,11 @@ INCLUDE 'mpif.h'
 
      PRINT*, myDGSEM % myRank, "Doing Reduction"
 #ifdef HAVE_MPI
-     CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
-     CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
-     CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
-     CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
-     CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD ) 
+     CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr ) 
+     CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr ) 
+     CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr ) 
+     CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr ) 
+     CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr ) 
 #endif
      PRINT*, myDGSEM % myRank, "Done with Reduction"
 
