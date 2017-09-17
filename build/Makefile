@@ -59,6 +59,11 @@ else ifeq (${FC},pgfortran)
     OPT+=-Mcuda=${GPU_ARCH},ptxinfo
     CPPFLAGS+=-DHAVE_CUDA
 
+    ifeq (${CUDA_DIRECT},yes)
+      $(info '+CUDA-DIRECT')
+      CPPFLAGS+=-DCUDA_DIRECT
+    endif
+
   endif
   
   ifeq (${DUAL_GPU},yes)
@@ -68,10 +73,11 @@ else ifeq (${FC},pgfortran)
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI
-    FC=mpif90
+    FC=${MPIFC}
     LIB+=${MPI_LIB}
     INC+=${MPI_INC}
   endif
+
   
 endif
   
