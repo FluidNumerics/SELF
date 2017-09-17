@@ -64,13 +64,13 @@ INCLUDE 'mpif.h'
        !
        ! :: Attributes ::  
        ! unPackMap(1:nSharedFaces)   >> Maps the local shared boundary face ID in the message to the correct boundaryID
-#ifdef CUDA_DIRECT
-       REAL(prec), DEVICE, ALLOCATABLE :: sendStateBuffer(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
-       REAL(prec), DEVICE, ALLOCATABLE :: recvStateBuffer(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: sendStressBuffer(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
+#ifdef HAVE_CUDA
+       REAL(prec), PINNED, ALLOCATABLE :: sendStateBuffer(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
+       REAL(prec), PINNED, ALLOCATABLE :: recvStateBuffer(:,:,:,:,:)
+       REAL(prec), PINNED, ALLOCATABLE :: sendStressBuffer(:,:,:,:,:)
+       REAL(prec), PINNED, ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
+       REAL(prec), PINNED, ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
+       REAL(prec), PINNED, ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
        INTEGER, DEVICE, ALLOCATABLE    :: bufferMap_dev(:)
        INTEGER, DEVICE, ALLOCATABLE    :: neighborRank_dev(:)
        INTEGER, DEVICE, ALLOCATABLE    :: bufferSize_dev(:)
