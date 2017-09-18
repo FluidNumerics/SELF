@@ -1839,6 +1839,7 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
                                                           myDGSEM % mesh % nElems )
 
+      iError = cudaDeviceSynchronize( )
 #ifdef CUDA_DIRECT
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
@@ -2032,6 +2033,7 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
                                                           myDGSEM % mesh % nElems )
 
+      iError = cudaDeviceSynchronize( )
 #ifdef CUDA_DIRECT
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
@@ -2224,6 +2226,7 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
                                                           myDGSEM % mesh % nElems )
 
+      iError = cudaDeviceSynchronize( )
 #ifdef CUDA_DIRECT
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
