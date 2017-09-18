@@ -605,12 +605,10 @@ INCLUDE 'mpif.h'
       DEALLOCATE( bufferCounter )
 
 #ifdef HAVE_CUDA
-#ifdef CUDA_DIRECT
       myDGSEM % mpiPackets % rankTable_dev    = myDGSEM % mpiPackets % rankTable
       myDGSEM % mpiPackets % neighborRank_dev = myDGSEM % mpiPackets % neighborRank
       myDGSEM % mpiPackets % bufferSize_dev   = myDGSEM % mpiPackets % bufferSize
       myDGSEM % mpiPackets % bufferMap_dev    = myDGSEM % mpiPackets % bufferMap
-#endif
 #endif
    
  END SUBROUTINE ConstructCommTables_Fluid
@@ -2022,7 +2020,7 @@ INCLUDE 'mpif.h'
       grid = dim3(myDGSEM % nBoundaryFaces,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % sendStressBuffer_dev, &
-                                                          myDGSEM % stress % boundarySolution_dev, &
+                                                          myDGSEM % stressTensor % boundarySolution_dev, &
                                                           myDGSEM % mesh % faces_dev % elementIDs, &
                                                           myDGSEM % mesh % faces_dev % elementSides, &
                                                           myDGSEM % extComm % boundaryIDs_dev, &
@@ -2047,14 +2045,14 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer_dev(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
-                           stateReqHandle(iNeighbor*2), iError)  
+                           stressReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 
@@ -2074,14 +2072,14 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
-                           stateReqHandle(iNeighbor*2), iError)  
+                           stressReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 #endif
@@ -2118,14 +2116,14 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
-                           stateReqHandle(iNeighbor*2), iError)  
+                           stressReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 #endif
@@ -2147,7 +2145,7 @@ INCLUDE 'mpif.h'
    REAL(prec) :: t2, t1
 #endif
 
-      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stressReqHandle,stateStats,iError)
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stressReqHandle,stressStats,iError)
 
 #ifdef HAVE_CUDA
   
@@ -2239,14 +2237,14 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           sgsReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendSGSBuffer_dev(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
-                           stateReqHandle(iNeighbor*2), iError)  
+                           sgsReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 
@@ -2265,14 +2263,14 @@ INCLUDE 'mpif.h'
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           SGSReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendSGSBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
-                           stateReqHandle(iNeighbor*2), iError)  
+                           SGSReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
 #endif
@@ -2340,7 +2338,7 @@ INCLUDE 'mpif.h'
    REAL(prec) :: t2, t1
 #endif
 
-      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
+      CALL MPI_WaitAll(myDGSEM % nNeighbors*2,SGSReqHandle,sgsStats,iError)
 
 #ifdef HAVE_CUDA
   
@@ -5720,7 +5718,6 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE EquationOfState_CUDAKernel
 !
-#ifdef CUDA_DIRECT
  ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, elementIDs, elementSides, boundaryIDs, &
                                                             extProcIDs, rankTable, bufferMap, nFaces, nBoundaries, nRanks, myRank, N, nEq, nNeighbors, &
                                                             bufferSize, nElements )
@@ -5788,7 +5785,6 @@ INCLUDE 'mpif.h'
 
 
  END SUBROUTINE BufferToBoundary_CUDAKernel
-#endif
 
 #endif
  END MODULE Fluid_Class
