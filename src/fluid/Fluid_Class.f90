@@ -1838,9 +1838,15 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq,&
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
                                                           myDGSEM % mesh % nElems )
+#ifdef DEBUG
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+       PRINT*, "BoundaryToBuffer Failed!"
+      ENDIF
+#endif
 
-      iError = cudaDeviceSynchronize( )
 #ifdef CUDA_DIRECT
+      iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -1867,6 +1873,7 @@ INCLUDE 'mpif.h'
 #else
 
       myDGSEM % mpiPackets % sendStateBuffer= myDGSEM % mpiPackets % sendStateBuffer_dev
+      iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -1974,6 +1981,12 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq, myDGSEM % nNeighbors, &
                                                           myDGSEM % mpiPackets % bufferSize(1), myDGSEM % mesh % nElems )
+#ifdef DEBUG
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+       PRINT*, "BufferToBoundary Failed!"
+      ENDIF
+#endif
 
 #else
 
@@ -2017,7 +2030,7 @@ INCLUDE 'mpif.h'
   
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
-                   nEq )
+                   (nEq-1)*3 )
       grid = dim3(myDGSEM % nBoundaryFaces,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % sendStressBuffer_dev, &
@@ -2032,9 +2045,15 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, (nEq-1)*3,&
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
                                                           myDGSEM % mesh % nElems )
+#ifdef DEBUG
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+       PRINT*, "BoundaryToBuffer Failed!"
+      ENDIF
+#endif
 
-      iError = cudaDeviceSynchronize( )
 #ifdef CUDA_DIRECT
+      iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -2043,14 +2062,14 @@ INCLUDE 'mpif.h'
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer_dev(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer_dev(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
@@ -2061,6 +2080,7 @@ INCLUDE 'mpif.h'
 #else
 
       myDGSEM % mpiPackets % sendStressBuffer= myDGSEM % mpiPackets % sendStressBuffer_dev
+      iError = cudaDeviceSynchronize( )
       
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
@@ -2114,14 +2134,14 @@ INCLUDE 'mpif.h'
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
@@ -2156,7 +2176,7 @@ INCLUDE 'mpif.h'
 #endif
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
-                   nEq )
+                   (nEq-1)*3 )
       grid = dim3(myDGSEM % extComm % nBoundaries,1,1) 
 
       CALL BufferToBoundary_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % recvStressBuffer_dev, &
@@ -2168,6 +2188,13 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, (nEq-1)*3, myDGSEM % nNeighbors, &
                                                           myDGSEM % mpiPackets % bufferSize(1), myDGSEM % mesh % nElems )
+
+#ifdef DEBUG
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+       PRINT*, "BufferToBoundary Failed!"
+      ENDIF
+#endif
 
 #else
 
@@ -2210,7 +2237,7 @@ INCLUDE 'mpif.h'
   
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
-                   nEq )
+                   nEq-1 )
       grid = dim3(myDGSEM % nBoundaryFaces,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % sendSGSBuffer_dev, &
@@ -2226,8 +2253,15 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
                                                           myDGSEM % mesh % nElems )
 
-      iError = cudaDeviceSynchronize( )
+#ifdef DEBUG
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+       PRINT*, "BoundaryToBuffer Failed!"
+      ENDIF
+#endif
+
 #ifdef CUDA_DIRECT
+      iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -2254,6 +2288,7 @@ INCLUDE 'mpif.h'
 #else
 
       myDGSEM % mpiPackets % sendSGSBuffer= myDGSEM % mpiPackets % sendSGSBuffer_dev
+      iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             ! In the event that the external process ID (p2) is not equal to the current rank (p1),
@@ -2350,7 +2385,7 @@ INCLUDE 'mpif.h'
 #endif
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
-                   nEq )
+                   nEq-1 )
       grid = dim3(myDGSEM % extComm % nBoundaries,1,1) 
 
       CALL BufferToBoundary_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % recvSGSBuffer_dev, &
@@ -2360,8 +2395,14 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % mpiPackets % rankTable_dev, &
                                                           myDGSEM % extComm % unPackMap_dev, &
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
-                                                          myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq, myDGSEM % nNeighbors, &
+                                                          myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq-1, myDGSEM % nNeighbors, &
                                                           myDGSEM % mpiPackets % bufferSize(1), myDGSEM % mesh % nElems )
+#ifdef DEBUG
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+       PRINT*, "BufferToBoundary Failed!"
+      ENDIF
+#endif
 
 #else
 
@@ -3986,19 +4027,19 @@ INCLUDE 'mpif.h'
            DO j = 0, myDGSEM % N
               DO i = 0, myDGSEM % N
 
-                 volume = myDGSEM % volume + myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
+                 volume = volume + myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
                                              myDGSEM % dgStorage % qWeight(i)*&
                                              myDGSEM % dgStorage % qWeight(j)*&
                                              myDGSEM % dgStorage % qWeight(k)
 
-                 mass = myDGSEM % mass + ( myDGSEM % state % solution(i,j,k,4,iEl)+&
+                 mass = mass + ( myDGSEM % state % solution(i,j,k,4,iEl)+&
                                            myDGSEM % static % solution(i,j,k,4,iEl) )*&
                                          myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
                                              myDGSEM % dgStorage % qWeight(i)*&
                                              myDGSEM % dgStorage % qWeight(j)*&
                                              myDGSEM % dgStorage % qWeight(k)
 
-                 KE   = myDGSEM % KE + ( myDGSEM % state % solution(i,j,k,1,iEl)**2 +&
+                 KE   = KE + ( myDGSEM % state % solution(i,j,k,1,iEl)**2 +&
                                          myDGSEM % state % solution(i,j,k,2,iEl)**2 +&
                                          myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                                        ( myDGSEM % state % solution(i,j,k,4,iEl)+&
@@ -4008,7 +4049,7 @@ INCLUDE 'mpif.h'
                                              myDGSEM % dgStorage % qWeight(j)*&
                                              myDGSEM % dgStorage % qWeight(k)
 
-                 PE   = myDGSEM % PE - myDGSEM % state % solution(i,j,k,4,iEl)*&
+                 PE   = PE - myDGSEM % state % solution(i,j,k,4,iEl)*&
                                        myDGSEM % params % g*&
                                        myDGSEM % mesh % geom(iEl) % z(i,j,k)*&
                                        myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
@@ -4016,8 +4057,10 @@ INCLUDE 'mpif.h'
                                              myDGSEM % dgStorage % qWeight(j)*&
                                              myDGSEM % dgStorage % qWeight(k)
 
-                 heat = myDGSEM % heat + myDGSEM % state % solution(i,j,k,5,iEl)/&
-                                         myDGSEM % state % solution(i,j,k,4,iEl)*&
+                 heat = heat + ( myDGSEM % static % solution(i,j,k,5,iEl) + &
+                                 myDGSEM % state % solution(i,j,k,5,iEl) )/&
+                               ( myDGSEM % static % solution(i,j,k,4,iEl) +&
+                                 myDGSEM % state % solution(i,j,k,4,iEl) )*&
                                          myDGSEM % mesh % geom(iEl) % J(i,j,k)*& 
                                              myDGSEM % dgStorage % qWeight(i)*&
                                              myDGSEM % dgStorage % qWeight(j)*&
@@ -5744,7 +5787,7 @@ INCLUDE 'mpif.h'
       j   = threadIdx % y - 1
       iEq = threadIdx % z 
       
-      iFace     = boundaryIDs( bID )
+      iFace     = boundaryIDs(bID)
       p2        = extProcIDs(bID)
       
       ! In the event that the external process ID (p2) is identical to the current rank (p1),
@@ -5752,8 +5795,8 @@ INCLUDE 'mpif.h'
       ! message exchange
       IF( p2 /= myRank )THEN 
          sendBuffer(i,j,iEq,bufferMap(bID),rankTable(p2) ) = boundarySolution(i,j,iEq,elementSides(1,iFace),elementIDs(1,iFace)) 
+!         PRINT*, sendBuffer(i,j,iEq,bufferMap(bID), rankTable(p2))
       ENDIF
-
 
  END SUBROUTINE BoundaryToBuffer_CUDAKernel
 !
