@@ -297,15 +297,15 @@ CONTAINS
          myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
 
+         !$OMP MASTER
+         CALL myeu % WritePickup( )
+         CALL myeu % WriteTecplot( )
+         !$OMP END MASTER
 
 #ifdef DIAGNOSTICS
          CALL myeu % Diagnostics( ) 
          CALL myeu % WriteDiagnostics( diagUnits )
 #endif
-         !$OMP MASTER
-         CALL myeu % WritePickup( )
-         CALL myeu % WriteTecplot( )
-         !$OMP END MASTER
 
       ENDDO
       !$OMP END PARALLEL
