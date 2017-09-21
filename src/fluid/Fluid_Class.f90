@@ -1071,7 +1071,6 @@ INCLUDE 'mpif.h'
 
 #ifdef HAVE_MPI
          CALL myDGSEM % MPI_StressExchange( )
-         CALL myDGSEM % FinalizeMPI_StressExchange( )
 #endif
 
 ! ----------------------------------------------------------------------------- ! 
@@ -1098,7 +1097,7 @@ INCLUDE 'mpif.h'
 
          CALL myDGSEM % InternalStressFlux( )
 #ifdef HAVE_MPI
-         !CALL myDGSEM % FinalizeMPI_StressExchange( )
+         CALL myDGSEM % FinalizeMPI_StressExchange( )
 #endif
          CALL myDGSEM % BoundaryStressFlux( )
 
