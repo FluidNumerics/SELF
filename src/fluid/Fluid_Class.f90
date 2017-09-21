@@ -64,6 +64,7 @@ INCLUDE 'mpif.h'
        !
        ! :: Attributes ::  
        ! unPackMap(1:nSharedFaces)   >> Maps the local shared boundary face ID in the message to the correct boundaryID
+       INTEGER :: maxBufferSize
 #ifdef HAVE_CUDA
        REAL(prec), DEVICE, ALLOCATABLE :: sendStateBuffer_dev(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
        REAL(prec), DEVICE, ALLOCATABLE :: recvStateBuffer_dev(:,:,:,:,:)
@@ -404,6 +405,13 @@ INCLUDE 'mpif.h'
                 stateStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
                 stressStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
                 SGSStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2) )
+
+      myDGSEM % externalSGS = myDGSEM % params % viscosity
+#ifdef HAVE_CUDA
+      myDGSEM % externalSGS_dev = myDGSEM % externalSGS
+#endif
+
+
 #endif
 
  END SUBROUTINE Build_Fluid
@@ -532,6 +540,8 @@ INCLUDE 'mpif.h'
             sharedFaceCount(p2) = sharedFaceCount(p2)+1
          ENDIF
       ENDDO
+
+
       myDGSEM % nNeighbors = SUM( myDGSEM % mpiPackets % rankTable )
       PRINT*, '  S/R ConstructCommTables : Found', myDGSEM % nNeighbors, 'neighbors for Rank', myDGSEM % myRank
       
@@ -542,6 +552,7 @@ INCLUDE 'mpif.h'
        ALLOCATE( myDGSEM % mpiPackets % neighborRank_dev(1:myDGSEM % nNeighbors), &
                  myDGSEM % mpiPackets % bufferSize_dev(1:myDGSEM % nNeighbors) )
 #endif
+
 
       ! For each neighbor, set the neighbor's rank
       iNeighbor = 0
@@ -559,7 +570,7 @@ INCLUDE 'mpif.h'
          myDGSEM % mpiPackets % bufferSize(iNeighbor) = sharedFaceCount(p2)
       ENDDO
 
-      myDGSEM % mpiPackets % bufferSize = maxFaceCount
+      myDGSEM % mpiPackets % maxBufferSize = maxFaceCount
          
 #ifdef HAVE_CUDA
       ALLOCATE( myDGSEM % mpiPackets % recvStateBuffer_dev(0:myDGSEM % N, 0:myDGSEM % N, 1:nEq,1:maxFaceCount,1:myDGSEM % nNeighbors), &
@@ -922,10 +933,10 @@ INCLUDE 'mpif.h'
 ! communication costs.
 
 #ifdef HAVE_MPI
-      CALL CPU_TIME( t1 )
+     ! CALL CPU_TIME( t1 )
       CALL myDGSEM % MPI_StateExchange( ) 
-      CALL CPU_TIME( t2 )
-      PRINT*, myDGSEM % myRank, 'MPI_StateExchange :',t2-t1
+     ! CALL CPU_TIME( t2 )
+     ! PRINT*, myDGSEM % myRank, 'MPI_StateExchange :',t2-t1
 #endif
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -949,10 +960,10 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % InternalFaceFlux( )
 
 #ifdef HAVE_MPI
-      CALL CPU_TIME( t1 )
+      !CALL CPU_TIME( t1 )
       CALL myDGSEM % FinalizeMPI_StateExchange( ) 
-      CALL CPU_TIME( t2 )
-      PRINT*, myDGSEM % myRank, 'Finalize MPI_StateExchange :',t2-t1
+      !CALL CPU_TIME( t2 )
+      !PRINT*, myDGSEM % myRank, 'Finalize MPI_StateExchange :',t2-t1
 #endif
 
       CALL myDGSEM % BoundaryFaceFlux( )
@@ -2062,14 +2073,14 @@ INCLUDE 'mpif.h'
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer_dev(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer_dev(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
@@ -2090,14 +2101,14 @@ INCLUDE 'mpif.h'
             ! We need to send the internal state along the shared edge to process p2.
             ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEQ-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*15*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
@@ -2122,7 +2133,7 @@ INCLUDE 'mpif.h'
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
          
             myDGSEM % mpiPackets % sendStressBuffer(:,:,:,myDGSEM % mpiPackets % bufferMap(bID), iNeighbor ) =&
-               myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
+               myDGSEM % stressTensor % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
       ENDDO
@@ -3251,17 +3262,17 @@ INCLUDE 'mpif.h'
 #else
    ! Local
    INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
-   INTEGER    :: iFace2, p2
+   INTEGER    :: bID, p2
    INTEGER    :: e1, e2, s1, s2
 
       !$OMP DO
-      DO iFace = 1, myDGSEM % nBoundaryFaces
+      DO bID = 1, myDGSEM % extComm % nBoundaries
 
-         iFace2 = myDGSEM % extComm % boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
-         e1     = myDGSEM % mesh % Faces(iFace2) % elementIDs(1)
-         s1     = myDGSEM % mesh % Faces(iFace2) % elementSides(1)
-         e2     = myDGSEM % mesh % Faces(iFace2) % elementIDs(2)
-         p2     = myDGSEM % extComm % extProcIDs( iFace )
+         iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+         e1    = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
+         s1    = myDGSEM % mesh % Faces(iFace) % elementSides(1)
+         e2    = myDGSEM % mesh % Faces(iFace) % elementIDs(2)
+         p2    = myDGSEM % extComm % extProcIDs( bID )
          
          IF( p2 == myDGSEM % myRank )THEN ! Enforce no boundary flux due to the fluid stress
             DO j = 0, myDGSEM % N 
