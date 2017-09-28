@@ -414,6 +414,9 @@ INCLUDE 'mpif.h'
 
 #endif
 
+!CALL myDGSEM % Trash( )
+!STOP
+
  END SUBROUTINE Build_Fluid
 !
   SUBROUTINE Trash_Fluid( myDGSEM )
@@ -525,6 +528,7 @@ INCLUDE 'mpif.h'
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, nmsg, maxFaceCount
    INTEGER, ALLOCATABLE :: bufferCounter(:)
+   INTEGER :: fUnit
 
       ! Count up the number of neighboring ranks
       ALLOCATE( myDGSEM % mpiPackets % rankTable(0:myDGSEM % nProc-1) )
@@ -621,7 +625,7 @@ INCLUDE 'mpif.h'
       myDGSEM % mpiPackets % bufferSize_dev   = myDGSEM % mpiPackets % bufferSize
       myDGSEM % mpiPackets % bufferMap_dev    = myDGSEM % mpiPackets % bufferMap
 #endif
-   
+
  END SUBROUTINE ConstructCommTables_Fluid
 #endif
 !
@@ -1822,6 +1826,7 @@ INCLUDE 'mpif.h'
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+   INTEGER    :: fUnit
 #ifdef HAVE_CUDA
    TYPE(dim3) :: grid, tBlock
   
@@ -1842,6 +1847,11 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq,&
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % maxBufferSize, &
                                                           myDGSEM % mesh % nElems )
+
+      iError = cudaGetLastError()
+      IF( iError /= cudaSuccess )THEN
+        PRINT*, "Error :",cudaGetErrorString(iError)
+      ENDIF
 
 
 #ifdef CUDA_DIRECT
@@ -1868,6 +1878,7 @@ INCLUDE 'mpif.h'
 
       myDGSEM % mpiPackets % sendStateBuffer= myDGSEM % mpiPackets % sendStateBuffer_dev
       iError = cudaDeviceSynchronize( )
+
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStateBuffer(:,:,:,:,iNeighbor), & 
@@ -1883,7 +1894,7 @@ INCLUDE 'mpif.h'
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
                            stateReqHandle(iNeighbor*2), iError)  
-                           
+                         
       ENDDO
       
       
@@ -1900,6 +1911,7 @@ INCLUDE 'mpif.h'
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
             s1        = myDGSEM % mesh % Faces(iFace) % elementSides(1)
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
+         
          
             myDGSEM % mpiPackets % sendStateBuffer(:,:,:,myDGSEM % mpiPackets % bufferMap(bID), iNeighbor ) =&
                myDGSEM % state % boundarySolution(:,:,:,s1,e1) 
@@ -1925,15 +1937,16 @@ INCLUDE 'mpif.h'
       ENDDO
 #endif
 
-      IF( myDGSEM % myRank == 0 )THEN
-      OPEN( UNIT=100, FILE='SendBuff.bin', &
-            FORM='UNFORMATTED', ACCESS='DIRECT', &
-            RECL= (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % maxBufferSize*prec )
-      DO iNeighbor = 1, myDGSEM % nNeighbors 
-         WRITE( UNIT=100, REC=iNeighbor ) myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor)
-      ENDDO
-      CLOSE( UNIT=100 )
-      ENDIF
+!      IF( myDGSEM % myRank == 0 )THEN
+!      OPEN( UNIT=NewUnit(fUnit), FILE='SendBuff.bin', &
+!            FORM='UNFORMATTED', ACCESS='DIRECT', &
+!            RECL= (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % maxBufferSize*prec )
+!      PRINT*,"BufferSize : ", myDGSEM % mpiPackets % maxBufferSize
+!      DO iNeighbor = 1, myDGSEM % nNeighbors 
+!         WRITE( UNIT=fUnit, REC=iNeighbor ) myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor)
+!      ENDDO
+!      CLOSE( UNIT=fUnit )
+!      ENDIF
 
 
  END SUBROUTINE MPI_StateExchange_Fluid
@@ -1946,12 +1959,22 @@ INCLUDE 'mpif.h'
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
+   INTEGER    :: fUnit
 #ifdef HAVE_CUDA
    TYPE(dim3) :: grid, tBlock
 #endif
 
       CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
 
+!      IF( myDGSEM % myRank == 0 )THEN
+!      OPEN( UNIT=NewUnit(fUnit), FILE='RecvBuff.bin', &
+!            FORM='UNFORMATTED', ACCESS='DIRECT', &
+!            RECL= (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % maxBufferSize*prec )
+!      DO iNeighbor = 1, myDGSEM % nNeighbors 
+!         WRITE( UNIT=fUnit, REC=iNeighbor ) myDGSEM % mpiPackets % recvStateBuffer(:,:,:,:,iNeighbor)
+!      ENDDO
+!      CLOSE( UNIT=fUnit )
+!      ENDIF
 #ifdef HAVE_CUDA
   
 #ifndef CUDA_DIRECT
@@ -4744,7 +4767,7 @@ INCLUDE 'mpif.h'
                   externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)
                ENDDO
                   
-            ELSEIF( e2 == RADIATION .)THEN
+            ELSEIF( e2 == RADIATION )THEN
                         
                DO iEq = 1, nEq_dev
                   externalState(i,j,iEq,iFace) = 0.0_prec
@@ -5660,64 +5683,68 @@ INCLUDE 'mpif.h'
 
  END SUBROUTINE EquationOfState_CUDAKernel
 !
- ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, elementIDs, elementSides, boundaryIDs, &
-                                                            extProcIDs, rankTable, bufferMap, nFaces, nBoundaries, nRanks, myRank, N, nEq, nNeighbors, &
+ ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, faceToElement, faceToSide, boundaryToFaceID, &
+                                                            boundaryToProcID, rankToNeighbor, boundaryToBuffer, nFaces, nBoundaries, nRanks, myRank, N, nEq, nNeighbors, &
                                                             bufferSize, nElements )
    IMPLICIT NONE
    INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
    INTEGER, VALUE, INTENT(in)        :: N, nEq, nNeighbors, nElements, bufferSize
-   INTEGER, DEVICE, INTENT(in)       :: elementIDs(1:2,1:nFaces)
-   INTEGER, DEVICE, INTENT(in)       :: elementSides(1:2,1:nFaces)
-   INTEGER, DEVICE, INTENT(in)       :: boundaryIDs(1:nFaces)
-   INTEGER, DEVICE, INTENT(in)       :: extProcIDS(1:nBoundaries)
-   INTEGER, DEVICE, INTENT(in)       :: rankTable(1:nRanks)
-   INTEGER, DEVICE, INTENT(in)       :: bufferMap(1:nBoundaries)
+   INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
+   INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
+   INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
+   INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
+   INTEGER, DEVICE, INTENT(in)       :: rankToNeighbor(0:nRanks-1)
+   INTEGER, DEVICE, INTENT(in)       :: boundaryToBuffer(1:nBoundaries)
    REAL(prec), DEVICE, INTENT(inout) :: sendBuffer(0:N,0:N,1:nEq,1:bufferSize,1:nNeighbors)
    REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:nEq,1:6,1:nElements)
    ! Local
    INTEGER :: bID, i, j, iEq
-   INTEGER :: iFace, p2
+   INTEGER :: iFace, p2, neighborID, bufferID, elementID, sideID
 
       bID = blockIdx % x
       i   = threadIdx % x - 1
       j   = threadIdx % y - 1
       iEq = threadIdx % z 
       
-      iFace     = boundaryIDs(bID)
-      p2        = extProcIDs(bID)
+      p2 = boundaryToProcID(bID)
       
-      ! In the event that the external process ID (p2) is identical to the current rank (p1),
-      ! then this boundary edge involves a physical boundary condition and does not require a 
-      ! message exchange
       IF( p2 /= myRank )THEN 
-         sendBuffer(i,j,iEq,bufferMap(bID),rankTable(p2) ) = boundarySolution(i,j,iEq,elementSides(1,iFace),elementIDs(1,iFace)) 
+
+         neighborID = rankToNeighbor(p2)
+         bufferID   = boundaryToBuffer(bID)
+         iFace      = boundaryToFaceID(bID)
+         elementID  = faceToElement(1,iFace)
+         sideID     = faceToSide(1,iFace)
+
+         IF( myRank == 0 )THEN
+         sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID) 
+         ENDIF
       ENDIF
 
  END SUBROUTINE BoundaryToBuffer_CUDAKernel
 !
- ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalSolution, boundaryIDs, &
-                                                            extProcIDs, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, nEq, nNeighbors, &
+ ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalSolution, boundaryToFaceID, &
+                                                            boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, nEq, nNeighbors, &
                                                             bufferSize, nElements )
    IMPLICIT NONE
    INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
    INTEGER, VALUE, INTENT(in)        :: N, nEq, nNeighbors, nElements, bufferSize
-   INTEGER, DEVICE, INTENT(in)       :: boundaryIDs(1:nFaces)
-   INTEGER, DEVICE, INTENT(in)       :: extProcIDS(1:nBoundaries)
-   INTEGER, DEVICE, INTENT(in)       :: rankTable(1:nRanks)
+   INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
+   INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
+   INTEGER, DEVICE, INTENT(in)       :: rankTable(0:nRanks-1)
    INTEGER, DEVICE, INTENT(in)       :: unPackMap(1:nBoundaries)
    REAL(prec), DEVICE, INTENT(in)    :: recvBuffer(0:N,0:N,1:nEq,1:bufferSize,1:nNeighbors)
    REAL(prec), DEVICE, INTENT(inout) :: externalSolution(0:N,0:N,1:nEq,1:nBoundaries)
    ! Local
    INTEGER :: bID, i, j, iEq
-   INTEGER :: iFace, p2
+   INTEGER :: p2
 
       bID = blockIdx % x
       i   = threadIdx % x - 1
       j   = threadIdx % y - 1
       iEq = threadIdx % z 
       
-      iFace     = boundaryIDs( bID )
-      p2        = extProcIDs(bID)
+      p2        = boundaryToProcID(bID)
       
 
       IF( p2 /= myRank )THEN 
