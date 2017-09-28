@@ -895,7 +895,6 @@ INCLUDE 'mpif.h'
    IMPLICIT NONE
    CLASS(Fluid), INTENT(inout) :: myDGSEM
    REAL(prec), INTENT(in)      :: tn
-   REAL(prec) :: t1, t2
 
 
 ! ----------------------------------------------------------------------------- ! 
@@ -933,10 +932,7 @@ INCLUDE 'mpif.h'
 ! communication costs.
 
 #ifdef HAVE_MPI
-     ! CALL CPU_TIME( t1 )
       CALL myDGSEM % MPI_StateExchange( ) 
-     ! CALL CPU_TIME( t2 )
-     ! PRINT*, myDGSEM % myRank, 'MPI_StateExchange :',t2-t1
 #endif
 ! ----------------------------------------------------------------------------- ! 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -960,10 +956,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % InternalFaceFlux( )
 
 #ifdef HAVE_MPI
-      !CALL CPU_TIME( t1 )
       CALL myDGSEM % FinalizeMPI_StateExchange( ) 
-      !CALL CPU_TIME( t2 )
-      !PRINT*, myDGSEM % myRank, 'Finalize MPI_StateExchange :',t2-t1
 #endif
 
       CALL myDGSEM % BoundaryFaceFlux( )
@@ -1833,9 +1826,9 @@ INCLUDE 'mpif.h'
    TYPE(dim3) :: grid, tBlock
   
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
-                   4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
-                   nEq )
-      grid = dim3(myDGSEM % nBoundaryFaces,1,1) 
+                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+                    nEq )
+      grid = dim3(myDGSEM % extComm % nBoundaries,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % sendStateBuffer_dev, &
                                                           myDGSEM % state % boundarySolution_dev, &
@@ -1847,24 +1840,14 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % mpiPackets % bufferMap_dev,&
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq,&
-                                                          myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
+                                                          myDGSEM % nNeighbors, myDGSEM % mpiPackets % maxBufferSize, &
                                                           myDGSEM % mesh % nElems )
-#ifdef DEBUG
-      iError = cudaGetLastError()
-      IF( iError /= cudaSuccess )THEN
-       PRINT*, "BoundaryToBuffer Failed!"
-      ENDIF
-#endif
+
 
 #ifdef CUDA_DIRECT
       iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStateBuffer_dev(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
@@ -1887,17 +1870,12 @@ INCLUDE 'mpif.h'
       iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStateBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           stateReqHandle(iNeighbor*2-1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
@@ -1907,6 +1885,8 @@ INCLUDE 'mpif.h'
                            stateReqHandle(iNeighbor*2), iError)  
                            
       ENDDO
+      
+      
 #endif
 
 #else
@@ -1915,9 +1895,6 @@ INCLUDE 'mpif.h'
          iFace     = myDGSEM % extComm % boundaryIDs( bID )
          p2        = myDGSEM % extComm % extProcIDs(bID)
          
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
          IF( p2 /= myDGSEM % myRank )THEN 
 
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
@@ -1931,17 +1908,12 @@ INCLUDE 'mpif.h'
       ENDDO
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStateBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
-                           stateReqHandle((iNeighbor-1)*2+1), iError )           
+                           stateReqHandle(iNeighbor*2-1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
@@ -1953,7 +1925,16 @@ INCLUDE 'mpif.h'
       ENDDO
 #endif
 
-
+      IF( myRank == 0 )THEN
+      OPEN( UNIT=100, FILE='SendBuff.bin', &
+            FORM='UNFORMATTED', ACCESS='DIRECT', &
+            RECL= (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % maxBufferSize*prec )
+      PRINT*,
+      DO iNeighbor = 1, myDGSEM % nNeighbors 
+         WRITE( UNIT=2, REC=iNeighbor ) myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor)
+      ENDDO
+      CLOSE( UNIT=100 )
+      ENDIF
 
 
  END SUBROUTINE MPI_StateExchange_Fluid
@@ -1968,7 +1949,6 @@ INCLUDE 'mpif.h'
    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
 #ifdef HAVE_CUDA
    TYPE(dim3) :: grid, tBlock
-   REAL(prec) :: t2, t1
 #endif
 
       CALL MPI_WaitAll(myDGSEM % nNeighbors*2,stateReqHandle,stateStats,iError)
@@ -1991,33 +1971,19 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % extComm % unPackMap_dev, &
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq, myDGSEM % nNeighbors, &
-                                                          myDGSEM % mpiPackets % bufferSize(1), myDGSEM % mesh % nElems )
-#ifdef DEBUG
-      iError = cudaGetLastError()
-      IF( iError /= cudaSuccess )THEN
-       PRINT*, "BufferToBoundary Failed!"
-      ENDIF
-#endif
+                                                          myDGSEM % mpiPackets % maxBufferSize, myDGSEM % mesh % nElems )
 
 #else
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
 
-         iFace     = myDGSEM % extComm % boundaryIDs( bID )
          p2        = myDGSEM % extComm % extProcIDs(bID)
          
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
          IF( p2 /= myDGSEM % myRank )THEN 
       
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
             jUnpack   = myDGSEM % extComm % unpackMap(bID)
-            IF( jUnpack == 0 )THEN
-              PRINT*, 'Something catastrophic happenend!'
-              CALL myDGSEM % Trash( )
-              STOP
-            ENDIF
+
             myDGSEM % externalState(:,:,:,bID) = myDGSEM % mpiPackets % recvStateBuffer(:,:,:,jUnpack,iNeighbor)
          ENDIF
 
@@ -2042,7 +2008,7 @@ INCLUDE 'mpif.h'
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
                    (nEq-1)*3 )
-      grid = dim3(myDGSEM % nBoundaryFaces,1,1) 
+      grid = dim3(myDGSEM % extComm % nBoundaries,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % sendStressBuffer_dev, &
                                                           myDGSEM % stressTensor % boundarySolution_dev, &
@@ -2054,33 +2020,22 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % mpiPackets % bufferMap_dev,&
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, (nEq-1)*3,&
-                                                          myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
+                                                          myDGSEM % nNeighbors, myDGSEM % mpiPackets % maxBufferSize, &
                                                           myDGSEM % mesh % nElems )
-#ifdef DEBUG
-      iError = cudaGetLastError()
-      IF( iError /= cudaSuccess )THEN
-       PRINT*, "BoundaryToBuffer Failed!"
-      ENDIF
-#endif
 
 #ifdef CUDA_DIRECT
       iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer_dev(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
                            stressReqHandle((iNeighbor-1)*2+1), iError )           
 
             CALL MPI_ISEND( myDGSEM % mpiPackets % sendStressBuffer_dev(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &       
                            MPI_PREC, &      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0, &       
                            MPI_COMM_WORLD, &
@@ -2095,13 +2050,8 @@ INCLUDE 'mpif.h'
       
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer(:,:,:,:,iNeighbor), & 
-                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEQ-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
+                           (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
                            myDGSEM % mpiPackets % neighborRank(iNeighbor), 0,  &                        
                            MPI_COMM_WORLD,   &                
@@ -2123,9 +2073,6 @@ INCLUDE 'mpif.h'
          iFace     = myDGSEM % extComm % boundaryIDs( bID )
          p2        = myDGSEM % extComm % extProcIDs(bID)
          
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
          IF( p2 /= myDGSEM % myRank )THEN 
 
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
@@ -2139,11 +2086,6 @@ INCLUDE 'mpif.h'
       ENDDO
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvStressBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*3*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
@@ -2198,34 +2140,19 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % extComm % unPackMap_dev, &
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, (nEq-1)*3, myDGSEM % nNeighbors, &
-                                                          myDGSEM % mpiPackets % bufferSize(1), myDGSEM % mesh % nElems )
-
-#ifdef DEBUG
-      iError = cudaGetLastError()
-      IF( iError /= cudaSuccess )THEN
-       PRINT*, "BufferToBoundary Failed!"
-      ENDIF
-#endif
+                                                          myDGSEM % mpiPackets % maxBufferSize, myDGSEM % mesh % nElems )
 
 #else
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
 
-         iFace     = myDGSEM % extComm % boundaryIDs( bID )
          p2        = myDGSEM % extComm % extProcIDs(bID)
          
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
          IF( p2 /= myDGSEM % myRank )THEN 
       
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
             jUnpack   = myDGSEM % extComm % unpackMap(bID)
-            IF( jUnpack == 0 )THEN
-              PRINT*, 'Something catastrophic happenend!'
-              CALL myDGSEM % Trash( )
-              STOP
-            ENDIF
+
             myDGSEM % externalStress(:,:,:,bID) = myDGSEM % mpiPackets % recvStressBuffer(:,:,:,jUnpack,iNeighbor)
          ENDIF
 
@@ -2249,7 +2176,7 @@ INCLUDE 'mpif.h'
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
                    nEq-1 )
-      grid = dim3(myDGSEM % nBoundaryFaces,1,1) 
+      grid = dim3(myDGSEM % extComm % nBoundaries,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mpiPackets % sendSGSBuffer_dev, &
                                                           myDGSEM % sgsCoeffs % boundarySolution_dev, &
@@ -2261,25 +2188,14 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % mpiPackets % bufferMap_dev,&
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq-1,&
-                                                          myDGSEM % nNeighbors, myDGSEM % mpiPackets % bufferSize(1), &
+                                                          myDGSEM % nNeighbors, myDGSEM % mpiPackets % maxBufferSize, &
                                                           myDGSEM % mesh % nElems )
-
-#ifdef DEBUG
-      iError = cudaGetLastError()
-      IF( iError /= cudaSuccess )THEN
-       PRINT*, "BoundaryToBuffer Failed!"
-      ENDIF
 #endif
 
 #ifdef CUDA_DIRECT
       iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvSGSBuffer_dev(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
@@ -2302,11 +2218,6 @@ INCLUDE 'mpif.h'
       iError = cudaDeviceSynchronize( )
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvSGSBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
@@ -2330,9 +2241,6 @@ INCLUDE 'mpif.h'
          iFace     = myDGSEM % extComm % boundaryIDs( bID )
          p2        = myDGSEM % extComm % extProcIDs(bID)
          
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
          IF( p2 /= myDGSEM % myRank )THEN 
 
             e1        = myDGSEM % mesh % Faces(iFace) % elementIDs(1)
@@ -2347,11 +2255,6 @@ INCLUDE 'mpif.h'
 
       DO iNeighbor = 1, myDGSEM % nNeighbors 
             
-            ! In the event that the external process ID (p2) is not equal to the current rank (p1),
-            ! then this boundary requires a message exchange between ranks p1 and p2.
-         
-            ! We need to send the internal state along the shared edge to process p2.
-            ! A unique "tag" for the message is the global edge ID
             CALL MPI_IRECV( myDGSEM % mpiPackets % recvSGSBuffer(:,:,:,:,iNeighbor), & 
                            (myDGSEM % N+1)*(myDGSEM % N+1)*(nEq-1)*myDGSEM % mpiPackets % bufferSize(iNeighbor), &                
                            MPI_PREC,   &                      
@@ -2407,33 +2310,19 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % extComm % unPackMap_dev, &
                                                           myDGSEM % mesh % nFaces, myDGSEM % extComm % nBoundaries, &
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq-1, myDGSEM % nNeighbors, &
-                                                          myDGSEM % mpiPackets % bufferSize(1), myDGSEM % mesh % nElems )
-#ifdef DEBUG
-      iError = cudaGetLastError()
-      IF( iError /= cudaSuccess )THEN
-       PRINT*, "BufferToBoundary Failed!"
-      ENDIF
-#endif
+                                                          myDGSEM % mpiPackets % maxBufferSize, myDGSEM % mesh % nElems )
 
 #else
 
       DO bID = 1, myDGSEM % extComm % nBoundaries
 
-         iFace     = myDGSEM % extComm % boundaryIDs( bID )
          p2        = myDGSEM % extComm % extProcIDs(bID)
          
-         ! In the event that the external process ID (p2) is identical to the current rank (p1),
-         ! then this boundary edge involves a physical boundary condition and does not require a 
-         ! message exchange
          IF( p2 /= myDGSEM % myRank )THEN 
       
             iNeighbor = myDGSEM % mpiPackets % rankTable(p2)
             jUnpack   = myDGSEM % extComm % unpackMap(bID)
-            IF( jUnpack == 0 )THEN
-              PRINT*, 'Something catastrophic happenend!'
-              CALL myDGSEM % Trash( )
-              STOP
-            ENDIF
+
             myDGSEM % externalSGS(:,:,:,bID) = myDGSEM % mpiPackets % recvSGSBuffer(:,:,:,jUnpack,iNeighbor)
 
          ENDIF
@@ -3278,7 +3167,7 @@ INCLUDE 'mpif.h'
             DO j = 0, myDGSEM % N 
                DO i = 0, myDGSEM % N
                   DO iEq = 1, (myDGSEM % nEq-1)*3
-                        myDGSEM % externalStress(i,j,iEq,iFace) = -myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
+                        myDGSEM % externalStress(i,j,iEq,bID) = -myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
                   ENDDO
                ENDDO
             ENDDO
@@ -4851,21 +4740,21 @@ INCLUDE 'mpif.h'
          e2     = elementIDs(2,iFace2)
          p2     = procIDs( iFace )
          
-         IF( i <= polydeg_dev .AND. j <= polydeg_dev )THEN
+         IF( i <= polydeg_dev .AND. j <= polydeg_dev .AND. p2 == myRank_dev)THEN
          
-            IF( e2 == PRESCRIBED .AND. p2 == myRank_dev )THEN
+            IF( e2 == PRESCRIBED )THEN
                
                DO iEq = 1, nEq_dev
                   externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)
                ENDDO
                   
-            ELSEIF( e2 == RADIATION .AND. p2 == myRank_dev )THEN
+            ELSEIF( e2 == RADIATION .)THEN
                         
                DO iEq = 1, nEq_dev
                   externalState(i,j,iEq,iFace) = 0.0_prec
                ENDDO
                  
-            ELSEIF( e2 == NO_NORMAL_FLOW .AND. p2 == myRank_dev )THEN
+            ELSEIF( e2 == NO_NORMAL_FLOW )THEN
                              
                ! normal
                nx = nHat(1,i,j,s1,e1) !**
@@ -4918,7 +4807,7 @@ INCLUDE 'mpif.h'
                externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
                externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
                         
-            ELSEIF( e2 == DRAG_SLIP .AND. p2 == myRank_dev )THEN
+            ELSEIF( e2 == DRAG_SLIP )THEN
                              
                ! normal
                nx = nHat(1,i,j,s1,e1) !**
@@ -5779,16 +5668,16 @@ INCLUDE 'mpif.h'
                                                             extProcIDs, rankTable, bufferMap, nFaces, nBoundaries, nRanks, myRank, N, nEq, nNeighbors, &
                                                             bufferSize, nElements )
    IMPLICIT NONE
-   INTEGER, VALUE, INTENT(in)      :: nFaces, nBoundaries, nRanks, myRank
-   INTEGER, VALUE, INTENT(in)      :: N, nEq, nNeighbors, nElements, bufferSize
-   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
-   INTEGER, DEVICE, INTENT(in)     :: extProcIDS(1:nBoundaries)
-   INTEGER, DEVICE, INTENT(in)     :: rankTable(1:nRanks)
-   INTEGER, DEVICE, INTENT(in)     :: bufferMap(1:nBoundaries)
-   REAL(prec), DEVICE, INTENT(out) :: sendBuffer(0:N,0:N,1:nEq,1:bufferSize,1:nNeighbors)
-   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:N,0:N,1:nEq,1:6,1:nElements)
+   INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
+   INTEGER, VALUE, INTENT(in)        :: N, nEq, nNeighbors, nElements, bufferSize
+   INTEGER, DEVICE, INTENT(in)       :: elementIDs(1:2,1:nFaces)
+   INTEGER, DEVICE, INTENT(in)       :: elementSides(1:2,1:nFaces)
+   INTEGER, DEVICE, INTENT(in)       :: boundaryIDs(1:nFaces)
+   INTEGER, DEVICE, INTENT(in)       :: extProcIDS(1:nBoundaries)
+   INTEGER, DEVICE, INTENT(in)       :: rankTable(1:nRanks)
+   INTEGER, DEVICE, INTENT(in)       :: bufferMap(1:nBoundaries)
+   REAL(prec), DEVICE, INTENT(inout) :: sendBuffer(0:N,0:N,1:nEq,1:bufferSize,1:nNeighbors)
+   REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:nEq,1:6,1:nElements)
    ! Local
    INTEGER :: bID, i, j, iEq
    INTEGER :: iFace, p2
@@ -5806,7 +5695,6 @@ INCLUDE 'mpif.h'
       ! message exchange
       IF( p2 /= myRank )THEN 
          sendBuffer(i,j,iEq,bufferMap(bID),rankTable(p2) ) = boundarySolution(i,j,iEq,elementSides(1,iFace),elementIDs(1,iFace)) 
-!         PRINT*, sendBuffer(i,j,iEq,bufferMap(bID), rankTable(p2))
       ENDIF
 
  END SUBROUTINE BoundaryToBuffer_CUDAKernel
