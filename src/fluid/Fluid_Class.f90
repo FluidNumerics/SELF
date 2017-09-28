@@ -1925,13 +1925,12 @@ INCLUDE 'mpif.h'
       ENDDO
 #endif
 
-      IF( myRank == 0 )THEN
+      IF( myDGSEM % myRank == 0 )THEN
       OPEN( UNIT=100, FILE='SendBuff.bin', &
             FORM='UNFORMATTED', ACCESS='DIRECT', &
             RECL= (myDGSEM % N+1)*(myDGSEM % N+1)*nEq*myDGSEM % mpiPackets % maxBufferSize*prec )
-      PRINT*,
       DO iNeighbor = 1, myDGSEM % nNeighbors 
-         WRITE( UNIT=2, REC=iNeighbor ) myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor)
+         WRITE( UNIT=100, REC=iNeighbor ) myDGSEM % mpiPackets % sendStateBuffer(:,:,:,:,iNeighbor)
       ENDDO
       CLOSE( UNIT=100 )
       ENDIF
@@ -2190,7 +2189,6 @@ INCLUDE 'mpif.h'
                                                           myDGSEM % nProc, myDGSEM % myRank, myDGSEM % N, nEq-1,&
                                                           myDGSEM % nNeighbors, myDGSEM % mpiPackets % maxBufferSize, &
                                                           myDGSEM % mesh % nElems )
-#endif
 
 #ifdef CUDA_DIRECT
       iError = cudaDeviceSynchronize( )
@@ -2271,8 +2269,6 @@ INCLUDE 'mpif.h'
                            
       ENDDO
 #endif
-
- 
 
    
  END SUBROUTINE MPI_SGSExchange_Fluid
