@@ -56,18 +56,28 @@ else ifeq (${FC},pgfortran)
   ifeq (${CUDA},yes)
   
     $(info '+CUDA-Fortran')
-    OPT+=-Mcuda=${GPU_ARCH},ptxinfo
+    OPT+=-Mcuda=${GPU_ARCH},ptxinfo,lineinfo
     CPPFLAGS+=-DHAVE_CUDA
+
+    ifeq (${CUDA_DIRECT},yes)
+      $(info '+CUDA-DIRECT')
+      CPPFLAGS+=-DCUDA_DIRECT
+    endif
 
   endif
   
+  ifeq (${DUAL_GPU},yes)
+    CPPFLAGS+=-DDUAL_GPU
+  endif
+
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI
-    FC=mpif90
+    FC=${MPIFC}
     LIB+=${MPI_LIB}
     INC+=${MPI_INC}
   endif
+
   
 endif
   
@@ -572,7 +582,7 @@ FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${
 	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
 Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
-	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
+	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90

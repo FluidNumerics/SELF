@@ -2,16 +2,20 @@
 
 # Compilers
 export FC=pgfortran
-
+export MPIFC=mpif90
+#export MPIFC=${HOME}/pgi_mpi_withcuda/bin/mpif90
 
 # Parallelization schemes
-export CUDA=no
+export CUDA=yes
 export GPU_ARCH=cc35
 export DUAL_GPU=yes
+export CUDA_DIRECT=no
 
 export MPI=yes
 export MPI_LIB=
 export MPI_INC=
+#export MPI_LIB="-L${HOME}/pgi_mpi_withcuda/lib -lmpi"
+#export MPI_INC="-I${HOME}/pgi_mpi_withcuda/include" 
 
 export OMP=no
 
@@ -25,4 +29,5 @@ export LIBSIM_INC="-I${HOME}/Software/visit/visit2.12.0/src/sim/V2/lib/"
 
 export DEBUG=no
 
-export TIMING=no
+export TIMING=yes
+export DIAGNOSTICS=yes
