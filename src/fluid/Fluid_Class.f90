@@ -589,6 +589,13 @@ INCLUDE 'mpif.h'
                 myDGSEM % mpiPackets % sendSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors), &
                 myDGSEM % mpiPackets % recvSGSBuffer(0:myDGSEM % N, 0:myDGSEM % N, 1:(nEq-1),1:maxFaceCount,1:myDGSEM % nNeighbors) )
                 
+      myDGSEM % mpiPackets % recvStateBuffer  = 0.0_prec
+      myDGSEM % mpiPackets % sendStateBuffer  = 0.0_prec
+      myDGSEM % mpiPackets % recvStressBuffer = 0.0_prec
+      myDGSEM % mpiPackets % sendStressBuffer = 0.0_prec
+      myDGSEM % mpiPackets % recvSGSBuffer    = 0.0_prec
+      myDGSEM % mpiPackets % sendSGSBuffer    = 0.0_prec
+
       bufferCounter = 0
        
       ALLOCATE( myDGSEM % mpiPackets % bufferMap(1:myDGSEM % extComm % nBoundaries) )
@@ -4722,9 +4729,8 @@ INCLUDE 'mpif.h'
    REAL(prec) :: tx, ty, tz
    
       iFace = blockIdx % x
-      ! ////////////////////////////////////////////////////////////////////////// !
-      i   = threadIdx % x-1
-      j   = threadIdx % y-1
+      i     = threadIdx % x-1
+      j     = threadIdx % y-1
 
       IF( iFace <= nBoundaryFaces_dev )THEN
       
@@ -5062,7 +5068,7 @@ INCLUDE 'mpif.h'
                               ( (externalState(ii,jj,6,bID)+boundarySolution_static(i,j,6,s1,e1))/ P0_dev )**rC_dev   )
                   
                   T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
-                          (boundarySolution(i,j,4,s2,e2)+boundarySolution_static(i,j,4,s1,e1) )  
+                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
                                    
                   cIn  = sqrt( R_dev*T* &
                               ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
