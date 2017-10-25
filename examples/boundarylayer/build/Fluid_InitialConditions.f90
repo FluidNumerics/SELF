@@ -20,33 +20,33 @@ USE Fluid_Class
  IMPLICIT NONE
 
  TYPE( Fluid ) :: myeu
- INTEGER       :: myRank, mpiErr, nProcs
+ INTEGER       :: mpiErr
  CHARACTER(4)  :: rankChar
  LOGICAL       :: setupSuccess
 
 #ifdef HAVE_MPI
       ! MPI Initialization
       CALL MPI_INIT( mpiErr )
-      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myRank, mpiErr )
-      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, nProcs, mpiErr )
+      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myeu % myRank, mpiErr )
+      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myeu % nProc, mpiErr )
       ! Sanity check
-      PRINT*, 'Fluid_InitialConditions_MPI : Greetings from Process ', myRank, ' of ',nProcs
+      PRINT*, 'Fluid_InitialConditions_MPI : Greetings from Process ', myeu % myRank, ' of ',myeu % nProc
 #else
-      myRank = 0
-      nProcs = 1
+      myeu % myRank = 0
+      myeu % nProc  = 1
 #endif
-      CALL myeu % Build( myRank, nProcs, setupSuccess )
+      CALL myeu % Build( setupSuccess )
  
       IF( SetupSuccess )THEN
-         CALL InitialCondition( myeu, myRank )
+         CALL InitialCondition( myeu, myeu % myRank )
          
          PRINT*, "Reset Boundary conditions"
-         CALL ResetBoundaryConditions( myeu, myRank )
+         CALL ResetBoundaryConditions( myeu, myeu % myRank )
          PRINT*, "DONE!"
          
-         CALL myeu % WritePickup( myRank ) 
+         CALL myeu % WritePickup( ) 
          
-         CALL myeu % WriteTecplot( myRank )
+         CALL myeu % WriteTecplot( )
          
          ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the 
          ! integrator, the mesh scaling is not applied a second time 
@@ -54,16 +54,17 @@ USE Fluid_Class
                                              1.0_prec/myeu % params % xScale, &
                                              1.0_prec/myeu % params % yScale, &
                                              1.0_prec/myeu % params % zScale )
-         WRITE( rankChar, '(I4.4)' )myRank
+         WRITE( rankChar, '(I4.4)' )myeu % myRank
          CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
       
 #ifdef HAVE_MPI
          CALL MPI_BARRIER( )
 #endif
       
-         CALL myeu % Trash( )
 
       ENDIF
+
+      CALL myeu % Trash( )
 
 #ifdef HAVE_MPI
       CALL MPI_FINALIZE( mpiErr )
@@ -95,8 +96,9 @@ CONTAINS
 
                IF( myDGSEM % mesh % geom(e1) % nHat(3, 0, 0, s1) > 0.0_prec ) THEN ! Top
                   myDGSEM % mesh % faces(iFace2) % elementIDs(2) =PRESCRIBED
-                  myDGSEM % prescribedState(:,:,:,iFace2) = myDGSEM % state % boundarySolution(:,:,:,s1,e1)
-               ELSE ! Top
+                  myDGSEM % prescribedState(:,:,1,iFace) = myDGSEM % static % boundarySolution(:,:,4,s1,e1)*myDGSEM % params % v0
+                  PRINT*, myDGSEM % mesh % faces(iFace2) % elementIDs(2), PRESCRIBED, myDGSEM % prescribedState(1,1,1,iFace)
+               ELSE ! Bottom
                   myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
                ENDIF
 
@@ -112,7 +114,7 @@ CONTAINS
  SUBROUTINE InitialCondition( myDGSEM, myRank )
    IMPLICIT NONE
    TYPE( Fluid ), INTENT(inout) :: myDGSEM
-   INTEGER, INTENT(in)                             :: myRank
+   INTEGER, INTENT(in)          :: myRank
    ! Local
    INTEGER    :: i, j, k, iEl, iFace
    REAL(prec) :: x, y, z, Lx, Ly, r
@@ -124,10 +126,17 @@ CONTAINS
       !$OMP PARALLEL
       CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
       !$OMP END PARALLEL
-      
+
+#ifdef HAVE_CUDA
+      myDGSEM % static % solution_dev = myDGSEM % static % solution
+#endif
       !$OMP PARALLEL
       CALL myDGSEM % CalculateStaticBoundarySolution( )
       !$OMP END PARALLEL
+#ifdef HAVE_CUDA
+      ! Copy the boundary solution from the device to the host
+      myDGSEM % static % boundarySolution  = myDGSEM % static % boundarySolution_dev
+#endif
      
       ! ////////////////////////////////////////////////////////////////////////////////// !
       DO iEl = 1, myDGSEM % mesh % nElems
