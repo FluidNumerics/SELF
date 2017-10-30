@@ -3757,7 +3757,7 @@ INCLUDE 'mpif.h'
   CHARACTER(5)  :: zoneID
   CHARACTER(4)  :: rankChar
   REAL(prec)    :: hCapRatio, c, T
-  CHARACTER(10) :: timeStampString
+  CHARACTER(13) :: timeStampString
    
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
   
@@ -3829,7 +3829,7 @@ INCLUDE 'mpif.h'
    CLASS( Fluid  ), INTENT(inout) :: myDGSEM
    INTEGER, INTENT(out)           :: fileUnits(1:nDiagnostics) 
    ! Local
-   CHARACTER(10) :: timeStampString
+   CHARACTER(13) :: timeStampString
    
 
       myDGSEM % volume = 0.0_prec
@@ -4112,7 +4112,7 @@ INCLUDE 'mpif.h'
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
   CHARACTER(4)  :: rankChar
-  CHARACTER(10) :: timeStampString
+  CHARACTER(13) :: timeStampString
    
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
@@ -4173,7 +4173,7 @@ INCLUDE 'mpif.h'
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
   CHARACTER(4)  :: rankChar
-  CHARACTER(10) :: timeStampString
+  CHARACTER(13) :: timeStampString
    
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
@@ -4225,7 +4225,7 @@ INCLUDE 'mpif.h'
   INTEGER       :: i, j, k, iEl, iEq, fUnit
   CHARACTER(5)  :: zoneID
   CHARACTER(4)  :: rankChar
-  CHARACTER(10) :: timeStampString
+  CHARACTER(13) :: timeStampString
    
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
@@ -4280,7 +4280,7 @@ INCLUDE 'mpif.h'
    INTEGER       :: iEl
    INTEGER       :: thisRec, fUnit
    INTEGER       :: iEq, N
-   CHARACTER(10) :: timeStampString
+   CHARACTER(13) :: timeStampString
    
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
@@ -4343,7 +4343,7 @@ INCLUDE 'mpif.h'
    INTEGER       :: thisRec, fUnit
    INTEGER       :: iEq, N
    LOGICAL       :: itExists
-   CHARACTER(10) :: timeStampString
+   CHARACTER(13) :: timeStampString
    
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
    

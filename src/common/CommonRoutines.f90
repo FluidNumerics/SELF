@@ -784,11 +784,12 @@ CONTAINS
    IMPLICIT NONE
    REAL(prec)    :: time 
    CHARACTER(1)  :: units
-   CHARACTER(10) :: timeStampString
+   CHARACTER(13) :: timeStampString
    ! Local 
-   INTEGER      :: day, minute, hour, second
+   INTEGER      :: day, minute, hour, second, millisecond
    CHARACTER(4) :: dayStamp
    CHARACTER(2) :: hourStamp, minuteStamp, secondStamp
+   CHARACTER(3) :: milliSecondStamp
 
 
       ! Units in "seconds"
@@ -799,12 +800,14 @@ CONTAINS
          hour   = INT( (time-86400.0_prec*day)/3600.0_prec )
          minute = INT( (time-3600.0_prec*hour-86400.0_prec*day)/60.0_prec )
          second = INT( (time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day) )
+         milliSecond = INT( ((time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day)-REAL(second,prec))*1000.0_prec )
 
          WRITE( dayStamp,'(I4.4)' ) day 
          WRITE( hourStamp,'(I2.2)' ) hour
          WRITE( minuteStamp,'(I2.2)' ) minute
          WRITE( secondStamp,'(I2.2)' ) second
-         timeStampString = dayStamp//hourStamp//minuteStamp//secondStamp 
+         WRITE( milliSecondStamp,'(I3.3)' ) millisecond
+         timeStampString = dayStamp//hourStamp//minuteStamp//secondStamp//milliSecondStamp
          
       ! minutes
       ELSEIF( units(1:1) == 'm' )THEN
