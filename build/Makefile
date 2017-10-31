@@ -280,7 +280,7 @@ GOBJ3 = ModelPrecision.o \
 DecomposeHexMesh : ${GOBJ3} DecomposeHexMesh.o
 	${FC} ${OPT} ${GOBJ3} DecomposeHexMesh.o ${METISLIB} -o $@
 
-DecomposeStructuredHexMesh : ${GOBJ3} DecomposeStructuredHexMesh.o
+meshgen : ${GOBJ3} DecomposeStructuredHexMesh.o
 	${FC} ${OPT} ${GOBJ3} DecomposeStructuredHexMesh.o -o $@
 
 GenerateHexMesh : ${GOBJ3} GenerateMeshFiles_3D.o 
