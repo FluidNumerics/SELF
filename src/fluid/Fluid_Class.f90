@@ -3799,7 +3799,7 @@ INCLUDE 'mpif.h'
                           
                   ! Sound speed estimate for the external and internal states
                   c = sqrt( myDGSEM % params % R*T*( ( sol(i,j,k,6) + bsol(i,j,k,6) )/myDGSEM % params % P0 )**hCapRatio   )
-                  WRITE(fUnit,'(17(F15.7,1x))') x(i,j,k), y(i,j,k), z(i,j,k),&
+                  WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k), y(i,j,k), z(i,j,k),&
                                   sol(i,j,k,1)/( sol(i,j,k,4) + bsol(i,j,k,4) ), &
                                   sol(i,j,k,2)/( sol(i,j,k,4) + bsol(i,j,k,4) ), &
                                   sol(i,j,k,3)/( sol(i,j,k,4) + bsol(i,j,k,4) ), &
