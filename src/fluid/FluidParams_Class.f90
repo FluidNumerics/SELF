@@ -25,6 +25,7 @@ USE ConstantsDictionary
       REAL(prec)    :: outputFrequency
       INTEGER       :: nDumps
       INTEGER       :: nStepsPerDump
+      REAL(prec)    :: jacobianStepSize
       ! SpaceManagement
       CHARACTER(50) :: SpecMeshFile
       CHARACTER(50) :: PeaceMeshFile
@@ -97,6 +98,7 @@ USE ConstantsDictionary
       REAL(prec)    :: endTime
       REAL(prec)    :: outputFrequency
       INTEGER       :: nStepsPerDump
+      REAL(prec)    :: jacobianStepSize
       ! SpaceManagement
       CHARACTER(50) :: SpecMeshFile
       CHARACTER(50) :: PeaceMeshFile
@@ -141,7 +143,7 @@ USE ConstantsDictionary
       LOGICAL :: fileExists
        
        
-      NAMELIST / TimeManagement / units, dt, startTime, endTime, outputFrequency
+      NAMELIST / TimeManagement / units, dt, startTime, endTime, outputFrequency, jacobianStepSize
       NAMELIST / SpaceManagement / SpecMeshFile, PeaceMeshFile, UCDMeshFile, MeshType, topographicShape, QuadType, polyDeg, &
                                     nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
                                    nPlot, xScale, yScale, zScale
@@ -156,6 +158,7 @@ USE ConstantsDictionary
       startTime       = 0.0_prec
       endTime         = 1.0_prec
       outputFrequency = 0.5_prec
+      jacobianStepSize = 1.0_prec*10.0_prec**(-6)
       ! SpaceManagement
       SpecMeshFile  = nada
       PeaceMeshFile = nada
@@ -244,6 +247,7 @@ USE ConstantsDictionary
          PRINT(MsgFMT), 'S/R Build_Params : Estimated Number of Time Steps :'
          PRINT('(4x,I10)'), thisParam % nStepsPerDump*thisParam % nDumps 
         
+         thisParam % jacobianStepSize = jacobianStepSize
          ! SpaceManagement 
          thisParam % SpecMeshFile = SpecMeshFile
          thisParam % PeaceMeshFile = PeaceMeshFile
