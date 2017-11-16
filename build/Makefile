@@ -66,10 +66,6 @@ else ifeq (${FC},pgfortran)
 
   endif
   
-  ifeq (${DUAL_GPU},yes)
-    CPPFLAGS+=-DDUAL_GPU
-  endif
-
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI
@@ -84,13 +80,6 @@ endif
 
 ifeq (${TIMING},yes)
   CPPFLAGS+=-DTIMING
-endif
-
-ifeq (${TESTING},yes)
-  ifeq (${MPI},yes)
-    $(info '>>> Testing with MPI only reports instance checks from rank 0.')
-  endif
-    CPPFLAGS+=-DTESTING
 endif
 
 ifeq (${INSITU_VIZ},yes)
