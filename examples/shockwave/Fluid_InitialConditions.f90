@@ -99,7 +99,7 @@ USE Fluid_Class
 
             ELSE ! sides
 
-               myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
+               myDGSEM % mesh % faces(iFace2) % elementIDs(2) = RADIATION
 
             ENDIF
                
@@ -122,7 +122,7 @@ USE Fluid_Class
       Lx = myDGSEM % params % xScale
       Ly = myDGSEM % params % yScale
       H  = myDGSEM % params % zScale
-      rPulse = 1.0_prec
+      rPulse = 0.05_prec*Lx
       
       myDGSEM % state % solution = 0.0_prec
 #ifdef HAVE_CUDA
@@ -146,7 +146,7 @@ USE Fluid_Class
                   y = myDGSEM % mesh % geom(iEl) % y(i,j,k)
                   z = myDGSEM % mesh % geom(iEl) % z(i,j,k)
                   
-                  r =  ( x-1.5_prec )**2  + ( z-0.5_prec*H )**2
+                  r =  ( x-0.2_prec*Lx )**2 + ( y-0.2_prec*Ly )**2  + ( z-0.5_prec*H )**2
                 
 
 !                  pulseShape = 0.15625_prec*( 1.0_prec + tanh( (x-(0.1_prec*Lx-rPulse))/rPulse ) )*&
