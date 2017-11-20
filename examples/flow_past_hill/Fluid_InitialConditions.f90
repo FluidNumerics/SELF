@@ -97,7 +97,6 @@ CONTAINS
                IF( myDGSEM % mesh % geom(e1) % nHat(3, 0, 0, s1) > 0.0_prec ) THEN ! Top
                   myDGSEM % mesh % faces(iFace2) % elementIDs(2) =PRESCRIBED
                   myDGSEM % prescribedState(:,:,1,iFace) = myDGSEM % static % boundarySolution(:,:,4,s1,e1)*myDGSEM % params % v0
-                  PRINT*, myDGSEM % mesh % faces(iFace2) % elementIDs(2), PRESCRIBED, myDGSEM % prescribedState(1,1,1,iFace)
                ELSE ! Bottom
                   myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
                ENDIF
