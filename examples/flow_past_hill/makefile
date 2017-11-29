@@ -3,19 +3,22 @@ SHELL=/bin/bash
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 INITDIR=$(shell pwd)
 
-.PHONY: meshgen \
+.PHONY: DecomposeStructuredHexMesh \
+        GenerateHexMesh \
         initialize \
-        integrate 
+        integrate \
+        test_stateExchange
 
 meshgen :
-	make --directory=${SELFDIR}/build/ -e CUDA=no MPI=no meshgen
-	make --directory=${SELFDIR}/build/ clean
+	make --directory=${SELFDIR}/build/ CUDA=no MPI=no meshgen
 	mv ${SELFDIR}/build/meshgen ./
+	make --directory=${SELFDIR}/build/ clean
+
 
 initialize :
 	@echo 'Found SELF installation directory : '${SELFDIR}
 	@echo 'Using modifications in directory : '${INITDIR}
-	make MODDIR=${INITDIR} -C ${SELFDIR}/build/ initialize
+	make -C ${SELFDIR}/build/ MODDIR=${INITDIR} initialize
 	mv ${SELFDIR}/build/initialize ./
 
 integrate :
