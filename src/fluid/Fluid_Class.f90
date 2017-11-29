@@ -267,7 +267,7 @@ INCLUDE 'mpif.h'
    !
 #ifdef HAVE_CUDA
    INTEGER(kind=cuda_count_kind) :: freebytes, totalbytes
-   INTEGER                       :: iStat, cudaDeviceNumber
+   INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 #endif   
 
       CALL myDGSEM % params % Build( setupSuccess )
@@ -277,15 +277,10 @@ INCLUDE 'mpif.h'
       ENDIF
 #ifdef HAVE_CUDA
 
-#ifdef DUAL_GPU
-      cudaDeviceNumber = MOD( myDGSEM % myRank, 2 )
+      iStat = cudaGetDeviceCount( nDevices )
+      cudaDeviceNumber = MOD( myDGSEM % myRank, nDevices )
       PRINT*, '    S/R Build_Fluid : Rank :', myDGSEM % myRank, ': Getting Device # ', cudaDeviceNumber
       iStat = cudaSetDevice( cudaDeviceNumber )
-#else
-      cudaDeviceNumber = 0
-      PRINT*, '    S/R Build_Fluid : Rank :', myDGSEM % myRank, ': Getting Device # ', cudaDeviceNumber
-      iStat = cudaSetDevice( cudaDeviceNumber )
-#endif
 
 #endif
 
