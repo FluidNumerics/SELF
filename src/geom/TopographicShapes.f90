@@ -16,7 +16,7 @@ IMPLICIT NONE
    REAL(prec)            :: GaussianHill
    REAL(prec),INTENT(in) :: x, y
  
-      GaussianHill = 0.4_prec*exp( -( (x-0.5_prec)**2/(2.0_prec*0.05_prec**2) + (y-0.5_prec)**2/(2.0_prec*0.1_prec**2)  ) )
+      GaussianHill = 0.4_prec*exp( -( (x-0.25_prec)**2/(2.0_prec*0.05_prec**2) + (y-0.5_prec)**2/(2.0_prec*0.1_prec**2)  ) )
       
  END FUNCTION GaussianHill
 
