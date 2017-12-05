@@ -1,29 +1,21 @@
 #!/bin/bash
 
 # Obtain the number of MPI processes
-nP=$( grep nProc geometry.params | awk '{gsub(/,$/,""); print $3}' )
-iter0=$( grep iterInit runtime.params | awk '{gsub(/,$/,""); print $3}' )
-dFreq=$( grep dumpFreq runtime.params | awk '{gsub(/,$/,""); print $3}' )
-nT=$( grep nTimeSteps runtime.params | awk '{gsub(/,$/,""); print $3}' )
-iterEnd=$( echo "${nT}+${iter0}" | bc )
+nP=8
 nPu=$( echo "${nP}-1" | bc)
 
-echo 'geometry.params : nProcessess =' ${nP}
-echo 'runtime.params  : iterInit    = '${iter0}
-echo 'runtimes.params : dumpFreq    =' ${dFreq}
-echo 'runtimes.params : nTimeSteps  =' ${nT}
-echo 'Last Iterate    : iterEnd     =' ${iterEnd}
+echo 'runtime.params : nProcessess =' ${nP}
 
 # Loop over model iterates
-for i in $( seq -f "%010g" $iter0 $dFreq $iterEnd )
+for file in $( ls State.0000.*.tec )
 do 
    tname='mastertemp.tec'
-   fpname='ShallowWater.0000.'$i'.tec'
-   cat $fpname > $tname
-   #rm $fpname
+   cat $file > $tname
+
    for j in $( seq -f "%04g" 1 $nPu )
    do
-      fpname='ShallowWater.'$j'.'$i'.tec'
+      iter=$( echo $file | awk -F '.' '{print $3}' )
+      fpname='State.'$j'.'$iter'.tec'
       echo $fpname
       # Temporarily copy the "master" file
       cat $tname > temp1.tec
@@ -31,9 +23,9 @@ do
       cat $fpname | sed 1d > temp2.tec
       # Concatenate the master file with the process file
       cat temp1.tec temp2.tec > $tname
-      #rm $fpname
+   #   rm $fpname
    done
-   fname='ShallowWater.'$i'.tec'
+   fname='State.'$iter'.tec'
    cat mastertemp.tec > $fname
 done
 

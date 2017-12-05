@@ -1,13 +1,7 @@
 ! CommonRoutines.f90
 ! 
-! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
-! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
-!
-! The SELF and accompanying DOcumentation were produced in part under the 
-! support of Florida State University and the National Science Foundation 
-! through Grant OCE-1049131 during 2015 and in part  the support of the 
-! Center for Nonlinear Studies and the Department of Energy through the 
-! LANL/LDRD program in 2016.
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! CommonRoutines.f90 is part of the Spectral Element Libraries in Fortran (SELF).
 !
@@ -716,6 +710,54 @@ CONTAINS
 
  END FUNCTION Invert_3x3 
 !
+ FUNCTION InvertSpectralOpMatrix( A, N ) RESULT( Ainv )
+ ! Inverts an (N+1)x(N+1) matrix using a polynomial representation of the
+ ! inverse
+   IMPLICIT NONE
+   INTEGER :: N
+   REAL(prec) :: A(0:N,0:N)
+   REAL(prec) :: Ainv(0:N,0:N)
+   ! Local
+   INTEGER    :: row, col, j, iter
+   REAL(prec) :: I(0:N,0:N)
+   REAL(prec) :: Ainv_ij, maxChange
+
+      Ainv = 0.0_prec
+      I    = 0.0_prec
+      DO row = 0, N
+         Ainv(row,row) = 1.0_prec
+         I(row,row)    = 1.0_prec
+      ENDDO
+
+      DO iter = 1, maxInverseIters
+
+         maxChange = 0.0_prec
+         DO col = 0, N
+            DO row = 0, N
+   
+               Ainv_ij = 0.0_prec
+               DO j = 0, N
+                  Ainv_ij = Ainv_ij + Ainv(j,col)*(I(row,j) - A(row,j))
+               ENDDO
+               maxChange = MAX( ABS(Ainv(row,col) - Ainv_ij), maxChange )
+               Ainv(row,col) = Ainv_ij
+   
+            ENDDO
+         ENDDO
+         
+         IF( maxChange <= tolerance )THEN
+           PRINT*, ' InvertSpectralOpMatrix : Converged in ',iter,' iterations.'
+           EXIT
+         ENDIF
+      
+      ENDDO
+
+      IF( maxChange > tolerance )THEN
+         PRINT*, 'InvertSpectralOpMatrix : Did not converge.', maxChange
+      ENDIF
+
+ END FUNCTION InvertSpectralOpMatrix
+!
  FUNCTION UpperCase( str ) RESULT( upper )
 
     Implicit None
@@ -736,5 +778,45 @@ CONTAINS
         ENDIF
     ENDDO
 
-END FUNCTION UpperCase
+ END FUNCTION UpperCase
+!
+ FUNCTION TimeStamp( time, units ) RESULT( timeStampString ) 
+   IMPLICIT NONE
+   REAL(prec)    :: time 
+   CHARACTER(1)  :: units
+   CHARACTER(13) :: timeStampString
+   ! Local 
+   INTEGER      :: day, minute, hour, second, millisecond
+   CHARACTER(4) :: dayStamp
+   CHARACTER(2) :: hourStamp, minuteStamp, secondStamp
+   CHARACTER(3) :: milliSecondStamp
+
+
+      ! Units in "seconds"
+      IF( units(1:1) == 's' ) THEN 
+   
+         ! Obtain the day
+         day    = INT( time/86400.0_prec )
+         hour   = INT( (time-86400.0_prec*day)/3600.0_prec )
+         minute = INT( (time-3600.0_prec*hour-86400.0_prec*day)/60.0_prec )
+         second = INT( (time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day) )
+         milliSecond = INT( ((time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day)-REAL(second,prec))*1000.0_prec )
+
+         WRITE( dayStamp,'(I4.4)' ) day 
+         WRITE( hourStamp,'(I2.2)' ) hour
+         WRITE( minuteStamp,'(I2.2)' ) minute
+         WRITE( secondStamp,'(I2.2)' ) second
+         WRITE( milliSecondStamp,'(I3.3)' ) millisecond
+         timeStampString = dayStamp//hourStamp//minuteStamp//secondStamp//milliSecondStamp
+         
+      ! minutes
+      ELSEIF( units(1:1) == 'm' )THEN
+
+      ! hours
+      ELSEIF( units(1:1) == 'h' )THEN
+
+      
+      ENDIF
+
+ END FUNCTION TimeStamp
 END MODULE CommonRoutines

@@ -1,27 +1,28 @@
 &TimeManagement
-dt = 0.0001,
-iterInit = 0,
-nTimeSteps = 10000,
-dumpFreq = 1000,
+units = 'seconds',
+dt = 2.0D-6,
+startTime = 0.0,
+endTime   = 5.0D-2,
+outputFrequency = 1.0D-3,
 /
 &SpaceManagement
 PeaceMeshFile = 'box',
 polyDeg = 7,
-nZElem = 20,
-nYElem = 20,
-nXElem = 20,
+nZElem = 50,
+nYElem = 1,
+nXElem = 50,
 nProcX = 1,
 nProcY = 1,
 nProcZ = 1,
 nPlot = 7,
-xScale = 3.0D3,
-yScale = 3.0D3,
-zScale = 3.0D3,
+xScale = 100.0,
+yScale = 1.0,
+zScale = 100.0,
 /
 &SubGridScale
-SubGridModel = 'SpectralEKE',
-viscosity = 0.8,
-viscLengthScale = 5.0,
+SubGridModel = 'Laplacian',
+viscosity = 5.0,
+viscLengthScale = 0.05,
 nCutoff = 6,
 /
 &PhysicalConstants

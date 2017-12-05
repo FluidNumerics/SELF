@@ -1,26 +1,7 @@
 ! BoundaryCommunicator_Class.f90
 ! 
-! Copyright 2015 Joseph Schoonover <schoonover.numerics@gmail.com>, The Florida State University
-! Copyright 2016 Joseph Schoonover <jschoonover@lanl.gov>, Los Alamos National Laboratory
-!
-! The SELF and accompanying documentation were produced in part under the 
-! support of Florida State University and the National Science Foundation 
-! through Grant OCE-1049131 during 2015 and in part under the support of the 
-! Center for Nonlinear Studies and the Department of Energy through the 
-! LANL/LDRD program in 2016.
-!
-! BoundaryCommunicator_Class.f90 is part of the Spectral Element Libraries in Fortran (SELF).
-! 
-! Licensed under the Apache License, Version 2.0 (the "License"); 
-! You may obtain a copy of the License at 
-!
-! http://www.apache.org/licenses/LICENSE-2.0 
-!
-! Unless required by applicable law or agreed to in writing, software 
-! distributed under the License is distributed on an "AS IS" BASIS, 
-! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-! See the License for the specific language governing permissions and  
-! limitations under the License.
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -78,8 +59,9 @@ IMPLICIT NONE
 !>@}
    TYPE BoundaryCommunicator
       INTEGER                               :: nBoundaries
-      INTEGER, ALLOCATABLE                  :: extElemIDs(:), extProcIDs(:)
+      INTEGER, ALLOCATABLE                  :: extProcIDs(:)
       INTEGER, ALLOCATABLE                  :: boundaryIDs(:)
+      INTEGER, ALLOCATABLE                  :: unPackMap(:)
 
       CONTAINS
 
@@ -130,12 +112,13 @@ IMPLICIT NONE
 
       myBC % nBoundaries = nBe
 
-      ALLOCATE( myBC % extElemIDS(1:nBe), myBC % extProcIDs(1:nBe) )
+      ALLOCATE( myBC % extProcIDs(1:nBe) )
       ALLOCATE( myBC % boundaryIDs(1:nBe) )
+      ALLOCATE( myBC % unPackMap(1:nBe) )
 
-      myBC % extElemIDs  = 0
       myBC % extProcIDs  = 0
       myBC % boundaryIDs = 0
+      myBC % unPackMap   = 0
 
  END SUBROUTINE Initialize_BoundaryCommunicator
 !
@@ -164,7 +147,8 @@ IMPLICIT NONE
    IMPLICIT NONE
    CLASS(BoundaryCommunicator), INTENT(inout) :: myBC
 
-      DEALLOCATE( myBC % extElemIDS, myBC % extProcIDs, myBC % boundaryIDs )
+      DEALLOCATE( myBC % unPackMap, myBC % extProcIDs, myBC % boundaryIDs )
+
 
  END SUBROUTINE Trash_BoundaryCommunicator
 !
@@ -222,8 +206,8 @@ IMPLICIT NONE
       DO i = 1, myBC % nBoundaries
 
          WRITE( fUnit, * ) myBC % boundaryIDs(i), &
-                           myBC % extElemIDs(i), &
-                           myBC % extProcIDs(i)
+                           myBC % extProcIDs(i), &
+                           myBC % unPackMap(i)
 
       ENDDO 
 
@@ -286,8 +270,8 @@ IMPLICIT NONE
       DO i = 1, myBC % nBoundaries
 
          READ( fUnit, * ) myBC % boundaryIDs(i), &
-                          myBC % extElemIDs(i), &
-                          myBC % extProcIDs(i)
+                          myBC % extProcIDs(i), &
+                          myBC % unPackMap(i)
 
       ENDDO 
 

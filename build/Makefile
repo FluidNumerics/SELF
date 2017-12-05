@@ -7,81 +7,97 @@
 
 SHELL=/bin/bash
 
-FC=pgfortran
-OPT=
 METISLIB=-L/usr/local/lib/ -lmetis
-LIB=
-INC=
-WFLAGS= 
 
-MPILIB=
-MPIINC=
-FMACRO=
 # determine the main directory for this experiment
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 SRCDIR=${SELFDIR}/src/
 
 
+ifeq (${FC},gfortran)
 
-ifeq (${CUDA},yes)
+  $(info 'Compiling with GNU Compilers')
 
-  $(info 'Compiling with PGI CUDA-Fortran')
-  FC=pgfortran
-  OPT=-fast -Mcuda=cc60,ptxinfo
-  FMACRO=-Mpreprocess -DHAVE_CUDA
+  CPPFLAGS=-cpp 
 
-  ifeq (${MPI},yes)
-    $(info 'Compiling with PGI MPI')
-    FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
-    OPT=-fast -Mcuda=cc60,ptxinfo
-    FMACRO=-Mpreprocess -DHAVE_CUDA -DHAVE_MPI
-    MPILIB=-L/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/lib/ -lmpi
-    MPIINC=-I/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/include/
-  endif
-
-else
-
-  FMACRO=-Mpreprocess 
-  FC=pgfortran
   ifeq (${DEBUG},yes)
-    OPT=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
+    OPT+=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
   else
-    OPT=-fast
+    OPT+=-Ofast -ffree-line-length-none
   endif
-  
+
   ifeq (${OPENMP},yes)
+    $(info '+OpenMP')
     OPT+=-fopenmp
-    FMACRO+=-DHAVE_OPENMP
+    CPPFLAGS+=-DHAVE_OPENMP
   endif
+
+  ifeq (${MPI},yes)
+    $(info '+MPI')
+    CPPFLAGS+=-DHAVE_MPI
+    LIB+=${MPI_LIB}
+    INC+=${MPI_INC}
+  endif
+ 
+    
+
+else ifeq (${FC},pgfortran)
+
+  $(info 'Compiling with PGI Compilers')
+  CPPFLAGS=-Mpreprocess 
+
+  ifeq (${DEBUG},yes)
+    OPT+=-O0 -g -Kieee -traceback -Minfo=all -Mbounds
+    CPPFLAGS+=-DDEBUG
+  else
+    OPT+=-fast
+  endif
+
+  ifeq (${CUDA},yes)
   
+    $(info '+CUDA-Fortran')
+    OPT+=-Mcuda=${GPU_ARCH},ptxinfo,lineinfo
+    CPPFLAGS+=-DHAVE_CUDA
+
+    ifeq (${CUDA_DIRECT},yes)
+      $(info '+CUDA-DIRECT')
+      CPPFLAGS+=-DCUDA_DIRECT
+    endif
+
+  endif
   
   ifeq (${MPI},yes)
-    $(info 'Compiling with GNU Fortran OpenMPI')
-    FC=/usr/local/pgi/linux86-64/2016/mpi/openmpi-1.10.2/bin/mpif90
-    OPT=-O2
-    FMACRO=-Mpreprocess
-    FMACRO+=-DHAVE_MPI
-    ifeq (${NEW_MPI},yes)
-      FMACRO+=-DNEW_MPI
-    endif
+    $(info '+MPI')
+    CPPFLAGS+=-DHAVE_MPI
+    FC=${MPIFC}
+    LIB+=${MPI_LIB}
+    INC+=${MPI_INC}
   endif
-# OPT=-O0 -g
 
+  
 endif
+  
 
 ifeq (${TIMING},yes)
-  FMACRO+=-DTIMING
+  CPPFLAGS+=-DTIMING
 endif
 
-ifeq (${TESTING},yes)
+ifeq (${INSITU_VIZ},yes)
   ifeq (${MPI},yes)
-    $(info '>>> Testing with MPI is currently not a functional or supported feature in SELF-Fluids')
-    $(info '>>> Disabling Testing.')
-    TESTING=no
+    $(info '>>> MPI with in-situ graphics is currently not supported.')
   else
-    FMACRO+=-DTESTING
+    CPPFLAGS+=-DINSITU_VIZ
+    INC+=${LIBSIM_INC}
+    LIB+=${LIBSIM_LIB}
   endif
 endif
+
+ifeq (${DIAGNOSTICS},yes)
+  CPPFLAGS+=-DDIAGNOSTICS
+endif
+
+LIB+=${LAPACK_LIB}
+INC+=${LAPACK_INC}
 
 # ---------------------------------------------------------------------- #
 #                           ~/src/common/                                #
@@ -107,7 +123,7 @@ CommonRoutines.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/Common
 	${FC} ${OPT} -c ${SRCDIR}common/CommonRoutines.f90 -o $@
 
 Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}common/Timing.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}common/Timing.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/Timing.f90 -o $@
 
 # Test programs
    
@@ -129,6 +145,10 @@ NodalStorage_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o 
                        Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalStorage_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}spectralops/NodalStorage_Class.f90 -o $@
 
+DGITIntegrator_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
+                       Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/DGITIntegrator_Class.f90 
+	${FC} ${OPT} -c ${SRCDIR}spectralops/DGITIntegrator_Class.f90 -o $@
+
 # Cuda Extensions
 
 Lagrange_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}spectralops/cuda/Lagrange_Cuda_Class.cuf
@@ -138,15 +158,15 @@ NodalStorage_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutin
                        Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf
 	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf -o $@
 
+DGITIntegrator_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
+                       Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/DGITIntegrator_Cuda_Class.cuf
+	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/DGITIntegrator_Cuda_Class.cuf -o $@
 
 # ---------------------------------------------------------------------- #
 #                       ~/src/solutionstorage/                           #
 # ---------------------------------------------------------------------- #
 
 # MODULE list #
-DGSEMSolutionStorage_1D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o ${SRCDIR}solutionstorage/DGSEMSolutionStorage_1D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}solutionstorage/DGSEMSolutionStorage_1D_Class.f90 -o $@
-
 DGSEMSolutionStorage_2D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o ${SRCDIR}solutionstorage/DGSEMSolutionStorage_2D_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}solutionstorage/DGSEMSolutionStorage_2D_Class.f90 -o $@
 	
@@ -187,7 +207,7 @@ cmdi : ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModel
 	${FC} ${OPT} ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o -o $@
 
 ModelDataInstances_Class.o : ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 ModelPrecision.o CommonRoutines.o
-	${FC} ${OPT} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
 
 CompareModelDataInstances.o : ${SRCDIR}integration_testing/CompareModelDataInstances.f90 ModelDataInstances_Class.o ModelPrecision.o
 	${FC} ${OPT} -c ${SRCDIR}integration_testing/CompareModelDataInstances.f90 -o $@
@@ -249,7 +269,7 @@ GOBJ3 = ModelPrecision.o \
 DecomposeHexMesh : ${GOBJ3} DecomposeHexMesh.o
 	${FC} ${OPT} ${GOBJ3} DecomposeHexMesh.o ${METISLIB} -o $@
 
-DecomposeStructuredHexMesh : ${GOBJ3} DecomposeStructuredHexMesh.o
+meshgen : ${GOBJ3} DecomposeStructuredHexMesh.o
 	${FC} ${OPT} ${GOBJ3} DecomposeStructuredHexMesh.o -o $@
 
 GenerateHexMesh : ${GOBJ3} GenerateMeshFiles_3D.o 
@@ -312,9 +332,6 @@ DecomposeStructuredHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 	
 ## Modules 
 #
-GeometryParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/GeometryParams_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/GeometryParams_Class.f90 -o $@
-
 BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/BoundaryCommunicator_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
@@ -345,7 +362,7 @@ MappedGeometry_2D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutin
 	
 MappedGeometry_3D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                             Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/MappedGeometry_3D_Class.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}geom/MappedGeometry_3D_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MappedGeometry_3D_Class.f90 -o $@
 
 QuadMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o HashTable_Class.o \
                    Quadrature.o Curve_Class.o MappedGeometry_2D_Class.o QuadElement_Class.o \
@@ -355,7 +372,7 @@ QuadMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o Ha
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surface_Class.o MappedGeometry_3D_Class.o HexElement_Class.o \
                   Face_Class.o Node_Class.o ${SRCDIR}geom/HexMesh_Class.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
@@ -432,7 +449,7 @@ TestHexMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Clas
 
 Ray_Class.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o BoundaryCommunicator_Class.o \
               MappedGeometry_3D_Class.o HexMesh_Class.o ${SRCDIR}viz/Ray_Class.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}viz/Ray_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}viz/Ray_Class.f90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
@@ -554,39 +571,39 @@ FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${
 	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
 Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
-	${FC} ${OPT} -c ${FMACRO} ${SRCDIR}fluid/Fluid_Class.f90 -o $@
+	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${FMACRO} -c ${MODDIR}/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 else
 Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 endif
 
 Fluid_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
 
 TestMPIStateExchange_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${LIB} ${INC} -o $@
 	
 Fluid_PickupToTecplot.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${LIB} ${INC} -o $@
 	
 SampleAlongRays.o : ModelPrecision.o Fluid_Class.o Ray_Class.o ${SRCDIR}fluid/SampleAlongRays.f90
-	${FC} ${OPT} ${FMACRO} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
 
 initialize: ${CNOBJ} Fluid_InitialConditions.o
-	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${MPILIB} ${MPIINC} -o $@
- 
+	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
+
 integrate: ${CNOBJ} Fluid_Driver.o
-	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
 	
 pickuptoptecplot : ${CNOBJ} Fluid_PickupToTecplot.o
-	${FC} ${OPT} ${CNOBJ} Fluid_PickupToTecplot.o ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CNOBJ} Fluid_PickupToTecplot.o ${LIB} ${INC} -o $@
 	
 test_stateExchange: ${CNOBJ} TestMPIStateExchange_Driver.o
-	${FC} ${OPT} ${CNOBJ} TestMPIStateExchange_Driver.o ${MPILIB} ${MPIINC} -o $@
+	${FC} ${OPT} ${CNOBJ} TestMPIStateExchange_Driver.o ${LIB} ${INC} -o $@
 	
 	
 SOBJ = ModelPrecision.o \
@@ -613,7 +630,7 @@ SOBJ = ModelPrecision.o \
        SampleAlongRays.o
 
 sars: ${SOBJ}
-	${FC} ${OPT} ${FMACRO} ${SOBJ} -o $@ 	
+	${FC} ${OPT} ${CPPFLAGS} ${SOBJ} -o $@ 	
 
 .PHONY : clean
 

@@ -1,6 +1,7 @@
 ! Fluid_InitialConditions.f90
 ! 
-! Copyright 2017 Joseph Schoonover <schoonover.numerics@gmail.com>
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -19,56 +20,59 @@ USE Fluid_Class
  IMPLICIT NONE
 
  TYPE( Fluid ) :: myeu
- INTEGER       :: myRank, mpiErr, nProcs
+ INTEGER       :: mpiErr
  CHARACTER(4)  :: rankChar
+ LOGICAL       :: setupSuccess
 
 #ifdef HAVE_MPI
       ! MPI Initialization
       CALL MPI_INIT( mpiErr )
-      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myRank, mpiErr )
-      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, nProcs, mpiErr )
+      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myeu % myRank, mpiErr )
+      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myeu % nProc, mpiErr )
       ! Sanity check
-      PRINT*, 'Fluid_InitialConditions_MPI : Greetings from Process ', myRank, ' of ',nProcs
+      PRINT*, 'Fluid_InitialConditions_MPI : Greetings from Process ', myeu % myRank, ' of ', myeu % nProc
 #else
-      myRank = 0
-      nProcs = 1
+      myeu % myRank = 0
+      myeu % nProc  = 1
 #endif
-      CALL myeu % Build( myRank, nProcs )
+      CALL myeu % Build( setupSuccess )
  
-      CALL InitialCondition( myeu )
-      
-      PRINT*, "Reset Boundary conditions"
-      CALL ResetBoundaryConditions( myeu, myRank )
-      PRINT*, "DONE!"
-      
-      CALL myeu % WritePickup( 0, myRank ) 
-      
-      CALL myeu % WriteTecplot( 0, myeu % params % nPlot, myRank )
-      
-      ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the 
-      ! integrator, the mesh scaling is not applied a second time 
-      CALL myeu % mesh % ScaleTheMesh( myeu % dgStorage % interp, &
-                                          1.0_prec/myeu % params % xScale, &
-                                          1.0_prec/myeu % params % yScale, &
-                                          1.0_prec/myeu % params % zScale )
-      WRITE( rankChar, '(I4.4)' )myRank
-      CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
+      IF( SetupSuccess )THEN
+         CALL InitialCondition( myeu )
+         
+         PRINT*, "Reset Boundary conditions"
+         CALL ResetBoundaryConditions( myeu )
+         PRINT*, "DONE!"
+         
+         CALL myeu % WritePickup( ) 
+         
+         CALL myeu % WriteTecplot( )
+         
+         ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the 
+         ! integrator, the mesh scaling is not applied a second time 
+         CALL myeu % mesh % ScaleTheMesh( myeu % dgStorage % interp, &
+                                             1.0_prec/myeu % params % xScale, &
+                                             1.0_prec/myeu % params % yScale, &
+                                             1.0_prec/myeu % params % zScale )
+         WRITE( rankChar, '(I4.4)' ) myeu % myRank
+         CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
       
 #ifdef HAVE_MPI
-      CALL MPI_BARRIER( )
+         CALL MPI_BARRIER( )
 #endif
       
-      CALL myeu % Trash( )
+         CALL myeu % Trash( )
+
+      ENDIF
 
 #ifdef HAVE_MPI
       CALL MPI_FINALIZE( mpiErr )
 #endif
 
  CONTAINS
- SUBROUTINE ResetBoundaryConditions( myDGSEM, myRank )
+ SUBROUTINE ResetBoundaryConditions( myDGSEM )
   
    TYPE( Fluid ), INTENT(inout) :: myDGSEM
-   INTEGER, INTENT(in)          :: myRank
    ! Local
    INTEGER :: iFace, iFace2, e1, e2, s1, p2
    
@@ -81,7 +85,7 @@ USE Fluid_Class
          e2    = myDGSEM % mesh % Faces(iFace2) % elementIDs(2)
          p2    = myDGSEM % extComm % extProcIDs( iFace )
          
-         IF( e2 < 0 .AND. p2 == myRank )THEN
+         IF( e2 < 0 .AND. p2 == myeu % myRank )THEN
          
             myDGSEM % mesh % faces(iFace2) % elementIDs(2) = NO_NORMAL_FLOW
                

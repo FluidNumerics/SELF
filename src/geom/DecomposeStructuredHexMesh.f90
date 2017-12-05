@@ -1,3 +1,7 @@
+
+! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! All rights reserved.
+
 PROGRAM DecomposeStructuredHexMesh
 
  ! src/common/
@@ -10,19 +14,21 @@ PROGRAM DecomposeStructuredHexMesh
  ! src/geom/
  USE HexMesh_Class
  USE TopographicShapes
- USE Params_Class
+ USE FluidParams_Class
  ! src/boundary/
  USE BoundaryCommunicator_Class
  
   
  IMPLICIT NONE
 
- TYPE( NodalStorage )         :: nodal
- TYPE( HexMesh )              :: mesh, procMesh
- TYPE( RunParams )            :: params
- TYPE( MultiTimers )          :: timers
- TYPE( BoundaryCommunicator ) :: bcom
- INTEGER(KIND=8)              :: procID
+ TYPE( NodalStorage )                      :: nodal
+ TYPE( HexMesh )                           :: mesh
+ TYPE( HexMesh ), ALLOCATABLE              :: procMesh(:)
+ TYPE( FluidParams )                       :: params
+ TYPE( MultiTimers )                       :: timers
+ TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
+ INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
+ INTEGER                      :: procID
  INTEGER                      :: pfnodes(1:nQuadNodes), gfNodes(1:nQuadNodes), nIDs(1:nQuadNodes)
  INTEGER                      :: nElems, nProc, pID, i
  INTEGER                      :: iEl, jEl, iSide, iNode, nAdj, nID, elID, nBe, nMPI
@@ -31,13 +37,55 @@ PROGRAM DecomposeStructuredHexMesh
  INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
  INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:)
  REAL(prec), ALLOCATABLE      :: materials(:)
- CHARACTER(4)                 :: pIDChar
+ LOGICAL                      :: setupSuccess
  
+
+      CALL Setup( )
+
+      IF( setupSuccess )THEN
+
+         CALL timers % StartTimer( 1 )
+   
+         CALL PartitionElementsAndNodes_Structured( )
+         
+            
+         ! Now we generate the local mesh for each process
+         DO procID = 0, nProc-1
+         
+            CALL procMesh(procID) % Initialize(  nNodePerProc(procID), &
+                                         nElPerProc(procID), &
+                                         1, params % polyDeg )
+             
+            CALL DecomposeNodes( procID )
+   
+            CALL DecomposeElements( procID )                            
+   
+            CALL DecomposeFaces( procID ) 
+            
+            CALL FileIO( procID ) 
+            
+         ENDDO
+   
+         CALL SetupCommTables( )
+   
+         CALL timers % StopTimer( 1 )
+         
+         CALL Cleanup( )
+      ENDIF
+
+ CONTAINS
+
+ SUBROUTINE Setup( )
+    IMPLICIT NONE
+
       ! Read in the parameters
-      CALL params % Build( )
+      CALL params % Build( setupSuccess )
+      IF( .NOT. setupSuccess )THEN
+         RETURN
+      ENDIF
       CALL timers % Build( )
       
-      CALL timers % AddTimer( 'Spectral Partition Time', 1 )
+      CALL timers % AddTimer( 'Total Time', 1 )
       ! Build an interpolant
       CALL nodal % Build( N = params % polyDeg, &
                           nPlot = params % nPlot, &
@@ -85,10 +133,66 @@ PROGRAM DecomposeStructuredHexMesh
       
       ALLOCATE( partitions(1:nElems) )
       partitions = 0
-      
-     
-      IF ( nProc > 1 )THEN
+      ALLOCATE( bcom(0:nProc-1), procMesh(0:nProc-1) ) 
+      ALLOCATE( faceProcCount(1:mesh % nFaces), &
+                faceProcOwners(1:mesh % nFaces,1:2), &
+                faceBoundaryIDs(1:mesh % nFaces,1:2) )
 
+      faceProcCount   = 0
+      faceProcOwners  = -1
+      faceBoundaryIDs = 0
+
+ END SUBROUTINE Setup
+!
+ SUBROUTINE Cleanup( )
+    IMPLICIT NONE
+    
+      DO procID = 0, nProc-1
+         CALL bCom(procID) % Trash( )
+         CALL procMesh(procID) % Trash( )
+      ENDDO
+      DEALLOCATE( bCom, procMesh )
+      
+
+      ! For visualizing the decomposition
+      materials = REAL( partitions, prec )
+      CALL mesh % WriteMaterialTecplot( materials )
+      
+      CALL timers % Write_MultiTimers( )
+
+      ! Clean up memory !
+      DEALLOCATE( materials, &
+                  faceProcCount, &
+                  faceProcOwners, &
+                  faceBoundaryIDs )
+      
+      CALL mesh % Trash( )
+      CALL nodal % Trash( )
+      CALL timers % Trash( )
+
+ END SUBROUTINE Cleanup
+!
+ SUBROUTINE FileIO( procID )
+    IMPLICIT NONE
+    INTEGER, INTENT(in) :: procID
+    ! Local 
+    CHARACTER(4) :: pIDChar
+
+
+         ! Now we need to write a peace-mesh file and and communicator file
+         WRITE( pIDChar, '(I4.4)' ) procID
+         CALL procmesh(procID) % WriteTecplot( 'mesh.'//pIDChar )
+         CALL procmesh(procID) % WritePeaceMeshFile( TRIM(params % PeaceMeshFile)//'.'//pIDChar )
+         !CALL bCom(procID) % WritePickup( 'ExtComm.'//pIDChar )
+         
+ 
+ END SUBROUTINE FileIO
+!
+ SUBROUTINE PartitionElementsAndNodes_Structured( )
+    IMPLICIT NONE
+    
+
+      IF( nProc > 1 )THEN
          nxp = params % nXelem/params % nProcX
          nyp = params % nYelem/params % nProcY
          nzp = params % nZelem/params % nProcZ
@@ -139,10 +243,9 @@ PROGRAM DecomposeStructuredHexMesh
             PRINT*, 'Process ID :',procID, ', nElems :', nElPerProc(procID)
             PRINT*, 'Process ID :',procID, ', nNodes :', nNodePerProc(procID)
          ENDDO
-      
-         CALL timers % StopTimer( 1 )
-      
-      ELSE  ! This is a single rank job
+
+      ELSE
+
          DO iEl = 1, nElems
             nElPerProc(0) = mesh % nElems
             globalToLocal(iEl,1) = iEl ! Local ID is global ID
@@ -158,238 +261,294 @@ PROGRAM DecomposeStructuredHexMesh
             nNodePerProc = nNodePerProc + nodeLogic(nID,:)
             globalToLocalNode(nID,:) = nNodePerProc
          ENDDO
-         
+
       ENDIF
-         
-         ! Add in the node logic!!!
-         
-      ! Now we generate the local mesh for each process
-      DO procID = 0, nProc-1
+ 
       
-         CALL procMesh % Initialize(  nNodePerProc(procID), &
-                                      nElPerProc(procID), &
-                                      1, params % polyDeg )
-                                      
-         !PRINT*, 'Setting up local nodes'
-         ! The nodes on the local node mesh are assigned using the global mesh and the "nodeLogic"
-         ! array
-         DO nID = 1, mesh % nNodes
-         
-            ! We only assign node information if it is "owned" by this process
-            IF( nodeLogic(nID,procID) == 1 )THEN 
-               ! Obtain the local node ID from the "global-to-local" array
-               localID = globalToLocalNode( nID, procID )
-               ! Assign the local node attributes
-               procMesh % nodes(localID) % nodeID   = nID
-               procMesh % nodes(localID) % nodeType = mesh % nodes(nID) % nodeType
-               procMesh % nodes(localID) % x        = mesh % nodes(nID) % x
-               procMesh % nodes(localID) % y        = mesh % nodes(nID) % y
-               procMesh % nodes(localID) % z        = mesh % nodes(nID) % z
-            ENDIF
-            
-         ENDDO
+ END SUBROUTINE PartitionElementsAndNodes_Structured
+!
+ SUBROUTINE DecomposeNodes( procID )
+   IMPLICIT NONE
+   INTEGER, INTENT(in) :: procID
+   ! Local 
+   INTEGER :: nID, localID
 
-         ! Set the element-node connectivity
-         DO iEl = 1, mesh % nElems
-            ! We only assign element information if it is "owned" by this process
-            IF( globalToLocal(iEl,2) == procID )THEN
-               elID = globalToLocal(iEl,1) ! Obtain the local element ID from the global-to-local array
-               
-               DO iNode = 1, 8
-                  ! First we grab the global node ID for this element's corner node
-                  nID = mesh % elements(iEl) % nodeIDs(iNode)
-                  ! Then we convert this to a local node ID for this process
-                  localID = globalToLocalNode( nID, procID )
-                  ! And now we assign the local Node ID to the local element's corner node ID's
-                  procMesh % elements(elID) % nodeIDs(iNode)  = localID
-               ENDDO
-               procMesh % elements(elID) % elementID = iEl
-                  
-               ! Set the geometry
-               procMesh % geom(elID) % nHat   = mesh % geom(iEl) % nHat
-               procMesh % geom(elID) % xBound = mesh % geom(iEl) % xBound
-               procMesh % geom(elID) % yBound = mesh % geom(iEl) % yBound
-               procMesh % geom(elID) % zBound = mesh % geom(iEl) % zBound
-               procMesh % geom(elID) % x      = mesh % geom(iEl) % x
-               procMesh % geom(elID) % y      = mesh % geom(iEl) % y
-               procMesh % geom(elID) % z      = mesh % geom(iEl) % z
-               procMesh % geom(elID) % J      = mesh % geom(iEl) % J
-               procMesh % geom(elID) % dxds   = mesh % geom(iEl) % dxds
-               procMesh % geom(elID) % dxdp   = mesh % geom(iEl) % dxdp
-               procMesh % geom(elID) % dxdq   = mesh % geom(iEl) % dxdq
-               procMesh % geom(elID) % dyds   = mesh % geom(iEl) % dyds
-               procMesh % geom(elID) % dydp   = mesh % geom(iEl) % dydp
-               procMesh % geom(elID) % dydq   = mesh % geom(iEl) % dydq
-               procMesh % geom(elID) % dzds   = mesh % geom(iEl) % dzds
-               procMesh % geom(elID) % dzdp   = mesh % geom(iEl) % dzdp
-               procMesh % geom(elID) % dzdq   = mesh % geom(iEl) % dzdq
-               procMesh % geom(elID) % Ja     = mesh % geom(iEl) % Ja
+     DO nID = 1, mesh % nNodes
+     
+        ! We only assign node information if it is "owned" by this process
+        IF( nodeLogic(nID,procID) == 1 )THEN 
+           ! Obtain the local node ID from the "global-to-local" array
+           localID = globalToLocalNode( nID, procID )
+           ! Assign the local node attributes
+           procMesh(procID) % nodes(localID) % nodeID   = nID
+           procMesh(procID) % nodes(localID) % nodeType = mesh % nodes(nID) % nodeType
+           procMesh(procID) % nodes(localID) % x        = mesh % nodes(nID) % x
+           procMesh(procID) % nodes(localID) % y        = mesh % nodes(nID) % y
+           procMesh(procID) % nodes(localID) % z        = mesh % nodes(nID) % z
+        ENDIF
+        
+     ENDDO
 
-            ENDIF
-            
-         ENDDO
-         
-         ! Set the faces
-         ! First we count the local faces and fill in the face connectivity
-         
-         CALL procMesh % ConstructFaces( )
-         PRINT*, 'Process ID :',procID, ', nFaces :', procMesh % nFaces
-         
-         
-         ! Now we need to cycle through the faces and find the boundary faces
-         ! If we find a boundary face (unassigned secondary element), then we need to search
-         ! through the global mesh to find the matching face to determine the appropriate 
-         ! boundary condition. The boundary condition could either be a physical boundary condition,
-         ! numerical boundary condition, or may need to indicate an MPI_SEND/RECV pair.
-         
-         ! Count the number of boundary faces
-         nBe = 0
-         DO iFace = 1, procMesh % nFaces
-            e2 = procMesh % faces(iFace) % ElementIDs(2)
-            IF( e2 <= 0 )THEN
+ END SUBROUTINE DecomposeNodes
+!
+ SUBROUTINE DecomposeElements( procID )
+   IMPLICIT NONE
+   INTEGER, INTENT(in) :: procID
+   ! Local
+   INTEGER :: iEl, elID, nID, localID
+
+     ! Set the element-node connectivity
+     DO iEl = 1, mesh % nElems
+        ! We only assign element information if it is "owned" by this process
+        IF( globalToLocal(iEl,2) == procID )THEN
+           elID = globalToLocal(iEl,1) ! Obtain the local element ID from the global-to-local array
+           
+           DO iNode = 1, 8
+              ! First we grab the global node ID for this element's corner node
+              nID = mesh % elements(iEl) % nodeIDs(iNode)
+              ! Then we convert this to a local node ID for this process
+              localID = globalToLocalNode( nID, procID )
+              ! And now we assign the local Node ID to the local element's corner node ID's
+              procMesh(procID) % elements(elID) % nodeIDs(iNode)  = localID
+           ENDDO
+           procMesh(procID) % elements(elID) % elementID = iEl
+              
+           ! Set the geometry
+           procMesh(procID) % geom(elID) % nHat   = mesh % geom(iEl) % nHat
+           procMesh(procID) % geom(elID) % xBound = mesh % geom(iEl) % xBound
+           procMesh(procID) % geom(elID) % yBound = mesh % geom(iEl) % yBound
+           procMesh(procID) % geom(elID) % zBound = mesh % geom(iEl) % zBound
+           procMesh(procID) % geom(elID) % x      = mesh % geom(iEl) % x
+           procMesh(procID) % geom(elID) % y      = mesh % geom(iEl) % y
+           procMesh(procID) % geom(elID) % z      = mesh % geom(iEl) % z
+           procMesh(procID) % geom(elID) % J      = mesh % geom(iEl) % J
+           procMesh(procID) % geom(elID) % dxds   = mesh % geom(iEl) % dxds
+           procMesh(procID) % geom(elID) % dxdp   = mesh % geom(iEl) % dxdp
+           procMesh(procID) % geom(elID) % dxdq   = mesh % geom(iEl) % dxdq
+           procMesh(procID) % geom(elID) % dyds   = mesh % geom(iEl) % dyds
+           procMesh(procID) % geom(elID) % dydp   = mesh % geom(iEl) % dydp
+           procMesh(procID) % geom(elID) % dydq   = mesh % geom(iEl) % dydq
+           procMesh(procID) % geom(elID) % dzds   = mesh % geom(iEl) % dzds
+           procMesh(procID) % geom(elID) % dzdp   = mesh % geom(iEl) % dzdp
+           procMesh(procID) % geom(elID) % dzdq   = mesh % geom(iEl) % dzdq
+           procMesh(procID) % geom(elID) % Ja     = mesh % geom(iEl) % Ja
+
+        ENDIF
+        
+     ENDDO
+
+ END SUBROUTINE DecomposeElements
+!
+ SUBROUTINE DecomposeFaces( procID )
+   IMPLICIT NONE
+   INTEGER, INTENT(in) :: procID 
+   INTEGER             :: e1, e2, p1, p2, iFace, iFaceLocal
+   INTEGER             :: nBe, nMPI
+
+      procMesh(procID) % nFaces = 0 
+      nBe               = 0
+      DO iFace = 1, mesh % nFaces
+
+         e1 = mesh % faces(iFace) % elementIDs(1)
+         e2 = mesh % faces(iFace) % elementIDs(2)
+
+         p1 = globalToLocal(e1,2)
+         IF( e2 > 0 )THEN
+            p2 = globalToLocal(e2,2)
+         ELSE
+            p2  = p1
+         ENDIF
+
+         IF( p1 == procID .OR. p2 == procID )THEN
+            procMesh(procID) % nFaces = procMesh(procID) % nFaces + 1
+            IF( e2 < 0 .OR. p2 /= p1 )THEN
                nBe = nBe + 1
             ENDIF
-         ENDDO
-         PRINT*, 'Process ID :',procID, ', nBFace :', nBe
-         
-         ! And initialize the boundary communicator
-         CALL bCom % Initialize( nBe )
-         ! Assign the boundary face ID to the
-         nBe = 0
-         nMPI = 0
-         DO iFace = 1, procMesh % nFaces
-         
-            e2 = procMesh % faces(iFace) % ElementIDs(2)
-            IF( e2 <= 0 )THEN ! This face is a boundary of this process
-            
-               ! Now we search through the global mesh for an identical face
-               ! Recall that the face is identified by its terminating nodes.
-               ! Here, we must use the global node ID's
-               nIDs = procMesh % faces(iFace) % nodeIDs ! local node ID
-               DO i = 1, nQuadNodes
-                  pfnodes(i) = procMesh % nodes(nIDs(i)) % nodeID
-               ENDDO
-               
-               DO jFace = 1, mesh % nFaces ! Cycle through the global mesh and search for an identical face
-                  ! Obtain the terminating global node IDs from the global mesh
-                  gfnodes = mesh % faces(jFace) % nodeIDs
-              
-                  IF( NodesAreTheSame( pfnodes, gfnodes, nQuadNodes ) )THEN ! we have found an identical face
-                     
-                     ! In this case, we have found an identical face 
-                     ! We need to copy over the secondary element information
-                     iEl = mesh % faces(jFace) % elementIDs(2)
-                     IF( iEl > 0 )THEN ! If iEl > 0, then this face is internal to the global mesh
-                                       ! implying that an MPI communication is needed
-                        ! For this case, an MPI_SEND/RECV pair is needed and all secondary element
-                        ! information must be copied from the global mesh
-                        elID = globalToLocal(iEl, 1) ! obtain the process local element ID
-                        pID  = globalToLocal(iEl, 2) ! obtain the process ID
-                        
-                        ! We need to make sure that the "secondary" element is associated with
-                        ! another process. 
-                        pIDs(1) = globalToLocal( mesh % faces(jFace) % elementIDs(1),2 )
-                        pIDs(2) = globalToLocal( mesh % faces(jFace) % elementIDs(2),2 )
-                        
-                        ! Select the secondary element as the outside element
-                        IF( pIDs(2) == procID )THEN
-                           ! In this case, the "secondary" element is owned the process
-                           ! with ID "procID" (this process). Then, here must swap the
-                           ! elements; primary becomes secondary, and vv.
-                           iEl  = mesh % faces(jFace) % elementIDs(1)
-                           elID = globalToLocal(iEl, 1)
-                           pID  = globalToLocal(iEl, 2)
-                        ENDIF
-                        
-                        ! If the process ID of the global-secondary element is owned by the current 
-                        ! process, then we need to assign the global primary element as the local
-                        ! secondary element
-                        IF( pIDs(1) == pIDs(2) .AND. pID==procID )THEN ! This is a periodic boundary
-                           iEl = mesh % faces(jFace) % elementIDs(1)
-                           procMesh % faces(iFace) % faceID = jFace
-                           procMesh % faces(iFace) % elementIDs(2) = globalToLocal( mesh % faces(jFace) % elementIDs(2), 1 )
-                           ! Remove this as a boundary face
-                           bCom % nBoundaries = bCom % nBoundaries-1
-!                           PRINT*, ' P ',procID,  pID, &
-!                                procMesh % faces(iFace) % elementIDs(2), &
-!                                procMesh % faces(iFace) % elementIDs(1), &
-!                                procMesh % faces(iFace) % elementSides(1)
-                        ELSE
-                           nBe = nBe + 1
-                           bCom % boundaryIDs(nBe) = iFace
-                           bCom % extElemIDs(nBe) = elID
-                           bCom % extProcIDs(nBe) = pID 
-                           procMesh % faces(iFace) % boundaryID = nBe
-                        
-                           nMPI = nMPI + 1
-                           procMesh % faces(iFace) % faceID = jFace
-                           procMesh % faces(iFace) % elementIDs(2) = -elID
-                           procMesh % faces(iFace) % iStart = mesh % faces(jFace) % iStart
-                           procMesh % faces(iFace) % iInc = mesh % faces(jFace) % iInc
-                           procMesh % faces(iFace) % jStart = mesh % faces(jFace) % jStart
-                           procMesh % faces(iFace) % jInc = mesh % faces(jFace) % jInc
-                           procMesh % faces(iFace) % swapDimensions = mesh % faces(jFace) % swapDimensions
-                        
-!                        PRINT*, procID, nBe,&
-!                                iEl, pID, &
-!                                procMesh % elements(procmesh % faces(iFace) % elementIDs(1)) % elementID , &
-!                                procMesh % faces(iFace) % elementIDs(1), &
-!                                procMesh % faces(iFace) % elementSides(1)
-                           
-                           
-                        ENDIF
-                        
-                     ELSE
-                        ! In this case, a physical or numerical boundary is found and we only 
-                        ! need to assign the secondary element ID
-                        procMesh % faces(iFace) % elementIDs(2) = iEl
-                        nBe = nBe + 1
-                        bCom % boundaryIDs(nBe) = iFace
-                        bCom % extElemIDs(nBe) = iEl
-                        bCom % extProcIDs(nBe) = procID 
-                        procMesh % faces(iFace) % boundaryID = nBe
-                        
-                     ENDIF
-                     
-                     ! In either case, we have identified the face and we can exit this inner loop
-                     EXIT
-                     
-                  ENDIF
-               
-               ENDDO 
-               
-            ENDIF ! If this is a boundary face
-            
-         ENDDO ! loop over the local faces
-         PRINT*, 'Process ID :',procID, ', nMPI   :', nMPI
-         
-         ! Now we need to write a peace-mesh file and and communicator file
-         WRITE( pIDChar, '(I4.4)' ) procID
-         CALL procmesh % WriteTecplot( 'mesh.'//pIDChar )
-         CALL procmesh % WritePeaceMeshFile( TRIM(params % PeaceMeshFile)//'.'//pIDChar )
-         CALL bCom % WritePickup( 'ExtComm.'//pIDChar )
-         
-         CALL procMesh % Trash( )
-         CALL bCom % Trash( )
-         
+         ENDIF
+
       ENDDO
-      
-      ! For visualizing the decomposition
-      materials = REAL( partitions, prec )
-      CALL mesh % WriteMaterialTecplot( materials )
-      
-      CALL timers % Write_MultiTimers( )
 
-      ! Clean up memory !
-      DEALLOCATE( materials )
+      PRINT*, '========================================================================='
+      PRINT*, 'Process ID :',procID, ', nFaces :', procMesh(procID) % nFaces
+      PRINT*, 'Process ID :',procID, ', nBFace :', nBe
+      DEALLOCATE( procMesh(procID) % faces )
+      ALLOCATE( procMesh(procID) % faces(1:procMesh(procID) % nFaces) ) 
+      CALL bCom(procID) % Initialize( nBe )
+
+      iFaceLocal = 0
+      nBe        = 0
+      nMPI       = 0
+      DO iFace = 1, mesh % nFaces
+
+         e1 = mesh % faces(iFace) % elementIDs(1)
+         e2 = mesh % faces(iFace) % elementIDs(2)
+
+         p1 = globalToLocal(e1,2)
+         IF( e2 > 0 )THEN
+            p2 = globalToLocal(e2,2)
+         ELSE
+            p2  = p1
+         ENDIF
+
+         IF( p1 == procID .OR. p2 == procID )THEN
+            iFaceLocal = iFaceLocal + 1
+            faceProcCount(iFace) = faceProcCount(iFace) + 1
+            IF( faceProcCount(iFace) > 2 )THEN
+               PRINT*, ' DecomposeFaces : Something catastrophic happened !' 
+               CALL Cleanup( )
+               STOP 
+            ENDIF
+            faceProcOwners(iFace, faceProcCount(iFace)) = procID
+
+            IF( p2 == p1 .AND. e2 > 0 )THEN ! Internal Face
+              
+               procMesh(procID) % faces(iFaceLocal) % faceID          = iFace
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(1)   = globalToLocal( e1, 1 ) 
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(2)   = globalToLocal( e2, 1 ) 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(1) = mesh % faces(iFace) % elementSides(1) 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(2) = mesh % faces(iFace) % elementSides(2)
+               procMesh(procID) % faces(iFaceLocal) % iStart          = mesh % faces(iFace) % iStart
+               procMesh(procID) % faces(iFaceLocal) % iInc            = mesh % faces(iFace) % iInc
+               procMesh(procID) % faces(iFaceLocal) % jStart          = mesh % faces(iFace) % jStart
+               procMesh(procID) % faces(iFaceLocal) % jInc            = mesh % faces(iFace) % jInc
+               procMesh(procID) % faces(iFaceLocal) % swapDimensions  = mesh % faces(iFace) % swapDimensions
+
+            ELSEIF( p2 == p1 .AND. e2 < 0 )THEN ! Physical boundary
+
+               procMesh(procID) % faces(iFaceLocal) % faceID          = iFace
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(1)   = globalToLocal( e1, 1 ) 
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(2)   = e2 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(1) = mesh % faces(iFace) % elementSides(1) 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(2) = mesh % faces(iFace) % elementSides(2)
+               procMesh(procID) % faces(iFaceLocal) % iStart          = mesh % faces(iFace) % iStart
+               procMesh(procID) % faces(iFaceLocal) % iInc            = mesh % faces(iFace) % iInc
+               procMesh(procID) % faces(iFaceLocal) % jStart          = mesh % faces(iFace) % jStart
+               procMesh(procID) % faces(iFaceLocal) % jInc            = mesh % faces(iFace) % jInc
+               procMesh(procID) % faces(iFaceLocal) % swapDimensions  = mesh % faces(iFace) % swapDimensions
+
+               nBe = nBe + 1
+               bCom(procID) % boundaryIDs(nBe) = iFaceLocal
+               bCom(procID) % extProcIDs(nBe)  = procID 
+
+               ! Physical boundary ID's will be set to negative for physical boundaries
+               ! so that boundaries requiring communication can be separated from physical
+               ! boundaries. This will allow more operations to be run concurrently with
+               ! communication.
+               procMesh(procID) % faces(iFaceLocal) % boundaryID = -nBe
+
+            ELSEIF( p2 /= p1 .AND. procID == p1 )THEN ! MPI Boundary
+ 
+               nMPI = nMPI + 1 
+          
+               procMesh(procID) % faces(iFaceLocal) % faceID          = iFace
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(1)   = globalToLocal( e1, 1 ) 
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(2)   = -e2 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(1) = mesh % faces(iFace) % elementSides(1) 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(2) = mesh % faces(iFace) % elementSides(2)
+               procMesh(procID) % faces(iFaceLocal) % iStart          = mesh % faces(iFace) % iStart
+               procMesh(procID) % faces(iFaceLocal) % iInc            = mesh % faces(iFace) % iInc
+               procMesh(procID) % faces(iFaceLocal) % jStart          = mesh % faces(iFace) % jStart
+               procMesh(procID) % faces(iFaceLocal) % jInc            = mesh % faces(iFace) % jInc
+               procMesh(procID) % faces(iFaceLocal) % swapDimensions  = mesh % faces(iFace) % swapDimensions
+
+               nBe = nBe + 1
+               bCom(procID) % boundaryIDs(nBe) = iFaceLocal
+               bCom(procID) % extProcIDs(nBe)  = p2 
+
+               ! Boundary ID's associated with MPI boundaries are reported as positive integers
+               ! so that they can be distinguished from physical boundaries that do not require
+               ! communication with neighboring processes. 
+               procMesh(procID) % faces(iFaceLocal) % boundaryID = nBe
+
+               faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
+
+            ELSEIF( p2 /= p1 .AND. procID == p2 )THEN ! MPI Boundary
+            
+               nMPI = nMPI + 1 
+            
+               procMesh(procID) % faces(iFaceLocal) % faceID          = iFace
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(1)   = globalToLocal( e2, 1 ) 
+               procMesh(procID) % faces(iFaceLocal) % elementIDs(2)   = -e1 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(1) = mesh % faces(iFace) % elementSides(2) 
+               procMesh(procID) % faces(iFaceLocal) % elementSides(2) = mesh % faces(iFace) % elementSides(1)
+               procMesh(procID) % faces(iFaceLocal) % iStart          = mesh % faces(iFace) % iStart
+               procMesh(procID) % faces(iFaceLocal) % iInc            = mesh % faces(iFace) % iInc
+               procMesh(procID) % faces(iFaceLocal) % jStart          = mesh % faces(iFace) % jStart
+               procMesh(procID) % faces(iFaceLocal) % jInc            = mesh % faces(iFace) % jInc
+               procMesh(procID) % faces(iFaceLocal) % swapDimensions  = mesh % faces(iFace) % swapDimensions
+            
+               nBe = nBe + 1
+               bCom(procID) % boundaryIDs(nBe) = iFaceLocal
+               bCom(procID) % extProcIDs(nBe)  = p1 
+
+               ! Boundary ID's associated with MPI boundaries are reported as positive integers
+               ! so that they can be distinguished from physical boundaries that do not require
+               ! communication with neighboring processes. 
+               procMesh(procID) % faces(iFaceLocal) % boundaryID = nBe
+
+               faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
+
+            ENDIF
+         ENDIF
+
+      ENDDO
+      PRINT*, 'Process ID :',procID, ', nMPI   :', nMPI
+
+ END SUBROUTINE DecomposeFaces
+!
+ SUBROUTINE SetupCommTables( )
+   IMPLICIT NONE
+   ! Local
+   INTEGER :: procID, bID, extProc, extBID
+   INTEGER :: globalFaceID, localFaceID
+   INTEGER :: nMPI(0:nProc-1)
+   CHARACTER(4) :: pIDChar
+
+
       
-   !   CALL mesh % WriteTecplot( )
-      CALL mesh % Trash( )
-      CALL nodal % Trash( )
-      CALL timers % Trash( )
+      DO procID = 0, nProc-1
 
- CONTAINS
+         nMPI = 0
+         DO bID = 1, bCom(procID) % nBoundaries
 
+            extProc = bCom(procID) % extProcIDs(bID)
+            IF( extProc /= procID )THEN
+
+               ! nMPI is an array that keeps track of the order in which MPI messages will be sent
+               ! to procID's neighbors
+               nMPI(extProc) = nMPI(extProc) + 1
+               localFaceID  = bCom(procID) % boundaryIDs(bID)
+               globalFaceID = procMesh(procID) % faces(localFaceID) % faceID
+
+               IF( faceProcOwners(globalFaceID, 1) == procID )THEN
+                  extBID = faceBoundaryIDs(globalFaceID,2)
+               ELSEIF( faceProcOwners(globalFaceID,2) == procID )THEN
+                  extBID = faceBoundaryIDs(globalFaceID,1)
+               ELSE
+                  PRINT*, '  SetupCommTables : Something catastrophic happened !'
+                  CALL Cleanup( )
+                  STOP
+               ENDIF
+
+
+               bCom(extProc) % unPackMap(extBID) = nMPI(extProc)
+                  
+
+            ENDIF
+
+         ENDDO
+
+      ENDDO   
+
+      DO procID = 0, nProc-1
+         WRITE( pIDChar, '(I4.4)' ) procID
+         CALL bCom(procID) % WritePickup( 'ExtComm.'//pIDChar )
+      ENDDO
+     
+
+
+ END SUBROUTINE SetupCommTables
+!
  FUNCTION NodesAreTheSame( nlist, mlist, N ) RESULT( NATS )
    IMPLICIT NONE
    INTEGER :: N
