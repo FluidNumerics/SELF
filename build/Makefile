@@ -135,11 +135,8 @@ Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}comm
 Quadrature.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}spectralops/Quadrature.f90
 	${FC} ${OPT} -c ${SRCDIR}spectralops/Quadrature.f90 -o $@
 
-InterpolationSupportRoutines.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectralops/InterpolationSupportRoutines.f90
-	${FC} ${OPT} -c ${SRCDIR}spectralops/InterpolationSupportRoutines.f90 -o $@
-
-Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o InterpolationSupportRoutines.o ${SRCDIR}spectralops/Lagrange_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}spectralops/Lagrange_Class.f90 -o $@
+Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectralops/Lagrange_Class.f90
+	${FC} ${OPT} ${CPP} -c ${SRCDIR}spectralops/Lagrange_Class.f90 -o $@
 
 NodalStorage_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                        Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalStorage_Class.f90
@@ -150,9 +147,6 @@ DGITIntegrator_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.
 	${FC} ${OPT} -c ${SRCDIR}spectralops/DGITIntegrator_Class.f90 -o $@
 
 # Cuda Extensions
-
-Lagrange_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}spectralops/cuda/Lagrange_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/Lagrange_Cuda_Class.cuf -o $@
 
 NodalStorage_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                        Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf
@@ -223,7 +217,6 @@ GOBJS = ModelPrecision.o \
         HashTable_Class.o \
         Timing.o \
         Quadrature.o \
-        InterpolationSupportRoutines.o \
         Lagrange_Class.o \
         NodalStorage_Class.o \
         DGSEMSolutionStorage_2D_Class.o \
@@ -251,7 +244,6 @@ GOBJ3 = ModelPrecision.o \
         KeyRing_Class.o \
         Timing.o \
         Quadrature.o \
-        InterpolationSupportRoutines.o \
         Lagrange_Class.o \
         NodalStorage_Class.o \
         DGSEMSolutionStorage_2D_Class.o \
@@ -284,7 +276,6 @@ EQMOBJ = ModelPrecision.o \
          KeyRing_Class.o \
          Timing.o \
          Quadrature.o \
-         InterpolationSupportRoutines.o \
          Lagrange_Class.o \
          NodalStorage_Class.o \
          Node_Class.o \
@@ -414,12 +405,12 @@ HexMesh_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o HexMesh_Class.o \
 
 # --------- QuadMesh ----------- #
 TestQuadMesh_Cuda : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o HashTable_Class.o \
-                   InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
+                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Edge_Class.o QuadElement_Class.o Curve_Class.o MappedGeometry_2D_Class.o  QuadMesh_Class.o\
                    Node_Cuda_Class.o Edge_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_2D_Cuda_Class.o \
                    QuadMesh_Cuda_Class.o FluidParams_Class.o TestQuadMesh_Cuda.o
 	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o HashTable_Class.o \
-                   InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
+                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Edge_Class.o QuadElement_Class.o Curve_Class.o MappedGeometry_2D_Class.o  QuadMesh_Class.o\
                    Node_Cuda_Class.o Edge_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_2D_Cuda_Class.o \
                    QuadMesh_Cuda_Class.o FluidParams_Class.o TestQuadMesh_Cuda.o -o $@
@@ -429,12 +420,12 @@ TestQuadMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Cla
 
 # --------- HexMesh ----------- #
 TestHexMesh_Cuda : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o KeyRing_Class.o \
-                   InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
+                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Face_Class.o HexElement_Class.o Surface_Class.o MappedGeometry_3D_Class.o  HexMesh_Class.o\
                    Node_Cuda_Class.o Face_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_3D_Cuda_Class.o \
                    HexMesh_Cuda_Class.o FluidParams_Class.o TestHexMesh_Cuda.o
 	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o KeyRing_Class.o \
-                   InterpolationSupportRoutines.o Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
+                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
                    Node_Class.o Face_Class.o HexElement_Class.o Surface_Class.o MappedGeometry_3D_Class.o  HexMesh_Class.o\
                    Node_Cuda_Class.o Face_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_3D_Cuda_Class.o \
                    HexMesh_Cuda_Class.o FluidParams_Class.o TestHexMesh_Cuda.o -o $@
@@ -471,7 +462,6 @@ CNOBJ += Timing.o \
          HashTable_Class.o \
          KeyRing_Class.o \
          Quadrature.o \
-         InterpolationSupportRoutines.o \
          Lagrange_Class.o \
          Lagrange_Cuda_Class.o \
          NodalStorage_Class.o \
@@ -516,7 +506,6 @@ CNOBJ = ModelPrecision.o \
          KeyRing_Class.o \
          ModelDataInstances_Class.o \
          Quadrature.o \
-         InterpolationSupportRoutines.o \
          Lagrange_Class.o \
          NodalStorage_Class.o \
          RollOffFilter_Class.o \
@@ -540,7 +529,6 @@ CNOBJ = ModelPrecision.o \
         HashTable_Class.o \
          KeyRing_Class.o \
          Quadrature.o \
-         InterpolationSupportRoutines.o \
          Lagrange_Class.o \
          NodalStorage_Class.o \
          RollOffFilter_Class.o \
@@ -609,7 +597,6 @@ test_stateExchange: ${CNOBJ} TestMPIStateExchange_Driver.o
 SOBJ = ModelPrecision.o \
        ConstantsDictionary.o \
        CommonRoutines.o \
-       InterpolationSupportRoutines.o \
        Lagrange_Class.o \
        Quadrature.o \
        NodalStorage_Class.o \
