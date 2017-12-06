@@ -1748,13 +1748,127 @@ IMPLICIT NONE
 
   END SUBROUTINE ApplyInterpolationMatrix_3D_CUDAKernel
 !
+  ATTRIBUTES(Global) SUBROUTINE CalculateDerivative_1D_CUDAKernel( DMatT, f, derf, N, nVariables, nElems )
+    ! Currently only works for M,N <= 7
+    IMPLICIT NONE
+    INTEGER, INTENT(in)             :: N, nVariables, nElems
+    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(out) :: derf(0:N,1:nVariables,1:nElems)
+    ! Local
+    INTEGER            :: i, j, iEl, iVar, ii
+    REAL(prec), SHARED :: floc(0:7)
+    REAL(prec)         :: df
+  
+  
+      iVar = blockIdx % x
+      iEl  = blockIdx % y
+      i    = threadIdx % x-1
+      
+      IF( i <= N )THEN
+      
+         ! Pre-fetch into shared memory for this block
+         floc(i) = f(i,iVar,iEl)
+
+         CALL syncthreads( )
+
+         df = 0.0_prec
+
+         DO ii = 0, N
+            df = df + DMatT(ii,i)*floc(ii,j)
+         ENDDO
+                  
+         derf(i,iVar,iEl) = df
+
+      ENDIF
+    
+  END SUBROUTINE CalculateDerivative_1D_CUDAKernel
+!
+  ATTRIBUTES(Global) SUBROUTINE CalculateGradient_2D_CUDAKernel( DMatT, f, gradf, N, nVariables, nElems )
+    ! Currently only works for M,N <= 7
+    IMPLICIT NONE
+    INTEGER, INTENT(in)             :: N, nVariables, nElems
+    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(out) :: gradf(0:N,0:N,1:nVariables,1:nElems)
+    ! Local
+    INTEGER            :: i, j, iEl, iVar, ii
+    REAL(prec), SHARED :: floc(0:7,0:7)
+    REAL(prec)         :: df(1:2)
+  
+  
+      iVar = blockIdx % x
+      iEl  = blockIdx % y
+      i    = threadIdx % x-1
+      j    = threadIdx % y-1
+      
+      IF( i <= N .AND. j <= N )THEN
+      
+         ! Pre-fetch into shared memory for this block
+         floc(i,j) = f(i,j,iVar,iEl)
+
+         CALL syncthreads( )
+
+         df(1) = 0.0_prec
+         df(2) = 0.0_prec
+
+         DO ii = 0, N
+            df(1) = df(1) + DMatT(ii,i)*floc(ii,j)
+            df(2) = df(2) + DMatT(ii,j)*floc(i,ii)
+         ENDDO
+                  
+         gradf(1,i,j,iVar,iEl) = df(1)
+         gradf(2,i,j,iVar,iEl) = df(2)
+
+      ENDIF
+    
+  END SUBROUTINE CalculateGradient_2D_CUDAKernel
+!
+  ATTRIBUTES(Global) SUBROUTINE CalculateDivergence_2D_CUDAKernel( DMatT, f, divf, N, nVariables, nElems )
+    ! Currently only works for M,N <= 7
+    IMPLICIT NONE
+    INTEGER, INTENT(in)             :: N, nVariables, nElems
+    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:N,0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(out) :: divf(0:N,0:N,1:nVariables,1:nElems)
+    ! Local
+    INTEGER            :: i, j, k, iEl, iVar, ii
+    REAL(prec), SHARED :: floc(1:3,0:7,0:7)
+    REAL(prec) :: df
+  
+  
+      iVar = blockIdx % x
+      iEl  = blockIdx % y
+      i    = threadIdx % x-1
+      j    = threadIdx % y-1
+      
+      IF( i <= N .AND. j <= N )THEN
+      
+         ! Pre-fetch into shared memory for this block
+         floc(1,i,j) = f(1,i,j,iVar,iEl)
+         floc(2,i,j) = f(2,i,j,iVar,iEl)
+
+         CALL syncthreads( )
+
+         df = 0.0_prec
+         DO ii = 0, N
+            df = df + DMatT(ii,i)*floc(1,ii,j) + &
+                      DMatT(ii,j)*floc(2,i,ii) + &
+         ENDDO
+                  
+         divf(i,j,iVar,iEl) = divf
+
+      ENDIF
+    
+  END SUBROUTINE CalculateDivergence_2D_CUDAKernel 
+!
   ATTRIBUTES(Global) SUBROUTINE CalculateGradient_3D_CUDAKernel( DMatT, f, gradf, N, nVariables, nElems )
     ! Currently only works for M,N <= 7
     IMPLICIT NONE
     INTEGER, INTENT(in)             :: N, nVariables, nElems
     REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
     REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElems)
-    REAL(prec), DEVICE, INTENT(out) :: divf(0:N,0:N,0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(out) :: gradf(0:N,0:N,0:N,1:nVariables,1:nElems)
     ! Local
     INTEGER            :: i, j, k, iEl, iVar, ii
     REAL(prec), SHARED :: floc(0:7,0:7,0:7)
@@ -1832,7 +1946,6 @@ IMPLICIT NONE
     
  END SUBROUTINE CalculateDivergence_3D_CUDAKernel
  
-END MODULE Lagrange_Cuda_Class
 #endif
 
 
