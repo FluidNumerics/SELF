@@ -684,7 +684,7 @@ INCLUDE 'mpif.h'
             
          ENDDO ! m, loop over the RK3 steps
 
-         myDGSEM % simulationTime = myDGSEM % simulationTime + dt
+         myDGSEM % simulationTime = t0 + REAL(iT,prec)*dt
       
       ENDDO
 
@@ -4349,6 +4349,8 @@ INCLUDE 'mpif.h'
       INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
      
       IF( itExists )THEN
+      
+         PRINT*, '  Opening State.'//rankChar//'.'//timeStampString//'.pickup'
      
          OPEN( UNIT=NEWUNIT(fUnit), &
                FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
