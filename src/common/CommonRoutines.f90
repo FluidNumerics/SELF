@@ -58,7 +58,7 @@ CONTAINS
    REAL(prec) :: a, b
    LOGICAL :: AisB
 
-      IF( a == ZERO .OR. b == ZERO )THEN 
+      IF( a == 0.0_prec .OR. b == 0.0_prec )THEN 
          IF( ABS(a-b) <= EPSILON(ONE) )THEN 
             AisB = .TRUE.
          ELSE
@@ -225,7 +225,7 @@ CONTAINS
    INTEGER :: ind
 
       CALL SortArray( myArray, low, high )
-      arraysum = ZERO
+      arraysum = 0.0_prec
       DO ind = low, high
          arraysum = arraysum + myArray(ind)
       ENDDO
@@ -518,7 +518,7 @@ CONTAINS
          D = A(1,1)*A(2,2) - A(1,2)*A(2,1)
          RETURN
       ELSE
-         D = ZERO
+         D = 0.0_prec
          DO j = 1, N
             M = GetMinor( A, 1, j, N )
             D = D + (-1.0_prec)**(j+1)*A(1,j)*Determinant( M, N-1 )

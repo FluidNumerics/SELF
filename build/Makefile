@@ -136,7 +136,7 @@ Quadrature.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}spectralops/Quadr
 	${FC} ${OPT} -c ${SRCDIR}spectralops/Quadrature.f90 -o $@
 
 Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectralops/Lagrange_Class.f90
-	${FC} ${OPT} ${CPP} -c ${SRCDIR}spectralops/Lagrange_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectralops/Lagrange_Class.f90 -o $@
 
 NodalStorage_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                        Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalStorage_Class.f90

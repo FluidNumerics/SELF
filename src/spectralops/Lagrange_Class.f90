@@ -20,6 +20,10 @@ USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
 
+#ifdef HAVE_CUDA
+USE cudafor
+#endif
+
 IMPLICIT NONE
 
 !> \addtogroup Lagrange_Class 
@@ -85,8 +89,13 @@ IMPLICIT NONE
 
   TYPE, PUBLIC :: Lagrange
 
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED        :: N    
+    INTEGER, MANAGED        :: M 
+#else
     INTEGER                 :: N     
-    INTEGER                 :: M     
+    INTEGER                 :: M 
+#endif
     REAL(prec), ALLOCATABLE :: interpolationPoints(:)
     REAL(prec), ALLOCATABLE :: targetPoints(:)
     REAL(prec), ALLOCATABLE :: barycentricWeights(:)
@@ -97,8 +106,8 @@ IMPLICIT NONE
 
 #ifdef HAVE_CUDA
     REAL(prec), ALLOCATABLE, DEVICE :: barycentricWeights_dev(:)  
-    REAL(prec), ALLOCATABLE, DEVICE :: interpolatonMatrix_dev(:,:)
-    REAL(prec), ALLOCATABLE, DEVICE :: interpolatonMatrixTranspose_dev(:,:)
+    REAL(prec), ALLOCATABLE, DEVICE :: interpolationMatrix_dev(:,:)
+    REAL(prec), ALLOCATABLE, DEVICE :: interpolationMatrixTranspose_dev(:,:)
     REAL(prec), ALLOCATABLE, DEVICE :: derivativeMatrix_dev(:,:)  
     REAL(prec), ALLOCATABLE, DEVICE :: derivativeMatrixTranspose_dev(:,:)  
 #endif
@@ -375,8 +384,8 @@ IMPLICIT NONE
     REAL(prec) :: lp(0:myPoly % N)
     INTEGER    :: i, j
 
-      ls = LagrangePolynomials( myPoly % s, myPoly % barycentricWeights, sE(1), myPoly % N ) 
-      lp = LagrangePolynomials( myPoly % s, myPoly % barycentricWeights, sE(2), myPoly % N )
+      ls = myPoly % CalculateLagrangePolynomials( sE(1) ) 
+      lp = myPoly % CalculateLagrangePolynomials( sE(2) )
       
       interpF = 0.0_prec
       DO j = 0, myPoly % N
@@ -438,9 +447,9 @@ IMPLICIT NONE
     REAL(prec) :: lq(0:myPoly % N)
     INTEGER    ::  i, j, k
 
-      ls = LagrangePolynomials( myPoly % s, myPoly % barycentricWeights, sE(1), myPoly % N ) 
-      lp = LagrangePolynomials( myPoly % s, myPoly % barycentricWeights, sE(2), myPoly % N )
-      lq = LagrangePolynomials( myPoly % s, myPoly % barycentricWeights, sE(3), myPoly % N ) 
+      ls = myPoly % CalculateLagrangePolynomials( sE(1) ) 
+      lp = myPoly % CalculateLagrangePolynomials( sE(2) )
+      lq = myPoly % CalculateLagrangePolynomials( sE(3) )
       
       interpF = 0.0_prec
       DO k = 0, myPoly % N
@@ -515,7 +524,8 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
      
       CALL ApplyInterpolationMatrix_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % interpolationMatrixTranspose_dev, &
-                                                                     f, fNew, nElems )
+                                                                     f, fNew, myPoly % N, myPoly % M, &
+                                                                     nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -586,7 +596,8 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
      
       CALL ApplyInterpolationMatrix_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % interpolationMatrixTranspose_dev, &
-                                                                     f, fNew, nElems )
+                                                                     f, fNew, myPoly % N, myPoly % M, &
+                                                                     nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -659,7 +670,8 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
      
       CALL ApplyInterpolationMatrix_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % interpolationMatrixTranspose_dev, &
-                                                                     f, fNew, nElems )
+                                                                     f, fNew, myPoly % N, myPoly % M,&
+                                                                     nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -711,14 +723,73 @@ IMPLICIT NONE
 ! ================================================================================================ ! 
 !>@}
 
+  SUBROUTINE CalculateDerivative_1D( myPoly, f, derF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: derF(0:myPoly % N, 1:nVariables, 1:nElements)
+    TYPE(dim3) :: grid, tBlock
+    INTEGER    :: threadCount
+  
+      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
+
+      tBlock = dim3( threadCount, 1, 1 )
+      grid   = dim3( nVariables, nElements, 1)
+     
+      CALL CalculateDerivative_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
+                                                                f, derF, myPoly % N , nVariables, nElements )
+
+#else
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: derF(0:myPoly % N, 1:nVariables, 1:nElements)
+
+      derF = CalculateDerivative_1D_Lagrange( myPoly, f, nVariables, nElements )
+
+#endif
+
+  END SUBROUTINE CalculateDerivative_1D
+
+  SUBROUTINE CalculateGradient_2D( myPoly, f, gradF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: gradF(1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    TYPE(dim3) :: grid, tBlock
+    INTEGER    :: threadCount
+  
+      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
+
+      tBlock = dim3( threadCount, threadCount, 1 )
+      grid   = dim3( nVariables, nElements, 1)
+
+      CALL CalculateGradient_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
+                                                                f, gradF, myPoly % N , nVariables, nElements )
+
+#else
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: gradF(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+
+      gradF = CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements )
+
+#endif
+
+  END SUBROUTINE CalculateGradient_2D
 
 
 !> \addtogroup Lagrange_Class
 !! @{ 
 ! ================================================================================================ !
-! S/R ApplyDerivativeMatrix_2D 
+! S/R CalculateDivergence_2D 
 ! 
-!> \fn ApplyDerivativeMatrix_2D_Lagrange  
+!> \fn CalculateDivergence_2D_Lagrange  
 !! Calculates the derivative of the Lagrange interpolant, in each computational direction, given a 
 !! set of nodal function values at the native interpolation nodes.
 !!
@@ -754,6 +825,66 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
+
+  SUBROUTINE CalculateDivergence_2D( myPoly, f, divF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    TYPE(dim3) :: grid, tBlock
+    INTEGER    :: threadCount
+  
+      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
+
+      tBlock = dim3( threadCount, threadCount, 1 )
+      grid   = dim3( nVariables, nElements, 1)
+
+      CALL CalculateDivergence_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
+                                                                f, divF, myPoly % N , nVariables, nElements )
+
+#else
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+
+      divF = CalculateDivergence_2D_Lagrange( myPoly, f, nVariables, nElements )
+
+#endif
+
+  END SUBROUTINE CalculateDivergence_2D
+
+  SUBROUTINE CalculateGradient_3D( myPoly, f, gradF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    TYPE(dim3) :: grid, tBlock
+    INTEGER    :: threadCount
+  
+      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
+
+      tBlock = dim3( threadCount, threadCount, threadCount )
+      grid   = dim3( nVariables, nElements, 1)
+
+      CALL CalculateGradient_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
+                                                              f, gradF, myPoly % N , nVariables, nElements )
+
+#else
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: gradF(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+
+      gradF = CalculateGradient_3D_Lagrange( myPoly, f, nVariables, nElements )
+
+#endif
+
+  END SUBROUTINE CalculateGradient_3D
 
 
 !> \addtogroup Lagrange_Class
@@ -793,6 +924,36 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
+
+  SUBROUTINE CalculateDivergence_3D( myPoly, f, divF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    TYPE(dim3) :: grid, tBlock
+    INTEGER    :: threadCount
+  
+      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
+
+      tBlock = dim3( threadCount, threadCount, threadCount )
+      grid   = dim3( nVariables, nElements, 1)
+
+      CALL CalculateDivergence_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
+                                                                f, divF, myPoly % N , nVariables, nElements )
+
+#else
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+
+      divF = CalculateDivergence_3D_Lagrange( myPoly, f, nVariables, nElements )
+
+#endif
+
+  END SUBROUTINE CalculateDivergence_3D
 
 
 !> \addtogroup Lagrange_Class
@@ -844,7 +1005,7 @@ IMPLICIT NONE
 
       WRITE( fUnit, * )'#f'
       DO iS = 0, myPoly % N
-         WRITE( fUnit, * ) myPoly % s(iS), f(iS)
+         WRITE( fUnit, * ) myPoly % interpolationPoints(iS), f(iS)
       ENDDO
 
       CLOSE( fUnit )
@@ -959,7 +1120,7 @@ IMPLICIT NONE
    REAL(prec) :: s(0:myPoly % N)
    
       N = myPoly % N
-      s = myPoly % s
+      s = myPoly % interpolationPoints
 
       OPEN( UNIT   = NewUnit(fUnit), &
             FILE   = TRIM(filename)//'.tec', &
@@ -972,7 +1133,7 @@ IMPLICIT NONE
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               WRITE( fUnit, * ) myPoly % s(i), myPoly % s(j), myPoly % s(k), f(i,j,k)
+               WRITE( fUnit, * ) myPoly % interpolationPoints(i), myPoly % interpolationPoints(j), myPoly % interpolationPoints(k), f(i,j,k)
             ENDDO
          ENDDO
       ENDDO
@@ -1033,23 +1194,23 @@ IMPLICIT NONE
     ! Local
     INTEGER :: i, j
    
-      DO i = 0, N
+      DO i = 0, myPoly % N
         myPoly % barycentricWeights(i) = 1.0_prec
       ENDDO
 
       ! Computes the product w_k = w_k*(s_k - s_j), k /= j
-      DO j = 1,N
+      DO j = 1, myPoly % N
         DO i = 0, j-1
 
           myPoly % barycentricWeights(i) = myPoly % barycentricWeights(i)*&
-                                           ( myPoly % interpolationPoints(i) - myPoly % interpoaltionPoints(j) )
+                                           ( myPoly % interpolationPoints(i) - myPoly % interpolationPoints(j) )
           myPoly % barycentricWeights(j) = myPoly % barycentricWeights(j)*&
                                            ( myPoly % interpolationPoints(j) - myPoly % interpolationPoints(i) )
 
          ENDDO 
       ENDDO 
  
-      DO j = 0, N
+      DO j = 0, myPoly % N
         myPoly % barycentricWeights(j) = 1.0_prec/myPoly % barycentricWeights(j)
       ENDDO 
 
@@ -1150,7 +1311,7 @@ IMPLICIT NONE
 
             myPoly % interpolationMatrix(row,col) = 0.0_prec
            
-            IF( AlmostEqual( so(row), s(col) ) )THEN
+            IF( AlmostEqual( myPoly % targetPoints(row), myPoly % interpolationPoints(col) ) )THEN
                rowHasMatch = .TRUE.
                myPoly % interpolationMatrix(row,col) = 1.0_prec
             ENDIF
@@ -1255,7 +1416,7 @@ IMPLICIT NONE
          
         myPoly % derivativeMatrix(row,row) = 0.0_prec
 
-        DO col = 0, N
+        DO col = 0, myPoly % N
            
           IF( .NOT. (col == row) )THEN
 
@@ -1360,7 +1521,7 @@ IMPLICIT NONE
       temp1 = 0.0_prec
      
       DO j = 0, myPoly % N 
-         temp2 = myPoly % barycentricWeightsw(j)/(sE - myPoly % interpolationPoints(j))
+         temp2 = myPoly % barycentricWeights(j)/(sE - myPoly % interpolationPoints(j))
          lAtS(j) = temp2
          temp1 = temp1 + temp2
       ENDDO 
@@ -1387,7 +1548,7 @@ IMPLICIT NONE
 
             DO i = 0, myPoly % N
 
-              fNew(a,iVar,iEl) = fNew(a,iVar,iEl) + myPoly % interpolationMatrixTranspose(i,a)*f(i)
+              fNew(a,iVar,iEl) = fNew(a,iVar,iEl) + myPoly % interpolationMatrixTranspose(i,a)*f(i,iVar,iEl)
 
             ENDDO
 
@@ -1439,8 +1600,8 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS(Lagrange) :: myPoly
     INTEGER         :: nElements, nVariables
-    REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElems)
-    REAL(prec)      :: fNew(0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElems)
+    REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec)      :: fNew(0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
     ! Local
     INTEGER :: i, j, k, a, b, c, iEl, iVar
     REAL(prec) :: fa, fab
@@ -1462,7 +1623,7 @@ IMPLICIT NONE
                      
                     fa = 0.0_prec
                     DO i = 0, myPoly % N
-                      fa = fa + f(i,j,k,iVar,iEl)*myPoly % interpolationMatrixTranspose(i,m)
+                      fa = fa + f(i,j,k,iVar,iEl)*myPoly % interpolationMatrixTranspose(i,a)
                     ENDDO
                         
                     fab = fab + fa*myPoly % interpolationMatrixTranspose(j,b)
@@ -1509,7 +1670,7 @@ IMPLICIT NONE
 
   END FUNCTION CalculateDerivative_1D_Lagrange
 !
-  FUNCTION CalculateGradient_2D_Lagrange( myPoly, f, 1:nVariables, 1:nElements ) RESULT( gradF )  
+  FUNCTION CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
 
     IMPLICIT NONE
     CLASS(Lagrange) :: myPoly
@@ -1538,14 +1699,43 @@ IMPLICIT NONE
 
   END FUNCTION CalculateGradient_2D_Lagrange
 !
+  FUNCTION CalculateDivergence_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( divF )  
+    IMPLICIT NONE
+    CLASS(Lagrange) :: myPoly
+    INTEGER         :: nVariables, nElements
+    REAL(prec)      :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec)      :: divF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER :: i, j, iEl, iVar, ii
+  
+      
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO j = 0, myPoly % N
+            DO i = 0, myPoly % N
+               
+              divf(i,j,iVar,iEl) = 0.0_prec
+
+              DO ii = 0, myPoly % N  
+                divf(i,j,iVar,iEl) = divf(i,j,iVar,iEl) + myPoly % derivativeMatrixTranspose(ii,i)*f(1,ii,j,iVar,iEl) + &
+                                                            myPoly % derivativeMatrixTranspose(ii,j)*f(2,i,ii,iVar,iEl)
+              ENDDO
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      
+  END FUNCTION CalculateDivergence_2D_Lagrange
+!
   FUNCTION CalculateGradient_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
     IMPLICIT NONE
     CLASS(Lagrange) :: myPoly
-    INTEGER         :: nVariablesnElements
+    INTEGER         :: nVariables, nElements
     REAL(prec)      :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec)      :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i, j, k, iEl, iVar ii
+    INTEGER :: i, j, k, iEl, iVar, ii
   
       
       DO iEl = 1, nElements
@@ -1554,14 +1744,14 @@ IMPLICIT NONE
             DO j = 0, myPoly % N
               DO i = 0, myPoly % N
                
-                gradf(1,i,j,k,iEl) = 0.0_prec
-                gradf(2,i,j,k,iEl) = 0.0_prec
-                gradf(3,i,j,k,iEl) = 0.0_prec
+                gradf(1,i,j,k,iVar,iEl) = 0.0_prec
+                gradf(2,i,j,k,iVar,iEl) = 0.0_prec
+                gradf(3,i,j,k,iVar,iEl) = 0.0_prec
 
                 DO ii = 0, myPoly % N  
-                  gradf(1,i,j,k,iEl) = gradf(1,i,j,k,iEl) + myPoly % derivativeMatrixTranspose(ii,i)*f(ii,j,k,iVar,iEl)
-                  gradf(2,i,j,k,iEl) = gradf(2,i,j,k,iEl) + myPoly % derivativeMatrixTranspose(ii,j)*f(i,ii,k,iVar,iEl)
-                  gradf(3,i,j,k,iEl) = gradf(3,i,j,k,iEl) + myPoly % derivativeMatrixTranspose(ii,k)*f(i,j,ii,iVar,iEl)
+                  gradf(1,i,j,k,iVar,iEl) = gradf(1,i,j,k,iVar,iEl) + myPoly % derivativeMatrixTranspose(ii,i)*f(ii,j,k,iVar,iEl)
+                  gradf(2,i,j,k,iVar,iEl) = gradf(2,i,j,k,iVar,iEl) + myPoly % derivativeMatrixTranspose(ii,j)*f(i,ii,k,iVar,iEl)
+                  gradf(3,i,j,k,iVar,iEl) = gradf(3,i,j,k,iVar,iEl) + myPoly % derivativeMatrixTranspose(ii,k)*f(i,j,ii,iVar,iEl)
                 ENDDO
 
               ENDDO
@@ -1575,11 +1765,11 @@ IMPLICIT NONE
   FUNCTION CalculateDivergence_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( divF )  
     IMPLICIT NONE
     CLASS(Lagrange) :: myPoly
-    INTEGER         :: nVariablesnElements
+    INTEGER         :: nVariables, nElements
     REAL(prec)      :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec)      :: divF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i, j, k, iEl, iVar ii
+    INTEGER :: i, j, k, iEl, iVar, ii
   
       
       DO iEl = 1, nElements
@@ -1588,12 +1778,12 @@ IMPLICIT NONE
             DO j = 0, myPoly % N
               DO i = 0, myPoly % N
                
-                divf(i,j,k,iEl) = 0.0_prec
+                divf(i,j,k,iVar,iEl) = 0.0_prec
 
                 DO ii = 0, myPoly % N  
-                  divf(i,j,k,iEl) = divf(i,j,k,iEl) + myPoly % derivativeMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) + &
-                                                      myPoly % derivativeMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) + &
-                                                      myPoly % derivativeMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                  divf(i,j,k,iVar,iEl) = divf(i,j,k,iVar,iEl) + myPoly % derivativeMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) + &
+                                                                myPoly % derivativeMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) + &
+                                                                myPoly % derivativeMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
 
               ENDDO
@@ -1645,7 +1835,7 @@ IMPLICIT NONE
           fm = fm + floc(i)*IntMatT(i,a)
         ENDDO
                
-        fnew(a,b,iEl) = fm
+        fnew(a,iVar,iEl) = fm
          
       ENDIF
 
@@ -1689,7 +1879,7 @@ IMPLICIT NONE
 
         ENDDO
             
-        fnew(a,b,iEl) = fmn
+        fnew(a,b,iVar,iEl) = fmn
          
       ENDIF
 
@@ -1742,7 +1932,7 @@ IMPLICIT NONE
 
         ENDDO
          
-         fnew(a,b,c,iEl) = fmnp
+         fnew(a,b,c,iVar,iEl) = fmnp
          
       ENDIF
 
@@ -1775,7 +1965,7 @@ IMPLICIT NONE
          df = 0.0_prec
 
          DO ii = 0, N
-            df = df + DMatT(ii,i)*floc(ii,j)
+            df = df + DMatT(ii,i)*floc(ii)
          ENDDO
                   
          derf(i,iVar,iEl) = df
@@ -1790,7 +1980,7 @@ IMPLICIT NONE
     INTEGER, INTENT(in)             :: N, nVariables, nElems
     REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
     REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,1:nVariables,1:nElems)
-    REAL(prec), DEVICE, INTENT(out) :: gradf(0:N,0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(out) :: gradf(1:2,0:N,0:N,1:nVariables,1:nElems)
     ! Local
     INTEGER            :: i, j, iEl, iVar, ii
     REAL(prec), SHARED :: floc(0:7,0:7)
@@ -1829,11 +2019,11 @@ IMPLICIT NONE
     IMPLICIT NONE
     INTEGER, INTENT(in)             :: N, nVariables, nElems
     REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
-    REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:N,0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:2,0:N,0:N,1:nVariables,1:nElems)
     REAL(prec), DEVICE, INTENT(out) :: divf(0:N,0:N,1:nVariables,1:nElems)
     ! Local
     INTEGER            :: i, j, k, iEl, iVar, ii
-    REAL(prec), SHARED :: floc(1:3,0:7,0:7)
+    REAL(prec), SHARED :: floc(1:2,0:7,0:7)
     REAL(prec) :: df
   
   
@@ -1853,10 +2043,10 @@ IMPLICIT NONE
          df = 0.0_prec
          DO ii = 0, N
             df = df + DMatT(ii,i)*floc(1,ii,j) + &
-                      DMatT(ii,j)*floc(2,i,ii) + &
+                      DMatT(ii,j)*floc(2,i,ii)
          ENDDO
                   
-         divf(i,j,iVar,iEl) = divf
+         divf(i,j,iVar,iEl) = df
 
       ENDIF
     
@@ -1868,7 +2058,7 @@ IMPLICIT NONE
     INTEGER, INTENT(in)             :: N, nVariables, nElems
     REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
     REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElems)
-    REAL(prec), DEVICE, INTENT(out) :: gradf(0:N,0:N,0:N,1:nVariables,1:nElems)
+    REAL(prec), DEVICE, INTENT(out) :: gradf(1:3,0:N,0:N,0:N,1:nVariables,1:nElems)
     ! Local
     INTEGER            :: i, j, k, iEl, iVar, ii
     REAL(prec), SHARED :: floc(0:7,0:7,0:7)
@@ -1940,7 +2130,7 @@ IMPLICIT NONE
                       DMatT(ii,k)*floc(3,i,j,ii)
          ENDDO
                   
-         divf(i,j,k,iVar,iEl) = divf
+         divf(i,j,k,iVar,iEl) = df
 
       ENDIF
     
