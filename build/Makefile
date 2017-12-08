@@ -78,6 +78,10 @@ else ifeq (${FC},pgfortran)
 endif
   
 
+ifeq (${DOUBLE_PRECISION},yes)
+  CPPFLAGS+=-DDOUBLE_PRECISION
+endif
+
 ifeq (${TIMING},yes)
   CPPFLAGS+=-DTIMING
 endif
@@ -105,7 +109,7 @@ INC+=${LAPACK_INC}
 
 # Modules
 ModelPrecision.o : ${SRCDIR}common/ModelPrecision.f90
-	${FC} ${OPT} -c ${SRCDIR}common/ModelPrecision.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/ModelPrecision.f90 -o $@
 
 ConstantsDictionary.o : ModelPrecision.o ${SRCDIR}common/ConstantsDictionary.f90
 	${FC} ${OPT} -c ${SRCDIR}common/ConstantsDictionary.f90 -o $@
@@ -128,53 +132,25 @@ Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}comm
 # Test programs
    
 # ---------------------------------------------------------------------- #
-#                           ~/src/spectralops/                           #
+#                           ~/src/spectral/                           #
 # ---------------------------------------------------------------------- #
 
 # Modules
 Quadrature.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}spectralops/Quadrature.f90
-	${FC} ${OPT} -c ${SRCDIR}spectralops/Quadrature.f90 -o $@
+	${FC} ${OPT} -c ${SRCDIR}spectral/Quadrature.f90 -o $@
 
 Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectralops/Lagrange_Class.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectralops/Lagrange_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/Lagrange_Class.f90 -o $@
 
-NodalStorage_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                       Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalStorage_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}spectralops/NodalStorage_Class.f90 -o $@
+NodalDG_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
+                  Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalDG_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDG_Class.f90 -o $@
 
-DGITIntegrator_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                       Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/DGITIntegrator_Class.f90 
-	${FC} ${OPT} -c ${SRCDIR}spectralops/DGITIntegrator_Class.f90 -o $@
-
-# Cuda Extensions
-
-NodalStorage_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                       Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/NodalStorage_Cuda_Class.cuf -o $@
-
-DGITIntegrator_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                       Quadrature.o Lagrange_Cuda_Class.o ${SRCDIR}spectralops/cuda/DGITIntegrator_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}spectralops/cuda/DGITIntegrator_Cuda_Class.cuf -o $@
-
-# ---------------------------------------------------------------------- #
-#                       ~/src/solutionstorage/                           #
-# ---------------------------------------------------------------------- #
-
-# MODULE list #
-DGSEMSolutionStorage_2D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o ${SRCDIR}solutionstorage/DGSEMSolutionStorage_2D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}solutionstorage/DGSEMSolutionStorage_2D_Class.f90 -o $@
+NodalDGSolutionStorage_3D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o \
+                              ${SRCDIR}spectral/NodalDGSolutionStorage_3D_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}spectralops/NodalDGSolutionStorage_3D_Class.f90 -o $@
 	
-DGSEMSolutionStorage_3D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o ${SRCDIR}solutionstorage/DGSEMSolutionStorage_3D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}solutionstorage/DGSEMSolutionStorage_3D_Class.f90 -o $@
 
-# Cuda Extensions
-
-DGSEMSolutionStorage_2D_Cuda_Class.o : ModelPrecision.o ${SRCDIR}solutionstorage/cuda/DGSEMSolutionStorage_2D_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}solutionstorage/cuda/DGSEMSolutionStorage_2D_Cuda_Class.cuf -o $@
-
-
-DGSEMSolutionStorage_3D_Cuda_Class.o : ModelPrecision.o ${SRCDIR}solutionstorage/cuda/DGSEMSolutionStorage_3D_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}solutionstorage/cuda/DGSEMSolutionStorage_3D_Cuda_Class.cuf -o $@
 
 # ---------------------------------------------------------------------- #
 #                           ~/src/filters/                               #
