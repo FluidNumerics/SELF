@@ -83,6 +83,7 @@ IMPLICIT NONE
 
       ! Type-Specific
       PROCEDURE :: CalculateFunctionsAtBoundaries_3D
+      PROCEDURE :: DG_Divergence_3D
       
     END TYPE NodalDG
     
@@ -278,6 +279,10 @@ IMPLICIT NONE
     
     
   END SUBROUTINE CalculateFunctionsAtBoundaries_3D
+  
+  SUBROUTINE DG_Divergence_3D( myNodal, f, fnAtBoundaries, divF, nVariables, nElements )
+    IMPLICIT NONE
+  END SUBROUTINE DG_Divergence_3D
 
 ! ================================================================================================ !
 ! ------------------------------------- PRIVATE ROUTINES ----------------------------------------- !
@@ -321,6 +326,12 @@ IMPLICIT NONE
   FUNCTION DG_Divergence_3D_NodalDG( myNodal, f, fnAtBoundaries, nVariables, nElements ) RESULT( divF )
     IMPLICIT NONE
     TYPE( NodalDG ) :: myNodal
+    INTEGER         :: nVariables, nElements
+    REAL(prec)      :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec)      :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec)      :: divf(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    
+    
   END FUNCTION DG_Divergence_3D_NodalDG
 
 #ifdef HAVE_CUDA
