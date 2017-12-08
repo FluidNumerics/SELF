@@ -136,19 +136,19 @@ Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}comm
 # ---------------------------------------------------------------------- #
 
 # Modules
-Quadrature.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}spectralops/Quadrature.f90
+Quadrature.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}spectral/Quadrature.f90
 	${FC} ${OPT} -c ${SRCDIR}spectral/Quadrature.f90 -o $@
 
-Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectralops/Lagrange_Class.f90
+Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectral/Lagrange_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/Lagrange_Class.f90 -o $@
 
 NodalDG_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                  Quadrature.o Lagrange_Class.o ${SRCDIR}spectralops/NodalDG_Class.f90
+                  Quadrature.o Lagrange_Class.o ${SRCDIR}spectral/NodalDG_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDG_Class.f90 -o $@
 
 NodalDGSolutionStorage_3D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o \
                               ${SRCDIR}spectral/NodalDGSolutionStorage_3D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}spectralops/NodalDGSolutionStorage_3D_Class.f90 -o $@
+	${FC} ${OPT} -c ${SRCDIR}spectral/NodalDGSolutionStorage_3D_Class.f90 -o $@
 	
 
 

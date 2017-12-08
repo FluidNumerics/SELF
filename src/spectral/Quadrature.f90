@@ -113,12 +113,12 @@ IMPLICIT NONE
 
 
       nReal = REAL(N, prec)
-      den = nReal + ONE
+      den = nReal + 1.0_prec
 
       DO j = 0, N
          jReal = REAL(j, prec)
          weights(j) = pi/den
-         nodes(j) = -cos( 0.5_prec*(2.0_prec*jReal + ONE)*weights(j) )
+         nodes(j) = -cos( 0.5_prec*(2.0_prec*jReal + 1.0_prec)*weights(j) )
       ENDDO
 
  END SUBROUTINE ChebyshevGauss
@@ -146,8 +146,8 @@ IMPLICIT NONE
          nodes(j) = -cos( jReal*weights(j) )
       ENDDO
 
-      weights(0)  = weights(0)*HALF
-      weights(N) = weights(N)*HALF 
+      weights(0)  = weights(0)*0.5_prec
+      weights(N) = weights(N)*0.5_prec 
 
  END SUBROUTINE ChebyshevGaussLobatto
 !
@@ -222,13 +222,13 @@ IMPLICIT NONE
  
       IF( N == 0 ) then
 
-         nodes(0) = ZERO
-         weights(0) = TWO
+         nodes(0) = 0.0_prec
+         weights(0) = 2.0_prec
 
       ELSEIF( N == 1 ) then
      
-         nodes(0) = -sqrt(ONE/3.0_prec)
-         weights(0) = ONE
+         nodes(0) = -sqrt(1.0_prec/3.0_prec)
+         weights(0) = 1.0_prec
          nodes(1) = -nodes(0)
          weights(1) = weights(0)
 
@@ -236,7 +236,7 @@ IMPLICIT NONE
      
          DO j = 0, ( (N+1)/2 ) ! Loop over the roots
 
-            nodes(j) = -cos( (TWO*REAL(j,prec) + ONE)*pi/(TWO*REAL(N,prec) + ONE) )
+            nodes(j) = -cos( (2.0_prec*REAL(j,prec) + 1.0_prec)*pi/(2.0_prec*REAL(N,prec) + 1.0_prec) )
 
             DO kIt = 1, newtonMax ! Loop over the Newton's iterations
 
@@ -248,7 +248,7 @@ IMPLICIT NONE
             ENDDO ! kIt, loop over the Newton's iterations
 
             CALL LegendrePolynomial(N+1, nodes(j), lN1, dlN1)
-            weights(j) = TWO/( (ONE - nodes(j)*nodes(j))*dlN1*dlN1 )
+            weights(j) = 2.0_prec/( (1.0_prec - nodes(j)*nodes(j))*dlN1*dlN1 )
             weights(N - j) = weights(j) ! uses symmetry to assign weights
             nodes(N - j) = -nodes(j)
 
@@ -256,10 +256,10 @@ IMPLICIT NONE
  
       ENDIF ! conditional on whether to use newton's method
 
-      IF( mod(REAL(N,prec),TWO) == ZERO)then ! odd number of roots - get the weight for xRoot=0.0
+      IF( mod(REAL(N,prec),2.0_prec) == 0.0_prec)then ! odd number of roots - get the weight for xRoot=0.0
          
-         CALL LegendrePolynomial(N+1, ZERO, lN1, dlN1)
-         nodes(N/2) = ZERO
+         CALL LegendrePolynomial(N+1, 0.0_prec, lN1, dlN1)
+         nodes(N/2) = 0.0_prec
          weights(N/2) = 2.0/(dlN1*dlN1)
 
       ENDIF ! IF we are looking for an odd number of roots.
@@ -284,17 +284,17 @@ IMPLICIT NONE
 
       IF( N == 1 ) then
 
-         nodes(0) = -ONE
-         weights(0) = ONE
-         nodes(1) = ONE
-         weights(1) = ONE
+         nodes(0) = -1.0_prec
+         weights(0) = 1.0_prec
+         nodes(1) = 1.0_prec
+         weights(1) = 1.0_prec
 
       ELSE ! use Newton's method
 
-         nodes(0) = -ONE
-         weights(0) = TWO/(REAL(N,prec)*(REAL(N,prec) + ONE) )
+         nodes(0) = -1.0_prec
+         weights(0) = 2.0_prec/(REAL(N,prec)*(REAL(N,prec) + 1.0_prec) )
 
-         nodes(N) = ONE
+         nodes(N) = 1.0_prec
          weights(N) = weights(0)
 
          DO j = 1, ( (N+1)/2 -1 ) ! Loop over the roots
@@ -312,7 +312,7 @@ IMPLICIT NONE
             ENDDO ! kIt, loop over the Newton's iterations
             
             CALL LegendreQandL(N, nodes(j), q, qprime, lN)
-            weights(j) = TWO/( REAL(N,prec)*(REAL(N,prec) + ONE)*lN*lN )
+            weights(j) = 2.0_prec/( REAL(N,prec)*(REAL(N,prec) + 1.0_prec)*lN*lN )
             weights(N - j) = weights(j) ! uses symmetry to assign weights
             nodes(N - j) = -nodes(j)
 
@@ -321,11 +321,11 @@ IMPLICIT NONE
       ENDIF ! conditional on whether to use newton's method
 
      
-      IF( mod(REAL(N,prec),TWO) == ZERO)then ! odd number of roots - get the weight for xRoot=0.0
+      IF( mod(REAL(N,prec),2.0_prec) == 0.0_prec)then ! odd number of roots - get the weight for xRoot=0.0
          
-         CALL LegendreQandL(N, ZERO, q, qprime, lN)
-         nodes(N/2) = ZERO
-         weights(N/2) = TWO/( REAL(N,prec)*(REAL(N,prec) + ONE)*lN*lN )
+         CALL LegendreQandL(N, 0.0_prec, q, qprime, lN)
+         nodes(N/2) = 0.0_prec
+         weights(N/2) = 2.0_prec/( REAL(N,prec)*(REAL(N,prec) + 1.0_prec)*lN*lN )
 
       ENDIF ! IF we are looking for an odd number of roots.
 
@@ -346,21 +346,21 @@ IMPLICIT NONE
    INTEGER    :: j, kIt ! Loop counter 
 
 
-      nodes(0) = ONE
-      weights(0) = TWO/(REAL(N,prec)*(REAL(N,prec)) )
+      nodes(0) = 1.0_prec
+      weights(0) = 2.0_prec/(REAL(N,prec)*(REAL(N,prec)) )
 
       DO j = 1, N ! Loop over the roots
 
-        nodes(j) =  -cos( HALF*pi*(TWO*REAL(j+1,prec)-ONE)/(TWO*REAL(N,prec)-ONE) )
+        nodes(j) =  -cos( 0.5_prec*pi*(2.0_prec*REAL(j+1,prec)-1.0_prec)/(2.0_prec*REAL(N,prec)-1.0_prec) )
         
          DO kIt = 1, newtonMax ! Loop over the Newton's iterations
 
             CALL LegendrePolynomial(N+1, nodes(j), lN, dLdx)
             q = lN
-            qprime = dLdx*(ONE + nodes(j)) - lN
+            qprime = dLdx*(1.0_prec + nodes(j)) - lN
             CALL LegendrePolynomial(N, nodes(j), lN, dLdx)
             q = (q + lN)
-            qprime = (qprime + (ONE + nodes(j))*dLdx - lN)/( ONE + nodes(j) )
+            qprime = (qprime + (1.0_prec + nodes(j))*dLdx - lN)/( 1.0_prec + nodes(j) )
             delta = -q/qprime 
             nodes(j) = nodes(j) + delta
  
@@ -369,7 +369,7 @@ IMPLICIT NONE
          ENDDO ! kIt, loop over the Newton's iterations
 
          CALL LegendrePolynomial(N, nodes(j), lN, dLdx)
-         weights(j) = ONE/( (ONE-nodes(j))*dLdx*dLdx )
+         weights(j) = 1.0_prec/( (1.0_prec-nodes(j))*dLdx*dLdx )
          nodes(j) = -nodes(j)
 
       ENDDO ! j, loop over all of the roots
@@ -393,27 +393,27 @@ IMPLICIT NONE
 
       IF( N == 0 )then
  
-         lAtX = ONE    ! Legendre Polynomial
-         dLdxAtX = ZERO ! Derivative
+         lAtX = 1.0_prec    ! Legendre Polynomial
+         dLdxAtX = 0.0_prec ! Derivative
       
       ELSEIF( N == 1)then
 
          lAtX = x       ! Legendre Polynomial
-         dLdxAtX = ONE  ! Derivative
+         dLdxAtX = 1.0_prec  ! Derivative
 
       ELSE  ! Then we turn to the recursive relation for higher order Legendre Polynomials
   
-         lnM2 = ONE     ! Initializing the recursive loop
+         lnM2 = 1.0_prec     ! Initializing the recursive loop
          lnM1 = x
-         dlnM2 = ZERO
-         dlnM1 = ONE
+         dlnM2 = 0.0_prec
+         dlnM1 = 1.0_prec
 
          DO i = 2,N ! Recursive relation for the legendre polynomials
         
-            lAtX = ((TWO*REAL(i,prec) - ONE)*x*lnM1 -&
+            lAtX = ((2.0_prec*REAL(i,prec) - 1.0_prec)*x*lnM1 -&
                     (REAL(i,prec) - 1.0)*lnM2)/(REAL(i,prec))
 
-            dldxAtX = dlnM2 + (TWO*REAL(i,prec)-ONE)*lnM1
+            dldxAtX = dlnM2 + (2.0_prec*REAL(i,prec)-1.0_prec)*lnM1
             lnM2 = lnM1
             lnM1 = lAtX
             dlnM2 = dlnM1
@@ -440,14 +440,14 @@ IMPLICIT NONE
    REAL(prec) :: lNm1, lNm2, dlNm1, dlNm2, dlN, lN1, dlN1
    INTEGER :: i
 
-      lNm2 = ONE
+      lNm2 = 1.0_prec
       lNm1 = x
-      dlNm2 = ZERO
-      dlNm1 = ONE
+      dlNm2 = 0.0_prec
+      dlNm1 = 1.0_prec
 
       DO i = 2, N
-         lN = (TWO*i - ONE)/(REAL(i,prec))*x*lNm1 - (REAL(i,prec) - ONE)/(REAL(i,prec))*lNm2
-         dlN = dlNm2 + (TWO*REAL(i,prec) - ONE)*lNm1
+         lN = (2.0_prec*i - 1.0_prec)/(REAL(i,prec))*x*lNm1 - (REAL(i,prec) - 1.0_prec)/(REAL(i,prec))*lNm2
+         dlN = dlNm2 + (2.0_prec*REAL(i,prec) - 1.0_prec)*lNm1
          lNm2 = lNm1
          lNm1 = lN
          dlNm2 = dlNm1
@@ -455,8 +455,8 @@ IMPLICIT NONE
       ENDDO
 
       i = N + 1
-      lN1 = (TWO*i - ONE)/(REAL(i,prec))*x*lN - (REAL(i,prec) - ONE)/(REAL(i,prec))*lNm2
-      dlN1 = dlNm2 + (TWO*REAL(i,prec) - ONE)*lNm1
+      lN1 = (2.0_prec*i - 1.0_prec)/(REAL(i,prec))*x*lN - (REAL(i,prec) - 1.0_prec)/(REAL(i,prec))*lNm2
+      dlN1 = dlNm2 + (2.0_prec*REAL(i,prec) - 1.0_prec)*lNm1
       q = lN1 - lNm2
       qprime = dlN1 - dlNm2
 

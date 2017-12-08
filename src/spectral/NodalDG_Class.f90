@@ -11,7 +11,6 @@ MODULE NodalDG_Class
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
-USE Quadrature
 USE Lagrange_Class
 
 IMPLICIT NONE
@@ -59,10 +58,10 @@ IMPLICIT NONE
   TYPE NodalDG
 #ifdef HAVE_CUDA
     INTEGER, MANAGED        :: N    
-    INTEGER, MANAGED        :: nPlot 
+    INTEGER, MANAGED        :: nTargetPoints
 #else
     INTEGER                 :: N     
-    INTEGER                 :: nPlot 
+    INTEGER                 :: nTargetPoints
 #endif
     TYPE(Lagrange)          :: interp 
     REAL(prec), ALLOCATABLE :: quadratureWeights(:)
@@ -146,8 +145,8 @@ IMPLICIT NONE
     INTEGER   :: i, j
     REAL(prec):: quadraturePoints(0:N), quadratureWeights(0:N)
 
-      myNodal % N     = N
-      myNodal % nPlot = nPlot
+      myNodal % N             = N
+      myNodal % nTargetPoints = nTargetPoints
       
       ! Allocate space
       ALLOCATE( myNodal % dgDerivativeMatrix(0:N,0:N), &
@@ -252,27 +251,25 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS( NodalDG ), INTENT(in) :: myNodal 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: N, nVariables, nElements
-    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
-    REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,nElements)
+    REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
     ! Local
     TYPE(dim3) :: grid, tBlock
   
-      tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
-                    4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+      tBlock = dim3(4*(ceiling( REAL(myNodal % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myNodal % N+1)/4 ) ) , &
                     nVariables )
       grid = dim3(nElements, 1, 1)  
       
       CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( f, fAtBoundaries, &
                                                                            myNodal % boundaryInterpolationMatrix_dev, &
-                                                                           nVariables, nElements )
+                                                                           myNodal % N, nVariables, nElements )
       
 #else
-    INTEGER, INTENT(in)     :: N, nVariables, nElements
-    REAL(prec), INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,nElements)
-    REAL(prec), INTENT(in)  :: boundaryMatrix(0:N,0:1)
-    REAL(prec), INTENT(out) :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,nElements)
+    REAL(prec), INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
      
       fAtBoundaries = CalculateFunctionsAtBoundaries_3D_NodalDG( myNodal, f, nVariables, nElements )
 
@@ -301,16 +298,16 @@ IMPLICIT NONE
           DO j = 0, myNodal % N
             DO i = 0, myNodal % N
             
-              fBound(i,j,1:6) = 0.0_prec
+              fAtBoundaries(i,j,iVar,1:6,iEl) = 0.0_prec
               
               DO k = 0, myNodal % N
                
-                fBound(i,j,1) = fBound(i,j,1) + myNodal % boundaryInterpolationMatrix(k,0)*f(k,i,j) ! South
-                fBound(i,j,2) = fBound(i,j,2) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,k,j) ! East
-                fBound(i,j,3) = fBound(i,j,3) + myNodal % boundaryInterpolationMatrix(k,1)*f(k,i,j) ! North
-                fBound(i,j,4) = fBound(i,j,4) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,k,j) ! West
-                fBound(i,j,5) = fBound(i,j,5) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,j,k) ! Bottom
-                fBound(i,j,6) = fBound(i,j,6) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,j,k) ! Top
+                fAtBoundaries(i,j,iVar,1,iEl) = fAtBoundaries(i,j,iVar,1,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(k,i,j,iVar,iEl) ! South
+                fAtBoundaries(i,j,iVar,2,iEl) = fAtBoundaries(i,j,iVar,2,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,k,j,iVar,iEl) ! East
+                fAtBoundaries(i,j,iVar,3,iEl) = fAtBoundaries(i,j,iVar,3,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(k,i,j,iVar,iEl) ! North
+                fAtBoundaries(i,j,iVar,4,iEl) = fAtBoundaries(i,j,iVar,4,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,k,j,iVar,iEl) ! West
+                fAtBoundaries(i,j,iVar,5,iEl) = fAtBoundaries(i,j,iVar,5,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,j,k,iVar,iEl) ! Bottom
+                fAtBoundaries(i,j,iVar,6,iEl) = fAtBoundaries(i,j,iVar,6,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,j,k,iVar,iEl) ! Top
                
               ENDDO
               
@@ -340,7 +337,7 @@ IMPLICIT NONE
       
 	    bSol(1:6) = 0.0_prec
 
-	    DO i = 0, polydeg_dev
+	    DO i = 0, N
 
         bSol(1) = bSol(1) + boundaryMatrix(i,0)*f(j,i,k,iVar,iEl) ! south
 		    bSol(2) = bSol(2) + boundaryMatrix(i,1)*f(i,j,k,iVar,iEl) ! east
@@ -352,7 +349,7 @@ IMPLICIT NONE
 	    ENDDO
                
       DO i = 1, 6
-        boundarySolution(j,k,iVar,i,iEl) = bSol(i)
+        fAtBoundaries(j,k,iVar,i,iEl) = bSol(i)
       ENDDO
       
   END SUBROUTINE CalculateFunctionsAtBoundaries_3D_CUDAKernel

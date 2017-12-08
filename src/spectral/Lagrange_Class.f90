@@ -1794,16 +1794,7 @@ IMPLICIT NONE
       ENDDO
       
   END FUNCTION CalculateDivergence_3D_Lagrange
-!
-!
-!==================================================================================================!
-!--------------------------------- File I/O Routines ----------------------------------------------!
-!==================================================================================================!
-!
-!
-!
-!
-!
+
 #ifdef HAVE_CUDA
 
   ATTRIBUTES(Global) SUBROUTINE ApplyInterpolationMatrix_1D_CUDAKernel( IntMatT, f, fNew, N, M, nVariables, nElems  )
