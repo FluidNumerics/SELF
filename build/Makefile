@@ -146,9 +146,9 @@ NodalDG_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                   Quadrature.o Lagrange_Class.o ${SRCDIR}spectral/NodalDG_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDG_Class.f90 -o $@
 
-NodalDGSolutionStorage_3D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o \
-                              ${SRCDIR}spectral/NodalDGSolutionStorage_3D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}spectral/NodalDGSolutionStorage_3D_Class.f90 -o $@
+NodalDGSolution_3D_Class.o : ModelPrecision.o ConstantsDictionary.o NodalStorage_Class.o \
+                              ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90 -o $@
 	
 
 

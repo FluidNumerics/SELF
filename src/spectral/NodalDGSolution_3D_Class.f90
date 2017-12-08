@@ -14,11 +14,7 @@
   
 MODULE NodalDGSolution_3D_Class
 
-! src/common/
 USE ModelPrecision
-USE ConstantsDictionary
-! src/nodal/
-USE NodalStorage_Class
 
 IMPLICIT NONE
 
@@ -69,21 +65,19 @@ IMPLICIT NONE
 
 !>@}
 
-    TYPE NodalDGSolution_3D
-      INTEGER                 :: nEq, N
-      REAL(prec), allocatable :: Solution(:,:,:,:,:)
-      REAL(prec), allocatable :: tendency(:,:,:,:,:)
-      REAL(prec), allocatable :: boundarySolution(:,:,:,:,:) ! Indexed over the boundaries. 
-      REAL(prec), allocatable :: boundaryFlux(:,:,:,:,:)     ! Indexed over the boundaries
+  TYPE NodalDGSolution_3D
+    INTEGER                 :: N, nEquations
+    REAL(prec), ALLOCATABLE :: solution(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: tendency(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: boundarySolution(:,:,:,:,:) ! Indexed over the boundaries. 
+    REAL(prec), ALLOCATABLE :: boundaryFlux(:,:,:,:,:)     ! Indexed over the boundaries
 
-      CONTAINS
+    CONTAINS
 
-      ! CONSTRUCTORS/DESTRUCTORS
-      PROCEDURE :: Build => Build_NodalDGSolution_3D
-      PROCEDURE :: Trash => Trash_NodalDGSolution_3D
+    PROCEDURE :: Build => Build_NodalDGSolution_3D
+    PROCEDURE :: Trash => Trash_NodalDGSolution_3D
 
-!      PROCEDURE :: CalculateBoundarySolution => CalculateBoundarySolution_NodalDGSolution_3D
-    END TYPE NodalDGSolution_3D
+  END TYPE NodalDGSolution_3D
     
     
  
