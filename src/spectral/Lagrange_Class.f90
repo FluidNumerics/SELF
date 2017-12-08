@@ -1533,7 +1533,7 @@ IMPLICIT NONE
 
   FUNCTION ApplyInterpolationMatrix_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( fNew )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
+    TYPE(Lagrange) :: myPoly
     INTEGER         :: nVariables, nElements
     REAL(prec)      :: f(0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec)      :: fNew(0:myPoly % M, 1:nVariables, 1:nElements)
@@ -1562,7 +1562,7 @@ IMPLICIT NONE
 
   FUNCTION ApplyInterpolationMatrix_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( fNew )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
+    TYPE(Lagrange) :: myPoly
     INTEGER         :: nVariables, nElements
     REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec)      :: fNew(0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
@@ -1599,7 +1599,7 @@ IMPLICIT NONE
 
   FUNCTION ApplyInterpolationMatrix_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( fNew )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
+    TYPE(Lagrange) :: myPoly
     INTEGER         :: nElements, nVariables
     REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec)      :: fNew(0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
@@ -1647,7 +1647,7 @@ IMPLICIT NONE
 
   FUNCTION CalculateDerivative_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( derF )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
+    TYPE(Lagrange) :: myPoly
     INTEGER         :: nVariables, nElements
     REAL(prec)      :: f(0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec)      :: derF(0:myPoly % N,1:nVariables,1:nElements)
@@ -1674,7 +1674,7 @@ IMPLICIT NONE
   FUNCTION CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
 
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
+    TYPE(Lagrange) :: myPoly
     INTEGER         :: nVariables, nElements
     REAL(prec)      :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec)      :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
@@ -1702,10 +1702,10 @@ IMPLICIT NONE
 !
   FUNCTION CalculateDivergence_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( divF )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
-    INTEGER         :: nVariables, nElements
-    REAL(prec)      :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec)      :: divF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    TYPE( Lagrange ) :: myPoly
+    INTEGER          :: nVariables, nElements
+    REAL(prec)       :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec)       :: divF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER :: i, j, iEl, iVar, ii
   
@@ -1731,10 +1731,10 @@ IMPLICIT NONE
 !
   FUNCTION CalculateGradient_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
-    INTEGER         :: nVariables, nElements
-    REAL(prec)      :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec)      :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    TYPE( Lagrange ) :: myPoly
+    INTEGER          :: nVariables, nElements
+    REAL(prec)       :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec)       :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER :: i, j, k, iEl, iVar, ii
   
@@ -1765,10 +1765,10 @@ IMPLICIT NONE
 !
   FUNCTION CalculateDivergence_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( divF )  
     IMPLICIT NONE
-    CLASS(Lagrange) :: myPoly
-    INTEGER         :: nVariables, nElements
-    REAL(prec)      :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec)      :: divF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    TYPE( Lagrange ) :: myPoly
+    INTEGER          :: nVariables, nElements
+    REAL(prec)       :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec)       :: divF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER :: i, j, k, iEl, iVar, ii
   

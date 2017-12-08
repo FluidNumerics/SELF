@@ -286,10 +286,10 @@ IMPLICIT NONE
 
   FUNCTION CalculateFunctionsAtBoundaries_3D_NodalDG( myNodal, f, nVariables, nElements ) RESULT( fAtBoundaries )
     IMPLICIT NONE
-    CLASS(NodalDG) :: myNodal
-    INTEGER        :: nVariables, nElements
-    REAL(prec)     :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
-    REAL(prec)     :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    TYPE( NodalDG ) :: myNodal
+    INTEGER         :: nVariables, nElements
+    REAL(prec)      :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec)      :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
     ! Local
     INTEGER :: i, j, k, iVar, iEl
 
@@ -316,7 +316,12 @@ IMPLICIT NONE
         ENDDO
       ENDDO
 
- END FUNCTION CalculateFunctionsAtBoundaries_3D_NodalDG
+  END FUNCTION CalculateFunctionsAtBoundaries_3D_NodalDG
+ 
+  FUNCTION DG_Divergence_3D_NodalDG( myNodal, f, fnAtBoundaries, nVariables, nElements ) RESULT( divF )
+    IMPLICIT NONE
+    TYPE( NodalDG ) :: myNodal
+  END FUNCTION DG_Divergence_3D_NodalDG
 
 #ifdef HAVE_CUDA
   ATTRIBUTES(Global) SUBROUTINE CalculateFunctionsAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix, N, nVariables, nElements ) 
