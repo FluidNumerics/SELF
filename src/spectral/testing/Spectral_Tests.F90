@@ -42,8 +42,10 @@ IMPLICIT NONE
 
   INTEGER, PARAMETER :: polyLow = 3
 #ifdef HAVE_CUDA
+  INTEGER, PARAMETER :: nRef = 7
   INTEGER, PARAMETER :: polyHigh = 7
 #else
+  INTEGER, PARAMETER :: nRef = 50
   INTEGER, PARAMETER :: polyHigh = 20
 #endif
 
@@ -69,15 +71,15 @@ IMPLICIT NONE
 #endif
 
     CALL referenceInterpolant % Build( targetPoints  = UniformPoints( -1.0_prec, 1.0_prec, 100 ), &
-                                       N             = 50, &
+                                       N             = nRef, &
                                        nTargetPoints = 100, &
                                        quadrature    = GAUSS  )
 
-    CALL referenceFunctions % Build( N          = 50, &
+    CALL referenceFunctions % Build( N          = nRef, &
                                      nEquations = 1, &
                                      nElements  = 1 )
 
-    CALL interpolatedFunctions % Build( N          = 50, &
+    CALL interpolatedFunctions % Build( N          = nRef, &
                                         nEquations = 1, &
                                         nElements  = 1 )
                                      
@@ -218,10 +220,10 @@ CONTAINS
         CALL trialFunctions % UpdateDevice( )
         
 !        ! Interpolation test
-!        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution_dev, &
-!                                                                      fNew       = interpolatedFunctions % solution_dev, & 
-!                                                                      nVariables = nVars, &
-!                                                                      nElements  = nElems)
+        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution_dev, &
+                                                                      fNew       = interpolatedFunctions % solution_dev, & 
+                                                                      nVariables = nVars, &
+                                                                      nElements  = nElems)
                                                                       
         ! Divergence test (strong form)                                                              
         CALL trialInterpolant % interp % CalculateDivergence_3D( f          = trialFunctions % flux_dev, &
