@@ -101,8 +101,10 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: i
   
-      PRINT*, '  Case f_1(x,y,z) = x*y*z  '
-      PRINT*, ' ----------------------------------------------------------------------------- '
+      WRITE(*,*) '  Case f_1(x,y,z) = x*y*z  '
+      WRITE(*,*) ' ------------------------------------------------------------------------------------------- '
+      WRITE(*,*) ' Polynomial degree   Interpolation Error  Divergence Error (strong)  Divergence Error (weak)'
+      WRITE(*,*) ' ------------------------------------------------------------------------------------------- '
       
       CALL F1( referenceInterpolant % interp, &
                referenceFunctions % solution, & 
@@ -141,7 +143,7 @@ CONTAINS
         F1_divergence_strong_error(i) = MAXVAL( ABS( trialFunctions % tendency ) )
         F1_divergence_dgweak_error(i) = MAXVAL( ABS( trialFunctions % source ) )
 
-        WRITE(*,'(2x,I3,3(2x,E17.5))') i, F1_interpolation_error(i), F1_divergence_strong_error(i), F1_divergence_dgweak_error(i)
+        WRITE(*,'(8x,I3,5x,2(4x,E17.5),8x,E17.5)') i, F1_interpolation_error(i), F1_divergence_strong_error(i), F1_divergence_dgweak_error(i)
         
   
         CALL trialFunctions % Trash( )
@@ -238,10 +240,10 @@ CONTAINS
                                                   nElements      = nElems )
                                                   
         ! Gradient test (strong form)
-!        CALL trialInterpolant % interp % CalculateGradient_3D( f          = trialFunctions % solution_dev, &
-!                                                               gradF      = trialFunctions % flux_dev, &
-!                                                               nVariables = nVars, &
-!                                                               nElements  = nElems )
+        CALL trialInterpolant % interp % CalculateGradient_3D( f          = trialFunctions % solution_dev, &
+                                                               gradF      = trialFunctions % flux_dev, &
+                                                               nVariables = nVars, &
+                                                               nElements  = nElems )
                                                                       
         CALL interpolatedFunctions % UpdateHost( )
         CALL trialFunctions % UpdateHost( )
