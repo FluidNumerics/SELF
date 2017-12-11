@@ -282,6 +282,38 @@ IMPLICIT NONE
   
   SUBROUTINE DG_Divergence_3D( myNodal, f, fnAtBoundaries, divF, nVariables, nElements )
     IMPLICIT NONE
+    CLASS( NodalDG ) :: myNodal
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: divF(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3( 4*(ceiling( REAL(myNodal % N+1)/4 ) ), &
+                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) , &
+                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) )
+      grid = dim3( nVariables, nElements, 1)  
+
+      CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( f, fnAtBoundaries, divF, &
+                                                          myNodal % boundaryInterpolationMatrix_dev, &
+                                                          myNodal % dgDerivativeMatrixTranspose_dev, &
+                                                          myNodal % quadratureWeights_dev, &
+                                                          myNodal % N, nVariables, nElements )
+
+
+#else
+    INTEGER         :: nVariables, nElements
+    REAL(prec)      :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec)      :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec)      :: divf(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+
+
+      divF = DG_Divergence_3D_NodalDG( myNodal, f, fnAtBoundaries, nVariables, nElements )
+    
+#endif
+
   END SUBROUTINE DG_Divergence_3D
 
 ! ================================================================================================ !
@@ -330,8 +362,40 @@ IMPLICIT NONE
     REAL(prec)      :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec)      :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
     REAL(prec)      :: divf(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
-    
-    
+    ! Local
+    INTEGER    :: ii, i, j, k, iVar, iEl
+    REAL(prec) :: df
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myNodal % N
+            DO j = 0, myNodal % N
+              DO i = 0, myNodal % N   
+ 
+                df = 0.0_prec
+                DO ii = 0, myNodal % N
+                  df = df + myNodal % dgDerivativeMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) + &
+                            myNodal % dgDerivativeMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) + &
+                            myNodal % dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                ENDDO
+                 
+                divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*myNodal % boundaryInterpolationMatrix(j,0) + &
+                                                fnAtBoundaries(i,k,iVar,3,iEl)*myNodal % boundaryInterpolationMatrix(j,1) )/&
+                                              myNodal % quadratureWeights(j) + &
+                                              ( fnAtBoundaries(j,k,iVar,4,iEl)*myNodal % boundaryInterpolationMatrix(i,0) + &
+                                                fnAtBoundaries(j,k,iVar,2,iEl)*myNodal % boundaryInterpolationMatrix(i,1) )/&
+                                              myNodal % quadratureWeights(i) + &
+                                              ( fnAtBoundaries(i,j,iVar,5,iEl)*myNodal % boundaryInterpolationMatrix(k,0) + &
+                                                fnAtBoundaries(i,j,iVar,6,iEl)*myNodal % boundaryInterpolationMatrix(k,1) )/&
+                                              myNodal % quadratureWeights(k) )
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+                            
+
   END FUNCTION DG_Divergence_3D_NodalDG
 
 #ifdef HAVE_CUDA
@@ -351,18 +415,18 @@ IMPLICIT NONE
       k   = threadIdx % y-1
       j   = threadIdx % x-1
       
-	    bSol(1:6) = 0.0_prec
+      bSol(1:6) = 0.0_prec
 
-	    DO i = 0, N
+      DO i = 0, N
 
         bSol(1) = bSol(1) + boundaryMatrix(i,0)*f(j,i,k,iVar,iEl) ! south
-		    bSol(2) = bSol(2) + boundaryMatrix(i,1)*f(i,j,k,iVar,iEl) ! east
-		    bSol(3) = bSol(3) + boundaryMatrix(i,1)*f(j,i,k,iVar,iEl) ! north
-		    bSol(4) = bSol(4) + boundaryMatrix(i,0)*f(i,j,k,iVar,iEl) ! west
-		    bSol(5) = bSol(5) + boundaryMatrix(i,0)*f(j,k,i,iVar,iEl) ! botom
-		    bSol(6) = bSol(6) + boundaryMatrix(i,1)*f(j,k,i,iVar,iEl) ! top
+        bSol(2) = bSol(2) + boundaryMatrix(i,1)*f(i,j,k,iVar,iEl) ! east
+        bSol(3) = bSol(3) + boundaryMatrix(i,1)*f(j,i,k,iVar,iEl) ! north
+        bSol(4) = bSol(4) + boundaryMatrix(i,0)*f(i,j,k,iVar,iEl) ! west
+        bSol(5) = bSol(5) + boundaryMatrix(i,0)*f(j,k,i,iVar,iEl) ! botom
+        bSol(6) = bSol(6) + boundaryMatrix(i,1)*f(j,k,i,iVar,iEl) ! top
 
-	    ENDDO
+      ENDDO
                
       DO i = 1, 6
         fAtBoundaries(j,k,iVar,i,iEl) = bSol(i)
@@ -376,6 +440,7 @@ IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:N,0:N,0:N,1:nVariables,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
+    REAL(prec), DEVICE, INTENT(in)  :: dgDerivativeMatrixTranspose(0:N,0:N)
     REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:N)
     REAL(prec), DEVICE, INTENT(out) :: divF(0:N,0:N,1:nVariables,1:6,1:nElements)
     ! Local
@@ -402,14 +467,14 @@ IMPLICIT NONE
                   dgDerivativeMatrixTranspose(ii,k)*fLocal(3,i,j,ii)
       ENDDO
        
-      divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iEq,1,iEl)*bmat(j,0) + &
-                                      fnAtBoundaries(i,k,iEq,3,iEl)*boundaryMatrix(j,1) )/&
+      divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
+                                      fnAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
                                     quadratureWeights(j) + &
-                                    ( fnAtBoundaries(j,k,iEq,4,iEl)*boundaryMatrix(i,0) + &
-                                      fnAtBoundaries(j,k,iEq,2,iEl)*boundaryMatrix(i,1) )/&
+                                    ( fnAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &
+                                      fnAtBoundaries(j,k,iVar,2,iEl)*boundaryMatrix(i,1) )/&
                                     quadratureWeights(i) + &
-                                    ( fnAtBoundaries(i,j,iEq,5,iEl)*boundaryMatrix(k,0) + &
-                                      fnAtBoundaries(i,j,iEq,6,iEl)*boundaryMatrix(k,1) )/&
+                                    ( fnAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
+                                      fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
                                     quadratureWeights(k) )
                   
                   
