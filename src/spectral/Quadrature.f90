@@ -4,12 +4,6 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-
-!> \file Quadrature.f90
-!! Contains the \ref Quadrature module.
-
-
-!> \defgroup Quadrature Quadrature 
 !! Contains routines from D.A. Kopriva, 2009, "Implementing Spectral Methods for Partial 
 !! Differential Equations: Algorithms for Scientists and Engineers", Springer.
 !!

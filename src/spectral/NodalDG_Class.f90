@@ -4,8 +4,6 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-
-
 MODULE NodalDG_Class
 
 USE ModelPrecision
@@ -15,10 +13,6 @@ USE Lagrange_Class
 
 IMPLICIT NONE
 
-!> \addtogroup NodalDG_Class 
-!! @{
-
-!> \struct NodalDG
 !!  The NodalDG class contains attributes needed for implementing spectral element methods
 !!  in 3-D.
 !!  

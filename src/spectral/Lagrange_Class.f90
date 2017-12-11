@@ -4,15 +4,6 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-
-!> \file Lagrange_Class.f90
-!! Contains the \ref Lagrange_Class module, and <BR>
-!! defines the \ref Lagrange data-structure.
-
-
-!> \defgroup Lagrange_Class Lagrange_Class 
-!! This module defines the Lagrange data-structure and its associated routines.
-
 MODULE Lagrange_Class
 
 !src/common

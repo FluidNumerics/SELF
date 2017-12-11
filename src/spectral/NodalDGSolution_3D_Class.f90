@@ -4,24 +4,12 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-
-!> \file NodalDGSolution_3D_Class.f90
-!! Contains the \ref NodalDGSolution_3D_Class module, and <BR>
-!! defines the \ref NodalDGSolution_3D data-structure.
-
-!> \defgroup NodalDGSolution_3D_Class NodalDGSolution_3D_Class 
-!! This module defines the NodalDGSolution_3D data-structure and its associated routines.
-  
 MODULE NodalDGSolution_3D_Class
 
 USE ModelPrecision
 
 IMPLICIT NONE
 
-!> \addtogroup NodalDGSolution_3D_Class 
-!! @{
-
-!> \struct NodalDGSolution_3D
 !!  The NodalDGSolution_3D class provides attributes for storing a solution and its flux on a
 !!  single spectral element.
 !!  
@@ -66,16 +54,37 @@ IMPLICIT NONE
 !>@}
 
   TYPE NodalDGSolution_3D
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED        :: N, nEquations
+#else
     INTEGER                 :: N, nEquations
+#endif
     REAL(prec), ALLOCATABLE :: solution(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: source(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: boundarySolution(:,:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: boundaryFlux(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: tendency(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: boundarySolution(:,:,:,:,:) ! Indexed over the boundaries. 
-    REAL(prec), ALLOCATABLE :: boundaryFlux(:,:,:,:,:)     ! Indexed over the boundaries
+
+#ifdef HAVE_CUDA
+    REAL(prec), ALLOCATABLE :: solution_dev(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: source_dev(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: boundarySolution_dev(:,:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: boundaryFlux_dev(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: tendency_dev(:,:,:,:,:)
+
+#endif
 
     CONTAINS
 
     PROCEDURE :: Build => Build_NodalDGSolution_3D
     PROCEDURE :: Trash => Trash_NodalDGSolution_3D
+
+#ifdef HAVE_CUDA
+    PROCEDURE :: UpdateDevice => UpdateDevice_NodalDGSolution_3D
+    PROCEDURE :: UpdateHost   => UpdateHost_NodalDGSolution_3D
+#endif
 
   END TYPE NodalDGSolution_3D
     
@@ -115,27 +124,46 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Build_NodalDGSolution_3D( myDGS, N, nEq, nElems )
 
-   IMPLICIT NONE
-   CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
-   INTEGER, INTENT(in)                    :: N, nEq, nElems
+  SUBROUTINE Build_NodalDGSolution_3D( myDGS, N, nEq, nElems )
+    IMPLICIT NONE
+    CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
+    INTEGER, INTENT(in)                      :: N, nEq, nElems
       
-      myDGS % N   = N
-      myDGS % nEq = nEq
+      myDGS % N          = N
+      myDGS % nEquations = nEq
 
-      ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEq,1:nElems) )
-      ALLOCATE( myDGS % tendency(0:N,0:N,0:N,1:nEq,1:nElems) )
-      ALLOCATE( myDGS % boundarySolution(0:N,0:N,1:nEq,1:nHexFaces,1:nElems) ) 
-      ALLOCATE( myDGS % boundaryFlux(0:N,0:N,1:nEq,1:nHexFaces,1:nElems) ) 
+      ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEq,1:nElems), &
+                myDGS % flux(1:3,0:N,0:N,0:N,1:nEq,1:nElems), &
+                myDGS % source(0:N,0:N,0:N,1:nEq,1:nElems), &
+                myDGS % boundarySolution(0:N,0:N,1:nEq,1:6,1:nElems), &
+                myDGS % boundaryFlux(0:N,0:N,1:nEq,1:6,1:nElems), &
+                myDGS % tendency(0:N,0:N,0:N,1:nEq,1:nElems) )
       
-      myDGS % solution = 0.0_prec
-      myDGS % tendency = 0.0_prec
+      myDGS % solution         = 0.0_prec
+      myDGS % flux             = 0.0_prec
+      myDGS % source           = 0.0_prec
+      myDGS % tendency         = 0.0_prec
       myDGS % boundarySolution = 0.0_prec
-      myDGS % boundaryFlux = 0.0_prec
+      myDGS % boundaryFlux     = 0.0_prec
 
+#ifdef HAVE_CUDA
+      ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEq,1:nElems), &
+                myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEq,1:nElems), &
+                myDGS % source_dev(0:N,0:N,0:N,1:nEq,1:nElems), &
+                myDGS % boundarySolution_dev(0:N,0:N,1:nEq,1:6,1:nElems), &
+                myDGS % boundaryFlux_dev(0:N,0:N,1:nEq,1:6,1:nElems), &
+                myDGS % tendency_dev(0:N,0:N,0:N,1:nEq,1:nElems) )
 
- END SUBROUTINE Build_NodalDGSolution_3D
+      myDGS % solution_dev         = 0.0_prec
+      myDGS % flux_dev             = 0.0_prec
+      myDGS % source_dev           = 0.0_prec
+      myDGS % tendency_dev         = 0.0_prec
+      myDGS % boundarySolution_dev = 0.0_prec
+      myDGS % boundaryFlux_dev     = 0.0_prec
+#endif
+
+  END SUBROUTINE Build_NodalDGSolution_3D
 !
 !> \addtogroup NodalDGSolution_3D_Class
 !! @{ 
@@ -158,17 +186,59 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Trash_NodalDGSolution_3D( myDGS )
 
-   IMPLICIT NONE
-   CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
+  SUBROUTINE Trash_NodalDGSolution_3D( myDGS )
+    IMPLICIT NONE
+    CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
 
-      DEALLOCATE( myDGS % Solution )
-      DEALLOCATE( myDGS % tendency )
-      DEALLOCATE( myDGS % boundarySolution ) 
-      DEALLOCATE( myDGS % boundaryFlux ) 
+      DEALLOCATE( myDGS % solution, &
+                  myDGS % flux, &
+                  myDGS % source, &
+                  myDGS % boundarySolution, &
+                  myDGS % boundaryFlux, &
+                  myDGS % tendency )
 
- END SUBROUTINE Trash_NodalDGSolution_3D
 
+#ifdef HAVE_CUDA
+      DEALLOCATE( myDGS % solution_dev, &
+                  myDGS % flux_dev, &
+                  myDGS % source_dev, &
+                  myDGS % boundarySolution_dev, &
+                  myDGS % boundaryFlux_dev, &
+                  myDGS % tendency_dev )
+
+#endif
+
+  END SUBROUTINE Trash_NodalDGSolution_3D
+
+#ifdef HAVE_CUDA
+
+  SUBROUTINE UpdateDevice_NodalDGSolution_3D( myDGS )
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
+
+      myDGS % solution_dev         = myDGS % solution
+      myDGS % flux_dev             = myDGS % flux
+      myDGS % source_dev           = myDGS % source
+      myDGS % boundarySolution_dev = myDGS % boundarySolution
+      myDGS % boundaryFlux_dev     = myDGS % boundaryFlux
+      myDGS % tendency_dev         = myDGS % tendency
+
+  END SUBROUTINE UpdateDevice_NodalDGSolution_3D
+
+  SUBROUTINE UpdateHost_NodalDGSolution_3D( myDGS )
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
+
+      myDGS % solution         = myDGS % solution_dev
+      myDGS % flux             = myDGS % flux_dev
+      myDGS % source           = myDGS % source_dev
+      myDGS % boundarySolution = myDGS % boundarySolution_dev
+      myDGS % boundaryFlux     = myDGS % boundaryFlux_dev
+      myDGS % tendency         = myDGS % tendency_dev
+
+  END SUBROUTINE UpdateHost_NodalDGSolution_3D
+
+#endif
 
 END MODULE NodalDGSolution_3D_Class
