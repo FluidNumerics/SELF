@@ -128,9 +128,9 @@ IMPLICIT NONE
       PROCEDURE :: Interpolate_2D => Interpolate_2D_Lagrange
       PROCEDURE :: Interpolate_3D => Interpolate_3D_Lagrange
 
-      PROCEDURE :: Differentiate_1D => Differentiate_1D_Lagrange
-      PROCEDURE :: Differentiate_2D => Differentiate_2D_Lagrange
-      PROCEDURE :: Differentiate_3D => Differentiate_3D_Lagrange
+!      PROCEDURE :: Differentiate_1D => Differentiate_1D_Lagrange
+!      PROCEDURE :: Differentiate_2D => Differentiate_2D_Lagrange
+!      PROCEDURE :: Differentiate_3D => Differentiate_3D_Lagrange
 
       PROCEDURE, PRIVATE :: CalculateBarycentricWeights  => CalculateBarycentricWeights_Lagrange
       PROCEDURE, PRIVATE :: CalculateInterpolationMatrix => CalculateInterpolationMatrix_Lagrange

@@ -9,6 +9,7 @@ MODULE NodalDG_Class
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
+USE Quadrature
 USE Lagrange_Class
 
 IMPLICIT NONE
@@ -158,7 +159,7 @@ IMPLICIT NONE
       CALL LegendreQuadrature( N, quadraturePoints, quadratureWeights, quadrature )
       myNodal % quadratureWeights = quadratureWeights    
        
-      CALL myNodal % interp % Build( N, nTargetPoints, quadratureWeights, targetPoints )
+      CALL myNodal % interp % Build( N, nTargetPoints, quadraturePoints, targetPoints )
    
       myNodal % boundaryInterpolationMatrix(0:N,0) = myNodal % interp % CalculateLagrangePolynomials( -1.0_prec)
       myNodal % boundaryInterpolationMatrix(0:N,1) = myNodal % interp % CalculateLagrangePolynomials( 1.0_prec )

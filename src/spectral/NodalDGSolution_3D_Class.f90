@@ -27,14 +27,14 @@ IMPLICIT NONE
 !! <H3> Attributes </H3>
 !!    <table>
 !!       <tr> <th> N <td> INTEGER  <td> Polynomial degree of the spectral element method
-!!       <tr> <th> nEq <td> INTEGER <td> Number of (prognostic) solution variables.
-!!       <tr> <th> solution(0:N,0:N,0:N,1:nEq) <td> REAL(prec) <td> An array containing the solution variables
-!!       <tr> <th> tendency(0:N,0:N,0:N,1:nEq) <td> REAL(prec) <td> An array containing the tendency of the 
-!!       <tr> <th> tendency(0:N,0:N,0:N,1:nEq) <td> REAL(prec) <td> An array containing the tendency of the 
+!!       <tr> <th> nEquations <td> INTEGER <td> Number of (prognostic) solution variables.
+!!       <tr> <th> solution(0:N,0:N,0:N,1:nEquations) <td> REAL(prec) <td> An array containing the solution variables
+!!       <tr> <th> tendency(0:N,0:N,0:N,1:nEquations) <td> REAL(prec) <td> An array containing the tendency of the 
+!!       <tr> <th> tendency(0:N,0:N,0:N,1:nEquations) <td> REAL(prec) <td> An array containing the tendency of the 
 !!                                                          solution variables.
-!!       <tr> <th> boundarySolution(0:N,0:N,1:6,1:nEq)* <td> REAL(prec) <td>
+!!       <tr> <th> boundarySolution(0:N,0:N,1:6,1:nEquations)* <td> REAL(prec) <td>
 !!                  An array containing the solution variables at the element boundary
-!!       <tr> <th> boundaryFlux(0:N,0:N,1:6,1:nEq)* <td> REAL(prec) <td>
+!!       <tr> <th> boundaryFlux(0:N,0:N,1:6,1:nEquations)* <td> REAL(prec) <td>
 !!                  An array containing the flux at the element boundary
 !!    </table>
 !!
@@ -108,9 +108,9 @@ IMPLICIT NONE
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(NodalDGSolution_3D) :: this <BR>
-!! <B>INTEGER</B>                :: N, nEq <BR>
+!! <B>INTEGER</B>                :: N, nEquations <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Build( N, nEq ) <BR>
+!!     <B>CALL</B> this % Build( N, nEquations ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
@@ -118,27 +118,27 @@ IMPLICIT NONE
 !!                                                       each attribute and each array is initialized
 !!                                                       with a value of 0.0_prec. 
 !!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree of the DG-method you plan on using
-!!   <tr> <td> in <th> nEq <td> INTEGER <td> Number of prognostic variables; number of equations for
+!!   <tr> <td> in <th> nEquations <td> INTEGER <td> Number of prognostic variables; number of equations for
 !!                                           the system being solved
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
 
-  SUBROUTINE Build_NodalDGSolution_3D( myDGS, N, nEq, nElems )
+  SUBROUTINE Build_NodalDGSolution_3D( myDGS, N, nEquations, nElements )
     IMPLICIT NONE
     CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
-    INTEGER, INTENT(in)                      :: N, nEq, nElems
+    INTEGER, INTENT(in)                      :: N, nEquations, nElements
       
       myDGS % N          = N
-      myDGS % nEquations = nEq
+      myDGS % nEquations = nEquations
 
-      ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEq,1:nElems), &
-                myDGS % flux(1:3,0:N,0:N,0:N,1:nEq,1:nElems), &
-                myDGS % source(0:N,0:N,0:N,1:nEq,1:nElems), &
-                myDGS % boundarySolution(0:N,0:N,1:nEq,1:6,1:nElems), &
-                myDGS % boundaryFlux(0:N,0:N,1:nEq,1:6,1:nElems), &
-                myDGS % tendency(0:N,0:N,0:N,1:nEq,1:nElems) )
+      ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % source(0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % boundarySolution(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % boundaryFlux(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % tendency(0:N,0:N,0:N,1:nEquations,1:nElements) )
       
       myDGS % solution         = 0.0_prec
       myDGS % flux             = 0.0_prec
@@ -148,12 +148,12 @@ IMPLICIT NONE
       myDGS % boundaryFlux     = 0.0_prec
 
 #ifdef HAVE_CUDA
-      ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEq,1:nElems), &
-                myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEq,1:nElems), &
-                myDGS % source_dev(0:N,0:N,0:N,1:nEq,1:nElems), &
-                myDGS % boundarySolution_dev(0:N,0:N,1:nEq,1:6,1:nElems), &
-                myDGS % boundaryFlux_dev(0:N,0:N,1:nEq,1:6,1:nElems), &
-                myDGS % tendency_dev(0:N,0:N,0:N,1:nEq,1:nElems) )
+      ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % source_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % boundarySolution_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % boundaryFlux_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % tendency_dev(0:N,0:N,0:N,1:nEquations,1:nElements) )
 
       myDGS % solution_dev         = 0.0_prec
       myDGS % flux_dev             = 0.0_prec

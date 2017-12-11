@@ -129,7 +129,6 @@ CommonRoutines.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/Common
 Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}common/Timing.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/Timing.f90 -o $@
 
-# Test programs
    
 # ---------------------------------------------------------------------- #
 #                           ~/src/spectral/                           #
@@ -149,6 +148,16 @@ NodalDG_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
 NodalDGSolution_3D_Class.o : ModelPrecision.o ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90 -o $@
 	
+
+# Test program
+
+spectral_tests : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o Spectral_Tests.o
+	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o Spectral_Tests.o -o $@
+
+
+Spectral_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o \
+                   ${SRCDIR}spectral/testing/Spectral_Tests.F90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/Spectral_Tests.F90 -o $@
 
 
 # ---------------------------------------------------------------------- #
