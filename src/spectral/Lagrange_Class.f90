@@ -80,13 +80,8 @@ IMPLICIT NONE
 
   TYPE, PUBLIC :: Lagrange
 
-#ifdef HAVE_CUDA
-    INTEGER, MANAGED        :: N    
-    INTEGER, MANAGED        :: M 
-#else
     INTEGER                 :: N     
     INTEGER                 :: M 
-#endif
     REAL(prec), ALLOCATABLE :: interpolationPoints(:)
     REAL(prec), ALLOCATABLE :: targetPoints(:)
     REAL(prec), ALLOCATABLE :: barycentricWeights(:)
@@ -96,6 +91,7 @@ IMPLICIT NONE
     REAL(prec), ALLOCATABLE :: derivativeMatrixTranspose(:,:)  
 
 #ifdef HAVE_CUDA
+    INTEGER, ALLOCATABLE, DEVICE    :: N_dev, M_dev
     REAL(prec), ALLOCATABLE, DEVICE :: barycentricWeights_dev(:)  
     REAL(prec), ALLOCATABLE, DEVICE :: interpolationMatrix_dev(:,:)
     REAL(prec), ALLOCATABLE, DEVICE :: interpolationMatrixTranspose_dev(:,:)
@@ -184,11 +180,11 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(out)   :: myPoly
     INTEGER, INTENT(in)            :: N, M
     REAL(prec), INTENT(in)         :: s(0:N), so(0:M)
-   
+    
       ! Set the number of observations (those we have and those we want)
       myPoly % N  = N
       myPoly % M  = M
-      
+     
       ! Allocate storage
       ALLOCATE( myPoly % interpolationPoints(0:N), &
                 myPoly % barycentricWeights(0:N), &
@@ -215,12 +211,16 @@ IMPLICIT NONE
       CALL myPoly % CalculateDerivativeMatrix( )
 
 #ifdef HAVE_CUDA
+      ALLOCATE( myPoly % N_dev, myPoly % M_dev )
       ALLOCATE( myPoly % barycentricWeights_dev(0:N), &
                 myPoly % interpolationMatrix_dev(0:M,0:N), &
                 myPoly % interpolationMatrixTranspose_dev(0:N,0:M), &
                 myPoly % derivativeMatrix_dev(0:N,0:N), &
                 myPoly % derivativeMatrixTranspose_dev(0:N,0:N) )
  
+      myPoly % N_dev = N
+      myPoly % M_dev = M
+      
       myPoly % barycentricWeights_dev           = myPoly % barycentricWeights
       myPoly % interpolationMatrix_dev          = myPoly % interpolationMatrix
       myPoly % interpolationMatrixTranspose_dev = myPoly % interpolationMatrixTranspose
@@ -268,6 +268,7 @@ IMPLICIT NONE
                   myPoly % derivativeMatrix, &
                   myPoly % derivativeMatrixTranspose )
 #ifdef HAVE_CUDA
+      DEALLOCATE( myPoly % N_dev, myPoly % M_dev )
       DEALLOCATE( myPoly % barycentricWeights_dev, &
                   myPoly % interpolationMatrix_dev, &
                   myPoly % interpolationMatrixTranspose_dev, &
@@ -503,7 +504,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: fNew(0:myPoly % M, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -515,7 +516,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
      
       CALL ApplyInterpolationMatrix_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % interpolationMatrixTranspose_dev, &
-                                                                     f, fNew, myPoly % N, myPoly % M, &
+                                                                     f, fNew, myPoly % N_dev, myPoly % M_dev, &
                                                                      nVariables, nElements )
 
 #else
@@ -575,7 +576,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: fNew(0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -587,7 +588,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
      
       CALL ApplyInterpolationMatrix_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % interpolationMatrixTranspose_dev, &
-                                                                     f, fNew, myPoly % N, myPoly % M, &
+                                                                     f, fNew, myPoly % N_dev, myPoly % M_dev, &
                                                                      nVariables, nElements )
 
 #else
@@ -649,7 +650,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: fNew(0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -659,9 +660,8 @@ IMPLICIT NONE
 
       tBlock = dim3( threadCount, threadCount, threadCount )
       grid   = dim3( nVariables, nElements, 1)
-     
       CALL ApplyInterpolationMatrix_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % interpolationMatrixTranspose_dev, &
-                                                                     f, fNew, myPoly % N, myPoly % M,&
+                                                                     f, fNew, myPoly % N_dev, myPoly % M_dev,&
                                                                      nVariables, nElements )
 
 #else
@@ -719,7 +719,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: derF(0:myPoly % N, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -731,7 +731,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
      
       CALL CalculateDerivative_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
-                                                                f, derF, myPoly % N , nVariables, nElements )
+                                                                f, derF, myPoly % N_dev , nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -749,7 +749,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: gradF(1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -761,7 +761,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
 
       CALL CalculateGradient_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
-                                                                f, gradF, myPoly % N , nVariables, nElements )
+                                                                f, gradF, myPoly % N_dev, nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -822,7 +822,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -834,7 +834,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
 
       CALL CalculateDivergence_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
-                                                                f, divF, myPoly % N , nVariables, nElements )
+                                                                f, divF, myPoly % N_dev, nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -852,7 +852,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -864,7 +864,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
 
       CALL CalculateGradient_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
-                                                              f, gradF, myPoly % N , nVariables, nElements )
+                                                              f, gradF, myPoly % N_dev, nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -921,7 +921,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock
@@ -933,7 +933,7 @@ IMPLICIT NONE
       grid   = dim3( nVariables, nElements, 1)
 
       CALL CalculateDivergence_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % derivativeMatrixTranspose_dev, &
-                                                                f, divF, myPoly % N , nVariables, nElements )
+                                                                f, divF, myPoly % N_dev, nVariables, nElements )
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements

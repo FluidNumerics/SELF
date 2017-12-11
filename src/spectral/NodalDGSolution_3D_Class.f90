@@ -54,11 +54,8 @@ IMPLICIT NONE
 !>@}
 
   TYPE NodalDGSolution_3D
-#ifdef HAVE_CUDA
-    INTEGER, MANAGED        :: N, nEquations
-#else
+
     INTEGER                 :: N, nEquations
-#endif
     REAL(prec), ALLOCATABLE :: solution(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: source(:,:,:,:,:)
@@ -67,12 +64,13 @@ IMPLICIT NONE
     REAL(prec), ALLOCATABLE :: tendency(:,:,:,:,:)
 
 #ifdef HAVE_CUDA
-    REAL(prec), ALLOCATABLE :: solution_dev(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: source_dev(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: boundarySolution_dev(:,:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: boundaryFlux_dev(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: tendency_dev(:,:,:,:,:)
+    INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nEquations_dev
+    REAL(prec), DEVICE, ALLOCATABLE :: solution_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: source_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: boundarySolution_dev(:,:,:,:,:) 
+    REAL(prec), DEVICE, ALLOCATABLE :: boundaryFlux_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: tendency_dev(:,:,:,:,:)
 
 #endif
 
@@ -148,6 +146,10 @@ IMPLICIT NONE
       myDGS % boundaryFlux     = 0.0_prec
 
 #ifdef HAVE_CUDA
+      ALLOCATE( myDGS % N_dev, myDGS % nEquations_dev )
+      myDGS % N_dev          = N
+      myDGS % nEquations_dev = nEquations
+      
       ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % source_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
@@ -200,6 +202,7 @@ IMPLICIT NONE
 
 
 #ifdef HAVE_CUDA
+      DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev )
       DEALLOCATE( myDGS % solution_dev, &
                   myDGS % flux_dev, &
                   myDGS % source_dev, &

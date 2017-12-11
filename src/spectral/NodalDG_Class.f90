@@ -51,13 +51,9 @@ IMPLICIT NONE
 !>@}
 
   TYPE NodalDG
-#ifdef HAVE_CUDA
-    INTEGER, MANAGED        :: N    
-    INTEGER, MANAGED        :: nTargetPoints
-#else
+
     INTEGER                 :: N     
     INTEGER                 :: nTargetPoints
-#endif
     TYPE(Lagrange)          :: interp 
     REAL(prec), ALLOCATABLE :: quadratureWeights(:)
     REAL(prec), ALLOCATABLE :: dgDerivativeMatrix(:,:)
@@ -65,6 +61,8 @@ IMPLICIT NONE
     REAL(prec), ALLOCATABLE :: boundaryInterpolationMatrix(:,:)
       
 #ifdef HAVE_CUDA
+    INTEGER, ALLOCATABLE, DEVICE    :: N_dev  
+    INTEGER, ALLOCATABLE, DEVICE    :: nTargetPoints_dev
     REAL(prec), DEVICE, ALLOCATABLE :: quadratureWeights_dev(:)
     REAL(prec), DEVICE, ALLOCATABLE :: dgDerivativeMatrix_dev(:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: dgDerivativeMatrixTranspose_dev(:,:)
@@ -184,6 +182,11 @@ IMPLICIT NONE
       ENDDO
  
 #ifdef HAVE_CUDA
+      ALLOCATE( myNodal % N_dev, myNodal % nTargetPoints_dev )
+      myNodal % N_dev             = N
+      myNodal % nTargetPoints_dev = nTargetPoints
+      
+      
       ALLOCATE( myNodal % dgDerivativeMatrix_dev(0:N,0:N), &
                 myNodal % dgDerivativeMatrixTranspose_dev(0:N,0:N), &
                 myNodal % boundaryInterpolationMatrix_dev(0:N,0:1), &
@@ -234,6 +237,7 @@ IMPLICIT NONE
                   myNodal % quadratureWeights )
                   
 #ifdef HAVE_CUDA
+      DEALLOCATE( myNodal % N_dev, myNodal % nTargetPoints_dev )
       DEALLOCATE( myNodal % dgDerivativeMatrix_dev, &
                   myNodal % dgDerivativeMatrixTranspose_dev, &
                   myNodal % boundaryInterpolationMatrix_dev, &
@@ -248,7 +252,7 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS( NodalDG ), INTENT(in) :: myNodal 
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,nElements)
     REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
     ! Local
@@ -261,7 +265,7 @@ IMPLICIT NONE
       
       CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( f, fAtBoundaries, &
                                                                            myNodal % boundaryInterpolationMatrix_dev, &
-                                                                           myNodal % N, nVariables, nElements )
+                                                                           myNodal % N_dev, nVariables, nElements )
       
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -280,23 +284,24 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS( NodalDG ) :: myNodal
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: divF(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     ! Local
     TYPE(dim3) :: grid, tBlock
-  
-      tBlock = dim3( 4*(ceiling( REAL(myNodal % N+1)/4 ) ), &
-                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) , &
-                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) )
-      grid = dim3( nVariables, nElements, 1)  
+    INTEGER    :: threadCount
+    
+      threadCount = MIN( 4*(ceiling( REAL(myNodal % N+1)/4 ) ), 8 )
+
+      tBlock = dim3( threadCount, threadCount, threadCount )
+      grid = dim3( nVariables, nElements, 1) 
 
       CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( f, fnAtBoundaries, divF, &
                                                           myNodal % boundaryInterpolationMatrix_dev, &
                                                           myNodal % dgDerivativeMatrixTranspose_dev, &
                                                           myNodal % quadratureWeights_dev, &
-                                                          myNodal % N, nVariables, nElements )
+                                                          myNodal % N_dev, nVariables, nElements )
 
 
 #else
@@ -316,7 +321,7 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS( NodalDG ) :: myNodal
 #ifdef HAVE_CUDA
-    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
@@ -332,7 +337,7 @@ IMPLICIT NONE
                                                         myNodal % boundaryInterpolationMatrix_dev, &
                                                         myNodal % dgDerivativeMatrixTranspose_dev, &
                                                         myNodal % quadratureWeights_dev, &
-                                                        myNodal % N, nVariables, nElements )
+                                                        myNodal % N_dev, nVariables, nElements )
 
 
 #else
@@ -477,7 +482,7 @@ IMPLICIT NONE
 #ifdef HAVE_CUDA
   ATTRIBUTES(Global) SUBROUTINE CalculateFunctionsAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix, N, nVariables, nElements ) 
     IMPLICIT NONE
-    INTEGER, MANAGED, INTENT(in)    :: N, nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)     :: N, nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
     REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
@@ -491,6 +496,7 @@ IMPLICIT NONE
       k   = threadIdx % y-1
       j   = threadIdx % x-1
       
+      IF( j <= N .AND. k <= N )THEN
       bSol(1:6) = 0.0_prec
 
       DO i = 0, N
@@ -508,11 +514,13 @@ IMPLICIT NONE
         fAtBoundaries(j,k,iVar,i,iEl) = bSol(i)
       ENDDO
       
+      ENDIF
+      
   END SUBROUTINE CalculateFunctionsAtBoundaries_3D_CUDAKernel
 
   ATTRIBUTES(Global) SUBROUTINE DG_Divergence_3D_CUDAKernel( f, fnAtBoundaries, divF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, N, nVariables, nElements )
     IMPLICIT NONE
-    INTEGER, MANAGED, INTENT(in)    :: N, nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: N, nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:N,0:N,0:N,1:nVariables,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
@@ -521,7 +529,7 @@ IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(out) :: divF(0:N,0:N,1:nVariables,1:6,1:nElements)
     ! Local
     INTEGER            :: i, j, k, iVar, iEl, ii
-    REAL(prec) :: df
+    REAL(prec)         :: df
     REAL(prec), SHARED :: fLocal(1:3,0:7,0:7,0:7)
     
     
@@ -532,6 +540,8 @@ IMPLICIT NONE
       j = threadIdx % y - 1
       k = threadIdx % z - 1
     
+    
+      IF( i <= N .AND. j <= N .AND. k <= N )THEN
       fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
     
       CALL syncthreads( )
@@ -552,13 +562,14 @@ IMPLICIT NONE
                                     ( fnAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
                                       fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
                                     quadratureWeights(k) )
+       ENDIF
                   
                   
   END SUBROUTINE DG_Divergence_3D_CUDAKernel
 
   ATTRIBUTES(Global) SUBROUTINE DG_Gradient_3D_CUDAKernel( f, fAtBoundaries, gradF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, N, nVariables, nElements )
     IMPLICIT NONE
-    INTEGER, MANAGED, INTENT(in)    :: N, nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)    :: N, nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
@@ -578,6 +589,7 @@ IMPLICIT NONE
       j = threadIdx % y - 1
       k = threadIdx % z - 1
     
+      IF( i <= N .AND. j <= N .AND. k <= N )THEN
       fLocal(i,j,k) = f(i,j,k,iVar,iEl)
     
       CALL syncthreads( )
@@ -603,7 +615,8 @@ IMPLICIT NONE
       gradF(3,i,j,k,iVar,iEl) = -( df(3) + ( fAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
                                              fAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
                                            quadratureWeights(k) )
-                  
+        
+      ENDIF
                   
   END SUBROUTINE DG_Gradient_3D_CUDAKernel
 

@@ -12,18 +12,21 @@
 !  For 3-D cases, interpolation and differentation tests are performed on the following analytical
 !  functions : 
 !
-!    (1)  f(x,y,z) = x*y*z (scalar function, exactness)
+!    (1) Exactness
+!        (Scalar) f(x,y,z) = x*y*z 
+!        (Vector) \vec{g}(x,y,z) = y*z \hat{x} + x*z \hat{y} + x*y \hat{z}
+!                 
+!                  ===> divergence( \vec{g} ) = 0.0
 !
 !         In this case, the interpolation should be exact for all polynomials of degree 1 or higher.
 !         Interpolation errors and differentiation errors should be to machine precision accuracy.
 !
-!    (2)  f(x,y,z) = sin(pi*x)*sin(pi*y)*sin(pi*z) (scalar function, exponential error decay)
-!   
-!         In this case, the interpolation errors should decay exponentially with polynomial degree N.
+!    (2) Exponential Error Decay
+!        (Scalar)  f(x,y,z)       = sin(pi*x)*sin(pi*y)*sin(pi*z)
+!        (Vector)  \vec{g}(x,y,z) = -pi*cos(pi*x)*sin(pi*y)*sin(pi*z) \hat{x} +
+!                                   -pi*sin(pi*x)*cos(pi*y)*sin(pi*z) \hat{y} +
+!                                   -pi*sin(pi*x)*sin(pi*y)*cos(pi*z) \hat{z}
 !
-!    (3)  \vec{f}(x,y,z) = y*z \hat{x} + x*z \hat{y} + x*y \hat{z} ( exactness, divergence free )
-!
-!    (4)  \vec{f}(x,y,z) = sin(pi*y*z) \hat{x} + cos(pi*x*z) \hat{y} + sin(pi*x)*cos(pi*y) \hat{z} ( exponential error decay, divergence free )
 
 PROGRAM Spectral_Tests
 
@@ -38,7 +41,15 @@ USE NodalDGSolution_3D_Class
 IMPLICIT NONE
 
   INTEGER, PARAMETER :: polyLow = 3
+#ifdef HAVE_CUDA
+  INTEGER, PARAMETER :: polyHigh = 7
+#else
   INTEGER, PARAMETER :: polyHigh = 20
+#endif
+
+#ifdef HAVE_CUDA
+  INTEGER, ALLOCATABLE, DEVICE :: nVars, nElems
+#endif
 
   TYPE( NodalDG ) :: referenceInterpolant
   TYPE( NodalDG ) :: trialInterpolant
@@ -51,17 +62,21 @@ IMPLICIT NONE
   REAL(prec) :: F1_divergence_strong_error(polyLow:polyHigh)
   REAL(prec) :: F1_divergence_dgweak_error(polyLow:polyHigh)
   
+#ifdef HAVE_CUDA
+    ALLOCATE( nVars, nElems )
+    nVars  = 1
+    nElems = 1
+#endif
 
-  
     CALL referenceInterpolant % Build( targetPoints  = UniformPoints( -1.0_prec, 1.0_prec, 100 ), &
                                        N             = 50, &
                                        nTargetPoints = 100, &
                                        quadrature    = GAUSS  )
-                                       
+
     CALL referenceFunctions % Build( N          = 50, &
                                      nEquations = 1, &
                                      nElements  = 1 )
-                 
+
     CALL interpolatedFunctions % Build( N          = 50, &
                                         nEquations = 1, &
                                         nElements  = 1 )
@@ -73,7 +88,9 @@ IMPLICIT NONE
     CALL interpolatedFunctions % Trash( )  
     CALL referenceFunctions % Trash( )
     CALL referenceInterpolant % Trash( )
-  
+#ifdef HAVE_CUDA
+    DEALLOCATE( nVars, nElems )
+#endif
   
 CONTAINS
 
@@ -114,14 +131,14 @@ CONTAINS
                  trialFunctions % flux, &
                  trialFunctions % boundaryFlux, &
                  1, 1 )
-
+                 
         CALL RunTests 
 
         ! Report max errors !
         F1_interpolation_error(i)     = MAXVAL( ABS( interpolatedFunctions % solution - referenceFunctions % solution ) )                                                         
         F1_divergence_strong_error(i) = MAXVAL( ABS( trialFunctions % tendency ) )
         F1_divergence_dgweak_error(i) = MAXVAL( ABS( trialFunctions % source ) )
-        
+
         WRITE(*,'(2x,I3,3(2x,E17.5))') i, F1_interpolation_error(i), F1_divergence_strong_error(i), F1_divergence_dgweak_error(i)
         
   
@@ -197,24 +214,32 @@ CONTAINS
   SUBROUTINE RunTests( ) 
   
 #ifdef HAVE_CUDA
+        
         CALL trialFunctions % UpdateDevice( )
         
-        ! Interpolation test
-        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution_dev, &
-                                                                      fNew       = interpolatedFunctions % solution_dev, & 
-                                                                      nVariables = 1, &
-                                                                      nElements  = 1)
+!        ! Interpolation test
+!        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution_dev, &
+!                                                                      fNew       = interpolatedFunctions % solution_dev, & 
+!                                                                      nVariables = nVars, &
+!                                                                      nElements  = nElems)
+                                                                      
         ! Divergence test (strong form)                                                              
         CALL trialInterpolant % interp % CalculateDivergence_3D( f          = trialFunctions % flux_dev, &
                                                                  divF       = trialFunctions % tendency_dev, &
-                                                                 nVariables = 1, &
-                                                                 nElements  = 1 )
+                                                                 nVariables = nVars, &
+                                                                 nElements  = nElems )
         ! Divergence test (weak form)                                                         
         CALL trialInterpolant % DG_Divergence_3D( f              = trialFunctions % flux_dev, &
                                                   fnAtBoundaries = trialFunctions % boundaryFlux_dev, & 
-                                                  divF           = trialFunctions % source, &
-                                                  nVariables     = 1, &
-                                                  nElements      = 1 )
+                                                  divF           = trialFunctions % source_dev, &
+                                                  nVariables     = nVars, &
+                                                  nElements      = nElems )
+                                                  
+        ! Gradient test (strong form)
+!        CALL trialInterpolant % interp % CalculateGradient_3D( f          = trialFunctions % solution_dev, &
+!                                                               gradF      = trialFunctions % flux_dev, &
+!                                                               nVariables = nVars, &
+!                                                               nElements  = nElems )
                                                                       
         CALL interpolatedFunctions % UpdateHost( )
         CALL trialFunctions % UpdateHost( )
@@ -237,6 +262,12 @@ CONTAINS
                                                   divF           = trialFunctions % source, &
                                                   nVariables     = 1, &
                                                   nElements      = 1 )
+                                                  
+        ! Gradient test (strong form)
+        CALL trialInterpolant % interp % CalculateGradient_3D( f          = trialFunctions % solution, &
+                                                               gradF      = trialFunctions % flux, &
+                                                               nVariables = 1, &
+                                                               nElements  = 1 )
 #endif
   END SUBROUTINE RunTests
   
