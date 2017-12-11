@@ -84,6 +84,7 @@ IMPLICIT NONE
       ! Type-Specific
       PROCEDURE :: CalculateFunctionsAtBoundaries_3D
       PROCEDURE :: DG_Divergence_3D
+      PROCEDURE :: DG_Gradient_3D
       
     END TYPE NodalDG
     
@@ -316,6 +317,41 @@ IMPLICIT NONE
 
   END SUBROUTINE DG_Divergence_3D
 
+  SUBROUTINE DG_Gradient_3D( myNodal, f, fAtBoundaries, gradF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS( NodalDG ) :: myNodal
+#ifdef HAVE_CUDA
+    INTEGER, MANAGED, INTENT(in)    :: nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3( 4*(ceiling( REAL(myNodal % N+1)/4 ) ), &
+                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) , &
+                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) )
+      grid = dim3( nVariables, nElements, 1)  
+
+      CALL DG_Gradient_3D_CUDAKernel<<<grid, tBlock>>>( f, fAtBoundaries, gradF, &
+                                                        myNodal % boundaryInterpolationMatrix_dev, &
+                                                        myNodal % dgDerivativeMatrixTranspose_dev, &
+                                                        myNodal % quadratureWeights_dev, &
+                                                        myNodal % N, nVariables, nElements )
+
+
+#else
+    INTEGER         :: nVariables, nElements
+    REAL(prec)      :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec)      :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec)      :: gradf(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+
+      gradF = DG_Gradient_3D_NodalDG( myNodal, f, fAtBoundaries, nVariables, nElements )
+    
+#endif
+
+  END SUBROUTINE DG_Gradient_3D
+
 ! ================================================================================================ !
 ! ------------------------------------- PRIVATE ROUTINES ----------------------------------------- !
 ! ================================================================================================ !
@@ -398,6 +434,51 @@ IMPLICIT NONE
 
   END FUNCTION DG_Divergence_3D_NodalDG
 
+  FUNCTION DG_Gradient_3D_NodalDG( myNodal, f, fAtBoundaries, nVariables, nElements ) RESULT( gradF )
+    IMPLICIT NONE
+    TYPE( NodalDG ) :: myNodal
+    INTEGER         :: nVariables, nElements
+    REAL(prec)      :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec)      :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec)      :: gradf(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER    :: ii, i, j, k, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myNodal % N
+            DO j = 0, myNodal % N
+              DO i = 0, myNodal % N   
+ 
+                gradF(1:3,i,j,k,iVar,iEl) = 0.0_prec
+
+                DO ii = 0, myNodal % N
+                  gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myNodal % dgDerivativeMatrixTranspose(ii,i)*f(ii,j,k,iVar,iEl)
+                  gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myNodal % dgDerivativeMatrixTranspose(ii,j)*f(i,ii,k,iVar,iEl)
+                  gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myNodal % dgDerivativeMatrixTranspose(ii,k)*f(i,j,ii,iVar,iEl)
+                ENDDO
+                 
+                gradF(1,i,j,k,iVar,iEl) = -( gradF(1,i,j,k,iVar,iEl) + ( fAtBoundaries(j,k,iVar,4,iEl)*myNodal % boundaryInterpolationMatrix(i,0) + &
+                                                                         fAtBoundaries(j,k,iVar,2,iEl)*myNodal % boundaryInterpolationMatrix(i,1) )/&
+                                                                       myNodal % quadratureWeights(i)  )
+
+                gradF(2,i,j,k,iVar,iEl) = -( gradF(2,i,j,k,iVar,iEl) + ( fAtBoundaries(i,k,iVar,1,iEl)*myNodal % boundaryInterpolationMatrix(j,0) + &
+                                                                         fAtBoundaries(i,k,iVar,3,iEl)*myNodal % boundaryInterpolationMatrix(j,1) )/&
+                                                                       myNodal % quadratureWeights(j) )
+
+                gradF(3,i,j,k,iVar,iEl) = -( gradF(3,i,j,k,iVar,iEl) + ( fAtBoundaries(i,j,iVar,5,iEl)*myNodal % boundaryInterpolationMatrix(k,0) + &
+                                                                         fAtBoundaries(i,j,iVar,6,iEl)*myNodal % boundaryInterpolationMatrix(k,1) )/&
+                                                                       myNodal % quadratureWeights(k) )
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+                            
+
+  END FUNCTION DG_Gradient_3D_NodalDG
+
 #ifdef HAVE_CUDA
   ATTRIBUTES(Global) SUBROUTINE CalculateFunctionsAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix, N, nVariables, nElements ) 
     IMPLICIT NONE
@@ -479,6 +560,58 @@ IMPLICIT NONE
                   
                   
   END SUBROUTINE DG_Divergence_3D_CUDAKernel
+
+  ATTRIBUTES(Global) SUBROUTINE DG_Gradient_3D_CUDAKernel( f, fAtBoundaries, gradF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, N, nVariables, nElements )
+    IMPLICIT NONE
+    INTEGER, MANAGED, INTENT(in)    :: N, nVariables, nElements
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
+    REAL(prec), DEVICE, INTENT(in)  :: dgDerivativeMatrixTranspose(0:N,0:N)
+    REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:N)
+    REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:N,0:N,1:nVariables,1:6,1:nElements)
+    ! Local
+    INTEGER            :: i, j, k, iVar, iEl, ii
+    REAL(prec)         :: df(1:3)
+    REAL(prec), SHARED :: fLocal(0:7,0:7,0:7)
+    
+    
+      iVar = blockIDx % x
+      iEl  = blockIDx % y
+      
+      i = threadIdx % x - 1
+      j = threadIdx % y - 1
+      k = threadIdx % z - 1
+    
+      fLocal(i,j,k) = f(i,j,k,iVar,iEl)
+    
+      CALL syncthreads( )
+      
+      df(1) = 0.0_prec
+      df(2) = 0.0_prec
+      df(3) = 0.0_prec
+
+      DO ii = 0, N
+        df(1) = df(1) + dgDerivativeMatrixTranspose(ii,i)*fLocal(ii,j,k)
+        df(2) = df(2) + dgDerivativeMatrixTranspose(ii,j)*fLocal(i,ii,k)
+        df(3) = df(3) + dgDerivativeMatrixTranspose(ii,k)*fLocal(i,j,ii)
+      ENDDO
+       
+      gradF(1,i,j,k,iVar,iEl) = -( df(1) + ( fAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &
+                                             fAtBoundaries(j,k,iVar,2,iEl)*boundaryMatrix(i,1) )/&
+                                           quadratureWeights(i) )
+
+      gradF(2,i,j,k,iVar,iEl) = -( df(2) + ( fAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
+                                             fAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
+                                           quadratureWeights(j) )
+
+      gradF(3,i,j,k,iVar,iEl) = -( df(3) + ( fAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
+                                             fAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
+                                           quadratureWeights(k) )
+                  
+                  
+  END SUBROUTINE DG_Gradient_3D_CUDAKernel
+
 #endif
 
 END MODULE NodalDG_Class
