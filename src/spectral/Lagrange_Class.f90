@@ -1424,6 +1424,8 @@ IMPLICIT NONE
         ENDDO 
 
       ENDDO 
+      
+      myPoly % derivativeMatrixTranspose = TRANSPOSE( myPoly % derivativeMatrix )
 
   END SUBROUTINE CalculateDerivativeMatrix_Lagrange
 

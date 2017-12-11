@@ -112,34 +112,11 @@ CONTAINS
                  trialFunctions % solution, & 
                  trialFunctions % flux, 1, 1 )
 
-#ifdef HAVE_CUDA
-        CALL trialFunctions % UpdateDevice( )
-#endif
-  
-        ! Now that we have a lower order interpolant of the example function, it can be interpolated onto the 
-        ! reference  ( O(50) )quadrature points so that a max error can be estimated
-#ifdef HAVE_CUDA
-        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution_dev, &
-                                                                      fNew       = interpolatedFunctions % solution_dev, & 
-                                                                      nVariables = 1, &
-                                                                      nElements  = 1) 
-#else
-        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution, &
-                                                                      fNew       = interpolatedFunctions % solution, & 
-                                                                      nVariables = 1, &
-                                                                      nElements  = 1) 
-#endif
+        CALL RunTests 
 
-        F1_interpolation_error(i) = MAXVAL( ABS( interpolatedFunctions % solution - referenceFunctions % solution ) )
-  
-  
-        ! Divergence test (strong form)
-        CALL trialInterpolant % interp % CalculateDivergence_3D( f          = trialFunctions % flux, &
-                                                                 divF       = trialFunctions % tendency, &
-                                                                 nVariables = 1, &
-                                                                 nElements  = 1 )
-                                                                 
-        F1_divergence_strong_error(i) = MAXVAL( ABS(trialFunctions % tendency) )
+        ! Report max errors !
+        F1_interpolation_error(i)     = MAXVAL( ABS( interpolatedFunctions % solution - referenceFunctions % solution ) )                                                         
+        F1_divergence_strong_error(i) = MAXVAL( ABS( trialFunctions % tendency ) )
         
         PRINT*, '  ', i, F1_interpolation_error(i), F1_divergence_strong_error(i)
   
@@ -185,5 +162,37 @@ CONTAINS
                                   
     
   END SUBROUTINE F1
+  
+  SUBROUTINE RunTests( ) 
+  
+#ifdef HAVE_CUDA
+        CALL trialFunctions % UpdateDevice( )
+        
+        ! Interpolation test
+        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution_dev, &
+                                                                      fNew       = interpolatedFunctions % solution_dev, & 
+                                                                      nVariables = 1, &
+                                                                      nElements  = 1)
+        ! Divergence test (strong form)                                                              
+        CALL trialInterpolant % interp % CalculateDivergence_3D( f          = trialFunctions % flux_dev, &
+                                                                 divF       = trialFunctions % tendency_dev, &
+                                                                 nVariables = 1, &
+                                                                 nElements  = 1 )
+                                                                      
+                                                                       
+        CALL trialFunctions % UpdateHost( )
+#else
+        ! Interpolation test
+        CALL trialInterpolant % interp % ApplyInterpolationMatrix_3D( f          = trialFunctions % solution, &
+                                                                      fNew       = interpolatedFunctions % solution, & 
+                                                                      nVariables = 1, &
+                                                                      nElements  = 1) 
+        ! Divergence test (strong form) 
+        CALL trialInterpolant % interp % CalculateDivergence_3D( f          = trialFunctions % flux, &
+                                                                 divF       = trialFunctions % tendency, &
+                                                                 nVariables = 1, &
+                                                                 nElements  = 1 )
+#endif
+  END SUBROUTINE RunTests
   
 END PROGRAM Spectral_Tests
