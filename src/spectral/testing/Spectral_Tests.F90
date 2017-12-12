@@ -51,6 +51,7 @@ IMPLICIT NONE
 
 #ifdef HAVE_CUDA
   INTEGER, ALLOCATABLE, DEVICE :: nVars, nElems
+  INTEGER :: iStat
 #endif
 
   TYPE( NodalDG ) :: referenceInterpolant
@@ -59,10 +60,15 @@ IMPLICIT NONE
   TYPE( NodalDGSolution_3D ) :: referenceFunctions
   TYPE( NodalDGSolution_3D ) :: interpolatedFunctions
   TYPE( NodalDGSolution_3D ) :: trialFunctions
+  TYPE( NodalDGSolution_3D ) :: exact
   
   REAL(prec) :: F1_interpolation_error(polyLow:polyHigh)
   REAL(prec) :: F1_divergence_strong_error(polyLow:polyHigh)
   REAL(prec) :: F1_divergence_dgweak_error(polyLow:polyHigh)
+  
+  REAL(prec) :: F2_interpolation_error(polyLow:polyHigh)
+  REAL(prec) :: F2_divergence_strong_error(polyLow:polyHigh)
+  REAL(prec) :: F2_divergence_dgweak_error(polyLow:polyHigh)
   
 #ifdef HAVE_CUDA
     ALLOCATE( nVars, nElems )
@@ -86,6 +92,7 @@ IMPLICIT NONE
 
     CALL F1_Case( )
 
+    CALL F2_Case( )
 
     CALL interpolatedFunctions % Trash( )  
     CALL referenceFunctions % Trash( )
@@ -101,6 +108,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: i
   
+      WRITE(*,*) ' <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< '
       WRITE(*,*) '  Case f_1(x,y,z) = x*y*z  '
       WRITE(*,*) ' ------------------------------------------------------------------------------------------- '
       WRITE(*,*) ' Polynomial degree   Interpolation Error  Divergence Error (strong)  Divergence Error (weak)'
@@ -152,6 +160,80 @@ CONTAINS
       ENDDO
     
   END SUBROUTINE F1_Case
+    ! Case 2 - Exponential decay of error
+  SUBROUTINE F2_Case( )
+    IMPLICIT NONE
+    INTEGER :: i, ii, j, k, iVar, iEl
+    
+      WRITE(*,*) ' <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< '
+      WRITE(*,*) '  Case f_2(x,y,z) = sin(pi*x/2)*sin(pi*y/2)*sin(pi*z/2)  '
+      WRITE(*,*) ' ------------------------------------------------------------------------------------------- '
+      WRITE(*,*) ' Polynomial degree   Interpolation Error  Divergence Error (strong)  Divergence Error (weak)'
+      WRITE(*,*) ' ------------------------------------------------------------------------------------------- '
+      
+      CALL F2( referenceInterpolant % interp, &
+               referenceFunctions % solution, & 
+               referenceFunctions % flux, &
+               referenceFunctions % boundaryFlux, 1, 1 )
+
+        
+#ifdef HAVE_CUDA
+      CALL referenceFunctions % UpdateDevice( )
+#endif
+  
+      ! The main loop loops over polynomial degree. For each polynomial degree, max error in interpolation and 
+      ! differentiation operations are estimated and stored in the error arrays
+      DO i = polyLow, polyHigh
+
+        ! Allocate space for the NodalDG and DGSolution_3D structures (trial function)
+        CALL trialInterpolant % Build( targetPoints  = referenceInterpolant % interp % interpolationPoints, &
+                                       N             = i, &
+                                       nTargetPoints = referenceInterpolant % N, &
+                                       quadrature    = GAUSS  )
+                                       
+        CALL trialFunctions % Build( N          = i, &
+                                     nEquations = 1, &
+                                     nElements  = 1 )  
+         
+        CALL exact % Build( N          = i, &
+                            nEquations = 1, &
+                            nElements  = 1 )  
+        
+        ! The example function for case 1 is filled in the "solution" attribute of the trialFunctions data structure.
+        CALL F2( trialInterpolant % interp, &
+                 trialFunctions % solution, & 
+                 trialFunctions % flux, &
+                 trialFunctions % boundaryFlux, &
+                 1, 1 )
+        
+        DO k = 0, trialInterpolant % interp % N
+          DO j = 0, trialInterpolant % interp % N
+            DO ii = 0, trialInterpolant % interp % N
+            
+              exact % solution(ii,j,k,1,1) = -0.75_prec*pi*pi*trialFunctions % solution(ii,j,k,1,1)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+        
+        CALL RunTests 
+        
+        
+        ! Report max errors !
+        F2_interpolation_error(i)     = MAXVAL( ABS( interpolatedFunctions % solution - referenceFunctions % solution ) )                                                         
+        F2_divergence_strong_error(i) = MAXVAL( ABS( trialFunctions % tendency - exact % solution ) )
+        F2_divergence_dgweak_error(i) = MAXVAL( ABS( trialFunctions % source - exact % solution ) )
+
+        WRITE(*,'(8x,I3,5x,2(4x,E17.5),8x,E17.5)') i, F2_interpolation_error(i), F2_divergence_strong_error(i), F2_divergence_dgweak_error(i)
+        
+  
+        CALL exact % Trash( )
+        CALL trialFunctions % Trash( )
+        CALL trialInterpolant % Trash( )
+  
+      ENDDO
+    
+  END SUBROUTINE F2_Case
   
   SUBROUTINE F1( interp, f1f, f1Gradient, boundaryFlux, nVariables, nElements )
     IMPLICIT NONE
@@ -215,6 +297,67 @@ CONTAINS
     
   END SUBROUTINE F1
   
+  SUBROUTINE F2( interp, f2f, f2Gradient, boundaryFlux, nVariables, nElements )
+    IMPLICIT NONE
+    TYPE( Lagrange ), INTENT(in) :: interp 
+    INTEGER, INTENT(in)          :: nVariables, nElements
+    REAL(prec), INTENT(out)      :: f2f(0:interp % N, 0:interp % N, 0:interp % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out)      :: f2Gradient(1:3,0:interp % N, 0:interp % N, 0:interp % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out)      :: boundaryFlux(0:interp % N, 0:interp % N, 1:nVariables, 1:6, 1:nElements)
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+    
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, interp % N
+            DO j = 0, interp % N
+              DO i = 0, interp % N
+          
+                f2f(i,j,k,iVar,iEl) = sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                      sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                      sin( 0.5_prec*pi*interp % interpolationPoints(k) )
+                        
+                f2Gradient(1,i,j,k,iVar,iEl) = -0.5_prec*pi*cos( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                                            sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                                            sin( 0.5_prec*pi*interp % interpolationPoints(k) )
+                                  
+                f2Gradient(2,i,j,k,iVar,iEl) = -0.5_prec*pi*sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                                            cos( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                                            sin( 0.5_prec*pi*interp % interpolationPoints(k) )
+                                  
+                f2Gradient(3,i,j,k,iVar,iEl) = -0.5_prec*pi*sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                                            sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                                            cos( 0.5_prec*pi*interp % interpolationPoints(k) )
+              ENDDO
+            ENDDO
+          ENDDO
+          
+          DO k = 0, interp % N
+            DO j = 0, interp % N
+          
+                ! south
+                boundaryFlux(j,k,iVar,1,iEl) = 0.0_prec
+                ! east
+                boundaryFlux(j,k,iVar,2,iEl) = 0.0_prec
+                ! north
+                boundaryFlux(j,k,iVar,3,iEl) = 0.0_prec
+                ! west
+                boundaryFlux(j,k,iVar,4,iEl) = 0.0_prec
+                ! bottom
+                boundaryFlux(j,k,iVar,5,iEl) = 0.0_prec
+                ! top
+                boundaryFlux(j,k,iVar,6,iEl) = 0.0_prec
+                                                                                                               
+            ENDDO
+          ENDDO
+          
+        ENDDO
+      ENDDO
+                                  
+    
+  END SUBROUTINE F2
+  
+  
   SUBROUTINE RunTests( ) 
   
 #ifdef HAVE_CUDA
@@ -247,6 +390,7 @@ CONTAINS
                                                                       
         CALL interpolatedFunctions % UpdateHost( )
         CALL trialFunctions % UpdateHost( )
+        iStat = cudaDeviceSynchronize( )
         
 #else
         ! Interpolation test

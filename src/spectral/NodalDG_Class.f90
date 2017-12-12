@@ -296,13 +296,12 @@ IMPLICIT NONE
 
       tBlock = dim3( threadCount, threadCount, threadCount )
       grid = dim3( nVariables, nElements, 1) 
-
+      
       CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( f, fnAtBoundaries, divF, &
                                                           myNodal % boundaryInterpolationMatrix_dev, &
                                                           myNodal % dgDerivativeMatrixTranspose_dev, &
                                                           myNodal % quadratureWeights_dev, &
                                                           myNodal % N_dev, nVariables, nElements )
-
 
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -520,13 +519,13 @@ IMPLICIT NONE
 
   ATTRIBUTES(Global) SUBROUTINE DG_Divergence_3D_CUDAKernel( f, fnAtBoundaries, divF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, N, nVariables, nElements )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)    :: N, nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)     :: N, nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:N,0:N,0:N,1:nVariables,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:N,0:1)
     REAL(prec), DEVICE, INTENT(in)  :: dgDerivativeMatrixTranspose(0:N,0:N)
     REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:N)
-    REAL(prec), DEVICE, INTENT(out) :: divF(0:N,0:N,1:nVariables,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: divF(0:N,0:N,0:N,1:nVariables,1:nElements)
     ! Local
     INTEGER            :: i, j, k, iVar, iEl, ii
     REAL(prec)         :: df
@@ -542,28 +541,33 @@ IMPLICIT NONE
     
     
       IF( i <= N .AND. j <= N .AND. k <= N )THEN
-      fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
-    
+      
+        fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
+        
+      ENDIF
+      
       CALL syncthreads( )
       
-      df = 0.0_prec
-      DO ii = 0, N
-        df = df + dgDerivativeMatrixTranspose(ii,i)*fLocal(1,ii,j,k) + &
-                  dgDerivativeMatrixTranspose(ii,j)*fLocal(2,i,ii,k) + &
-                  dgDerivativeMatrixTranspose(ii,k)*fLocal(3,i,j,ii)
-      ENDDO
+      IF( i <= N .AND. j <= N .AND. k <= N )THEN
+      
+        df = 0.0_prec
+        DO ii = 0, N
+          df = df + dgDerivativeMatrixTranspose(ii,i)*fLocal(1,ii,j,k) + &
+                    dgDerivativeMatrixTranspose(ii,j)*fLocal(2,i,ii,k) + &
+                    dgDerivativeMatrixTranspose(ii,k)*fLocal(3,i,j,ii)
+        ENDDO
        
-      divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
-                                      fnAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
-                                    quadratureWeights(j) + &
-                                    ( fnAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &
-                                      fnAtBoundaries(j,k,iVar,2,iEl)*boundaryMatrix(i,1) )/&
-                                    quadratureWeights(i) + &
-                                    ( fnAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
-                                      fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
-                                    quadratureWeights(k) )
-       ENDIF
-                  
+        divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
+                                        fnAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
+                                      quadratureWeights(j) + &
+                                      ( fnAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &
+                                        fnAtBoundaries(j,k,iVar,2,iEl)*boundaryMatrix(i,1) )/&
+                                      quadratureWeights(i) + &
+                                      ( fnAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
+                                        fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
+                                      quadratureWeights(k) )
+                                      
+      ENDIF          
                   
   END SUBROUTINE DG_Divergence_3D_CUDAKernel
 

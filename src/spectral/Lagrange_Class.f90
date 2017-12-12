@@ -1765,7 +1765,6 @@ IMPLICIT NONE
     ! Local
     INTEGER :: i, j, k, iEl, iVar, ii
   
-      
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO k = 0, myPoly % N
@@ -1775,9 +1774,10 @@ IMPLICIT NONE
                 divf(i,j,k,iVar,iEl) = 0.0_prec
 
                 DO ii = 0, myPoly % N  
-                  divf(i,j,k,iVar,iEl) = divf(i,j,k,iVar,iEl) + myPoly % derivativeMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) + &
-                                                                myPoly % derivativeMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) + &
-                                                                myPoly % derivativeMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                  divf(i,j,k,iVar,iEl) = divf(i,j,k,iVar,iEl) + &
+                                         myPoly % derivativeMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) + &
+                                         myPoly % derivativeMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) + &
+                                         myPoly % derivativeMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
 
               ENDDO
