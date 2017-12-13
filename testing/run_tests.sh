@@ -2,26 +2,7 @@
 
 export SELFDIR=$(pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 
-# Compilers
-export FC=pgfortran
-export MPIFC=mpif90
-
-# Support
-export DEBUG=no
-export TIMING=yes
-
-# Precision
-export DOUBLE_PRECISION=yes
-
-# Parallelization schemes
-export CUDA=no
-export GPU_ARCH=cc60
-
-export MPI=no
-export MPI_LIB=
-export MPI_INC=
-
-export OMP=no
+source ${SELFDIR}/build/SELF_environment_settings
 
 # ---------------------------------------------------------------------- #
 
