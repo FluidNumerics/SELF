@@ -58,18 +58,20 @@ IMPLICIT NONE
     INTEGER                 :: N, nEquations
     REAL(prec), ALLOCATABLE :: solution(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: source(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: boundarySolution(:,:,:,:,:) 
     REAL(prec), ALLOCATABLE :: boundaryFlux(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: fluxDivergence(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: source(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: tendency(:,:,:,:,:)
 
 #ifdef HAVE_CUDA
     INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nEquations_dev
     REAL(prec), DEVICE, ALLOCATABLE :: solution_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
-    REAL(prec), DEVICE, ALLOCATABLE :: source_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: boundarySolution_dev(:,:,:,:,:) 
     REAL(prec), DEVICE, ALLOCATABLE :: boundaryFlux_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: fluxDivergence_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: source_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: tendency_dev(:,:,:,:,:)
 
 #endif
@@ -133,17 +135,19 @@ IMPLICIT NONE
 
       ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % source(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundarySolution(0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % boundaryFlux(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % fluxDivergence(0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % source(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % tendency(0:N,0:N,0:N,1:nEquations,1:nElements) )
       
       myDGS % solution         = 0.0_prec
       myDGS % flux             = 0.0_prec
-      myDGS % source           = 0.0_prec
-      myDGS % tendency         = 0.0_prec
       myDGS % boundarySolution = 0.0_prec
       myDGS % boundaryFlux     = 0.0_prec
+      myDGS % fluxDivergence   = 0.0_prec
+      myDGS % source           = 0.0_prec
+      myDGS % tendency         = 0.0_prec
 
 #ifdef HAVE_CUDA
       ALLOCATE( myDGS % N_dev, myDGS % nEquations_dev )
@@ -152,17 +156,20 @@ IMPLICIT NONE
       
       ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % source_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundarySolution_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % boundaryFlux_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % fluxDivergence_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % source_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % tendency_dev(0:N,0:N,0:N,1:nEquations,1:nElements) )
 
       myDGS % solution_dev         = 0.0_prec
       myDGS % flux_dev             = 0.0_prec
-      myDGS % source_dev           = 0.0_prec
-      myDGS % tendency_dev         = 0.0_prec
       myDGS % boundarySolution_dev = 0.0_prec
       myDGS % boundaryFlux_dev     = 0.0_prec
+      myDGS % fluxDivergence_dev   = 0.0_prec
+      myDGS % source_dev           = 0.0_prec
+      myDGS % tendency_dev         = 0.0_prec
+
 #endif
 
   END SUBROUTINE Build_NodalDGSolution_3D
@@ -195,9 +202,10 @@ IMPLICIT NONE
 
       DEALLOCATE( myDGS % solution, &
                   myDGS % flux, &
-                  myDGS % source, &
                   myDGS % boundarySolution, &
                   myDGS % boundaryFlux, &
+                  myDGS % fluxDivergence, &
+                  myDGS % source, &
                   myDGS % tendency )
 
 
@@ -205,14 +213,16 @@ IMPLICIT NONE
       DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev )
       DEALLOCATE( myDGS % solution_dev, &
                   myDGS % flux_dev, &
-                  myDGS % source_dev, &
                   myDGS % boundarySolution_dev, &
                   myDGS % boundaryFlux_dev, &
+                  myDGS % fluxDivergence_dev, &
+                  myDGS % source_dev, &
                   myDGS % tendency_dev )
 
 #endif
 
   END SUBROUTINE Trash_NodalDGSolution_3D
+
 
 #ifdef HAVE_CUDA
 
@@ -222,9 +232,10 @@ IMPLICIT NONE
 
       myDGS % solution_dev         = myDGS % solution
       myDGS % flux_dev             = myDGS % flux
-      myDGS % source_dev           = myDGS % source
       myDGS % boundarySolution_dev = myDGS % boundarySolution
       myDGS % boundaryFlux_dev     = myDGS % boundaryFlux
+      myDGS % fluxDivergence_dev   = myDGS % fluxDivergence
+      myDGS % source_dev           = myDGS % source
       myDGS % tendency_dev         = myDGS % tendency
 
   END SUBROUTINE UpdateDevice_NodalDGSolution_3D
@@ -235,9 +246,10 @@ IMPLICIT NONE
 
       myDGS % solution         = myDGS % solution_dev
       myDGS % flux             = myDGS % flux_dev
-      myDGS % source           = myDGS % source_dev
       myDGS % boundarySolution = myDGS % boundarySolution_dev
       myDGS % boundaryFlux     = myDGS % boundaryFlux_dev
+      myDGS % fluxDivergence   = myDGS % fluxDivergence_dev
+      myDGS % source           = myDGS % source_dev
       myDGS % tendency         = myDGS % tendency_dev
 
   END SUBROUTINE UpdateHost_NodalDGSolution_3D
