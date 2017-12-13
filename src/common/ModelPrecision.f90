@@ -15,9 +15,9 @@ INTEGER, PARAMETER :: dp   = SELECTED_REAL_KIND(15, 307)   ! 64-bit
 INTEGER, PARAMETER :: qp   = SELECTED_REAL_KIND(33, 4931)  ! 128-bit
 
 #ifdef DOUBLE_PRECISION
-INTEGER, PARAMETER :: prec = sp
-#else
 INTEGER, PARAMETER :: prec = dp
+#else
+INTEGER, PARAMETER :: prec = sp
 #endif
 
 END MODULE ModelPrecision
