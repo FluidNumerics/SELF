@@ -7,22 +7,46 @@ source ${SELFDIR}/build/SELF_environment_settings
 # ---------------------------------------------------------------------- #
 
 export CUDA=no
+export DOUBLE_PRECISION=yes
 
 make clean
 make spectral_tests
 
-./spectral_tests > cpu_spectral_tests.txt 
+./spectral_tests > cpu_spectral_tests.double.txt 
+
+# ---------------------------------------------------------------------- #
+
+export DOUBLE_PRECISION=no
+
+make clean
+make spectral_tests
+
+./spectral_tests > cpu_spectral_tests.single.txt 
 
 # ---------------------------------------------------------------------- #
 
 export CUDA=yes
+export DOUBLE_PRECISION=yes
 
 make clean
 make spectral_tests
 
-./spectral_tests > gpu_spectral_tests.txt 
+./spectral_tests > gpu_spectral_tests.double.txt 
 
 # ---------------------------------------------------------------------- #
 
-diff cpu_spectral_tests.txt cpu_spectral_tests.reference
-diff gpu_spectral_tests.txt gpu_spectral_tests.reference
+export CUDA=yes
+export DOUBLE_PRECISION=no
+
+make clean
+make spectral_tests
+
+./spectral_tests > gpu_spectral_tests.single.txt 
+
+# ---------------------------------------------------------------------- #
+
+diff cpu_spectral_tests.single.txt references/cpu_spectral_tests.single.reference
+diff gpu_spectral_tests.single.txt references/gpu_spectral_tests.single.reference
+
+diff cpu_spectral_tests.double.txt references/cpu_spectral_tests.double.reference
+diff gpu_spectral_tests.double.txt references/gpu_spectral_tests.double.reference
