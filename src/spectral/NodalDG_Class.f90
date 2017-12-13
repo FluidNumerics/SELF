@@ -414,7 +414,7 @@ IMPLICIT NONE
                             myNodal % dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
                  
-                divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*myNodal % boundaryInterpolationMatrix(j,0) + &
+                divF(i,j,k,iVar,iEl) =  df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*myNodal % boundaryInterpolationMatrix(j,0) + &
                                                 fnAtBoundaries(i,k,iVar,3,iEl)*myNodal % boundaryInterpolationMatrix(j,1) )/&
                                               myNodal % quadratureWeights(j) + &
                                               ( fnAtBoundaries(j,k,iVar,4,iEl)*myNodal % boundaryInterpolationMatrix(i,0) + &
@@ -422,7 +422,7 @@ IMPLICIT NONE
                                               myNodal % quadratureWeights(i) + &
                                               ( fnAtBoundaries(i,j,iVar,5,iEl)*myNodal % boundaryInterpolationMatrix(k,0) + &
                                                 fnAtBoundaries(i,j,iVar,6,iEl)*myNodal % boundaryInterpolationMatrix(k,1) )/&
-                                              myNodal % quadratureWeights(k) )
+                                              myNodal % quadratureWeights(k) 
 
               ENDDO
             ENDDO
@@ -557,7 +557,7 @@ IMPLICIT NONE
                     dgDerivativeMatrixTranspose(ii,k)*fLocal(3,i,j,ii)
         ENDDO
        
-        divF(i,j,k,iVar,iEl) = -( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
+        divF(i,j,k,iVar,iEl) = ( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
                                         fnAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
                                       quadratureWeights(j) + &
                                       ( fnAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &

@@ -2106,8 +2106,12 @@ IMPLICIT NONE
          floc(1,i,j,k) = f(1,i,j,k,iVar,iEl)
          floc(2,i,j,k) = f(2,i,j,k,iVar,iEl)
          floc(3,i,j,k) = f(3,i,j,k,iVar,iEl)
+      ENDIF
+      
          CALL syncthreads( )
-
+ 
+      IF( i <= N .AND. j <= N .AND. k <= N )THEN
+      
          df = 0.0_prec
          DO ii = 0, N
             df = df + DMatT(ii,i)*floc(1,ii,j,k) + &

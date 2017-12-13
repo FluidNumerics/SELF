@@ -317,17 +317,17 @@ CONTAINS
                                       sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
                                       sin( 0.5_prec*pi*interp % interpolationPoints(k) )
                         
-                f2Gradient(1,i,j,k,iVar,iEl) = -0.5_prec*pi*cos( 0.5_prec*pi*interp % interpolationPoints(i) )*&
-                                                            sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
-                                                            sin( 0.5_prec*pi*interp % interpolationPoints(k) )
+                f2Gradient(1,i,j,k,iVar,iEl) = 0.5_prec*pi*cos( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                                           sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                                           sin( 0.5_prec*pi*interp % interpolationPoints(k) )
                                   
-                f2Gradient(2,i,j,k,iVar,iEl) = -0.5_prec*pi*sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
-                                                            cos( 0.5_prec*pi*interp % interpolationPoints(j) )*&
-                                                            sin( 0.5_prec*pi*interp % interpolationPoints(k) )
+                f2Gradient(2,i,j,k,iVar,iEl) = 0.5_prec*pi*sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                                           cos( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                                           sin( 0.5_prec*pi*interp % interpolationPoints(k) )
                                   
-                f2Gradient(3,i,j,k,iVar,iEl) = -0.5_prec*pi*sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
-                                                            sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
-                                                            cos( 0.5_prec*pi*interp % interpolationPoints(k) )
+                f2Gradient(3,i,j,k,iVar,iEl) = 0.5_prec*pi*sin( 0.5_prec*pi*interp % interpolationPoints(i) )*&
+                                                           sin( 0.5_prec*pi*interp % interpolationPoints(j) )*&
+                                                           cos( 0.5_prec*pi*interp % interpolationPoints(k) )
               ENDDO
             ENDDO
           ENDDO
