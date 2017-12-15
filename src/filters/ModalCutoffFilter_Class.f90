@@ -175,7 +175,7 @@ CONTAINS
       ENDDO
 
       Pfilt = MATMUL( Pfilt, V )
-      thisFilter % filterMat = MATMUL( VInv, Pfilt )
+      thisFilter % filterMat = TRANSPOSE( MATMUL( VInv, Pfilt ) )
     
       DEALLOCATE( V, Pfilt, Vinv )
 

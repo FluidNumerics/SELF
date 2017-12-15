@@ -151,9 +151,8 @@ CONTAINS
                  
                   myDGSEM % state % solution(i,j,k,1,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*myDGSEM % params % v0
                   ! Drag profile
-!                  CALL RANDOM_NUMBER( r )
-                  r = sin( 40.0_prec*pi*x/Lx )
-                  myDGSEM % dragProfile(i,j,k,iEl) = myDGSEM % params % Cd*exp( -z/myDGSEM % params % dragScale )*(1.0_prec+0.1_prec*r)
+                  myDGSEM % dragProfile(i,j,k,iEl) = myDGSEM % params % Cd*&
+                         tanh( (myDGSEM % params % dragScale-z)/(0.1*myDGSEM % params % dragScale) )
                   
                ENDDO
             ENDDO
