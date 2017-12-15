@@ -4,14 +4,18 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
 MODULE NodalDGSolution_3D_Class
 
 USE ModelPrecision
+USE NodalDG_Class
 
 IMPLICIT NONE
 
-!!  The NodalDGSolution_3D class provides attributes for storing a solution and its flux on a
-!!  single spectral element.
+!> \addtogroup NodalDGSolution_3D_Class 
+!! @{
+!!  The NodalDGSolution_3D class provides attributes for storing a solution and the flux and source
+!!  terms associated with a conservation law.
 !!  
 !!  When implement a Discontinuous Galerkin Spectral Element method, it is common practice to use
 !!  the Gauss quadrature points within each element. To advance the discrete system, fluxes through
@@ -50,7 +54,6 @@ IMPLICIT NONE
 !!       <tr> <th> CalculateBoundarySolution <td> CalculateBoundarySolution_NodalDGSolution_3D
 !!    </table>
 !!
-
 !>@}
 
   TYPE NodalDGSolution_3D
@@ -223,6 +226,31 @@ IMPLICIT NONE
 
   END SUBROUTINE Trash_NodalDGSolution_3D
 
+  SUBROUTINE CalculateSolutionAtBoundaries( myDGS, dgStorage )
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+
+      CALL CalculateFunctionsAtBoundaries_3D( dgStorage, &
+                                              myDGS % solution, &
+                                              myDGS % boundarySolution, &
+                                              myDGS % nEquations, & 
+                                              myDGS % nElements )
+
+  END SUBROUTINE CalculateSolutionAtBoundaries
+
+  SUBROUTINE CalculateFluxDivergence( myDGS, dgStorage )
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+
+      CALL CalculateFluxDivergence_3D( dgStorage, &
+                                              myDGS % solution, &
+                                              myDGS % boundarySolution, &
+                                              myDGS % nEquations, & 
+                                              myDGS % nElements )
+
+  END SUBROUTINE CalculateFluxDivergence
 
 #ifdef HAVE_CUDA
 
