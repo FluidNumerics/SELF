@@ -59,13 +59,13 @@ CONTAINS
    LOGICAL :: AisB
 
       IF( a == 0.0_prec .OR. b == 0.0_prec )THEN 
-         IF( ABS(a-b) <= EPSILON(ONE) )THEN 
+         IF( ABS(a-b) <= EPSILON(1.0_prec) )THEN 
             AisB = .TRUE.
          ELSE
             AisB = .FALSE.
          ENDIF
       ELSE
-         IF( (abs(a-b) <= EPSILON(ONE)*abs(a)) .OR. (abs(a-b) <= EPSILON(ONE)*abs(b)) )THEN
+         IF( (abs(a-b) <= EPSILON(1.0_prec)*abs(a)) .OR. (abs(a-b) <= EPSILON(1.0_prec)*abs(b)) )THEN
             AisB = .TRUE.
          ELSE
             AisB = .FALSE.
