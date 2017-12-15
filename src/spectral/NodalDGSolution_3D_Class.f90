@@ -13,6 +13,7 @@ USE NodalDG_Class
 IMPLICIT NONE
 
 ! ================================================================================================ !
+!
 !  The NodalDGSolution_3D addtogroup provides attributes for storing a solution and the flux and source
 !  terms associated with a conservation law. 
 !
@@ -23,47 +24,8 @@ IMPLICIT NONE
 !  When building a Spectral Element solver, this addtogroup can be used to cleanly calculate the tendency in a 
 !  PDE.
 !
-!  Attributes
-!    
-!     INTEGER  ::  N  <td> Polynomial degree of the spectral element method
-!
-!     INTEGER  ::  nEquations <td> Number of solution variables.
-!
-!     INTEGER  ::  nElements <td> Number of elements that make up the spatial domain.
-!
-!     REAL(prec)  ::  solution(0:N,0:N,0:N,1:nEquations,1:nElements)
-!
-!     REAL(prec)  ::  flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements)
-!
-!     REAL(prec)  ::  boundarySolution(0:N,0:N,1:6,1:nEquations)*
-!
-!     REAL(prec)  ::  boundaryFlux(0:N,0:N,1:6,1:nEquations)*
-!
-!     REAL(prec)  ::  fluxDivergence(0:N,0:N,0:N,1:nEquations,1:nElements)
-!
-!     REAL(prec)  ::  source(0:N,0:N,0:N,1:nEquations,1:nElements)
-!
-!     REAL(prec)  ::  tendency(0:N,0:N,0:N,1:nEquations)
-!
-!
-!     >> *For the "boundary" arrays, the faces of a hexahedral element are numbered as SOUTH=1, 
-!         EAST=2, NORTH=3, WEST=4, BOTTOM=5, TOP=6.
-!
-!  Procedures
-!
-!      nodalSolution % Build( N, nEquations, nElements ) 
-!      nodalSolution % Trash( )
-!      nodalSolution % Calculate_Solution_at_Boundaries( nodalDGStorage )
-!      nodalSolution % Calculate_Weak_Flux_Divergence( nodalDGStorage )
-!      nodalSolution % Calculate_Strong_Flux_Divergence( nodalDGStorage ) 
-!
-!      >> nodalDGStorage is an instance of the NodalDG class.
-!
-!      >> If CUDA is enabled, additional routines are provided for updating the host-side arrays
-!         (CPU) and the device-side arrays (GPU)
-!
-!      nodalSolution % UpdateDevice( )
-!      nodalSolution % UpdateHost( )
+!  >> *For the "boundary" arrays, the faces of a hexahedral element are numbered as SOUTH=1, 
+!      EAST=2, NORTH=3, WEST=4, BOTTOM=5, TOP=6.
 !
 ! ================================================================================================ !
 

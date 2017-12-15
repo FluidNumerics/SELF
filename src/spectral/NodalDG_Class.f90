@@ -4,6 +4,8 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
+
 MODULE NodalDG_Class
 
 USE ModelPrecision
@@ -14,41 +16,18 @@ USE Lagrange_Class
 
 IMPLICIT NONE
 
-!!  The NodalDG class contains attributes needed for implementing spectral element methods
-!!  in 3-D.
-!!  
-!!  An interpolant is formed that handles mapping between a computational "quadrature" mesh and a
-!!  uniform plotting mesh. Quadrature (integration) weights are stored for use with Galerkin type
-!!  methods. Galerkin derivative matrices (collocation derivative matrices weighted by appropriate
-!!  ratios of the quadrature weights) are stored to facilitate the computation of weak derivatives.
-!!  Finally, an interpolation matrix and accompanying subroutine is provided to interpolate 3-D data, 
-!!  defined on the quadrature mesh, to the element boundaries.
-!!
-!! <H2> NodalDG </H2>
-!! <H3> Attributes </H3>
-!!    <table>
-!!       <tr> <th> N <td> INTEGER  <td> Polynomial degree of the spectral element method
-!!       <tr> <th> nPlot <td> INTEGER <td> Number uniform plotting points
-!!       <tr> <th> interp <td> Lagrange <td> Lagrange interpolant
-!!       <tr> <th> qWeight(0:N) <td> REAL(prec) <td> Quadrature integration weights
-!!       <tr> <th> dMatS(0:N,0:N) <td> REAL(prec) <td> Either the DG or CG derivative matrix
-!!       <tr> <th> dMatP(0:N,0:N) <td> REAL(prec) <td> Either the DG or CG derivative matrix transpose
-!!       <tr> <th> bMat(0:1,0:N) <td> REAL(prec) <td> Matrix for interpolating data to element boundaries
-!!    </table>
-!!
-!! <H3> Procedures </H3>
-!!    See \ref NodalDG_Class for more information. The first column lists the "call-name" and 
-!!    the second column lists the name of routine that is aliased onto the call-name.
-!!    <table>
-!!       <tr> <th> Build <td> Build_NodalDG
-!!       <tr> <th> Trash <td> Trash_NodalDG
-!!       <tr> <th> CalculateAtBoundaries_1D <td> CalculateAtBoundaries_1D_NodalDG
-!!       <tr> <th> CalculateAtBoundaries_2D <td> CalculateAtBoundaries_2D_NodalDG
-!!       <tr> <th> CalculateAtBoundaries_3D <td> CalculateAtBoundaries_3D_NodalDG
-!!    </table>
-!!
-
-!>@}
+! ================================================================================================ !
+!
+!  The NodalDG class contains attributes and procedure needed for performing interpolation, 
+!  differentiation, and integration for spectral element methods
+!  
+!  An interpolant is formed that handles mapping between a computational "quadrature" mesh and a
+!  uniform plotting mesh. Quadrature (integration) weights are stored for use with Galerkin type
+!  methods. Galerkin derivative matrices are stored to facilitate the computation of weak derivatives.
+!  Finally, an interpolation matrix and accompanying subroutine is provided to interpolate 3-D data, 
+!  defined on the quadrature mesh, to the element boundaries.
+!
+! ================================================================================================ !
 
   TYPE NodalDG
 
@@ -70,11 +49,9 @@ IMPLICIT NONE
 #endif
     CONTAINS
 
-      ! Manual Constructors/Destructors
       PROCEDURE :: Build => Build_NodalDG
       PROCEDURE :: Trash => Trash_NodalDG
 
-      ! Type-Specific
       PROCEDURE :: CalculateFunctionsAtBoundaries_3D
       PROCEDURE :: DG_Divergence_3D
       PROCEDURE :: DG_Gradient_3D
@@ -82,53 +59,45 @@ IMPLICIT NONE
     END TYPE NodalDG
     
  CONTAINS
-!
-!
-!==================================================================================================!
-!------------------------------- Manual Constructors/Destructors ----------------------------------!
-!==================================================================================================!
-!
-!
-!> \addtogroup NodalDG_Class 
-!! @{ 
+
 ! ================================================================================================ !
-! S/R Build 
+!
+! Build_NodalDG 
+!
+!   Allocates space fills values for the NodalDG attributes using to the specified quadrature and 
+!   approximation form.
 ! 
-!> \fn Build_NodalDG 
-!!  Allocates space fills values for the NodalDG attributes using to the specified 
-!!  quadrature and approximation form.
-!! 
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(NodalDG) :: this <BR>
-!! <B>INTEGER</B>               :: N, nPlot
-!!         .... <BR>
-!!     ! To build a  structure for Continuous Galerkin with Gauss-Lobatto quadrature <BR>
-!!     <B>CALL</B> this % Build( N, nPlot, GAUSS_LOBATTO, CG ) <BR>
-!!
-!!     ! To build a  structure for Discontinuous Galerkin with Gauss quadrature <BR>
-!!     <B>CALL</B> this % Build( N, nPlot, GAUSS, DG ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> out <th> myNodal <td> NodalDG <td> On output, the attributes of the
-!!                                                        NodalDG data structure are filled
-!!                                                        in.
-!!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree of the method.
-!!   <tr> <td> in <th> nPlot <td> INTEGER <td> The number of uniform plotting points in each 
-!!                                             computational direction.
-!!   <tr> <td> in <th> quadrature <td> INTEGER <td> A flag for specifying the desired type of 
-!!                                                  quadrature. Can be set to either GAUSS or
-!!                                                  GAUSS_LOBATTO. See \ref ModelFlags.f90 for
-!!                                                  flag definitions.
-!!   <tr> <td> in <th> approxForm <td> INTEGER <td> A flag for specifying the type of method that 
-!!                                                  you are using. Can be set to either CG or DG.
-!!                                                  See \ref ModelFlags.f90 for flag definitions.
-!! 
-!!  </table>  
-!!   
+!   Usage :
+!
+!     TYPE(NodalDG) :: dgStorage
+!     INTEGER       :: N, nTargetPoints, quadrature
+!     REAL(prec)    :: targetPoints(0:nTargetPoints)
+!
+!       CALL this % Build( targetPoints N, nTargetPoints, quadrature ) 
+! 
+!   Input/Output :
+!   
+!      dgStorage (out) 
+!        On output, the memory has been allocated for the attributes of the NodalDG structure, and
+!        the attributes are set according to the targetPoints and quadrature specified. If CUDA
+!        is enabled, device memory is allocated for the device attributes and device attributes are
+!        copied from the host-side arrays. 
+!       
+!      targetPoints(0:nTargetPoints) (in)
+!        The target interpolation points to aid in mapping from the quadrature mesh to a uniform
+!        plotting mesh.
+!
+!      N  (in)
+!        Polynomial degree of the DG Spectral Element Method
+!
+!      nTargetPoints (in)
+!        The upper bound of the targetPoints array.
+!
+!      quadrature (in)
+!        A flag for specifying the desired type of quadrature. Can be set to either GAUSS or
+!        GAUSS_LOBATTO.
+!   
 ! ================================================================================================ ! 
-!>@}
 
   SUBROUTINE Build_NodalDG( myNodal, targetPoints, N, nTargetPoints, quadrature  )
     IMPLICIT NONE
@@ -200,31 +169,25 @@ IMPLICIT NONE
 
   END SUBROUTINE Build_NodalDG
   
-!> \addtogroup NodalDG_Class 
-!! @{ 
-! ================================================================================================ !
-! S/R Trash
-! 
-!> \fn Trash_NodalDG  
-!! Frees memory held by the attributes of the NodalDG class. 
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(NodalDG) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Trash( ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in/out <th> myNodal <td> NodalDG <td>
-!!                         On <B>input</B>, a NodalDG class that has previously been 
-!!                         constructed. <BR>
-!!                         On <B>output</B>, the memory held by the attributes of this 
-!!                         data-structure have been freed.
-!!                                                           
-!!  </table>  
-!!   
 ! ================================================================================================ ! 
-!>@}
+!
+! Trash_NodalDG  
+!   Frees memory held by the attributes of the NodalDG class. 
+! 
+!   Usage :
+!
+!     TYPE(NodalDG) :: dgStorage
+!         
+!       CALL dgStorage % Trash( ) 
+! 
+!    Input/Output:
+!   
+!      dgStorage (in/out)
+!        On input, a NodalDG class that has previously been constructed. 
+!        On output, the memory held by the attributes of this data-structure is deallocated. If CUDA
+!        is enabled, device memory associated with device attributes is deallocated
+!                                                           
+! ================================================================================================ ! 
 
   SUBROUTINE Trash_NodalDG( myNodal)
     IMPLICIT NONE
@@ -247,6 +210,47 @@ IMPLICIT NONE
 
   END SUBROUTINE Trash_NodalDG
 
+! ================================================================================================ ! 
+! 
+! CalculateFunctionsAtBoundaries_3D
+!   Interpolates a set of functions, given on each element's quadrature mesh, to the element faces. 
+! 
+!   Usage :
+!
+!     TYPE(NodalDG) :: dgStorage
+!     REAL(prec)    :: f(0:N,0:N,0:N,1:nVariables,1:nElements)
+!     REAL(prec)    :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
+!     INTEGER       :: nVariables, nElements
+!     
+!         
+!       CALL dgStorage % CalculateFunctionsAtBoundaries( f, fAtBoundaries, nVariables, nElements ) 
+! 
+!    * Note that N refers to polynomial degree under the NodalDG class ( dgStorage % N )
+!
+!   Input/Output:
+!   
+!     If CUDA is enabled, all of the input and output must be device scalars and arrays
+!
+!     dgStorage (in)
+!     
+!     f(0:N,0:N,0:N,1:nVariables,1:nElements) (in)
+!       Array of nodal function values. The first three dimensions are over the quadrature points
+!       in 3-D, the fourth dimension is over the number of variables, and the last dimension
+!       cycles over the elements in a spectral element mesh.
+!
+!     fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements) (out)
+!       Array of nodal function values on the element faces. The first two dimensions are over 
+!       the quadrature points on the element faces, the third dimension is over the number of
+!       variables, the fourth dimension is over the faces of the element (south, east, north, west,
+!       bottom, top), and the last dimension cycles over the elements in a spectral element mesh.
+!      
+!     nVariables (in)
+!       The number of variables
+!
+!     nElements (in)
+!       The number of elements in the spectral element mesh.
+!       
+! ================================================================================================ ! 
 
   SUBROUTINE CalculateFunctionsAtBoundaries_3D( myNodal, f, fAtBoundaries, nVariables, nElements )
     IMPLICIT NONE
@@ -280,6 +284,53 @@ IMPLICIT NONE
     
   END SUBROUTINE CalculateFunctionsAtBoundaries_3D
   
+! ================================================================================================ ! 
+! 
+! DG_Divergence_3D
+!   Calculates the weak form of the divergence of a vector function.
+! 
+!   Usage :
+!
+!     TYPE(NodalDG) :: dgStorage
+!     REAL(prec)    :: f(1:3,0:N,0:N,0:N,1:nVariables,1:nElements)
+!     REAL(prec)    :: fnAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
+!     REAL(prec)    :: divF(0:N,0:N,0:N,1:nVariables,1:nElements)
+!     INTEGER       :: nVariables, nElements
+!     
+!         
+!       CALL dgStorage % DG_Divergence_3D( f, fnAtBoundaries, divF, nVariables, nElements ) 
+! 
+!    * Note that N refers to polynomial degree under the NodalDG class ( dgStorage % N )
+!
+!   Input/Output :
+!
+!     If CUDA is enabled, all of the input and output must be device scalars and arrays
+!
+!     dgStorage (in)
+!     
+!     f(1:3,0:N,0:N,0:N,1:nVariables,1:nElements) (in)
+!       Array of nodal (3-D)vector-function values. The first dimension is over the three spatial 
+!       directions of the vector, the next three dimensions are over the quadrature points
+!       in 3-D, the fifth dimension is over the number of variables, and the last dimension
+!       cycles over the elements in a spectral element mesh.
+!
+!     fnAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements) (in)
+!       Array of normal flux values on the element faces. The first two dimensions are over 
+!       the quadrature points on the element faces, the third dimension is over the number of
+!       variables, the fourth dimension is over the faces of the element (south, east, north, west,
+!       bottom, top), and the last dimension cycles over the elements in a spectral element mesh.
+!      
+!     divF(0:N,0:N,0:N,1:nVariables,1:nElements) (out)
+!       The divergence of the vector functions over all of the elements
+!
+!     nVariables (in)
+!       The number of variables
+!
+!     nElements (in)
+!       The number of elements in the spectral element mesh.
+!
+! ================================================================================================ ! 
+
   SUBROUTINE DG_Divergence_3D( myNodal, f, fnAtBoundaries, divF, nVariables, nElements )
     IMPLICIT NONE
     CLASS( NodalDG ) :: myNodal
@@ -316,11 +367,58 @@ IMPLICIT NONE
 
   END SUBROUTINE DG_Divergence_3D
 
+! ================================================================================================ ! 
+! 
+! DG_Gradient_3D
+!   Calculates the weak form of the gradient of function.
+! 
+!   Usage :
+!
+!     TYPE(NodalDG) :: dgStorage
+!     REAL(prec)    :: f(0:N,0:N,0:N,1:nVariables,1:nElements)
+!     REAL(prec)    :: fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements)
+!     REAL(prec)    :: gradF(1:3,0:N,0:N,0:N,1:nVariables,1:nElements)
+!     INTEGER       :: nVariables, nElements
+!     
+!         
+!       CALL dgStorage % DG_Gradient_3D( f, fAtBoundaries, gradF, nVariables, nElements ) 
+! 
+!    * Note that N refers to polynomial degree under the NodalDG class ( dgStorage % N )
+!
+!   Input/Output :
+!
+!     If CUDA is enabled, all of the input and output must be device scalars and arrays
+!
+!     dgStorage (in)
+!     
+!     f(0:N,0:N,0:N,1:nVariables,1:nElements) (in)
+!       Array of nodalfunction values. The first three dimensions are over the quadrature points
+!       in 3-D, the fifth dimension is over the number of variables, and the last dimension
+!       cycles over the elements in a spectral element mesh.
+!
+!     fAtBoundaries(0:N,0:N,1:nVariables,1:6,1:nElements) (in)
+!       Array of function values on the element faces (weighted by the face normal). The first two 
+!       dimensions are over the quadrature points on the element faces, the third dimension is over 
+!       the number of variables, the fourth dimension is over the faces of the element (south, east,
+!       north, west, bottom, top), and the last dimension cycles over the elements in a spectral
+!        element mesh.
+!      
+!     gradF(1:3,0:N,0:N,0:N,1:nVariables,1:nElements) (out)
+!       The divergence of the vector functions over all of the elements
+!
+!     nVariables (in)
+!       The number of variables
+!
+!     nElements (in)
+!       The number of elements in the spectral element mesh.
+!
+! ================================================================================================ ! 
+
   SUBROUTINE DG_Gradient_3D( myNodal, f, fAtBoundaries, gradF, nVariables, nElements )
     IMPLICIT NONE
     CLASS( NodalDG ) :: myNodal
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
