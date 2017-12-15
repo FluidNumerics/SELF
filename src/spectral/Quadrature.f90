@@ -4,23 +4,12 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
+!
 ! Contains routines from D.A. Kopriva, 2009, "Implementing Spectral Methods for Partial 
 ! Differential Equations: Algorithms for Scientists and Engineers", Springer.
 !
 ! Routines are defined for computing Legendre and Chebyshev Gauss and Gauss-Lobatto
 ! quadrature nodes and weights.
-!
-! Only PUBLIC routines are documented here. However, references are given below for the PRIVATE 
-! routines.
-!  <table> 
-!   <tr> <th> ChebyshevGauss <td> Alg. 26 on pg. 67 of D.A. Kopriva, 2009. 
-!   <tr> <th> ChebyshevGaussLobatto <td> Alg. 27 on pg. 68 of D.A. Kopriva, 2009. 
-!   <tr> <th> LegendreGauss <td> Alg. 23 on pg. 64 of D.A. Kopriva, 2009. 
-!   <tr> <th> LegendreGaussLobatto <td> Alg. 25 on pg. 66 of D.A. Kopriva, 2009. 
-!   <tr> <th> LegendreQandL <td> Alg. 24 on pg. 65 of D.A. Kopriva, 2009.
-!   <tr> <th> LegendrePolynomial <td> Alg. 22 on pg. 63 of D.A. Kopriva, 2009. 
-!  </table>
-
  
 MODULE Quadrature
 
@@ -38,31 +27,83 @@ IMPLICIT NONE
   CONTAINS
 
 ! =============================================================================================== !
-!> \addtogroup Quadrature 
-!! @{ 
-!> \fn ChebyshevQuadrature  
-!! Returns the specified Chebyshev quadrature nodes and integration weights. 
-!! 
-!! Given a polynomial degree, and quadrature type (Gauss or Gauss Lobatto), this subroutine manages
-!! the calls to underlying private routines to generate the desired Chebyshev quadrature. 
-!! 
-!! <H2> Usage : </H2> 
-!! <B>INTEGER</B>    :: N, quadType <BR>
-!! <B>REAL</B>(prec) :: nodes(0:N), weights(0:N) <BR>
-!!         .... <BR>
+! LegendreQuadrature  
+!   Returns the specified Legendre quadrature nodes and integration weights. 
+! 
+!   Given a polynomial degree, and quadrature type (Gauss or Gauss Lobatto), this subroutine manages
+!   the calls to underlying private routines to generate the desired Legendre quadrature. 
+! 
+!   Usage :
+!
+!     INTEGER    :: N, quadType 
+!     REAL(prec) :: nodes(0:N), weights(0:N) 
+!
+!       CALL LegendreQuadrature( N, quadType, nodes, weights ) 
+! 
+!   Parameters :
+!
+!     N (in)
+!       Degree of the quadrature
+!
+!     quadType (in) 
+!       Flag specifying the quadrature type. Can be set to GAUSS or GAUSS_LOBATTO
+!
+!     nodes(0:N) (out)
+!       Array of quadrature nodes
+!
+!     weights(0:N) (out)
+!       Array of quadrature weights
+!   
+! =============================================================================================== !
 
-!!     <B>CALL</B> ChebyshevQuadrature( N, quadType, nodes, weights ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> N <td> INTEGER <td> Degree of the quadrature
-!!   <tr> <td> in <th> quadType <td> INTEGER <td> Flag specifying the quadrature type. Can be set
-!!                                                to GAUSS or GAUSS_LOBATTO (See \ref ModelFlags.f90 )
-!!   <tr> <td> out <th> nodes(0:N) <td> REAL(prec) <td> Array of quadrature nodes
-!!   <tr> <td> out <th> weights(0:N) <td> REAL(prec) <td> Array of quadrature weights
-!!  </table>  
-!!   
-!>@}
+  SUBROUTINE LegendreQuadrature( N, nodes, weights, QuadType )
+    IMPLICIT NONE
+    INTEGER, INTENT(in)     :: N
+    REAL(prec), INTENT(out) :: nodes(0:N)
+    REAL(prec), INTENT(out) :: weights(0:N)
+    INTEGER, INTENT(in)     :: QuadType
+   
+      IF( QuadType  == GAUSS_LOBATTO )THEN
+
+        CALL LegendreGaussLobatto( N, nodes, weights )
+
+      ELSEIF( QuadType == GAUSS )THEN
+
+        CALL LegendreGauss( N, nodes, weights )
+
+      ENDIF
+
+  END SUBROUTINE LegendreQuadrature
+
+! =============================================================================================== !
+! ChebyshevQuadrature  
+!
+!   Returns the specified Chebyshev quadrature nodes and integration weights. 
+! 
+!   Given a polynomial degree, and quadrature type (Gauss or Gauss Lobatto), this subroutine manages
+!   the calls to underlying private routines to generate the desired Chebyshev quadrature. 
+! 
+!   Usage :
+!
+!     INTEGER    :: N, quadType 
+!     REAL(prec) :: nodes(0:N), weights(0:N) 
+!
+!       CALL ChebyshevQuadrature( N, quadType, nodes, weights ) 
+! 
+!   Input/Output : 
+!
+!     N (in) 
+!       Degree of the quadrature
+!
+!     quadType (in)
+!       Flag specifying the quadrature type. Can be set to GAUSS or GAUSS_LOBATTO
+!
+!     nodes(0:N) (out)
+!       Array of quadrature nodes
+!
+!     weights(0:N) (out)
+!       Array of quadrature weights
+!   
 ! ================================================================================================ ! 
 
   SUBROUTINE ChebyshevQuadrature( N, quadType, nodes, weights )
@@ -134,51 +175,6 @@ IMPLICIT NONE
 
   END SUBROUTINE ChebyshevGaussLobatto
 
-! =============================================================================================== !
-!> \addtogroup Quadrature 
-!! @{ 
-!> \fn LegendreQuadrature  
-!! Returns the specified Legendre quadrature nodes and integration weights. 
-!! 
-!! Given a polynomial degree, and quadrature type (Gauss or Gauss Lobatto), this subroutine manages
-!! the calls to underlying private routines to generate the desired Legendre quadrature. 
-!! 
-!! <H2> Usage : </H2> 
-!! <B>INTEGER</B> :: N, quadType <BR>
-!! <B>REAL</B>(prec) :: nodes(0:N), weights(0:N) <BR>
-!!         .... <BR>
-!!     <B>CALL</B> LegendreQuadrature( N, quadType, nodes, weights ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> N <td> INTEGER <td> Degree of the quadrature
-!!   <tr> <td> in <th> quadType <td> INTEGER <td> Flag specifying the quadrature type. Can be set
-!!                                                to GAUSS or GAUSS_LOBATTO (See \ref ModelFlags.f90 )
-!!   <tr> <td> out <th> nodes(0:N) <td> REAL(prec) <td> Array of quadrature nodes
-!!   <tr> <td> out <th> weights(0:N) <td> REAL(prec) <td> Array of quadrature weights
-!!  </table>  
-!!   
-!>@}
-! =============================================================================================== !
-
-  SUBROUTINE LegendreQuadrature( N, nodes, weights, QuadType )
-    IMPLICIT NONE
-    INTEGER, INTENT(in)     :: N
-    REAL(prec), INTENT(out) :: nodes(0:N)
-    REAL(prec), INTENT(out) :: weights(0:N)
-    INTEGER, INTENT(in)     :: QuadType
-   
-      IF( QuadType  == GAUSS_LOBATTO )THEN
-
-        CALL LegendreGaussLobatto( N, nodes, weights )
-
-      ELSEIF( QuadType == GAUSS )THEN
-
-        CALL LegendreGauss( N, nodes, weights )
-
-      ENDIF
-
-  END SUBROUTINE LegendreQuadrature
 
 ! =============================================================================================== !
 ! S/R LegendreGauss
