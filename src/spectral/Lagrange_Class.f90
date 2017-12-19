@@ -4,6 +4,7 @@
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
 MODULE Lagrange_Class
 
 !src/common
@@ -17,66 +18,19 @@ USE cudafor
 
 IMPLICIT NONE
 
-!> \addtogroup Lagrange_Class 
-!! @{
 
-!> \struct Lagrange
-!! A data-structure for handling Lagrange interpolation in one, two, or three dimensions
-!!
-!! The Lagrange data-structure stores the information necessary to interpolate between two
-!! sets of grid-points and to estimate the derivative of data at native grid points. Routines for
-!! multidimensional interpolation are based on the tensor product on two 1-D interpolants. It is 
-!! assumed that the polynomial degree (and the interpolation nodes) are the same in each direction.
-!! This assumption permits the storage of only one array of interpolation nodes and barycentric 
-!! weights and is what allows this data structure to be flexible.
-!!
-!! <H2> Lagrange </H2>
-!! <H3> Attributes </H3>
-!!    <table>
-!!       <tr> <th> N <td> INTEGER  <td> Number of native grid points
-!!       <tr> <th> M <td> INTEGER <td> Number of target grid points
-!!       <tr> <th> interpolationPoints(0:N) <td> REAL(prec) <td> Locations where we have observations (native grid points)
-!!       <tr> <th> barycentricWeights(0:N) <td> REAL(prec) <td> Barycentric interpolation weights 
-!!       <tr> <th> targetPoints(0:M) <td> REAL(prec) <td> Locations where we want observations (target grid points)
-!!       <tr> <th> interpolationMatrix(0:M,0:N) <td> REAL(prec) <td> Interpolation matrix to help map an 
-!!                                    array of data given at the native nodes to the target nodes.
-!!       <tr> <th> interpolationMatrixTranspose(0:M,0:N) <td> REAL(prec) <td> Transpose of the interpolation matrix to help
-!!                                     map an array of data given at the native nodes to the 
-!!                                     target nodes.
-!!       <tr> <th> derivativeMatrix(0:N,0:N) <td> REAL(prec) <td> Derivative matrix to estimate the 
-!!                                    derivative of an interpolant at the native grid points in the 
-!!                                    first computational direction.
-!!       <tr> <th> derivativeMatrixTranspose(0:N,0:N) <td> REAL(prec) <td> Derivative matrix to estimate the 
-!!                                    derivative of an interpolant at the native grid points in the 
-!!                                    second computational direction.
-!!    </table>
-!!
-!! <H3> Procedures </H3>
-!!    See \ref Lagrange_Class for more information. The first column lists the "call-name" and 
-!!    the second column lists the name of routine that is aliased onto the call-name.
-!!    <table>
-!!       <tr> <th> Build <td> Build_Lagrange
-!!       <tr> <th> Trash <td> Trash_Lagrange
-!!       <tr> <th> CalculateLagrangePolynomials <td> CalculateLagrangePolynomials_Lagrange
-!!       <tr> <th> Interpolate_1D <td> Interpolate_1D_Lagrange
-!!       <tr> <th> Interpolate_2D <td> Interpolate_2D_Lagrange
-!!       <tr> <th> Interpolate_3D <td> Interpolate_3D_Lagrange
-!!       <tr> <th> Differentiate_1D <td> Differentiate_1D_Lagrange
-!!       <tr> <th> Differentiate_2D <td> Differentiate_2D_Lagrange
-!!       <tr> <th> Differentiate_3D <td> Differentiate_3D_Lagrange
-!!       <tr> <th> ApplyInterpolationMatrix_1D <td> ApplyInterpolationMatrix_1D_Lagrange
-!!       <tr> <th> ApplyInterpolationMatrix_2D <td> ApplyInterpolationMatrix_2D_Lagrange
-!!       <tr> <th> ApplyInterpolationMatrix_3D <td> ApplyInterpolationMatrix_3D_Lagrange
-!!       <tr> <th> ApplyDerivativeMatrix_1D <td> ApplyDerivativeMatrix_1D_Lagrange
-!!       <tr> <th> ApplyDerivativeMatrix_2D <td> ApplyDerivativeMatrix_2D_Lagrange
-!!       <tr> <th> ApplyDerivativeMatrix_3D <td> ApplyDerivativeMatrix_3D_Lagrange
-!!       <tr> <th> WriteTecplot_1D <td> WriteTecplot_1D_Lagrange
-!!       <tr> <th> WriteTecplot_2D <td> WriteTecplot_2D_Lagrange
-!!       <tr> <th> WriteTecplot_3D <td> WriteTecplot_3D_Lagrange
-!!    </table>
-!!
-
-!>@}
+! =============================================================================================== !
+!
+! A data-structure for handling Lagrange interpolation in one, two, or three dimensions
+!
+! The Lagrange data-structure stores the information necessary to interpolate between two
+! sets of grid-points and to estimate the derivative of data at native grid points. Routines for
+! multidimensional interpolation are based on the tensor product of 1-D interpolants. It is 
+! assumed that the polynomial degree (and the interpolation nodes) are the same in each direction.
+! This assumption permits the storage of only one array of interpolation nodes and barycentric 
+! weights and is what allows this data structure to be flexible.
+!
+! =============================================================================================== !
 
   TYPE, PUBLIC :: Lagrange
 
@@ -104,7 +58,9 @@ IMPLICIT NONE
       PROCEDURE :: Build => Build_Lagrange
       PROCEDURE :: Trash => Trash_Lagrange
       
-      PROCEDURE :: CalculateLagrangePolynomials  
+      PROCEDURE :: Interpolate_1D => Interpolate_1D_Lagrange
+      PROCEDURE :: Interpolate_2D => Interpolate_2D_Lagrange
+      PROCEDURE :: Interpolate_3D => Interpolate_3D_Lagrange
 
       PROCEDURE :: ApplyInterpolationMatrix_1D
       PROCEDURE :: ApplyInterpolationMatrix_2D
@@ -120,72 +76,63 @@ IMPLICIT NONE
       PROCEDURE :: CalculateDivergence_3D
 !      PROCEDURE :: CalculateCurl_3D
 
-      PROCEDURE :: Interpolate_1D => Interpolate_1D_Lagrange
-      PROCEDURE :: Interpolate_2D => Interpolate_2D_Lagrange
-      PROCEDURE :: Interpolate_3D => Interpolate_3D_Lagrange
-
-!      PROCEDURE :: Differentiate_1D => Differentiate_1D_Lagrange
-!      PROCEDURE :: Differentiate_2D => Differentiate_2D_Lagrange
-!      PROCEDURE :: Differentiate_3D => Differentiate_3D_Lagrange
-
       PROCEDURE, PRIVATE :: CalculateBarycentricWeights  => CalculateBarycentricWeights_Lagrange
       PROCEDURE, PRIVATE :: CalculateInterpolationMatrix => CalculateInterpolationMatrix_Lagrange
       PROCEDURE, PRIVATE :: CalculateDerivativeMatrix    => CalculateDerivativeMatrix_Lagrange
-      
-      ! File I/O
-      PROCEDURE :: WriteTecplot_1D => WriteTecplot_1D_Lagrange
-      PROCEDURE :: WriteTecplot_2D => WriteTecplot_2D_Lagrange
-      PROCEDURE :: WriteTecplot_3D => WriteTecplot_3D_Lagrange
+      PROCEDURE          :: CalculateLagrangePolynomials  
       
     END TYPE Lagrange
 
  
  CONTAINS
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 
-!> \addtogroup Lagrange_Class 
-!! @{ 
 ! ================================================================================================ !
-! S/R Build
 !
-!>  \fn Build_Lagrange
-!!  A manual constructor for the Lagrange class that allocates memory and fills in data 
-!!  for the attributes of the Lagrange class.
-!! 
-!!  The Build subroutine allocates memory for the native and non-native grid points, barycentric
-!!  weights interpolation matrix, and derivative matrix. The native and non-native grid points are
-!!  filled in using the REAL(prec) input arrays "s" and "so". The barycentric weights are then 
-!!  calculated and stored. Once the barycentric weights are calculated, the interpolation and
-!!  derivative matrices are calculated and stored.
-!!
-!!  <H2> Usage : </H2>
-!!     <B>TYPE</B>(Lagrange) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Build( N, M, s, so ) <BR>
-!!
-!!  <table>
-!!       <tr> <td> in/out <th> myPoly <td> TYPE(Lagrange) <td> The Lagrange data structure to 
-!!                                                                be constructed
-!!       <tr> <td> in <th> N <td> INTEGER <td> The number of native grid points
-!!       <tr> <td> in <th> M <td> INTEGER <td> The number of target grid points
-!!       <tr> <td> in <th> s(0:N) <td> REAL(prec) <td> The native grid points
-!!       <tr> <td> in <th> so(0:N) <td> REAL(prec) <td> The target grid points
-!!  </table>
-!!
+! Build_Lagrange
+!
+!   A manual constructor for the Lagrange class that allocates memory and fills in data 
+!   for the attributes of the Lagrange class.
+!  
+!   The Build subroutine allocates memory for the interpolation and target points, barycentric
+!   weights, interpolation matrix, and derivative matrix.
+!
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp 
+!     INTEGER        :: N, M
+!     REAL(prec)     :: interpNodes(0:N), targetNodes(0:M+1) 
+!
+!     CALL interp % Build( N, M, interpNodes, targetNodes )
+!
+!   Input/Output :
+!
+!     myPoly  (out)  
+!       The Lagrange data structure to be constructed
+!
+!     N (in)
+!       The degree of the polynomial interpolant
+!
+!     M (in)
+!       M+1 is the number of target grid points. The upper bound of the targetNodes array
+!
+!     interpNodes(0:N) (in)
+!       The interpolation nodes.
+!
+!     targetNodes(0:M) (in)
+!       The target nodes. The interpolationMatrix will map the a function at the interpolation
+!       nodes onto the target nodes.
+!
 ! =============================================================================================== !
-!>@}
 
-  SUBROUTINE Build_Lagrange( myPoly, N, M, s, so )
+  SUBROUTINE Build_Lagrange( myPoly, N, M, interpNodes, targetNodes )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(out)   :: myPoly
     INTEGER, INTENT(in)            :: N, M
-    REAL(prec), INTENT(in)         :: s(0:N), so(0:M)
+    REAL(prec), INTENT(in)         :: interpNodes(0:N), targetNodes(0:M)
     
-      ! Set the number of observations (those we have and those we want)
       myPoly % N  = N
       myPoly % M  = M
      
-      ! Allocate storage
       ALLOCATE( myPoly % interpolationPoints(0:N), &
                 myPoly % barycentricWeights(0:N), &
                 myPoly % targetPoints(0:M), &
@@ -202,9 +149,8 @@ IMPLICIT NONE
       myPoly % derivativeMatrix             = 0.0_prec
       myPoly % derivativeMatrixTranspose    = 0.0_prec
       
-      ! Fill in the nodal locations for the interpolation points and the target regridding points.
-      myPoly % interpolationPoints(0:N) = s(0:N)
-      myPoly % targetPoints(0:M)        = so(0:M)
+      myPoly % interpolationPoints(0:N) = interpNodes(0:N)
+      myPoly % targetPoints(0:M)        = targetNodes(0:M)
 
       CALL myPoly % CalculateBarycentricWeights( )
       CALL myPoly % CalculateInterpolationMatrix( )
@@ -231,32 +177,27 @@ IMPLICIT NONE
  
  END SUBROUTINE Build_Lagrange
 
-!
-!> \addtogroup Lagrange_Class 
-!! @{ 
 ! ================================================================================================ !
-! S/R Trash 
+!
+! Trash_Lagrange
+!
+!   A manual destructor for the Lagrange class that deallocates the memory held by its attributes. 
 ! 
-!> \fn Trash_Lagrange
-!! A manual destructor for the Lagrange class that deallocates the memory held by its 
-!!  attributes. 
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Trash( ) <BR>
-!!  
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in/out <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                       On <B>input</B>, the Lagrange data structure with attributes filled in. <BR>
-!!                       On <B>output</B>,the memory associated with this data-structure is freed.
-!!  </table>  
-!!   
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp
+!     
+!       CALL interp % Trash( ) 
+!  
+!   Input/Output :
+! 
+!     interp (in/out)  
+!       On input, a previously constructed Lagrange data structure. 
+!       On output, the memory associated with this data-structure is freed.
+!   
 ! ================================================================================================ ! 
-!>@}
 
-  SUBROUTINE Trash_Lagrange(myPoly)
+  SUBROUTINE Trash_Lagrange( myPoly )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
@@ -278,39 +219,36 @@ IMPLICIT NONE
 
   END SUBROUTINE Trash_Lagrange
 
-
-!> \addtogroup Lagrange_Class
-!! @{ 
 ! ================================================================================================ !
-! Function Interpolate 
+!
+! Interpolate_1D_Lagrange
+!
+!   Interpolates an array of data onto a desired location using Lagrange interpolation.
+!
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp
+!     REAL(prec)     :: f(0:interp % N) 
+!     REAL(prec)     :: sE 
+!     REAL(prec)     :: fAtSE 
+!         
+!       fAtSE = interp % Interpolate_1D( f, sE ) 
 ! 
-!> \fn Interpolate_1D_Lagrange
-!!  Interpolates an array of data onto a desired location using Lagrange interpolation.
-!!
-!!  This function depends on <BR>
-!!   Module \ref Lagrange_Class.f90 : \ref CalculateLagrangePolynomials
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: f(0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: sE <BR>
-!! <B>REAL</B>(prec)     :: fAtSE <BR>
-!!         .... <BR>
-!!     fAtSE = this % Interpolate_1D( f, sE ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N) <td> REAL(prec) <td> 
-!!                     An array of function nodal values located at the native interpolation nodes.
-!!   <tr> <td> in <th> sE <td> REAL(prec) <td> 
-!!                     The location where you want to interpolate to.
-!!   <tr> <td> out <th> fAtSE <td> REAL(prec) <td> The interpolant evaluated at sE.
-!!  </table>  
-!!
+!   Parameters :
+!  
+!     myPoly (in)
+!       A previously constructed Lagrange data-structure.
+!
+!     f (in)  
+!       An array of function nodal values located at the native interpolation nodes.
+!
+!     sE (in) 
+!       The location where you want to interpolate to.
+!
+!     fAtSE (out)
+!       The interpolant evaluated at sE.  
+!
 ! ================================================================================================ ! 
-!>@}
 
   FUNCTION Interpolate_1D_Lagrange( myPoly, f, sE ) RESULT( interpF )  
     IMPLICIT NONE
@@ -318,7 +256,7 @@ IMPLICIT NONE
     REAL(prec)      :: sE
     REAL(prec)      :: f(0:myPoly % N)
     REAL(prec)      :: interpF
-    ! LOCAL
+    ! Local
     REAL(prec) :: lAtS(0:myPoly % N)
     INTEGER    :: i
    
@@ -331,38 +269,36 @@ IMPLICIT NONE
     
   END FUNCTION Interpolate_1D_Lagrange
 
-!> \addtogroup Lagrange_Class
-!! @{ 
 ! ================================================================================================ !
-! Function Interpolate_2D 
+!
+! Interpolate_2D_Lagrange
+!
+!   Interpolates an array of data onto a desired location using Lagrange interpolation.
+!
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp
+!     REAL(prec)     :: f(0:interp % N,0:interp % N) 
+!     REAL(prec)     :: sE(1:2) 
+!     REAL(prec)     :: fAtSE 
+!         
+!       fAtSE = interp % Interpolate_2D( f, sE ) 
 ! 
-!> \fn Interpolate_2D_Lagrange 
-!!  Interpolates an array of data onto a desired location using Lagrange interpolation.
-!!
-!!  This function depends on <BR>
-!!   Module \ref Lagrange_Class.f90 : \ref CalculateLagrangePolynomials
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: f(0:this % N, 0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: sE(1:2) <BR>
-!! <B>REAL</B>(prec)     :: fAtSE <BR>
-!!         .... <BR>
-!!     fAtSE = this % Interpolate( f, sE ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N) <td> REAL(prec) <td> 
-!!                     An array of function nodal values located at the native interpolation nodes.
-!!   <tr> <td> in <th> sE(1:2) <td> REAL(prec) <td> 
-!!                     The (2-D) location where you want to interpolate to.
-!!   <tr> <td> out <th> fAtSE <td> REAL(prec) <td> The interpolant evaluated at sE.
-!!  </table>  
-!!
+!   Parameters :
+!  
+!     myPoly (in)
+!       A previously constructed Lagrange data-structure.
+!
+!     f (in)  
+!       An array of function nodal values located at the native interpolation nodes.
+!
+!     sE (in) 
+!       The location where you want to interpolate to.
+!
+!     fAtSE (out)
+!       The interpolant evaluated at sE.  
+!
 ! ================================================================================================ ! 
-!>@}
 
   FUNCTION Interpolate_2D_Lagrange( myPoly, f, sE ) RESULT( interpF )  
     IMPLICIT NONE
@@ -370,7 +306,7 @@ IMPLICIT NONE
     REAL(prec)      :: sE(1:2)
     REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N)
     REAL(prec)      :: interpF
-    ! LOCAL
+    ! Local
     REAL(prec) :: fj
     REAL(prec) :: ls(0:myPoly % N)
     REAL(prec) :: lp(0:myPoly % N)
@@ -393,38 +329,36 @@ IMPLICIT NONE
       
  END FUNCTION Interpolate_2D_Lagrange
 
-!> \addtogroup Lagrange_Class
-!! @{ 
 ! ================================================================================================ !
-! Function Interpolate_3D 
+!
+! Interpolate_3D_Lagrange
+!
+!   Interpolates an array of data onto a desired location using Lagrange interpolation.
+!
+!   Usage :
+!
+!     TYPE(Lagrange) :: interp
+!     REAL(prec)     :: f(0:interp % N,0:interp % N,0:interp % N) 
+!     REAL(prec)     :: sE(1:3) 
+!     REAL(prec)     :: fAtSE 
+!         
+!       fAtSE = interp % Interpolate_3D( f, sE ) 
 ! 
-!> \fn Interpolate_3D_Lagrange 
-!!  Interpolates an array of data onto a desired location using Lagrange interpolation.
-!!
-!!  This function depends on <BR>
-!!   Module \ref Lagrange_Class.f90 : \ref CalculateLagrangePolynomials
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: f(0:this % N, 0:this % N, 0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: sE(1:3) <BR>
-!! <B>REAL</B>(prec)     :: fAtSE <BR>
-!!         .... <BR>
-!!     fAtSE = this % Interpolate( f, sE ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange_1D) <td> 
-!!                     A previously constructed Lagrange_1D data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N,0:myPoly % N) <td> REAL(prec) <td> 
-!!                     An array of function nodal values located at the native interpolation nodes.
-!!   <tr> <td> in <th> sE(1:3) <td> REAL(prec) <td> 
-!!                     The (3-D) location where you want to interpolate to.
-!!   <tr> <td> out <th> interpF <td> REAL(prec) <td> The interpolant evaluated at sE.
-!!  </table>  
-!!
+!   Parameters :
+!  
+!     myPoly (in)
+!       A previously constructed Lagrange data-structure.
+!
+!     f (in)  
+!       An array of function nodal values located at the native interpolation nodes.
+!
+!     sE (in) 
+!       The location where you want to interpolate to.
+!
+!     fAtSE (out)
+!       The interpolant evaluated at sE.  
+!
 ! ================================================================================================ ! 
-!>@}
 
   FUNCTION Interpolate_3D_Lagrange( myPoly, f, sE ) RESULT( interpF )  
     IMPLICIT NONE
@@ -432,7 +366,7 @@ IMPLICIT NONE
     REAL(prec)      :: sE(1:3)
     REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N)
     REAL(prec)      :: interpF
-    ! LOCAL
+    ! Local
     REAL(prec) :: fjk, fk
     REAL(prec) :: ls(0:myPoly % N)
     REAL(prec) :: lp(0:myPoly % N)
@@ -479,20 +413,20 @@ IMPLICIT NONE
 !! \f$ \lbrace \xi_i \rbrace_{i=0}^N \f$ nodes. This routine performs the matrix-multiply that
 !! maps an array of nodal values from the native interpolation nodes to the target nodes 
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: ftarget(0:this % M) <BR>
-!!         .... <BR>
-!!     ftarget = this % ApplyInterpolationMatrix_1D( fnative ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)     :: fnative(0:this % N) 
+!! REAL</B>(prec)     :: ftarget(0:this % M) 
+!!         .... 
+!!     ftarget = this % ApplyInterpolationMatrix_1D( fnative ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
+!!     in  myPoly  TYPE(Lagrange)  
 !!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N) <td> REAL(prec) <td>
+!!     in  f(0:myPoly % N)  REAL(prec) 
 !!                     Array of function nodal values at the native interpolation nodes.
-!!   <tr> <td> out <th> fNew(0:myPoly % M) <td> REAL(prec) <td> 
+!!     out  fNew(0:myPoly % M)  REAL(prec)  
 !!                     Array of function nodal values at the target interpolation nodes.
 !!  </table>  
 !!   
@@ -551,20 +485,20 @@ IMPLICIT NONE
 !! This routine performs the matrix-multiplications that map an array of nodal values from the 
 !! native interpolation nodes to the target nodes. 
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N,0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: ftarget(0:this % M,0:this % M) <BR>
-!!         .... <BR>
-!!     ftarget = this % ApplyInterpolationMatrix_2D( fnative ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)     :: fnative(0:this % N,0:this % N) 
+!! REAL</B>(prec)     :: ftarget(0:this % M,0:this % M) 
+!!         .... 
+!!     ftarget = this % ApplyInterpolationMatrix_2D( fnative ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
+!!     in  myPoly  TYPE(Lagrange)  
 !!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N,0:this % N) <td> REAL(prec) <td>
+!!     in  f(0:myPoly % N,0:this % N)  REAL(prec) 
 !!                     2-D Array of function nodal values at the native interpolation nodes.
-!!   <tr> <td> out <th> fNew(0:myPoly % M,0:this % M) <td> REAL(prec) <td> 
+!!     out  fNew(0:myPoly % M,0:this % M)  REAL(prec)  
 !!                     2-D Array of function nodal values at the target interpolation nodes.
 !!  </table>  
 !!   
@@ -625,20 +559,20 @@ IMPLICIT NONE
 !! \f]
 !!
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N,0:this % N,0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: ftarget(0:this % M,0:this % M,0:this % M) <BR>
-!!         .... <BR>
-!!     ftarget = this % ApplyInterpolationMatrix_3D( fnative ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)     :: fnative(0:this % N,0:this % N,0:this % N) 
+!! REAL</B>(prec)     :: ftarget(0:this % M,0:this % M,0:this % M) 
+!!         .... 
+!!     ftarget = this % ApplyInterpolationMatrix_3D( fnative ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
+!!     in  myPoly  TYPE(Lagrange)  
 !!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N,0:this % N,0:this % N) <td> REAL(prec) <td>
+!!     in  f(0:myPoly % N,0:this % N,0:this % N)  REAL(prec) 
 !!                     3-D Array of function nodal values at the native interpolation nodes.
-!!   <tr> <td> out <th> fNew(0:myPoly % M,0:this % M,0:this % M) <td> REAL(prec) <td> 
+!!     out  fNew(0:myPoly % M,0:this % M,0:this % M)  REAL(prec)  
 !!                     3-D Array of function nodal values at the target interpolation nodes.
 !!  </table>  
 !!   
@@ -694,20 +628,20 @@ IMPLICIT NONE
 !! matrix-multiply that results in an estimate of the derivative of a function whose nodal values
 !! are the  \f$ f_i \f$ at the native interpolation nodes.
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: dfds(0:this % N) <BR>
-!!         .... <BR>
-!!     dfds = this % ApplyDerivativeMatrix_1D( fnative ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)     :: fnative(0:this % N) 
+!! REAL</B>(prec)     :: dfds(0:this % N) 
+!!         .... 
+!!     dfds = this % ApplyDerivativeMatrix_1D( fnative ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
+!!     in  myPoly  TYPE(Lagrange)  
 !!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N) <td> REAL(prec) <td>
+!!     in  f(0:myPoly % N)  REAL(prec) 
 !!                     Array of function nodal values at the native interpolation nodes.
-!!   <tr> <td> out <th> derF(0:myPoly % M) <td> REAL(prec) <td> 
+!!     out  derF(0:myPoly % M)  REAL(prec)  
 !!                     Array of estimated derivative values at the native interpolation nodes.
 !!  </table>  
 !!   
@@ -796,20 +730,20 @@ IMPLICIT NONE
 !! at the native interpolation nodes. This serves as an estimate of the derivative of the underlying
 !! function.
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N,0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: derF(0:this % N,0:this % N,1:2) <BR>
-!!         .... <BR>
-!!     derF = this % ApplyDerivativeMatrix_2D( fnative ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)     :: fnative(0:this % N,0:this % N) 
+!! REAL</B>(prec)     :: derF(0:this % N,0:this % N,1:2) 
+!!         .... 
+!!     derF = this % ApplyDerivativeMatrix_2D( fnative ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
+!!     in  myPoly  TYPE(Lagrange)  
 !!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N,0:this % N) <td> REAL(prec) <td>
+!!     in  f(0:myPoly % N,0:this % N)  REAL(prec) 
 !!                     2-D Array of function nodal values at the native Derivative nodes.
-!!   <tr> <td> out <th> derF(0:myPoly % N,0:this % N,1:2) <td> REAL(prec) <td> 
+!!     out  derF(0:myPoly % N,0:this % N,1:2)  REAL(prec)  
 !!                     3-D Array containing the derivative (in each direction) of the interpolant at
 !!                     the native interpolation nodes.
 !!  </table>  
@@ -895,20 +829,20 @@ IMPLICIT NONE
 !! at the native interpolation nodes. This serves as an estimate of the derivative of the underlying
 !! function.
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N,0:this % N,0:this % N) <BR>
-!! <B>REAL</B>(prec)     :: derF(0:this % N,0:this % N,0:this % N,1:3) <BR>
-!!         .... <BR>
-!!     derF = this % ApplyDerivativeMatrix_3D( fnative ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)     :: fnative(0:this % N,0:this % N,0:this % N) 
+!! REAL</B>(prec)     :: derF(0:this % N,0:this % N,0:this % N,1:3) 
+!!         .... 
+!!     derF = this % ApplyDerivativeMatrix_3D( fnative ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
+!!     in  myPoly  TYPE(Lagrange)  
 !!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> f(0:myPoly % N,0:this % N,0:this % N) <td> REAL(prec) <td>
+!!     in  f(0:myPoly % N,0:this % N,0:this % N)  REAL(prec) 
 !!                     3-D Array of function nodal values at the native Derivative nodes.
-!!   <tr> <td> out <th> derF(0:myPoly % N,0:this % N,1:2) <td> REAL(prec) <td> 
+!!     out  derF(0:myPoly % N,0:this % N,1:2)  REAL(prec)  
 !!                     4-D Array containing the derivative of the interpolant (in each direction) at
 !!                     the nativeinterpolation nodes.
 !!  </table>  
@@ -945,193 +879,6 @@ IMPLICIT NONE
 #endif
 
   END SUBROUTINE CalculateDivergence_3D
-
-
-!> \addtogroup Lagrange_Class
-!! @{ 
-! ================================================================================================ !
-! S/R WriteTecplot_1D 
-! 
-!> \fn WriteTecplot_1D_Lagrange 
-!! Writes an ASCII tecplot file for 1-D data given a set of function nodal values at the native
-!! interpolation nodes.
-!! 
-!! Passing in filename ="example" results in a file called "example.curve" that conforms to the 
-!! 1-D tecplot file format. This file can be viewed in any data-visualization software that can 
-!! read tecplot files.
-!!
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N) <BR>
-!! <B>CHARACTER</B>(len) :: filename <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % WriteTecplot_1D( fnative, filename ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                     A previously constructed Lagrange_1D data-structure.
-!!   <tr> <td> in <th> fnative(0:myPoly % N) <td> REAL(prec) <td>
-!!                     An array of function nodal values at the native interpolation nodes
-!!   <tr> <td> in <th> filename <td> CHARACTER(*) <td>
-!!                     Name of the file where the native interpolation nodes and function <BR>
-!!                     nodal values will be written.
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- SUBROUTINE WriteTecplot_1D_Lagrange( myPoly, f, filename )
-
-   IMPLICIT NONE
-   CLASS( Lagrange ), INTENT(in) :: myPoly
-   REAL(prec), INTENT(in)        :: f(0:myPoly % N)
-   CHARACTER(*), INTENT(in)      :: filename
-   ! Local
-   INTEGER :: fUnit, iS
-
-      OPEN( UNIT   = NewUnit(fUnit), &
-            FILE   = TRIM(filename)//'.curve', &
-            FORM   = 'FORMATTED', &
-            STATUS = 'REPLACE' )
-
-      WRITE( fUnit, * )'#f'
-      DO iS = 0, myPoly % N
-         WRITE( fUnit, * ) myPoly % interpolationPoints(iS), f(iS)
-      ENDDO
-
-      CLOSE( fUnit )
-
- END SUBROUTINE WriteTecplot_1D_Lagrange
-!
-!> \addtogroup Lagrange_Class
-!! @{ 
-! ================================================================================================ !
-! S/R WriteTecplot 
-! 
-!> \fn WriteTecplot_2D_Lagrange  
-!! Writes an ASCII tecplot file for 2-D data given a set of function nodal values at the native
-!! interpolation nodes.
-!! 
-!! Passing in filename ="example" results in a file called "example.tec" that conforms to the 
-!! 2-D tecplot FEM file format. This file can be viewed in any data-visualization software that can 
-!! read tecplot files.
-!!
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N,0:this % N) <BR>
-!! <B>CHARACTER</B>(len) :: filename <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % WriteTecplot_2D( fnative, filename ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                     A previously constructed Lagrange data-structure.
-!!   <tr> <td> in <th> fnative(0:myPoly % N, 0:myPoly % N)<td> REAL(prec) <td>
-!!                     An array of function nodal values at the native interpolation nodes
-!!   <tr> <td> in <th> filename <td> CHARACTER(*) <td>
-!!                     Name of the file where the native interpolation nodes and function <BR>
-!!                     nodal values will be written.
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- SUBROUTINE WriteTecplot_2D_Lagrange( myPoly, f, filename )
-
-   IMPLICIT NONE
-   CLASS( Lagrange ), INTENT(in) :: myPoly
-   REAL(prec), INTENT(in)        :: f(0:myPoly % N,0:myPoly % N)
-   CHARACTER(*), INTENT(in)      :: filename
-   ! Local
-   INTEGER    :: fUnit, i, j, N
-   REAL(prec) :: s(0:myPoly % N)
-   
-      N = myPoly % N
-      s = myPoly % N
-
-      OPEN( UNIT   = NewUnit(fUnit), &
-            FILE   = TRIM(filename)//'.tec', &
-            FORM   = 'FORMATTED', &
-            STATUS = 'REPLACE' )
-
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "f" '
-      WRITE(fUnit,*) 'ZONE T="el00", I=',N+1,', J=', N+1,',F=POINT'
-      
-      DO j = 0, N
-         DO i = 0, N
-            WRITE( fUnit, * ) s(i), s(j), f(i,j)
-         ENDDO
-      ENDDO
-
-      CLOSE( fUnit )
-
- END SUBROUTINE WriteTecplot_2D_Lagrange
-!
-!> \addtogroup Lagrange_Class
-!! @{ 
-! ================================================================================================ !
-! S/R WriteTecplot 
-! 
-!> \fn WriteTecplot_Lagrange  
-!! Writes an ASCII tecplot file for 3-D data given a set of function nodal values at the native
-!! interpolation nodes.
-!! 
-!! Passing in filename ="example" results in a file called "example.tec" that conforms to the 
-!! 3-D tecplot FEM file format. This file can be viewed in any data-visualization software that can 
-!! read tecplot files.
-!!
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)     :: fnative(0:this % N,0:this % N,0:this % N) <BR>
-!! <B>CHARACTER</B>(len) :: filename <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % WriteTecplot_3D( fnative, filename ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                     A previously constructed Lagrange_1D data-structure.
-!!   <tr> <td> in <th> fnative(0:myPoly % N, 0:myPoly % N,0:this % N)<td> REAL(prec) <td>
-!!                     An array of function nodal values at the native interpolation nodes
-!!   <tr> <td> in <th> filename <td> CHARACTER(*) <td>
-!!                     Name of the file where the native interpolation nodes and function <BR>
-!!                     nodal values will be written.
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- SUBROUTINE WriteTecplot_3D_Lagrange( myPoly, f, filename )
-
-   IMPLICIT NONE
-   CLASS( Lagrange ), INTENT(in) :: myPoly
-   REAL(prec), INTENT(in)        :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N)
-   CHARACTER(*), INTENT(in)      :: filename
-   ! Local
-   INTEGER    :: fUnit, i, j, k, N
-   REAL(prec) :: s(0:myPoly % N)
-   
-      N = myPoly % N
-      s = myPoly % interpolationPoints
-
-      OPEN( UNIT   = NewUnit(fUnit), &
-            FILE   = TRIM(filename)//'.tec', &
-            FORM   = 'FORMATTED', &
-            STATUS = 'REPLACE' )
-
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "f" '
-      WRITE(fUnit,*) 'ZONE T="el00", I=',N+1,', J=', N+1,', K=', N+1,',F=POINT'
-      
-      DO k = 0, N
-         DO j = 0, N
-            DO i = 0, N
-               WRITE( fUnit, * ) myPoly % interpolationPoints(i), myPoly % interpolationPoints(j), myPoly % interpolationPoints(k), f(i,j,k)
-            ENDDO
-         ENDDO
-      ENDDO
-
-      CLOSE( fUnit )
-
- END SUBROUTINE WriteTecplot_3D_Lagrange
  
 ! ================================================================================================ !
 ! ------------------------------------- PRIVATE ROUTINES ----------------------------------------- !
@@ -1164,17 +911,17 @@ IMPLICIT NONE
 !! 
 !!   This routine is from Alg. 30 on pg. 75 of D.A. Kopriva, 2009.
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % CalculateBarycentricWeights( ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!!         .... 
+!!     CALL</B> this % CalculateBarycentricWeights( ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myPoly <td> TYPE(Lagrange) <td>
-!!           On <B>input</B>, myPoly is the Lagrange data structure is sent in with the <BR>
-!!           native interpolation nodes already filled in. <BR>
-!!           On <B>output</B>, myPoly has the barycentric weights filled in.
+!!     in/out  myPoly  TYPE(Lagrange) 
+!!           On input</B>, myPoly is the Lagrange data structure is sent in with the 
+!!           native interpolation nodes already filled in. 
+!!           On output</B>, myPoly has the barycentric weights filled in.
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
@@ -1270,18 +1017,18 @@ IMPLICIT NONE
 !! matrix, and the "interpolationMatrixTranspose" attribute with the transpose of the interpolation matrix.
 !!
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % CalculateInterpolationMatrix(  ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!!         .... 
+!!     CALL</B> this % CalculateInterpolationMatrix(  ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myPoly <td> TYPE <td> 
-!!             A previously constructed Lagrange data-structure. <BR>
-!!             On <B>input</B>, the native interpolation nodes, target interpolation nodes,
-!!             and the barycentric weights must be defined. <BR>
-!!             On <B>output</B>, the interpolation matrix and its transpose are filled in.
+!!     in/out  myPoly  TYPE  
+!!             A previously constructed Lagrange data-structure. 
+!!             On input</B>, the native interpolation nodes, target interpolation nodes,
+!!             and the barycentric weights must be defined. 
+!!             On output</B>, the interpolation matrix and its transpose are filled in.
 !!  </table>
 !!
 ! ================================================================================================ ! 
@@ -1379,21 +1126,21 @@ IMPLICIT NONE
 !! This subroutine calculates the derivative matrix and its transpose and stores them in the
 !!  data-structure attributes "D" and "derivativeMatrixTranspose" respectively.
 !! 
-!! This subroutine depends on <BR>
+!! This subroutine depends on 
 !!   Module \ref InterpolatioNupportRoutines.f90 : \ref derivativematrix
 !!
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % CaclulateDerivativeMatrix(  ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!!         .... 
+!!     CALL</B> this % CaclulateDerivativeMatrix(  ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myPoly <td> TYPE <td> 
-!!             A previously constructed Lagrange data-structure. <BR>
-!!             On <B>input</B>, the native interpolation nodes
-!!             and the barycentric weights must be defined. <BR>
-!!             On <B>output</B>, the derivative matrix is filled in.
+!!     in/out  myPoly  TYPE  
+!!             A previously constructed Lagrange data-structure. 
+!!             On input</B>, the native interpolation nodes
+!!             and the barycentric weights must be defined. 
+!!             On output</B>, the derivative matrix is filled in.
 !!  </table>
 ! ================================================================================================ ! 
 !>@}
@@ -1401,7 +1148,7 @@ IMPLICIT NONE
   SUBROUTINE CalculateDerivativeMatrix_Lagrange( myPoly )  
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
-    ! LOCAL
+    ! Local
     INTEGER    :: row, col
 
       DO row = 0, myPoly % N
@@ -1462,22 +1209,22 @@ IMPLICIT NONE
 !! at this point. This is useful if you have multiple arrays of data that are given at the same
 !! native nodes and require interpolation onto a single point.
 !!
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(Lagrange) :: this <BR>
-!! <B>REAL</B>(prec)        :: lAtS(0:this % N,0:this % N) <BR>
-!! <B>REAL</B>(prec)        :: sE, pE <BR>
-!!         .... <BR>
-!!     lAtS = this % CalculateLagrangePolynomials( sE ) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(Lagrange) :: this 
+!! REAL</B>(prec)        :: lAtS(0:this % N,0:this % N) 
+!! REAL</B>(prec)        :: sE, pE 
+!!         .... 
+!!     lAtS = this % CalculateLagrangePolynomials( sE ) 
 !! 
-!!  <H2> Parameters : </H2>
+!!   Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myPoly <td> TYPE(Lagrange) <td> 
-!!                     A previously constructed Lagrange structure. <BR>
+!!     in  myPoly  TYPE(Lagrange)  
+!!                     A previously constructed Lagrange structure. 
 !!                     The interpolation nodes and barycentric weights are required to produce 
 !!                     sensible output.
-!!   <tr> <td> in <th> sE <td> REAL(prec) <td> 
+!!     in  sE  REAL(prec)  
 !!                     Location to evaluate the Lagrange interpolating polyomials
-!!   <tr> <td> out <th> lAtS(0:myPoly % N) <td> REAL(prec) <td>
+!!     out  lAtS(0:myPoly % N)  REAL(prec) 
 !!                      Array containing the value of each Lagrange interpolating polynomial 
 !!                      at sE. 
 !!  </table>  
@@ -1490,7 +1237,7 @@ IMPLICIT NONE
     CLASS(Lagrange) :: myPoly
     REAL(prec)      :: sE
     REAL(prec)      :: lAtS(0:myPoly % N)
-    ! LOCAL
+    ! Local
     REAL(prec) :: temp1, temp2
     INTEGER    :: j
     LOGICAL    :: xMatchesNode
