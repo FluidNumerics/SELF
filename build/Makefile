@@ -153,6 +153,11 @@ NodalDGSolution_3D_Class.o : ModelPrecision.o NodalDG_Class.o ${SRCDIR}spectral/
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90 -o $@
 	
 
+SpectralFilter_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectral/SpectralFilter_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}spectral/SpectralFilter_Class.f90 -o $@
+
+
+
 # Test program
 
 spectral_tests : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o Spectral_Tests.o
@@ -164,65 +169,11 @@ Spectral_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Cl
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/Spectral_Tests.F90 -o $@
 
 
-# ---------------------------------------------------------------------- #
-#                           ~/src/filters/                               #
-# ---------------------------------------------------------------------- #
-
-ModalCutoffFilter_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}filters/ModalCutoffFilter_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}filters/ModalCutoffFilter_Class.f90 -o $@
-
-RollOffFilter_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}filters/RollOffFilter_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}filters/RollOffFilter_Class.f90 -o $@
-
-
-# CUDA Extensions
-
-RollOffFilter_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o RollOffFilter_Class.o ${SRCDIR}filters/cuda/RollOffFilter_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}filters/cuda/RollOffFilter_Cuda_Class.cuf -o $@
-
-   
-# ---------------------------------------------------------------------- #
-#                        ~/src/integration_testing/                      #
-# ---------------------------------------------------------------------- #
-
-cmdi : ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o
-	${FC} ${OPT} ModelPrecision.o CommonRoutines.o ModelDataInstances_Class.o CompareModelDataInstances.o -o $@
-
-ModelDataInstances_Class.o : ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 ModelPrecision.o CommonRoutines.o
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}integration_testing/ModelDataInstances_Class.f90 -o $@
-
-CompareModelDataInstances.o : ${SRCDIR}integration_testing/CompareModelDataInstances.f90 ModelDataInstances_Class.o ModelPrecision.o
-	${FC} ${OPT} -c ${SRCDIR}integration_testing/CompareModelDataInstances.f90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #
 # ---------------------------------------------------------------------- #
 
-GOBJS = ModelPrecision.o \
-        ConstantsDictionary.o \
-        CommonRoutines.o \
-        LinkedList_Class.o \
-        HashTable_Class.o \
-        Timing.o \
-        Quadrature.o \
-        Lagrange_Class.o \
-        NodalStorage_Class.o \
-        DGSEMSolutionStorage_2D_Class.o \
-        Node_Class.o \
-        Edge_Class.o \
-        Curve_Class.o \
-        MappedGeometry_2D_Class.o \
-        QuadElement_Class.o \
-        QuadMesh_Class.o \
-        Params_Class.o \
-        BoundaryCommunicator_Class.o
-
-         
-DecomposeQuadMesh : ${GOBJS} DecomposeQuadMesh.o
-	${FC} ${OPT} ${GOBJS} DecomposeQuadMesh.o ${METISLIB} -o $@
-
-GeneratePCMesh_2D : ${GOBJS} GenerateMeshFiles_2D.o 
-	${FC} ${OPT} ${GOBJS} GenerateMeshFiles_2D.o  -o $@
 
 GOBJ3 = ModelPrecision.o \
         ConstantsDictionary.o \
@@ -256,49 +207,11 @@ GenerateHexMesh : ${GOBJ3} GenerateMeshFiles_3D.o
 	${FC} ${OPT} ${GOBJ3} GenerateMeshFiles_3D.o  -o $@
 
 
-EQMOBJ = ModelPrecision.o \
-         ConstantsDictionary.o \
-         CommonRoutines.o \
-         LinkedList_Class.o \
-         HashTable_Class.o \
-         KeyRing_Class.o \
-         Timing.o \
-         Quadrature.o \
-         Lagrange_Class.o \
-         NodalStorage_Class.o \
-         Node_Class.o \
-         Edge_Class.o \
-         Face_Class.o \
-         Curve_Class.o \
-         Surface_Class.o \
-         MappedGeometry_2D_Class.o \
-         MappedGeometry_3D_Class.o \
-         QuadElement_Class.o \
-         HexElement_Class.o \
-         QuadMesh_Class.o \
-         HexMesh_Class.o \
-         FluidParams_Class.o \
-         BoundaryCommunicator_Class.o
-
-ExtrudeQuadMesh : ${EQMOBJ} ExtrudeQuadMesh.o 
-	${FC} ${OPT} ${EQMOBJ} ExtrudeQuadMesh.o  -o $@
-
 ## Programs
-GenerateMeshFiles_2D.o : ModelPrecision.o NodalStorage_Class.o QuadMesh_Class.o \
-                         BoundaryCommunicator_Class.o FluidParams_Class.o ${SRCDIR}geom/GenerateMeshFiles_2D.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/GenerateMeshFiles_2D.f90 -o $@
 
 GenerateMeshFiles_3D.o : ModelPrecision.o NodalStorage_Class.o HexMesh_Class.o \
                          BoundaryCommunicator_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/GenerateMeshFiles_3D.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/GenerateMeshFiles_3D.f90 -o $@
-
-ExtrudeQuadMesh.o : ModelPrecision.o NodalStorage_Class.o QuadMesh_Class.o HexMesh_Class.o \
-                    BoundaryCommunicator_Class.o FluidParams_Class.o ${SRCDIR}geom/ExtrudeQuadMesh.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/ExtrudeQuadMesh.f90 -o $@
-
-DecomposeQuadMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
-                      NodalStorage_Class.o QuadMesh_Class.o FluidParams_Class.o ${SRCDIR}geom/DecomposeQuadMesh.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/DecomposeQuadMesh.f90 -o $@
 
 
 DecomposeHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
@@ -329,24 +242,13 @@ Curve_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR
 Surface_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Surface_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/Surface_Class.f90 -o $@
 
-QuadElement_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}geom/QuadElement_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/QuadElement_Class.f90 -o $@
-	
 HexElement_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}geom/HexElement_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/HexElement_Class.f90 -o $@
 
-MappedGeometry_2D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                            Lagrange_Class.o Curve_Class.o ${SRCDIR}geom/MappedGeometry_2D_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/MappedGeometry_2D_Class.f90 -o $@
-	
+
 MappedGeometry_3D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                             Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/MappedGeometry_3D_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MappedGeometry_3D_Class.f90 -o $@
-
-QuadMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o HashTable_Class.o \
-                   Quadrature.o Curve_Class.o MappedGeometry_2D_Class.o QuadElement_Class.o \
-                   Edge_Class.o Node_Class.o ${SRCDIR}geom/QuadMesh_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/QuadMesh_Class.f90 -o $@
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surface_Class.o MappedGeometry_3D_Class.o HexElement_Class.o \

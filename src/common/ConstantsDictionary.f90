@@ -145,6 +145,11 @@
    INTEGER, PARAMETER :: GAUSS_LOBATTO = -1
    INTEGER, PARAMETER :: DG = 2000
    INTEGER, PARAMETER :: CG = 2001
+  !==============================================!
+  ! ----------------- Filter ------------------- !
+  !==============================================!
+   INTEGER, PARAMETER :: ModalCutoff = 3000
+   INTEGER, PARAMETER :: TanhRollOff = 3001 
   !
   !==============================================!
   ! ---------------- Geometry ------------------ !
