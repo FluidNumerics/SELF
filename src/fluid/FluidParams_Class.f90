@@ -48,6 +48,7 @@ USE ConstantsDictionary
       REAL(prec)    :: zScale
       ! SubsgridScale
       INTEGER       :: SubGridModel
+      INTEGER       :: filterType
       REAL(prec)    :: viscosity
       REAL(prec)    :: viscLengthScale
       INTEGER       :: nCutoff
@@ -120,6 +121,7 @@ USE ConstantsDictionary
       REAL(prec)    :: zScale
       ! SubgridScale
       CHARACTER(20) :: SubGridModel
+      CHARACTER(20) :: filterType
       REAL(prec)    :: viscosity
       REAL(prec)    :: viscLengthScale
       INTEGER       :: nCutoff
@@ -147,7 +149,7 @@ USE ConstantsDictionary
       NAMELIST / SpaceManagement / SpecMeshFile, PeaceMeshFile, UCDMeshFile, MeshType, topographicShape, QuadType, polyDeg, &
                                     nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
                                    nPlot, xScale, yScale, zScale
-      NAMELIST / SubgridScale / SubGridModel, viscosity, viscLengthScale, nCutoff
+      NAMELIST / SubgridScale / SubGridModel, filterType, viscosity, viscLengthScale, nCutoff
       NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, dTdx, dTdy, rho0, P0, v0
       
       readSuccess = .FALSE.
@@ -180,6 +182,7 @@ USE ConstantsDictionary
       zScale        = ONE
       ! SubgridScale
       SubGridModel    = 'Laplacian'
+      filterType      = 'TanhRollOff'
       viscosity       = 0.0_prec  ! (m^2/s)
       viscLengthScale = 1.0_prec  ! (m)
       nCutoff = 5
@@ -302,6 +305,11 @@ USE ConstantsDictionary
             PRINT*, '   Invalid SubGridModel : '//UpperCase(SubGridModel)
             PRINT*, '   Valid options are "Laplacian", "SpectralEKE", or "SpectralFiltering"'
             STOP 'STOPPING!'
+         ENDIF
+         IF( TRIM( UpperCase( FilterType ) )=='TANHROLLOFF' )THEN
+           thisParam % filterType = tanhRollOff
+         ELSEIF( TRIM( UpperCase( FilterType ) )=='MODALCUTOFF' )THEN
+           thisParam % filterType = modalCutoff
          ENDIF
          !thisParam % subGridModel = subGridModel
          thisParam % viscosity       = viscosity
