@@ -154,7 +154,7 @@ NodalDGSolution_3D_Class.o : ModelPrecision.o NodalDG_Class.o ${SRCDIR}spectral/
 	
 
 SpectralFilter_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}spectral/SpectralFilter_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}spectral/SpectralFilter_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/SpectralFilter_Class.f90 -o $@
 
 
 

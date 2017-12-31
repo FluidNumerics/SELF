@@ -71,16 +71,18 @@ IMPLICIT NONE
 !>@}
 
    TYPE SpectralFilter
-      INTEGER                 :: N, nCutoff, nPacked
+      INTEGER                 :: N
       REAL(prec), ALLOCATABLE :: filterMat(:,:)
+
+#ifdef HAVE_CUDA
+      INTEGER, ALLOCATABLE, DEVICE    :: N_dev
+      REAL(prec), ALLOCATABLE, DEVICE :: filterMat_dev(:,:)
+#endif
       
       CONTAINS
   
       PROCEDURE :: Build => Build_SpectralFilter
       PROCEDURE :: Trash => Trash_SpectralFilter
-      PROCEDURE :: Apply1DFilter => Apply1DFilter_SpectralFilter
-      PROCEDURE :: Apply2DFilter => Apply2DFilter_SpectralFilter
-      PROCEDURE :: Apply3DFilter => Apply3DFilter_SpectralFilter
 
    END TYPE SpectralFilter
 
@@ -134,8 +136,6 @@ CONTAINS
    INTEGER                 :: row, col 
    
       thisFilter % N       = N
-      thisFilter % nCutoff = nCutoff
-      thisFilter % nPacked = (N+1)*(N+1)-1
 
       ALLOCATE( thisFilter % filterMat(0:N,0:N) )
 
@@ -169,8 +169,6 @@ CONTAINS
 
             Lnorm = Lnorm + Li*Li*w(col)
             V(row,col) = Li*w(col)
-            ! The inverse of the modal projection matrix is easy to build since the Legendre basis
-            ! is an orthogonal basis
             VInv(col,row) = Li
               
          ENDDO
@@ -182,6 +180,14 @@ CONTAINS
 
     
       DEALLOCATE( V, Pfilt, Vinv )
+
+#ifdef HAVE_CUDA
+      ALLOCATE( thisFilter % N_dev, &
+                thisfilter % filterMat_dev(0:N,0:N) )
+
+      thisFilter % filterMat_dev = thisFilter % filterMat
+#endif
+
 
  END SUBROUTINE Build_SpectralFilter
 !
@@ -211,6 +217,11 @@ CONTAINS
    CLASS(SpectralFilter), INTENT(inout) :: thisFilter
    
       DEALLOCATE( thisFilter % filterMat )
+
+#ifdef HAVE_CUDA
+      DEALLOCATE( thisFilter % N_dev, &
+                  thisfilter % filterMat_dev )
+#endif
 
  END SUBROUTINE Trash_SpectralFilter
 !
