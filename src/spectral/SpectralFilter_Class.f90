@@ -8,13 +8,14 @@
 
 MODULE SpectralFilter_Class
 
-! src/common/
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
-! src/spectralops/
 USE Quadrature
 
+#ifdef HAVE_CUDA
+USE cudafor
+#endif
 
 IMPLICIT NONE
 
@@ -83,6 +84,8 @@ IMPLICIT NONE
   
       PROCEDURE :: Build => Build_SpectralFilter
       PROCEDURE :: Trash => Trash_SpectralFilter
+      
+      PROCEDURE :: Filter3D
 
    END TYPE SpectralFilter
 
@@ -131,15 +134,13 @@ CONTAINS
    REAL(prec), INTENT(in)              :: w(0:N)
    INTEGER, INTENT(in)                 :: filterType
    ! Local
-   REAL(prec)              :: Lnorm, Li, Ls, sc, alpha, r
-   REAL(prec), ALLOCATABLE :: Pfilt(:,:), V(:,:), VInv(:,:)
-   INTEGER                 :: row, col 
+   REAL(prec) :: Lnorm, Li, Ls, sc, r
+   REAL(prec) :: Pfilt(0:N,0:N), V(0:N,0:N), VInv(0:N,0:N)
+   INTEGER    :: row, col 
    
       thisFilter % N       = N
 
       ALLOCATE( thisFilter % filterMat(0:N,0:N) )
-
-      ALLOCATE( Pfilt(0:N,0:N), V(0:N,0:N), VInv(0:N,0:N) )
 
       thisFilter % filterMat = 0.0_prec
 
@@ -147,8 +148,6 @@ CONTAINS
       V     = 0.0_prec
       VInv  = 0.0_prec
 
-      sc = real(nCutoff,prec)
-      alpha = log(TWO)/(sc*sc)
       DO row = 0, N 
  
          r = real(row,prec)
@@ -158,7 +157,7 @@ CONTAINS
               Pfilt(row,row) = 1.0_prec
            ENDIF
          ELSEIF( filterType == TanhRollOff )THEN
-           Pfilt(row,row) = 0.5_prec*(1.0_prec - tanh( (r-nCutoff) ) )
+           Pfilt(row,row) = 0.5_prec*(1.0_prec - tanh( (r- REAL(nCutoff,prec)) ) )
          ENDIF
 
          Lnorm = 0.0_prec
@@ -179,8 +178,6 @@ CONTAINS
       thisFilter % filterMat = TRANSPOSE( MATMUL( VInv, Pfilt ) )
 
     
-      DEALLOCATE( V, Pfilt, Vinv )
-
 #ifdef HAVE_CUDA
       ALLOCATE( thisFilter % N_dev, &
                 thisfilter % filterMat_dev(0:N,0:N) )
@@ -225,10 +222,150 @@ CONTAINS
 
  END SUBROUTINE Trash_SpectralFilter
 !
-!
-!==================================================================================================!
-!------------------------------------- Type Specific ----------------------------------------------!
-!==================================================================================================!
-!
-! 
+  SUBROUTINE Filter3D( thisFilter, f, filteredF, nVariables, nElements )
+ 
+   IMPLICIT NONE
+   CLASS(SpectralFilter), INTENT(in) :: thisFilter 
+   
+#ifdef HAVE_CUDA
+   INTEGER, DEVICE, INTENT(in)       :: nVariables, nElements
+   REAL(prec), DEVICE, INTENT(in)    :: f(0:thisFilter % N, &
+                                          0:thisFilter % N, &
+                                          0:thisFilter % N, &
+                                          1:nVariables, 1:nElements)
+   REAL(prec), DEVICE, INTENT(out)   :: filteredF(0:thisFilter % N, &
+                                                  0:thisFilter % N, &
+                                                  0:thisFilter % N, &
+                                                  1:nVariables, 1:nElements)
+   ! Local
+   TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3( 4*(ceiling( REAL(thisFilter % N+1)/4 ) ), &
+                     4*(ceiling( REAL(thisFilter % N+1)/4 ) ) , &
+                     4*(ceiling( REAL(thisFilter % N+1)/4 ) ) )
+      grid = dim3( nVariables, nElements, 1 )
+  
+      CALL Filter3D_CUDAKernel<<<grid,tBlock>>>( f, filteredF, &
+                                                 thisFilter % filterMat_dev, &
+                                                 thisFilter % N_dev, nVariables, nElements )
+                                                 
+
+#else
+   INTEGER, INTENT(in)    :: nVariables, nElements
+   REAL(prec), INTENT(in) :: f(0:thisFilter % N, &
+                               0:thisFilter % N, &
+                               0:thisFilter % N, &
+                               1:nVariables, 1:nElements)
+   REAL(prec), INTENT(out) :: filteredF(0:thisFilter % N, &
+                                       0:thisFilter % N, &
+                                       0:thisFilter % N, &
+                                       1:nVariables, 1:nElements)
+
+
+     filteredF = Filter3D_SpectralFilter( thisFilter, f, nVariables, nElements )
+#endif
+
+ END SUBROUTINE Filter3D
+ 
+ FUNCTION Filter3D_SpectralFilter( thisFilter, f, nVariables, nElements ) RESULT( filteredF )
+   IMPLICIT NONE
+   CLASS( SpectralFilter ) :: thisFilter
+   INTEGER                 :: nVariables, nElements
+   REAL(prec)              :: f(0:thisFilter % N, &
+                                0:thisFilter % N, &
+                                0:thisFilter % N, &
+                                1:nVariables, 1:nElements)
+   REAL(prec)              :: filteredF(0:thisFilter % N, &
+                                        0:thisFilter % N, &
+                                        0:thisFilter % N, &
+                                        1:nVariables, 1:nElements)
+   ! Local
+   INTEGER :: i, j, k, iVar, iEl
+   INTEGER :: ii, jj, kk
+   REAL(prec) :: uij, ui
+                                        
+                                        
+                                        
+ 
+          DO iEl = 1, nElements
+            DO iVar = 1, nVariables
+               DO k = 0, thisFilter % N
+                  DO j = 0, thisFilter % N
+                     DO i = 0, thisFilter % N
+                     
+                        filteredF(i,j,k,iVar,iEl) = 0.0_prec
+                        DO kk = 0, thisFilter % N
+                        
+                           uij = 0.0_prec
+                           DO jj = 0, thisFilter % N
+                              
+                              ui = 0.0_prec
+                              DO ii = 0, thisFilter % N
+                                 ui = ui + thisFilter % filterMat(ii,i)*&
+                                           f(ii,jj,kk,iVar,iEl)
+                              ENDDO
+                              
+                              uij = uij + thisFilter % filterMat(jj,j)*ui
+                           ENDDO
+                           
+                           filteredF(i,j,k,iVar,iEl) = filteredF(i,j,k,iVar,iEl) + thisFilter % filterMat(kk,k)*uij
+                           
+                        ENDDO
+                        
+                        
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+         
+ END FUNCTION Filter3D_SpectralFilter
+ 
+#ifdef HAVE_CUDA
+ ATTRIBUTES( Global ) SUBROUTINE Filter3D_CUDAKernel( f, filteredF, filterMatrix, N, nVariables, nElements )
+   IMPLICIT NONE
+   INTEGER, DEVICE, INTENT(in) :: N, nVariables, nElements
+   REAL(prec), DEVICE, INTENT(in) :: f(0:N,0:N,0:N,1:nVariables,1:nElements)
+   REAL(prec), DEVICE, INTENT(in) :: filterMatrix(0:N,0:N)
+   REAL(prec), DEVICE, INTENT(out) :: filteredF(0:N,0:N,0:N,1:nVariables,1:nElements)
+   ! Local
+   INTEGER :: i,j,k,iVar,iEl
+   INTEGER :: ii,jj,kk
+   REAL(prec) :: uijk, uij, ui
+   
+   
+     iVar = blockIdx % x
+     iEl  = blockIdx % y
+     
+     i = threadIdx % x-1
+     j = threadIdx % y-1
+     k = threadIdx % z-1
+     
+     IF( i <= N .AND. j <= N .AND. k <= N )THEN
+     
+     uijk = 0.0_prec
+    DO kk = 0, N
+    
+       uij = 0.0_prec
+       DO jj = 0, N
+          
+          ui = 0.0_prec
+          DO ii = 0, N
+             ui = ui + filterMatrix(ii,i)*f(ii,jj,kk,iVar,iEl)
+          ENDDO
+          
+          uij = uij + filterMatrix(jj,j)*ui
+       ENDDO
+       
+       uijk = uijk + filterMatrix(kk,k)*uij
+       
+    ENDDO
+                        
+   filteredF(i,j,k,iVar,iEl) = uijk
+   
+   ENDIF
+   
+ END SUBROUTINE Filter3D_CUDAKernel
+#endif 
+ 
 END MODULE SpectralFilter_Class
