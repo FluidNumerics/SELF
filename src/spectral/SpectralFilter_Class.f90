@@ -62,10 +62,12 @@ IMPLICIT NONE
    TYPE SpectralFilter
       INTEGER                 :: N
       REAL(prec), ALLOCATABLE :: filterMat(:,:)
+      REAL(prec), ALLOCATABLE :: nodalToModal(:,:)
 
 #ifdef HAVE_CUDA
       INTEGER, ALLOCATABLE, DEVICE    :: N_dev
       REAL(prec), ALLOCATABLE, DEVICE :: filterMat_dev(:,:)
+      REAL(prec), ALLOCATABLE, DEVICE :: nodalToModal_dev(:,:)
 #endif
       
       CONTAINS
@@ -128,7 +130,8 @@ CONTAINS
    
       thisFilter % N       = N
 
-      ALLOCATE( thisFilter % filterMat(0:N,0:N) )
+      ALLOCATE( thisFilter % filterMat(0:N,0:N), &
+                thisFilter % nodalToModal(0:N,0:N) )
 
       thisFilter % filterMat = 0.0_prec
 
@@ -155,20 +158,21 @@ CONTAINS
             CALL LegendrePolynomial( row, s(col), Li, Ls)
 
             Lnorm = Lnorm + Li*Li*w(col)
-            V(row,col) = Li*w(col)
+            thisFilter % nodalToModal(row,col) = Li*w(col)
             VInv(col,row) = Li
               
          ENDDO
-            V(row,0:N) = V(row,0:N)/Lnorm
+            thisFilter % nodalToModal(row,0:N) = thisFilter % nodalToModal(row,0:N)/Lnorm
       ENDDO
 
-      Pfilt = MATMUL( Pfilt, V )
+      Pfilt = MATMUL( Pfilt, thisFilter % nodalToModal )
       thisFilter % filterMat = TRANSPOSE( MATMUL( VInv, Pfilt ) )
 
     
 #ifdef HAVE_CUDA
       ALLOCATE( thisFilter % N_dev, &
-                thisfilter % filterMat_dev(0:N,0:N) )
+                thisfilter % filterMat_dev(0:N,0:N), &
+                thisFilter % nodalToModal_dev(0:N,0:N) )
 
       thisFilter % filterMat_dev = thisFilter % filterMat
 #endif
@@ -201,14 +205,16 @@ CONTAINS
    IMPLICIT NONE
    CLASS(SpectralFilter), INTENT(inout) :: thisFilter
    
-      DEALLOCATE( thisFilter % filterMat )
+      DEALLOCATE( thisFilter % filterMat, &
+                  thisFilter % nodalToModal )
 
 #ifdef HAVE_CUDA
       DEALLOCATE( thisFilter % N_dev, &
-                  thisfilter % filterMat_dev )
+                  thisfilter % filterMat_dev, &
+                  thisFilter % nodalToModal_dev )
 #endif
 
- END SUBROUTINE Trash_SpectralFilter
+  END SUBROUTINE Trash_SpectralFilter
 !
   SUBROUTINE Filter3D( thisFilter, f, filteredF, nVariables, nElements )
  
@@ -253,7 +259,52 @@ CONTAINS
      filteredF = Filter3D_SpectralFilter( thisFilter, f, nVariables, nElements )
 #endif
 
- END SUBROUTINE Filter3D
+  END SUBROUTINE Filter3D
+
+  SUBROUTINE CalculateModalCoefficients3D( thisFilter, nodalF, modalF, nVariables, nElements )
+ 
+   IMPLICIT NONE
+   CLASS(SpectralFilter), INTENT(in) :: thisFilter 
+   
+#ifdef HAVE_CUDA
+   INTEGER, DEVICE, INTENT(in)       :: nVariables, nElements
+   REAL(prec), DEVICE, INTENT(in)    :: nodalF(0:thisFilter % N, &
+                                               0:thisFilter % N, &
+                                               0:thisFilter % N, &
+                                               1:nVariables, 1:nElements)
+   REAL(prec), DEVICE, INTENT(out)   :: modalF(0:thisFilter % N, &
+                                               0:thisFilter % N, &
+                                               0:thisFilter % N, &
+                                               1:nVariables, 1:nElements)
+   ! Local
+   TYPE(dim3) :: grid, tBlock
+  
+      tBlock = dim3( 4*(ceiling( REAL(thisFilter % N+1)/4 ) ), &
+                     4*(ceiling( REAL(thisFilter % N+1)/4 ) ) , &
+                     4*(ceiling( REAL(thisFilter % N+1)/4 ) ) )
+      grid = dim3( nVariables, nElements, 1 )
+  
+      CALL Filter3D_CUDAKernel<<<grid,tBlock>>>( nodalF, modalF, &
+                                                 thisFilter % nodalToModal_dev, &
+                                                 thisFilter % N_dev, nVariables, nElements )
+                                                 
+
+#else
+   INTEGER, INTENT(in)    :: nVariables, nElements
+   REAL(prec), INTENT(in) :: nodalF(0:thisFilter % N, &
+                               0:thisFilter % N, &
+                               0:thisFilter % N, &
+                               1:nVariables, 1:nElements)
+   REAL(prec), INTENT(out) :: modalF(0:thisFilter % N, &
+                                       0:thisFilter % N, &
+                                       0:thisFilter % N, &
+                                       1:nVariables, 1:nElements)
+
+
+     modalF = CalculateModalCoefficients3D_SpectralFilter( thisFilter, nodalF, nVariables, nElements )
+#endif
+
+ END SUBROUTINE CalculateModalCoefficients3D
  
  FUNCTION Filter3D_SpectralFilter( thisFilter, f, nVariables, nElements ) RESULT( filteredF )
    IMPLICIT NONE
@@ -309,6 +360,60 @@ CONTAINS
          
  END FUNCTION Filter3D_SpectralFilter
  
+ FUNCTION CalculateModalCoefficients3D_SpectralFilter( thisFilter, nodalF, nVariables, nElements ) RESULT( modalF )
+   IMPLICIT NONE
+   CLASS( SpectralFilter ) :: thisFilter
+   INTEGER                 :: nVariables, nElements
+   REAL(prec)              :: nodalf(0:thisFilter % N, &
+                                0:thisFilter % N, &
+                                0:thisFilter % N, &
+                                1:nVariables, 1:nElements)
+   REAL(prec)              :: modalF(0:thisFilter % N, &
+                                        0:thisFilter % N, &
+                                        0:thisFilter % N, &
+                                        1:nVariables, 1:nElements)
+   ! Local
+   INTEGER :: i, j, k, iVar, iEl
+   INTEGER :: ii, jj, kk
+   REAL(prec) :: uij, ui
+                                        
+                                        
+                                        
+ 
+          DO iEl = 1, nElements
+            DO iVar = 1, nVariables
+               DO k = 0, thisFilter % N
+                  DO j = 0, thisFilter % N
+                     DO i = 0, thisFilter % N
+                     
+                        modalF(i,j,k,iVar,iEl) = 0.0_prec
+                        DO kk = 0, thisFilter % N
+                        
+                           uij = 0.0_prec
+                           DO jj = 0, thisFilter % N
+                              
+                              ui = 0.0_prec
+                              DO ii = 0, thisFilter % N
+                                 ui = ui + thisFilter % nodalToModal(ii,i)*&
+                                           nodalF(ii,jj,kk,iVar,iEl)
+                              ENDDO
+                              
+                              uij = uij + thisFilter % nodalToModal(jj,j)*ui
+                           ENDDO
+                           
+                           nodalF(i,j,k,iVar,iEl) = modalF(i,j,k,iVar,iEl) + thisFilter % nodalToModal(kk,k)*uij
+                           
+                        ENDDO
+                        
+                        
+                     ENDDO
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDDO
+         
+ END FUNCTION CalculateModalCoefficients3D_SpectralFilter
+
 #ifdef HAVE_CUDA
  ATTRIBUTES( Global ) SUBROUTINE Filter3D_CUDAKernel( f, filteredF, filterMatrix, N, nVariables, nElements )
    IMPLICIT NONE
