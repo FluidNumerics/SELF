@@ -19,57 +19,45 @@ USE cudafor
 
 IMPLICIT NONE
 
-!> \addtogroup SpectralFilter_Class 
-!! @{
+! SpectralFilter_Class 
+! A data-structure for handling Legendre Modal Filtering in 1, 2, and 3
+! dimensions using either a modal cutoff filter or a roll-off filter.
+!
+!  This module provides a data structure for constructing and storing element-local filter matrices
+!  that can be used for polynomial de-aliasing or as part of SGS parameterizations.
+!
+!   This module was inspired by the paper
+! 
+!    D. Flad, A. Beck, and C. Munz, (2016) "Simulation of underresolved turbulent flows by adaptive 
+!       filtering using the high order discontinuous Galerkin spectral element method", JCP, 313, 
+!       pp. 1-12
+!
+!   It is assumed that data is described by the same polynomial degree in each computational direction
+!   and that the filtering is performed using the same cutoff degree in each computational direction.
+!
+!  SpectralFilter </H2>
+!  Attributes </H3>
+!    
+!       <tr> <th> N <td> INTEGER  <td> Polynomial degree associated with the filter
+!       <tr> <th> nCutoff <td> INTEGER <td> Cutoff polynomial degree indicating which Legendre 
+!                                           modal coefficients are made null
+!       <tr> <th> nPacked <td> REAL(prec) <td> Upper bound of 2-D array obtained from packing down
+!                                              3-D array; used for filtering 3-D data
+!       <tr> <th> filterMat(:,:) <td> REAL(prec) <td> The filtering matrix
+!    </table>
+!
+!  Procedures </H3>
+!    See \ref SpectralFilter_Class for more information. The first column lists the "call-name" and 
+!    the second column lists the name of routine that is aliased onto the call-name.
+!    
+!       <tr> <th> Build <td> Build_SpectralFilter
+!       <tr> <th> Trash <td> Trash_SpectralFilter
+!       <tr> <th> Apply1DFilter <td> Apply1DFilter_SpectralFilter
+!       <tr> <th> Apply2DFilter <td> Apply2DFilter_SpectralFilter
+!       <tr> <th> Apply3DFilter <td> Apply3DFilter_SpectralFilter
+!    </table>
+!
 
-!> \struct SpectralFilter
-!! A data-structure for handling Legendre Modal Filtering in 1, 2, and 3 dimensions using a "Roll-Off"
-!! Filter
-!!
-!!  This module provides a data structure for constructing and storing element-local filter matrices
-!!  that can be used for polynomial de-aliasing or as part of SGS parameterizations. 1, 2, or 3-D
-!!  arrays,representative of the nodal values of an interpolant, can be passed in to the supplied 
-!!  procedures "Apply1DFilter", "Apply2DFilter", or "Apply3DFilter"  to return a filtered form of 
-!!  the interpolant.  
-!!
-!!   This module was inspired by the paper
-!! 
-!!    D. Flad, A. Beck, and C. Munz, (2016) "Simulation of underresolved turbulent flows by adaptive 
-!!       filtering using the high order discontinuous Galerkin spectral element method", JCP, 313, 
-!!       pp. 1-12
-!!
-!!
-!!   The data-structure provided here can be used with a high-end routine in order to incorporate
-!!   "switch-based" filtering of prognostic solution variables. For under-resolved simulations, such 
-!!   filtering can provide fine-tuned control of dissipation necessary for stability.
-!!
-!!   It is assumed that data is described by the same polynomial degree in each computational direction
-!!   and that the filtering is performed using the same cutoff degree in each computational direction.
-!!
-!! <H2> SpectralFilter </H2>
-!! <H3> Attributes </H3>
-!!    <table>
-!!       <tr> <th> N <td> INTEGER  <td> Polynomial degree associated with the filter
-!!       <tr> <th> nCutoff <td> INTEGER <td> Cutoff polynomial degree indicating which Legendre 
-!!                                           modal coefficients are made null
-!!       <tr> <th> nPacked <td> REAL(prec) <td> Upper bound of 2-D array obtained from packing down
-!!                                              3-D array; used for filtering 3-D data
-!!       <tr> <th> filterMat(:,:) <td> REAL(prec) <td> The filtering matrix
-!!    </table>
-!!
-!! <H3> Procedures </H3>
-!!    See \ref SpectralFilter_Class for more information. The first column lists the "call-name" and 
-!!    the second column lists the name of routine that is aliased onto the call-name.
-!!    <table>
-!!       <tr> <th> Build <td> Build_SpectralFilter
-!!       <tr> <th> Trash <td> Trash_SpectralFilter
-!!       <tr> <th> Apply1DFilter <td> Apply1DFilter_SpectralFilter
-!!       <tr> <th> Apply2DFilter <td> Apply2DFilter_SpectralFilter
-!!       <tr> <th> Apply3DFilter <td> Apply3DFilter_SpectralFilter
-!!    </table>
-!!
-
-!>@}
 
    TYPE SpectralFilter
       INTEGER                 :: N
@@ -106,15 +94,15 @@ CONTAINS
 !> \fn Build_SpectralFilter 
 !! Allocates space for the modal cutoff filter and initializes the attributes of the data structure 
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(SpectralFilter) :: this <BR>
-!! <B>INTEGER</B>                 :: N, nCutoff <BR>
-!! <B>REAL</B>(prec)              :: s(0:N), w(0:N) <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(SpectralFilter) :: this <BR>
+!! INTEGER</B>                 :: N, nCutoff <BR>
+!! REAL</B>(prec)              :: s(0:N), w(0:N) <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Build( s, w, N, nCutoff ) <BR>
+!!     CALL</B> this % Build( s, w, N, nCutoff ) <BR>
 !! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
+!!   Parameters : </H2>
+!!   
 !!   <tr> <td> out <th> thisFilter <td> SpectralFilter <td> 
 !!   <tr> <td> in <th> s(0:N) <td> REAL(prec) <td> The interpolation nodes of your data
 !!   <tr> <td> in <th> w(0:N) <td> REAL(prec) <td> The quadrature weights for discrete integration
@@ -196,13 +184,13 @@ CONTAINS
 !> \fn Trash_SpectralFilter 
 !! Frees memory associated with the modal cutoff filter 
 !! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(SpectralFilter) :: this <BR>
+!!  Usage : </H2> 
+!! TYPE</B>(SpectralFilter) :: this <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Trash(  ) <BR>
+!!     CALL</B> this % Trash(  ) <BR>
 !! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
+!!   Parameters : </H2>
+!!   
 !!   <tr> <td> out <th> thisFilter <td> SpectralFilter <td> 
 !!  </table>  
 !!   
