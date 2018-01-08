@@ -18,7 +18,42 @@
 ! modal cutoff filter with the cutoff set to 6. The result should be zero to
 ! machine precision.
 !
+! ========================================================================================================= !
+
+USE Quadrature
+USE NodalDG_Class
+USE NodalDGSolution_3D_Class
+USE SpectralFilter_Class
+
 
 PROGRAM SpectralFilter_Tests
+
+  INTEGER, PARAMETER :: polyDegree = 7
+  INTEGER, PARAMETER :: nCutoff = 6
+ 
+  TYPE( SpectralFilter )     :: modalFilter
+  TYPE( NodalDG )            :: dgStorage
+  TYPE( NodalDGSolution_3D ) :: testFunction
+  TYPE( NodalDGSolution_3D ) :: filteredFunction
+
+
+    CALL dgStorage % Build( targetPoints  = UniformPoints( -1.0_prec, 1.0_prec, 10 ), &
+                            N             = polyDegree, &
+                            nTargetPoints = 10, &
+                            quadrature    = GAUSS  )
+
+    CALL testFunction % Build( N          = polyDegree, &
+                               nEquations = 1, &
+                               nElements  = 1 )
+
+    CALL filteredFunction % Build( N          = polyDegree, &
+                                   nEquations = 1, &
+                                   nElements  = 1 )
+
+    CALL modalFilter % Build( dgStorage % interp % interpolationPoints, &
+                              dgStorage % interp % interpolationWeights, &
+                              polyDegree, nCutoff, ModalCutoff )
+
+ 
 
 END PROGRAM SpectralFilter_Tests
