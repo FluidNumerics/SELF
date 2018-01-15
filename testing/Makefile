@@ -4,6 +4,7 @@ SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 INITDIR=$(shell pwd)
 
 .PHONY: spectral_tests \
+        spectralfilter_tests \
         clean
 
 spectral_tests :

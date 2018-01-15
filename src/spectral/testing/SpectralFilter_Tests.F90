@@ -30,14 +30,14 @@ IMPLICIT NONE
 
 
   INTEGER, PARAMETER :: polyDegree = 7
-  INTEGER, PARAMETER :: nCutoff = 6
  
   TYPE( SpectralFilter )     :: modalFilter
   TYPE( NodalDG )            :: dgStorage
-  TYPE( NodalDGSolution_3D ) :: Legendre7
+  TYPE( NodalDGSolution_3D ) :: Legendre
   TYPE( NodalDGSolution_3D ) :: filteredFunction
-  REAL(prec)                 :: L(0:polyDegree), Ls
-  INTEGER                    :: i, j, k
+  REAL(prec)                 :: L(0:polyDegree), Ls, transferFunction(1:polyDegree,1:polyDegree)
+!  REAL(prec)                 :: modalCoeffs(0:polyDegree,0:polyDegree,0:polyDegree)
+  INTEGER                    :: i, j, k, filterID, polyID
 
 
     CALL dgStorage % Build( targetPoints  = UniformPoints( -1.0_prec, 1.0_prec, 10 ), &
@@ -45,46 +45,59 @@ IMPLICIT NONE
                             nTargetPoints = 10, &
                             quadrature    = GAUSS  )
 
-    CALL Legendre7 % Build( N          = polyDegree, &
-                            nEquations = 1, &
-                            nElements  = 1 )
-
-
-    DO i = 0, polyDegree
-      CALL LegendrePolynomial( polyDegree, dgStorage % interp % interpolationPoints(i), &
-                               L(i), Ls)
-    ENDDO
-
-    DO k = 0, polyDegree
-      DO j = 0, polyDegree
-        DO i = 0, polyDegree
-
-          Legendre7 % solution(i,j,k,1,1) = L(i)*L(j)*L(k)
-
-        ENDDO
-      ENDDO
-    ENDDO
-
     CALL filteredFunction % Build( N          = polyDegree, &
                                    nEquations = 1, &
                                    nElements  = 1 )
 
-    CALL modalFilter % Build( dgStorage % interp % interpolationPoints, &
-                              dgStorage % quadratureWeights, &
-                              polyDegree, nCutoff, ModalCutoff )
+    DO filterID = 1, polyDegree
 
- 
-    CALL modalFilter % Filter3D( f = Legendre7 % solution,&
-                                 filteredF = filteredFunction % solution, &
-                                 nVariables = 1, &
-                                 nElements = 1 )
+      CALL modalFilter % Build( dgStorage % interp % interpolationPoints, &
+                                dgStorage % quadratureWeights, &
+                                polyDegree, filterID, ModalCutoff )
+  
+      DO polyID = 1, polyDegree
+  
+        CALL Legendre % Build( N          = polyDegree, &
+                               nEquations = 1, &
+                               nElements  = 1 )
+    
+        DO i = 0, polyDegree
+          CALL LegendrePolynomial( polyID, dgStorage % interp % interpolationPoints(i), &
+                                   L(i), Ls)
+        ENDDO
+       
+        DO k = 0, polyDegree
+          DO j = 0, polyDegree
+            DO i = 0, polyDegree
+    
+              Legendre % solution(i,j,k,1,1) = L(i)*L(j)*L(k)
+    
+            ENDDO
+          ENDDO
+        ENDDO
+    
+        CALL modalFilter % Filter3D( f = Legendre % solution,&
+                                     filteredF = filteredFunction % solution, &
+                                     nVariables = 1, &
+                                     nElements = 1 )
+     
+        transferFunction(polyID,filterID) = MAXVAL( ABS(filteredFunction % solution) )/MAXVAL( ABS(Legendre % solution) )
+        CALL Legendre % Trash( )
 
-    PRINT*, MAXVAL( filteredFunction % solution )
+      ENDDO
+  
+      CALL modalFilter % Trash( )
+
+    ENDDO
+
+    DO filterID = 1, polyDegree 
+
+      WRITE(*,'(7(E13.6))') transferFunction(1:polyDegree,filterID)
+
+    ENDDO
 
 
-    CALL modalFilter % Trash( )
     CALL filteredFunction % Trash( )
-    CALL Legendre7 % Trash( )
     CALL dgStorage % Trash( )
 
 END PROGRAM SpectralFilter_Tests
