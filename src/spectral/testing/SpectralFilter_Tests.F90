@@ -19,22 +19,25 @@
 ! machine precision.
 !
 ! ========================================================================================================= !
+PROGRAM SpectralFilter_Tests
 
 USE Quadrature
 USE NodalDG_Class
 USE NodalDGSolution_3D_Class
 USE SpectralFilter_Class
 
+IMPLICIT NONE
 
-PROGRAM SpectralFilter_Tests
 
   INTEGER, PARAMETER :: polyDegree = 7
   INTEGER, PARAMETER :: nCutoff = 6
  
   TYPE( SpectralFilter )     :: modalFilter
   TYPE( NodalDG )            :: dgStorage
-  TYPE( NodalDGSolution_3D ) :: testFunction
+  TYPE( NodalDGSolution_3D ) :: Legendre7
   TYPE( NodalDGSolution_3D ) :: filteredFunction
+  REAL(prec)                 :: L(0:polyDegree), Ls
+  INTEGER                    :: i, j, k
 
 
     CALL dgStorage % Build( targetPoints  = UniformPoints( -1.0_prec, 1.0_prec, 10 ), &
@@ -42,18 +45,46 @@ PROGRAM SpectralFilter_Tests
                             nTargetPoints = 10, &
                             quadrature    = GAUSS  )
 
-    CALL testFunction % Build( N          = polyDegree, &
-                               nEquations = 1, &
-                               nElements  = 1 )
+    CALL Legendre7 % Build( N          = polyDegree, &
+                            nEquations = 1, &
+                            nElements  = 1 )
+
+
+    DO i = 0, polyDegree
+      CALL LegendrePolynomial( polyDegree, dgStorage % interp % interpolationPoints(i), &
+                               L(i), Ls)
+    ENDDO
+
+    DO k = 0, polyDegree
+      DO j = 0, polyDegree
+        DO i = 0, polyDegree
+
+          Legendre7 % solution(i,j,k,1,1) = L(i)*L(j)*L(k)
+
+        ENDDO
+      ENDDO
+    ENDDO
 
     CALL filteredFunction % Build( N          = polyDegree, &
                                    nEquations = 1, &
                                    nElements  = 1 )
 
     CALL modalFilter % Build( dgStorage % interp % interpolationPoints, &
-                              dgStorage % interp % interpolationWeights, &
+                              dgStorage % quadratureWeights, &
                               polyDegree, nCutoff, ModalCutoff )
 
  
+    CALL modalFilter % Filter3D( f = Legendre7 % solution,&
+                                 filteredF = filteredFunction % solution, &
+                                 nVariables = 1, &
+                                 nElements = 1 )
+
+    PRINT*, MAXVAL( filteredFunction % solution )
+
+
+    CALL modalFilter % Trash( )
+    CALL filteredFunction % Trash( )
+    CALL Legendre7 % Trash( )
+    CALL dgStorage % Trash( )
 
 END PROGRAM SpectralFilter_Tests

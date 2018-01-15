@@ -169,6 +169,13 @@ Spectral_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Cl
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/Spectral_Tests.F90 -o $@
 
 
+spectralfilter_tests : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o SpectralFilter_Tests.o
+	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o SpectralFilter_Tests.o -o $@
+
+
+SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o \
+                   ${SRCDIR}spectral/testing/SpectralFilter_Tests.F90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/SpectralFilter_Tests.F90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #
