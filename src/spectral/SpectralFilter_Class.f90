@@ -161,7 +161,9 @@ CONTAINS
                 thisfilter % filterMat_dev(0:N,0:N), &
                 thisFilter % nodalToModal_dev(0:N,0:N) )
 
-      thisFilter % filterMat_dev = thisFilter % filterMat
+      thisFilter % filterMat_dev    = thisFilter % filterMat
+      thisFilter % N_dev            = N
+      thisFilter % nodalToModal_dev = thisFilter % nodalToModal
 #endif
 
 
@@ -261,6 +263,7 @@ CONTAINS
                      4*(ceiling( REAL(thisFilter % N+1)/4 ) ) , &
                      4*(ceiling( REAL(thisFilter % N+1)/4 ) ) )
       grid = dim3( nVariables, nElements, 1 )
+PRINT*, tBlock
   
       CALL Filter3D_CUDAKernel<<<grid,tBlock>>>( f, filteredF, &
                                                  thisFilter % filterMat_dev, &
@@ -512,9 +515,9 @@ CONTAINS
       
       IF( i <= N .AND. j <= N .AND. k <= N )THEN
 
-        fLocal(i,j,k) = f(i,j,k,iVar,iEl)
+!        fLocal(i,j,k) = f(i,j,k,iVar,iEl)
 
-        CALL syncthreads( )
+!        CALL syncthreads( )
       
         uijk = 0.0_prec
 
@@ -528,7 +531,7 @@ CONTAINS
 
             DO ii = 0, N
 
-              ui = ui + filterMatrix(ii,i)*fLocal(ii,jj,kk)
+              ui = ui + filterMatrix(ii,i)*f(ii,jj,kk,iVar,iEl)
 
             ENDDO
               

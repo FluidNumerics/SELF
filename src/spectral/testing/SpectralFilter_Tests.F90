@@ -38,7 +38,17 @@ IMPLICIT NONE
   REAL(prec)                 :: L(0:polyDegree), Ls, transferFunction(1:polyDegree,1:polyDegree)
 !  REAL(prec)                 :: modalCoeffs(0:polyDegree,0:polyDegree,0:polyDegree)
   INTEGER                    :: i, j, k, filterID, polyID
+#ifdef HAVE_CUDA
+  INTEGER, ALLOCATABLE, DEVICE :: nVars, nElems
+  INTEGER :: iStat
+#endif
 
+
+#ifdef HAVE_CUDA
+    ALLOCATE( nVars, nElems )
+    nVars  = 1
+    nElems = 1
+#endif
 
     CALL dgStorage % Build( targetPoints  = UniformPoints( -1.0_prec, 1.0_prec, 10 ), &
                             N             = polyDegree, &
@@ -76,11 +86,23 @@ IMPLICIT NONE
           ENDDO
         ENDDO
     
+#ifdef HAVE_CUDA
+
+        CALL Legendre % UpdateDevice( )
+
+        CALL modalFilter % Filter3D( f          = Legendre % solution_dev,&
+                                     filteredF  = filteredFunction % solution_dev, &
+                                     nVariables = nVars, &
+                                     nElements  = nElems )
+
+        CALL filteredFunction % UpdateHost( ) 
+
+#else     
         CALL modalFilter % Filter3D( f = Legendre % solution,&
                                      filteredF = filteredFunction % solution, &
                                      nVariables = 1, &
                                      nElements = 1 )
-     
+#endif     
         transferFunction(polyID,filterID) = MAXVAL( ABS(filteredFunction % solution) )/MAXVAL( ABS(Legendre % solution) )
         CALL Legendre % Trash( )
 
