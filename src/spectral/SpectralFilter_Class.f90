@@ -263,7 +263,6 @@ CONTAINS
                      4*(ceiling( REAL(thisFilter % N+1)/4 ) ) , &
                      4*(ceiling( REAL(thisFilter % N+1)/4 ) ) )
       grid = dim3( nVariables, nElements, 1 )
-PRINT*, tBlock
   
       CALL Filter3D_CUDAKernel<<<grid,tBlock>>>( f, filteredF, &
                                                  thisFilter % filterMat_dev, &
