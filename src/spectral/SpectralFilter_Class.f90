@@ -514,9 +514,9 @@ CONTAINS
       
       IF( i <= N .AND. j <= N .AND. k <= N )THEN
 
-!        fLocal(i,j,k) = f(i,j,k,iVar,iEl)
+        fLocal(i,j,k) = f(i,j,k,iVar,iEl)
 
-!        CALL syncthreads( )
+        CALL syncthreads( )
       
         uijk = 0.0_prec
 
@@ -530,7 +530,7 @@ CONTAINS
 
             DO ii = 0, N
 
-              ui = ui + filterMatrix(ii,i)*f(ii,jj,kk,iVar,iEl)
+              ui = ui + filterMatrix(ii,i)*fLocal(ii,jj,kk)
 
             ENDDO
               
