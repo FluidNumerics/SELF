@@ -180,57 +180,16 @@ SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o Noda
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #
 # ---------------------------------------------------------------------- #
-
-
-GOBJ3 = ModelPrecision.o \
-        ConstantsDictionary.o \
-        CommonRoutines.o \
-        LinkedList_Class.o \
-        HashTable_Class.o \
-        KeyRing_Class.o \
-        Timing.o \
-        Quadrature.o \
-        Lagrange_Class.o \
-        NodalStorage_Class.o \
-        DGSEMSolutionStorage_2D_Class.o \
-        Node_Class.o \
-        Face_Class.o \
-        Curve_Class.o \
-        Surface_Class.o \
-        MappedGeometry_3D_Class.o \
-        HexElement_Class.o \
-        HexMesh_Class.o \
-        TopographicShapes.o \
-        FluidParams_Class.o \
-        BoundaryCommunicator_Class.o
-
-DecomposeHexMesh : ${GOBJ3} DecomposeHexMesh.o
-	${FC} ${OPT} ${GOBJ3} DecomposeHexMesh.o ${METISLIB} -o $@
-
-meshgen : ${GOBJ3} DecomposeStructuredHexMesh.o
-	${FC} ${OPT} ${GOBJ3} DecomposeStructuredHexMesh.o -o $@
-
-GenerateHexMesh : ${GOBJ3} GenerateMeshFiles_3D.o 
-	${FC} ${OPT} ${GOBJ3} GenerateMeshFiles_3D.o  -o $@
-
-
-## Programs
-
-GenerateMeshFiles_3D.o : ModelPrecision.o NodalStorage_Class.o HexMesh_Class.o \
-                         BoundaryCommunicator_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/GenerateMeshFiles_3D.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/GenerateMeshFiles_3D.f90 -o $@
-
-
-DecomposeHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
-                      NodalStorage_Class.o HexMesh_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/DecomposeHexMesh.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/DecomposeHexMesh.f90 -o $@
-
-DecomposeStructuredHexMesh.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o \
-                      NodalStorage_Class.o HexMesh_Class.o TopographicShapes.o FluidParams_Class.o ${SRCDIR}geom/DecomposeStructuredHexMesh.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/DecomposeStructuredHexMesh.f90 -o $@
-	
 ## Modules 
 #
+	
+Surface_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Surface_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}geom/Surface_Class.f90 -o $@
+
+HexElements_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
+                      Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/HexElements_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexElements_Class.f90 -o $@
+
 BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/BoundaryCommunicator_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
@@ -245,17 +204,11 @@ Face_Class.o : ModelPrecision.o  ConstantsDictionary.o ${SRCDIR}geom/Face_Class.
 
 Curve_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Curve_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/Curve_Class.f90 -o $@
-	
-Surface_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Surface_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/Surface_Class.f90 -o $@
 
 HexElement_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}geom/HexElement_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/HexElement_Class.f90 -o $@
 
 
-MappedGeometry_3D_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                            Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/MappedGeometry_3D_Class.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MappedGeometry_3D_Class.f90 -o $@
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surface_Class.o MappedGeometry_3D_Class.o HexElement_Class.o \
@@ -264,71 +217,6 @@ HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o Key
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
-
-# /////////// CUDA Extensions /////////// #
-
-BoundaryCommunicator_Cuda_Class.o : BoundaryCommunicator_Class.o ${SRCDIR}geom/cuda/BoundaryCommunicator_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/BoundaryCommunicator_Cuda_Class.cuf -o $@
-	
-Node_Cuda_Class.o : ModelPrecision.o Node_Class.o ${SRCDIR}geom/cuda/Node_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/Node_Cuda_Class.cuf -o $@
-	
-Edge_Cuda_Class.o : ModelPrecision.o Edge_Class.o ${SRCDIR}geom/cuda/Edge_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/Edge_Cuda_Class.cuf -o $@
-	
-Face_Cuda_Class.o : ModelPrecision.o Face_Class.o ${SRCDIR}geom/cuda/Face_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/Face_Cuda_Class.cuf -o $@
-	
-Element_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}geom/cuda/Element_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/Element_Cuda_Class.cuf -o $@
-
-MappedGeometry_2D_Cuda_Class.o : ModelPrecision.o MappedGeometry_2D_Class.o ${SRCDIR}geom/cuda/MappedGeometry_2D_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/MappedGeometry_2D_Cuda_Class.cuf -o $@
-	
-MappedGeometry_3D_Cuda_Class.o : ModelPrecision.o MappedGeometry_3D_Class.o ${SRCDIR}geom/cuda/MappedGeometry_3D_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/MappedGeometry_3D_Cuda_Class.cuf -o $@
-
-QuadMesh_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o QuadMesh_Class.o \
-                        Lagrange_Class.o Element_Cuda_Class.o Node_Cuda_Class.o Edge_Cuda_Class.o \
-                        Curve_Class.o MappedGeometry_2D_Cuda_Class.o ${SRCDIR}geom/cuda/QuadMesh_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/QuadMesh_Cuda_Class.cuf -o $@
-
-HexMesh_Cuda_Class.o : ModelPrecision.o ConstantsDictionary.o HexMesh_Class.o \
-                        Lagrange_Class.o Lagrange_Cuda_Class.o Element_Cuda_Class.o Node_Cuda_Class.o Face_Cuda_Class.o \
-                        Surface_Class.o MappedGeometry_3D_Cuda_Class.o ${SRCDIR}geom/cuda/HexMesh_Cuda_Class.cuf
-	${FC} ${OPT} -c ${SRCDIR}geom/cuda/HexMesh_Cuda_Class.cuf -o $@
-
-# Cuda Test Programs
-
-# --------- QuadMesh ----------- #
-TestQuadMesh_Cuda : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o HashTable_Class.o \
-                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
-                   Node_Class.o Edge_Class.o QuadElement_Class.o Curve_Class.o MappedGeometry_2D_Class.o  QuadMesh_Class.o\
-                   Node_Cuda_Class.o Edge_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_2D_Cuda_Class.o \
-                   QuadMesh_Cuda_Class.o FluidParams_Class.o TestQuadMesh_Cuda.o
-	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o HashTable_Class.o \
-                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
-                   Node_Class.o Edge_Class.o QuadElement_Class.o Curve_Class.o MappedGeometry_2D_Class.o  QuadMesh_Class.o\
-                   Node_Cuda_Class.o Edge_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_2D_Cuda_Class.o \
-                   QuadMesh_Cuda_Class.o FluidParams_Class.o TestQuadMesh_Cuda.o -o $@
-
-TestQuadMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Class.o QuadMesh_Cuda_Class.o ${SRCDIR}geom/tests/QuadMesh_Cuda/IOandDataTransfers/TestQuadMesh_Cuda.f90
-	${FC} ${OPT} -c ${SELFDIR}/tests/QuadMesh_Cuda/IOandDataTransfers/TestQuadMesh_Cuda.f90 -o $@
-
-# --------- HexMesh ----------- #
-TestHexMesh_Cuda : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o KeyRing_Class.o \
-                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
-                   Node_Class.o Face_Class.o HexElement_Class.o Surface_Class.o MappedGeometry_3D_Class.o  HexMesh_Class.o\
-                   Node_Cuda_Class.o Face_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_3D_Cuda_Class.o \
-                   HexMesh_Cuda_Class.o FluidParams_Class.o TestHexMesh_Cuda.o
-	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o LinkedList_Class.o KeyRing_Class.o \
-                   Quadrature.o Lagrange_Class.o NodalStorage_Class.o \
-                   Node_Class.o Face_Class.o HexElement_Class.o Surface_Class.o MappedGeometry_3D_Class.o  HexMesh_Class.o\
-                   Node_Cuda_Class.o Face_Cuda_Class.o Element_Cuda_Class.o MappedGeometry_3D_Cuda_Class.o \
-                   HexMesh_Cuda_Class.o FluidParams_Class.o TestHexMesh_Cuda.o -o $@
-
-TestHexMesh_Cuda.o : ConstantsDictionary.o NodalStorage_Class.o FluidParams_Class.o HexMesh_Cuda_Class.o ${SRCDIR}geom/tests/HexMesh_Cuda/IOandDataTransfers/TestHexMesh_Cuda.f90
-	${FC} ${OPT} -c ${SELFDIR}/tests/HexMesh_Cuda/IOandDataTransfers/TestHexMesh_Cuda.f90 -o $@
 
 
 # ---------------------------------------------------------------------- #
