@@ -22,10 +22,10 @@ IMPLICIT NONE
 !  A surface is a geometric primitive that can be described two free parameters.
 !
 !  As an example, a surface in three-dimensions is represented as
-!  \f[
+!
 !       \vec{x}(\xi^1,\xi^2) = x(\xi^1,\xi^2) \hat{x} + y(\xi^1,\xi^2) \hat{y} + z(\xi^1,\xi^2) \hat{z}
-!  \f]
-!  where \f$ (\xi^1,\xi^2) \f$ are parameters defined on [-1,1]x[-1,1]. 
+!
+!  where (\xi^1,\xi^2)  are parameters defined on [-1,1]x[-1,1]. 
 !  In the SELF, surfaces in 3-D are primarily used in the generation of mappings between physical 
 !  and computational space for hexahedral elements.
 !
@@ -157,10 +157,22 @@ END SUBROUTINE Trash_Surfaces
 
 #ifdef HAVE_CUDA
 SUBROUTINE UpdateDevice_Surfaces( mySurfaces )
+  IMPLICIT NONE
+  CLASS( Surfaces ), INTENT(inout) :: mySurfaces
+
+    mySurfaces % x_dev    = mySurfaces % x
+    mySurfaces % dxds_dev = mySurfaces % dxds
+
 END SUBROUTINE UpdateDevice_Surfaces
 
 
 SUBROUTINE UpdateHost_Surfaces( mySurfaces )
+  IMPLICIT NONE
+  CLASS( Surfaces ), INTENT(inout) :: mySurfaces
+
+    mySurfaces % x    = mySurfaces % x_dev
+    mySurfaces % dxds = mySurfaces % dxds_dev
+
 END SUBROUTINE UpdateHost_Surfaces
 #endif
 
