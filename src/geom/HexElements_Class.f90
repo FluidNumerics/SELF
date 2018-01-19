@@ -1,133 +1,94 @@
-! MappedGeometry_3D_Class.f90
+! HexElement_Class.f90
 ! 
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-!> \file MappedGeometry_3D_Class.f90
-!! Contains the \ref MappedGeometry_3D_Class module, and <BR>
-!! defines the \ref MappedGeometry_3D data-structure.
 
-!> \defgroup MappedGeometry_3D_Class MappedGeometry_3D_Class 
-!! This module defines the MappedGeometry_3D data-structure and its associated routines.
-
-MODULE MappedGeometry_3D_Class
-
-! src/common/
+MODULE HexElement_Class
+ 
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
-! src/interp/
 USE Lagrange_Class
-#ifdef HAVE_CUDA
-USE Lagrange_Cuda_Class
-#endif
-! src/geom/
 USE Surface_Class
+
 
 IMPLICIT NONE
 
-!> \addtogroup MappedGeometry_3D_Class 
-!! @{
 
-!> \struct MappedGeometry_3D
-!!  The MappedGeometry_3D class provides attributes and type-bound procedures for handling 
-!!  curvilinear mappings between physical space and a reference computational space.
-!!
-!!  The MappedGeometry_3D class enables the implementation of spectral element methods in complicated
-!!  geometry. Given the four bounding surfaces of an element, the internal geometry (physical node 
-!!  positions, covariant basis vectors, and Jacobian) is constructed using transfinite interpolation
-!!  with linear blending.
-!!
-!! <H2> MappedGeometry_3D </H2>
-!! <H3> Attributes </H3>
-!!    <table>
-!!       <tr> <th> N <td> INTEGER  <td> Polynomial degree of the spectral element method
-!!       <tr> <th> nHat(1:3,0:N,0:N,1:6) <td> REAL(prec) <td> Outward pointing element boundary normal vectors
-!!                                                     along each element edge.
-!!       <tr> <th> xBound(0:N,0:N,1:6) <td> REAL(prec) <td> x-position of each of the boundary surfaces
-!!       <tr> <th> yBound(0:N,0:N,1:6) <td> REAL(prec) <td> y-position of each of the boundary surfaces
-!!       <tr> <th> zBound(0:N,0:N,1:6) <td> REAL(prec) <td> z-position of each of the boundary surfaces
-!!       <tr> <th> x(0:N,0:N,0:N) <td> REAL(prec) <td> x-position of the interior nodes
-!!       <tr> <th> y(0:N,0:N,0:N) <td> REAL(prec) <td> y-position of the interior nodes
-!!       <tr> <th> z(0:N,0:N,0:N) <td> REAL(prec) <td> z-position of the interior nodes
-!!       <tr> <th> J(0:N,0:N,0:N) <td> REAL(prec) <td> Jacobian of the mapping at the interior nodes
-!!       <tr> <th> dxds(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial x}{\partial \xi^1} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dxdp(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial x}{\partial \xi^2} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dxdq(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial x}{\partial \xi^3} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dyds(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial y}{\partial \xi^1} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dydp(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial y}{\partial \xi^2} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dydq(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial y}{\partial \xi^3} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dzds(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial z}{\partial \xi^1} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dzdp(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial z}{\partial \xi^2} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> dzdq(0:N,0:N,0:N) <td> REAL(prec) <td> \f$ \frac{\partial z}{\partial \xi^3} \f$ at
-!!                                                    each of the interior nodes
-!!       <tr> <th> Ja(0:N,0:N,0:N,1:3,1:3) <td> REAL(prec) <td> The contravariant metric tensor at
-!!                                                         all of the interior nodes.
-!!    </table>
-!!
-!! <H3> Procedures </H3>
-!!    See \ref MappedGeometry_3D_Class for more information. The first column lists the "call-name" and 
-!!    the second column lists the name of routine that is aliased onto the call-name.
-!!    <table>
-!!       <tr> <th> Initialize <td> Initialize_MappedGeometry_3D
-!!       <tr> <th> Build <td> Build_MappedGeometry_3D
-!!       <tr> <th> Trash <td> Trash_MappedGeometry_3D
-!!       <tr> <th> GenerateMesh <td> GenerateMesh_MappedGeometry_3D
-!!       <tr> <th> GenerateMetrics <td> GenerateMetrics_MappedGeometry_3D
-!!       <tr> <th> GenerateBoundaryMetrics <td> GenerateBoundaryMetrics_MappedGeometry_3D
-!!       <tr> <th> ScaleGeometry <td> ScaleGeometry_MappedGeometry_3D
-!!       <tr> <th> CalculateLocation <td> CalculateLocation_MappedGeometry_3D
-!!       <tr> <th> CalculateMetrics <td> CalculateMetrics_MappedGeometry_3D
-!!       <tr> <th> CalculateComputationalCoordinates <td> CalculateComputationalCoordinates_MappedGeometry_3D
-!!       <tr> <th> WriteTecplot <td> WriteTecplot_MappedGeometry_3D
-!!    </table>
-!!
+!  The HexElement data structure defines attributes needed to describe a quadrilateral element.
+!
+!  HexElements, elements, edges, and faces form the foundation of describing an unstructured mesh. 
+!  The relationship betweens nodes and elements and nodes and edges (or faces in 3-D) define the 
+!  connectivity in an unstructured mesh. In this data structure a HexElement is defined through an
+!  integer ID, its four corner nodes, and its neighbors. 
+!
+!   --- COMBINE DOCUMENTATION --- 
+!
+!  The HexElements class provides attributes and type-bound procedures for handling 
+!  curvilinear mappings between physical space and a reference computational space.
+!
+!  The HexElements class enables the implementation of spectral element methods in complicated
+!  geometry. Given the four bounding surfaces of an element, the internal geometry (physical node 
+!  positions, covariant basis vectors, and Jacobian) is constructed using transfinite interpolation
+!  with linear blending.
+!  
+!
 
-!>@}
-   TYPE MappedGeometry_3D
-      INTEGER                    :: N
-      REAL(prec), ALLOCATABLE    :: nHat(:,:,:,:) 
-      REAL(prec), ALLOCATABLE    :: xBound(:,:,:)
-      REAL(prec), ALLOCATABLE    :: yBound(:,:,:) 
-      REAL(prec), ALLOCATABLE    :: zBound(:,:,:) 
-      REAL(prec), ALLOCATABLE    :: x(:,:,:), y(:,:,:), z(:,:,:)
-      REAL(prec), ALLOCATABLE    :: J(:,:,:)    
-      REAL(prec), ALLOCATABLE    :: dxds(:,:,:), dxdp(:,:,:), dxdq(:,:,:)
-      REAL(prec), ALLOCATABLE    :: dyds(:,:,:), dydp(:,:,:), dydq(:,:,:)
-      REAL(prec), ALLOCATABLE    :: dzds(:,:,:), dzdp(:,:,:), dzdq(:,:,:)
-      REAL(prec), ALLOCATABLE    :: Ja(:,:,:,:,:)
+  TYPE HexElements
+    INTEGER                 :: N, nElements
+    INTEGER, ALLOCATABLE    :: elementID(:)
+    INTEGER, ALLOCATABLE    :: nodeIDs(:,:)
+    INTEGER, ALLOCATABLE    :: neighbors(:,:)
+    REAL(prec), ALLOCATABLE :: nHat(:,:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: xBound(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: yBound(:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: zBound(:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: x(:,:,:,:), y(:,:,:,:), z(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: J(:,:,:,:)    
+    REAL(prec), ALLOCATABLE :: dxds(:,:,:,:), dxdp(:,:,:,:), dxdq(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: dyds(:,:,:,:), dydp(:,:,:,:), dydq(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: dzds(:,:,:,:), dzdp(:,:,:,:), dzdq(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: Ja(:,:,:,:,:)
+  
+#ifdef HAVE_CUDA
+    INTEGER, ALLOCATABLE    :: N_dev, nElements_dev
+    INTEGER, ALLOCATABLE    :: elementID_dev(:)
+    INTEGER, ALLOCATABLE    :: nodeIDs_dev(:,:)
+    INTEGER, ALLOCATABLE    :: neighbors_dev(:,:)
+    REAL(prec), ALLOCATABLE :: nHat_dev(:,:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: xBound_dev(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: yBound_dev(:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: zBound_dev(:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: x_dev(:,:,:,:), y_dev(:,:,:,:), z_dev(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: J_dev(:,:,:,:)    
+    REAL(prec), ALLOCATABLE :: dxds_dev(:,:,:,:), dxdp_dev(:,:,:,:), dxdq_dev(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: dyds_dev(:,:,:,:), dydp_dev(:,:,:,:), dydq_dev(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: dzds_dev(:,:,:,:), dzdp_dev(:,:,:,:), dzdq_dev(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: Ja_dev(:,:,:,:,:)
+#endif
 
-      CONTAINS
+    CONTAINS
+      PROCEDURE :: Build      => Build_HexElements
+      PROCEDURE :: Trash      => Trash_HexElements
 
-      PROCEDURE :: Initialize => Initialize_MappedGeometry_3D
-      PROCEDURE :: Build      => Build_MappedGeometry_3D
-      PROCEDURE :: Trash      => Trash_MappedGeometry_3D
-
-      PROCEDURE :: GenerateMesh => GenerateMesh_MappedGeometry_3D
-      PROCEDURE :: GenerateMetrics => GenerateMetrics_MappedGeometry_3D
-      PROCEDURE :: GenerateBoundaryMetrics => GenerateBoundaryMetrics_MappedGeometry_3D
-      PROCEDURE :: ScaleGeometry => ScaleGeometry_MappedGeometry_3D
-      PROCEDURE :: CalculateLocation => CalculateLocation_MappedGeometry_3D
-      PROCEDURE :: CalculateMetrics => CalculateMetrics_MappedGeometry_3D
-      PROCEDURE :: CalculateComputationalCoordinates => CalculateComputationalCoordinates_MappedGeometry_3D
+      PROCEDURE :: GenerateMesh => GenerateMesh_HexElements
+      PROCEDURE :: GenerateMetrics => GenerateMetrics_HexElements
+      PROCEDURE :: GenerateBoundaryMetrics => GenerateBoundaryMetrics_HexElements
+      PROCEDURE :: ScaleGeometry => ScaleGeometry_HexElements
+      PROCEDURE :: CalculateLocation => CalculateLocation_HexElements
+      PROCEDURE :: CalculateMetrics => CalculateMetrics_HexElements
+      PROCEDURE :: CalculateComputationalCoordinates => CalculateComputationalCoordinates_HexElements
       
-      PROCEDURE :: ResetInternalMesh => ResetInternalMesh_MappedGeometry_3D
+      PROCEDURE :: ResetInternalMesh => ResetInternalMesh_HexElements
       
-      PROCEDURE :: WriteTecplot => WriteTecplot_MappedGeometry_3D
-   END TYPE MappedGeometry_3D
+      PROCEDURE :: WriteTecplot => WriteTecplot_HexElements
+  
+  END TYPE HexElements
 
 
- INTEGER, PRIVATE :: nDims = 3
  PRIVATE :: TransfiniteInterpolation, LinearBlend
  
  CONTAINS
@@ -138,191 +99,166 @@ IMPLICIT NONE
 !==================================================================================================!
 !
 !
-!> \addtogroup MappedGeometry_3D_Class
+!> \addtogroup HexElements_Class
 !! @{ 
 ! ================================================================================================ !
 ! S/R Initialize
 ! 
-!> \fn Initialize_MappedGeometry_3D  
-!! Allocates memory for each of the attributes of the MappedGeometry_3D Class and initializes all
+!> \fn Initialize_HexElements  
+!! Allocates memory for each of the attributes of the HexElements Class and initializes all
 !! arrays to zero.
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>INTEGER</B>                 :: N <BR>
 !!         .... <BR>
 !!     <B>CALL</B> this % Initialize( N ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> out <th> myGeom <td> MappedGeometry_3D <td> On output, an initialized MappedGeometry_3D
+!!   <tr> <td> out <th> myHex <td> HexElements <td> On output, an initialized HexElements
 !!                                                         data structure
 !!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree of the spectral element 
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Initialize_MappedGeometry_3D( myGeom, N )
+ SUBROUTINE Build_HexElements( myHex, N, nElements )
 
   IMPLICIT NONE
-  CLASS(MappedGeometry_3D), INTENT(out) :: myGeom
-  INTEGER, INTENT(in)                   :: N
+  CLASS(HexElements), INTENT(out) :: myHex
+  INTEGER, INTENT(in)             :: N, nElements
 
-      myGeom % N = N
+      myHex % N = N
+      myHex % nElements = nElements
        
       ! Allocate space
-      ALLOCATE( myGeom % dxds(0:N,0:N,0:N), myGeom % dxdp(0:N,0:N,0:N), myGeom % dxdq(0:N,0:N,0:N) )
-      ALLOCATE( myGeom % dyds(0:N,0:N,0:N), myGeom % dydp(0:N,0:N,0:N), myGeom % dydq(0:N,0:N,0:N) )
-      ALLOCATE( myGeom % dzds(0:N,0:N,0:N), myGeom % dzdp(0:N,0:N,0:N), myGeom % dzdq(0:N,0:N,0:N) )
-      ALLOCATE( myGeom % Ja(0:N,0:N,0:N,1:3,1:3) )
-      ALLOCATE( myGeom % J(0:N,0:N,0:N) )
-      ALLOCATE( myGeom % x(0:N,0:N,0:N), myGeom % y(0:N,0:N,0:N), myGeom % z(0:N,0:N,0:N) )
-      ALLOCATE( myGeom % xBound(0:N,0:N,1:nHexFaces) )
-      ALLOCATE( myGeom % yBound(0:N,0:N,1:nHexFaces) )
-      ALLOCATE( myGeom % zBound(0:N,0:N,1:nHexFaces) )
-      ALLOCATE( myGeom % nHat(1:3,0:N,0:N,1:nHexFaces) )
+      ALLOCATE( myHex % elementID(1:nElements), myHex % nodeIDs(1:8,1:nElements), myHex % neighbors(1:6,1:nElements) )
+      ALLOCATE( myHex % dxds(0:N,0:N,0:N,1:nElements), myHex % dxdp(0:N,0:N,0:N,1:nElements), myHex % dxdq(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % dyds(0:N,0:N,0:N,1:nElements), myHex % dydp(0:N,0:N,0:N,1:nElements), myHex % dydq(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % dzds(0:N,0:N,0:N,1:nElements), myHex % dzdp(0:N,0:N,0:N,1:nElements), myHex % dzdq(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % Ja(0:N,0:N,0:N,1:3,1:3,1:nElements) )
+      ALLOCATE( myHex % J(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % x(0:N,0:N,0:N,1:nElements), myHex % y(0:N,0:N,0:N,1:nElements), myHex % z(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % xBound(0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myHex % yBound(0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myHex % zBound(0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myHex % nHat(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
       
-      myGeom % dxds   = ZERO
-      myGeom % dxdp   = ZERO
-      myGeom % dxdq   = ZERO
-      myGeom % dyds   = ZERO
-      myGeom % dydp   = ZERO
-      myGeom % dydq   = ZERO
-      myGeom % dzds   = ZERO
-      myGeom % dzdp   = ZERO
-      myGeom % dzdq   = ZERO
-      myGeom % J      = ZERO
-      myGeom % x      = ZERO
-      myGeom % y      = ZERO
-      myGeom % z      = ZERO
-      myGeom % xBound = ZERO
-      myGeom % yBound = ZERO
-      myGeom % zBound = ZERO
+      myHex % dxds   = 0.0_prec
+      myHex % dxdp   = 0.0_prec
+      myHex % dxdq   = 0.0_prec
+      myHex % dyds   = 0.0_prec
+      myHex % dydp   = 0.0_prec
+      myHex % dydq   = 0.0_prec
+      myHex % dzds   = 0.0_prec
+      myHex % dzdp   = 0.0_prec
+      myHex % dzdq   = 0.0_prec
+      myHex % J      = 0.0_prec
+      myHex % x      = 0.0_prec
+      myHex % y      = 0.0_prec
+      myHex % z      = 0.0_prec
+      myHex % xBound = 0.0_prec
+      myHex % yBound = 0.0_prec
+      myHex % zBound = 0.0_prec
 
- END SUBROUTINE Initialize_MappedGeometry_3D
-!
-!> \addtogroup MappedGeometry_3D_Class
-!! @{ 
-! ================================================================================================ !
-! S/R Build
-! 
-!> \fn Build_MappedGeometry_3D  
-!! Allocates memory for each of the attributes of the MappedGeometry_3D Class and generates the
-!! physical mesh and metric terms.
-!! 
-!!  This subroutine depends on <BR>
-!!   Module \ref MappedGeometry_3D_Class : S/R \ref Initialize_MappedGeometry_3D <BR>
-!!   Module \ref MappedGeometry_3D_Class : S/R \ref GenerateMesh_MappedGeometry_3D <BR>
-!!   Module \ref MappedGeometry_3D_Class : S/R \ref GenerateMetrics_MappedGeometry_3D <BR>
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
-!! <B>TYPE</B>(Lagrange)          :: interp <BR>
-!! <B>TYPE</B>(Surface)           :: boundaries(1:6) <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Build( interp, boundaries ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> out <th> myGeom <td> MappedGeometry_3D <td> On output, an initialized MappedGeometry_3D
-!!                                                         data structure with the mesh and metric
-!!                                                         terms filled in
-!!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant that defines the 
-!!                                                  reference computational mesh. 
-!!   <tr> <td> in <th> mySurfaces(1:6)* <td> Surface <td> 3-D Surface that defines the each of the 
-!!                                                      boundaries of the quadrilateral element. 
-!!  </table>  
-!!   
-!!  * The boundary surfaces must be specified using the following mapping :
-!!    boundaries(1)  -> South Boundary
-!!    boundaries(2)  -> East Boundary
-!!    boundaries(3)  -> North Boundary
-!!    boundaries(4)  -> West Boundary
-!!    boundaries(5)  -> Bottom Boundary
-!!    boundaries(6)  -> Top Boundary
-!!   For convenience, the integers corresponding to the boundary side have been given in the 
-!!   file \ref ConstantsDictionary.f90 .
-! ================================================================================================ ! 
-!>@}
- SUBROUTINE Build_MappedGeometry_3D( myGeom, interp, mySurfaces )
-
-   IMPLICIT NONE
-   CLASS(MappedGeometry_3D), INTENT(out) :: myGeom
 #ifdef HAVE_CUDA
-   TYPE(Lagrange_Cuda), INTENT(in)       :: interp
-#else
-   TYPE(Lagrange), INTENT(in)            :: interp
-#endif
-   TYPE(Surface), INTENT(in)             :: mySurfaces(1:6)
-   !LOCAL
-   INTEGER :: N
 
-      N = interp % N
-      CALL myGeom % Initialize( N )
-      ! Generate the mesh locations, and the mapping metrics
-      CALL myGeom % GenerateMesh( interp, mySurfaces )
-      CALL myGeom % GenerateMetrics( interp )
- 
- END SUBROUTINE Build_MappedGeometry_3D
+      ALLOCATE( myHex % N_dev, myHex % nElements_dev )
+      ALLOCATE( myHex % elementID_dev(1:nElements), myHex % nodeIDs_dev(1:8,1:nElements), myHex % neighbors_dev(1:6,1:nElements) )
+      ALLOCATE( myHex % dxds_dev(0:N,0:N,0:N,1:nElements), myHex % dxdp_dev(0:N,0:N,0:N,1:nElements), myHex % dxdq_dev(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % dyds_dev(0:N,0:N,0:N,1:nElements), myHex % dydp_dev(0:N,0:N,0:N,1:nElements), myHex % dydq_dev(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % dzds_dev(0:N,0:N,0:N,1:nElements), myHex % dzdp_dev(0:N,0:N,0:N,1:nElements), myHex % dzdq_dev(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % Ja_dev(0:N,0:N,0:N,1:3,1:3,1:nElements) )
+      ALLOCATE( myHex % J_dev(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % x_dev(0:N,0:N,0:N,1:nElements), myHex % y_dev(0:N,0:N,0:N,1:nElements), myHex % z_dev(0:N,0:N,0:N,1:nElements) )
+      ALLOCATE( myHex % xBound_dev(0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myHex % yBound_dev(0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myHex % zBound_dev(0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myHex % nHat_dev(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+
+      myHex % N_dev =  N
+      myHex % nElements_dev = nElements
+
+#endif
+
+ END SUBROUTINE Build_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class 
+!> \addtogroup HexElements_Class 
 !! @{ 
 ! ================================================================================================ !
 ! S/R Trash 
 ! 
-!> \fn Trash_MappedGeometry_3D_Class  
-!! Frees memory held by the attributes of the MappedGeometry_3D data-structure.
+!> \fn Trash_HexElements_Class  
+!! Frees memory held by the attributes of the HexElements data-structure.
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !!         .... <BR>
 !!     <B>CALL</B> this % Trash( ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myGeom <td> MappedGeometry_3D <td>
-!!                         On <B>input</B>, a previously constructed MappedGeometry_3D data structure <BR>
+!!   <tr> <td> in/out <th> myHex <td> HexElements <td>
+!!                         On <B>input</B>, a previously constructed HexElements data structure <BR>
 !!                         On <B>output</B>, memory held by attributes is freed
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Trash_MappedGeometry_3D( myGeom )
+ SUBROUTINE Trash_HexElements( myHex )
 
    IMPLICIT NONE
-   CLASS(MappedGeometry_3D), INTENT(inout)  :: myGeom
+   CLASS(HexElements), INTENT(inout)  :: myHex
 
-      DEALLOCATE( myGeom % dxds, myGeom % dxdp, myGeom % dxdq )
-      DEALLOCATE( myGeom % dyds, myGeom % dydp, myGeom % dydq )
-      DEALLOCATE( myGeom % dzds, myGeom % dzdp, myGeom % dzdq )
-      DEALLOCATE( myGeom % J, myGeom % x, myGeom % y, myGeom % z )
-      DEALLOCATE( myGeom % xBound, myGeom % yBound, myGeom % zBound )
-      DEALLOCATE( myGeom % nHat )
+      DEALLOCATE( myHex % elementID, myHex % nodeIDs, myHex % neighbors )
+      DEALLOCATE( myHex % dxds, myHex % dxdp, myHex % dxdq )
+      DEALLOCATE( myHex % dyds, myHex % dydp, myHex % dydq )
+      DEALLOCATE( myHex % dzds, myHex % dzdp, myHex % dzdq )
+      DEALLOCATE( myHex % J, myHex % Ja, myHex % x, myHex % y, myHex % z )
+      DEALLOCATE( myHex % xBound, myHex % yBound, myHex % zBound )
+      DEALLOCATE( myHex % nHat )
+
+#ifdef HAVE_CUDA
+      
+      DEALLOCATE( myHex % elementID_dev, myHex % nodeIDs_dev, myHex % neighbors_dev )
+      DEALLOCATE( myHex % dxds_dev, myHex % dxdp_dev, myHex % dxdq_dev )
+      DEALLOCATE( myHex % dyds_dev, myHex % dydp_dev, myHex % dydq_dev )
+      DEALLOCATE( myHex % dzds_dev, myHex % dzdp_dev, myHex % dzdq_dev )
+      DEALLOCATE( myHex % J_dev, myHex % Ja_dev, myHex % x_dev, myHex % y_dev, myHex % z_dev )
+      DEALLOCATE( myHex % xBound_dev, myHex % yBound_dev, myHex % zBound_dev )
+      DEALLOCATE( myHex % nHat_dev )
+
+#endif
  
- END SUBROUTINE Trash_MappedGeometry_3D
+ END SUBROUTINE Trash_HexElements
+
+
+SUBROUTINE UpdateDevice_HexElements
+
+END SUBROUTINE UpdateDevice_HexElements
+
+SUBROUTINE UpdateHost_HexElements
+
+END SUBROUTINE UpdateHost_HexElements
+
 !
-!
-!==================================================================================================!
-!--------------------------------- Type Specific Routines -----------------------------------------!
-!==================================================================================================!
-!
-!
-!> \addtogroup MappedGeometry_3D_Class 
+!> \addtogroup HexElements_Class 
 !! @{ 
 ! ================================================================================================ !
 ! S/R GenerateMesh 
 ! 
-!> \fn GenerateMesh_MappedGeometry_3D  
+!> \fn GenerateMesh_HexElements  
 !! Generates the physical interior and boundary positions at each of the computational mesh points.
 !! 
 !! Given the four boundary surfaces and an interpolant that stores the computational mesh points,
 !! the physical mesh positions are generated using transfinite interpolation with linear blending.
 !! 
 !!  This subroutine depends on <BR>
-!!   Module \ref MappedGeometry_3D_Class : PRIVATE Function TransfiniteInterpolation <BR>
+!!   Module \ref HexElements_Class : PRIVATE Function TransfiniteInterpolation <BR>
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !! <B>TYPE</B>(Surface)           :: boundaries(1:6) <BR>
 !!         .... <BR>
@@ -330,8 +266,8 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myGeom <td> MappedGeometry_3D <td> 
-!!                         On <B>input</B>, an initialized MappedGeometry_3D data structure, <BR>
+!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!                         On <B>input</B>, an initialized HexElements data structure, <BR>
 !!                         On <B>output</B>, the mesh physical positions (interior and boundary)
 !!                         are filled in.
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant that defines the 
@@ -342,90 +278,74 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE GenerateMesh_MappedGeometry_3D( myGeom, interp, theSurfaces )
+ SUBROUTINE GenerateMesh_HexElements( myHex, interp, theSurfaces )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(inout) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)         :: interp
-#else
+   CLASS( HexElements ), INTENT(inout) :: myHex
    TYPE( Lagrange ), INTENT(in)              :: interp
-#endif
    TYPE( Surface ), INTENT(in)               :: theSurfaces(1:6)
    ! Local
-   INTEGER    :: iS, iP, iQ, N
+   INTEGER    :: i, j, k, N
    REAL(prec) :: s(0:interp % N), p, x(1:3)
    
       N = interp % N
       s = interp % s
       
-      DO iQ = 0, N
-         DO iP = 0,N
-            DO iS = 0,N
-               x = TransfiniteInterpolation( theSurfaces, s(iS), s(iP), s(iQ) )
-               myGeom % x(iS,iP,iQ) = x(1)
-               myGeom % y(iS,iP,iQ) = x(2)
-               myGeom % z(iS,iP,iQ) = x(3)
+      DO k = 0, N
+         DO j = 0,N
+            DO i = 0,N
+               x = TransfiniteInterpolation( theSurfaces, s(i), s(j), s(k) )
+               myHex % x(i,j,k) = x(1)
+               myHex % y(i,j,k) = x(2)
+               myHex % z(i,j,k) = x(3)
             ENDDO
          ENDDO 
       ENDDO 
-!      print*, s
-!      print*,'---------- south surface ----------------'
-!      print*, theSurfaces(south) % x(1,0,1)
-!      print*, theSurfaces(south) % x(1,0,2)
-!      print*, theSurfaces(south) % x(1,0,3)
-!      print*,'-----------------------------------------'
+
       ! Do the boundary locations
-      DO iP = 0, N
-         DO iS = 0, N
+      DO j = 0, N
+         DO i = 0, N
             p = -ONE  ! south boundary
-            x = TransfiniteInterpolation( theSurfaces, s(iS), p, s(iP) )
-            myGeom % xBound(iS,iP,south) = x(1)
-            myGeom % yBound(iS,iP,south) = x(2)
-            myGeom % zBound(iS,iP,south) = x(3)
+            x = TransfiniteInterpolation( theSurfaces, s(i), p, s(j) )
+            myHex % xBound(i,j,south) = x(1)
+            myHex % yBound(i,j,south) = x(2)
+            myHex % zBound(i,j,south) = x(3)
             ! west boundary
-            x = TransfiniteInterpolation( theSurfaces, p, s(iS), s(iP) )
-            myGeom % xBound(iS,iP,west) = x(1)
-            myGeom % yBound(iS,iP,west) = x(2)
-            myGeom % zBound(iS,iP,west) = x(3)
+            x = TransfiniteInterpolation( theSurfaces, p, s(i), s(j) )
+            myHex % xBound(i,j,west) = x(1)
+            myHex % yBound(i,j,west) = x(2)
+            myHex % zBound(i,j,west) = x(3)
             ! bottom boundary
-            x = TransfiniteInterpolation( theSurfaces, s(iS), s(iP), p )
-            myGeom % xBound(iS,iP,bottom) = x(1)
-            myGeom % yBound(iS,iP,bottom) = x(2)
-            myGeom % zBound(iS,iP,bottom) = x(3)
+            x = TransfiniteInterpolation( theSurfaces, s(i), s(j), p )
+            myHex % xBound(i,j,bottom) = x(1)
+            myHex % yBound(i,j,bottom) = x(2)
+            myHex % zBound(i,j,bottom) = x(3)
             
             p = ONE  ! north boundary
-            x = TransfiniteInterpolation( theSurfaces, s(iS), p, s(iP) )
-            myGeom % xBound(iS,iP,north) = x(1)
-            myGeom % yBound(iS,iP,north) = x(2)
-            myGeom % zBound(iS,iP,north) = x(3)
+            x = TransfiniteInterpolation( theSurfaces, s(i), p, s(j) )
+            myHex % xBound(i,j,north) = x(1)
+            myHex % yBound(i,j,north) = x(2)
+            myHex % zBound(i,j,north) = x(3)
             ! east boundary
-            x = TransfiniteInterpolation( theSurfaces, p, s(iS), s(iP) )
-            myGeom % xBound(iS,iP,east) = x(1)
-            myGeom % yBound(iS,iP,east) = x(2)
-            myGeom % zBound(iS,iP,east) = x(3)
+            x = TransfiniteInterpolation( theSurfaces, p, s(i), s(j) )
+            myHex % xBound(i,j,east) = x(1)
+            myHex % yBound(i,j,east) = x(2)
+            myHex % zBound(i,j,east) = x(3)
             ! top boundary
-            x = TransfiniteInterpolation( theSurfaces, s(iS), s(iP), p )
-            myGeom % xBound(iS,iP,top) = x(1)
-            myGeom % yBound(iS,iP,top) = x(2)
-            myGeom % zBound(iS,iP,top) = x(3)
+            x = TransfiniteInterpolation( theSurfaces, s(i), s(j), p )
+            myHex % xBound(i,j,top) = x(1)
+            myHex % yBound(i,j,top) = x(2)
+            myHex % zBound(i,j,top) = x(3)
          ENDDO
       ENDDO
-! PRINT*, myGeom % xBound(:,:,south)
-! PRINT*, myGeom % yBound(:,:,south)
-! PRINT*, myGeom % zBound(:,:,south)
-! STOP
- END SUBROUTINE GenerateMesh_MappedGeometry_3D
+
+ END SUBROUTINE GenerateMesh_HexElements
 !
- SUBROUTINE ResetInternalMesh_MappedGeometry_3D( myGeom, interp )
+ SUBROUTINE ResetInternalMesh_HexElements( myHex, interp )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(inout) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)         :: interp
-#else
+   CLASS( HexElements ), INTENT(inout) :: myHex
    TYPE( Lagrange ), INTENT(in)              :: interp
-#endif
    ! Local
    INTEGER    :: i, j, k
    REAL(prec) :: s(0:interp % N), p, x(1:3)
@@ -435,29 +355,29 @@ IMPLICIT NONE
          DO j = 0, interp % N
             DO i = 0, interp % N
                x = TransfiniteInterpolation_Alt( interp, &
-                                                 myGeom % xBound, &
-                                                 myGeom % yBound, &
-                                                 myGeom % zBound, &
+                                                 myHex % xBound, &
+                                                 myHex % yBound, &
+                                                 myHex % zBound, &
                                                  interp % s(i), &
                                                  interp % s(j), &
                                                  interp % s(k) )
-               myGeom % x(i,j,k) = x(1)
-               myGeom % y(i,j,k) = x(2)
-               myGeom % z(i,j,k) = x(3)
+               myHex % x(i,j,k) = x(1)
+               myHex % y(i,j,k) = x(2)
+               myHex % z(i,j,k) = x(3)
             ENDDO
          ENDDO 
       ENDDO 
 
 
 
- END SUBROUTINE ResetInternalMesh_MappedGeometry_3D
+ END SUBROUTINE ResetInternalMesh_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class 
+!> \addtogroup HexElements_Class 
 !! @{ 
 ! ================================================================================================ !
 ! S/R GenerateMetrics 
 ! 
-!> \fn GenerateMetrics_MappedGeometry_3D  
+!> \fn GenerateMetrics_HexElements  
 !! Generates and stores the covariant and contravariant basis vector components, Jacobian of the 
 !! mapping, and the outward pointing boundary normal vectors.
 !! 
@@ -478,21 +398,21 @@ IMPLICIT NONE
 !!
 !!  This subroutine depends on <BR>
 !!   Module \ref Lagrange_Class : Function \ref ApplyDerivativeMatrix_3D_Lagrange <BR>
-!!   Module \ref MappedGeometry_3D_Class : S/R \ref GenerateBoundaryMetrics_MappedGeometry_3D <BR>
+!!   Module \ref HexElements_Class : S/R \ref GenerateBoundaryMetrics_HexElements <BR>
 !! 
-!!  ** To produce meaningful output, GenerateMesh_MappedGeometry_3D must be called prior to calling
+!!  ** To produce meaningful output, GenerateMesh_HexElements must be called prior to calling
 !!     this routine.
 !!
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !!         .... <BR>
 !!     <B>CALL</B> this % GenerateMetrics( interp ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myGeom <td> MappedGeometry_3D <td> 
-!!                         On <B>input</B>, an initialized MappedGeometry_3D data structure, <BR>
+!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!                         On <B>input</B>, an initialized HexElements data structure, <BR>
 !!                         On <B>output</B>, the metric terms are filled in, including the
 !!                         outward pointing normal vectors on the element boundaries
 !!   <tr> <td> in <th> interp <td> Lagrange <td>  Lagrange interpolant that defines the 
@@ -501,17 +421,13 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE GenerateMetrics_MappedGeometry_3D( myGeom, interp )
+ SUBROUTINE GenerateMetrics_HexElements( myHex, interp )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(inout) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)              :: interp
-#else
+   CLASS( HexElements ), INTENT(inout) :: myHex
    TYPE( Lagrange ), INTENT(in)              :: interp
-#endif
    ! Local
-   INTEGER    :: iS, iP, iQ, N
+   INTEGER    :: i, j, k, N
    REAL(prec) :: cv(1:3,1:3)
    REAL(prec) :: covT(0:interp % N, 0:interp % N, 0:interp % N, 1:3,1:3)
    REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3)
@@ -521,26 +437,26 @@ IMPLICIT NONE
    
       N = interp % N
       
-      covT(0:N,0:N,0:N,1,1:3) = interp % ApplyDerivativeMatrix_3D( myGeom % x )
-      covT(0:N,0:N,0:N,2,1:3) = interp % ApplyDerivativeMatrix_3D( myGeom % y )
-      covT(0:N,0:N,0:N,3,1:3) = interp % ApplyDerivativeMatrix_3D( myGeom % z )
+      covT(0:N,0:N,0:N,1,1:3) = interp % ApplyDerivativeMatrix_3D( myHex % x )
+      covT(0:N,0:N,0:N,2,1:3) = interp % ApplyDerivativeMatrix_3D( myHex % y )
+      covT(0:N,0:N,0:N,3,1:3) = interp % ApplyDerivativeMatrix_3D( myHex % z )
       
-      DO iQ = 0, N
-         DO iP = 0, N
-            DO iS = 0, N
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
 
-               myGeom % dxds(iS,iP,iQ) = covT(iS,iP,iQ,1,1)
-               myGeom % dxdp(iS,iP,iQ) = covT(iS,iP,iQ,1,2)
-               myGeom % dxdq(iS,iP,iQ) = covT(iS,iP,iQ,1,3)
-               myGeom % dyds(iS,iP,iQ) = covT(iS,iP,iQ,2,1)
-               myGeom % dydp(iS,iP,iQ) = covT(iS,iP,iQ,2,2)
-               myGeom % dydq(iS,iP,iQ) = covT(iS,iP,iQ,2,3)
-               myGeom % dzds(iS,iP,iQ) = covT(iS,iP,iQ,3,1)
-               myGeom % dzdp(iS,iP,iQ) = covT(iS,iP,iQ,3,2)
-               myGeom % dzdq(iS,iP,iQ) = covT(iS,iP,iQ,3,3)
+               myHex % dxds(i,j,k) = covT(i,j,k,1,1)
+               myHex % dxdp(i,j,k) = covT(i,j,k,1,2)
+               myHex % dxdq(i,j,k) = covT(i,j,k,1,3)
+               myHex % dyds(i,j,k) = covT(i,j,k,2,1)
+               myHex % dydp(i,j,k) = covT(i,j,k,2,2)
+               myHex % dydq(i,j,k) = covT(i,j,k,2,3)
+               myHex % dzds(i,j,k) = covT(i,j,k,3,1)
+               myHex % dzdp(i,j,k) = covT(i,j,k,3,2)
+               myHex % dzdq(i,j,k) = covT(i,j,k,3,3)
                
-               cv = covT(iS,iP,iQ,1:3,1:3)
-               myGeom % J(iS,iP,iQ) = Determinant( cv, 3 )
+               cv = covT(i,j,k,1:3,1:3)
+               myHex % J(i,j,k) = Determinant( cv, 3 )
                
             ENDDO
          ENDDO
@@ -548,10 +464,10 @@ IMPLICIT NONE
       
       ! Generate the contravariant metric tensor a la Kopriva (2006)
       !Ja_1
-      DO iQ = 0, N
-         DO iP = 0, N
-            DO iS = 0, N
-               v(iS,iP,iQ,1:3)  = -myGeom % z(iS,iP,iQ)*covT(iS,iP,iQ,2,1:3) 
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
+               v(i,j,k,1:3)  = -myHex % z(i,j,k)*covT(i,j,k,2,1:3) 
             ENDDO
          ENDDO
       ENDDO
@@ -561,14 +477,14 @@ IMPLICIT NONE
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myGeom % Ja(0:N,0:N,0:N,1,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myGeom % Ja(0:N,0:N,0:N,1,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myGeom % Ja(0:N,0:N,0:N,1,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      myHex % Ja(0:N,0:N,0:N,1,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
+      myHex % Ja(0:N,0:N,0:N,1,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
+      myHex % Ja(0:N,0:N,0:N,1,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
       !Ja_2
-      DO iQ = 0, N
-         DO iP = 0, N
-            DO iS = 0, N
-               v(iS,iP,iQ,1:3)  = -myGeom % x(iS,iP,iQ)*covT(iS,iP,iQ,3,1:3) 
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
+               v(i,j,k,1:3)  = -myHex % x(i,j,k)*covT(i,j,k,3,1:3) 
             ENDDO
          ENDDO
       ENDDO
@@ -578,14 +494,14 @@ IMPLICIT NONE
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myGeom % Ja(0:N,0:N,0:N,2,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myGeom % Ja(0:N,0:N,0:N,2,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myGeom % Ja(0:N,0:N,0:N,2,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      myHex % Ja(0:N,0:N,0:N,2,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
+      myHex % Ja(0:N,0:N,0:N,2,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
+      myHex % Ja(0:N,0:N,0:N,2,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
       !Ja_3
-      DO iQ = 0, N
-         DO iP = 0, N
-            DO iS = 0, N
-               v(iS,iP,iQ,1:3)  = -myGeom % y(iS,iP,iQ)*covT(iS,iP,iQ,1,1:3) 
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
+               v(i,j,k,1:3)  = -myHex % y(i,j,k)*covT(i,j,k,1,1:3) 
             ENDDO
          ENDDO
       ENDDO
@@ -595,20 +511,20 @@ IMPLICIT NONE
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myGeom % Ja(0:N,0:N,0:N,3,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myGeom % Ja(0:N,0:N,0:N,3,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myGeom % Ja(0:N,0:N,0:N,3,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      myHex % Ja(0:N,0:N,0:N,3,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
+      myHex % Ja(0:N,0:N,0:N,3,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
+      myHex % Ja(0:N,0:N,0:N,3,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
       
-      CALL myGeom % GenerateBoundaryMetrics( interp )
+      CALL myHex % GenerateBoundaryMetrics( interp )
 
- END SUBROUTINE GenerateMetrics_MappedGeometry_3D
+ END SUBROUTINE GenerateMetrics_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class 
+!> \addtogroup HexElements_Class 
 !! @{ 
 ! ================================================================================================ !
 ! S/R GenerateMetrics 
 ! 
-!> \fn GenerateMetrics_MappedGeometry_3D  
+!> \fn GenerateMetrics_HexElements  
 !! Generates and stores the outward pointing boundary normal vectors.
 !!
 !!  The outward pointing boundary normal vectors are equivalent to the contravariant basis vectors
@@ -618,19 +534,19 @@ IMPLICIT NONE
 !!  This subroutine depends on <BR>
 !!   Module \ref Lagrange_Class : Function \ref Differentiate_3D_Lagrange <BR>
 !! 
-!!  ** To produce meaningful output, GenerateMesh_MappedGeometry_3D must be called prior to calling
+!!  ** To produce meaningful output, GenerateMesh_HexElements must be called prior to calling
 !!     this routine.
 !!
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !!         .... <BR>
 !!     <B>CALL</B> this % GenerateBoundaryMetrics( interp ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myGeom <td> MappedGeometry_3D <td> 
-!!                         On <B>input</B>, an initialized MappedGeometry_3D data structure, <BR>
+!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!                         On <B>input</B>, an initialized HexElements data structure, <BR>
 !!                         On <B>output</B>, the outward pointing normal vectors on the element
 !!                         boundaries are filled in
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant that defines the 
@@ -639,17 +555,13 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
-  SUBROUTINE GenerateBoundaryMetrics_MappedGeometry_3D( myGeom, interp  )
+  SUBROUTINE GenerateBoundaryMetrics_HexElements( myHex, interp  )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(inout) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)         :: interp
-#else
+   CLASS( HexElements ), INTENT(inout) :: myHex
    TYPE( Lagrange ), INTENT(in)              :: interp
-#endif
    ! Local
-   INTEGER    :: iS, iP, N
+   INTEGER    :: i, j, N
    REAL(prec) :: s(0:interp % N), p
    REAL(prec) :: Jain(0:interp % N,0:interp % N,0:interp % N)
    REAL(prec) :: J, signJ, nx, ny, nz
@@ -658,101 +570,101 @@ IMPLICIT NONE
       N = interp % N
       s = interp % s
            ! Do the boundary locations
-      DO iP = 0, N
-         DO iS = 0, N
+      DO j = 0, N
+         DO i = 0, N
          
             p = -ONE  ! bottom, south, and west boundaries
             
             !bottom boundary
-            node = (/s(iS), s(iP), p /)
-            J = interp % Interpolate_3D( myGeom % J, node ) !Determinant( cv, nDims )
+            node = (/s(i), s(j), p /)
+            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting bottom boundary normal
-            Jain = myGeom % Ja(0:N,0:N,0:N,1,3)
+            Jain = myHex % Ja(0:N,0:N,0:N,1,3)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,2,3)
+            Jain = myHex % Ja(0:N,0:N,0:N,2,3)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,3,3)
+            Jain = myHex % Ja(0:N,0:N,0:N,3,3)
             nz = interp % Interpolate_3D( Jain, node )
-            myGeom % nHat(1:nDims,iS,iP,bottom) = -signJ*(/ nx, ny, nz /)
+            myHex % nHat(1:3,i,j,bottom) = -signJ*(/ nx, ny, nz /)
             
-            node = (/ s(iS), p, s(iP) /)
-            J = interp % Interpolate_3D( myGeom % J, node ) !Determinant( cv, nDims )
+            node = (/ s(i), p, s(j) /)
+            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting southern boundary normal
-            Jain = myGeom % Ja(0:N,0:N,0:N,1,2)
+            Jain = myHex % Ja(0:N,0:N,0:N,1,2)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,2,2)
+            Jain = myHex % Ja(0:N,0:N,0:N,2,2)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,3,2)
+            Jain = myHex % Ja(0:N,0:N,0:N,3,2)
             nz = interp % Interpolate_3D( Jain, node )
-            myGeom % nHat(1:nDims,iS,iP,south)= -signJ*(/ nx, ny, nz /)
+            myHex % nHat(1:3,i,j,south)= -signJ*(/ nx, ny, nz /)
             
             ! west boundary
-            node = (/ p, s(iS), s(iP) /)
-            J = interp % Interpolate_3D( myGeom % J, node ) !Determinant( cv, nDims )
+            node = (/ p, s(i), s(j) /)
+            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting western boundary normal
-            Jain = myGeom % Ja(0:N,0:N,0:N,1,1)
+            Jain = myHex % Ja(0:N,0:N,0:N,1,1)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,2,1)
+            Jain = myHex % Ja(0:N,0:N,0:N,2,1)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,3,1)
+            Jain = myHex % Ja(0:N,0:N,0:N,3,1)
             nz = interp % Interpolate_3D( Jain, node )
-            myGeom % nHat(1:nDims,iS,iP,west) = -signJ*(/ nx, ny, nz /)
+            myHex % nHat(1:3,i,j,west) = -signJ*(/ nx, ny, nz /)
              
             p = ONE  ! top, north, and east boundaries
             
             !top boundary
-            node = (/s(iS), s(iP), p /)
-            J = interp % Interpolate_3D( myGeom % J, node )!Determinant( cv, nDims )
+            node = (/s(i), s(j), p /)
+            J = interp % Interpolate_3D( myHex % J, node )!Determinant( cv, 3 )
             signJ = SIGN(ONE,J)      
             ! Setting top boundary normal
-            Jain = myGeom % Ja(0:N,0:N,0:N,1,3)
+            Jain = myHex % Ja(0:N,0:N,0:N,1,3)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,2,3)
+            Jain = myHex % Ja(0:N,0:N,0:N,2,3)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,3,3)
+            Jain = myHex % Ja(0:N,0:N,0:N,3,3)
             nz = interp % Interpolate_3D( Jain, node )
-            myGeom % nHat(1:nDims,iS,iP,top) = signJ*(/ nx, ny, nz /)
+            myHex % nHat(1:3,i,j,top) = signJ*(/ nx, ny, nz /)
             
             !north boundary
-            node = (/ s(iS), p, s(iP) /)
-            J = interp % Interpolate_3D( myGeom % J, node ) !Determinant( cv, nDims )
+            node = (/ s(i), p, s(j) /)
+            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)    
             ! Setting southern boundary normal
-            Jain = myGeom % Ja(0:N,0:N,0:N,1,2)
+            Jain = myHex % Ja(0:N,0:N,0:N,1,2)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,2,2)
+            Jain = myHex % Ja(0:N,0:N,0:N,2,2)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,3,2)
+            Jain = myHex % Ja(0:N,0:N,0:N,3,2)
             nz = interp % Interpolate_3D( Jain, node )
-            myGeom % nHat(1:nDims,iS,iP,north) = signJ*(/ nx, ny, nz /)
+            myHex % nHat(1:3,i,j,north) = signJ*(/ nx, ny, nz /)
             
             ! east boundary
-            node = (/ p, s(iS), s(iP) /)
-            J = interp % Interpolate_3D( myGeom % J, node ) !Determinant( cv, nDims )
+            node = (/ p, s(i), s(j) /)
+            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting eastern boundary normal
-            Jain = myGeom % Ja(0:N,0:N,0:N,1,1)
+            Jain = myHex % Ja(0:N,0:N,0:N,1,1)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,2,1)
+            Jain = myHex % Ja(0:N,0:N,0:N,2,1)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myGeom % Ja(0:N,0:N,0:N,3,1)
+            Jain = myHex % Ja(0:N,0:N,0:N,3,1)
             nz = interp % Interpolate_3D( Jain, node )
-            myGeom % nHat(1:nDims,iS,iP,east) = signJ*(/ nx, ny, nz /)
+            myHex % nHat(1:3,i,j,east) = signJ*(/ nx, ny, nz /)
             
          ENDDO
       ENDDO
 
- END SUBROUTINE GenerateBoundaryMetrics_MappedGeometry_3D
+ END SUBROUTINE GenerateBoundaryMetrics_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class
+!> \addtogroup HexElements_Class
 !! @{ 
 ! ================================================================================================ !
 ! Function CalculateLocation 
 ! 
-!> \fn CalculateLocation_MappedGeometry_3D  
+!> \fn CalculateLocation_HexElements  
 !! Given a computational coordinate, the physical coordinate is calculated using Lagrange 
 !! interpolation.
 !! 
@@ -760,7 +672,7 @@ IMPLICIT NONE
 !!   Module \ref Lagrange_Class : Function \ref Interpolate_3D_Lagrange <BR>
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !! <B>REAL</B>(prec)              :: s(1:2), x(1:2) <BR>
 !!         .... <BR>
@@ -768,8 +680,8 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myGeom <td> MappedGeometry_3D <td> An intialized and constructed 
-!!                                                        MappedGeometry_3D data structure
+!!   <tr> <td> in <th> myHex <td> HexElements <td> An intialized and constructed 
+!!                                                        HexElements data structure
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
 !!                                                  contains the computational mesh.
 !!   <tr> <td> in <th> s(1:3) <td> REAL(prec)  <td> Computational location where the physical 
@@ -781,30 +693,26 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- FUNCTION CalculateLocation_MappedGeometry_3D( myGeom, interp, s ) RESULT( x )
+ FUNCTION CalculateLocation_HexElements( myHex, interp, s ) RESULT( x )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda )      :: interp
-#else
+   CLASS( HexElements ) :: myHex
    TYPE( Lagrange )           :: interp
-#endif
    REAL(prec)                 :: s(1:3)
    REAL(prec)                 :: x(1:3)
   
-      x(1) = interp % Interpolate_3D( myGeom % x, s )
-      x(2) = interp % Interpolate_3D( myGeom % y, s )
-      x(3) = interp % Interpolate_3D( myGeom % z, s )
+      x(1) = interp % Interpolate_3D( myHex % x, s )
+      x(2) = interp % Interpolate_3D( myHex % y, s )
+      x(3) = interp % Interpolate_3D( myHex % z, s )
   
- END FUNCTION CalculateLocation_MappedGeometry_3D
+ END FUNCTION CalculateLocation_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class
+!> \addtogroup HexElements_Class
 !! @{ 
 ! ================================================================================================ !
 ! Function CalculateMetrics 
 ! 
-!> \fn CalculateMetrics_MappedGeometry_3D  
+!> \fn CalculateMetrics_HexElements  
 !! Given a computational coordinate, the covariant metric tensor is estimated by differentiation
 !! of the Lagrange interpolant of the mesh positions.
 !!
@@ -841,7 +749,7 @@ IMPLICIT NONE
 !!   Module \ref Lagrange_Class : Function \ref Differentiate_3D_Lagrange <BR>
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !! <B>REAL</B>(prec)              :: s(1:3), covT(1:3,1:3) <BR>
 !!         .... <BR>
@@ -849,8 +757,8 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myGeom <td> MappedGeometry_3D <td> An intialized and constructed 
-!!                                                        MappedGeometry_3D data structure
+!!   <tr> <td> in <th> myHex <td> HexElements <td> An intialized and constructed 
+!!                                                        HexElements data structure
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
 !!                                                  contains the computational mesh.
 !!   <tr> <td> in <th> s(1:3) <td> REAL(prec)  <td> Computational position where the covariant metric
@@ -864,30 +772,26 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- FUNCTION CalculateMetrics_MappedGeometry_3D( myGeom, interp, s ) RESULT( covT )
+ FUNCTION CalculateMetrics_HexElements( myHex, interp, s ) RESULT( covT )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda )      :: interp
-#else
+   CLASS( HexElements ) :: myHex
    TYPE( Lagrange )           :: interp
-#endif
    REAL(prec)                 :: s(1:3)
    REAL(prec)                 :: covT(1:3,1:3)
  
-      covT(1,1:3) = interp % Differentiate_3D( myGeom % x, s )
-      covT(2,1:3) = interp % Differentiate_3D( myGeom % y, s )
-      covT(3,1:3) = interp % Differentiate_3D( myGeom % z, s )
+      covT(1,1:3) = interp % Differentiate_3D( myHex % x, s )
+      covT(2,1:3) = interp % Differentiate_3D( myHex % y, s )
+      covT(3,1:3) = interp % Differentiate_3D( myHex % z, s )
 
- END FUNCTION CalculateMetrics_MappedGeometry_3D
+ END FUNCTION CalculateMetrics_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class 
+!> \addtogroup HexElements_Class 
 !! @{ 
 ! ================================================================================================ !
 ! S/R CalculateComputationalCoordinates
 ! 
-!> \fn CalculateComputationalCoordinates_MappedGeometry_3D 
+!> \fn CalculateComputationalCoordinates_HexElements 
 !! Given a physical position, the corresponding computational coordinate is estimated.
 !!
 !! From the physical coordinates \f$ ( x^*, y^*, z^* ) \f$, the mapping
@@ -913,12 +817,12 @@ IMPLICIT NONE
 !!  a specified tolerance (parameter "newtonTolerance" in \ref ConstantsDictionary.f90 ).
 !!
 !!  This subroutine depends on <BR>
-!!   Module \ref MappedGeometry_3D_Class : Function \ref CalculateLocation_MappedGeometry_3D <BR>
-!!   Module \ref MappedGeometry_3D_Class : Function \ref CalculateMetrics_MappedGeometry_3D <BR>
+!!   Module \ref HexElements_Class : Function \ref CalculateLocation_HexElements <BR>
+!!   Module \ref HexElements_Class : Function \ref CalculateMetrics_HexElements <BR>
 !!   Module \ref CommonRoutines          : Function \ref Invert_2x2 <BR>
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !! <B>REAL</B>(prec)              :: x(1:3), s(1:3) <BR>
 !! <B>LOGICAL</B>                 :: successful <BR>
@@ -927,8 +831,8 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myGeom <td> MappedGeometry_3D <td> An intialized and constructed 
-!!                                                        MappedGeometry_3D data structure
+!!   <tr> <td> in <th> myHex <td> HexElements <td> An intialized and constructed 
+!!                                                        HexElements data structure
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
 !!                                                  contains the computational mesh.
 !!   <tr> <td> in <th> x(1:3) <td> REAL(prec)  <td> Physical location where we would like to determine
@@ -943,15 +847,11 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE CalculateComputationalCoordinates_MappedGeometry_3D( myGeom, interp, x, s, success )
+ SUBROUTINE CalculateComputationalCoordinates_HexElements( myHex, interp, x, s, success )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(in) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda )                  :: interp
-#else
+   CLASS( HexElements ), INTENT(in) :: myHex
    TYPE( Lagrange ), INTENT(in)           :: interp
-#endif
    REAL(prec), INTENT(in)                 :: x(1:3)
    REAL(prec), INTENT(out)                :: s(1:3)
    LOGICAL, INTENT(out), OPTIONAL         :: success
@@ -969,7 +869,7 @@ IMPLICIT NONE
       DO i = 1, newtonMax
      
          ! Calculate the physical coordinate associated with the computational coordinate guess
-         thisX = myGeom % CalculateLocation( interp, thisS )
+         thisX = myHex % CalculateLocation( interp, thisS )
      
          ! Calculate the residual
          dr = x - thisX
@@ -986,7 +886,7 @@ IMPLICIT NONE
             RETURN
          ENDIF
         
-         A = myGeom % CalculateMetrics( interp, thisS ) ! Calculate the covariant metric tensor
+         A = myHex % CalculateMetrics( interp, thisS ) ! Calculate the covariant metric tensor
        !  print*, A
          Ainv = Invert_3x3( A ) ! Invert the covariant metric tensor.
                                 ! This matrix is ivertable as long as the Jacobian is non-zero.
@@ -1016,19 +916,19 @@ IMPLICIT NONE
       ENDIF
       
      
- END SUBROUTINE CalculateComputationalCoordinates_MappedGeometry_3D
+ END SUBROUTINE CalculateComputationalCoordinates_HexElements
 !
-!> \addtogroup MappedGeometry_3D_Class
+!> \addtogroup HexElements_Class
 !! @{ 
 ! ================================================================================================ !
 ! S/R ScaleGeometry
 ! 
-!> \fn ScaleGeometry_MappedGeometry_3D 
+!> \fn ScaleGeometry_HexElements 
 !! Scales the physical coordinates and metric terms by a given x-scale and y-scale.
 !! 
 !! 
 !! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
+!! <B>TYPE</B>(HexElements) :: this <BR>
 !! <B>TYPE</B>(Lagrange)          :: interp <BR>
 !! <B>REAL</B>(prec)              :: xScale, yScale <BR>
 !!         .... <BR>
@@ -1036,8 +936,8 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myGeom <td> MappedGeometry_3D <td> 
-!!                         On <B>input</B>, an intialized and constructed MappedGeometry_3D data 
+!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!                         On <B>input</B>, an intialized and constructed HexElements data 
 !!                         structure <BR>
 !!                         On <B>output</B>, the physical coordinates and metric terms have been
 !!                         scaled by the given x and y scales.
@@ -1051,221 +951,25 @@ IMPLICIT NONE
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE ScaleGeometry_MappedGeometry_3D( myGeom, interp, xScale, yScale, zScale )
+ SUBROUTINE ScaleGeometry_HexElements( myHex, interp, xScale, yScale, zScale )
 
    IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(inout) :: myGeom
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)         :: interp
-#else
+   CLASS( HexElements ), INTENT(inout) :: myHex
    TYPE( Lagrange ), INTENT(in)              :: interp
-#endif
    REAL(prec), INTENT(in)                    :: xScale, yScale, zScale
    
-         myGeom % x = xScale*( myGeom % x )
-         myGeom % y = yScale*( myGeom % y )
-         myGeom % z = zScale*( myGeom % z )
-         myGeom % xBound = xScale*( myGeom % xBound )
-         myGeom % yBound = yScale*( myGeom % yBound )
-         myGeom % zBound = zScale*( myGeom % zBound )
-
-!         myGeom % dxds = xScale*( myGeom % dxds )
-!         myGeom % dxdp = xScale*( myGeom % dxdp )
-!         myGeom % dxdq = xScale*( myGeom % dxdq )
-!         myGeom % dyds = yScale*( myGeom % dyds )
-!         myGeom % dydp = yScale*( myGeom % dydp )
-!         myGeom % dydq = yScale*( myGeom % dydq )
-!         myGeom % dzds = zScale*( myGeom % dzds )
-!         myGeom % dzdp = zScale*( myGeom % dzdp )
-!         myGeom % dzdq = zScale*( myGeom % dzdq )
-          
-!         myGeom % J = xScale*yScale*zScale*( myGeom % J )
+         myHex % x = xScale*( myHex % x )
+         myHex % y = yScale*( myHex % y )
+         myHex % z = zScale*( myHex % z )
+         myHex % xBound = xScale*( myHex % xBound )
+         myHex % yBound = yScale*( myHex % yBound )
+         myHex % zBound = zScale*( myHex % zBound )
 
          ! Update the boundary metrics -- normals and normal lengths
-         CALL myGeom % GenerateMetrics( interp )
-         CALL myGeom % GenerateBoundaryMetrics( interp  )
+         CALL myHex % GenerateMetrics( interp )
+         CALL myHex % GenerateBoundaryMetrics( interp  )
          
- END SUBROUTINE ScaleGeometry_MappedGeometry_3D
-!
-!
-!==================================================================================================!
-!------------------------------------ File I/O Routines -------------------------------------------!
-!==================================================================================================!
-!
-!
-!> \addtogroup MappedGeometry_3D_Class 
-!! @{ 
-! ================================================================================================ !
-! S/R WriteTecplot 
-! 
-!> \fn WriteTecplot_MappedGeometry_3D 
-!! Writes a tecplot of the metric terms at the physical coordinates contained in the MappedGeometry_3D
-!! data structure.
-!! 
-!! Given a filename (say filename="foo"), the file written is "foo.tec". If a filename is not given
-!! the file is called "LocalGeometry.tec".
-!!
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(MappedGeometry_3D) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % WriteTecplot(  ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myGeom <td> MappedGeometry_3D <td> An intialized and constructed 
-!!                                                        MappedGeometry_3D data structure
-!!   <tr> <td> in (optional) <th> filename <td> CHARACTER <td> "Base"-name of the tecplot file.
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- SUBROUTINE WriteTecplot_MappedGeometry_3D( myGeom, filename )
-
-   IMPLICIT NONE
-   CLASS( MappedGeometry_3D ), INTENT(in) :: myGeom
-   CHARACTER(*), INTENT(in), OPTIONAL     :: filename  
-   ! Local
-   INTEGER :: iX, iY, iZ, N, fUnit
-   REAL(prec) :: x, y, z, dxds, dxdp, dxdq, dyds, dydp, dydq, dzds, dzdp, dzdq, J
-  
-      N = myGeom % N
-    
-      IF( PRESENT(filename) )THEN
-         OPEN( UNIT   = NEWUNIT(fUnit), &
-               FILE   = TRIM(filename)//'.tec', &
-               FORM   = 'formatted', & 
-               STATUS = 'REPLACE' )
-      ELSE
-         OPEN( UNIT   = NEWUNIT(fUnit), &
-               FILE   = 'LocalGeometry.tec', &
-               FORM   = 'formatted', & 
-               STATUS = 'REPLACE' )
-      ENDIF
-
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "Jacobian", "dxds", "dxdp", "dxdq",'//&
-                                 '"dyds", "dydp", "dydq", "dzds", "dzdp", "dzdq"'
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,', K=', N+1,',F=POINT'
-      
-      DO iZ = 0, N
-         DO iY = 0, N
-            DO iX = 0, N
-          
-               x = myGeom % x(iX,iY,iZ)
-               y = myGeom % y(iX,iY,iZ)
-               z = myGeom % z(iX,iY,iZ)
-               J = myGeom % J(iX,iY,iZ)
-             
-               dxds = myGeom % dxds(iX,iY,iZ)
-               dxdp = myGeom % dxdp(iX,iY,iZ)
-               dxdq = myGeom % dxdq(iX,iY,iZ)
-               dyds = myGeom % dyds(iX,iY,iZ)
-               dydp = myGeom % dydp(iX,iY,iZ)
-               dydq = myGeom % dydq(iX,iY,iZ)
-               dzds = myGeom % dzds(iX,iY,iZ)
-               dzdp = myGeom % dzdp(iX,iY,iZ)
-               dzdq = myGeom % dzdq(iX,iY,iZ)
-             
-               WRITE(fUnit,*)  x, y, z, J, dxds, dxdp, dxdq, dyds, dydp, dydq, dzds, dzdp, dzdq
-   
-            ENDDO
-         ENDDO
-      ENDDO
-
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'SouthFace.tec', &
-            FORM   = 'formatted', & 
-            STATUS = 'REPLACE' )
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "nx", "ny", "nz" '
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,',F=POINT'
-      DO iY = 0, N
-         DO iX = 0, N
-            WRITE(fUnit,*)  myGeom % xBound(iX,iY,South), &
-                            myGeom % yBound(iX,iY,South), &
-                            myGeom % zBound(iX,iY,South), &
-                            myGeom % nHat(1:3,iX,iY,South)
-         ENDDO
-      ENDDO
-      CLOSE(UNIT=fUnit)
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'NorthFace.tec', &
-            FORM   = 'formatted', & 
-            STATUS = 'REPLACE' )
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "nx", "ny", "nz" '
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,',F=POINT'
-      DO iY = 0, N
-         DO iX = 0, N
-
-            WRITE(fUnit,*)  myGeom % xBound(iX,iY,North), &
-                            myGeom % yBound(iX,iY,North), &
-                            myGeom % zBound(iX,iY,North), &
-                            myGeom % nHat(1:3,iX,iY,North)
-         ENDDO
-      ENDDO
-      CLOSE(UNIT=fUnit)
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'WestFace.tec', &
-            FORM   = 'formatted', & 
-            STATUS = 'REPLACE' )
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "nx", "ny", "nz" '
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,',F=POINT'
-      DO iY = 0, N
-         DO iX = 0, N
-            WRITE(fUnit,*)  myGeom % xBound(iX,iY,West), &
-                            myGeom % yBound(iX,iY,West), &
-                            myGeom % zBound(iX,iY,West), &
-                            myGeom % nHat(1:3,iX,iY,West)
-         ENDDO
-      ENDDO
-      CLOSE(UNIT=fUnit)
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'EastFace.tec', &
-            FORM   = 'formatted', & 
-            STATUS = 'REPLACE' )
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "nx", "ny", "nz" '
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,',F=POINT'
-      DO iY = 0, N
-         DO iX = 0, N
-            WRITE(fUnit,*)  myGeom % xBound(iX,iY,East), &
-                            myGeom % yBound(iX,iY,East), &
-                            myGeom % zBound(iX,iY,East), &
-                            myGeom % nHat(1:3,iX,iY,East)
-         ENDDO
-      ENDDO
-      CLOSE(UNIT=fUnit)
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'BottomFace.tec', &
-            FORM   = 'formatted', & 
-            STATUS = 'REPLACE' )
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "nx", "ny", "nz" '
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,',F=POINT'
-      DO iY = 0, N
-         DO iX = 0, N
-            WRITE(fUnit,*)  myGeom % xBound(iX,iY,Bottom), &
-                            myGeom % yBound(iX,iY,Bottom), &
-                            myGeom % zBound(iX,iY,Bottom), &
-                            myGeom % nHat(1:3,iX,iY,Bottom)
-         ENDDO
-      ENDDO
-      CLOSE(UNIT=fUnit)
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-            FILE   = 'TopFace.tec', &
-            FORM   = 'formatted', & 
-            STATUS = 'REPLACE' )
-      WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "nx", "ny", "nz" '
-      WRITE(fUnit,*)  'ZONE T="el0", I=',N+1,', J=', N+1,',F=POINT'
-      DO iY = 0, N
-         DO iX = 0, N
-            WRITE(fUnit,*)  myGeom % xBound(iX,iY,Top), &
-                            myGeom % yBound(iX,iY,Top), &
-                            myGeom % zBound(iX,iY,Top), &
-                            myGeom % nHat(1:3,iX,iY,Top)
-         ENDDO
-      ENDDO
-      CLOSE(UNIT=fUnit)
-
-    RETURN
-
- END SUBROUTINE WriteTecplot_MappedGeometry_3D
+ END SUBROUTINE ScaleGeometry_HexElements
 !
 !
 ! ///////////////////////////////////// PRIVATE ////////////////////////////////////////////////// !
@@ -1280,10 +984,10 @@ IMPLICIT NONE
    IMPLICIT NONE
    TYPE( Surface )  :: surfaces(1:6)
    REAL(prec)       :: a, b, c
-   REAL(prec)       :: P(1:nDims)
+   REAL(prec)       :: P(1:3)
    ! LOCAL
-   REAL(prec)  :: P1(1:nDims), P2(1:nDims), P3(1:nDims)
-   REAL(prec)  :: sSurf(1:nDims), nSurf(1:nDims), eSurf(1:nDims), wSurf(1:nDims), bSurf(1:nDims), tSurf(1:nDims)
+   REAL(prec)  :: P1(1:3), P2(1:3), P3(1:3)
+   REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
    REAL(prec)  :: ref(1:2)
    INTEGER     :: i, j
@@ -1390,10 +1094,10 @@ IMPLICIT NONE
 #endif
    REAL(prec)       :: x(0:interp % N,0:interp % N,1:6), y(0:interp % N,0:interp % N,1:6), z(0:interp % N,0:interp % N,1:6)
    REAL(prec)       :: a, b, c
-   REAL(prec)       :: P(1:nDims)
+   REAL(prec)       :: P(1:3)
    ! LOCAL
-   REAL(prec)  :: P1(1:nDims), P2(1:nDims), P3(1:nDims)
-   REAL(prec)  :: sSurf(1:nDims), nSurf(1:nDims), eSurf(1:nDims), wSurf(1:nDims), bSurf(1:nDims), tSurf(1:nDims)
+   REAL(prec)  :: P1(1:3), P2(1:3), P3(1:3)
+   REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
    REAL(prec)  :: ref(1:2)
    INTEGER     :: i, j
@@ -1531,4 +1235,4 @@ IMPLICIT NONE
     
  END FUNCTION LinearBlend
 !
-END MODULE MappedGeometry_3D_Class
+END MODULE HexElements_Class
