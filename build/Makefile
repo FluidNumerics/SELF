@@ -183,8 +183,8 @@ SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o Noda
 ## Modules 
 #
 	
-Surface_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Surface_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/Surface_Class.f90 -o $@
+Surfaces_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Surfaces_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}geom/Surfaces_Class.f90 -o $@
 
 HexElements_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                       Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/HexElements_Class.f90
