@@ -9,7 +9,6 @@
 MODULE Edges_Class
 
 USE ModelPrecision
-USE ConstantsDictionary
 
 IMPLICIT NONE
 
