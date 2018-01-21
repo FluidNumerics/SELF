@@ -157,13 +157,13 @@ CONTAINS
     CLASS( Edges ), INTENT(inout) :: myEdges
 
 
-      myEdges % edgeID_dev       = myEdges % edgeID
-      myEdges % boundaryID_dev   = myEdges % boundaryID
-      myEdges % nodeIDs_dev      = myEdges % nodeIDs
-      myEdges % elementIDs_dev   = myEdges % elementIDs
-      myEdges % elementSides_dev = myEdges % elementSides
-      myEdges % start_dev        = myEdges % start
-      myEdges % inc_dev          = myEdges % inc   
+      myEdges % edgeID       = myEdges % edgeID_dev
+      myEdges % boundaryID   = myEdges % boundaryID_dev
+      myEdges % nodeIDs      = myEdges % nodeIDs_dev
+      myEdges % elementIDs   = myEdges % elementIDs_dev
+      myEdges % elementSides = myEdges % elementSides_dev
+      myEdges % start        = myEdges % start_dev
+      myEdges % inc          = myEdges % inc_dev
   
 
   END SUBROUTINE UpdateHost_Edges
