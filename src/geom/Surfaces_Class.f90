@@ -34,13 +34,13 @@ IMPLICIT NONE
 !
 
   TYPE Surfaces 
-    INTEGER                 :: N, nSurfaces, nDim
+    INTEGER                 :: N, nSurfaces
     TYPE(Lagrange)          :: interp
     REAL(prec), ALLOCATABLE :: x(:,:,:,:)
     REAL(prec), ALLOCATABLE :: dxds(:,:,:,:,:)
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nSurfaces_dev, nDim_dev
+    INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nSurfaces_dev
     REAL(prec), DEVICE, ALLOCATABLE :: x_dev(:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: dxds_dev(:,:,:,:,:)
 #endif
@@ -59,6 +59,10 @@ IMPLICIT NONE
     PROCEDURE :: EvaluateSlope  => EvaluateSlope_Surfaces
     
   END TYPE Surfaces
+
+#ifdef HAVE_CUDA
+  INTEGER, DEVICE, ALLOCATABLE, PRIVATE :: nDim_dev
+#endif
 
  CONTAINS
 !
@@ -93,31 +97,32 @@ IMPLICIT NONE
 !   
 ! ================================================================================================ ! 
 
-SUBROUTINE Build_Surfaces( mySurfaces, nodes, N, nSurfaces, nDim )
+SUBROUTINE Build_Surfaces( mySurfaces, nodes, N, nSurfaces )
   IMPLICIT NONE
   CLASS( Surfaces ), INTENT(out) :: mySurfaces
-  INTEGER, INTENT(in)            :: N, nDim, nSurfaces
+  INTEGER, INTENT(in)            :: N, nSurfaces
   REAL(prec), INTENT(in)         :: nodes(0:N)
 
  
     mySurfaces % N         = N
-    mySurfaces % nDim      = nDim
-    mySurfaces % nSurfaces =  nSurfaces
+    mySurfaces % nSurfaces = nSurfaces
 
-    ALLOCATE( mySurfaces % x(0:N,0:N,1:nDim,1:nSurfaces), &
-              mySurfaces % dxds(1:2,0:N,0:N,1:nDim,1:nSurfaces) )
+    ALLOCATE( mySurfaces % x(0:N,0:N,1:3,1:nSurfaces), &
+              mySurfaces % dxds(1:2,0:N,0:N,1:3,1:nSurfaces) )
 
     CALL mySurfaces % interp % Build( N, N, nodes, nodes )
 
 #ifdef HAVE_CUDA
 
-    ALLOCATE( mySurfaces % N_dev, mySurfaces % nDim_dev, mySurfaces % nSurfaces_dev )
-    ALLOCATE( mySurfaces % x_dev(0:N,0:N,1:nDim,1:nSurfaces), &
-              mySurfaces % dxds_dev(1:2,0:N,0:N,1:nDim,1:nSurfaces) )
+    ALLOCATE( mySurfaces % N_dev, mySurfaces % nSurfaces_dev )
+    ALLOCATE( mySurfaces % x_dev(0:N,0:N,1:3,1:nSurfaces), &
+              mySurfaces % dxds_dev(1:2,0:N,0:N,1:3,1:nSurfaces) )
 
     mySurfaces % N_dev         = N
-    mySurfaces % nDim_dev      = nDim
     mySurfaces % nSurfaces_dev = nSurfaces
+
+    ALLOCATE( nDim_dev )
+    nDim_dev = 3
 
 #endif
 
@@ -154,8 +159,10 @@ SUBROUTINE Trash_Surfaces( mySurfaces )
     DEALLOCATE( mySurfaces % x, mySurfaces % dxds )
 
 #ifdef HAVE_CUDA
-    DEALLOCATE( mySurfaces % N_dev, mySurfaces % nDim_dev, mySurfaces % nSurfaces_dev )
+    DEALLOCATE( mySurfaces % N_dev, mySurfaces % nSurfaces_dev )
     DEALLOCATE( mySurfaces % x_dev, mySurfaces % dxds_dev )
+
+    DEALLOCATE( nDim_dev )
 #endif
 
 
@@ -216,7 +223,7 @@ END SUBROUTINE UpdateHost_Surfaces
 SUBROUTINE Set_Surfaces( mySurfaces, x )
   IMPLICIT NONE
   CLASS( Surfaces ), INTENT(inout) :: mySurfaces
-  REAL(prec), INTENT(in)           :: x(0:mySurfaces % N, 0:mySurfaces % N, 1:mySurfaces % nDim,1:mySurfaces % nSurfaces)
+  REAL(prec), INTENT(in)           :: x(0:mySurfaces % N, 0:mySurfaces % N, 1:3, 1:mySurfaces % nSurfaces)
 
     mySurfaces % x = x
 
@@ -271,12 +278,12 @@ SUBROUTINE CalculateSlope_Surfaces( mySurfaces )
 #ifdef HAVE_CUDA
 
     CALL mySurfaces % interp % CalculateGradient_2D( mySurfaces % x_dev, mySurfaces % dxds_dev, &
-                                                     mySurfaces % nDim_dev, mySurfaces % nSurfaces_dev )
+                                                     nDim_dev, mySurfaces % nSurfaces_dev )
 
 #else
 
     CALL mySurfaces % interp % CalculateGradient_2D( mySurfaces % x, mySurfaces % dxds, &
-                                                     mySurfaces % nDim, mySurfaces % nSurfaces )
+                                                     3, mySurfaces % nSurfaces )
 
 #endif
      
@@ -310,13 +317,13 @@ FUNCTION Evaluate_Surfaces( mySurfaces, s, j ) RESULT( x )
   IMPLICIT NONE
   CLASS( Surfaces ) :: mySurfaces
   REAL(prec)        :: s(1:2)
-  REAL(prec)        :: x(1:mySurfaces % nDim)
+  REAL(prec)        :: x(1:3)
   INTEGER           :: j
   ! Local
   INTEGER :: i
   
 
-    DO i = 1, mySurfaces % nDim
+    DO i = 1, 3
 
       x(i) = mySurfaces % interp % Interpolate_2D( mySurfaces % x(:,:,i,j), s )
 
@@ -354,13 +361,13 @@ FUNCTION EvaluateSlope_Surfaces( mySurfaces, s, j ) RESULT( dxds )
   IMPLICIT NONE
   CLASS( Surfaces ) :: mySurfaces
   REAL(prec)        :: s(1:2)
-  REAL(prec)        :: dxds(1:mySurfaces % nDim,1:2)
+  REAL(prec)        :: dxds(1:3,1:2)
   INTEGER           :: j
   ! Local
   INTEGER ::  i
   
 
-    DO i = 1, mySurfaces % nDim
+    DO i = 1, 3
       
       dxds(i,1) = mySurfaces % interp % Interpolate_2D( mySurfaces % dxds(1,:,:,i,j), s )
       dxds(i,2) = mySurfaces % interp % Interpolate_2D( mySurfaces % dxds(2,:,:,i,j), s )
