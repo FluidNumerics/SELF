@@ -186,6 +186,9 @@ SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o Noda
 Edges_Class.o : ModelPrecision.o ${SRCDIR}geom/Edges_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Edges_Class.f90 -o $@
 
+Faces_Class.o : ModelPrecision.o  ConstantsDictionary.o ${SRCDIR}geom/Faces_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Faces_Class.f90 -o $@
+
 Nodes_Class.o : ModelPrecision.o ${SRCDIR}geom/Nodes_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Nodes_Class.f90 -o $@
 	
@@ -201,9 +204,6 @@ BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 
 
 	
-Face_Class.o : ModelPrecision.o  ConstantsDictionary.o ${SRCDIR}geom/Face_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/Face_Class.f90 -o $@
-
 Curve_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Curve_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/Curve_Class.f90 -o $@
 
