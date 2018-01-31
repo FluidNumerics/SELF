@@ -116,69 +116,89 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> out <th> myHex <td> HexElements <td> On output, an initialized HexElements
+!!   <tr> <td> out <th> myElements <td> HexElements <td> On output, an initialized HexElements
 !!                                                         data structure
 !!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree of the spectral element 
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Build_HexElements( myHex, N, nElements )
+ SUBROUTINE Build_HexElements( myElements, N, nElements )
 
   IMPLICIT NONE
-  CLASS(HexElements), INTENT(out) :: myHex
+  CLASS(HexElements), INTENT(out) :: myElements
   INTEGER, INTENT(in)             :: N, nElements
 
-      myHex % N = N
-      myHex % nElements = nElements
+      myElements % N = N
+      myElements % nElements = nElements
        
-      ! Allocate space
-      ALLOCATE( myHex % elementID(1:nElements), myHex % nodeIDs(1:8,1:nElements), myHex % neighbors(1:6,1:nElements) )
-      ALLOCATE( myHex % dxds(0:N,0:N,0:N,1:nElements), myHex % dxdp(0:N,0:N,0:N,1:nElements), myHex % dxdq(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % dyds(0:N,0:N,0:N,1:nElements), myHex % dydp(0:N,0:N,0:N,1:nElements), myHex % dydq(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % dzds(0:N,0:N,0:N,1:nElements), myHex % dzdp(0:N,0:N,0:N,1:nElements), myHex % dzdq(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % Ja(0:N,0:N,0:N,1:3,1:3,1:nElements) )
-      ALLOCATE( myHex % J(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % x(0:N,0:N,0:N,1:nElements), myHex % y(0:N,0:N,0:N,1:nElements), myHex % z(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % xBound(0:N,0:N,1:nHexFaces,1:nElements) )
-      ALLOCATE( myHex % yBound(0:N,0:N,1:nHexFaces,1:nElements) )
-      ALLOCATE( myHex % zBound(0:N,0:N,1:nHexFaces,1:nElements) )
-      ALLOCATE( myHex % nHat(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myElements % elementID(1:nElements), &
+                myElements % nodeIDs(1:8,1:nElements), &
+                myElements % neighbors(1:6,1:nElements), &
+                myElements % dxds(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdp(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdq(0:N,0:N,0:N,1:nElements), &
+                myElements % dyds(0:N,0:N,0:N,1:nElements), &
+                myElements % dydp(0:N,0:N,0:N,1:nElements), &
+                myElements % dydq(0:N,0:N,0:N,1:nElements), &
+                myElements % dzds(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdp(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdq(0:N,0:N,0:N,1:nElements), &
+                myElements % Ja(0:N,0:N,0:N,1:3,1:3,1:nElements), &
+                myElements % J(0:N,0:N,0:N,1:nElements), &
+                myElements % x(0:N,0:N,0:N,1:nElements), &
+                myElements % y(0:N,0:N,0:N,1:nElements), &
+                myElements % z(0:N,0:N,0:N,1:nElements), &
+                myElements % xBound(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % yBound(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % zBound(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % nHat(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
       
-      myHex % dxds   = 0.0_prec
-      myHex % dxdp   = 0.0_prec
-      myHex % dxdq   = 0.0_prec
-      myHex % dyds   = 0.0_prec
-      myHex % dydp   = 0.0_prec
-      myHex % dydq   = 0.0_prec
-      myHex % dzds   = 0.0_prec
-      myHex % dzdp   = 0.0_prec
-      myHex % dzdq   = 0.0_prec
-      myHex % J      = 0.0_prec
-      myHex % x      = 0.0_prec
-      myHex % y      = 0.0_prec
-      myHex % z      = 0.0_prec
-      myHex % xBound = 0.0_prec
-      myHex % yBound = 0.0_prec
-      myHex % zBound = 0.0_prec
+      myElements % dxds   = 0.0_prec
+      myElements % dxdp   = 0.0_prec
+      myElements % dxdq   = 0.0_prec
+      myElements % dyds   = 0.0_prec
+      myElements % dydp   = 0.0_prec
+      myElements % dydq   = 0.0_prec
+      myElements % dzds   = 0.0_prec
+      myElements % dzdp   = 0.0_prec
+      myElements % dzdq   = 0.0_prec
+      myElements % J      = 0.0_prec
+      myElements % x      = 0.0_prec
+      myElements % y      = 0.0_prec
+      myElements % z      = 0.0_prec
+      myElements % xBound = 0.0_prec
+      myElements % yBound = 0.0_prec
+      myElements % zBound = 0.0_prec
 
 #ifdef HAVE_CUDA
 
-      ALLOCATE( myHex % N_dev, myHex % nElements_dev )
-      ALLOCATE( myHex % elementID_dev(1:nElements), myHex % nodeIDs_dev(1:8,1:nElements), myHex % neighbors_dev(1:6,1:nElements) )
-      ALLOCATE( myHex % dxds_dev(0:N,0:N,0:N,1:nElements), myHex % dxdp_dev(0:N,0:N,0:N,1:nElements), myHex % dxdq_dev(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % dyds_dev(0:N,0:N,0:N,1:nElements), myHex % dydp_dev(0:N,0:N,0:N,1:nElements), myHex % dydq_dev(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % dzds_dev(0:N,0:N,0:N,1:nElements), myHex % dzdp_dev(0:N,0:N,0:N,1:nElements), myHex % dzdq_dev(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % Ja_dev(0:N,0:N,0:N,1:3,1:3,1:nElements) )
-      ALLOCATE( myHex % J_dev(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % x_dev(0:N,0:N,0:N,1:nElements), myHex % y_dev(0:N,0:N,0:N,1:nElements), myHex % z_dev(0:N,0:N,0:N,1:nElements) )
-      ALLOCATE( myHex % xBound_dev(0:N,0:N,1:nHexFaces,1:nElements) )
-      ALLOCATE( myHex % yBound_dev(0:N,0:N,1:nHexFaces,1:nElements) )
-      ALLOCATE( myHex % zBound_dev(0:N,0:N,1:nHexFaces,1:nElements) )
-      ALLOCATE( myHex % nHat_dev(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+      ALLOCATE( myElements % N_dev, myElements % nElements_dev )
 
-      myHex % N_dev =  N
-      myHex % nElements_dev = nElements
+      ALLOCATE( myElements % elementID_dev(1:nElements), &
+                myElements % nodeIDs_dev(1:8,1:nElements), &
+                myElements % neighbors_dev(1:6,1:nElements), &
+                myElements % dxds_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdp_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdq_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dyds_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dydp_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dydq_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dzds_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdp_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdq_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % Ja_dev(0:N,0:N,0:N,1:3,1:3,1:nElements), &
+                myElements % J_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % x_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % y_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % z_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % xBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % yBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % zBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % nHat_dev(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+
+      myElements % N_dev =  N
+      myElements % nElements_dev = nElements
 
 #endif
 
@@ -199,42 +219,74 @@ IMPLICIT NONE
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myHex <td> HexElements <td>
+!!   <tr> <td> in/out <th> myElements <td> HexElements <td>
 !!                         On <B>input</B>, a previously constructed HexElements data structure <BR>
 !!                         On <B>output</B>, memory held by attributes is freed
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Trash_HexElements( myHex )
+ SUBROUTINE Trash_HexElements( myElements )
 
    IMPLICIT NONE
-   CLASS(HexElements), INTENT(inout)  :: myHex
+   CLASS(HexElements), INTENT(inout)  :: myElements
 
-      DEALLOCATE( myHex % elementID, myHex % nodeIDs, myHex % neighbors )
-      DEALLOCATE( myHex % dxds, myHex % dxdp, myHex % dxdq )
-      DEALLOCATE( myHex % dyds, myHex % dydp, myHex % dydq )
-      DEALLOCATE( myHex % dzds, myHex % dzdp, myHex % dzdq )
-      DEALLOCATE( myHex % J, myHex % Ja, myHex % x, myHex % y, myHex % z )
-      DEALLOCATE( myHex % xBound, myHex % yBound, myHex % zBound )
-      DEALLOCATE( myHex % nHat )
-
-#ifdef HAVE_CUDA
+      ALLOCATE( myElements % elementID(1:nElements), &
+                myElements % nodeIDs(1:8,1:nElements), &
+                myElements % neighbors(1:6,1:nElements), &
+                myElements % dxds(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdp(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdq(0:N,0:N,0:N,1:nElements), &
+                myElements % dyds(0:N,0:N,0:N,1:nElements), &
+                myElements % dydp(0:N,0:N,0:N,1:nElements), &
+                myElements % dydq(0:N,0:N,0:N,1:nElements), &
+                myElements % dzds(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdp(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdq(0:N,0:N,0:N,1:nElements), &
+                myElements % Ja(0:N,0:N,0:N,1:3,1:3,1:nElements), &
+                myElements % J(0:N,0:N,0:N,1:nElements), &
+                myElements % x(0:N,0:N,0:N,1:nElements), &
+                myElements % y(0:N,0:N,0:N,1:nElements), &
+                myElements % z(0:N,0:N,0:N,1:nElements), &
+                myElements % xBound(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % yBound(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % zBound(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % nHat(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
       
-      DEALLOCATE( myHex % elementID_dev, myHex % nodeIDs_dev, myHex % neighbors_dev )
-      DEALLOCATE( myHex % dxds_dev, myHex % dxdp_dev, myHex % dxdq_dev )
-      DEALLOCATE( myHex % dyds_dev, myHex % dydp_dev, myHex % dydq_dev )
-      DEALLOCATE( myHex % dzds_dev, myHex % dzdp_dev, myHex % dzdq_dev )
-      DEALLOCATE( myHex % J_dev, myHex % Ja_dev, myHex % x_dev, myHex % y_dev, myHex % z_dev )
-      DEALLOCATE( myHex % xBound_dev, myHex % yBound_dev, myHex % zBound_dev )
-      DEALLOCATE( myHex % nHat_dev )
+#ifdef HAVE_CUDA
+
+      ALLOCATE( myElements % N_dev, myElements % nElements_dev )
+
+      ALLOCATE( myElements % elementID_dev(1:nElements), &
+                myElements % nodeIDs_dev(1:8,1:nElements), &
+                myElements % neighbors_dev(1:6,1:nElements), &
+                myElements % dxds_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdp_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dxdq_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dyds_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dydp_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dydq_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dzds_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdp_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % dzdq_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % Ja_dev(0:N,0:N,0:N,1:3,1:3,1:nElements), &
+                myElements % J_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % x_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % y_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % z_dev(0:N,0:N,0:N,1:nElements), &
+                myElements % xBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % yBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % zBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
+                myElements % nHat_dev(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
 
 #endif
+      
+
  
  END SUBROUTINE Trash_HexElements
 
 
-SUBROUTINE UpdateDevice_HexElements
+SUBROUTINE UpdateDevice_HexElements( 
 
 END SUBROUTINE UpdateDevice_HexElements
 
@@ -266,7 +318,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!   <tr> <td> in/out <th> myElements <td> HexElements <td> 
 !!                         On <B>input</B>, an initialized HexElements data structure, <BR>
 !!                         On <B>output</B>, the mesh physical positions (interior and boundary)
 !!                         are filled in.
@@ -278,12 +330,12 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE GenerateMesh_HexElements( myHex, interp, theSurfaces )
+ SUBROUTINE GenerateMesh_HexElements( myElements, interp, theSurfaces )
 
    IMPLICIT NONE
-   CLASS( HexElements ), INTENT(inout) :: myHex
-   TYPE( Lagrange ), INTENT(in)              :: interp
-   TYPE( Surface ), INTENT(in)               :: theSurfaces(1:6)
+   CLASS( HexElements ), INTENT(inout) :: myElements
+   TYPE( Lagrange ), INTENT(in)        :: interp
+   TYPE( Surface ), INTENT(in)         :: theSurfaces(1:6)
    ! Local
    INTEGER    :: i, j, k, N
    REAL(prec) :: s(0:interp % N), p, x(1:3)
@@ -295,9 +347,9 @@ END SUBROUTINE UpdateHost_HexElements
          DO j = 0,N
             DO i = 0,N
                x = TransfiniteInterpolation( theSurfaces, s(i), s(j), s(k) )
-               myHex % x(i,j,k) = x(1)
-               myHex % y(i,j,k) = x(2)
-               myHex % z(i,j,k) = x(3)
+               myElements % x(i,j,k) = x(1)
+               myElements % y(i,j,k) = x(2)
+               myElements % z(i,j,k) = x(3)
             ENDDO
          ENDDO 
       ENDDO 
@@ -307,44 +359,44 @@ END SUBROUTINE UpdateHost_HexElements
          DO i = 0, N
             p = -ONE  ! south boundary
             x = TransfiniteInterpolation( theSurfaces, s(i), p, s(j) )
-            myHex % xBound(i,j,south) = x(1)
-            myHex % yBound(i,j,south) = x(2)
-            myHex % zBound(i,j,south) = x(3)
+            myElements % xBound(i,j,south) = x(1)
+            myElements % yBound(i,j,south) = x(2)
+            myElements % zBound(i,j,south) = x(3)
             ! west boundary
             x = TransfiniteInterpolation( theSurfaces, p, s(i), s(j) )
-            myHex % xBound(i,j,west) = x(1)
-            myHex % yBound(i,j,west) = x(2)
-            myHex % zBound(i,j,west) = x(3)
+            myElements % xBound(i,j,west) = x(1)
+            myElements % yBound(i,j,west) = x(2)
+            myElements % zBound(i,j,west) = x(3)
             ! bottom boundary
             x = TransfiniteInterpolation( theSurfaces, s(i), s(j), p )
-            myHex % xBound(i,j,bottom) = x(1)
-            myHex % yBound(i,j,bottom) = x(2)
-            myHex % zBound(i,j,bottom) = x(3)
+            myElements % xBound(i,j,bottom) = x(1)
+            myElements % yBound(i,j,bottom) = x(2)
+            myElements % zBound(i,j,bottom) = x(3)
             
             p = ONE  ! north boundary
             x = TransfiniteInterpolation( theSurfaces, s(i), p, s(j) )
-            myHex % xBound(i,j,north) = x(1)
-            myHex % yBound(i,j,north) = x(2)
-            myHex % zBound(i,j,north) = x(3)
+            myElements % xBound(i,j,north) = x(1)
+            myElements % yBound(i,j,north) = x(2)
+            myElements % zBound(i,j,north) = x(3)
             ! east boundary
             x = TransfiniteInterpolation( theSurfaces, p, s(i), s(j) )
-            myHex % xBound(i,j,east) = x(1)
-            myHex % yBound(i,j,east) = x(2)
-            myHex % zBound(i,j,east) = x(3)
+            myElements % xBound(i,j,east) = x(1)
+            myElements % yBound(i,j,east) = x(2)
+            myElements % zBound(i,j,east) = x(3)
             ! top boundary
             x = TransfiniteInterpolation( theSurfaces, s(i), s(j), p )
-            myHex % xBound(i,j,top) = x(1)
-            myHex % yBound(i,j,top) = x(2)
-            myHex % zBound(i,j,top) = x(3)
+            myElements % xBound(i,j,top) = x(1)
+            myElements % yBound(i,j,top) = x(2)
+            myElements % zBound(i,j,top) = x(3)
          ENDDO
       ENDDO
 
  END SUBROUTINE GenerateMesh_HexElements
 !
- SUBROUTINE ResetInternalMesh_HexElements( myHex, interp )
+ SUBROUTINE ResetInternalMesh_HexElements( myElements, interp )
 
    IMPLICIT NONE
-   CLASS( HexElements ), INTENT(inout) :: myHex
+   CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    ! Local
    INTEGER    :: i, j, k
@@ -355,15 +407,15 @@ END SUBROUTINE UpdateHost_HexElements
          DO j = 0, interp % N
             DO i = 0, interp % N
                x = TransfiniteInterpolation_Alt( interp, &
-                                                 myHex % xBound, &
-                                                 myHex % yBound, &
-                                                 myHex % zBound, &
+                                                 myElements % xBound, &
+                                                 myElements % yBound, &
+                                                 myElements % zBound, &
                                                  interp % s(i), &
                                                  interp % s(j), &
                                                  interp % s(k) )
-               myHex % x(i,j,k) = x(1)
-               myHex % y(i,j,k) = x(2)
-               myHex % z(i,j,k) = x(3)
+               myElements % x(i,j,k) = x(1)
+               myElements % y(i,j,k) = x(2)
+               myElements % z(i,j,k) = x(3)
             ENDDO
          ENDDO 
       ENDDO 
@@ -411,7 +463,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!   <tr> <td> in/out <th> myElements <td> HexElements <td> 
 !!                         On <B>input</B>, an initialized HexElements data structure, <BR>
 !!                         On <B>output</B>, the metric terms are filled in, including the
 !!                         outward pointing normal vectors on the element boundaries
@@ -421,10 +473,10 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE GenerateMetrics_HexElements( myHex, interp )
+ SUBROUTINE GenerateMetrics_HexElements( myElements, interp )
 
    IMPLICIT NONE
-   CLASS( HexElements ), INTENT(inout) :: myHex
+   CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    ! Local
    INTEGER    :: i, j, k, N
@@ -437,26 +489,26 @@ END SUBROUTINE UpdateHost_HexElements
    
       N = interp % N
       
-      covT(0:N,0:N,0:N,1,1:3) = interp % ApplyDerivativeMatrix_3D( myHex % x )
-      covT(0:N,0:N,0:N,2,1:3) = interp % ApplyDerivativeMatrix_3D( myHex % y )
-      covT(0:N,0:N,0:N,3,1:3) = interp % ApplyDerivativeMatrix_3D( myHex % z )
+      covT(0:N,0:N,0:N,1,1:3) = interp % ApplyDerivativeMatrix_3D( myElements % x )
+      covT(0:N,0:N,0:N,2,1:3) = interp % ApplyDerivativeMatrix_3D( myElements % y )
+      covT(0:N,0:N,0:N,3,1:3) = interp % ApplyDerivativeMatrix_3D( myElements % z )
       
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
 
-               myHex % dxds(i,j,k) = covT(i,j,k,1,1)
-               myHex % dxdp(i,j,k) = covT(i,j,k,1,2)
-               myHex % dxdq(i,j,k) = covT(i,j,k,1,3)
-               myHex % dyds(i,j,k) = covT(i,j,k,2,1)
-               myHex % dydp(i,j,k) = covT(i,j,k,2,2)
-               myHex % dydq(i,j,k) = covT(i,j,k,2,3)
-               myHex % dzds(i,j,k) = covT(i,j,k,3,1)
-               myHex % dzdp(i,j,k) = covT(i,j,k,3,2)
-               myHex % dzdq(i,j,k) = covT(i,j,k,3,3)
+               myElements % dxds(i,j,k) = covT(i,j,k,1,1)
+               myElements % dxdp(i,j,k) = covT(i,j,k,1,2)
+               myElements % dxdq(i,j,k) = covT(i,j,k,1,3)
+               myElements % dyds(i,j,k) = covT(i,j,k,2,1)
+               myElements % dydp(i,j,k) = covT(i,j,k,2,2)
+               myElements % dydq(i,j,k) = covT(i,j,k,2,3)
+               myElements % dzds(i,j,k) = covT(i,j,k,3,1)
+               myElements % dzdp(i,j,k) = covT(i,j,k,3,2)
+               myElements % dzdq(i,j,k) = covT(i,j,k,3,3)
                
                cv = covT(i,j,k,1:3,1:3)
-               myHex % J(i,j,k) = Determinant( cv, 3 )
+               myElements % J(i,j,k) = Determinant( cv, 3 )
                
             ENDDO
          ENDDO
@@ -467,7 +519,7 @@ END SUBROUTINE UpdateHost_HexElements
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               v(i,j,k,1:3)  = -myHex % z(i,j,k)*covT(i,j,k,2,1:3) 
+               v(i,j,k,1:3)  = -myElements % z(i,j,k)*covT(i,j,k,2,1:3) 
             ENDDO
          ENDDO
       ENDDO
@@ -477,14 +529,14 @@ END SUBROUTINE UpdateHost_HexElements
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myHex % Ja(0:N,0:N,0:N,1,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myHex % Ja(0:N,0:N,0:N,1,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myHex % Ja(0:N,0:N,0:N,1,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      myElements % Ja(0:N,0:N,0:N,1,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
+      myElements % Ja(0:N,0:N,0:N,1,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
+      myElements % Ja(0:N,0:N,0:N,1,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
       !Ja_2
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               v(i,j,k,1:3)  = -myHex % x(i,j,k)*covT(i,j,k,3,1:3) 
+               v(i,j,k,1:3)  = -myElements % x(i,j,k)*covT(i,j,k,3,1:3) 
             ENDDO
          ENDDO
       ENDDO
@@ -494,14 +546,14 @@ END SUBROUTINE UpdateHost_HexElements
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myHex % Ja(0:N,0:N,0:N,2,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myHex % Ja(0:N,0:N,0:N,2,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myHex % Ja(0:N,0:N,0:N,2,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      myElements % Ja(0:N,0:N,0:N,2,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
+      myElements % Ja(0:N,0:N,0:N,2,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
+      myElements % Ja(0:N,0:N,0:N,2,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
       !Ja_3
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               v(i,j,k,1:3)  = -myHex % y(i,j,k)*covT(i,j,k,1,1:3) 
+               v(i,j,k,1:3)  = -myElements % y(i,j,k)*covT(i,j,k,1,1:3) 
             ENDDO
          ENDDO
       ENDDO
@@ -511,11 +563,11 @@ END SUBROUTINE UpdateHost_HexElements
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myHex % Ja(0:N,0:N,0:N,3,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myHex % Ja(0:N,0:N,0:N,3,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myHex % Ja(0:N,0:N,0:N,3,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      myElements % Ja(0:N,0:N,0:N,3,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
+      myElements % Ja(0:N,0:N,0:N,3,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
+      myElements % Ja(0:N,0:N,0:N,3,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
       
-      CALL myHex % GenerateBoundaryMetrics( interp )
+      CALL myElements % GenerateBoundaryMetrics( interp )
 
  END SUBROUTINE GenerateMetrics_HexElements
 !
@@ -545,7 +597,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!   <tr> <td> in/out <th> myElements <td> HexElements <td> 
 !!                         On <B>input</B>, an initialized HexElements data structure, <BR>
 !!                         On <B>output</B>, the outward pointing normal vectors on the element
 !!                         boundaries are filled in
@@ -555,10 +607,10 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
-  SUBROUTINE GenerateBoundaryMetrics_HexElements( myHex, interp  )
+  SUBROUTINE GenerateBoundaryMetrics_HexElements( myElements, interp  )
 
    IMPLICIT NONE
-   CLASS( HexElements ), INTENT(inout) :: myHex
+   CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    ! Local
    INTEGER    :: i, j, N
@@ -577,82 +629,82 @@ END SUBROUTINE UpdateHost_HexElements
             
             !bottom boundary
             node = (/s(i), s(j), p /)
-            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
+            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting bottom boundary normal
-            Jain = myHex % Ja(0:N,0:N,0:N,1,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,3)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,2,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,3)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,3,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,3)
             nz = interp % Interpolate_3D( Jain, node )
-            myHex % nHat(1:3,i,j,bottom) = -signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,bottom) = -signJ*(/ nx, ny, nz /)
             
             node = (/ s(i), p, s(j) /)
-            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
+            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting southern boundary normal
-            Jain = myHex % Ja(0:N,0:N,0:N,1,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,2)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,2,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,2)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,3,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,2)
             nz = interp % Interpolate_3D( Jain, node )
-            myHex % nHat(1:3,i,j,south)= -signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,south)= -signJ*(/ nx, ny, nz /)
             
             ! west boundary
             node = (/ p, s(i), s(j) /)
-            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
+            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting western boundary normal
-            Jain = myHex % Ja(0:N,0:N,0:N,1,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,1)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,2,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,1)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,3,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,1)
             nz = interp % Interpolate_3D( Jain, node )
-            myHex % nHat(1:3,i,j,west) = -signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,west) = -signJ*(/ nx, ny, nz /)
              
             p = ONE  ! top, north, and east boundaries
             
             !top boundary
             node = (/s(i), s(j), p /)
-            J = interp % Interpolate_3D( myHex % J, node )!Determinant( cv, 3 )
+            J = interp % Interpolate_3D( myElements % J, node )!Determinant( cv, 3 )
             signJ = SIGN(ONE,J)      
             ! Setting top boundary normal
-            Jain = myHex % Ja(0:N,0:N,0:N,1,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,3)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,2,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,3)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,3,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,3)
             nz = interp % Interpolate_3D( Jain, node )
-            myHex % nHat(1:3,i,j,top) = signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,top) = signJ*(/ nx, ny, nz /)
             
             !north boundary
             node = (/ s(i), p, s(j) /)
-            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
+            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)    
             ! Setting southern boundary normal
-            Jain = myHex % Ja(0:N,0:N,0:N,1,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,2)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,2,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,2)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,3,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,2)
             nz = interp % Interpolate_3D( Jain, node )
-            myHex % nHat(1:3,i,j,north) = signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,north) = signJ*(/ nx, ny, nz /)
             
             ! east boundary
             node = (/ p, s(i), s(j) /)
-            J = interp % Interpolate_3D( myHex % J, node ) !Determinant( cv, 3 )
+            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
             signJ = SIGN(ONE,J)                    
             ! Setting eastern boundary normal
-            Jain = myHex % Ja(0:N,0:N,0:N,1,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,1)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,2,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,1)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myHex % Ja(0:N,0:N,0:N,3,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,1)
             nz = interp % Interpolate_3D( Jain, node )
-            myHex % nHat(1:3,i,j,east) = signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,east) = signJ*(/ nx, ny, nz /)
             
          ENDDO
       ENDDO
@@ -680,7 +732,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myHex <td> HexElements <td> An intialized and constructed 
+!!   <tr> <td> in <th> myElements <td> HexElements <td> An intialized and constructed 
 !!                                                        HexElements data structure
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
 !!                                                  contains the computational mesh.
@@ -693,17 +745,17 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
- FUNCTION CalculateLocation_HexElements( myHex, interp, s ) RESULT( x )
+ FUNCTION CalculateLocation_HexElements( myElements, interp, s ) RESULT( x )
 
    IMPLICIT NONE
-   CLASS( HexElements ) :: myHex
+   CLASS( HexElements ) :: myElements
    TYPE( Lagrange )           :: interp
    REAL(prec)                 :: s(1:3)
    REAL(prec)                 :: x(1:3)
   
-      x(1) = interp % Interpolate_3D( myHex % x, s )
-      x(2) = interp % Interpolate_3D( myHex % y, s )
-      x(3) = interp % Interpolate_3D( myHex % z, s )
+      x(1) = interp % Interpolate_3D( myElements % x, s )
+      x(2) = interp % Interpolate_3D( myElements % y, s )
+      x(3) = interp % Interpolate_3D( myElements % z, s )
   
  END FUNCTION CalculateLocation_HexElements
 !
@@ -757,7 +809,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myHex <td> HexElements <td> An intialized and constructed 
+!!   <tr> <td> in <th> myElements <td> HexElements <td> An intialized and constructed 
 !!                                                        HexElements data structure
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
 !!                                                  contains the computational mesh.
@@ -772,17 +824,17 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
- FUNCTION CalculateMetrics_HexElements( myHex, interp, s ) RESULT( covT )
+ FUNCTION CalculateMetrics_HexElements( myElements, interp, s ) RESULT( covT )
 
    IMPLICIT NONE
-   CLASS( HexElements ) :: myHex
+   CLASS( HexElements ) :: myElements
    TYPE( Lagrange )           :: interp
    REAL(prec)                 :: s(1:3)
    REAL(prec)                 :: covT(1:3,1:3)
  
-      covT(1,1:3) = interp % Differentiate_3D( myHex % x, s )
-      covT(2,1:3) = interp % Differentiate_3D( myHex % y, s )
-      covT(3,1:3) = interp % Differentiate_3D( myHex % z, s )
+      covT(1,1:3) = interp % Differentiate_3D( myElements % x, s )
+      covT(2,1:3) = interp % Differentiate_3D( myElements % y, s )
+      covT(3,1:3) = interp % Differentiate_3D( myElements % z, s )
 
  END FUNCTION CalculateMetrics_HexElements
 !
@@ -831,7 +883,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in <th> myHex <td> HexElements <td> An intialized and constructed 
+!!   <tr> <td> in <th> myElements <td> HexElements <td> An intialized and constructed 
 !!                                                        HexElements data structure
 !!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
 !!                                                  contains the computational mesh.
@@ -847,10 +899,10 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE CalculateComputationalCoordinates_HexElements( myHex, interp, x, s, success )
+ SUBROUTINE CalculateComputationalCoordinates_HexElements( myElements, interp, x, s, success )
 
    IMPLICIT NONE
-   CLASS( HexElements ), INTENT(in) :: myHex
+   CLASS( HexElements ), INTENT(in) :: myElements
    TYPE( Lagrange ), INTENT(in)           :: interp
    REAL(prec), INTENT(in)                 :: x(1:3)
    REAL(prec), INTENT(out)                :: s(1:3)
@@ -869,7 +921,7 @@ END SUBROUTINE UpdateHost_HexElements
       DO i = 1, newtonMax
      
          ! Calculate the physical coordinate associated with the computational coordinate guess
-         thisX = myHex % CalculateLocation( interp, thisS )
+         thisX = myElements % CalculateLocation( interp, thisS )
      
          ! Calculate the residual
          dr = x - thisX
@@ -886,7 +938,7 @@ END SUBROUTINE UpdateHost_HexElements
             RETURN
          ENDIF
         
-         A = myHex % CalculateMetrics( interp, thisS ) ! Calculate the covariant metric tensor
+         A = myElements % CalculateMetrics( interp, thisS ) ! Calculate the covariant metric tensor
        !  print*, A
          Ainv = Invert_3x3( A ) ! Invert the covariant metric tensor.
                                 ! This matrix is ivertable as long as the Jacobian is non-zero.
@@ -936,7 +988,7 @@ END SUBROUTINE UpdateHost_HexElements
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
-!!   <tr> <td> in/out <th> myHex <td> HexElements <td> 
+!!   <tr> <td> in/out <th> myElements <td> HexElements <td> 
 !!                         On <B>input</B>, an intialized and constructed HexElements data 
 !!                         structure <BR>
 !!                         On <B>output</B>, the physical coordinates and metric terms have been
@@ -951,23 +1003,23 @@ END SUBROUTINE UpdateHost_HexElements
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE ScaleGeometry_HexElements( myHex, interp, xScale, yScale, zScale )
+ SUBROUTINE ScaleGeometry_HexElements( myElements, interp, xScale, yScale, zScale )
 
    IMPLICIT NONE
-   CLASS( HexElements ), INTENT(inout) :: myHex
+   CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    REAL(prec), INTENT(in)                    :: xScale, yScale, zScale
    
-         myHex % x = xScale*( myHex % x )
-         myHex % y = yScale*( myHex % y )
-         myHex % z = zScale*( myHex % z )
-         myHex % xBound = xScale*( myHex % xBound )
-         myHex % yBound = yScale*( myHex % yBound )
-         myHex % zBound = zScale*( myHex % zBound )
+         myElements % x = xScale*( myElements % x )
+         myElements % y = yScale*( myElements % y )
+         myElements % z = zScale*( myElements % z )
+         myElements % xBound = xScale*( myElements % xBound )
+         myElements % yBound = yScale*( myElements % yBound )
+         myElements % zBound = zScale*( myElements % zBound )
 
          ! Update the boundary metrics -- normals and normal lengths
-         CALL myHex % GenerateMetrics( interp )
-         CALL myHex % GenerateBoundaryMetrics( interp  )
+         CALL myElements % GenerateMetrics( interp )
+         CALL myElements % GenerateBoundaryMetrics( interp  )
          
  END SUBROUTINE ScaleGeometry_HexElements
 !

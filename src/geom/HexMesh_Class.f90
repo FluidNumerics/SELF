@@ -5,13 +5,6 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-!> \file HexMesh_Class.f90
-!! Contains the \ref HexMesh_Class module, and <BR>
-!! defines the HexMesh data-structure.
-
-!> \defgroup HexMesh_Class HexMesh_Class 
-!! This module defines the HexMesh data-structure and its associated routines.
-
 MODULE HexMesh_Class
 
 ! src/common/
@@ -24,80 +17,30 @@ USE Quadrature
 USE Lagrange_Class
 ! src/geom/
 USE Surface_Class
-USE MappedGeometry_3D_Class
-USE HexElement_Class
-USE Face_Class
+USE HexElements_Class
+USE Faces_Class
 USE Node_Class
-
-
 
 IMPLICIT NONE
 
-!> \addtogroup HexMesh_Class 
-!! @{
-
-!> \struct HexMesh
-!!  The HexMesh data structure defines attributes needed to describe a conformal unstructured
-!!  spectral element mesh. 
-!!
-!!  The HexMesh data-structure brings together nodes, elements, faces, and mapped-geometry 
-!!  data-structures to completely describe a 3-D spectral element mesh. Type-bound procedures are 
-!!  provided for filling in mesh connectivity information including element-to-element neighbors, 
-!!  edge-to-element IDs, element-to-node IDs, and edge-to-node IDs.
-!!
-!! <H2> HexMesh </H2>
-!! <H3> Attributes </H3>
-!!    <table>
-!!       <tr> <th> nElems <td> INTEGER  <td> Number of elements in the mesh
-!!       <tr> <th> nNodes <td> INTEGER <td>  Number of nodes in the mesh
-!!       <tr> <th> nEdges <td> INTEGER <td>  Number of edges in the mesh
-!!       <tr> <th> elements(1:nElems) <td> HexElement <td> Element-to-node and element-to-neighbor
-!!                                                           information
-!!       <tr> <th> geom(1:nElems) <td> MappedGeometry_3D <td> Computational-to-physical space
-!!                                                            mapping information.
-!!       <tr> <th> nodes(1:nNodes) <td> Node <td> Node ID's with node position
-!!       <tr> <th> faces(1:nEdges) <td> Edge <td> Face-to-node and face-to-element information
-!!       <tr> <th> cornerMap(1:3,1:8) <td> INTEGER <td> "Convenience array" for relating the 
-!!                                          computational coordinates to local corner-node ID's
-!!                                          (primarily for use use GAUSS_LOBATTO quadratures)
-!!       <tr> <th> sideMap(1:6) <td> INTEGER <td> "Convenience array" for relating the 
-!!                                          computational coordinates to local side ID's
-!!                                          (primarily for use use GAUSS_LOBATTO quadratures)
-!!       <tr> <th> faceMap(1:2,1:6) <td> INTEGER <td>  "Convenience array" for relating the 
-!!                                          local face ID's to local corner-node ID's
-!!       <tr> <th> edgeFaceMap(1:2,1:4) <td> INTEGER <td>  "Convenience array" for relating the 
-!!                                          local face-edge ID's to local corner-node ID's
-!!    </table>
-!!
-!! <H3> Procedures </H3>
-!!    See \ref HexMesh_Class for more information. The first column lists the "call-name" and 
-!!    the second column lists the name of routine that is aliased onto the call-name.
-!!    <table>
-!!       <tr> <th> Initialize <td> Initialize_HexMesh
-!!       <tr> <th> Trash <td> Trash_HexMesh
-!!       <tr> <th> ConstructElementNeighbors <td> ConstructElementNeighbors_HexMesh
-!!       <tr> <th> ConstructFaces <td> ConstructFaces_HexMesh
-!!       <tr> <th> ScaleTheMesh <td> ScaleTheMesh_HexMesh
-!!       <tr> <th> LoadDefaultMesh <td> LoadDefaultMesh_HexMesh
-!!       <tr> <th> ReadPeaceMeshFile <td> ReadPeaceMeshFile_HexMesh
-!!       <tr> <th> WritePeaceMeshFile <td> WritePeaceMeshFile_HexMesh
-!!       <tr> <th> WriteTecplot <td> WriteTecplot_HexMesh
-!!       <tr> <th> WriteMaterialTecplot <td> WriteMaterialTecplot_HexMesh
-!!    </table>
-!!
-
-!>@}
+! HexMesh
+!  The HexMesh data structure defines attributes needed to describe a conformal unstructured
+!  spectral element mesh. 
+!
+!  The HexMesh data-structure brings together nodes, elements, faces, and mapped-geometry 
+!  data-structures to completely describe a 3-D spectral element mesh. Type-bound procedures are 
+!  provided for filling in mesh connectivity information including element-to-element neighbors, 
+!  edge-to-element IDs, element-to-node IDs, and edge-to-node IDs.
+!
  
    TYPE HexMesh 
-      INTEGER                                 :: nElems, nNodes, nFaces
-      TYPE( HexElement ), ALLOCATABLE         :: elements(:) !
-      TYPE( MappedGeometry_3D ), ALLOCATABLE  :: geom(:)
-      TYPE( Node  ), ALLOCATABLE              :: nodes(:)  
-      TYPE( Face ), ALLOCATABLE               :: faces(:)
-      INTEGER                                 :: cornerMap(1:3,1:nHexNodes) 
-      INTEGER                                 :: sideMap(1:nHexFaces) 
-      INTEGER                                 :: faceMap(1:nQuadNodes,1:nHexFaces) 
-      INTEGER                                 :: edgeFaceMap(1:2,1:nQuadEdges)
+      TYPE( HexElements ) :: elements 
+      TYPE( Nodes  )      :: nodes
+      TYPE( Faces )       :: faces
+      INTEGER             :: cornerMap(1:3,1:8) 
+      INTEGER             :: sideMap(1:6) 
+      INTEGER             :: faceMap(1:4,1:6) 
+      INTEGER             :: edgeFaceMap(1:2,1:4)
 
       CONTAINS
       
@@ -191,7 +134,7 @@ IMPLICIT NONE
       ! of the hex-element.
       ! 
       ! The face ordering is  1 - South, 2 - East, 3 - North, 4 - West, 5 - Bottom, 6 - Top 
-      myHexmesh % sideMap(1:nHexFaces) = (/ 0, N, N, 0, 0, N /)
+      myHexmesh % sideMap(1:6) = (/ 0, N, N, 0, 0, N /)
       
       ! The eight corner nodes in an approximation that uses Gauss-Lobatto points, typically CG-type
       ! methods, have fixed computational coordinates. The corner node numbering  starts in the 
@@ -211,9 +154,9 @@ IMPLICIT NONE
       ! The computational coordinates for the corner nodes is given assuming a Gauss-Lobatto 
       ! computational mesh is used. Note that for a Gauss mesh, the corner nodes are not included.
       
-      myHexmesh % cornerMap(1, 1:nHexNodes) = (/ 0, N, N,  0,  0, N, N,  0 /)
-      myHexmesh % cornerMap(2, 1:nHexNodes) = (/ 0,  0, N, N,  0,  0, N, N /)
-      myHexmesh % cornerMap(3, 1:nHexNodes) = (/ 0,  0,  0,  0, N, N, N, N /)
+      myHexmesh % cornerMap(1, 1:8) = (/ 0, N, N,  0,  0, N, N,  0 /)
+      myHexmesh % cornerMap(2, 1:8) = (/ 0,  0, N, N,  0,  0, N, N /)
+      myHexmesh % cornerMap(3, 1:8) = (/ 0,  0,  0,  0, N, N, N, N /)
       
       ! Mesh construction usually begins with the specification of elements and the corner nodes, in
       ! addition to the element geometry. From the element-to-node connectivity, we need to construct
@@ -225,12 +168,12 @@ IMPLICIT NONE
       ! can be determined. The first index cycles over the nodes which make up the face in a 
       ! counterclockwise direction. The second index cycles over the faces in the element.
       
-      myHexMesh % faceMap(1:nQuadNodes, south)  = (/ 1, 2, 6, 5 /)
-      myHexMesh % faceMap(1:nQuadNodes, east)   = (/ 2, 3, 7, 6 /)
-      myHexMesh % faceMap(1:nQuadNodes, north)  = (/ 4, 3, 7, 8 /)
-      myHexMesh % faceMap(1:nQuadNodes, west)   = (/ 1, 4, 8, 5 /)
-      myHexMesh % faceMap(1:nQuadNodes, bottom) = (/ 1, 2, 3, 4 /)
-      myHexMesh % faceMap(1:nQuadNodes, top)    = (/ 5, 6, 7, 8 /)
+      myHexMesh % faceMap(1:4, south)  = (/ 1, 2, 6, 5 /)
+      myHexMesh % faceMap(1:4, east)   = (/ 2, 3, 7, 6 /)
+      myHexMesh % faceMap(1:4, north)  = (/ 4, 3, 7, 8 /)
+      myHexMesh % faceMap(1:4, west)   = (/ 1, 4, 8, 5 /)
+      myHexMesh % faceMap(1:4, bottom) = (/ 1, 2, 3, 4 /)
+      myHexMesh % faceMap(1:4, top)    = (/ 5, 6, 7, 8 /)
       
       ! Each of the faces can be identified by their four corner nodes. The geometry of the faces
       ! is described using two computational coordinates between [-1,1]X[-1,1]. This 2-D computational
@@ -244,8 +187,8 @@ IMPLICIT NONE
       ! the edge of the face with the first being the southern edge and increasing the second index
       ! proceeds counter-clockwise.
       
-      myHexmesh % edgeFaceMap(1, 1:nQuadEdges) = (/ 1, 2, 4, 1 /)
-      myHexmesh % edgeFaceMap(2, 1:nQuadEdges) = (/ 2, 3, 3, 4 /)
+      myHexmesh % edgeFaceMap(1, 1:4) = (/ 1, 2, 4, 1 /)
+      myHexmesh % edgeFaceMap(2, 1:4) = (/ 2, 3, 3, 4 /)
       
       ! The number of nodes, the number of elements, and the number of faces are stored in this data
       ! structure for convenience. In another implementation (planned for the next version), the 
@@ -371,7 +314,7 @@ IMPLICIT NONE
    ! LOCAL
    TYPE( KeyRing ) :: KeyCabinet(1:myHexMesh % nNodes)
    INTEGER :: nEls, nNodes, iEl, nFaces, k, j  
-   INTEGER :: locNodeIDs(1:nQuadNodes), globNodeIDs(1:nQuadNodes)
+   INTEGER :: locNodeIDs(1:4), globNodeIDs(1:4)
    INTEGER :: keyRingID, globFaceID
    INTEGER :: N
    LOGICAL :: keyExists
@@ -387,16 +330,16 @@ IMPLICIT NONE
 
       DO iEl = 1, nEls ! Loop over the elements in the mesh
 
-         DO k = 1, nHexFaces ! Loop over the faces of each element
+         DO k = 1, 6 ! Loop over the faces of each element
 
             ! In this first step, we want to identify the unique global node ID's for this face
             ! To do this, we start by gathering the local (to the element) node ID's.
-            DO j = 1, nQuadNodes   
+            DO j = 1, 4   
                locNodeIDs(j) = myHexMesh % faceMap(j,k) ! starting local node for this Face
             ENDDO
             
             ! Now, we extract, for this element, the global node ID's for each local node ID
-            DO j = 1, nQuadNodes 
+            DO j = 1, 4 
                globNodeIDs(j) = myHexMesh % elements(iEl) % nodeIDs( locNodeIDs(j) )
             ENDDO
             ! Our key cabinet has many key-rings with each key-ring containing a set of notched keys.
@@ -413,7 +356,7 @@ IMPLICIT NONE
             ! necessarily in the same order). If the face has been built already, the face ID is 
             ! returned in globFaceID and the logical, "keyExists", is set to TRUE. Otherwise, 
             ! globFaceID is set to zero and "keyExsists" is set to FALSE.
-            CALL KeyCabinet(keyRingID) % FindDataForNotches( globNodeIDS, nQuadNodes, &
+            CALL KeyCabinet(keyRingID) % FindDataForNotches( globNodeIDS, 4, &
                                                              globFaceID, keyExists )
             ! Here is where the conditional processing begins. 
             ! 
@@ -425,7 +368,7 @@ IMPLICIT NONE
             IF( .NOT.(keyExists) )then ! this is a new face
 
                nFaces = nFaces + 1
-               CALL KeyCabinet(keyRingID) % AddToList( nFaces, globNodeIDs, nQuadNodes )
+               CALL KeyCabinet(keyRingID) % AddToList( nFaces, globNodeIDs, 4 )
                
             ENDIF
             
@@ -452,16 +395,16 @@ IMPLICIT NONE
 
       DO iEl = 1, nEls ! Loop over the elements in the mesh
 
-         DO k = 1, nHexFaces ! Loop over the faces of each element
+         DO k = 1, 6 ! Loop over the faces of each element
 
             ! In this first step, we want to identify the unique global node ID's for this face
             ! To do this, we start by gathering the local (to the element) node ID's.
-            DO j = 1, nQuadNodes   
+            DO j = 1, 4   
                locNodeIDs(j) = myHexMesh % faceMap(j,k) ! starting local node for this Face
             ENDDO
             
             ! Now, we extract, for this element, the global node ID's for each local node ID
-            DO j = 1, nQuadNodes 
+            DO j = 1, 4 
                globNodeIDs(j) = myHexMesh % elements(iEl) % nodeIDs(locNodeIDs(j))
             ENDDO
             
@@ -479,7 +422,7 @@ IMPLICIT NONE
             ! necessarily in the same order). If the face has been built already, the face ID is 
             ! returned in globFaceID and the logical, "keyExists", is set to TRUE. Otherwise, 
             ! globFaceID is set to zero and "keyExsists" is set to FALSE.
-            CALL KeyCabinet(keyRingID) % FindDataForNotches( globNodeIDS, nQuadNodes, &
+            CALL KeyCabinet(keyRingID) % FindDataForNotches( globNodeIDS, 4, &
                                                              globFaceID, keyExists )
 
             ! Here is where the conditional processing begins. 
@@ -505,7 +448,7 @@ IMPLICIT NONE
 
                ! First, we store the key-ring information
                nFaces = nFaces + 1
-               CALL KeyCabinet(keyRingID) % AddToList( nFaces, globNodeIDs, nQuadNodes )
+               CALL KeyCabinet(keyRingID) % AddToList( nFaces, globNodeIDs, 4 )
 
                ! Now, we set the primary element information
                myHexMesh % faces( nFaces ) % faceID          = nFaces
@@ -791,9 +734,9 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout) :: myHexMesh
    INTEGER, INTENT(in)             :: faceID
-   INTEGER, INTENT(in)             :: secondaryNodes(1:nQuadNodes)
+   INTEGER, INTENT(in)             :: secondaryNodes(1:4)
    ! Local
-   INTEGER :: primaryNodes(1:nQuadNodes)
+   INTEGER :: primaryNodes(1:4)
    INTEGER :: nShifts, i, N
    LOGICAL :: theyMatch 
    
@@ -802,17 +745,17 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       nShifts = 0
       theyMatch = .FALSE.
       
-      DO i = 1, nQuadNodes
+      DO i = 1, 4
 
          ! First, we compare the primary and secondary nodes. This routine returns a zero 
          ! if the arrays match, and a one if they do not match.
-         theyMatch = CompareArray( primaryNodes, secondaryNodes, nQuadNodes )
+         theyMatch = CompareArray( primaryNodes, secondaryNodes, 4 )
          
          IF( theyMatch )THEN
             EXIT
          ELSE
             nShifts = nShifts + 1
-            CALL ForwardShift( primaryNodes, nQuadNodes )
+            CALL ForwardShift( primaryNodes, 4 )
          ENDIF
          
       ENDDO
@@ -998,13 +941,13 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout)  :: myHexMesh
 #ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)    :: interp
+   TYPE( Lagrange_Cuda ), INTENT(in):: interp
 #else
    TYPE( Lagrange ), INTENT(in)     :: interp
 #endif
    INTEGER, INTENT(in)              :: nXelem, nYelem, nZelem
    ! LOCAL
-   TYPE( Surface ) :: boundSurfs(1:nHexFaces)
+   TYPE( Surface ) :: boundSurfs(1:6)
 
    REAL(prec) :: x, y, z, zb, zi, dxElem, dyElem, dzElem
    REAL(prec) :: x1(1:nDims), x2(1:nDims), x3(1:nDims), x4(1:nDims)
@@ -1012,7 +955,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    REAL(prec), ALLOCATABLE :: xc(:,:,:), s(:)
 
    INTEGER :: nNodes, nElems, nFaces, gPolyDeg
-   INTEGER :: nodes(1:nHexNodes)
+   INTEGER :: nodes(1:8)
    INTEGER :: n1, n2, n3, n4
    INTEGER :: iNode, iEl, iSide, iX, iY, iZ, i, j
 
@@ -1069,7 +1012,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! Do the element information
       xc = ZERO
       ! Do the initial build for the parametric surfaces
-      DO iSide = 1, nHexFaces
+      DO iSide = 1, 6
          CALL boundSurfs(iSide) % Build( xc, s, gPolyDeg, nDims ) 
       ENDDO
    
@@ -1091,7 +1034,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                myHexMesh % elements(iEl) % nodeIDs = nodes
          
                IF( iZ == 1 )THEN
-                    DO iSide = 1, nHexFaces ! Loop over the sides of the quads
+                    DO iSide = 1, 6 ! Loop over the sides of the quads
    
                      ! To build the current face, we construct a plane that passes through
                      ! the four corner nodes. Here, we grab the global node ID's for the four
@@ -1141,7 +1084,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    
                   ENDDO             
                ELSE
-                  DO iSide = 1, nHexFaces ! Loop over the sides of the quads
+                  DO iSide = 1, 6 ! Loop over the sides of the quads
    
                      ! To build the current face, we construct a plane that passes through
                      ! the four corner nodes. Here, we grab the global node ID's for the four
@@ -1196,7 +1139,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! Clear up memory
       DEALLOCATE( s, xc )
 
-      DO iSide = 1, nHexFaces
+      DO iSide = 1, 6
          CALL boundSurfs(iSide) % Trash( )
       ENDDO
   
@@ -1213,7 +1156,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 #endif
    INTEGER, INTENT(in)              :: nXelem, nYelem, nZelem
    ! LOCAL
-   TYPE( Surface ) :: boundSurfs(1:nHexFaces)
+   TYPE( Surface ) :: boundSurfs(1:6)
 
    REAL(prec) :: x, y, z, zi, zb, dxElem, dyElem, dzElem, dxi
    REAL(prec) :: x1(1:nDims), x2(1:nDims), x3(1:nDims), x4(1:nDims)
@@ -1221,7 +1164,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    REAL(prec), ALLOCATABLE :: xc(:,:,:), s(:)
 
    INTEGER :: nNodes, nElems, nFaces, gPolyDeg
-   INTEGER :: nodes(1:nHexNodes)
+   INTEGER :: nodes(1:8)
    INTEGER :: n1, n2, n3, n4
    INTEGER :: iNode, iEl, iSide, iX, iY, iZ, i, j
 
@@ -1254,7 +1197,9 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! ---- Initialize the mesh (empty) ---- !
       CALL myHexMesh % Initialize( nNodes, nElems, nFaces, interp % N ) 
       
-      
+      IF( ASSOCIATED( TopographicShape ) )THEN
+        PRINT*, "ASSOCIATED!"
+      ENDIF
       ! ---- Read in the corner nodes ---- !
       DO iZ = 1, nZElem + 1
          zi = dZElem*(REAL(iZ-1,prec))
@@ -1265,7 +1210,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                x = dXElem*(REAL(iX-1,prec))
                
                zb = TopographicShape( x, y )
-               
+
                z = zb*(1.0_prec-zi) + 1.0_prec*zi
                
                myHexMesh % nodes(iNode) % x = x
@@ -1279,7 +1224,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! Do the element information
       xc = 0.0_prec
       ! Do the initial build for the parametric surfaces
-      DO iSide = 1, nHexFaces
+      DO iSide = 1, 6
          CALL boundSurfs(iSide) % Build( xc, s, gPolyDeg, nDims ) 
       ENDDO
    
@@ -1301,7 +1246,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                myHexMesh % elements(iEl) % nodeIDs = nodes
 
                IF( iZ == 1 )THEN
-                    DO iSide = 1, nHexFaces ! Loop over the sides of the quads
+                    DO iSide = 1, 6 ! Loop over the sides of the quads
    
                      ! To build the current face, we construct a plane that passes through
                      ! the four corner nodes. Here, we grab the global node ID's for the four
@@ -1352,7 +1297,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    
                   ENDDO             
                ELSE
-                  DO iSide = 1, nHexFaces ! Loop over the sides of the quads
+                  DO iSide = 1, 6 ! Loop over the sides of the quads
    
                      ! To build the current face, we construct a plane that passes through
                      ! the four corner nodes. Here, we grab the global node ID's for the four
@@ -1407,7 +1352,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! Clear up memory
       DEALLOCATE( s, xc )
 
-      DO iSide = 1, nHexFaces
+      DO iSide = 1, 6
          CALL boundSurfs(iSide) % Trash( )
       ENDDO
   
@@ -1486,7 +1431,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       DO iEl = 1, nElems
          READ( fUnit, rec=k ) myHexMesh % elements(iEl) % elementID 
          k = k+1
-         DO i = 1, nHexNodes
+         DO i = 1, 8
             READ( fUnit, rec=k ) myHexMesh % elements(iEl) % nodeIDs(i)
             k = k+1
          ENDDO
@@ -1582,7 +1527,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                ENDDO
             ENDDO
          ENDDO
-         DO l = 1, nHexFaces
+         DO l = 1, 6
             DO j = 0, N
                DO i = 0, N
                   READ( fUnit, rec=k ) myHexMesh % geom(iEl) % xBound(i,j,l)
@@ -1677,7 +1622,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
       DO iEl = 1, nElems
          WRITE( fUnit, rec=k ) myHexMesh % elements(iEl) % elementID 
          k = k+1
-         DO i = 1, nHexNodes
+         DO i = 1, 8
             WRITE( fUnit, rec=k ) myHexMesh % elements(iEl) % nodeIDs(i)
             k = k+1
          ENDDO
@@ -1773,7 +1718,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
                ENDDO
             ENDDO
          ENDDO
-         DO l = 1, nHexFaces
+         DO l = 1, 6
             DO j = 0, N
                DO i = 0, N
                   WRITE( fUnit, rec=k ) myHexMesh % geom(iEl) % xBound(i,j,l)
@@ -1840,7 +1785,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
    INTEGER :: fUnit, k, i, j, l, row, col, n1, n2, n3, n4
    REAL(prec) :: xc(0:1,0:1,1:3), s(0:1)
    REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3), c1(1:3), c2(1:3)
-   TYPE( Surface ) :: boundSurfs(1:nHexFaces)
+   TYPE( Surface ) :: boundSurfs(1:6)
 
 
       PRINT*, 'Mesh File : '//TRIM( filename )
@@ -1898,7 +1843,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
       s(1) = 1.0_prec
       xc   = 0.0_prec
       ! Do the initial build for the parametric surfaces
-      DO iSide = 1, nHexFaces
+      DO iSide = 1, 6
          CALL boundSurfs(iSide) % Build( xc, s, 1, nDims ) 
       ENDDO
       
@@ -1909,7 +1854,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
       ! blending is used to construct the internal mesh geometry.
       DO iEl = 1, nElems
       
-          DO iSide = 1, nHexFaces ! Loop over the sides of the quads
+          DO iSide = 1, 6 ! Loop over the sides of the quads
 
              ! To build the current face, we construct a plane that passes through
              ! the four corner nodes. Here, we grab the global node ID's for the four
@@ -1952,7 +1897,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
       ENDDO
       
       
-      DO iSide = 1, nHexFaces
+      DO iSide = 1, 6
          CALL boundSurfs(iSide) % Trash( ) 
       ENDDO
   
