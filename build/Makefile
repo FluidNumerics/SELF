@@ -202,16 +202,6 @@ HexElements_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
 BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/BoundaryCommunicator_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
-
-	
-Curve_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRCDIR}geom/Curve_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/Curve_Class.f90 -o $@
-
-HexElement_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}geom/HexElement_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/HexElement_Class.f90 -o $@
-
-
-
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surface_Class.o MappedGeometry_3D_Class.o HexElement_Class.o \
                   Face_Class.o Node_Class.o ${SRCDIR}geom/HexMesh_Class.f90
