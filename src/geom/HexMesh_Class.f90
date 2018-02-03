@@ -208,7 +208,7 @@ IMPLICIT NONE
       ! requires the use of dynamic storage, e.g. a linked-list like structure for elements, edges,
       ! and nodes.
 
-      CALL myHexMesh % elements % Build( nElements, N )
+      CALL myHexMesh % elements % Build( N, nElements )
       CALL myHexmesh % nodes % Build( nNodes )
       CALL myHexMesh % faces % Build( nFaces, N )
 
@@ -771,8 +771,6 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
          ENDDO
       ENDDO
    
-      PRINT*, 'iFace : ',iFace
-
        DO k = 1, myHexMesh % faces % nFaces
          DO j = 0, myHexMesh % elements % N
             DO i = 0, myHexMesh % elements % N
@@ -1060,18 +1058,17 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    INTEGER, INTENT(in)              :: nXelem, nYelem, nZelem
    LOGICAL, INTENT(in)              :: doublyPeriodic
    ! Logical
-   TYPE( Surfaces ), ALLOCATABLE :: boundSurfs(:)
+   TYPE( Surfaces ) :: boundSurfs
    REAL(prec) :: x, y, z, zb, zi, dxElem, dyElem, dzElem
    REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
    REAL(prec) :: c1(1:3), c2(1:3)
-   REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:)
+   REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:), weights(:)
 
    INTEGER :: nNodes, nElements, nFaces, gPolyDeg
    INTEGER :: nodes(1:8)
    INTEGER :: n1, n2, n3, n4
-   INTEGER :: iNode, iEl, iSide, iX, iY, iZ, i, j
+   INTEGER :: iNode, iEl, iSide, iX, iY, iZ, i, j, iSurf
 
-      
       dxElem = 1.0_prec/nXElem
       dyElem = 1.0_prec/nYElem
       dzElem = 1.0_prec/nZElem
@@ -1087,12 +1084,13 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       PRINT*, 'nElements : ', nElements
       PRINT*, 'gPolyDeg  : ', gPolyDeg
 
-      ! Generate the chebyshev points of order gPolyDeg
+      ! Generate the Legendre-Gauss Lobatto points of order gPolyDeg
       ! These are the points used to define the parametric
       ! curves for the element boundaries
 
-      ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6) )
-      s = UniformPoints( -1.0_prec, 1.0_prec, gPolyDeg )
+      ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6*nElements), weights(0:gpolyDeg) )
+      s = UniformPoints(-1.0_prec,1.0_prec,gPolyDeg)
+!      CALL LegendreQuadrature( gPolyDeg, s, weights, GAUSS_LOBATTO )
       
       ! ---- Build the mesh (empty) ---- !
       CALL myHexMesh % Build( nNodes, nElements, nFaces, interp % N ) 
@@ -1121,12 +1119,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
   
       ! Do the element information
       xc = 0.0_prec
-      ! Do the initial build for the parametric surfaces
-      ALLOCATE( boundSurfs(1:nElements) )
-      DO iEl = 1, nElements
-         CALL boundSurfs(iEl) % Build( s, gPolyDeg, 6 ) 
-      ENDDO
-   
+      CALL boundSurfs % Build( s, gPolyDeg, 6*nElements ) 
+        
       DO iZ = 1, nZElem
          DO iY = 1, nYElem
             DO iX = 1, nXElem
@@ -1147,6 +1141,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                IF( iZ == 1 )THEN
                     DO iSide = 1, 6 ! Loop over the sides of the quads
    
+                     iSurf = iSide + 6*(iEl-1)
                      ! To build the current face, we construct a plane that passes through
                      ! the four corner nodes. Here, we grab the global node ID's for the four
                      ! corner nodes.
@@ -1177,8 +1172,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                            ! Transfinite inerpolation with linear blending is used to construct the face
                               c1(1:2) = ( 0.5_prec*(x2(1:2)-x1(1:2))*(1.0_prec+s(i)) + x1(1:2) ) 
                               c2(1:2) = ( 0.5_prec*(x3(1:2)-x4(1:2))*(1.0_prec+s(i)) + x4(1:2) )
-                              xc(i,j,1:2,iSide) = 0.5_prec*(c2(1:2)-c1(1:2))*(1.0_prec+s(j)) + c1(1:2)
-                              xc(i,j,3,iSide)   = TopographicShape( xc(i,j,1,iSide), xc(i,j,2,iSide) )
+                              xc(i,j,1:2,iSurf) = 0.5_prec*(c2(1:2)-c1(1:2))*(1.0_prec+s(j)) + c1(1:2)
+                              xc(i,j,3,iSurf)   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
                            ENDDO
                         ENDDO
                      ELSE
@@ -1187,19 +1182,19 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                            ! Transfinite inerpolation with linear blending is used to construct the face
                               c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                               c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                              xc(i,j,1:3,iSide) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+                              xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                            ENDDO
                         ENDDO                     
                      ENDIF
+                     !PRINT*,'iSurf', iSurf
    
                   ENDDO             
                   
-                  CALL boundSurfs(iEl) % Set_Surfaces( xc ) 
-
                ELSE
 
                   DO iSide = 1, 6 ! Loop over the sides of the quads
    
+                     iSurf = iSide + 6*(iEl-1)
                      ! To build the current face, we construct a plane that passes through
                      ! the four corner nodes. Here, we grab the global node ID's for the four
                      ! corner nodes.
@@ -1226,16 +1221,16 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                        
                      DO j = 0, gPolyDeg
                         DO i = 0, gPolyDeg
-                        ! Transfinite inerpolation with linear blending is used to construct the face
+                        ! Transfinite interpolation with linear blending is used to construct the face
                            c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                            c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                           xc(i,j,1:3,iSide) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+                           xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                         ENDDO
                      ENDDO
+                     !PRINT*,'iSurf', iSurf
    
                   ENDDO
 
-                  CALL boundSurfs(iEl) % Set_Surfaces( xc ) 
 
                ENDIF
                
@@ -1243,6 +1238,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
          ENDDO
       ENDDO ! iEl, cycle over the elements
 
+      CALL boundSurfs % Set_Surfaces( xc ) 
       CALL myHexMesh % elements % GenerateMesh( interp, boundSurfs )
       CALL myHexMesh % elements % GenerateMetrics( interp )
 
@@ -1257,12 +1253,9 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       CALL myHexMesh % ConstructElementNeighbors( )
       
       ! Clear up memory
-      DEALLOCATE( s, xc )
+      DEALLOCATE( s, xc, weights )
 
-      DO iEl = 1, nElements
-         CALL boundSurfs(iEl) % Trash( )
-      ENDDO
-      DEALLOCATE( boundSurfs )
+      CALL boundSurfs % Trash( )
   
 #ifdef HAVE_CUDA
       CALL myHexMesh % UpdateDevice( )
@@ -1570,7 +1563,7 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       k = k+1
 
       PRINT*, 'nNodes    : ', nNodes
-      PRINT*, 'nElements    : ', nElements
+      PRINT*, 'nElements : ', nElements
       PRINT*, 'nFaces    : ', nFaces
       PRINT*, 'N         : ', N
 
@@ -1734,10 +1727,11 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
    CHARACTER(3)  :: shortDummy
    INTEGER :: nNodes, nElements, nFaces
    INTEGER :: iFace, iNode, iEl, iSide
-   INTEGER :: fUnit, k, i, j, l, row, col, n1, n2, n3, n4
-   REAL(prec) :: xc(0:1,0:1,1:3,1:6), s(0:1)
+   INTEGER :: fUnit, k, i, j, l, row, col, n1, n2, n3, n4, iSurf
+   REAL(prec) :: s(0:1)
+   REAL(prec), ALLOCATABLE :: xc(:,:,:,:)
    REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3), c1(1:3), c2(1:3)
-   TYPE( Surfaces ), ALLOCATABLE :: boundSurfs(:)
+   TYPE( Surfaces ) :: boundSurfs
 
 
       PRINT*, 'Mesh File : '//TRIM( filename )
@@ -1770,6 +1764,8 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       PRINT*, 'N         : ', interp % N
       ! ---- Build the quadrature mesh (empty) ---- !
       CALL myHexMesh % Build( nNodes, nElements, nFaces, interp % N ) 
+
+      ALLOCATE( xc(0:1,0:1,1:3,1:6*nElements) )
       
       ! Read in the corner node positions
       DO iNode = 1, nNodes
@@ -1795,10 +1791,7 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       s(1) = 1.0_prec
       xc   = 0.0_prec
 
-      ALLOCATE( boundSurfs(1:nElements) )
-      DO iEl = 1, nElements
-         CALL boundSurfs(iEl) % Build( s, 1, 6 ) 
-      ENDDO
+      CALL boundSurfs % Build( s, 1, 6*nElements ) 
       
       
       ! For now, we assume tri-linear mappings so that the geometry can be constructed
@@ -1809,6 +1802,7 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       
           DO iSide = 1, 6 ! Loop over the sides of the quads
 
+             iSurf = iSide + (iEl-1)*6
              ! To build the current face, we construct a plane that passes through
              ! the four corner nodes. Here, we grab the global node ID's for the four
              ! corner nodes.
@@ -1838,23 +1832,22 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
                    ! Transfinite inerpolation with linear blending is used to construct the face
                    c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                    c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                   xc(i,j,1:3,iSide) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+                   xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                 ENDDO
              ENDDO
 
           ENDDO
-          CALL boundSurfs(iEl) % Set_Surfaces( xc ) 
       ENDDO
 
+      CALL boundSurfs % Set_Surfaces( xc ) 
       CALL myHexMesh % elements % GenerateMesh( interp, boundSurfs )
       CALL myHexMesh % elements % GenerateMetrics( interp )
       
       
-      DO iEl = 1, nElements
-         CALL boundSurfs(iEl) % Trash( ) 
-      ENDDO
+      CALL boundSurfs % Trash( ) 
+
+      DEALLOCATE( xc )
   
-      DEALLOCATE( boundSurfs )
 
 #ifdef HAVE_CUDA
       CALL myHexMesh % UpdateDevice( )

@@ -113,6 +113,8 @@ SUBROUTINE Build_Surfaces( mySurfaces, nodes, N, nSurfaces )
               mySurfaces % dxds(1:2,0:N,0:N,1:3,1:nSurfaces) )
 
     CALL mySurfaces % interp % Build( N, N, nodes, nodes )
+    mySurfaces % x = 0.0_prec
+    mySurfaces % dxds = 0.0_prec
 
 #ifdef HAVE_CUDA
 

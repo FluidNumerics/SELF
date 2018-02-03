@@ -108,7 +108,7 @@ PROGRAM MeshGenerator_3D
                                               params % nXelem, &
                                               params % nYelem, &
                                               params % nZelem, &
-                                              .TRUE. )
+                                              .FALSE. )
          ENDIF
 
       nElems = mesh % elements % nElements

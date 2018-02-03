@@ -359,7 +359,7 @@ END SUBROUTINE UpdateHost_HexElements
    IMPLICIT NONE
    CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)        :: interp
-   TYPE( Surfaces ), INTENT(in)        :: theSurfaces(1:myElements % nElements)
+   TYPE( Surfaces ), INTENT(in)        :: theSurfaces
    ! Local
    INTEGER    :: i, j, k, iEl
    REAL(prec) :: s(0:interp % N), p, x(1:3)
@@ -371,7 +371,7 @@ END SUBROUTINE UpdateHost_HexElements
       DO k = 0, interp % N
          DO j = 0,interp % N
             DO i = 0,interp % N
-               x = TransfiniteInterpolation( theSurfaces(iEl), s(i), s(j), s(k) )
+               x = TransfiniteInterpolation( theSurfaces, iEl, s(i), s(j), s(k) )
                myElements % x(i,j,k,1:3,iEl) = x
             ENDDO
          ENDDO 
@@ -382,22 +382,22 @@ END SUBROUTINE UpdateHost_HexElements
          DO i = 0, interp % N
 
             p = -1.0_prec ! south boundary
-            myElements % xBound(i,j,1:3,south,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), p, s(j) )
+            myElements % xBound(i,j,1:3,south,iEl) = TransfiniteInterpolation( theSurfaces, iEl, s(i), p, s(j) )
 
             ! west boundary
-            myElements % xBound(i,j,1:3,west,iEl) = TransfiniteInterpolation( theSurfaces(iEl), p, s(i), s(j) )
+            myElements % xBound(i,j,1:3,west,iEl) = TransfiniteInterpolation( theSurfaces, iEl, p, s(i), s(j) )
 
             ! bottom boundary
-            myElements % xBound(i,j,1:3,bottom,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), s(j), p )
+            myElements % xBound(i,j,1:3,bottom,iEl) = TransfiniteInterpolation( theSurfaces, iEl, s(i), s(j), p )
             
             p = 1.0_prec  ! north boundary
-            myElements % xBound(i,j,1:3,north,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), p, s(j) )
+            myElements % xBound(i,j,1:3,north,iEl) = TransfiniteInterpolation( theSurfaces, iEl, s(i), p, s(j) )
 
             ! east boundary
-            myElements % xBound(i,j,1:3,east,iEl) = TransfiniteInterpolation( theSurfaces(iEl), p, s(i), s(j) )
+            myElements % xBound(i,j,1:3,east,iEl) = TransfiniteInterpolation( theSurfaces, iEl, p, s(i), s(j) )
 
             ! top boundary
-            myElements % xBound(i,j,1:3,top,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), s(j), p )
+            myElements % xBound(i,j,1:3,top,iEl) = TransfiniteInterpolation( theSurfaces, iEl, s(i), s(j), p )
 
          ENDDO
       ENDDO
@@ -492,7 +492,7 @@ END SUBROUTINE UpdateHost_HexElements
    ! Local
    INTEGER    :: i, j, k, iEl, N
    REAL(prec) :: cv(1:3,1:3)
-   REAL(prec) :: xGradient(1:3,0:N,0:N,0:N,1:3,1:myElements % nElements)
+   REAL(prec) :: xGradient(1:3,0:interp % N,0:interp % N,0:interp % N,1:3,1:myElements % nElements)
    REAL(prec) :: covT(0:interp % N, 0:interp % N, 0:interp % N, 1:3,1:3,1:myElements % nElements)
    REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
    REAL(prec) :: Dv(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
@@ -508,13 +508,14 @@ END SUBROUTINE UpdateHost_HexElements
 
       DO iEl = 1, myElements % nElements 
       
-      covT(0:N,0:N,0:N,1,1:3,iEl) = xGradient(1:3,0:N,0:N,0:N,1,iEl)
-      covT(0:N,0:N,0:N,2,1:3,iEl) = xGradient(1:3,0:N,0:N,0:N,2,iEl)
-      covT(0:N,0:N,0:N,3,1:3,iEl) = xGradient(1:3,0:N,0:N,0:N,3,iEl)
-
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
+
+              covT(i,j,k,1,1:3,iEl) = xGradient(1:3,i,j,k,1,iEl)
+              covT(i,j,k,2,1:3,iEl) = xGradient(1:3,i,j,k,2,iEl)
+              covT(i,j,k,3,1:3,iEl) = xGradient(1:3,i,j,k,3,iEl)
+
 
                myElements % dxds(i,j,k,iEl) = covT(i,j,k,1,1,iEl)
                myElements % dxdp(i,j,k,iEl) = covT(i,j,k,1,2,iEl)
@@ -813,10 +814,14 @@ END SUBROUTINE UpdateHost_HexElements
          ! Update the boundary metrics -- normals and normal lengths
          CALL myElements % GenerateMetrics( interp )
          CALL myElements % GenerateBoundaryMetrics( interp  )
+
+#ifdef HAVE_CUDA
+         CALL myElements % UpdateDevice( ) 
+#endif
          
  END SUBROUTINE ScaleGeometry_HexElements
 !
- FUNCTION TransfiniteInterpolation( boundingSurfaces, a, b, c ) RESULT( P )
+ FUNCTION TransfiniteInterpolation( boundingSurfaces, iEl, a, b, c ) RESULT( P )
  ! TransfiniteInterpolation
  !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the 
  !  bidirectional mapping at xi^1 = a, xi^2 = b, xi^3 = c. The boundary of the computational 
@@ -826,6 +831,7 @@ END SUBROUTINE UpdateHost_HexElements
  ! DECLARATIONS
    IMPLICIT NONE
    TYPE( Surfaces )  :: boundingSurfaces
+   INTEGER           :: iEl
    REAL(prec)       :: a, b, c
    REAL(prec)       :: P(1:3)
    ! LOCAL
@@ -833,7 +839,7 @@ END SUBROUTINE UpdateHost_HexElements
    REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
    REAL(prec)  :: ref(1:2)
-   INTEGER     :: i, j
+   INTEGER     :: i, j, iSurf
    
       ref = (/ -1.0_prec, 1.0_prec /)
 
@@ -847,12 +853,12 @@ END SUBROUTINE UpdateHost_HexElements
 
       ! The bounding surfaces need to be evaluated at the provided computational coordinates
 
-      wSurf = boundingSurfaces % Evaluate( (/b, c/), west )   ! west
-      eSurf = boundingSurfaces % Evaluate( (/b, c/), east )   ! east
-      sSurf = boundingSurfaces % Evaluate( (/a, c/), south )  ! south
-      nSurf = boundingSurfaces % Evaluate( (/a, c/), north )  ! north
-      bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom ) ! bottom
-      tSurf = boundingSurfaces % Evaluate( (/a, b/), top )    ! top
+      wSurf = boundingSurfaces % Evaluate( (/b, c/), west + (iEl-1)*6 )   ! west
+      eSurf = boundingSurfaces % Evaluate( (/b, c/), east + (iEl-1)*6 )   ! east
+      sSurf = boundingSurfaces % Evaluate( (/a, c/), south + (iEl-1)*6 )  ! south
+      nSurf = boundingSurfaces % Evaluate( (/a, c/), north + (iEl-1)*6 )  ! north
+      bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
+      tSurf = boundingSurfaces % Evaluate( (/a, b/), top + (iEl-1)*6 )    ! top
 
       ! P1 contains the interpolation in the first computational coordinate
       ! The first computational coordinate is assumed to vary between the (computational) east and
@@ -877,23 +883,23 @@ END SUBROUTINE UpdateHost_HexElements
          ! Now we need to compute the tensor product of the first and second computational direction 
          ! interpolants and subtract from P1.
 
-         wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west )
-         eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east )
+         wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west + (iEl-1)*6 )
+         eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east + (iEl-1)*6 )
          P1 = P1 - l2(i)*( wSurf*l1(1) + eSurf*l1(2) )
          
          ! Now we need to compute the tensor product of the first and third computational direction 
          ! interpolants and subtract from P1.
 
-         wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west )
-         eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east )
+         wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west + (iEl-1)*6 )
+         eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east + (iEl-1)*6 )
 
          P1 = P1 - l3(i)*( wSurf*l1(1) + eSurf*l1(2) )
       
          ! Now we need to compute the tensor product of the second and third computational direction 
          ! interpolants and subtract from P2.
 
-         sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south )
-         nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north )
+         sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south + (iEl-1)*6 )
+         nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north + (iEl-1)*6 )
 
          P2 = P2 - l3(i)*( sSurf*l2(1) + nSurf*l2(2) )
       
@@ -903,8 +909,8 @@ END SUBROUTINE UpdateHost_HexElements
       DO j = 1,2
          DO i = 1,2
          
-            wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west )
-            eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east )
+            wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west + (iEl-1)*6 )
+            eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east + (iEl-1)*6 )
             P3 = P3 + l2(i)*l3(j)*( wSurf*l1(1) + eSurf*l1(2) )
          
          ENDDO
