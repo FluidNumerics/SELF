@@ -19,7 +19,7 @@ USE Lagrange_Class
 USE Surfaces_Class
 USE HexElements_Class
 USE Faces_Class
-USE Node_Class
+USE Nodes_Class
 
 IMPLICIT NONE
 
@@ -211,13 +211,13 @@ IMPLICIT NONE
 
       CALL myHexMesh % elements % Build( nElements, N )
       CALL myHexmesh % nodes % Build( nNodes )
-      CALL myHexMesh % faces % Build( nFaces )
+      CALL myHexMesh % faces % Build( nFaces, N )
 
 #ifdef HAVE_CUDA
 
-      ALLOCATE( myHexMesh % cornerMap_dev(1:3,1:8) 
-                myHexMesh % sideMap_dev(1:6) 
-                myHexMesh % faceMap_dev(1:4,1:6) 
+      ALLOCATE( myHexMesh % cornerMap_dev(1:3,1:8), &
+                myHexMesh % sideMap_dev(1:6), & 
+                myHexMesh % faceMap_dev(1:4,1:6), & 
                 myHexMesh % edgeFaceMap_dev(1:2,1:4) )
 
       myHexMesh % cornerMap_dev   = myHexMesh % cornerMap
@@ -261,9 +261,9 @@ IMPLICIT NONE
       CALL myHexMesh % faces % Trash( )
 
 #ifdef HAVE_CUDA
-      DEALLOCATE( myHexMesh % cornerMap_dev
-                  myHexMesh % sideMap_dev 
-                  myHexMesh % faceMap_dev 
+      DEALLOCATE( myHexMesh % cornerMap_dev, &
+                  myHexMesh % sideMap_dev, & 
+                  myHexMesh % faceMap_dev, & 
                   myHexMesh % edgeFaceMap_dev )
 #endif
 
@@ -325,7 +325,7 @@ IMPLICIT NONE
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout) :: myHexMesh
    ! LOCAL
-   TYPE( KeyRing ) :: KeyCabinet(1:myHexMesh % nNodes)
+   TYPE( KeyRing ) :: KeyCabinet(1:myHexMesh % nodes % nNodes)
    INTEGER :: nEls, nNodes, iEl, nFaces, i, j, k, ii, jj 
    INTEGER :: locNodeIDs(1:4), globNodeIDs(1:4)
    INTEGER :: keyRingID, globFaceID
@@ -399,7 +399,7 @@ IMPLICIT NONE
       ! Re-allocate space for the mesh Faces
 
       CALL myHexMesh % Faces % Trash( )
-      CALL myHexMesh % Faces % Build( nFaces )
+      CALL myHexMesh % Faces % Build( nFaces, N )
       nFaces = 0
 
       DO iEl = 1, nEls ! Loop over the elements in the mesh
@@ -461,7 +461,7 @@ IMPLICIT NONE
 
                ! Now, we set the primary element information
                myHexMesh % faces % faceID(nFaces)         = nFaces
-               myHexMesh % faces % nodeIDs(nFaces)        = globNodeIDs
+               myHexMesh % faces % nodeIDs(1:4,nFaces)    = globNodeIDs
                myHexMesh % faces % elementIDs(1,nFaces)   = iEl
                myHexMesh % faces % elementSides(1,nFaces) = k
                ! Now we default the secondary element information and the swap flag
@@ -524,7 +524,7 @@ IMPLICIT NONE
 
 #ifdef HAVE_CUDA
 
-      CALL myHexMesh % Update_Device( )
+      CALL myHexMesh % faces % UpdateDevice( )
 
 #endif
 
@@ -542,8 +542,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       nFaces = (nZElem+1)*nXElem*nYElem + (nXElem+1)*nYElem*nZElem + (nYElem+1)*nXElem*nZElem
       
       ! Re-allocate space for the mesh Faces
-      CALL myHexMesh % Trash( )
-      CALL myHexMesh % Build( nFaces )
+      CALL myHexMesh % faces % Trash( )
+      CALL myHexMesh % faces % Build( nFaces, myHexMesh % elements % N )
 
       iFace = 0
       
@@ -753,8 +753,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       PRINT*, 'iFace : ',iFace
 
        DO k = 1, myHexMesh % faces % nFaces
-         DO j = 0, N
-            DO i = 0, N
+         DO j = 0, myHexMesh % elements % N
+            DO i = 0, myHexMesh % elements % N
 
                IF( i == 0 )THEN
                   IF( j == 0 )THEN
@@ -794,7 +794,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 
 #ifdef HAVE_CUDA
 
-      CALL myHexMesh % Update_Device( )
+      CALL myHexMesh % faces % UpdateDevice( )
 
 #endif
 
@@ -851,7 +851,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    INTEGER :: nShifts, i, N
    LOGICAL :: theyMatch 
    
-      primaryNodes = myHexMesh % faces % nodeIDs(faceID)
+      primaryNodes = myHexMesh % faces % nodeIDs(1:4,faceID)
       N = myHexMesh % elements % N
       nShifts = 0
       theyMatch = .FALSE.
@@ -938,8 +938,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    INTEGER :: e(1:2), s(1:2), iFace
   
       DO iFace = 1, myHexMesh % faces % nFaces
-         e = myHexMesh % faces % elementIDs(iFace)
-         s = myHexMesh % faces % elementSides(iFace)
+         e = myHexMesh % faces % elementIDs(1:2,iFace)
+         s = myHexMesh % faces % elementSides(1:2,iFace)
          IF( e(2) > 0 )THEN
             myHexMesh % elements % neighbors(s(1), e(1))      = e(2)
             myHexMesh % elements % neighbors(ABS(s(2)), e(2)) = e(1)
@@ -991,8 +991,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 
 #ifdef HAVE_CUDA
 
-      CALL myHexMesh % elements % Update_Device( )
-      CALL myHexMesh % nodes % Update_Device( ) 
+      CALL myHexMesh % elements % UpdateDevice( )
+      CALL myHexMesh % nodes % UpdateDevice( ) 
 
 #endif
 
@@ -1070,7 +1070,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! These are the points used to define the parametric
       ! curves for the element boundaries
 
-      ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:nElements) )
+      ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6) )
       s = UniformPoints( -1.0_prec, 1.0_prec, gPolyDeg )
       
       ! ---- Build the mesh (empty) ---- !
@@ -1121,7 +1121,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                nodes(7) = iX + 1 + (iY)*(nXElem+1) + (iZ)*(nXElem+1)*(nYElem+1)    ! NorthEast
                nodes(8) = iX + (iY)*(nXElem+1) + (iZ)*(nXElem+1)*(nYElem+1)        ! NorthWest
 
-               myHexMesh % elements % nodeIDs(iEl) = nodes
+               myHexMesh % elements % nodeIDs(1:8,iEl) = nodes
          
                IF( iZ == 1 )THEN
                     DO iSide = 1, 6 ! Loop over the sides of the quads
@@ -1134,21 +1134,21 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                      n3 = nodes( myHexMesh % faceMap(3,iSide) ) 
                      n4 = nodes( myHexMesh % faceMap(4,iSide) ) 
    
-                     x1(1) = myHexMesh % nodes % x(n1)
-                     x1(2) = myHexMesh % nodes % y(n1)
-                     x1(3) = myHexMesh % nodes % z(n1)
+                     x1(1) = myHexMesh % nodes % x(1,n1)
+                     x1(2) = myHexMesh % nodes % x(2,n1)
+                     x1(3) = myHexMesh % nodes % x(3,n1)
                      
-                     x2(1) = myHexMesh % nodes % x(n2)
-                     x2(2) = myHexMesh % nodes % y(n2)
-                     x2(3) = myHexMesh % nodes % z(n2)
+                     x2(1) = myHexMesh % nodes % x(1,n2)
+                     x2(2) = myHexMesh % nodes % x(2,n2)
+                     x2(3) = myHexMesh % nodes % x(3,n2)
                      
-                     x3(1) = myHexMesh % nodes % x(n3)
-                     x3(2) = myHexMesh % nodes % y(n3)
-                     x3(3) = myHexMesh % nodes % z(n3)
+                     x3(1) = myHexMesh % nodes % x(1,n3)
+                     x3(2) = myHexMesh % nodes % x(2,n3)
+                     x3(3) = myHexMesh % nodes % x(3,n3)
                      
-                     x4(1) = myHexMesh % nodes % x(n4)
-                     x4(2) = myHexMesh % nodes % y(n4)
-                     x4(3) = myHexMesh % nodes % z(n4)
+                     x4(1) = myHexMesh % nodes % x(1,n4)
+                     x4(2) = myHexMesh % nodes % x(2,n4)
+                     x4(3) = myHexMesh % nodes % x(3,n4)
                      
                      IF( iSide == BOTTOM )THEN
                         DO j = 0, gPolyDeg
@@ -1156,8 +1156,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                            ! Transfinite inerpolation with linear blending is used to construct the face
                               c1(1:2) = ( 0.5_prec*(x2(1:2)-x1(1:2))*(1.0_prec+s(i)) + x1(1:2) ) 
                               c2(1:2) = ( 0.5_prec*(x3(1:2)-x4(1:2))*(1.0_prec+s(i)) + x4(1:2) )
-                              xc(i,j,1:2,iEl) = 0.5_prec*(c2(1:2)-c1(1:2))*(1.0_prec+s(j)) + c1(1:2)
-                              xc(i,j,3,iSide,iEl)   = TopographicShape( xc(i,j,1), xc(i,j,2) )
+                              xc(i,j,1:2,iSide) = 0.5_prec*(c2(1:2)-c1(1:2))*(1.0_prec+s(j)) + c1(1:2)
+                              xc(i,j,3,iSide)   = TopographicShape( xc(i,j,1,iSide), xc(i,j,2,iSide) )
                            ENDDO
                         ENDDO
                      ELSE
@@ -1166,14 +1166,14 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                            ! Transfinite inerpolation with linear blending is used to construct the face
                               c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                               c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                              xc(i,j,1:3,iSide,iEl) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+                              xc(i,j,1:3,iSide) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                            ENDDO
                         ENDDO                     
                      ENDIF
    
                   ENDDO             
                   
-                  CALL boundSurfs(iEl) % Set( xc ) 
+                  CALL boundSurfs(iEl) % Set_Surfaces( xc ) 
 
                ELSE
 
@@ -1187,35 +1187,35 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                      n3 = nodes( myHexMesh % faceMap(3,iSide) ) 
                      n4 = nodes( myHexMesh % faceMap(4,iSide) ) 
    
-                     x1(1) = myHexMesh % nodes % x(n1)
-                     x1(2) = myHexMesh % nodes % y(n1)
-                     x1(3) = myHexMesh % nodes % z(n1)
+                     x1(1) = myHexMesh % nodes % x(1,n1)
+                     x1(2) = myHexMesh % nodes % x(2,n1)
+                     x1(3) = myHexMesh % nodes % x(3,n1)
                                                       
-                     x2(1) = myHexMesh % nodes % x(n2)
-                     x2(2) = myHexMesh % nodes % y(n2)
-                     x2(3) = myHexMesh % nodes % z(n2)
+                     x2(1) = myHexMesh % nodes % x(1,n2)
+                     x2(2) = myHexMesh % nodes % x(2,n2)
+                     x2(3) = myHexMesh % nodes % x(3,n2)
                                                       
-                     x3(1) = myHexMesh % nodes % x(n3)
-                     x3(2) = myHexMesh % nodes % y(n3)
-                     x3(3) = myHexMesh % nodes % z(n3)
+                     x3(1) = myHexMesh % nodes % x(1,n3)
+                     x3(2) = myHexMesh % nodes % x(2,n3)
+                     x3(3) = myHexMesh % nodes % x(3,n3)
                                                       
-                     x4(1) = myHexMesh % nodes % x(n4)
-                     x4(2) = myHexMesh % nodes % y(n4)
-                     x4(3) = myHexMesh % nodes % z(n4)
+                     x4(1) = myHexMesh % nodes % x(1,n4)
+                     x4(2) = myHexMesh % nodes % x(2,n4)
+                     x4(3) = myHexMesh % nodes % x(3,n4)
                        
                      DO j = 0, gPolyDeg
                         DO i = 0, gPolyDeg
                         ! Transfinite inerpolation with linear blending is used to construct the face
                            c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                            c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                           xc(i,j,1:3,iSide,iEl) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+                           xc(i,j,1:3,iSide) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                         ENDDO
                      ENDDO
    
                   ENDDO
 
-                 
-                  CALL boundSurfs(iEl) % Set( xc ) 
+                  CALL boundSurfs(iEl) % Set_Surfaces( xc ) 
+
                ENDIF
                
             ENDDO
@@ -1374,11 +1374,11 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ! ---- Read in the corner nodes ---- !
       k = 1
       DO iNode = 1, nNodes  ! Loop over the nodes in the file
-         READ( fUnit, rec=k ) myHexMesh % nodes % x(iNode)
+         READ( fUnit, rec=k ) myHexMesh % nodes % x(1,iNode)
          k = k+1
-         READ( fUnit, rec=k ) myHexMesh % nodes % y(iNode)
+         READ( fUnit, rec=k ) myHexMesh % nodes % x(2,iNode)
          k = k+1
-         READ( fUnit, rec=k ) myHexMesh % nodes % z(iNode)
+         READ( fUnit, rec=k ) myHexMesh % nodes % x(3,iNode)
          k = k+1
       ENDDO
 
@@ -1488,9 +1488,9 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 
 #ifdef HAVE_CUDA
 
-      CALL myHexMesh % elements % Update_Device( )
-      CALL myHexMesh % faces % Update_Device( )
-      CALL myHexMesh % nodes % Update_Device( ) 
+      CALL myHexMesh % elements % UpdateDevice( )
+      CALL myHexMesh % faces % UpdateDevice( )
+      CALL myHexMesh % nodes % UpdateDevice( ) 
 
 #endif
   
@@ -1613,11 +1613,11 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       ! ---- Read in the corner nodes ---- !
       k = 1
       DO iNode = 1, nNodes  ! Loop over the nodes in the file
-         WRITE( fUnit, rec=k ) myHexMesh % nodes % x(iNode)
+         WRITE( fUnit, rec=k ) myHexMesh % nodes % x(1,iNode)
          k = k+1                                           
-         WRITE( fUnit, rec=k ) myHexMesh % nodes % y(iNode)
+         WRITE( fUnit, rec=k ) myHexMesh % nodes % x(2,iNode)
          k = k+1                                           
-         WRITE( fUnit, rec=k ) myHexMesh % nodes % z(iNode)
+         WRITE( fUnit, rec=k ) myHexMesh % nodes % x(3,iNode)
          k = k+1
       ENDDO
 
@@ -1722,9 +1722,9 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
    INTEGER :: nNodes, nElements, nFaces
    INTEGER :: iFace, iNode, iEl, iSide
    INTEGER :: fUnit, k, i, j, l, row, col, n1, n2, n3, n4
-   REAL(prec) :: xc(0:1,0:1,1:3), s(0:1)
+   REAL(prec) :: xc(0:1,0:1,1:3,1:6), s(0:1)
    REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3), c1(1:3), c2(1:3)
-   TYPE( Surface ) :: boundSurfs(1:6)
+   TYPE( Surfaces ), ALLOCATABLE :: boundSurfs(:)
 
 
       PRINT*, 'Mesh File : '//TRIM( filename )
@@ -1753,7 +1753,7 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       nFaces = 1
 
       PRINT*, 'nNodes    : ', nNodes
-      PRINT*, 'nElements    : ', nElements
+      PRINT*, 'nElements : ', nElements
       PRINT*, 'N         : ', interp % N
       ! ---- Build the quadrature mesh (empty) ---- !
       CALL myHexMesh % Build( nNodes, nElements, nFaces, interp % N ) 
@@ -1768,9 +1768,9 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       
       ! ---- Read in the element connectivity ---- !
       DO iEl = 1, nElements
-         myHexMesh % elements(iEl) % elementID = iEl
+         myHexMesh % elements % elementID(iEl) = iEl
          READ( fUnit, * ) i, j, shortDummy, &
-                          myHexMesh % elements(iEl) % nodeIDs(1:8)
+                          myHexMesh % elements % nodeIDs(1:8,iEl)
       ENDDO 
       CLOSE( fUnit )
       
@@ -1781,9 +1781,10 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       s(0) = -1.0_prec
       s(1) = 1.0_prec
       xc   = 0.0_prec
-      ! Do the initial build for the parametric surfaces
-      DO iSide = 1, 6
-         CALL boundSurfs(iSide) % Build( xc, s, 1, 3 ) 
+
+      ALLOCATE( boundSurfs(1:nElements) )
+      DO iEl = 1, nElements
+         CALL boundSurfs(iEl) % Build( s, 1, 6 ) 
       ENDDO
       
       
@@ -1798,48 +1799,59 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
              ! To build the current face, we construct a plane that passes through
              ! the four corner nodes. Here, we grab the global node ID's for the four
              ! corner nodes.
-             n1 = myHexMesh % elements(iEl) % nodeIDs( myHexMesh % faceMap(1,iSide) )
-             n2 = myHexMesh % elements(iEl) % nodeIDs( myHexMesh % faceMap(2,iSide) )
-             n3 = myHexMesh % elements(iEl) % nodeIDs( myHexMesh % faceMap(3,iSide) ) 
-             n4 = myHexMesh % elements(iEl) % nodeIDs( myHexMesh % faceMap(4,iSide) ) 
+             n1 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(1,iSide), iEl )
+             n2 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(2,iSide), iEl )
+             n3 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(3,iSide), iEl ) 
+             n4 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(4,iSide), iEl ) 
 
-             x1(1) = myHexMesh % nodes(n1) % x
-             x1(2) = myHexMesh % nodes(n1) % y
-             x1(3) = myHexMesh % nodes(n1) % z
-               
-             x2(1) = myHexMesh % nodes(n2) % x
-             x2(2) = myHexMesh % nodes(n2) % y
-             x2(3) = myHexMesh % nodes(n2) % z
-               
-             x3(1) = myHexMesh % nodes(n3) % x
-             x3(2) = myHexMesh % nodes(n3) % y
-             x3(3) = myHexMesh % nodes(n3) % z
-               
-             x4(1) = myHexMesh % nodes(n4) % x
-             x4(2) = myHexMesh % nodes(n4) % y
-             x4(3) = myHexMesh % nodes(n4) % z
+             x1(1) = myHexMesh % nodes % x(1,n1)
+             x1(2) = myHexMesh % nodes % x(2,n1)
+             x1(3) = myHexMesh % nodes % x(3,n1)
+                                              
+             x2(1) = myHexMesh % nodes % x(1,n2)
+             x2(2) = myHexMesh % nodes % x(2,n2)
+             x2(3) = myHexMesh % nodes % x(3,n2)
+                                              
+             x3(1) = myHexMesh % nodes % x(1,n3)
+             x3(2) = myHexMesh % nodes % x(2,n3)
+             x3(3) = myHexMesh % nodes % x(3,n3)
+                                              
+             x4(1) = myHexMesh % nodes % x(1,n4)
+             x4(2) = myHexMesh % nodes % x(2,n4)
+             x4(3) = myHexMesh % nodes % x(3,n4)
                  
              DO j = 0, 1
                 DO i = 0, 1
                    ! Transfinite inerpolation with linear blending is used to construct the face
                    c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                    c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                   xc(i,j,1:3) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+                   xc(i,j,1:3,iSide) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                 ENDDO
              ENDDO
-             CALL boundSurfs(iSide) % Reset( xc ) 
 
           ENDDO
-          CALL myHexMesh % geom(iEl) % GenerateMesh( interp, boundSurfs )
-          CALL myHexMesh % geom(iEl) % GenerateMetrics( interp )
-      
+          CALL boundSurfs(iEl) % Set_Surfaces( xc ) 
       ENDDO
+
+      CALL myHexMesh % elements % GenerateMesh( interp, boundSurfs )
+      CALL myHexMesh % elements % GenerateMetrics( interp )
       
       
-      DO iSide = 1, 6
-         CALL boundSurfs(iSide) % Trash( ) 
+      DO iEl = 1, nElements
+         CALL boundSurfs(iEl) % Trash( ) 
       ENDDO
   
+      DEALLOCATE( boundSurfs )
+
+#ifdef HAVE_CUDA
+
+      CALL myHexMesh % elements % UpdateDevice( )
+      CALL myHexMesh % nodes % UpdateDevice( )
+      CALL myHexMesh % faces % UpdateDevice( )
+
+#endif
+
+
  END SUBROUTINE ReadUCDMeshFile_HexMesh
 !
 !> \addtogroup HexMesh_Class 
@@ -1873,10 +1885,10 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
   CLASS(HexMesh), INTENT(inout)     :: myHexMesh
   CHARACTER(*), INTENT(in), OPTIONAL :: filename  
   ! Local
-  INTEGER :: iS, iP, iQ, N, iEl, fUnit, eID
+  INTEGER :: i,j,k, N, iEl, fUnit, eID
   CHARACTER(7) :: zoneID
 
-      N = myHexMesh % geom(1) % N
+      N = myHexMesh % elements % N
 
     IF( PRESENT(filename) )THEN
     
@@ -1894,29 +1906,29 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
     WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "Jacobian", "dxds", "dxdp", "dxdq", "dyds", "dydp", "dydq", "dzds", "dzdp", "dzdq" '
 
 
-    DO iEl = 1, myHexMesh % nElements
+    DO iEl = 1, myHexMesh % elements % nElements
 
-       eID = myHexMesh % elements(iEl) % elementID
+       eID = myHexMesh % elements % elementID(iEl)
        WRITE(zoneID,'(I7.7)') eID
        WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',N+1,', J=',N+1,', K=',N+1,',F=POINT'
 
-       DO iQ = 0, N
-          DO iP = 0, N
-             DO iS = 0,N
+       DO k = 0, N
+          DO j = 0, N
+             DO i = 0,N
 
-                WRITE(fUnit,'(13(E15.7,1x))')  myHexMesh % geom(iEl) % x(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % y(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % z(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % J(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dxds(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dxdp(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dxdq(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dyds(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dydp(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dydq(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dzds(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dzdp(iS,iP,iQ), &
-                               myHexMesh % geom(iEl) % dzdq(iS,iP,iQ)
+                WRITE(fUnit,'(13(E15.7,1x))')  myHexMesh % elements % x(i,j,k,1,iEl), &
+                                               myHexMesh % elements % x(i,j,k,2,iEl), &
+                                               myHexMesh % elements % x(i,j,k,3,iEl), &
+                                               myHexMesh % elements % J(i,j,k,iEl), &
+                                               myHexMesh % elements % dxds(i,j,k,iEl), &
+                                               myHexMesh % elements % dxdp(i,j,k,iEl), &
+                                               myHexMesh % elements % dxdq(i,j,k,iEl), &
+                                               myHexMesh % elements % dyds(i,j,k,iEl), &
+                                               myHexMesh % elements % dydp(i,j,k,iEl), &
+                                               myHexMesh % elements % dydq(i,j,k,iEl), &
+                                               myHexMesh % elements % dzds(i,j,k,iEl), &
+                                               myHexMesh % elements % dzdp(i,j,k,iEl), &
+                                               myHexMesh % elements % dzdq(i,j,k,iEl)
              ENDDO
           ENDDO
       ENDDO
@@ -1966,13 +1978,13 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
 
    IMPLICIT NONE
    CLASS(HexMesh), INTENT(inout)      :: myHexMesh
-   REAL(prec), INTENT(in)             :: materialIDs(1:myHexMesh % nElements)
+   REAL(prec), INTENT(in)             :: materialIDs(1:myHexMesh % elements % nElements)
    CHARACTER(*), INTENT(in), OPTIONAL :: filename  
    ! Local
-   INTEGER :: iS, iP, iQ, N, iEl,fUnit
+   INTEGER :: i, j, k, N, iEl,fUnit
    CHARACTER(7) :: zoneID
 
-      N = myHexMesh % geom(1) % N
+      N = myHexMesh % elements % N
 
       IF( PRESENT(filename) )THEN
          OPEN( UNIT=NEWUNIT(fUnit), &
@@ -1986,17 +1998,17 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
            
       WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "materialIDs" '
    
-      DO iEl = 1, myHexMesh % nElements
+      DO iEl = 1, myHexMesh % elements % nElements
    
-         WRITE(zoneID,'(I7.7)') myHexMesh % elements(iEl) % elementID
+         WRITE(zoneID,'(I7.7)') myHexMesh % elements % elementID(iEl)
          WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',N+1,', J=',N+1,', K=',N+1,',F=POINT'
    
-         DO iQ = 0, N
-            DO iP = 0, N
-               DO iS = 0, N
-                  WRITE(fUnit,*) myHexMesh % geom(iEl) % x(iS,iP,iQ), &
-                                 myHexMesh % geom(iEl) % y(iS,iP,iQ), &
-                                 myHexMesh % geom(iEl) % z(iS,iP,iQ), &
+         DO k = 0, N
+            DO j = 0, N
+               DO i = 0, N
+                  WRITE(fUnit,*) myHexMesh % elements % x(i,j,k,1,iEl), &
+                                 myHexMesh % elements % x(i,j,k,2,iEl), &
+                                 myHexMesh % elements % x(i,j,k,3,iEl), &
                                  materialIDs(iEl)
                ENDDO
             ENDDO

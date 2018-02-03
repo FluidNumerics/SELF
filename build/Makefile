@@ -203,8 +203,8 @@ BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 	${FC} ${OPT} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
-                  Quadrature.o Surface_Class.o MappedGeometry_3D_Class.o HexElement_Class.o \
-                  Face_Class.o Node_Class.o ${SRCDIR}geom/HexMesh_Class.f90
+                  Quadrature.o Surfaces_Class.o HexElements_Class.o \
+                  Faces_Class.o Nodes_Class.o ${SRCDIR}geom/HexMesh_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
