@@ -1,50 +1,50 @@
-! Nodes_Class.f90
-! 
+! Nodes_CLASS.f90
+!
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE Nodes_Class
+MODULE Nodes_CLASS
 
-USE ModelPrecision
+  USE ModelPrecision
 
-IMPLICIT NONE
+  IMPLICIT NONE
 
 
-!  The Nodes data structure defines attributes and type-bound procedures for working with the "node"
+!  The Nodes DATA structure defines attributes and TYPE-bound procedures for working with the "node"
 !  mesh primitive in an unstructured mesh.
 !
 !  Nodess, elements, edges, and faces form the foundation of describing an unstructured mesh. The
-!  relationship betweens nodes and elements and nodes and edges (or faces in 3-D) define the 
-!  connectivity in an unstructured mesh. In this data structure a node is defined through an
-!  integer ID, its type (INTERIOR or BOUNDARY), and its position. 
+!  relationship betweens nodes and elements and nodes and edges (or faces in 3-D) define the
+!  connectivity in an unstructured mesh. In this DATA structure a node is defined through an
+!  INTEGER ID, its TYPE (INTERIOR or BOUNDARY), and its position.
 
   TYPE Nodes
     INTEGER                 :: nNodes
     INTEGER, ALLOCATABLE    :: nodeID(:)
-    INTEGER, ALLOCATABLE    :: nodeType(:)
+    INTEGER, ALLOCATABLE    :: nodeTYPE(:)
     REAL(prec), ALLOCATABLE :: x(:,:)
 
-#ifdef HAVE_CUDA 
+#ifdef HAVE_CUDA
     INTEGER, DEVICE, ALLOCATABLE    :: nNodes_dev
     INTEGER, DEVICE, ALLOCATABLE    :: nodeID_dev(:)
-    INTEGER, DEVICE, ALLOCATABLE    :: nodeType_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE    :: nodeTYPE_dev(:)
     REAL(prec), DEVICE, ALLOCATABLE :: x_dev(:,:)
 #endif
 
-    CONTAINS
+  CONTAINS
 
-      PROCEDURE :: Build => Build_Nodes
-      PROCEDURE :: Trash => Trash_Nodes
+    PROCEDURE :: Build => Build_Nodes
+    PROCEDURE :: Trash => Trash_Nodes
 
-#ifdef HAVE_CUDA 
-      PROCEDURE :: UpdateDevice => UpdateDevice_Nodes
-      PROCEDURE :: UpdateHost   => UpdateHost_Nodes 
+#ifdef HAVE_CUDA
+    PROCEDURE :: UpdateDevice => UpdateDevice_Nodes
+    PROCEDURE :: UpdateHost   => UpdateHost_Nodes
 #endif
 
-      PROCEDURE :: ScalePosition => ScalePosition_Nodes
-     
+    PROCEDURE :: ScalePosition => ScalePosition_Nodes
+
   END TYPE Nodes
 
 CONTAINS
@@ -54,28 +54,28 @@ CONTAINS
     CLASS( Nodes ), INTENT(out) :: myNodes
     INTEGER, INTENT(in)         :: nNodes
 
-      myNodes % nNodes = nNodes
+    myNodes % nNodes = nNodes
 
-      ALLOCATE( myNodes % nodeID(1:nNodes), &
-                myNodes % nodeType(1:nNodes), &
-                myNodes % x(1:3,1:nNodes) )
-  
-      myNodes % nodeID   = 0
-      myNodes % nodeType = 0
-      myNodes % x        = 0.0_prec
+    ALLOCATE( myNodes % nodeID(1:nNodes), &
+      myNodes % nodeTYPE(1:nNodes), &
+      myNodes % x(1:3,1:nNodes) )
+
+    myNodes % nodeID   = 0
+    myNodes % nodeTYPE = 0
+    myNodes % x        = 0.0_prec
 
 #ifdef HAVE_CUDA
 
-      ALLOCATE( myNodes % nNodes_dev )
-      ALLOCATE( myNodes % nodeID_dev(1:nNodes), &
-                myNodes % nodeType_dev(1:nNodes), &
-                myNodes % x_dev(1:3,1:nNodes) )
+    ALLOCATE( myNodes % nNodes_dev )
+    ALLOCATE( myNodes % nodeID_dev(1:nNodes), &
+      myNodes % nodeTYPE_dev(1:nNodes), &
+      myNodes % x_dev(1:3,1:nNodes) )
 
-      myNodes % nNodes_dev = nNodes
+    myNodes % nNodes_dev = nNodes
 
-      myNodes % nodeID_dev   = 0
-      myNodes % nodeType_dev = 0
-      myNodes % x_dev        = 0.0_prec
+    myNodes % nodeID_dev   = 0
+    myNodes % nodeTYPE_dev = 0
+    myNodes % x_dev        = 0.0_prec
 
 #endif
 
@@ -88,16 +88,16 @@ CONTAINS
     CLASS( Nodes ), INTENT(inout) :: myNodes
 
 
-      DEALLOCATE( myNodes % nodeID, &
-                  myNodes % nodeType, &
-                  myNodes % x )
-  
+    DEALLOCATE( myNodes % nodeID, &
+      myNodes % nodeTYPE, &
+      myNodes % x )
+
 #ifdef HAVE_CUDA
 
-      DEALLOCATE( myNodes % nNodes_dev )
-      DEALLOCATE( myNodes % nodeID_dev, &
-                  myNodes % nodeType_dev, &
-                  myNodes % x_dev )
+    DEALLOCATE( myNodes % nNodes_dev )
+    DEALLOCATE( myNodes % nodeID_dev, &
+      myNodes % nodeTYPE_dev, &
+      myNodes % x_dev )
 
 #endif
 
@@ -110,9 +110,9 @@ CONTAINS
     CLASS( Nodes ), INTENT(inout) :: myNodes
 
 
-      myNodes % nodeID_dev   = myNodes % nodeID
-      myNodes % nodeType_dev = myNodes % nodeType
-      myNodes % x_dev        = myNodes % x
+    myNodes % nodeID_dev   = myNodes % nodeID
+    myNodes % nodeTYPE_dev = myNodes % nodeTYPE
+    myNodes % x_dev        = myNodes % x
 
 
   END SUBROUTINE UpdateDevice_Nodes
@@ -124,9 +124,9 @@ CONTAINS
     CLASS( Nodes ), INTENT(inout) :: myNodes
 
 
-      myNodes % nodeID   = myNodes % nodeID_dev
-      myNodes % nodeType = myNodes % nodeType_dev
-      myNodes % x        = myNodes % x_dev
+    myNodes % nodeID   = myNodes % nodeID_dev
+    myNodes % nodeTYPE = myNodes % nodeTYPE_dev
+    myNodes % x        = myNodes % x_dev
 
 
   END SUBROUTINE UpdateHost_Nodes
@@ -140,20 +140,20 @@ CONTAINS
     ! Local
     INTEGER :: i
 
-      DO i = 1, myNodes % nNodes
+    DO i = 1, myNodes % nNodes
 
-        myNodes % x(1,i) = xScale*myNodes % x(1,i)
-        myNodes % x(2,i) = yScale*myNodes % x(2,i)
-        myNodes % x(3,i) = zScale*myNodes % x(3,i)
+      myNodes % x(1,i) = xScale*myNodes % x(1,i)
+      myNodes % x(2,i) = yScale*myNodes % x(2,i)
+      myNodes % x(3,i) = zScale*myNodes % x(3,i)
 
-      ENDDO
+    ENDDO
 
 #ifdef HAVE_CUDA
 
-      CALL myNodes % UpdateDevice( )
- 
+    CALL myNodes % UpdateDevice( )
+
 #endif
 
- END SUBROUTINE ScalePosition_Nodes
- 
-END MODULE Nodes_Class
+  END SUBROUTINE ScalePosition_Nodes
+
+END MODULE Nodes_CLASS

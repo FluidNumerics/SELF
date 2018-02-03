@@ -211,7 +211,7 @@ MeshGenerator_3D.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Tim
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MeshGenerator_3D.f90
 
 
-SMeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
+MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
               LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
               TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o
 	${FC} ${OPT}  ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \

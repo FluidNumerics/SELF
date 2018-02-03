@@ -3,14 +3,14 @@ SHELL=/bin/bash
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 INITDIR=$(shell pwd)
 
-.PHONY: SMeshGen_3D \
+.PHONY: MeshGen_3D \
         initialize \
         integrate \
         test_stateExchange
 
-SMeshGen_3D :
-	make --directory=${SELFDIR}/build/ SMeshGen_3D
-	mv ${SELFDIR}/build/SMeshGen_3D ./
+MeshGen_3D :
+	make --directory=${SELFDIR}/build/ MeshGen_3D
+	mv ${SELFDIR}/build/MeshGen_3D ./
 
 initialize :
 	@echo 'Found SELF installation directory : '${SELFDIR}
