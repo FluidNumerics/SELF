@@ -16,7 +16,7 @@ USE KeyRing_Class
 USE Quadrature
 USE Lagrange_Class
 ! src/geom/
-USE Surface_Class
+USE Surfaces_Class
 USE HexElements_Class
 USE Faces_Class
 USE Node_Class
@@ -46,26 +46,29 @@ IMPLICIT NONE
       
       PROCEDURE :: Initialize => Initialize_HexMesh
       PROCEDURE :: Trash      => Trash_HexMesh
-       
+              
+      ! Built in "strucured" mesh construction
+      PROCEDURE :: ConstructDefaultMesh         => ConstructDefaultMesh_HexMesh
+      PROCEDURE :: ConstructDoublyPeriodicMesh  => ConstructDoublyPeriodicMesh_HexMesh
+      PROCEDURE :: ConstructDoublyPeriodicFaces => ConstructDoublyPeriodicFaces_HexMesh
+
+      ! Mesh Format readers/writers
+      PROCEDURE :: ReadSELFMeshFile    => ReadSELFMeshFile_HexMesh
+      PROCEDURE :: WriteSELFMeshFile   => WriteSELFMeshFile_HexMesh
+      PROCEDURE :: ReadUCDMeshFile     => ReadUCDMeshFile_HexMesh
+
+      ! Connectivity Routines
       PROCEDURE :: ConstructFaces            => ConstructFaces_HexMesh
       PROCEDURE :: ConstructElementNeighbors => ConstructElementNeighbors_HexMesh
       PROCEDURE :: DetermineOrientation      => DetermineOrientation_HexMesh 
       PROCEDURE :: ScaleTheMesh              => ScaleTheMesh_HexMesh
-      PROCEDURE :: LoadDefaultMesh           => LoadDefaultMesh_HexMesh
       
-      PROCEDURE :: ConstructDoublyPeriodicFaces => ConstructDoublyPeriodicFaces_HexMesh
-      PROCEDURE :: LoadDoublyPeriodicMesh       => LoadDoublyPeriodicMesh_HexMesh
-       
-      PROCEDURE :: ReadPeaceMeshFile    => ReadPeaceMeshFile_HexMesh
-      PROCEDURE :: WritePeaceMeshFile   => WritePeaceMeshFile_HexMesh
-      PROCEDURE :: ReadUCDMeshFile      => ReadUCDMeshFile_HexMesh
+      ! Visualization I/O Routines
       PROCEDURE :: WriteTecplot         => WriteTecplot_Hexmesh
       PROCEDURE :: WriteMaterialTecplot => WriteMaterialTecplot_Hexmesh
        
     END TYPE HexMesh
 
-
- INTEGER, PRIVATE, PARAMETER    :: nDims = 3
  INTEGER, PRIVATE, PARAMETER    :: BoundaryFlagDefault = NO_NORMAL_FLOW
 
 
@@ -906,9 +909,9 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 !> \addtogroup HexMesh_Class
 !! @{ 
 ! ================================================================================================ !
-! S/R LoadDefaultMesh
+! S/R ConstructDefaultMesh
 ! 
-!> \fn LoadDefaultMesh_HexMesh  
+!> \fn ConstructDefaultMesh_HexMesh  
 !! Constructs a "structured" spectral element mesh with nXelem-by-nYelem elements. 
 !! 
 !! This routine builds a mesh with nXelem elements in the x-direction,  nYelem elements in the
@@ -936,7 +939,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE LoadDefaultMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem  )
+ SUBROUTINE ConstructDefaultMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem  )
 
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout)  :: myHexMesh
@@ -950,8 +953,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    TYPE( Surface ) :: boundSurfs(1:6)
 
    REAL(prec) :: x, y, z, zb, zi, dxElem, dyElem, dzElem
-   REAL(prec) :: x1(1:nDims), x2(1:nDims), x3(1:nDims), x4(1:nDims)
-   REAL(prec) :: c1(1:nDims), c2(1:nDims)
+   REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
+   REAL(prec) :: c1(1:3), c2(1:3)
    REAL(prec), ALLOCATABLE :: xc(:,:,:), s(:)
 
    INTEGER :: nNodes, nElems, nFaces, gPolyDeg
@@ -1013,7 +1016,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       xc = ZERO
       ! Do the initial build for the parametric surfaces
       DO iSide = 1, 6
-         CALL boundSurfs(iSide) % Build( xc, s, gPolyDeg, nDims ) 
+         CALL boundSurfs(iSide) % Build( xc, s, gPolyDeg, 3 ) 
       ENDDO
    
       DO iZ = 1, nZElem
@@ -1076,7 +1079,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                            ! Transfinite inerpolation with linear blending is used to construct the face
                               c1 = ( HALF*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                               c2 = ( HALF*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                              xc(i,j,1:nDims) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
+                              xc(i,j,1:3) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
                            ENDDO
                         ENDDO                     
                      ENDIF
@@ -1115,7 +1118,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                         ! Transfinite inerpolation with linear blending is used to construct the face
                            c1 = ( HALF*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                            c2 = ( HALF*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                           xc(i,j,1:nDims) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
+                           xc(i,j,1:3) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
                         ENDDO
                      ENDDO
                      CALL boundSurfs(iSide) % Reset( xc ) 
@@ -1143,9 +1146,9 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
          CALL boundSurfs(iSide) % Trash( )
       ENDDO
   
- END SUBROUTINE LoadDefaultMesh_HexMesh
+ END SUBROUTINE ConstructDefaultMesh_HexMesh
 !
- SUBROUTINE LoadDoublyPeriodicMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem  )
+ SUBROUTINE ConstructDoublyPeriodicMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem  )
 
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(out)  :: myHexMesh
@@ -1159,8 +1162,8 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
    TYPE( Surface ) :: boundSurfs(1:6)
 
    REAL(prec) :: x, y, z, zi, zb, dxElem, dyElem, dzElem, dxi
-   REAL(prec) :: x1(1:nDims), x2(1:nDims), x3(1:nDims), x4(1:nDims)
-   REAL(prec) :: c1(1:nDims), c2(1:nDims)
+   REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
+   REAL(prec) :: c1(1:3), c2(1:3)
    REAL(prec), ALLOCATABLE :: xc(:,:,:), s(:)
 
    INTEGER :: nNodes, nElems, nFaces, gPolyDeg
@@ -1225,7 +1228,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       xc = 0.0_prec
       ! Do the initial build for the parametric surfaces
       DO iSide = 1, 6
-         CALL boundSurfs(iSide) % Build( xc, s, gPolyDeg, nDims ) 
+         CALL boundSurfs(iSide) % Build( xc, s, gPolyDeg, 3 ) 
       ENDDO
    
       DO iZ = 1, nZElem
@@ -1280,7 +1283,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                               c2(1:2) = ( HALF*(x3(1:2)-x4(1:2))*(1.0_prec+s(i)) + x4(1:2) )
                               c1(3)   = TopographicShape( c1(1), c1(2) )
                               c2(3)   = TopographicShape( c2(1), c2(2) )
-                              xc(i,j,1:nDims) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
+                              xc(i,j,1:3) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
                            ENDDO
                         ENDDO
                      ELSE
@@ -1289,7 +1292,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                            ! Transfinite inerpolation with linear blending is used to construct the face
                               c1 = ( HALF*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                               c2 = ( HALF*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                              xc(i,j,1:nDims) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
+                              xc(i,j,1:3) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
                            ENDDO
                         ENDDO                     
                      ENDIF
@@ -1328,7 +1331,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
                         ! Transfinite inerpolation with linear blending is used to construct the face
                            c1 = ( HALF*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                            c2 = ( HALF*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                           xc(i,j,1:nDims) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
+                           xc(i,j,1:3) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
                         ENDDO
                      ENDDO
                      CALL boundSurfs(iSide) % Reset( xc ) 
@@ -1356,7 +1359,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
          CALL boundSurfs(iSide) % Trash( )
       ENDDO
   
- END SUBROUTINE LoadDoublyPeriodicMesh_HexMesh
+ END SUBROUTINE ConstructDoublyPeriodicMesh_HexMesh
 !
 !
 !==================================================================================================!
@@ -1367,27 +1370,27 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
 !> \addtogroup HexMesh_Class 
 !! @{ 
 ! ================================================================================================ !
-! S/R ReadPeaceMeshFile 
+! S/R ReadSELFMeshFile 
 ! 
-!> \fn ReadPeaceMeshFile_HexMesh 
-!! Reads a PeaceMesh file and constructs the HexMesh data structure.
+!> \fn ReadSELFMeshFile_HexMesh 
+!! Reads a SELFMesh file and constructs the HexMesh data structure.
 !! 
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(HexMesh)    :: this <BR>
 !! <B>CHARACTER</B>        :: filename <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % ReadPeaceMeshFile( filename ) <BR>
+!!     <B>CALL</B> this % ReadSELFMeshFile( filename ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
 !!   <tr> <td> out <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the PeaceMesh file
+!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the SELFMesh file
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE ReadPeaceMeshFile_HexMesh( myHexMesh, filename )
+ SUBROUTINE ReadSELFMeshFile_HexMesh( myHexMesh, filename )
 
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(out)   :: myHexMesh
@@ -1551,31 +1554,31 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
      
       CALL myHexMesh % ConstructElementNeighbors( )
   
- END SUBROUTINE ReadPeaceMeshFile_HexMesh
+ END SUBROUTINE ReadSELFMeshFile_HexMesh
 !
 !> \addtogroup HexMesh_Class 
 !! @{ 
 ! ================================================================================================ !
-! S/R WritePeaceMeshFile 
+! S/R WriteSELFMeshFile 
 ! 
-!> \fn WritePeaceMeshFile_HexMesh 
-!! Writes a PeaceMesh file using the HexMesh data structure.
+!> \fn WriteSELFMeshFile_HexMesh 
+!! Writes a SELFMesh file using the HexMesh data structure.
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(HexMesh)    :: this <BR>
 !! <B>CHARACTER</B>        :: filename <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % WritePeaceMeshFile( filename ) <BR>
+!!     <B>CALL</B> this % WriteSELFMeshFile( filename ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
 !!   <tr> <td> in <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the PeaceMesh file
+!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the SELFMesh file
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
 !>@}
-SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
+SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
 
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(in)   :: myHexMesh
@@ -1740,7 +1743,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
       
       CLOSE( fUnit )
      
- END SUBROUTINE WritePeaceMeshFile_HexMesh
+ END SUBROUTINE WriteSELFMeshFile_HexMesh
 !
 !> \addtogroup HexMesh_Class 
 !! @{ 
@@ -1762,7 +1765,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
 !!  <H2> Parameters : </H2>
 !!  <table> 
 !!   <tr> <td> out <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the PeaceMesh file
+!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the SELFMesh file
 !!  </table>  
 !!   
 ! ================================================================================================ ! 
@@ -1771,11 +1774,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
 
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(out)   :: myHexMesh
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ), INTENT(in)    :: interp
-#else
    TYPE( Lagrange ), INTENT(in)     :: interp
-#endif
    CHARACTER(*), INTENT(in)        :: filename
    ! LOCAL
    CHARACTER(60) :: longDummy
@@ -1844,7 +1843,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
       xc   = 0.0_prec
       ! Do the initial build for the parametric surfaces
       DO iSide = 1, 6
-         CALL boundSurfs(iSide) % Build( xc, s, 1, nDims ) 
+         CALL boundSurfs(iSide) % Build( xc, s, 1, 3 ) 
       ENDDO
       
       
@@ -1885,7 +1884,7 @@ SUBROUTINE WritePeaceMeshFile_HexMesh( myHexMesh, filename )
                    ! Transfinite inerpolation with linear blending is used to construct the face
                    c1 = ( HALF*(x2-x1)*(1.0_prec+s(i)) + x1 ) 
                    c2 = ( HALF*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                   xc(i,j,1:nDims) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
+                   xc(i,j,1:3) = HALF*(c2-c1)*(1.0_prec+s(j)) + c1
                 ENDDO
              ENDDO
              CALL boundSurfs(iSide) % Reset( xc ) 
