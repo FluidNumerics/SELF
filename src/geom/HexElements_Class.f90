@@ -82,8 +82,6 @@ IMPLICIT NONE
       PROCEDURE :: ScaleGeometry => ScaleGeometry_HexElements
       PROCEDURE :: ResetInternalMesh => ResetInternalMesh_HexElements
       
-      PROCEDURE :: WriteTecplot => WriteTecplot_HexElements
-  
   END TYPE HexElements
 
 

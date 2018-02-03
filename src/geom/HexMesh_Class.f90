@@ -55,11 +55,10 @@ IMPLICIT NONE
       PROCEDURE :: Trash => Trash_HexMesh
       
 #ifdef HAVE_CUDA
-
       PROCEDURE :: UpdateDevice => UpdateDevice_HexMesh
-
+      PROCEDURE :: UpdateHost   => UpdateHost_HexMesh
 #endif
-        
+
       ! Built in "strucured" mesh construction
       PROCEDURE :: ConstructStructuredMesh => ConstructStructuredMesh_HexMesh
 
@@ -279,6 +278,28 @@ IMPLICIT NONE
       RETURN
       
  END FUNCTION DefaultTopography
+!
+#ifdef HAVE_CUDA
+SUBROUTINE UpdateDevice_HexMesh( myHexMesh )
+IMPLICIT NONE
+CLASS( HexMesh ), INTENT(inout) :: myHexMesh
+
+CALL myHexMesh % faces % UpdateDevice( )
+CALL myHexMesh % elements % UpdateDevice( )
+CALL myHexMesh % nodes % UpdateDevice( )
+
+END SUBROUTINE UpdateDevice_HexMesh
+
+SUBROUTINE UpdateHost_HexMesh( myHexMesh )
+IMPLICIT NONE
+CLASS( HexMesh ), INTENT(inout) :: myHexMesh
+
+CALL myHexMesh % faces % UpdateHost( )
+CALL myHexMesh % elements % UpdateHost( )
+CALL myHexMesh % nodes % UpdateHost( )
+
+END SUBROUTINE UpdateHost_HexMesh
+#endif
 !
 !
 !==================================================================================================!
@@ -1244,11 +1265,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       DEALLOCATE( boundSurfs )
   
 #ifdef HAVE_CUDA
-
-      CALL myHexMesh % elements % UpdateDevice( )
-      CALL myHexMesh % nodes % UpdateDevice( )
-      CALL myHexMesh % faces % UpdateDevice( )
-
+      CALL myHexMesh % UpdateDevice( )
 #endif
 
  END SUBROUTINE ConstructStructuredMesh_HexMesh
@@ -1487,11 +1504,7 @@ SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZEl
       ENDDO
 
 #ifdef HAVE_CUDA
-
-      CALL myHexMesh % elements % UpdateDevice( )
-      CALL myHexMesh % faces % UpdateDevice( )
-      CALL myHexMesh % nodes % UpdateDevice( ) 
-
+      CALL myHexMesh % UpdateDevice( )
 #endif
   
  END SUBROUTINE ReadSELFMeshFile_HexMesh
@@ -1844,11 +1857,7 @@ SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
       DEALLOCATE( boundSurfs )
 
 #ifdef HAVE_CUDA
-
-      CALL myHexMesh % elements % UpdateDevice( )
-      CALL myHexMesh % nodes % UpdateDevice( )
-      CALL myHexMesh % faces % UpdateDevice( )
-
+      CALL myHexMesh % UpdateDevice( )
 #endif
 
 

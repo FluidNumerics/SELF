@@ -50,8 +50,10 @@ IMPLICIT NONE
     PROCEDURE :: Build => Build_Surfaces
     PROCEDURE :: Trash => Trash_Surfaces
 
+#ifdef HAVE_CUDA
     PROCEDURE :: UpdateHost => UpdateHost_Surfaces
     PROCEDURE :: UpdateDevice => UpdateDevice_Surfaces
+#endif
 
     PROCEDURE :: Set_Surfaces
     PROCEDURE :: CalculateSlope => CalculateSlope_Surfaces

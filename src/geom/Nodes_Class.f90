@@ -38,8 +38,10 @@ IMPLICIT NONE
       PROCEDURE :: Build => Build_Nodes
       PROCEDURE :: Trash => Trash_Nodes
 
+#ifdef HAVE_CUDA 
       PROCEDURE :: UpdateDevice => UpdateDevice_Nodes
       PROCEDURE :: UpdateHost   => UpdateHost_Nodes 
+#endif
 
       PROCEDURE :: ScalePosition => ScalePosition_Nodes
      
