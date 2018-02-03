@@ -3892,12 +3892,12 @@ INCLUDE 'mpif.h'
    INTEGER, INTENT(in)            :: fileUnits(1:nDiagnostics) 
    
 
-      IF( myDGSEM % myRank ) THEN
-         CLOSE( UNIT=NewUnit(fileUnits(1)) )
-         CLOSE( UNIT=NewUnit(fileUnits(2)) )
-         CLOSE( UNIT=NewUnit(fileUnits(3)) )
-         CLOSE( UNIT=NewUnit(fileUnits(4)) )
-         CLOSE( UNIT=NewUnit(fileUnits(5)) )
+      IF( myDGSEM % myRank == 0 ) THEN
+         CLOSE( UNIT=fileUnits(1) )
+         CLOSE( UNIT=fileUnits(2) )
+         CLOSE( UNIT=fileUnits(3) )
+         CLOSE( UNIT=fileUnits(4) )
+         CLOSE( UNIT=fileUnits(5) )
       ENDIF
 
  END SUBROUTINE CloseDiagnosticsFiles_Fluid
