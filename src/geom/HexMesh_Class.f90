@@ -269,16 +269,16 @@ IMPLICIT NONE
 
  END SUBROUTINE Trash_HexMesh
 !
- FUNCTION StructuredTopography( x, y )
+ FUNCTION DefaultTopography( x, y )
    IMPLICIT NONE
-   REAL(prec)             :: StructuredTopography
+   REAL(prec)             :: DefaultTopography
    REAL(prec), INTENT(in) :: x, y
    
-      StructuredTopography = 0.0_prec
+      DefaultTopography = 0.0_prec
       
       RETURN
       
- END FUNCTION StructuredTopography
+ END FUNCTION DefaultTopography
 !
 !
 !==================================================================================================!

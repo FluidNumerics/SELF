@@ -67,10 +67,10 @@ USE OMP_LIB
 !> @}
    TYPE RoutineTimer
       LOGICAL                      :: started = .FALSE., stopped = .FALSE.
-      REAL(prec)                   :: startTime = ZERO
-      REAL(prec)                   :: stopTime = ZERO
-      REAL(prec)                   :: accumulatedTime = ZERO
-      REAL(prec)                   :: nObs = ZERO
+      REAL(prec)                   :: startTime = 0.0_prec
+      REAL(prec)                   :: stopTime = 0.0_prec
+      REAL(prec)                   :: accumulatedTime = 0.0_prec
+      REAL(prec)                   :: nObs = 0.0_prec
       INTEGER                      :: timerID
       CHARACTER(timerNameLength)   :: whatYourTiming
       TYPE( RoutineTimer ),POINTER :: next
@@ -369,7 +369,7 @@ USE OMP_LIB
 
 
       theTimer % whatYourTiming = timerName
-      theTimer % nObs = ZERO
+      theTimer % nObs = 0.0_prec
 
  END SUBROUTINE SetName_RoutineTimer
 !
@@ -469,7 +469,7 @@ USE OMP_LIB
         CALL theTimers % SetName( timername )
         
         theTimers % current % timerID = timerID
-        theTimers % current % nObs = ZERO
+        theTimers % current % nObs = 0.0_prec
         
         ! Point the next to null and the tail to current
         theTimers % current % next => NULL( )
@@ -652,7 +652,7 @@ USE OMP_LIB
          eTime = theTimer % stopTime - theTimer % startTime 
       ELSE
          PRINT*, 'Module Timing.f90 : S/R ElapsedTime : Warning! Timer "', TRIM(theTimer % whatYourTiming),'" is not stopped'
-         eTime = ZERO 
+         eTime = 0.0_prec 
       ENDIF
  END FUNCTION ElapsedTime_RoutineTimer
 !
@@ -677,7 +677,7 @@ USE OMP_LIB
       theTimers % current % accumulatedTime = theTimers % current % accumulatedTime + &
                                               theTimers % current % ElapsedTime( )
 
-      theTimers % current % nObs = theTimers % current % nObs + ONE 
+      theTimers % current % nObs = theTimers % current % nObs + 1.0_prec 
 
 
  END SUBROUTINE AccumulateTimings

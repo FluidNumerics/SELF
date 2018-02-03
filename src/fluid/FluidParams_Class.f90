@@ -177,9 +177,9 @@ USE ConstantsDictionary
       nProcY        = 0
       nProcZ        = 0
       nPlot         = 10
-      xScale        = ONE
-      yScale        = ONE 
-      zScale        = ONE
+      xScale        = 1.0_prec
+      yScale        = 1.0_prec
+      zScale        = 1.0_prec
       ! SubgridScale
       SubGridModel    = 'Laplacian'
       filterType      = 'TanhRollOff'

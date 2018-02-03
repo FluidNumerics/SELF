@@ -1,16 +1,10 @@
 ! BoundaryCommunicator_Class.f90
 ! 
-! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! Copyright 2018 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-!> \file BoundaryCommunicator_Class.f90
-!! Contains the \ref BoundaryCommunicator_Class module, and <BR>
-!! defines the BoundaryCommunicator data-structure.
-
-!> \defgroup BoundaryCommunicator_Class BoundaryCommunicator_Class 
-!! This module defines the BoundaryCommunicator data-structure and its associated routines.
 MODULE BoundaryCommunicator_Class
 
 ! src/common/
@@ -21,42 +15,39 @@ USE CommonRoutines
 IMPLICIT NONE
 
 
-!> \addtogroup BoundaryCommunicator_Class 
-!! @{
 
-!> \struct BoundaryCommunicator
-!! The BoundaryCommunicator class provides a convenient package of attributes for implementing
-!! boundary conditions.
-!!
-!! This structure was motivated by the need for a robust means of implementing boundary conditions
-!! on an unstructured mesh. This class makes it trivial to implement message-passing for
-!! MPI parallelism.
-!!
-!! <H2> BoundaryCommunicator </H2>
-!! <H3> Attributes </H3>
-!!    <table>
-!!       <tr> <th> nBoundaries <td> INTEGER  <td> The number of boundary edges obtained from a 
-!!                                                   search through mesh edges
-!!       <tr> <th> extElemIDs(1:nBoundaries) <td> INTEGER  <td> The local element ID's of external
-!!                          elements. These are either given as boundary condition flags or as the 
-!!                          local element ID of a neighboring processes mesh
-!!       <tr> <th> extProcIDs(1:nBoundaries) <td> INTEGER  <td> Process ID for the neighboring element.
-!!       <tr> <th> boundaryIDs(1:nBoundaries) <td> INTEGER  <td> Edge ID corresponding to a given
-!!                                                                      boundary edge ID.
-!!    </table>
-!!
-!! <H3> Procedures </H3>
-!!    See \ref BoundaryCommunicator_Class for more information. The first column lists the "call-name" and 
-!!    the second column lists the name of routine that is aliased onto the call-name.
-!!    <table>
-!!       <tr> <th> Initialize <td> Initialize_BoundaryCommunicator
-!!       <tr> <th> Trash <td> Trash_BoundaryCommunicator
-!!       <tr> <th> ReadPickup <td> ReadPickup_BoundaryCommunicator
-!!       <tr> <th> WritePickup <td> WritePickup_BoundaryCommunicator
-!!    </table>
-!!
+! BoundaryCommunicator
+! The BoundaryCommunicator class provides a convenient package of attributes for implementing
+! boundary conditions.
+!
+! This structure was motivated by the need for a robust means of implementing boundary conditions
+! on an unstructured mesh. This class makes it trivial to implement message-passing for
+! MPI parallelism.
+!
+! <H2> BoundaryCommunicator </H2>
+! <H3> Attributes </H3>
+!    <table>
+!       <tr> <th> nBoundaries <td> INTEGER  <td> The number of boundary edges obtained from a 
+!                                                   search through mesh edges
+!       <tr> <th> extElemIDs(1:nBoundaries) <td> INTEGER  <td> The local element ID's of external
+!                          elements. These are either given as boundary condition flags or as the 
+!                          local element ID of a neighboring processes mesh
+!       <tr> <th> extProcIDs(1:nBoundaries) <td> INTEGER  <td> Process ID for the neighboring element.
+!       <tr> <th> boundaryIDs(1:nBoundaries) <td> INTEGER  <td> Edge ID corresponding to a given
+!                                                                      boundary edge ID.
+!    </table>
+!
+! <H3> Procedures </H3>
+!    See \ref BoundaryCommunicator_Class for more information. The first column lists the "call-name" and 
+!    the second column lists the name of routine that is aliased onto the call-name.
+!    <table>
+!       <tr> <th> Initialize <td> Initialize_BoundaryCommunicator
+!       <tr> <th> Trash <td> Trash_BoundaryCommunicator
+!       <tr> <th> ReadPickup <td> ReadPickup_BoundaryCommunicator
+!       <tr> <th> WritePickup <td> WritePickup_BoundaryCommunicator
+!    </table>
+!
 
-!>@}
    TYPE BoundaryCommunicator
       INTEGER                               :: nBoundaries
       INTEGER, ALLOCATABLE                  :: extProcIDs(:)

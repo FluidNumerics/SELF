@@ -111,7 +111,6 @@ INC+=${LAPACK_INC}
 #                           ~/src/common/                                #
 # ---------------------------------------------------------------------- #
 
-# Modules
 ModelPrecision.o : ${SRCDIR}common/ModelPrecision.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/ModelPrecision.f90 -o $@
 
@@ -138,7 +137,6 @@ Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}comm
 #                           ~/src/spectral/                           #
 # ---------------------------------------------------------------------- #
 
-# Modules
 Quadrature.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}spectral/Quadrature.f90
 	${FC} ${OPT} -c ${SRCDIR}spectral/Quadrature.f90 -o $@
 
@@ -180,8 +178,6 @@ SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o Noda
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #
 # ---------------------------------------------------------------------- #
-## Modules 
-#
 
 Edges_Class.o : ModelPrecision.o ${SRCDIR}geom/Edges_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Edges_Class.f90 -o $@
@@ -210,14 +206,10 @@ HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o Key
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
 
+MeshGenerator_3D.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o NodalDG_Class.o HexMesh_Class.o \
+                     TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o ${SRCDIR}geom/MeshGenerator_3D.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MeshGenerator_3D.f90
 
-# ---------------------------------------------------------------------- #
-#                             ~/src/viz                                  #
-# ---------------------------------------------------------------------- #
-
-Ray_Class.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o BoundaryCommunicator_Class.o \
-              MappedGeometry_3D_Class.o HexMesh_Class.o ${SRCDIR}viz/Ray_Class.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}viz/Ray_Class.f90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
