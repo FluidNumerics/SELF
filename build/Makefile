@@ -196,7 +196,7 @@ Surfaces_Class.o : ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o ${SRC
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Surfaces_Class.f90 -o $@
 
 HexElements_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
-                      Lagrange_Class.o Surface_Class.o ${SRCDIR}geom/HexElements_Class.f90
+                      Lagrange_Class.o Surfaces_Class.o ${SRCDIR}geom/HexElements_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexElements_Class.f90 -o $@
 
 BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/BoundaryCommunicator_Class.f90

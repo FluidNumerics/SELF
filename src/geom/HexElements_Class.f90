@@ -1,18 +1,18 @@
-! HexElement_Class.f90
+! HexElements_Class.f90
 ! 
-! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! Copyright 2018 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
 
-MODULE HexElement_Class
+MODULE HexElements_Class
  
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
 USE Lagrange_Class
-USE Surface_Class
+USE Surfaces_Class
 
 
 IMPLICIT NONE
@@ -43,15 +43,13 @@ IMPLICIT NONE
     INTEGER, ALLOCATABLE    :: nodeIDs(:,:)
     INTEGER, ALLOCATABLE    :: neighbors(:,:)
     REAL(prec), ALLOCATABLE :: nHat(:,:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: xBound(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: yBound(:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: zBound(:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: x(:,:,:,:), y(:,:,:,:), z(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: xBound(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: x(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: J(:,:,:,:)    
     REAL(prec), ALLOCATABLE :: dxds(:,:,:,:), dxdp(:,:,:,:), dxdq(:,:,:,:)
     REAL(prec), ALLOCATABLE :: dyds(:,:,:,:), dydp(:,:,:,:), dydq(:,:,:,:)
     REAL(prec), ALLOCATABLE :: dzds(:,:,:,:), dzdp(:,:,:,:), dzdq(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: Ja(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: Ja(:,:,:,:,:,:)
   
 #ifdef HAVE_CUDA
     INTEGER, ALLOCATABLE    :: N_dev, nElements_dev
@@ -59,29 +57,29 @@ IMPLICIT NONE
     INTEGER, ALLOCATABLE    :: nodeIDs_dev(:,:)
     INTEGER, ALLOCATABLE    :: neighbors_dev(:,:)
     REAL(prec), ALLOCATABLE :: nHat_dev(:,:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: xBound_dev(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: yBound_dev(:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: zBound_dev(:,:,:,:) 
-    REAL(prec), ALLOCATABLE :: x_dev(:,:,:,:), y_dev(:,:,:,:), z_dev(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: xBound_dev(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: x_dev(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: J_dev(:,:,:,:)    
     REAL(prec), ALLOCATABLE :: dxds_dev(:,:,:,:), dxdp_dev(:,:,:,:), dxdq_dev(:,:,:,:)
     REAL(prec), ALLOCATABLE :: dyds_dev(:,:,:,:), dydp_dev(:,:,:,:), dydq_dev(:,:,:,:)
     REAL(prec), ALLOCATABLE :: dzds_dev(:,:,:,:), dzdp_dev(:,:,:,:), dzdq_dev(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: Ja_dev(:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: Ja_dev(:,:,:,:,:,:)
 #endif
 
     CONTAINS
+
       PROCEDURE :: Build      => Build_HexElements
       PROCEDURE :: Trash      => Trash_HexElements
+
+#ifdef HAVE_CUDA
+      PROCEDURE :: UpdateDevice => UpdateDevice_HexElements
+      PROCEDURE :: UpdateHost   => UpdateHost_HexElements
+#endif
 
       PROCEDURE :: GenerateMesh => GenerateMesh_HexElements
       PROCEDURE :: GenerateMetrics => GenerateMetrics_HexElements
       PROCEDURE :: GenerateBoundaryMetrics => GenerateBoundaryMetrics_HexElements
       PROCEDURE :: ScaleGeometry => ScaleGeometry_HexElements
-      PROCEDURE :: CalculateLocation => CalculateLocation_HexElements
-      PROCEDURE :: CalculateMetrics => CalculateMetrics_HexElements
-      PROCEDURE :: CalculateComputationalCoordinates => CalculateComputationalCoordinates_HexElements
-      
       PROCEDURE :: ResetInternalMesh => ResetInternalMesh_HexElements
       
       PROCEDURE :: WriteTecplot => WriteTecplot_HexElements
@@ -92,37 +90,27 @@ IMPLICIT NONE
  PRIVATE :: TransfiniteInterpolation, LinearBlend
  
  CONTAINS
-!
-!
-!==================================================================================================!
-!------------------------------- Manual Constructors/Destructors ----------------------------------!
-!==================================================================================================!
-!
-!
-!> \addtogroup HexElements_Class
-!! @{ 
-! ================================================================================================ !
-! S/R Initialize
+
 ! 
-!> \fn Initialize_HexElements  
-!! Allocates memory for each of the attributes of the HexElements Class and initializes all
-!! arrays to zero.
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(HexElements) :: this <BR>
-!! <B>INTEGER</B>                 :: N <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Initialize( N ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> out <th> myElements <td> HexElements <td> On output, an initialized HexElements
-!!                                                         data structure
-!!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree of the spectral element 
-!!  </table>  
-!!   
+!  Build_HexElements  
+! Allocates memory for each of the attributes of the HexElements Class and initializes all
+! arrays to zero.
+! 
+! <H2> Usage : </H2> 
+! <B>TYPE</B>(HexElements) :: this <BR>
+! <B>INTEGER</B>                 :: N <BR>
+!         .... <BR>
+!     <B>CALL</B> this % Build( N ) <BR>
+! 
+!  <H2> Parameters : </H2>
+!  <table> 
+!   <tr> <td> out <th> myElements <td> HexElements <td> On output, an initialized HexElements
+!                                                         data structure
+!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree of the spectral element 
+!  </table>  
+!   
 ! ================================================================================================ ! 
-!>@}
+
  SUBROUTINE Build_HexElements( myElements, N, nElements )
 
   IMPLICIT NONE
@@ -146,13 +134,9 @@ IMPLICIT NONE
                 myElements % dzdq(0:N,0:N,0:N,1:nElements), &
                 myElements % Ja(0:N,0:N,0:N,1:3,1:3,1:nElements), &
                 myElements % J(0:N,0:N,0:N,1:nElements), &
-                myElements % x(0:N,0:N,0:N,1:nElements), &
-                myElements % y(0:N,0:N,0:N,1:nElements), &
-                myElements % z(0:N,0:N,0:N,1:nElements), &
-                myElements % xBound(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % yBound(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % zBound(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % nHat(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+                myElements % x(0:N,0:N,0:N,1:3,1:nElements), &
+                myElements % xBound(0:N,0:N,1:3,1:6,1:nElements), &
+                myElements % nHat(1:3,0:N,0:N,1:6,1:nElements) )
       
       myElements % dxds   = 0.0_prec
       myElements % dxdp   = 0.0_prec
@@ -164,12 +148,9 @@ IMPLICIT NONE
       myElements % dzdp   = 0.0_prec
       myElements % dzdq   = 0.0_prec
       myElements % J      = 0.0_prec
+      myElements % Ja     = 0.0_prec
       myElements % x      = 0.0_prec
-      myElements % y      = 0.0_prec
-      myElements % z      = 0.0_prec
       myElements % xBound = 0.0_prec
-      myElements % yBound = 0.0_prec
-      myElements % zBound = 0.0_prec
 
 #ifdef HAVE_CUDA
 
@@ -189,16 +170,26 @@ IMPLICIT NONE
                 myElements % dzdq_dev(0:N,0:N,0:N,1:nElements), &
                 myElements % Ja_dev(0:N,0:N,0:N,1:3,1:3,1:nElements), &
                 myElements % J_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % x_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % y_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % z_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % xBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % yBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % zBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % nHat_dev(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+                myElements % x_dev(0:N,0:N,0:N,1:3,1:nElements), &
+                myElements % xBound_dev(0:N,0:N,1:3,1:6,1:nElements), &
+                myElements % nHat_dev(1:3,0:N,0:N,1:6,1:nElements) )
 
       myElements % N_dev =  N
       myElements % nElements_dev = nElements
+
+      myElements % dxds_dev   = 0.0_prec
+      myElements % dxdp_dev   = 0.0_prec
+      myElements % dxdq_dev   = 0.0_prec
+      myElements % dyds_dev   = 0.0_prec
+      myElements % dydp_dev   = 0.0_prec
+      myElements % dydq_dev   = 0.0_prec
+      myElements % dzds_dev   = 0.0_prec
+      myElements % dzdp_dev   = 0.0_prec
+      myElements % dzdq_dev   = 0.0_prec
+      myElements % J_dev      = 0.0_prec
+      myElements % Ja_dev     = 0.0_prec
+      myElements % x_dev      = 0.0_prec
+      myElements % xBound_dev = 0.0_prec
 
 #endif
 
@@ -231,53 +222,45 @@ IMPLICIT NONE
    IMPLICIT NONE
    CLASS(HexElements), INTENT(inout)  :: myElements
 
-      ALLOCATE( myElements % elementID(1:nElements), &
-                myElements % nodeIDs(1:8,1:nElements), &
-                myElements % neighbors(1:6,1:nElements), &
-                myElements % dxds(0:N,0:N,0:N,1:nElements), &
-                myElements % dxdp(0:N,0:N,0:N,1:nElements), &
-                myElements % dxdq(0:N,0:N,0:N,1:nElements), &
-                myElements % dyds(0:N,0:N,0:N,1:nElements), &
-                myElements % dydp(0:N,0:N,0:N,1:nElements), &
-                myElements % dydq(0:N,0:N,0:N,1:nElements), &
-                myElements % dzds(0:N,0:N,0:N,1:nElements), &
-                myElements % dzdp(0:N,0:N,0:N,1:nElements), &
-                myElements % dzdq(0:N,0:N,0:N,1:nElements), &
-                myElements % Ja(0:N,0:N,0:N,1:3,1:3,1:nElements), &
-                myElements % J(0:N,0:N,0:N,1:nElements), &
-                myElements % x(0:N,0:N,0:N,1:nElements), &
-                myElements % y(0:N,0:N,0:N,1:nElements), &
-                myElements % z(0:N,0:N,0:N,1:nElements), &
-                myElements % xBound(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % yBound(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % zBound(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % nHat(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+      DEALLOCATE( myElements % elementID, &
+                  myElements % nodeIDs, &
+                  myElements % neighbors, &
+                  myElements % dxds, &
+                  myElements % dxdp, &
+                  myElements % dxdq, &
+                  myElements % dyds, &
+                  myElements % dydp, &
+                  myElements % dydq, &
+                  myElements % dzds, &
+                  myElements % dzdp, &
+                  myElements % dzdq, &
+                  myElements % Ja, &
+                  myElements % J, &
+                  myElements % x, &
+                  myElements % xBound, &
+                  myElements % nHat )
       
 #ifdef HAVE_CUDA
 
       ALLOCATE( myElements % N_dev, myElements % nElements_dev )
 
-      ALLOCATE( myElements % elementID_dev(1:nElements), &
-                myElements % nodeIDs_dev(1:8,1:nElements), &
-                myElements % neighbors_dev(1:6,1:nElements), &
-                myElements % dxds_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dxdp_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dxdq_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dyds_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dydp_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dydq_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dzds_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dzdp_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % dzdq_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % Ja_dev(0:N,0:N,0:N,1:3,1:3,1:nElements), &
-                myElements % J_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % x_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % y_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % z_dev(0:N,0:N,0:N,1:nElements), &
-                myElements % xBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % yBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % zBound_dev(0:N,0:N,1:nHexFaces,1:nElements), &
-                myElements % nHat_dev(1:3,0:N,0:N,1:nHexFaces,1:nElements) )
+      DEALLOCATE( myElements % elementID_dev, &
+                  myElements % nodeIDs_dev, &
+                  myElements % neighbors_dev, &
+                  myElements % dxds_dev, &
+                  myElements % dxdp_dev, &
+                  myElements % dxdq_dev, &
+                  myElements % dyds_dev, &
+                  myElements % dydp_dev, &
+                  myElements % dydq_dev, &
+                  myElements % dzds_dev, &
+                  myElements % dzdp_dev, &
+                  myElements % dzdq_dev, &
+                  myElements % Ja_dev, &
+                  myElements % J_dev, &
+                  myElements % x_dev, &
+                  myElements % xBound_dev, &
+                  myElements % nHat_dev )
 
 #endif
       
@@ -285,14 +268,57 @@ IMPLICIT NONE
  
  END SUBROUTINE Trash_HexElements
 
+#ifdef HAVE_CUDA
+SUBROUTINE UpdateDevice_HexElements( myElements ) 
+IMPLICIT NONE
+CLASS( HexElements ), INTENT(inout) :: myElements
 
-SUBROUTINE UpdateDevice_HexElements( 
+myElements % elementID_dev = myElements % elementID
+myElements % nodeIDs_dev   = myElements % nodeIDs
+myElements % neighbors_dev = myElements % neighbors
+myElements % dxds_dev = myElements % dxds
+myElements % dxdp_dev = myElements % dxdp
+myElements % dxdq_dev = myElements % dxdq
+myElements % dyds_dev = myElements % dyds
+myElements % dydp_dev = myElements % dydp
+myElements % dydq_dev = myElements % dydq
+myElements % dzds_dev = myElements % dzds
+myElements % dzdp_dev = myElements % dzdp
+myElements % dzdq_dev = myElements % dzdq
+myElements % Ja_dev = myElements % Ja
+myElements % J_dev  = myElements % J
+myElements % x_dev = myElements % x
+myElements % xBound_dev = myElements % xBound
+myElements % nHat_dev   = myElements % nHat
+
 
 END SUBROUTINE UpdateDevice_HexElements
 
-SUBROUTINE UpdateHost_HexElements
+SUBROUTINE UpdateHost_HexElements( myElements )
+IMPLICIT NONE
+CLASS( HexElements ), INTENT(inout) :: myElements
+
+myElements % elementID = myElements % elementID_dev
+myElements % nodeIDs   = myElements % nodeIDs_dev
+myElements % neighbors = myElements % neighbors_dev
+myElements % dxds = myElements % dxds_dev
+myElements % dxdp = myElements % dxdp_dev
+myElements % dxdq = myElements % dxdq_dev
+myElements % dyds = myElements % dyds_dev
+myElements % dydp = myElements % dydp_dev
+myElements % dydq = myElements % dydq_dev
+myElements % dzds = myElements % dzds_dev
+myElements % dzdp = myElements % dzdp_dev
+myElements % dzdq = myElements % dzdq_dev
+myElements % Ja = myElements % Ja_dev
+myElements % J  = myElements % J_dev
+myElements % x = myElements % x_dev
+myElements % xBound = myElements % xBound_dev
+myElements % nHat   = myElements % nHat_dev
+
 
 END SUBROUTINE UpdateHost_HexElements
+#endif
 
 !
 !> \addtogroup HexElements_Class 
@@ -335,60 +361,49 @@ END SUBROUTINE UpdateHost_HexElements
    IMPLICIT NONE
    CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)        :: interp
-   TYPE( Surface ), INTENT(in)         :: theSurfaces(1:6)
+   TYPE( Surfaces ), INTENT(in)        :: theSurfaces(1:myElements % nElements)
    ! Local
-   INTEGER    :: i, j, k, N
+   INTEGER    :: i, j, k, iEl
    REAL(prec) :: s(0:interp % N), p, x(1:3)
    
-      N = interp % N
-      s = interp % s
+      s = interp % interpolationPoints
       
-      DO k = 0, N
-         DO j = 0,N
-            DO i = 0,N
-               x = TransfiniteInterpolation( theSurfaces, s(i), s(j), s(k) )
-               myElements % x(i,j,k) = x(1)
-               myElements % y(i,j,k) = x(2)
-               myElements % z(i,j,k) = x(3)
+      DO iEl = 1, myElements % nElements
+
+      DO k = 0, interp % N
+         DO j = 0,interp % N
+            DO i = 0,interp % N
+               x = TransfiniteInterpolation( theSurfaces(iEl), s(i), s(j), s(k) )
+               myElements % x(i,j,k,1:3,iEl) = x
             ENDDO
          ENDDO 
       ENDDO 
 
       ! Do the boundary locations
-      DO j = 0, N
-         DO i = 0, N
-            p = -ONE  ! south boundary
-            x = TransfiniteInterpolation( theSurfaces, s(i), p, s(j) )
-            myElements % xBound(i,j,south) = x(1)
-            myElements % yBound(i,j,south) = x(2)
-            myElements % zBound(i,j,south) = x(3)
+      DO j = 0, interp % N
+         DO i = 0, interp % N
+
+            p = -1.0_prec ! south boundary
+            myElements % xBound(i,j,1:3,south,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), p, s(j) )
+
             ! west boundary
-            x = TransfiniteInterpolation( theSurfaces, p, s(i), s(j) )
-            myElements % xBound(i,j,west) = x(1)
-            myElements % yBound(i,j,west) = x(2)
-            myElements % zBound(i,j,west) = x(3)
+            myElements % xBound(i,j,1:3,west,iEl) = TransfiniteInterpolation( theSurfaces(iEl), p, s(i), s(j) )
+
             ! bottom boundary
-            x = TransfiniteInterpolation( theSurfaces, s(i), s(j), p )
-            myElements % xBound(i,j,bottom) = x(1)
-            myElements % yBound(i,j,bottom) = x(2)
-            myElements % zBound(i,j,bottom) = x(3)
+            myElements % xBound(i,j,1:3,bottom,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), s(j), p )
             
-            p = ONE  ! north boundary
-            x = TransfiniteInterpolation( theSurfaces, s(i), p, s(j) )
-            myElements % xBound(i,j,north) = x(1)
-            myElements % yBound(i,j,north) = x(2)
-            myElements % zBound(i,j,north) = x(3)
+            p = 1.0_prec  ! north boundary
+            myElements % xBound(i,j,1:3,north,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), p, s(j) )
+
             ! east boundary
-            x = TransfiniteInterpolation( theSurfaces, p, s(i), s(j) )
-            myElements % xBound(i,j,east) = x(1)
-            myElements % yBound(i,j,east) = x(2)
-            myElements % zBound(i,j,east) = x(3)
+            myElements % xBound(i,j,1:3,east,iEl) = TransfiniteInterpolation( theSurfaces(iEl), p, s(i), s(j) )
+
             ! top boundary
-            x = TransfiniteInterpolation( theSurfaces, s(i), s(j), p )
-            myElements % xBound(i,j,top) = x(1)
-            myElements % yBound(i,j,top) = x(2)
-            myElements % zBound(i,j,top) = x(3)
+            myElements % xBound(i,j,1:3,top,iEl) = TransfiniteInterpolation( theSurfaces(iEl), s(i), s(j), p )
+
          ENDDO
+      ENDDO
+
       ENDDO
 
  END SUBROUTINE GenerateMesh_HexElements
@@ -397,28 +412,26 @@ END SUBROUTINE UpdateHost_HexElements
 
    IMPLICIT NONE
    CLASS( HexElements ), INTENT(inout) :: myElements
-   TYPE( Lagrange ), INTENT(in)              :: interp
+   TYPE( Lagrange ), INTENT(in)        :: interp
    ! Local
-   INTEGER    :: i, j, k
-   REAL(prec) :: s(0:interp % N), p, x(1:3)
+   INTEGER    :: i, j, k, iEl
    
       
+      DO iEl = 1, myElements % nElements
       DO k = 0, interp % N
          DO j = 0, interp % N
             DO i = 0, interp % N
-               x = TransfiniteInterpolation_Alt( interp, &
-                                                 myElements % xBound, &
-                                                 myElements % yBound, &
-                                                 myElements % zBound, &
-                                                 interp % s(i), &
-                                                 interp % s(j), &
-                                                 interp % s(k) )
-               myElements % x(i,j,k) = x(1)
-               myElements % y(i,j,k) = x(2)
-               myElements % z(i,j,k) = x(3)
+               myElements % x(i,j,k,1:3,iEl) = TransfiniteInterpolation_Alt( interp, &
+                                                 myElements % xBound(0:interp % N, 0:interp % N, 1, 1:6,iEl), &
+                                                 myElements % xBound(0:interp % N, 0:interp % N, 2, 1:6,iEl), &
+                                                 myElements % xBound(0:interp % N, 0:interp % N, 3, 1:6,iEl), &
+                                                 interp % interpolationPoints(i), &
+                                                 interp % interpolationPoints(j), &
+                                                 interp % interpolationPoints(k) )
             ENDDO
          ENDDO 
       ENDDO 
+      ENDDO
 
 
 
@@ -479,93 +492,130 @@ END SUBROUTINE UpdateHost_HexElements
    CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    ! Local
-   INTEGER    :: i, j, k, N
+   INTEGER    :: i, j, k, iEl, N
    REAL(prec) :: cv(1:3,1:3)
-   REAL(prec) :: covT(0:interp % N, 0:interp % N, 0:interp % N, 1:3,1:3)
-   REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3)
-   REAL(prec) :: Dv1(0:interp % N, 0:interp % N, 0:interp % N,1:3)
-   REAL(prec) :: Dv2(0:interp % N, 0:interp % N, 0:interp % N,1:3)
-   REAL(prec) :: Dv3(0:interp % N, 0:interp % N, 0:interp % N,1:3)
+   REAL(prec) :: xGradient(1:3,0:N,0:N,0:N,1:3,1:myElements % nElements)
+   REAL(prec) :: covT(0:interp % N, 0:interp % N, 0:interp % N, 1:3,1:3,1:myElements % nElements)
+   REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
+   REAL(prec) :: Dv(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
+   REAL(prec) :: Dv2(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
+   REAL(prec) :: Dv3(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
    
       N = interp % N
+
       
-      covT(0:N,0:N,0:N,1,1:3) = interp % ApplyDerivativeMatrix_3D( myElements % x )
-      covT(0:N,0:N,0:N,2,1:3) = interp % ApplyDerivativeMatrix_3D( myElements % y )
-      covT(0:N,0:N,0:N,3,1:3) = interp % ApplyDerivativeMatrix_3D( myElements % z )
+      xGradient(1:3,0:N,0:N,0:N,1:3,1:myElements % nElements) = CalculateGradient_3D_Lagrange( interp, &
+                                                                                               myElements % x,&
+                                                                                               3, myElements % nElements )
+
+      DO iEl = 1, myElements % nElements 
       
+      covT(0:N,0:N,0:N,1,1:3,iEl) = xGradient(1:3,0:N,0:N,0:N,1,iEl)
+      covT(0:N,0:N,0:N,2,1:3,iEl) = xGradient(1:3,0:N,0:N,0:N,2,iEl)
+      covT(0:N,0:N,0:N,3,1:3,iEl) = xGradient(1:3,0:N,0:N,0:N,3,iEl)
+
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
 
-               myElements % dxds(i,j,k) = covT(i,j,k,1,1)
-               myElements % dxdp(i,j,k) = covT(i,j,k,1,2)
-               myElements % dxdq(i,j,k) = covT(i,j,k,1,3)
-               myElements % dyds(i,j,k) = covT(i,j,k,2,1)
-               myElements % dydp(i,j,k) = covT(i,j,k,2,2)
-               myElements % dydq(i,j,k) = covT(i,j,k,2,3)
-               myElements % dzds(i,j,k) = covT(i,j,k,3,1)
-               myElements % dzdp(i,j,k) = covT(i,j,k,3,2)
-               myElements % dzdq(i,j,k) = covT(i,j,k,3,3)
+               myElements % dxds(i,j,k,iEl) = covT(i,j,k,1,1,iEl)
+               myElements % dxdp(i,j,k,iEl) = covT(i,j,k,1,2,iEl)
+               myElements % dxdq(i,j,k,iEl) = covT(i,j,k,1,3,iEl)
+               myElements % dyds(i,j,k,iEl) = covT(i,j,k,2,1,iEl)
+               myElements % dydp(i,j,k,iEl) = covT(i,j,k,2,2,iEl)
+               myElements % dydq(i,j,k,iEl) = covT(i,j,k,2,3,iEl)
+               myElements % dzds(i,j,k,iEl) = covT(i,j,k,3,1,iEl)
+               myElements % dzdp(i,j,k,iEl) = covT(i,j,k,3,2,iEl)
+               myElements % dzdq(i,j,k,iEl) = covT(i,j,k,3,3,iEl)
                
-               cv = covT(i,j,k,1:3,1:3)
-               myElements % J(i,j,k) = Determinant( cv, 3 )
+               cv = covT(i,j,k,1:3,1:3,iEl)
+               myElements % J(i,j,k,iEl) = Determinant( cv, 3 )
                
             ENDDO
          ENDDO
       ENDDO 
+
+      ENDDO
       
       ! Generate the contravariant metric tensor a la Kopriva (2006)
       !Ja_1
+      DO iEl = 1, myElements % nElements 
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               v(i,j,k,1:3)  = -myElements % z(i,j,k)*covT(i,j,k,2,1:3) 
+               v(i,j,k,1:3,iEl)  = -myElements % x(i,j,k,3,iEl)*covT(i,j,k,2,1:3,iEl) 
             ENDDO
          ENDDO
       ENDDO
-      Dv1 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,1) ) ! ( dv1/ds, dv1/dp, dv1/dq )
-      Dv2 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,2) ) ! ( dv2/ds, dv2/dp, dv2/dq )
-      Dv3 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,3) ) ! ( dv3/ds, dv3/dp, dv3/dq )
+      ENDDO
+
+      Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
+
       ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
       ! The contravariant metric tensor stores each contravariant basis vector in each column
       ! of the tensor
-      myElements % Ja(0:N,0:N,0:N,1,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myElements % Ja(0:N,0:N,0:N,1,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myElements % Ja(0:N,0:N,0:N,1,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      DO iEl = 1, myElements % nElements 
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
+              myElements % Ja(i,j,k,1,1,iEl) = ( Dv(2,i,j,k,3,iEl) - Dv(3,i,j,k,2,iEl) )
+              myElements % Ja(i,j,k,1,2,iEl) = -( Dv(1,i,j,k,3,iEl) - Dv(3,i,i,k,1,iEl) )
+              myElements % Ja(i,j,k,1,3,iEl) = ( Dv(1,i,j,k,2,iEl) - Dv(2,i,j,k,1,iEl) )
+            ENDDO
+         ENDDO
+      ENDDO
+      ENDDO
+
       !Ja_2
+      DO iEl = 1, myElements % nElements 
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               v(i,j,k,1:3)  = -myElements % x(i,j,k)*covT(i,j,k,3,1:3) 
+               v(i,j,k,1:3,iEl)  = -myElements % x(i,j,k,1,iEl)*covT(i,j,k,3,1:3,iEl) 
             ENDDO
          ENDDO
       ENDDO
-      Dv1 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,1) ) ! ( dv1/ds, dv1/dp, dv1/dq )
-      Dv2 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,2) ) ! ( dv2/ds, dv2/dp, dv2/dq )
-      Dv3 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,3) ) ! ( dv3/ds, dv3/dp, dv3/dq )
-      ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
-      ! The contravariant metric tensor stores each contravariant basis vector in each column
-      ! of the tensor
-      myElements % Ja(0:N,0:N,0:N,2,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myElements % Ja(0:N,0:N,0:N,2,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myElements % Ja(0:N,0:N,0:N,2,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      ENDDO
+
+      Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
+
+      DO iEl = 1, myElements % nElements 
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
+              myElements % Ja(i,j,k,2,1,iEl) = ( Dv(2,i,j,k,3,iEl) - Dv(3,i,j,k,2,iEl) )
+              myElements % Ja(i,j,k,2,2,iEl) = -( Dv(1,i,j,k,3,iEl) - Dv(3,i,i,k,1,iEl) )
+              myElements % Ja(i,j,k,2,3,iEl) = ( Dv(1,i,j,k,2,iEl) - Dv(2,i,j,k,1,iEl) )
+            ENDDO
+         ENDDO
+      ENDDO
+      ENDDO
+
       !Ja_3
+      DO iEl = 1, myElements % nElements 
       DO k = 0, N
          DO j = 0, N
             DO i = 0, N
-               v(i,j,k,1:3)  = -myElements % y(i,j,k)*covT(i,j,k,1,1:3) 
+               v(i,j,k,1:3,iEl)  = -myElements % x(i,j,k,2,iEl)*covT(i,j,k,1,1:3,iEl) 
             ENDDO
          ENDDO
       ENDDO
-      Dv1 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,1) ) ! ( dv1/ds, dv1/dp, dv1/dq )
-      Dv2 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,2) ) ! ( dv2/ds, dv2/dp, dv2/dq )
-      Dv3 = interp % ApplyDerivativeMatrix_3D( v(0:N,0:N,0:N,3) ) ! ( dv3/ds, dv3/dp, dv3/dq )
-      ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
-      ! The contravariant metric tensor stores each contravariant basis vector in each column
-      ! of the tensor
-      myElements % Ja(0:N,0:N,0:N,3,1) = ( Dv3(0:N,0:N,0:N,2) - Dv2(0:N,0:N,0:N,3) )
-      myElements % Ja(0:N,0:N,0:N,3,2) = -( Dv3(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,3) )
-      myElements % Ja(0:N,0:N,0:N,3,3) = ( Dv2(0:N,0:N,0:N,1) - Dv1(0:N,0:N,0:N,2) )
+      ENDDO
+
+      Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
+
+      DO iEl = 1, myElements % nElements 
+      DO k = 0, N
+         DO j = 0, N
+            DO i = 0, N
+              myElements % Ja(i,j,k,3,1,iEl) = ( Dv(2,i,j,k,3,iEl) - Dv(3,i,j,k,2,iEl) )
+              myElements % Ja(i,j,k,3,2,iEl) = -( Dv(1,i,j,k,3,iEl) - Dv(3,i,i,k,1,iEl) )
+              myElements % Ja(i,j,k,3,3,iEl) = ( Dv(1,i,j,k,2,iEl) - Dv(2,i,j,k,1,iEl) )
+            ENDDO
+         ENDDO
+      ENDDO
+      ENDDO
+
       
       CALL myElements % GenerateBoundaryMetrics( interp )
 
@@ -613,362 +663,107 @@ END SUBROUTINE UpdateHost_HexElements
    CLASS( HexElements ), INTENT(inout) :: myElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    ! Local
-   INTEGER    :: i, j, N
+   INTEGER    :: i, j, N, iEl
    REAL(prec) :: s(0:interp % N), p
    REAL(prec) :: Jain(0:interp % N,0:interp % N,0:interp % N)
-   REAL(prec) :: J, signJ, nx, ny, nz
+   REAL(prec) :: Jac, signJ, nx, ny, nz
    REAL(prec) :: node(1:3)
    
       N = interp % N
-      s = interp % s
+      s = interp % interpolationPoints
            ! Do the boundary locations
+      DO iEl = 1, myElements % nElements
+
       DO j = 0, N
          DO i = 0, N
          
-            p = -ONE  ! bottom, south, and west boundaries
+            p = -1.0_prec  ! bottom, south, and west boundaries
             
             !bottom boundary
             node = (/s(i), s(j), p /)
-            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
-            signJ = SIGN(ONE,J)                    
+            Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
+            signJ = SIGN(1.0_prec,Jac)                    
             ! Setting bottom boundary normal
-            Jain = myElements % Ja(0:N,0:N,0:N,1,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,3,iEl)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,2,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,3,iEl)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,3,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,3,iEl)
             nz = interp % Interpolate_3D( Jain, node )
-            myElements % nHat(1:3,i,j,bottom) = -signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,bottom,iEl) = -signJ*(/ nx, ny, nz /)
             
             node = (/ s(i), p, s(j) /)
-            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
-            signJ = SIGN(ONE,J)                    
+            Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
+            signJ = SIGN(1.0_prec,Jac)                    
             ! Setting southern boundary normal
-            Jain = myElements % Ja(0:N,0:N,0:N,1,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,2,iEl)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,2,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,2,iEl)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,3,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,2,iEl)
             nz = interp % Interpolate_3D( Jain, node )
-            myElements % nHat(1:3,i,j,south)= -signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,south,iEl)= -signJ*(/ nx, ny, nz /)
             
             ! west boundary
             node = (/ p, s(i), s(j) /)
-            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
-            signJ = SIGN(ONE,J)                    
+            Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
+            signJ = SIGN(1.0_prec,Jac)                    
             ! Setting western boundary normal
-            Jain = myElements % Ja(0:N,0:N,0:N,1,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,1,iEl)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,2,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,1,iEl)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,3,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,1,iEl)
             nz = interp % Interpolate_3D( Jain, node )
-            myElements % nHat(1:3,i,j,west) = -signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,west,iEl) = -signJ*(/ nx, ny, nz /)
              
-            p = ONE  ! top, north, and east boundaries
+            p = 1.0_prec  ! top, north, and east boundaries
             
             !top boundary
             node = (/s(i), s(j), p /)
-            J = interp % Interpolate_3D( myElements % J, node )!Determinant( cv, 3 )
-            signJ = SIGN(ONE,J)      
+            Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node )!Determinant( cv, 3 )
+            signJ = SIGN(1.0_prec,Jac)      
             ! Setting top boundary normal
-            Jain = myElements % Ja(0:N,0:N,0:N,1,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,3,iEl)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,2,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,3,iEl)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,3,3)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,3,iEl)
             nz = interp % Interpolate_3D( Jain, node )
-            myElements % nHat(1:3,i,j,top) = signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,top,iEl) = signJ*(/ nx, ny, nz /)
             
             !north boundary
             node = (/ s(i), p, s(j) /)
-            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
-            signJ = SIGN(ONE,J)    
+            Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
+            signJ = SIGN(1.0_prec,Jac)    
             ! Setting southern boundary normal
-            Jain = myElements % Ja(0:N,0:N,0:N,1,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,2,iEl)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,2,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,2,iEl)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,3,2)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,2,iEl)
             nz = interp % Interpolate_3D( Jain, node )
-            myElements % nHat(1:3,i,j,north) = signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,north,iEl) = signJ*(/ nx, ny, nz /)
             
             ! east boundary
             node = (/ p, s(i), s(j) /)
-            J = interp % Interpolate_3D( myElements % J, node ) !Determinant( cv, 3 )
-            signJ = SIGN(ONE,J)                    
+            Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
+            signJ = SIGN(1.0_prec,Jac)                    
             ! Setting eastern boundary normal
-            Jain = myElements % Ja(0:N,0:N,0:N,1,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,1,1,iEl)
             nx = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,2,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,2,1,iEl)
             ny = interp % Interpolate_3D( Jain, node )
-            Jain = myElements % Ja(0:N,0:N,0:N,3,1)
+            Jain = myElements % Ja(0:N,0:N,0:N,3,1,iEl)
             nz = interp % Interpolate_3D( Jain, node )
-            myElements % nHat(1:3,i,j,east) = signJ*(/ nx, ny, nz /)
+            myElements % nHat(1:3,i,j,east,iEl) = signJ*(/ nx, ny, nz /)
             
          ENDDO
       ENDDO
 
- END SUBROUTINE GenerateBoundaryMetrics_HexElements
-!
-!> \addtogroup HexElements_Class
-!! @{ 
-! ================================================================================================ !
-! Function CalculateLocation 
-! 
-!> \fn CalculateLocation_HexElements  
-!! Given a computational coordinate, the physical coordinate is calculated using Lagrange 
-!! interpolation.
-!! 
-!!  This function depends on <BR>
-!!   Module \ref Lagrange_Class : Function \ref Interpolate_3D_Lagrange <BR>
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(HexElements) :: this <BR>
-!! <B>TYPE</B>(Lagrange)          :: interp <BR>
-!! <B>REAL</B>(prec)              :: s(1:2), x(1:2) <BR>
-!!         .... <BR>
-!!     x = this % CalculateLocation( interp, s ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myElements <td> HexElements <td> An intialized and constructed 
-!!                                                        HexElements data structure
-!!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
-!!                                                  contains the computational mesh.
-!!   <tr> <td> in <th> s(1:3) <td> REAL(prec)  <td> Computational location where the physical 
-!!                                                  position is desired.
-!!   <tr> <td> out <th> x(1:3) <td> REAL(prec)  <td> Physical location estimated by interpolation
-!!                                                  onto the given computational position
-!!
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- FUNCTION CalculateLocation_HexElements( myElements, interp, s ) RESULT( x )
-
-   IMPLICIT NONE
-   CLASS( HexElements ) :: myElements
-   TYPE( Lagrange )           :: interp
-   REAL(prec)                 :: s(1:3)
-   REAL(prec)                 :: x(1:3)
-  
-      x(1) = interp % Interpolate_3D( myElements % x, s )
-      x(2) = interp % Interpolate_3D( myElements % y, s )
-      x(3) = interp % Interpolate_3D( myElements % z, s )
-  
- END FUNCTION CalculateLocation_HexElements
-!
-!> \addtogroup HexElements_Class
-!! @{ 
-! ================================================================================================ !
-! Function CalculateMetrics 
-! 
-!> \fn CalculateMetrics_HexElements  
-!! Given a computational coordinate, the covariant metric tensor is estimated by differentiation
-!! of the Lagrange interpolant of the mesh positions.
-!!
-!!  The output of this function is a 2x2 array whose entries are
-!!  \f[
-!!      covT(1,1) = \frac{\partial x}{\partial \xi^1}
-!!  \f]
-!!  \f[
-!!      covT(1,2) = \frac{\partial x}{\partial \xi^2}
-!!  \f]
-!!  \f[
-!!      covT(1,3) = \frac{\partial x}{\partial \xi^3}
-!!  \f]
-!!  \f[
-!!      covT(2,1) = \frac{\partial y}{\partial \xi^1}
-!!  \f]
-!!  \f[
-!!      covT(2,2) = \frac{\partial y}{\partial \xi^2}
-!!  \f]
-!!  \f[
-!!      covT(2,3) = \frac{\partial y}{\partial \xi^3}
-!!  \f]
-!!  \f[
-!!      covT(3,1) = \frac{\partial z}{\partial \xi^1}
-!!  \f]
-!!  \f[
-!!      covT(3,2) = \frac{\partial z}{\partial \xi^2}
-!!  \f]
-!!  \f[
-!!      covT(3,3) = \frac{\partial z}{\partial \xi^3}
-!!  \f]
-!! 
-!!  This function depends on <BR>
-!!   Module \ref Lagrange_Class : Function \ref Differentiate_3D_Lagrange <BR>
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(HexElements) :: this <BR>
-!! <B>TYPE</B>(Lagrange)          :: interp <BR>
-!! <B>REAL</B>(prec)              :: s(1:3), covT(1:3,1:3) <BR>
-!!         .... <BR>
-!!     x = this % CalculateMetrics( interp, s ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myElements <td> HexElements <td> An intialized and constructed 
-!!                                                        HexElements data structure
-!!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
-!!                                                  contains the computational mesh.
-!!   <tr> <td> in <th> s(1:3) <td> REAL(prec)  <td> Computational position where the covariant metric
-!!                                                  tensor is desired.
-!!   <tr> <td> out <th> covT(1:3,1:3) <td> REAL(prec)  <td> Covariant metric tensor estimated by 
-!!                                                         differentiation of a Lagrange interpolant
-!!                                                         of the mesh positions at the given 
-!!                                                         computational coordinate
-!!
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- FUNCTION CalculateMetrics_HexElements( myElements, interp, s ) RESULT( covT )
-
-   IMPLICIT NONE
-   CLASS( HexElements ) :: myElements
-   TYPE( Lagrange )           :: interp
-   REAL(prec)                 :: s(1:3)
-   REAL(prec)                 :: covT(1:3,1:3)
- 
-      covT(1,1:3) = interp % Differentiate_3D( myElements % x, s )
-      covT(2,1:3) = interp % Differentiate_3D( myElements % y, s )
-      covT(3,1:3) = interp % Differentiate_3D( myElements % z, s )
-
- END FUNCTION CalculateMetrics_HexElements
-!
-!> \addtogroup HexElements_Class 
-!! @{ 
-! ================================================================================================ !
-! S/R CalculateComputationalCoordinates
-! 
-!> \fn CalculateComputationalCoordinates_HexElements 
-!! Given a physical position, the corresponding computational coordinate is estimated.
-!!
-!! From the physical coordinates \f$ ( x^*, y^*, z^* ) \f$, the mapping
-!! \f[
-!!      \vec{x}^* = \vec{x}(\vec{\xi})
-!! \f] 
-!! must be inverted to obtain the computational coordinates. This routine uses Newton's method
-!! to approximate the solution. It is assumed that the computational domain is over the square,
-!! \f$ [-1,1] \times [-1,1] \f$. If the estimated computational coordinate is outside of this
-!! domain, the method is assumed unsuccessful. 
-!!
-!! Given an initial guess for the computational coordinate,\f$ \vec{\xi}_i \f$, Newton's method
-!! proceeds by solving for a correction based on directly solving a linearized form of the mapping,
-!! \f[
-!!      \vec{\Delta \xi} = C^{-1} \vec{r}_i
-!! \f]
-!! where \f$ C \f$ is the \f$ 3 \times 3 \f$ covariant metric tensor and 
-!! \f[
-!!       \vec{r}_i = \vec{x}^* - \vec{x}(\vec{\xi}_i)
-!! \f]
-!!  is the residual at iterate "i". In this routine, C is inverted exactly. The computational 
-!!  coordinate is updated, and the process is repeated until the residual magnitude falls below
-!!  a specified tolerance (parameter "newtonTolerance" in \ref ConstantsDictionary.f90 ).
-!!
-!!  This subroutine depends on <BR>
-!!   Module \ref HexElements_Class : Function \ref CalculateLocation_HexElements <BR>
-!!   Module \ref HexElements_Class : Function \ref CalculateMetrics_HexElements <BR>
-!!   Module \ref CommonRoutines          : Function \ref Invert_2x2 <BR>
-!! 
-!! <H2> Usage : </H2> 
-!! <B>TYPE</B>(HexElements) :: this <BR>
-!! <B>TYPE</B>(Lagrange)          :: interp <BR>
-!! <B>REAL</B>(prec)              :: x(1:3), s(1:3) <BR>
-!! <B>LOGICAL</B>                 :: successful <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % CalculateComputationalCoordinates( interp, x, s, successful ) <BR>
-!! 
-!!  <H2> Parameters : </H2>
-!!  <table> 
-!!   <tr> <td> in <th> myElements <td> HexElements <td> An intialized and constructed 
-!!                                                        HexElements data structure
-!!   <tr> <td> in <th> interp <td> Lagrange <td> Lagrange interpolant data structure that
-!!                                                  contains the computational mesh.
-!!   <tr> <td> in <th> x(1:3) <td> REAL(prec)  <td> Physical location where we would like to determine
-!!                                                  the computational coordinate
-!!   <tr> <td> out <th> s(1:3) <td> REAL(prec)  <td> Computational coordinate corresponding to the
-!!                                                  given physical coordinate
-!!   <tr> <td> out (optional) <th> success <td> LOGICAL <td> A flag that determines if the Newton's
-!!                                                           iteration was successful and returned
-!!                                                           computational coordinates within
-!!                                                           [-1,1]x[-1,1]
-!!  </table>  
-!!   
-! ================================================================================================ ! 
-!>@}
- SUBROUTINE CalculateComputationalCoordinates_HexElements( myElements, interp, x, s, success )
-
-   IMPLICIT NONE
-   CLASS( HexElements ), INTENT(in) :: myElements
-   TYPE( Lagrange ), INTENT(in)           :: interp
-   REAL(prec), INTENT(in)                 :: x(1:3)
-   REAL(prec), INTENT(out)                :: s(1:3)
-   LOGICAL, INTENT(out), OPTIONAL         :: success
-   ! LOCAL
-   REAL(prec) :: dr(1:3), ds(1:3), A(1:3,1:3), Ainv(1:3,1:3)
-   REAL(prec) :: thisX(1:3), thisS(1:3), resi
-   INTEGER    :: i 
-
-      thisS = 0.0_prec ! Initial guess is at the origin
-     
-      IF( PRESENT(success) )THEN
-         success = .FALSE.
-      ENDIF
-     
-      DO i = 1, newtonMax
-     
-         ! Calculate the physical coordinate associated with the computational coordinate guess
-         thisX = myElements % CalculateLocation( interp, thisS )
-     
-         ! Calculate the residual
-         dr = x - thisX
-         resi = SQRT( DOT_PRODUCT( dr, dr ) )
-     
-         IF( resi < newtonTolerance )THEN
-            s = thisS
-            IF( PRESENT(success) .AND. &
-                ABS(thisS(1))<=ONE+newtonTolerance .AND. &
-                ABS(thisS(2))<=ONE+newtonTolerance .AND. &
-                ABS(thisS(3))<=ONE+newtonTolerance )THEN
-               success = .TRUE.
-            ENDIF
-            RETURN
-         ENDIF
-        
-         A = myElements % CalculateMetrics( interp, thisS ) ! Calculate the covariant metric tensor
-       !  print*, A
-         Ainv = Invert_3x3( A ) ! Invert the covariant metric tensor.
-                                ! This matrix is ivertable as long as the Jacobian is non-zero.
-       !  print*, Ainv
-       !  STOP                       
-         ds = MATMUL( Ainv, dr ) ! calculate the correction in the computational coordinate
-         thisS = thisS + ds
-     
       ENDDO
-     
-      ! Calculate the residual
-      dr = x - thisX 
-      resi = SQRT( DOT_PRODUCT( dr, dr ) )
-      s = thisS
-      IF( resi < newtonTolerance )THEN
-         IF( PRESENT(success) .AND. &
-             ABS(thisS(1))<=ONE+newtonTolerance .AND. &
-             ABS(thisS(2))<=ONE+newtonTolerance .AND. &
-             ABS(thisS(3))<=ONE+newtonTolerance )THEN
-            success = .TRUE.
-         ENDIF
-         RETURN
-      ELSE
-        ! PRINT*,'Module MappedGeometryClass_3D.f90 : S/R CalculateComputationalCoordinates :'
-        ! PRINT*,'Search for coordinates failed. Final residual norm :', resi
-         RETURN
-      ENDIF
-      
-     
- END SUBROUTINE CalculateComputationalCoordinates_HexElements
+
+ END SUBROUTINE GenerateBoundaryMetrics_HexElements
 !
 !> \addtogroup HexElements_Class
 !! @{ 
@@ -1010,12 +805,12 @@ END SUBROUTINE UpdateHost_HexElements
    TYPE( Lagrange ), INTENT(in)              :: interp
    REAL(prec), INTENT(in)                    :: xScale, yScale, zScale
    
-         myElements % x = xScale*( myElements % x )
-         myElements % y = yScale*( myElements % y )
-         myElements % z = zScale*( myElements % z )
-         myElements % xBound = xScale*( myElements % xBound )
-         myElements % yBound = yScale*( myElements % yBound )
-         myElements % zBound = zScale*( myElements % zBound )
+         myElements % x(:,:,:,1,:) = xScale*( myElements % x(:,:,:,1,:) )
+         myElements % x(:,:,:,2,:) = yScale*( myElements % x(:,:,:,2,:) )
+         myElements % x(:,:,:,3,:) = zScale*( myElements % x(:,:,:,3,:) )
+         myElements % xBound(:,:,:,1,:) = xScale*( myElements % xBound(:,:,:,1,:) )
+         myElements % xBound(:,:,:,2,:) = yScale*( myElements % xBound(:,:,:,2,:) )
+         myElements % xBound(:,:,:,3,:) = zScale*( myElements % xBound(:,:,:,3,:) )
 
          ! Update the boundary metrics -- normals and normal lengths
          CALL myElements % GenerateMetrics( interp )
@@ -1023,9 +818,7 @@ END SUBROUTINE UpdateHost_HexElements
          
  END SUBROUTINE ScaleGeometry_HexElements
 !
-!
-! ///////////////////////////////////// PRIVATE ////////////////////////////////////////////////// !
- FUNCTION TransfiniteInterpolation( surfaces, a, b, c ) RESULT( P )
+ FUNCTION TransfiniteInterpolation( boundingSurfaces, a, b, c ) RESULT( P )
  ! TransfiniteInterpolation
  !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the 
  !  bidirectional mapping at xi^1 = a, xi^2 = b, xi^3 = c. The boundary of the computational 
@@ -1034,7 +827,7 @@ END SUBROUTINE UpdateHost_HexElements
  ! =============================================================================================== !
  ! DECLARATIONS
    IMPLICIT NONE
-   TYPE( Surface )  :: surfaces(1:6)
+   TYPE( Surfaces )  :: boundingSurfaces
    REAL(prec)       :: a, b, c
    REAL(prec)       :: P(1:3)
    ! LOCAL
@@ -1044,69 +837,65 @@ END SUBROUTINE UpdateHost_HexElements
    REAL(prec)  :: ref(1:2)
    INTEGER     :: i, j
    
-      ref = (/ -ONE, ONE /)
+      ref = (/ -1.0_prec, 1.0_prec /)
 
       ! Transfinite interpolation with linear blending uses linear lagrange interpolating polynomials
       ! to blend the bounding surfaces.
       ! The linear blending weights in the first computational direction are calculated.
+
       l1 = LinearBlend( a )
       l2 = LinearBlend( b )
       l3 = LinearBlend( c )
-!      print*,a,b,c
+
       ! The bounding surfaces need to be evaluated at the provided computational coordinates
-      wSurf = surfaces(west) % Evaluate( (/b, c/) )   ! west
-      eSurf = surfaces(east) % Evaluate( (/b, c/) )   ! east
-      sSurf = surfaces(south) % Evaluate( (/a, c/) )  ! south
-      nSurf = surfaces(north) % Evaluate( (/a, c/) )  ! north
-      bSurf = surfaces(bottom) % Evaluate( (/a, b/) ) ! bottom
-      tSurf = surfaces(top) % Evaluate( (/a, b/) )    ! top
-!      print*, 'xwest : ', wSurf
-!      print*, 'xeast : ',  eSurf
-!      print*, 'xsouth : ', sSurf
-!      print*, 'xnorth : ', nSurf
-!      print*, 'xbottom : ', bSurf
-!      print*, 'xtop : ', tSurf
-!      print*,'-----------------------'
+
+      wSurf = boundingSurfaces % Evaluate( (/b, c/), west )   ! west
+      eSurf = boundingSurfaces % Evaluate( (/b, c/), east )   ! east
+      sSurf = boundingSurfaces % Evaluate( (/a, c/), south )  ! south
+      nSurf = boundingSurfaces % Evaluate( (/a, c/), north )  ! north
+      bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom ) ! bottom
+      tSurf = boundingSurfaces % Evaluate( (/a, b/), top )    ! top
+
       ! P1 contains the interpolation in the first computational coordinate
       ! The first computational coordinate is assumed to vary between the (computational) east and
       ! west boundaries.
+
       P1 = l1(1)*wSurf + l1(2)*eSurf
+
       ! P2 contains the interpolation in the second computational coordinate
       ! The second computational coordinate is assumed to vary between the (computational) south and
       ! north boundaries.
+
       P2 = l2(1)*sSurf + l2(2)*nSurf
+
       ! P3 contains the interpolation in the first computational coordinate
       ! The first computational coordinate is assumed to vary between the (computational) bottom and
       ! top boundaries.
+
       P3 = l3(1)*bSurf + l3(2)*tSurf
-!      print*, 'P1 : ', P1
-!      print*, 'P2 : ', P2
-!      print*, 'P3 : ', P3
-!      STOP
+
       DO i = 1, 2
+
          ! Now we need to compute the tensor product of the first and second computational direction 
          ! interpolants and subtract from P1.
-         wSurf = surfaces(west) % Evaluate( (/ref(i), c/) )
-         eSurf = surfaces(east) % Evaluate( (/ref(i), c/) )
-         !CALL surfaces(west) % Evaluate( ref(i), c, wSurf(1), wSurf(2), wSurf(3) )
-         !CALL surfaces(east) % Evaluate( ref(i), c, eSurf(1), eSurf(2), eSurf(3) )
+
+         wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west )
+         eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east )
          P1 = P1 - l2(i)*( wSurf*l1(1) + eSurf*l1(2) )
          
          ! Now we need to compute the tensor product of the first and third computational direction 
          ! interpolants and subtract from P1.
-         wSurf = surfaces(west) % Evaluate( (/b, ref(i)/) )
-         eSurf = surfaces(east) % Evaluate( (/b, ref(i)/) )
-        ! CALL surfaces(west) % Evaluate( b, ref(i), wSurf(1), wSurf(2), wSurf(3) )
-        ! CALL surfaces(east) % Evaluate( b, ref(i), eSurf(1), eSurf(2), eSurf(3) )
+
+         wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west )
+         eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east )
 
          P1 = P1 - l3(i)*( wSurf*l1(1) + eSurf*l1(2) )
       
          ! Now we need to compute the tensor product of the second and third computational direction 
          ! interpolants and subtract from P2.
-         sSurf = surfaces(south) % Evaluate( (/a, ref(i)/) )
-         nSurf = surfaces(north) % Evaluate( (/a, ref(i)/) )
-        ! CALL surfaces(south) % Evaluate( a, ref(i), sSurf(1), sSurf(2), sSurf(3) )
-        ! CALL surfaces(north) % Evaluate( a, ref(i), nSurf(1), nSurf(2), nSurf(3) )
+
+         sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south )
+         nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north )
 
          P2 = P2 - l3(i)*( sSurf*l2(1) + nSurf*l2(2) )
       
@@ -1116,10 +905,8 @@ END SUBROUTINE UpdateHost_HexElements
       DO j = 1,2
          DO i = 1,2
          
-            wSurf = surfaces(west) % Evaluate( (/ref(i), ref(j)/) )
-            eSurf = surfaces(east) % Evaluate( (/ref(i), ref(j)/) )
-            !CALL surfaces(west) % Evaluate( ref(i), ref(j), wSurf(1), wSurf(2), wSurf(3) )
-            !CALL surfaces(east) % Evaluate( ref(i), ref(j), eSurf(1), eSurf(2), eSurf(3) )
+            wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west )
+            eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east )
             P3 = P3 + l2(i)*l3(j)*( wSurf*l1(1) + eSurf*l1(2) )
          
          ENDDO
@@ -1139,11 +926,7 @@ END SUBROUTINE UpdateHost_HexElements
  ! =============================================================================================== !
  ! DECLARATIONS
    IMPLICIT NONE
-#ifdef HAVE_CUDA
-   TYPE( Lagrange_Cuda ) :: interp
-#else
    TYPE( Lagrange ) :: interp
-#endif
    REAL(prec)       :: x(0:interp % N,0:interp % N,1:6), y(0:interp % N,0:interp % N,1:6), z(0:interp % N,0:interp % N,1:6)
    REAL(prec)       :: a, b, c
    REAL(prec)       :: P(1:3)
@@ -1154,7 +937,7 @@ END SUBROUTINE UpdateHost_HexElements
    REAL(prec)  :: ref(1:2)
    INTEGER     :: i, j
    
-      ref = (/ -ONE, ONE /)
+      ref = (/ -1.0_prec, 1.0_prec /)
 
       ! Transfinite interpolation with linear blending uses linear lagrange interpolating polynomials
       ! to blend the bounding surfaces.
@@ -1191,19 +974,26 @@ END SUBROUTINE UpdateHost_HexElements
       ! P1 contains the interpolation in the first computational coordinate
       ! The first computational coordinate is assumed to vary between the (computational) east and
       ! west boundaries.
+
       P1 = l1(1)*wSurf + l1(2)*eSurf
+
       ! P2 contains the interpolation in the second computational coordinate
       ! The second computational coordinate is assumed to vary between the (computational) south and
       ! north boundaries.
+
       P2 = l2(1)*sSurf + l2(2)*nSurf
+
       ! P3 contains the interpolation in the first computational coordinate
       ! The first computational coordinate is assumed to vary between the (computational) bottom and
       ! top boundaries.
+
       P3 = l3(1)*bSurf + l3(2)*tSurf
 
       DO i = 1, 2
+
          ! Now we need to compute the tensor product of the first and second computational direction 
          ! interpolants and subtract from P1.
+
          wSurf(1) = interp % Interpolate_2D( x(:,:,west), (/ref(i), c/) ) ! west
          wSurf(2) = interp % Interpolate_2D( y(:,:,west), (/ref(i), c/) )
          wSurf(3) = interp % Interpolate_2D( z(:,:,west), (/ref(i), c/) )
@@ -1216,6 +1006,7 @@ END SUBROUTINE UpdateHost_HexElements
          
          ! Now we need to compute the tensor product of the first and third computational direction 
          ! interpolants and subtract from P1.
+
          wSurf(1) = interp % Interpolate_2D( x(:,:,west), (/b, ref(i)/) ) ! west
          wSurf(2) = interp % Interpolate_2D( y(:,:,west), (/b, ref(i)/) )
          wSurf(3) = interp % Interpolate_2D( z(:,:,west), (/b, ref(i)/) )
@@ -1228,6 +1019,7 @@ END SUBROUTINE UpdateHost_HexElements
       
          ! Now we need to compute the tensor product of the second and third computational direction 
          ! interpolants and subtract from P2.
+
          sSurf(1) = interp % Interpolate_2D( x(:,:,south), (/a, ref(i)/) ) ! south
          sSurf(2) = interp % Interpolate_2D( y(:,:,south), (/a, ref(i)/) )
          sSurf(3) = interp % Interpolate_2D( z(:,:,south), (/a, ref(i)/) )
@@ -1244,9 +1036,6 @@ END SUBROUTINE UpdateHost_HexElements
       DO j = 1,2
          DO i = 1,2
          
-     !       wSurf = surfaces(west) % Evaluate( (/ref(i), ref(j)/) )
-     !       eSurf = surfaces(east) % Evaluate( (/ref(i), ref(j)/) )
-            
             wSurf(1) = interp % Interpolate_2D( x(:,:,west), (/ref(i), ref(j)/) ) ! west
             wSurf(2) = interp % Interpolate_2D( y(:,:,west), (/ref(i), ref(j)/) )
             wSurf(3) = interp % Interpolate_2D( z(:,:,west), (/ref(i), ref(j)/) )
@@ -1260,6 +1049,7 @@ END SUBROUTINE UpdateHost_HexElements
       ENDDO
       
       !Finally, the sum the interpolants is computed to yield the computational coordinate
+
       P = P1 + P2 + P3
       
  END FUNCTION TransfiniteInterpolation_Alt
@@ -1273,7 +1063,7 @@ END SUBROUTINE UpdateHost_HexElements
    REAL(prec) :: a
    REAL(prec) :: P(1:3)
 
-       P = HALF*( (ONE - a)*valLeft + (ONE + a)*valRight )
+       P = 0.5_prec*( (1.0_prec - a)*valLeft + (1.0_prec + a)*valRight )
     
  END FUNCTION Unidirectional
  FUNCTION LinearBlend( a ) RESULT( weights )
@@ -1282,8 +1072,8 @@ END SUBROUTINE UpdateHost_HexElements
    REAL(prec) :: a
    REAL(prec) :: weights(1:2)
 
-       weights(1) = HALF*(ONE - a)
-       weights(2) = HALF*(ONE + a)
+       weights(1) = 0.5_prec*(1.0_prec - a)
+       weights(2) = 0.5_prec*(1.0_prec + a)
     
  END FUNCTION LinearBlend
 !
