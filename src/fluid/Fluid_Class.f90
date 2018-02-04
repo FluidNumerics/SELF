@@ -329,7 +329,7 @@ INCLUDE 'mpif.h'
 #endif
 
 #ifdef HAVE_MPI
-      CALL myDGSEM % ConstructCommTables(  )
+      CALL myDGSEM % extComm % ConstructCommTables(  )
       ALLOCATE( stateReqHandle(1:myDGSEM % nNeighbors*2), &
                 stressReqHandle(1:myDGSEM % nNeighbors*2), &
                 SGSReqHandle(1:myDGSEM % nNeighbors*2), &

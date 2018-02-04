@@ -12,8 +12,12 @@ MODULE BoundaryCommunicator_CLASS
   USE ConstantsDictionary
   USE COMMONRoutines
 
+
   IMPLICIT NONE
 
+#ifdef HAVE_MPI
+  INCLUDE 'mpif.h'
+#endif
 
 
 ! BoundaryCommunicator
@@ -24,29 +28,6 @@ MODULE BoundaryCommunicator_CLASS
 ! on an unstructured mesh. This CLASS makes it trivial to implement message-passing for
 ! MPI parallelism.
 !
-! <H2> BoundaryCommunicator </H2>
-! <H3> Attributes </H3>
-!    <table>
-!       <tr> <th> nBoundaries <td> INTEGER  <td> The number of boundary edges obtained from a
-!                                                   search through mesh edges
-!       <tr> <th> extElemIDs(1:nBoundaries) <td> INTEGER  <td> The local element ID's of external
-!                          elements. These are either given as boundary condition flags or as the
-!                          local element ID of a neighboring processes mesh
-!       <tr> <th> extProcIDs(1:nBoundaries) <td> INTEGER  <td> Process ID for the neighboring element.
-!       <tr> <th> boundaryIDs(1:nBoundaries) <td> INTEGER  <td> Edge ID corresponding to a given
-!                                                                      boundary edge ID.
-!    </table>
-!
-! <H3> Procedures </H3>
-!    See \ref BoundaryCommunicator_CLASS for more information. The first column lists the "call-name" and
-!    the second column lists the name of routine that is aliased onto the call-name.
-!    <table>
-!       <tr> <th> Initialize <td> Initialize_BoundaryCommunicator
-!       <tr> <th> Trash <td> Trash_BoundaryCommunicator
-!       <tr> <th> ReadPickup <td> ReadPickup_BoundaryCommunicator
-!       <tr> <th> WritePickup <td> WritePickup_BoundaryCommunicator
-!    </table>
-!
 
   TYPE BoundaryCommunicator
     INTEGER                               :: nBoundaries
@@ -54,13 +35,37 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER, ALLOCATABLE                  :: boundaryIDs(:)
     INTEGER, ALLOCATABLE                  :: unPackMap(:)
 
+#ifdef HAVE_MPI
+    INTEGER :: myRank, nProc, nNeighbors
+    INTEGER :: maxBufferSize
+    INTEGER :: MPI_COMM, MPI_PREC, mpiErr
+
+    INTEGER, ALLOCATABLE :: bufferMap(:)
+    INTEGER, ALLOCATABLE :: neighborRank(:)
+    INTEGER, ALLOCATABLE :: bufferSize(:)
+    INTEGER, ALLOCATABLE :: rankTable(:)
+
+#ifdef HAVE_CUDA
+    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev, nNeighbors_dev
+    INTEGER, DEVICE, ALLOCATABLE :: bufferMap_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: neighborRank_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: bufferSize_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: rankTable_dev(:)
+#endif
+
+#endif
+
   CONTAINS
 
-    PROCEDURE :: Initialize => Initialize_BoundaryCommunicator
-    PROCEDURE :: Trash      => Trash_BoundaryCommunicator
+    PROCEDURE :: Build => Build_BoundaryCommunicator
+    PROCEDURE :: Trash => Trash_BoundaryCommunicator
 
     PROCEDURE :: ReadPickup  => ReadPickup_BoundaryCommunicator
     PROCEDURE :: WritePickup => WritePickup_BoundaryCommunicator
+
+#ifdef HAVE_MPI
+    PROCEDURE :: ConstructCommTables
+#endif
 
   END TYPE BoundaryCommunicator
 
@@ -75,43 +80,83 @@ CONTAINS
 !> \addtogroup BoundaryCommunicator_CLASS
 !! @{
 ! ================================================================================================ !
-! S/R Initialize
+! S/R Build
 !
-!> \fn Initialize_BoundaryCommunicator
+!> \fn Build_BoundaryCommunicator
 !! Allocates space for the BoundaryCommunicator structure and initializes all array values to zero.
 !!
 !! <H2> Usage : </H2>
 !! <B>TYPE</B>(BoundaryCommunicator) :: this <BR>
 !! <B>INTEGER</B>                    :: nBe <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Initialize( nBe ) <BR>
+!!     <B>CALL</B> this % Build( nBe ) <BR>
 !!
 !!  <H2> Parameters : </H2>
 !!  <table>
-!!   <tr> <td> out <th> myBC <td> BoundaryCommunicator <td>
+!!   <tr> <td> out <th> myComm <td> BoundaryCommunicator <td>
 !!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree for the solution storage
 !!   <tr> <td> in <th> nBe <td> INTEGER <td> The number of boundary edges in the mesh
 !!  </table>
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE Initialize_BoundaryCommunicator( myBC, nBe )
+  SUBROUTINE Build_BoundaryCommunicator( myComm, nBe )
 
     IMPLICIT NONE
-    CLASS(BoundaryCommunicator), INTENT(inout) :: myBC
+    CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
     INTEGER, INTENT(in)                      :: nBe
 
-    myBC % nBoundaries = nBe
+    myComm % nBoundaries = nBe
 
-    ALLOCATE( myBC % extProcIDs(1:nBe) )
-    ALLOCATE( myBC % boundaryIDs(1:nBe) )
-    ALLOCATE( myBC % unPackMap(1:nBe) )
+    ALLOCATE( myComm % extProcIDs(1:nBe) )
+    ALLOCATE( myComm % boundaryIDs(1:nBe) )
+    ALLOCATE( myComm % unPackMap(1:nBe) )
 
-    myBC % extProcIDs  = 0
-    myBC % boundaryIDs = 0
-    myBC % unPackMap   = 0
+    myComm % extProcIDs  = 0
+    myComm % boundaryIDs = 0
+    myComm % unPackMap   = 0
 
-  END SUBROUTINE Initialize_BoundaryCommunicator
+#ifdef HAVE_MPI
+
+    myComm % MPI_COMM = MPI_COMM_WORLD
+
+    IF( prec == sp )THEN
+      myComm % MPI_PREC = MPI_FLOAT
+    ELSE
+      myComm % MPI_PREC = MPI_DOUBLE
+    ENDIF
+
+    CALL MPI_INIT( myComm % mpiErr )
+    CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
+    CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
+
+    PRINT*, '    S/R Build_CommunicationTable : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
+
+    ALLOCATE( myComm % bufferMap(1:myComm % nBoundaries), &
+      myComm % rankTable(0:myComm % nProc-1) )
+
+#ifdef HAVE_CUDA
+
+    ALLOCATE( myComm % bufferMap_dev(1:myComm % nBoundaries), &
+      myComm % rankTable_dev(0:myComm % nProc-1) )
+
+#endif
+
+#ifdef HAVE_CUDA
+
+    ALLOCATE( myComm % myRank_dev, &
+      myComm % nProc_dev, &
+      myComm % nNeighbors_dev )
+
+    myComm % myRank_dev      = myComm % myRank
+    myComm % nProc_dev       = myComm % nProc
+    myComm % nNeighbors_dev  = myComm % nNeighbors
+
+#endif
+#endif
+
+
+  END SUBROUTINE Build_BoundaryCommunicator
 !
 !> \addtogroup BoundaryCommunicator_CLASS
 !! @{
@@ -128,18 +173,37 @@ CONTAINS
 !!
 !!  <H2> Parameters : </H2>
 !!  <table>
-!!   <tr> <td> in/out <th> myBC <td> BoundaryCommunicator <td>
+!!   <tr> <td> in/out <th> myComm <td> BoundaryCommunicator <td>
 !!  </table>
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE Trash_BoundaryCommunicator( myBC )
+  SUBROUTINE Trash_BoundaryCommunicator( myComm )
 
     IMPLICIT NONE
-    CLASS(BoundaryCommunicator), INTENT(inout) :: myBC
+    CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
 
-    DEALLOCATE( myBC % unPackMap, myBC % extProcIDs, myBC % boundaryIDs )
+    DEALLOCATE( myComm % unPackMap, myComm % extProcIDs, myComm % boundaryIDs )
 
+#ifdef HAVE_MPI
+
+    DEALLOCATE( myComm % neighborRank, &
+      myComm % bufferSize, &
+      myComm % bufferMap, &
+      myComm % rankTable )
+
+#ifdef HAVE_CUDA
+
+    DEALLOCATE( myComm % neighborRank_dev, &
+      myComm % bufferSize_dev, &
+      myComm % bufferMap_dev, &
+      myComm % rankTable_dev )
+
+#endif
+
+    CALL MPI_FINALIZE( myComm % mpiErr )
+
+#endif
 
   END SUBROUTINE Trash_BoundaryCommunicator
 !
@@ -169,17 +233,17 @@ CONTAINS
 !!
 !!  <H2> Parameters : </H2>
 !!  <table>
-!!   <tr> <td> in <th> myBC <td> BoundaryCommunicator <td> Previously constructed boundary-
+!!   <tr> <td> in <th> myComm <td> BoundaryCommunicator <td> Previously constructed boundary-
 !!                               communicator DATA structure
 !!   <tr> <td> in <th> filename <td> CHARACTER <td> File base-name for the pickup files
 !!  </table>
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE WritePickup_BoundaryCommunicator( myBC, filename )
+  SUBROUTINE WritePickup_BoundaryCommunicator( myComm, filename )
 
     IMPLICIT NONE
-    CLASS( BoundaryCommunicator ), INTENT(in) :: myBC
+    CLASS( BoundaryCommunicator ), INTENT(in) :: myComm
     CHARACTER(*), INTENT(in)                     :: filename
     ! LOCAL
     INTEGER       :: i, fUnit
@@ -192,13 +256,13 @@ CONTAINS
       STATUS ='REPLACE',&
       ACTION ='WRITE' )
 
-    WRITE( fUnit, * ) myBC % nBoundaries
+    WRITE( fUnit, * ) myComm % nBoundaries
 
-    DO i = 1, myBC % nBoundaries
+    DO i = 1, myComm % nBoundaries
 
-      WRITE( fUnit, * ) myBC % boundaryIDs(i), &
-        myBC % extProcIDs(i), &
-        myBC % unPackMap(i)
+      WRITE( fUnit, * ) myComm % boundaryIDs(i), &
+        myComm % extProcIDs(i), &
+        myComm % unPackMap(i)
 
     ENDDO
 
@@ -227,17 +291,17 @@ CONTAINS
 !!
 !!  <H2> Parameters : </H2>
 !!  <table>
-!!   <tr> <td> out <th> myBC <td> BoundaryCommunicator <td> Previously constructed boundary-
+!!   <tr> <td> out <th> myComm <td> BoundaryCommunicator <td> Previously constructed boundary-
 !!                               communicator DATA structure
 !!   <tr> <td> in <th> filename <td> CHARACTER <td> File base-name for the pickup files
 !!  </table>
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE ReadPickup_BoundaryCommunicator( myBC, filename )
+  SUBROUTINE ReadPickup_BoundaryCommunicator( myComm, filename )
 
     IMPLICIT NONE
-    CLASS( BoundaryCommunicator ), INTENT(inout) :: myBC
+    CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
     CHARACTER(*), INTENT(in)                     :: filename
     ! LOCAL
     INTEGER       :: i
@@ -256,13 +320,13 @@ CONTAINS
 
     READ( fUnit, * ) nBe
 
-    CALL myBC % Initialize( nBe )
+    CALL myComm % Build( nBe )
 
-    DO i = 1, myBC % nBoundaries
+    DO i = 1, myComm % nBoundaries
 
-      READ( fUnit, * ) myBC % boundaryIDs(i), &
-        myBC % extProcIDs(i), &
-        myBC % unPackMap(i)
+      READ( fUnit, * ) myComm % boundaryIDs(i), &
+        myComm % extProcIDs(i), &
+        myComm % unPackMap(i)
 
     ENDDO
 
@@ -270,7 +334,108 @@ CONTAINS
 
   END SUBROUTINE ReadPickup_BoundaryCommunicator
 !
+#ifdef HAVE_MPI
+  SUBROUTINE ConstructCommTables( myComm )
+
+    IMPLICIT NONE
+    CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
+    ! Local
+    INTEGER, ALLOCATABLE :: bufferCounter(:)
+    INTEGER :: sharedFaceCount(0:myComm % nProc-1)
+    INTEGER :: IFace, bID, iNeighbor
+    INTEGER :: tag, ierror
+    INTEGER :: e1, e2, s1, p2, nmsg, maxFaceCount
+    INTEGER :: fUnit
+
+
+    ! Count up the number of neighboring ranks
+    myComm % rankTable = 0
+    sharedFaceCount     = 0
+    DO bID = 1, myComm % nBoundaries
+
+      p2 = myComm % extProcIDS(bID)
+
+      IF( p2 /= myComm % myRank )THEN
+
+        myComm % rankTable(p2) = 1
+        sharedFaceCount(p2) = sharedFaceCount(p2)+1
+
+      ENDIF
+
+    ENDDO
+
+
+    myComm % nNeighbors = SUM( myComm % rankTable )
+    PRINT*, '  S/R ConstructCommTables : Found', myComm % nNeighbors, 'neighbors for Rank', myComm % myRank+1
+
+    ALLOCATE( myComm % neighborRank(1:myComm % nNeighbors), &
+      myComm % bufferSize(1:myComm % nNeighbors), &
+      bufferCounter(1:myComm % nNeighbors) )
+
+
+    ! For each neighbor, set the neighbor's rank
+    iNeighbor = 0
+    DO p2 = 0, myComm % nProc-1
+
+      IF( myComm % rankTable(p2) == 1 )THEN
+
+        iNeighbor = iNeighbor + 1
+        myComm % neighborRank(iNeighbor) = p2
+        myComm % rankTable(p2) = iNeighbor
+
+      ENDIF
+
+    ENDDO
+
+
+    maxFaceCount = MAXVAL( sharedFaceCount )
+    DO iNeighbor = 1, myComm % nNeighbors
+
+      p2 = myComm % neighborRank(iNeighbor)
+      myComm % bufferSize(iNeighbor) = sharedFaceCount(p2)
+
+    ENDDO
+
+
+    myComm % maxBufferSize = maxFaceCount
+    bufferCounter = 0
+
+
+
+    myComm % bufferMap = 0
+
+    DO bID = 1, myComm % nBoundaries
+
+      p2 = myComm % extProcIDs(bID)
+
+      ! In the event that the external process ID (p2) is identical to the current rank (p1),
+      ! THEN this boundary edge involves a physical boundary condition and DOes not require a
+      ! message exchange
+
+      IF( p2 /= myComm % myRank )THEN
+
+        iNeighbor = myComm % rankTable(p2)
+
+        bufferCounter(iNeighbor) = bufferCounter(iNeighbor) + 1
+        myComm % bufferMap(bID)   = bufferCounter(iNeighbor)
+
+      ENDIF
+
+    ENDDO
+
+    DEALLOCATE( bufferCounter )
+
+#ifdef HAVE_CUDA
+    ALLOCATE( myComm % neighborRank_dev(1:myComm % nNeighbors), &
+      myComm % bufferSize_dev(1:myComm % nNeighbors) )
+
+    myComm % rankTable_dev    = myComm % rankTable
+    myComm % neighborRank_dev = myComm % neighborRank
+    myComm % bufferSize_dev   = myComm % bufferSize
+    myComm % bufferMap_dev    = myComm % bufferMap
+#endif
+
+  END SUBROUTINE ConstructCommTables
+#endif
+
 END MODULE BoundaryCommunicator_CLASS
-
-
-
