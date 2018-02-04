@@ -220,14 +220,6 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
 
 	
 # ---------------------------------------------------------------------- #
-#                              ~/src/mpi                                 #
-# ---------------------------------------------------------------------- #
-
-CommunicationTable_Class.o : ModelPrecision.o BoundaryCommunicator_Class.o ${SRCDIR}mpi/CommunicationTable_Class.f90
-	${MPIFC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}mpi/CommunicationTable_Class.f90 ${LIB} ${INC}
-
-
-# ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
 

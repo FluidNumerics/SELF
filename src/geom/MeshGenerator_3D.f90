@@ -7,7 +7,7 @@ PROGRAM MeshGenerator_3D
 
   USE ModelPrecision
   USE ConstantsDictionary
-  USE COMMONRoutines
+  USE commonroutines
   USE Timing
   USE NodalDG_CLASS
   USE HexMesh_CLASS
