@@ -13,7 +13,7 @@ MODULE CommunicationTable_CLASS
 
   IMPLICIT NONE
 
-  INCLUDE 'mpIF.h'
+  INCLUDE 'mpif.h'
 
   TYPE CommunicationTable
 
@@ -27,6 +27,7 @@ MODULE CommunicationTable_CLASS
     INTEGER, ALLOCATABLE :: rankTable(:)
 
 #ifdef HAVE_CUDA
+    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev, nNeighbors_dev
     INTEGER, DEVICE, ALLOCATABLE :: bufferMap_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: neighborRank_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: bufferSize_dev(:)
@@ -219,10 +220,10 @@ CONTAINS
     ALLOCATE( myComm % neighborRank_dev(1:myComm % nNeighbors), &
       myComm % bufferSize_dev(1:myComm % nNeighbors) )
 
-    myDGSEM % mpiPackets % rankTable_dev    = myDGSEM % mpiPackets % rankTable
-    myDGSEM % mpiPackets % neighborRank_dev = myDGSEM % mpiPackets % neighborRank
-    myDGSEM % mpiPackets % bufferSize_dev   = myDGSEM % mpiPackets % bufferSize
-    myDGSEM % mpiPackets % bufferMap_dev    = myDGSEM % mpiPackets % bufferMap
+    myComm % rankTable_dev    = myComm % rankTable
+    myComm % neighborRank_dev = myComm % neighborRank
+    myComm % bufferSize_dev   = myComm % bufferSize
+    myComm % bufferMap_dev    = myComm % bufferMap
 #endif
 
   END SUBROUTINE ConstructCommTables
