@@ -33,6 +33,13 @@ INCLUDE 'mpif.h'
        INTEGER, DEVICE, ALLOCATABLE :: rankTable_dev(:)
 #endif
 
+      CONTAINS
+   
+        PROCEDURE :: Build => Build_CommunicationTable
+        PROCEDURE :: Trash => Trash_CommunicationTable
+        
+        PROCEDURE :: ConstructCommTables
+
     END TYPE CommunicationTable
 
 CONTAINS
@@ -40,9 +47,9 @@ CONTAINS
 SUBROUTINE Build_CommunicationTable( myComm, extComm, setupSuccess )
 
    IMPLICIT NONE
-   CLASS( CommunicationTable ), INTENT(out)  :: myComm
-   TYPE( BoundaryCommunicator ), INTENT(in)  :: extComm
-   LOGICAL, INTENT(inout)                    :: setupSuccess
+   CLASS( CommunicationTable ), INTENT(out)    :: myComm
+   TYPE( BoundaryCommunicator ), INTENT(inout) :: extComm
+   LOGICAL, INTENT(inout)                      :: setupSuccess
 
 
       myComm % MPI_COMM = MPI_COMM_WORLD
@@ -54,8 +61,8 @@ SUBROUTINE Build_CommunicationTable( myComm, extComm, setupSuccess )
       ENDIF
 
       CALL MPI_INIT( myComm % mpiErr )
-      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, mpiErr )
-      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, mpiErr )
+      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
+      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
 
       PRINT*, '    S/R Build_CommunicationTable : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
 
@@ -110,13 +117,12 @@ SUBROUTINE Build_CommunicationTable( myComm, extComm, setupSuccess )
 
      CALL MPI_FINALIZE( myComm % mpiErr )
       
- END SUBROUTINE Trash_CommTables
+ END SUBROUTINE Trash_CommunicationTable
 !
- SUBROUTINE ConstructCommTables( myComm, extComm, N, nEq )
+ SUBROUTINE ConstructCommTables( myComm, extComm )
    IMPLICIT NONE
-   CLASS( myComm ), INTENT(inout)              :: myComm
+   CLASS( CommunicationTable ), INTENT(inout)  :: myComm
    TYPE( BoundaryCommunicator ), INTENT(inout) :: extComm
-   INTEGER, INTENT(in)                         :: N, nEq
    ! Local
    INTEGER, ALLOCATABLE :: bufferCounter(:)
    INTEGER :: sharedFaceCount(0:myComm % nProc-1)
@@ -136,7 +142,7 @@ SUBROUTINE Build_CommunicationTable( myComm, extComm, setupSuccess )
 
          IF( p2 /= myComm % myRank )THEN
 
-            mpiLayer % rankTable(p2) = 1
+            myComm % rankTable(p2) = 1
             sharedFaceCount(p2) = sharedFaceCount(p2)+1
 
          ENDIF
