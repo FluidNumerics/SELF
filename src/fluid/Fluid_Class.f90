@@ -28,47 +28,41 @@ IMPLICIT NONE
 #ifdef HAVE_MPI
 INCLUDE 'mpif.h'
 
+    TYPE BodyForces
+      REAL(prec), ALLOCATABLE         :: drag(:,:,:,:)
+#ifdef HAVE_CUDA
+      REAL(prec), DEVICE, ALLOCATABLE :: drag_dev(:,:,:,:)
+#endif
+    END TYPE BodyForces
+
     TYPE Fluid
-      INTEGER                      :: nEq, N, nBoundaryFaces, nNeighbors
+      INTEGER                      :: nEq, N
       REAL(prec)                   :: simulationTime
       TYPE( FluidParams )          :: params
       TYPE( HexMesh )              :: mesh
       TYPE( BoundaryCommunicator ) :: extComm
-#ifdef HAVE_MPI
-      TYPE( MPILayer )             :: mpiHandler
-#endif
       TYPE( nodalDG )              :: dGStorage
       TYPE( RollOffFilter )        :: filter
 
+      TYPE( BodyForces )           :: sourceTerms
+
+      TYPE( NodalDGSolution_3D )   :: static
+
       TYPE( NodalDGSolution_3D )   :: state
       TYPE( NodalDGSolution_3D )   :: smoothState
-      TYPE( NodalDGSolution_3D )   :: static
+      TYPE( BoundaryConditions )   :: stateBCs
+
       TYPE( NodalDGSolution_3D )   :: stressTensor
+      TYPE( BoundaryConditions )   :: stressBCs
+
       TYPE( NodalDGSolution_3D )   :: sgsCoeffs
 
-! --- > Roll this into a "BodyForces" Class
-      REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
-#ifdef HAVE_CUDA
-      REAL(prec), DEVICE, ALLOCATABLE        :: dragProfile_dev(:,:,:,:)
+#ifdef HAVE_MPI
+      TYPE( MPILayer )             :: mpiStateHandler
+      TYPE( MPILayer )             :: mpiStressHandler
+      TYPE( MPILayer )             :: mpiSGSHandler
 #endif
-! <<<<
 
-! ---- > Roll this into a "FluidBoundaryConditions_Class"
-      
-      REAL(prec), ALLOCATABLE                 :: prescribedState(:,:,:,:)
-      REAL(prec), ALLOCATABLE                 :: externalState(:,:,:,:)
-      REAL(prec), ALLOCATABLE                 :: prescribedStress(:,:,:,:)
-      REAL(prec), ALLOCATABLE                 :: externalStress(:,:,:,:)
-      REAL(prec), ALLOCATABLE                 :: externalSGS(:,:,:,:)
-
-#ifdef HAVE_CUDA
-      REAL(prec), DEVICE, ALLOCATABLE         :: prescribedState_dev(:,:,:,:)
-      REAL(prec), DEVICE, ALLOCATABLE         :: externalState_dev(:,:,:,:)
-      REAL(prec), DEVICE, ALLOCATABLE         :: prescribedStress_dev(:,:,:,:)
-      REAL(prec), DEVICE, ALLOCATABLE         :: externalStress_dev(:,:,:,:)
-      REAL(prec), DEVICE, ALLOCATABLE         :: externalSGS_dev(:,:,:,:)
-#endif
-! <---
 
 #ifdef DIAGNOSTICS
       REAL(prec) :: volume, mass, KE, PE, heat
@@ -243,8 +237,8 @@ INCLUDE 'mpif.h'
       ! Load the mesh from the pc-mesh file and copy the mesh to the GPU
       CALL myDGSEM % BuildHexMesh(  )
 
-      ALLOCATE( myDGSEM % dragProfile(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
-      myDGSEM % dragProfile = 0.0_prec
+      ALLOCATE( myDGSEM % drag(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
+      myDGSEM % drag = 0.0_prec
 
       ! Initialize the state and static "solutionstorage" data structures
       CALL myDGSEM % state % Build( myDGSEM % N, nEq, &
@@ -280,8 +274,8 @@ INCLUDE 'mpif.h'
 
 ! >>> Roll this into a "CUDA_Build" Routine
 
-      ALLOCATE( myDGSEM % dragProfile_dev(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
-      myDGSEM % dragProfile_dev = 0.0_prec
+      ALLOCATE( myDGSEM % drag_dev(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
+      myDGSEM % drag_dev = 0.0_prec
       
       ! Copy values to the GPU variables
       myDGSEM % sgsCoeffs % solution_dev         = myDGSEM % sgsCoeffs % solution
@@ -399,7 +393,7 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % extComm % Trash( )
       CALL myDGSEM % filter % Trash( ) 
 
-      DEALLOCATE( myDGSEM % dragProfile )
+      DEALLOCATE( myDGSEM % drag )
       
       DEALLOCATE( myDGSEM % prescribedState )
       DEALLOCATE( myDGSEM % externalState )
@@ -408,7 +402,7 @@ INCLUDE 'mpif.h'
       DEALLOCATE( myDGSEM % externalSGS )
       
 #ifdef HAVE_CUDA
-      DEALLOCATE( myDGSEM % dragProfile_dev )
+      DEALLOCATE( myDGSEM % drag_dev )
       DEALLOCATE( myDGSEM % prescribedState_dev )
       DEALLOCATE( myDGSEM % externalState_dev )
       DEALLOCATE( myDGSEM % prescribedStress_dev )
@@ -2665,7 +2659,7 @@ INCLUDE 'mpif.h'
       CALL MappedTimeDerivative_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                              myDGSEM % static % solution_dev, &
                                                              myDGSEM % state % boundaryFlux_dev, &
-                                                             myDGSEM % dragProfile_dev, &
+                                                             myDGSEM % drag_dev, &
                                                              myDGSEM % mesh % geom_dev % Ja_dev, &
                                                              myDGSEM % mesh % geom_dev % J_dev, &
                                                              myDGSEM % dgStorage % bMat_dev, &
@@ -2792,7 +2786,7 @@ INCLUDE 'mpif.h'
                                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
                         myDGSEM % state % tendency(i,j,k,1,iEl) = myDGSEM % state % tendency(i,j,k,1,iEl) -&
-                                                                  myDGSEM % dragProfile(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,1,iEl)*F -&
+                                                                  myDGSEM % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,1,iEl)*F -&
                                                                   myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotY +&
                                                                   myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotZ
                      ENDDO
@@ -2808,7 +2802,7 @@ INCLUDE 'mpif.h'
                                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
                         myDGSEM % state % tendency(i,j,k,1,iEl) = myDGSEM % state % tendency(i,j,k,1,iEl) -&
-                                                                  myDGSEM % dragProfile(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,2,iEl)*F - &
+                                                                  myDGSEM % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,2,iEl)*F - &
                                                                   myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotZ +&
                                                                   myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotX
                      ENDDO
@@ -2824,7 +2818,7 @@ INCLUDE 'mpif.h'
                                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
                         myDGSEM % state % tendency(i,j,k,3,iEl) = myDGSEM % state % tendency(i,j,k,3,iEl) -&
-                                                                  myDGSEM % dragProfile(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,3,iEl)*F - &
+                                                                  myDGSEM % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,3,iEl)*F - &
                                                                   myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotX +&
                                                                   myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotY-&
                                                                  ( myDGSEM % state % solution(i,j,k,4,iEl) )*myDGSEM % params % g  !& 
@@ -3739,7 +3733,7 @@ INCLUDE 'mpif.h'
                                   bsol(i,j,k,4), &
                                   bsol(i,j,k,5)/( bsol(i,j,k,4) ),&
                                   bsol(i,j,k,6),&
-                                  myDGSEM % dragProfile(i,j,k,iEl), c
+                                  myDGSEM % drag(i,j,k,iEl), c
                ENDDO
             ENDDO
          ENDDO
@@ -4238,7 +4232,7 @@ INCLUDE 'mpif.h'
             thisRec = thisRec+1
          ENDDO
         
-         WRITE( fUnit, REC=thisRec )myDGSEM % dragProfile(:,:,:,iEl)
+         WRITE( fUnit, REC=thisRec )myDGSEM % drag(:,:,:,iEl)
          thisRec = thisRec+1
          
       ENDDO
@@ -4304,7 +4298,7 @@ INCLUDE 'mpif.h'
                thisRec = thisRec+1
             ENDDO
             
-            READ( fUnit, REC=thisRec )myDGSEM % dragProfile(:,:,:,iEl)
+            READ( fUnit, REC=thisRec )myDGSEM % drag(:,:,:,iEl)
             thisRec = thisRec+1
          
          ENDDO
@@ -4314,7 +4308,7 @@ INCLUDE 'mpif.h'
       ENDIF
 
 #ifdef HAVE_CUDA
-      myDGSEM % dragProfile_dev       = myDGSEM % dragProfile
+      myDGSEM % drag_dev       = myDGSEM % drag
       myDGSEM % state % solution_dev  = myDGSEM % state % solution
       myDGSEM % static % solution_dev = myDGSEM % static % solution
 #endif
