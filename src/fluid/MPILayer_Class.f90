@@ -5,27 +5,22 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE MPI_Layer_Class
+MODULE MPILayer_Class
 
 USE ModelPrecision
-USE ConstantsDictionary
-USE CommonRoutines
-USE FluidParams_Class
-USE Lagrange_Class
-USE dgStorage_Class
-USE RollOffFilter_Class
 USE NodalDGSolution_3D_Class
-USE HexMesh_Class
+USE Faces_Class
+USE BoundaryConditions_Class
 USE BoundaryCommunicator_Class
 
 #ifdef HAVE_CUDA
 USE cudafor
-#else
+#endif
 
 
 IMPLICIT NONE
 
-INCLUDE 'mpif.h'
+!INCLUDE 'mpif.h'
 
     TYPE MPILayer
 
@@ -38,7 +33,7 @@ INCLUDE 'mpif.h'
        INTEGER, ALLOCATABLE :: requestHandle(:)
        INTEGER, ALLOCATABLE :: requestStats(:,:)
 
-#ifdef HAVE_CUD
+#ifdef HAVE_CUDA
        INTEGER, DEVICE, ALLOCATABLE :: nVars_dev, N_dev
 
        REAL(prec), DEVICE, ALLOCATABLE :: sendBuffer_dev(:,:,:,:,:)
@@ -69,8 +64,8 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
 
       ALLOCATE( myMPI % requestHandle(1:extComm % nNeighbors*2), &
                 myMPI % requestStats(MPI_STATUS_SIZE,1:extComm % nNeighbors*2), &
-                myMPI % recvBuffer(0:N, 0:N, 1:nEq, 1:extComm % bufferSize, 1:extComm % nNeighbors), &
-                myMPI % sendBuffer(0:N, 0:N, 1:nEq, 1:extComm % bufferSize, 1:extComm % nNeighbors) )
+                myMPI % recvBuffer(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &
+                myMPI % sendBuffer(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
 
       myMPI % requestHandle = 0
       myMPI % requestStats  = 0
@@ -84,8 +79,8 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
       myMPI % N_dev     = N
       myMPI % nVars_dev = nVars
 
-      ALLOCATE( myMPI % recvBuffer_dev(0:N, 0:N, 1:nEq, 1:extComm % bufferSize, 1:extComm % nNeighbors), &
-                myMPI % sendBuffer_dev(0:N, 0:N, 1:nEq, 1:extComm % bufferSize, 1:extComm % nNeighbors) )
+      ALLOCATE( myMPI % recvBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &
+                myMPI % sendBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
       myMPI % recvBuffer_dev = 0.0_prec
       myMPI % sendBuffer_dev = 0.0_prec
 
@@ -126,14 +121,14 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
    TYPE( Faces ), INTENT(in)                :: meshFaces
    TYPE( BoundaryCommunicator ), INTENT(in) :: extComm
    ! Local
-   INTEGER    :: iNeighbor
+   INTEGER    :: iNeighbor, iError
 #ifdef HAVE_CUDA
    TYPE(dim3) :: grid, tBlock
 
   
-      tBlock = dim3(4*(ceiling( REAL(N+1)/4 ) ), &
-                    4*(ceiling( REAL(N+1)/4 ) ) , &
-                    nEq )
+      tBlock = dim3(4*(ceiling( REAL(myMPI % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myMPI % N+1)/4 ) ) , &
+                    myMPI % nVars )
       grid = dim3(extComm % nBoundaries,1,1) 
 
       CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myMPI % sendBuffer_dev, &
@@ -142,18 +137,18 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
                                                           meshFaces % elementSides_dev, &
                                                           extComm % boundaryIDs_dev, &
                                                           extComm % extProcIDs_dev, &
-                                                          mpiLayer % rankTable_dev,&
-                                                          mpiLayer % bufferMap_dev,&
+                                                          extComm % rankTable_dev,&
+                                                          extComm % bufferMap_dev,&
                                                           meshFaces % nFaces_dev, extComm % nBoundaries_dev, &
-                                                          myMPI % nProc_dev, myMPI % myRank_dev, &
+                                                          extComm % nProc_dev, extComm % myRank_dev, &
                                                           fluidState % N_dev, fluidState % nEquations_dev,&
-                                                          myMPI % nNeighbors_dev, myMPI % maxBufferSize_dev, &
+                                                          extComm % nNeighbors_dev, extComm % maxBufferSize_dev, &
                                                           fluidState % nElements_dev )
 
 
 #ifdef CUDA_DIRECT
       iError = cudaDeviceSynchronize( )
-      DO iNeighbor = 1, myMPI % nNeighbors 
+      DO iNeighbor = 1, extComm % nNeighbors 
 
             
             CALL MPI_IRECV( myMPI % recvBuffer_dev(:,:,:,:,iNeighbor), & 
@@ -177,7 +172,7 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
       myMPI % sendBuffer= myMPI % sendBuffer_dev
       iError = cudaDeviceSynchronize( )
 
-      DO iNeighbor = 1, myMPI % nNeighbors 
+      DO iNeighbor = 1, extComm % nNeighbors 
             
             CALL MPI_IRECV( myMPI % recvBuffer(:,:,:,:,iNeighbor), & 
                            (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &                
@@ -200,26 +195,26 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
 
 #else
    INTEGER    :: iFace, bID
-   INTEGER    :: tag, ierror
-   INTEGER    :: e1, e2, s1, p2, iNeighbor
+   INTEGER    :: tag
+   INTEGER    :: e1, e2, s1, p2
 
       DO bID = 1, extComm % nBoundaries
       
          iFace     = extComm % boundaryIDs( bID )
          p2        = extComm % extProcIDs(bID)
          
-         IF( p2 /= myMPI % myRank )THEN 
+         IF( p2 /= extComm % myRank )THEN 
 
             e1        = meshFaces % elementIDs(1,iFace)
             s1        = meshFaces % elementSides(1,iFace)
             iNeighbor = extComm % rankTable(p2)
          
-            myMPI % sendBuffer(:,:,:,myMPI % bufferMap(bID), iNeighbor ) = boundaryState(:,:,:,s1,e1) 
+            myMPI % sendBuffer(:,:,:,extComm % bufferMap(bID), iNeighbor ) = fluidState % boundarySolution(:,:,:,s1,e1) 
 
          ENDIF
       ENDDO
 
-      DO iNeighbor = 1, myMPI % nNeighbors 
+      DO iNeighbor = 1, extComm % nNeighbors 
             
             CALL MPI_IRECV( myMPI % recvBuffer(:,:,:,:,iNeighbor), & 
                            (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &                
@@ -241,12 +236,13 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
 
  END SUBROUTINE MPI_Exchange
 !
- SUBROUTINE Finalize_MPI_Exchange( myMPI, boundaryConditions, extComm ) 
+ SUBROUTINE Finalize_MPI_Exchange( myMPI, boundaryState, meshFaces, extComm ) 
 
    IMPLICIT NONE
-   CLASS( MPILayer ), INTENT(inout)               :: myMPI
-   TYPE( FluidBoundaryConditions ), INTENT(inout) :: boundaryConditions
-   TYPE( BoundaryCommunicator ), INTENT(in)       :: extComm
+   CLASS( MPILayer ), INTENT(inout)          :: myMPI
+   TYPE( BoundaryConditions ), INTENT(inout) :: boundaryState
+   TYPE( Faces ), INTENT(in)                 :: meshFaces
+   TYPE( BoundaryCommunicator ), INTENT(in)  :: extComm
    ! Local
    INTEGER    :: iFace, bID
    INTEGER    :: tag, ierror
@@ -272,16 +268,16 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
       grid = dim3(extComm % nBoundaries,1,1) 
 
       CALL BufferToBoundary_CUDAKernel<<<grid, tBlock>>>( myMPI % recvBuffer_dev, &
-                                                          boundaryConditions % externalState_dev, &
+                                                          boundaryState % externalState_dev, &
                                                           extComm % boundaryIDs_dev, &
                                                           extComm % extProcIDs_dev, &
                                                           extComm % rankTable_dev, &
                                                           extComm % unPackMap_dev, &
-                                                          meshFaces % nFaces_dec, &
+                                                          meshFaces % nFaces_dev, &
                                                           extComm % nBoundaries_dev, &
-                                                          extComm % nProc_dev, myMPI % myRank_dev, &
+                                                          extComm % nProc_dev, extComm % myRank_dev, &
                                                           myMPI % N_dev, myMPI % nVars_dev, extComm % nNeighbors_dev, &
-                                                          extComm % maxBufferSize_dev, boundaryConditions % nElements_dev )
+                                                          extComm % maxBufferSize_dev )
 
 #else
 
@@ -294,7 +290,7 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
             iNeighbor = extComm % rankTable(p2)
             jUnpack   = extComm % unpackMap(bID)
 
-            externalState(:,:,:,bID) = myMPI % recvBuffer(:,:,:,jUnpack,iNeighbor)
+            boundaryState % externalState(:,:,:,bID) = myMPI % recvBuffer(:,:,:,jUnpack,iNeighbor)
 
          ENDIF
 
@@ -303,7 +299,7 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
 #endif
 
 
- END SUBROUTINE Finalize_MPI_Exchange_Fluid
+ END SUBROUTINE Finalize_MPI_Exchange
 !
 #ifdef HAVE_CUDA
  ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, faceToElement, faceToSide, boundaryToFaceID, &
@@ -347,10 +343,10 @@ SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
 !
  ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalSolution, boundaryToFaceID, &
                                                             boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
-                                                            bufferSize, nElements )
+                                                            bufferSize )
    IMPLICIT NONE
    INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-   INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
+   INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, bufferSize
    INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
    INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
    INTEGER, DEVICE, INTENT(in)       :: rankTable(0:nRanks-1)

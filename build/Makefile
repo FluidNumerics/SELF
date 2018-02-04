@@ -196,7 +196,7 @@ HexElements_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexElements_Class.f90 -o $@
 
 BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}geom/BoundaryCommunicator_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surfaces_Class.o HexElements_Class.o \
@@ -210,7 +210,6 @@ MeshGenerator_3D.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Tim
                      TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o ${SRCDIR}geom/MeshGenerator_3D.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MeshGenerator_3D.f90
 
-
 MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
               LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
               TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o
@@ -223,6 +222,12 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
 #                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
 
+BoundaryConditions_Class.o : ModelPrecision.o ${SRCDIR}fluid/BoundaryConditions_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/BoundaryConditions_Class.f90
+
+MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o BoundaryConditions_Class.o BoundaryCommunicator_Class.o \
+                   ${SRCDIR}fluid/MPILayer_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
 ifeq (${CUDA},yes)
 

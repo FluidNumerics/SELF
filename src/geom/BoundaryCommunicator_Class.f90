@@ -30,10 +30,17 @@ MODULE BoundaryCommunicator_CLASS
 !
 
   TYPE BoundaryCommunicator
-    INTEGER                               :: nBoundaries
-    INTEGER, ALLOCATABLE                  :: extProcIDs(:)
-    INTEGER, ALLOCATABLE                  :: boundaryIDs(:)
-    INTEGER, ALLOCATABLE                  :: unPackMap(:)
+    INTEGER              :: nBoundaries
+    INTEGER, ALLOCATABLE :: extProcIDs(:)
+    INTEGER, ALLOCATABLE :: boundaryIDs(:)
+    INTEGER, ALLOCATABLE :: unPackMap(:)
+
+#ifdef HAVE_CUDA
+    INTEGER, DEVICE, ALLOCATABLE :: nBoundaries_dev
+    INTEGER, DEVICE, ALLOCATABLE :: extProcIDs_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: boundaryIDs_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: unPackMap_dev(:)
+#endif
 
 #ifdef HAVE_MPI
     INTEGER :: myRank, nProc, nNeighbors
@@ -46,7 +53,7 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER, ALLOCATABLE :: rankTable(:)
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev, nNeighbors_dev
+    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev, nNeighbors_dev, maxBufferSize_dev
     INTEGER, DEVICE, ALLOCATABLE :: bufferMap_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: neighborRank_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: bufferSize_dev(:)
@@ -59,6 +66,11 @@ MODULE BoundaryCommunicator_CLASS
 
     PROCEDURE :: Build => Build_BoundaryCommunicator
     PROCEDURE :: Trash => Trash_BoundaryCommunicator
+
+#ifdef HAVE_CUDA
+    PROCEDURE :: UpdateDevice => UpdateDevice_BoundaryCommunicator
+    PROCEDURE :: UpdateHost   => UpdateHost_BoundaryCommunicator
+#endif
 
     PROCEDURE :: ReadPickup  => ReadPickup_BoundaryCommunicator
     PROCEDURE :: WritePickup => WritePickup_BoundaryCommunicator
@@ -116,6 +128,17 @@ CONTAINS
     myComm % boundaryIDs = 0
     myComm % unPackMap   = 0
 
+#ifdef HAVE_CUDA
+
+    ALLOCATE( myComm % nBoundaries_dev )
+    myComm % nBoundaries_dev = nBe
+
+    ALLOCATE( myComm % extProcIDs_dev(1:nBe) )
+    ALLOCATE( myComm % boundaryIDs_dev(1:nBe) )
+    ALLOCATE( myComm % unPackMap_dev(1:nBe) )
+
+#endif
+
 #ifdef HAVE_MPI
 
     myComm % MPI_COMM = MPI_COMM_WORLD
@@ -146,7 +169,8 @@ CONTAINS
 
     ALLOCATE( myComm % myRank_dev, &
       myComm % nProc_dev, &
-      myComm % nNeighbors_dev )
+      myComm % nNeighbors_dev, &
+      myComm % maxBufferSize_dev )
 
     myComm % myRank_dev      = myComm % myRank
     myComm % nProc_dev       = myComm % nProc
@@ -185,6 +209,11 @@ CONTAINS
 
     DEALLOCATE( myComm % unPackMap, myComm % extProcIDs, myComm % boundaryIDs )
 
+#ifdef HAVE_CUDA
+    DEALLOCATE( myComm % nBoundaries_dev )
+    DEALLOCATE( myComm % unPackMap_dev, myComm % extProcIDs_dev, myComm % boundaryIDs_dev )
+#endif
+
 #ifdef HAVE_MPI
 
     DEALLOCATE( myComm % neighborRank, &
@@ -197,7 +226,8 @@ CONTAINS
     DEALLOCATE( myComm % neighborRank_dev, &
       myComm % bufferSize_dev, &
       myComm % bufferMap_dev, &
-      myComm % rankTable_dev )
+      myComm % rankTable_dev, &
+      myComm % maxBufferSize_dev )
 
 #endif
 
@@ -206,6 +236,52 @@ CONTAINS
 #endif
 
   END SUBROUTINE Trash_BoundaryCommunicator
+
+#ifdef HAVE_CUDA
+
+SUBROUTINE UpdateDevice_BoundaryCommunicator( myComm )
+
+IMPLICIT NONE
+CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
+
+
+myComm % unPackMap_dev = myComm % unPackMap
+myComm % extProcIDs_dev = myComm % extProcIDs
+myComm % boundaryIDs_dev = myComm % boundaryIDs
+
+#ifdef HAVE_MPI
+
+myComm % neighborRank_dev = myComm % neighborRank
+mycomm % bufferSize_dev   = myComm % bufferSize
+myComm % rankTable_dev    = myComm % rankTable
+myComm % maxBufferSize_dev = myComm % maxBufferSize
+
+#endif
+
+END SUBROUTINE UpdateDevice_BoundaryCommunicator
+
+SUBROUTINE UpdateHost_BoundaryCommunicator( myComm )
+
+IMPLICIT NONE
+CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
+
+
+myComm % unPackMap   = myComm % unPackMap_dev
+myComm % extProcIDs  = myComm % extProcIDs_dev
+myComm % boundaryIDs = myComm % boundaryIDs_dev
+
+#ifdef HAVE_MPI
+
+myComm % neighborRank  = myComm % neighborRank_dev
+mycomm % bufferSize    = myComm % bufferSize_dev
+myComm % rankTable     = myComm % rankTable_dev
+myComm % maxBufferSize = myComm % maxBufferSize_dev
+
+#endif
+
+END SUBROUTINE UpdateHost_BoundaryCommunicator
+
+#endif
 !
 !
 !==================================================================================================!
