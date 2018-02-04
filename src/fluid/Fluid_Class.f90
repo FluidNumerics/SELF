@@ -7,140 +7,60 @@
 
 MODULE Fluid_Class
 
-! src/common/
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
-#ifdef TESTING
-USE ModelDataInstances_Class
-#endif
-! src/highend/Fluid/
 USE FluidParams_Class
-
-#ifdef HAVE_CUDA
-! CUDA libraries
-! src/spectralops/cuda/
-USE Lagrange_Cuda_Class
-USE NodalStorage_Cuda_Class
-! src/filters/cuda/
-USE RollOffFilter_Cuda_Class
-! src/solutionstorage/cuda/
-USE DGSEMSolutionStorage_3D_Cuda_Class
-! src/geometry/cuda/
-USE Face_Cuda_Class
-USE Element_Cuda_Class  
-USE HexMesh_Cuda_Class 
-USE BoundaryCommunicator_Cuda_Class
-
-USE cudafor
-#else
-
-! src/spectralops/
 USE Lagrange_Class
-USE NodalStorage_Class
-! src/filters/
+USE dgStorage_Class
 USE RollOffFilter_Class
-! src/solutionstorage/
-USE DGSEMSolutionStorage_3D_Class
-! src/geometry/
+USE NodalDGSolution_3D_Class
 USE HexMesh_Class
 USE BoundaryCommunicator_Class
 
-#endif
+#ifdef HAVE_CUDA
+USE cudafor
+#else
 
-!#ifdef HAVE_MPI
-!USE mpi
-!#endif
 
 IMPLICIT NONE
 
 #ifdef HAVE_MPI
 INCLUDE 'mpif.h'
 
-    TYPE PairWiseMPIPacket
-       ! For the unstructured mesh, I opt for building my own data structure that bundles messages between neighboring
-       ! ranks, rather than attempting to build an MPI data structure. If a structured mesh is used, one optimization 
-       ! would be to use MPI-data types to handle the message passing.
-       !
-       ! :: Attributes ::  
-       ! unPackMap(1:nSharedFaces)   >> Maps the local shared boundary face ID in the message to the correct boundaryID
-       INTEGER :: maxBufferSize
-#ifdef HAVE_CUDA
-       REAL(prec), DEVICE, ALLOCATABLE :: sendStateBuffer_dev(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
-       REAL(prec), DEVICE, ALLOCATABLE :: recvStateBuffer_dev(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: sendStressBuffer_dev(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: recvStressBuffer_dev(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: sendSGSBuffer_dev(:,:,:,:,:)
-       REAL(prec), DEVICE, ALLOCATABLE :: recvSGSBuffer_dev(:,:,:,:,:)
-
-       REAL(prec), PINNED, ALLOCATABLE :: sendStateBuffer(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
-       REAL(prec), PINNED, ALLOCATABLE :: recvStateBuffer(:,:,:,:,:)
-       REAL(prec), PINNED, ALLOCATABLE :: sendStressBuffer(:,:,:,:,:)
-       REAL(prec), PINNED, ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
-       REAL(prec), PINNED, ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
-       REAL(prec), PINNED, ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
-
-       INTEGER, DEVICE, ALLOCATABLE    :: bufferMap_dev(:)
-       INTEGER, DEVICE, ALLOCATABLE    :: neighborRank_dev(:)
-       INTEGER, DEVICE, ALLOCATABLE    :: bufferSize_dev(:)
-       INTEGER, DEVICE, ALLOCATABLE    :: rankTable_dev(:)
-#else
-       REAL(prec), ALLOCATABLE :: sendStateBuffer(:,:,:,:,:) ! (0:N,0:N,1:nEq,1:nSharedFaces)
-       REAL(prec), ALLOCATABLE :: recvStateBuffer(:,:,:,:,:)
-       REAL(prec), ALLOCATABLE :: sendStressBuffer(:,:,:,:,:)
-       REAL(prec), ALLOCATABLE :: recvStressBuffer(:,:,:,:,:)
-       REAL(prec), ALLOCATABLE :: sendSGSBuffer(:,:,:,:,:)
-       REAL(prec), ALLOCATABLE :: recvSGSBuffer(:,:,:,:,:)
-#endif
-       INTEGER, ALLOCATABLE    :: bufferMap(:)
-       INTEGER, ALLOCATABLE    :: neighborRank(:)
-       INTEGER, ALLOCATABLE    :: bufferSize(:)
-       INTEGER, ALLOCATABLE    :: rankTable(:)
-    END TYPE PairWiseMPIPacket
-#endif
-
     TYPE Fluid
-      INTEGER                                :: nEq, N, nBoundaryFaces, nNeighbors, myRank, nProc
-      REAL(prec)                             :: simulationTime
-      TYPE( FluidParams )                    :: params
-      REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
+      INTEGER                      :: nEq, N, nBoundaryFaces, nNeighbors
+      REAL(prec)                   :: simulationTime
+      TYPE( FluidParams )          :: params
+      TYPE( HexMesh )              :: mesh
+      TYPE( BoundaryCommunicator ) :: extComm
 #ifdef HAVE_MPI
-      TYPE( PairWiseMPIPacket )              :: mpiPackets
+      TYPE( MPILayer )             :: mpiHandler
 #endif
+      TYPE( nodalDG )              :: dGStorage
+      TYPE( RollOffFilter )        :: filter
 
+      TYPE( NodalDGSolution_3D )   :: state
+      TYPE( NodalDGSolution_3D )   :: smoothState
+      TYPE( NodalDGSolution_3D )   :: static
+      TYPE( NodalDGSolution_3D )   :: stressTensor
+      TYPE( NodalDGSolution_3D )   :: sgsCoeffs
+
+! --- > Roll this into a "BodyForces" Class
+      REAL(prec), ALLOCATABLE                :: dragProfile(:,:,:,:)
 #ifdef HAVE_CUDA
       REAL(prec), DEVICE, ALLOCATABLE        :: dragProfile_dev(:,:,:,:)
-      TYPE( HexMesh_Cuda )                   :: mesh
-      TYPE( NodalStorage_Cuda )              :: dGStorage
-      TYPE( RollOffFilter_Cuda )             :: filter
-      TYPE( DGSEMSolution_3D_Cuda )          :: state
-      TYPE( LightDGSEMSolution_3D_Cuda )     :: smoothState
-      TYPE( DGSEMSolution_3D_Cuda )          :: static
-      TYPE( DGSEMSolution_3D_Cuda )          :: stressTensor
-      TYPE( LightDGSEMSolution_3D_Cuda )     :: sgsCoeffs
-#else
-      TYPE( HexMesh )                        :: mesh
-      TYPE( NodalStorage )                   :: dGStorage
-      TYPE( RollOffFilter )                  :: filter
-      TYPE( DGSEMSolution_3D )               :: state
-      TYPE( LightDGSEMSolution_3D )          :: smoothState
-      TYPE( DGSEMSolution_3D )               :: static
-      TYPE( DGSEMSolution_3D )               :: stressTensor
-      TYPE( LightDGSEMSolution_3D )          :: sgsCoeffs
 #endif
-      ! ////////////  Boundary communication information  //////////// !
-#ifdef HAVE_CUDA
-      TYPE( BoundaryCommunicator_Cuda )       :: extComm
-#else
-      TYPE( BoundaryCommunicator )            :: extComm
-#endif
+! <<<<
 
+! ---- > Roll this into a "FluidBoundaryConditions_Class"
       
       REAL(prec), ALLOCATABLE                 :: prescribedState(:,:,:,:)
       REAL(prec), ALLOCATABLE                 :: externalState(:,:,:,:)
       REAL(prec), ALLOCATABLE                 :: prescribedStress(:,:,:,:)
       REAL(prec), ALLOCATABLE                 :: externalStress(:,:,:,:)
       REAL(prec), ALLOCATABLE                 :: externalSGS(:,:,:,:)
+
 #ifdef HAVE_CUDA
       REAL(prec), DEVICE, ALLOCATABLE         :: prescribedState_dev(:,:,:,:)
       REAL(prec), DEVICE, ALLOCATABLE         :: externalState_dev(:,:,:,:)
@@ -148,6 +68,7 @@ INCLUDE 'mpif.h'
       REAL(prec), DEVICE, ALLOCATABLE         :: externalStress_dev(:,:,:,:)
       REAL(prec), DEVICE, ALLOCATABLE         :: externalSGS_dev(:,:,:,:)
 #endif
+! <---
 
 #ifdef DIAGNOSTICS
       REAL(prec) :: volume, mass, KE, PE, heat
@@ -275,6 +196,25 @@ INCLUDE 'mpif.h'
          PRINT(MsgFMT), 'S/R Build_Fluid : Halting before building,'
          RETURN
       ENDIF
+
+      myDGSEM % myRank = 0
+      myDGSEM % nProc  = 1
+
+#ifdef HAVE_MPI
+
+      IF( prec == sp )THEN
+         MPI_PREC = MPI_FLOAT
+      ELSE
+         MPI_PREC = MPI_DOUBLE
+      ENDIF
+
+      CALL MPI_INIT( mpiErr )
+      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myDGSEM % myRank, mpiErr )
+      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myDGSEM % nProc, mpiErr )
+      PRINT*, '    S/R Build_Fluid : Greetings from Process ', myDGSEM % myRank+1, ' of ', myDGSEM % nProc
+
+#endif
+
 #ifdef HAVE_CUDA
 
       iStat = cudaGetDeviceCount( nDevices )
@@ -285,13 +225,6 @@ INCLUDE 'mpif.h'
 #endif
 
 
-#ifdef HAVE_MPI
-      IF( prec == sp )THEN
-         MPI_PREC = MPI_FLOAT
-      ELSE
-         MPI_PREC = MPI_DOUBLE
-      ENDIF
-#endif
       callid = 0
       myDGSEM % N   = myDGSEM % params % polyDeg
       myDGSEM % nEq = nEq
@@ -303,8 +236,8 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % dGStorage % Build( myDGSEM % N, myDGSEM % params % nPlot, GAUSS, DG )
       
       ! Construct the roll-off filter matrix
-      CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % s,&
-                                     myDGSEM % dgStorage % qWeight, &
+      CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
+                                     myDGSEM % dgStorage % quadratureWeights, &
                                      myDGSEM % N, myDGSEM % params % nCutoff )
                                      
       ! Load the mesh from the pc-mesh file and copy the mesh to the GPU
@@ -345,6 +278,8 @@ INCLUDE 'mpif.h'
                                            
 #ifdef HAVE_CUDA
 
+! >>> Roll this into a "CUDA_Build" Routine
+
       ALLOCATE( myDGSEM % dragProfile_dev(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
       myDGSEM % dragProfile_dev = 0.0_prec
       
@@ -353,6 +288,7 @@ INCLUDE 'mpif.h'
       myDGSEM % sgsCoeffs % boundarySolution_dev = myDGSEM % sgsCoeffs % boundarySolution
 
       ! Set Device Constants
+! Make device copies inside of the params class.
       R_dev         = myDGSEM % params % R
       Cv_dev        = myDGSEM % params % Cv
       P0_dev        = myDGSEM % params % P0
@@ -496,18 +432,13 @@ INCLUDE 'mpif.h'
       PRINT*, 'Reading mesh from '//TRIM(myDGSEM % params % PeaceMeshFile)//'.'//rankChar//'.pc.mesh '
       
       ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
-      CALL myDGSEM % mesh % ReadPeaceMeshFile( TRIM(myDGSEM % params % PeaceMeshFile)//'.'//rankChar )
+      CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % PeaceMeshFile)//'.'//rankChar )
       
       ! Multiply the mesh positions to scale the size of the mesh
       CALL myDGSEM % mesh % ScaleTheMesh( myDGSEM % dgStorage % interp, &
                                           myDGSEM % params % xScale, &
                                           myDGSEM % params % yScale, &
                                           myDGSEM % params % zScale )
-
-#ifdef HAVE_CUDA
-      ! Here we update the device arrays on the mesh
-      CALL myDGSEM % mesh % UpdateDevice( myDGSEM % N )
-#endif
 
  END SUBROUTINE BuildHexMesh_Fluid
 !
@@ -2738,7 +2669,7 @@ INCLUDE 'mpif.h'
                                                              myDGSEM % mesh % geom_dev % Ja_dev, &
                                                              myDGSEM % mesh % geom_dev % J_dev, &
                                                              myDGSEM % dgStorage % bMat_dev, &
-                                                             myDGSEM % dgStorage % qWeight_dev, &
+                                                             myDGSEM % dgStorage % quadratureWeights_dev, &
                                                              myDGSEM % dgStorage % dMatP_dev, &
                                                              myDGSEM % state % tendency_dev )
 #else
@@ -2837,17 +2768,17 @@ INCLUDE 'mpif.h'
                                       myDGSEM % dgStorage % bmat(j,left-1) + &
                                       myDGSEM % state % boundaryFlux(i,k,iEq,NORTH,iEl)*&
                                       myDGSEM % dgStorage % bMat(j,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(j) + &
+                                      myDGSEM % dgStorage % quadratureWeights(j) + &
                                     ( myDGSEM % state % boundaryFlux(j,k,iEq,WEST,iEl)*&
                                       myDGSEM % dgStorage % bMat(i,left-1) + &
                                       myDGSEM % state % boundaryFlux(j,k,iEq,EAST,iEl)*&
                                       myDGSEM % dgStorage % bMat(i,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(i) + &
+                                      myDGSEM % dgStorage % quadratureWeights(i) + &
                                     ( myDGSEM % state % boundaryFlux(i,j,iEq,BOTTOM,iEl)*&
                                       myDGSEM % dgStorage % bMat(k,left-1) + &
                                       myDGSEM % state % boundaryFlux(i,j,iEq,TOP,iEl)*&
                                       myDGSEM % dgStorage % bMat(k,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(k) )/myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                                      myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % geom(iEl) % J(i,j,k)
                   ENDDO
                ENDDO
             ENDDO
@@ -2934,7 +2865,7 @@ INCLUDE 'mpif.h'
                                                               myDGSEM % static % solution_dev, &
                                                               myDGSEM % dgStorage % dMatP_dev, &
                                                               myDGSEM % dgStorage % bMat_dev, &
-                                                              myDGSEM % dgStorage % qWeight_dev, &
+                                                              myDGSEM % dgStorage % quadratureWeights_dev, &
                                                               myDGSEM % mesh % geom_dev % Ja_dev, &
                                                               myDGSEM % mesh % geom_dev % J_dev, &
                                                               myDGSEM % stressTensor % boundaryFlux_dev, &
@@ -3027,17 +2958,17 @@ INCLUDE 'mpif.h'
                                       myDGSEM % dgStorage % bmat(j,left-1) + &
                                       myDGSEM % stressTensor % boundaryFlux(i,k,jEq,NORTH,iEl)*&
                                       myDGSEM % dgStorage % bMat(j,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(j) + &
+                                      myDGSEM % dgStorage % quadratureWeights(j) + &
                                     ( myDGSEM % stressTensor % boundaryFlux(j,k,jEq,WEST,iEl)*&
                                       myDGSEM % dgStorage % bMat(i,left-1) + &
                                       myDGSEM % stressTensor % boundaryFlux(j,k,jEq,EAST,iEl)*&
                                       myDGSEM % dgStorage % bMat(i,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(i) + &
+                                      myDGSEM % dgStorage % quadratureWeights(i) + &
                                     ( myDGSEM % stressTensor % boundaryFlux(i,j,jEq,BOTTOM,iEl)*&
                                       myDGSEM % dgStorage % bMat(k,left-1) + &
                                       myDGSEM % stressTensor % boundaryFlux(i,j,jEq,TOP,iEl)*&
                                       myDGSEM % dgStorage % bMat(k,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(k) )/myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                                      myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % geom(iEl) % J(i,j,k)
                      ENDDO
                   ENDDO
                ENDDO
@@ -3489,7 +3420,7 @@ INCLUDE 'mpif.h'
                                                              myDGSEM % mesh % geom_dev % Ja_dev, &
                                                              myDGSEM % mesh % geom_dev % J_dev, &
                                                              myDGSEM % dgStorage % bMat_dev, &
-                                                             myDGSEM % dgStorage % qWeight_dev, &
+                                                             myDGSEM % dgStorage % quadratureWeights_dev, &
                                                              myDGSEM % dgStorage % dMatP_dev, &
                                                              myDGSEM % stressTensor % tendency_dev )
 #else
@@ -3567,17 +3498,17 @@ INCLUDE 'mpif.h'
                                       myDGSEM % dgStorage % bmat(j,left-1) + &
                                       myDGSEM % stressTensor % boundaryFlux(i,k,iEq,NORTH,iEl)*&
                                       myDGSEM % dgStorage % bMat(j,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(j) + &
+                                      myDGSEM % dgStorage % quadratureWeights(j) + &
                                     ( myDGSEM % stressTensor % boundaryFlux(j,k,iEq,WEST,iEl)*&
                                       myDGSEM % dgStorage % bMat(i,left-1) + &
                                       myDGSEM % stressTensor % boundaryFlux(j,k,iEq,EAST,iEl)*&
                                       myDGSEM % dgStorage % bMat(i,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(i) + &
+                                      myDGSEM % dgStorage % quadratureWeights(i) + &
                                     ( myDGSEM % stressTensor % boundaryFlux(i,j,iEq,BOTTOM,iEl)*&
                                       myDGSEM % dgStorage % bMat(k,left-1) + &
                                       myDGSEM % stressTensor % boundaryFlux(i,j,iEq,TOP,iEl)*&
                                       myDGSEM % dgStorage % bMat(k,right-1) )/&
-                                      myDGSEM % dgStorage % qWeight(k) )/myDGSEM % mesh % geom(iEl) % J(i,j,k)
+                                      myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % geom(iEl) % J(i,j,k)
                   ENDDO
                ENDDO
             ENDDO
@@ -3925,16 +3856,16 @@ INCLUDE 'mpif.h'
               DO i = 0, myDGSEM % N
 
                  volume = volume + myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
-                                             myDGSEM % dgStorage % qWeight(i)*&
-                                             myDGSEM % dgStorage % qWeight(j)*&
-                                             myDGSEM % dgStorage % qWeight(k)
+                                             myDGSEM % dgStorage % quadratureWeights(i)*&
+                                             myDGSEM % dgStorage % quadratureWeights(j)*&
+                                             myDGSEM % dgStorage % quadratureWeights(k)
 
                  mass = mass + ( myDGSEM % state % solution(i,j,k,4,iEl)+&
                                            myDGSEM % static % solution(i,j,k,4,iEl) )*&
                                          myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
-                                             myDGSEM % dgStorage % qWeight(i)*&
-                                             myDGSEM % dgStorage % qWeight(j)*&
-                                             myDGSEM % dgStorage % qWeight(k)
+                                             myDGSEM % dgStorage % quadratureWeights(i)*&
+                                             myDGSEM % dgStorage % quadratureWeights(j)*&
+                                             myDGSEM % dgStorage % quadratureWeights(k)
 
                  KE   = KE + ( myDGSEM % state % solution(i,j,k,1,iEl)**2 +&
                                          myDGSEM % state % solution(i,j,k,2,iEl)**2 +&
@@ -3942,26 +3873,26 @@ INCLUDE 'mpif.h'
                                        ( myDGSEM % state % solution(i,j,k,4,iEl)+&
                                          myDGSEM % static % solution(i,j,k,4,iEl) )*&
                                        myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
-                                             myDGSEM % dgStorage % qWeight(i)*&
-                                             myDGSEM % dgStorage % qWeight(j)*&
-                                             myDGSEM % dgStorage % qWeight(k)
+                                             myDGSEM % dgStorage % quadratureWeights(i)*&
+                                             myDGSEM % dgStorage % quadratureWeights(j)*&
+                                             myDGSEM % dgStorage % quadratureWeights(k)
 
                  PE   = PE - myDGSEM % state % solution(i,j,k,4,iEl)*&
                                        myDGSEM % params % g*&
                                        myDGSEM % mesh % geom(iEl) % z(i,j,k)*&
                                        myDGSEM % mesh % geom(iEl) % J(i,j,k)*&
-                                             myDGSEM % dgStorage % qWeight(i)*&
-                                             myDGSEM % dgStorage % qWeight(j)*&
-                                             myDGSEM % dgStorage % qWeight(k)
+                                             myDGSEM % dgStorage % quadratureWeights(i)*&
+                                             myDGSEM % dgStorage % quadratureWeights(j)*&
+                                             myDGSEM % dgStorage % quadratureWeights(k)
 
                  heat = heat + ( myDGSEM % static % solution(i,j,k,5,iEl) + &
                                  myDGSEM % state % solution(i,j,k,5,iEl) )/&
                                ( myDGSEM % static % solution(i,j,k,4,iEl) +&
                                  myDGSEM % state % solution(i,j,k,4,iEl) )*&
                                          myDGSEM % mesh % geom(iEl) % J(i,j,k)*& 
-                                             myDGSEM % dgStorage % qWeight(i)*&
-                                             myDGSEM % dgStorage % qWeight(j)*&
-                                             myDGSEM % dgStorage % qWeight(k)
+                                             myDGSEM % dgStorage % quadratureWeights(i)*&
+                                             myDGSEM % dgStorage % quadratureWeights(j)*&
+                                             myDGSEM % dgStorage % quadratureWeights(k)
 
               ENDDO
            ENDDO
@@ -5129,7 +5060,7 @@ INCLUDE 'mpif.h'
 
 !
  ATTRIBUTES(Global) SUBROUTINE MappedTimeDerivative_CUDAKernel( solution, static, boundaryFlux, drag, &
-                                                                Ja, Jac, bMat, qWeight, dMatP, tendency )
+                                                                Ja, Jac, bMat, quadratureWeights, dMatP, tendency )
 
    IMPLICIT NONE
    REAL(prec), DEVICE, INTENT(in)  :: solution(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
@@ -5139,7 +5070,7 @@ INCLUDE 'mpif.h'
    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:3,1:3,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: bMat(0:polydeg_dev,0:1)
-   REAL(prec), DEVICE, INTENT(in)  :: qWeight(0:polydeg_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:polydeg_dev)
    REAL(prec), DEVICE, INTENT(in)  :: dMatP(0:polydeg_dev,0:polydeg_dev)
    REAL(prec), DEVICE, INTENT(out) :: tendency(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
    ! Local
@@ -5188,13 +5119,13 @@ INCLUDE 'mpif.h'
       tend = -( tend + &
                 ( boundaryFlux(i,k,iEq,1,iEl)*bmat(j,0) + &
                   boundaryFlux(i,k,iEq,3,iEl)*bMat(j,1) )/&
-                qWeight(j) + &
+                quadratureWeights(j) + &
                 ( boundaryFlux(j,k,iEq,4,iEl)*bMat(i,0) + &
                   boundaryFlux(j,k,iEq,2,iEl)*bMat(i,1) )/&
-                qWeight(i) + &
+                quadratureWeights(i) + &
                 ( boundaryFlux(i,j,iEq,5,iEl)*bMat(k,0) + &
                   boundaryFlux(i,j,iEq,6,iEl)*bMat(k,1) )/&
-                qWeight(k) )/Jac(i,j,k,iEl)
+                quadratureWeights(k) )/Jac(i,j,k,iEl)
                       
              
       tendency(i,j,k,iEq,iEl) = tend
@@ -5227,14 +5158,14 @@ INCLUDE 'mpif.h'
        
  END SUBROUTINE MappedTimeDerivative_CUDAKernel
 !
- ATTRIBUTES(Global) SUBROUTINE CalculateStressTensor_CUDAKernel( solution, static, dMatP, bmat, qWeight, Ja, Jac, stressFlux, stressTensor ) 
+ ATTRIBUTES(Global) SUBROUTINE CalculateStressTensor_CUDAKernel( solution, static, dMatP, bmat, quadratureWeights, Ja, Jac, stressFlux, stressTensor ) 
  
    IMPLICIT NONE
    REAL(prec), DEVICE, INTENT(in)  :: solution(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: dMatP(0:polydeg_dev,0:polydeg_dev)
    REAL(prec), DEVICE, INTENT(in)  :: bmat(0:polydeg_dev,0:1)
-   REAL(prec), DEVICE, INTENT(in)  :: qWeight(0:polydeg_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:polydeg_dev)
    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:3,1:3,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
@@ -5283,13 +5214,13 @@ INCLUDE 'mpif.h'
          stressTensor(i,j,k,idir + (iEq-1)*3,iEl) = ( strTens + &
                 ( stressFlux(i,k,idir + (iEq-1)*3,1,iEl)*bmat(j,0) + &
                   stressFlux(i,k,idir + (iEq-1)*3,3,iEl)*bMat(j,1) )/&
-                qWeight(j) + &
+                quadratureWeights(j) + &
                 ( stressFlux(j,k,idir + (iEq-1)*3,4,iEl)*bMat(i,0) + &
                   stressFlux(j,k,idir + (iEq-1)*3,2,iEl)*bMat(i,1) )/&
-                qWeight(i) + &
+                quadratureWeights(i) + &
                 ( stressFlux(i,j,idir + (iEq-1)*3,5,iEl)*bMat(k,0) + &
                   stressFlux(i,j,idir + (iEq-1)*3,6,iEl)*bMat(k,1) )/&
-                qWeight(k) )/Jac(i,j,k,iEl)
+                quadratureWeights(k) )/Jac(i,j,k,iEl)
 
                      
  END SUBROUTINE CalculateStressTensor_CUDAKernel
@@ -5556,7 +5487,7 @@ INCLUDE 'mpif.h'
  END SUBROUTINE BoundaryStressFlux_CUDAKernel
 !
  ATTRIBUTES(Global) SUBROUTINE StressDivergence_CUDAKernel( stress, stressFlux, state, static, sgsCoeffs, &
-                                                             Ja, Jac, bMat, qWeight, dMatP, tendency ) ! ///////////////////// !
+                                                             Ja, Jac, bMat, quadratureWeights, dMatP, tendency ) ! ///////////////////// !
 
    IMPLICIT NONE
    REAL(prec), DEVICE, INTENT(in)  :: stress(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:15,1:nEl_dev)
@@ -5567,7 +5498,7 @@ INCLUDE 'mpif.h'
    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:3,1:3,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: bMat(0:polydeg_dev,0:1)
-   REAL(prec), DEVICE, INTENT(in)  :: qWeight(0:polydeg_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:polydeg_dev)
    REAL(prec), DEVICE, INTENT(in)  :: dMatP(0:polydeg_dev,0:polydeg_dev)
    REAL(prec), DEVICE, INTENT(out) :: tendency(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:15,1:nEl_dev)
    ! Local
@@ -5626,13 +5557,13 @@ INCLUDE 'mpif.h'
       tend = ( tend + &
                 ( stressFlux(i,k,iEq,1,iEl)*bmat(j,0) + &
                   stressFlux(i,k,iEq,3,iEl)*bMat(j,1) )/&
-                qWeight(j) + &
+                quadratureWeights(j) + &
                 ( stressFlux(j,k,iEq,4,iEl)*bMat(i,0) + &
                   stressFlux(j,k,iEq,2,iEl)*bMat(i,1) )/&
-                qWeight(i) + &
+                quadratureWeights(i) + &
                 ( stressFlux(i,j,iEq,5,iEl)*bMat(k,0) + &
                   stressFlux(i,j,iEq,6,iEl)*bMat(k,1) )/&
-                qWeight(k) )/Jac(i,j,k,iEl)
+                quadratureWeights(k) )/Jac(i,j,k,iEl)
                       
              
       tendency(i,j,k,iEq,iEl) = tend

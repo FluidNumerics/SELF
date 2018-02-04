@@ -218,10 +218,19 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
                       LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
                       TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o -o $@
 
+	
+# ---------------------------------------------------------------------- #
+#                              ~/src/mpi                                 #
+# ---------------------------------------------------------------------- #
+
+CommunicationTable_Class.o : ModelPrecision.o BoundaryCommunicator_Class.o ${SRCDIR}mpi/CommunicationTable_Class.f90
+	${MPIFC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}mpi/CommunicationTable_Class.f90 ${LIB} ${INC}
+
+
 # ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
-	
+
 
 ifeq (${CUDA},yes)
 
