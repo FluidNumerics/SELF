@@ -10,7 +10,7 @@ MODULE BoundaryCommunicator_CLASS
 ! src/COMMON/
   USE ModelPrecision
   USE ConstantsDictionary
-  USE commonroutines
+  USE CommonRoutines
 
 
   IMPLICIT NONE

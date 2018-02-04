@@ -10,7 +10,7 @@ MODULE HexElements_CLASS
 
   USE ModelPrecision
   USE ConstantsDictionary
-  USE commonroutines
+  USE CommonRoutines
   USE Lagrange_CLASS
   USE Surfaces_CLASS
 
