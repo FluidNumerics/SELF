@@ -66,8 +66,12 @@ USE ConstantsDictionary
       REAL(prec)    :: rho0 ! Reference density
       REAL(prec)    :: P0   ! reference pressure
       REAL(prec)    :: v0
+      REAL(prec)    :: hCapRatio
+      REAL(prec)    :: rC
 
 #ifdef HAVE_CUDA
+      REAL(prec), DEVICE, ALLOCATABLE    :: viscosity_dev
+      REAL(prec), DEVICE, ALLOCATABLE    :: viscLengthScale_dev
       ! Physical
       REAL(prec), DEVICE, ALLOCATABLE    :: fRotX_dev  ! coriolis parameter (x-component)
       REAL(prec), DEVICE, ALLOCATABLE    :: fRotY_dev   ! "                " (y-component)
@@ -82,6 +86,8 @@ USE ConstantsDictionary
       REAL(prec), DEVICE, ALLOCATABLE    :: rho0_dev  ! Reference density
       REAL(prec), DEVICE, ALLOCATABLE    :: P0_dev    ! reference pressure
       REAL(prec), DEVICE, ALLOCATABLE    :: v0_dev 
+      REAL(prec), DEVICE, ALLOCATABLE    :: hCapRatio_dev
+      REAL(prec), DEVICE, ALLOCATABLE    :: rC_dev
 
 #endif
 
@@ -364,9 +370,14 @@ USE ConstantsDictionary
 
       ENDIF
 
+ params % hCapRatio = ( params % R + params % Cv ) / params % Cv
+ params % rC        =   params % R / ( params % R + params % Cv )
+
 #ifdef HAVE_CUDA
 
-      ALLOCATE( params % fRotX_dev, & 
+      ALLOCATE( params % viscosity_dev, &
+                params % viscLengthScale_dev, &
+                params % fRotX_dev, & 
                 params % fRotY_dev, &
                 params % fRotZ_dev, &
                 params % Cd_dev, &
@@ -378,7 +389,9 @@ USE ConstantsDictionary
                 params % dTdz_dev, &
                 params % rho0_dev, &
                 params % P0_dev, & 
-                params % v0_dev ) 
+                params % v0_dev, &
+                params % hCapRatio_dev, &
+                params % rC_dev ) 
 
      CALL params % UpdateDevice( )
 #endif
@@ -392,7 +405,9 @@ USE ConstantsDictionary
 
 #ifdef HAVE_CUDA
 
-      DEALLOCATE( params % fRotX_dev, & 
+      DEALLOCATE( params % viscosity_dev, &
+                  params % viscLengthScale_dev, &
+                  params % fRotX_dev, & 
                   params % fRotY_dev, &
                   params % fRotZ_dev, &
                   params % Cd_dev, &
@@ -404,7 +419,9 @@ USE ConstantsDictionary
                   params % dTdz_dev, &
                   params % rho0_dev, &
                   params % P0_dev, & 
-                  params % v0_dev ) 
+                  params % v0_dev, & 
+                  params % hCapRatio_dev, &
+                  params % rC_dev ) 
 
 #endif
 
@@ -415,6 +432,9 @@ USE ConstantsDictionary
  SUBROUTINE UpdateDevice_ModelParameters( params )
  IMPLICIT NONE
  CLASS( ModelParameters ), INTENT(inout) :: params
+
+ params % viscosity_dev       = params % viscosity
+ params % viscLengthScale_dev = params % viscLengthScale
 
  params % fRotX_dev     = params % fRotX
  params % fRotY_dev     = params % fRotY
@@ -429,6 +449,9 @@ USE ConstantsDictionary
  params % rho0_dev      = params % rho0
  params % P0_dev        = params % P0
  params % v0_dev        = params % v0
+
+ params % hCapRatio_dev = params % hCapRatio
+ params % rC_dev        = params % rC
 
  END SUBROUTINE UpdateDevice_ModelParameters
 #endif
