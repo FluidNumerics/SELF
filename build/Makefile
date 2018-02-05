@@ -115,7 +115,7 @@ ModelPrecision.o : ${SRCDIR}common/ModelPrecision.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/ModelPrecision.f90 -o $@
 
 ConstantsDictionary.o : ModelPrecision.o ${SRCDIR}common/ConstantsDictionary.f90
-	${FC} ${OPT} -c ${SRCDIR}common/ConstantsDictionary.f90 -o $@
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/ConstantsDictionary.f90 -o $@
 
 LinkedList_Class.o : ${SRCDIR}common/LinkedList_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}common/LinkedList_Class.f90 -o $@
