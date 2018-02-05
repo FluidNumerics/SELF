@@ -1,4 +1,4 @@
-! FluidParams_Class.f90
+! ModelParameters_Class.f90
 ! 
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
@@ -6,7 +6,7 @@
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
  
-MODULE FluidParams_Class
+MODULE ModelParameters_Class
 
 ! src/common/
 USE ModelPrecision
@@ -17,7 +17,7 @@ USE ConstantsDictionary
  IMPLICIT NONE
 
 
-    TYPE FluidParams
+    TYPE ModelParameters
       ! TimeManagement
       REAL(prec)    :: dt
       REAL(prec)    :: startTime
@@ -28,7 +28,7 @@ USE ConstantsDictionary
       REAL(prec)    :: jacobianStepSize
       ! SpaceManagement
       CHARACTER(50) :: SpecMeshFile
-      CHARACTER(50) :: PeaceMeshFile
+      CHARACTER(50) :: SELFMeshFile
       CHARACTER(50) :: UCDMeshFile
       INTEGER       :: MeshType
       INTEGER       :: TopographicShape
@@ -63,17 +63,38 @@ USE ConstantsDictionary
       REAL(prec)    :: R  ! "Ideal gas constant"
       REAL(prec)    :: T0 ! Reference Temperature
       REAL(prec)    :: dTdz ! Linear temperature stratification
-      REAL(prec)    :: dTdx ! Linear temperature lateral gradient (x-component, for initial condition, NOT background)
-      REAL(prec)    :: dTdy ! Linear temperature lateral gradient (y-component, for initial condition, NOT background)
       REAL(prec)    :: rho0 ! Reference density
       REAL(prec)    :: P0   ! reference pressure
       REAL(prec)    :: v0
 
+#ifdef HAVE_CUDA
+      ! Physical
+      REAL(prec), DEVICE, ALLOCATABLE    :: fRotX_dev  ! coriolis parameter (x-component)
+      REAL(prec), DEVICE, ALLOCATABLE    :: fRotY_dev   ! "                " (y-component)
+      REAL(prec), DEVICE, ALLOCATABLE    :: fRotZ_dev   ! "                " (z-component)
+      REAL(prec), DEVICE, ALLOCATABLE    :: Cd_dev 
+      REAL(prec), DEVICE, ALLOCATABLE    :: dragscale_dev 
+      REAL(prec), DEVICE, ALLOCATABLE    :: g_dev   ! gravitational acceleration
+      REAL(prec), DEVICE, ALLOCATABLE    :: Cv_dev  ! Heat Capacity at constant volume
+      REAL(prec), DEVICE, ALLOCATABLE    :: R_dev   ! "Ideal gas constant"
+      REAL(prec), DEVICE, ALLOCATABLE    :: T0_dev  ! Reference Temperature
+      REAL(prec), DEVICE, ALLOCATABLE    :: dTdz_dev  ! Linear temperature stratification
+      REAL(prec), DEVICE, ALLOCATABLE    :: rho0_dev  ! Reference density
+      REAL(prec), DEVICE, ALLOCATABLE    :: P0_dev    ! reference pressure
+      REAL(prec), DEVICE, ALLOCATABLE    :: v0_dev 
+
+#endif
+
       CONTAINS
 
-      PROCEDURE :: Build => Build_FluidParams
+      PROCEDURE :: Build => Build_ModelParameters
+      PROCEDURE :: Trash => Trash_ModelParameters
 
-    END TYPE FluidParams 
+#ifdef HAVE_CUDA
+      PROCEDURE :: UpdateDevice => UpdateDevice_ModelParameters
+#endif
+
+    END TYPE ModelParameters 
 
   !=================================================================!
   ! ------ SubGridScale Model (Fluid) ---------- !
@@ -86,9 +107,9 @@ USE ConstantsDictionary
  CONTAINS
 
 
- SUBROUTINE Build_FluidParams( thisParam, readSuccess )
+ SUBROUTINE Build_ModelParameters( params, readSuccess )
 
-   CLASS( FluidParams ), intent(out) :: thisParam
+   CLASS( ModelParameters ), intent(out) :: params
    LOGICAL, INTENT(out)              :: readSuccess
    ! LOCAL
    INTEGER :: nUnit
@@ -102,7 +123,7 @@ USE ConstantsDictionary
       REAL(prec)    :: jacobianStepSize
       ! SpaceManagement
       CHARACTER(50) :: SpecMeshFile
-      CHARACTER(50) :: PeaceMeshFile
+      CHARACTER(50) :: SELFMeshFile
       CHARACTER(50) :: UCDMeshFile
       CHARACTER(20) :: MeshType
       CHARACTER(20) :: TopographicShape
@@ -136,8 +157,6 @@ USE ConstantsDictionary
       REAL(prec)    :: R  ! "Ideal gas constant" 
       REAL(prec)    :: T0 ! Reference Temperature
       REAL(prec)    :: dTdz
-      REAL(prec)    :: dTdx ! Linear temperature lateral gradient (x-component, for initial condition, NOT background)
-      REAL(prec)    :: dTdy ! Linear temperature lateral gradient (y-component, for initial condition, NOT background)
       REAL(prec)    :: rho0 ! Reference Density
       REAL(prec)    :: P0   ! reference pressure
       REAL(prec)    :: v0
@@ -146,11 +165,11 @@ USE ConstantsDictionary
        
        
       NAMELIST / TimeManagement / units, dt, startTime, endTime, outputFrequency, jacobianStepSize
-      NAMELIST / SpaceManagement / SpecMeshFile, PeaceMeshFile, UCDMeshFile, MeshType, topographicShape, QuadType, polyDeg, &
+      NAMELIST / SpaceManagement / SpecMeshFile, SELFMeshFile, UCDMeshFile, MeshType, topographicShape, QuadType, polyDeg, &
                                     nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
                                    nPlot, xScale, yScale, zScale
       NAMELIST / SubgridScale / SubGridModel, filterType, viscosity, viscLengthScale, nCutoff
-      NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, dTdx, dTdy, rho0, P0, v0
+      NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, rho0, P0, v0
       
       readSuccess = .FALSE.
 
@@ -163,7 +182,7 @@ USE ConstantsDictionary
       jacobianStepSize = 1.0_prec*10.0_prec**(-6)
       ! SpaceManagement
       SpecMeshFile  = nada
-      PeaceMeshFile = nada
+      SELFMeshFile = nada
       UCDMeshFile   = nada
       MeshType      = 'Default'
       topographicShape = 'Default'
@@ -197,8 +216,6 @@ USE ConstantsDictionary
       R  = 287.14_prec ! J/(kg*K)  (Dry air)
       T0 = 273.0_prec  ! K         (Room Temperature)
       dTdz = 0.0_prec  ! K/m
-      dTdx = 0.0_prec  ! K/m
-      dTdy = 0.0_prec  ! K/m
       rho0 = 2.0_prec  ! kg/m^3    (Surface density)
       P0   = rho0*R*T0
       v0   = 10.0_prec
@@ -218,24 +235,24 @@ USE ConstantsDictionary
          ! Internally, units of seconds are always used
          IF( units(1:1) == 'h' )THEN
 
-            thisParam % dt        = dt/3600.0_prec
-            thisParam % startTime = startTime/3600.0_prec
-            thisParam % endTime   = endTime/3600.0_prec
-            thisParam % outputFrequency = outputFrequency/3600.0_prec
+            params % dt        = dt/3600.0_prec
+            params % startTime = startTime/3600.0_prec
+            params % endTime   = endTime/3600.0_prec
+            params % outputFrequency = outputFrequency/3600.0_prec
 
          ELSEIF( units(1:1) == 'm' )THEN
 
-            thisParam % dt        = dt/60.0_prec
-            thisParam % startTime = startTime/60.0_prec
-            thisParam % endTime   = endTime/60.0_prec
-            thisParam % outputFrequency = outputFrequency/60.0_prec
+            params % dt        = dt/60.0_prec
+            params % startTime = startTime/60.0_prec
+            params % endTime   = endTime/60.0_prec
+            params % outputFrequency = outputFrequency/60.0_prec
 
          ELSEIF( units(1:1) == 's' )THEN
  
-            thisParam % dt        = dt
-            thisParam % startTime = startTime
-            thisParam % endTime   = endTime
-            thisParam % outputFrequency = outputFrequency
+            params % dt        = dt
+            params % startTime = startTime
+            params % endTime   = endTime
+            params % outputFrequency = outputFrequency
  
          ELSE
 
@@ -244,93 +261,91 @@ USE ConstantsDictionary
 
          ENDIF
 
-         thisParam % nStepsPerDump = INT( thisParam % outputFrequency/thisParam % dt )
-         thisParam % nDumps        = INT( (thisParam % endTime-thisParam % startTime)/thisParam % outputFrequency )
+         params % nStepsPerDump = INT( params % outputFrequency/params % dt )
+         params % nDumps        = INT( (params % endTime-params % startTime)/params % outputFrequency )
          
          PRINT(MsgFMT), 'S/R Build_Params : Estimated Number of Time Steps :'
-         PRINT('(4x,I10)'), thisParam % nStepsPerDump*thisParam % nDumps 
+         PRINT('(4x,I10)'), params % nStepsPerDump*params % nDumps 
         
-         thisParam % jacobianStepSize = jacobianStepSize
+         params % jacobianStepSize = jacobianStepSize
          ! SpaceManagement 
-         thisParam % SpecMeshFile = SpecMeshFile
-         thisParam % PeaceMeshFile = PeaceMeshFile
-         thisParam % UCDMeshFile = UCDMeshFile
+         params % SpecMeshFile = SpecMeshFile
+         params % SELFMeshFile = SELFMeshFile
+         params % UCDMeshFile = UCDMeshFile
          IF( TRIM( UpperCase( MeshType ) )=='DEFAULT' )THEN
-            thisParam % MeshType = DefaultMesh
+            params % MeshType = DefaultMesh
          ELSEIF( TRIM( UpperCase( MeshType ) )=='DOUBLYPERIODIC' )THEN
-            thisParam % MeshType = DoublyPeriodic
+            params % MeshType = DoublyPeriodic
          ELSE
-            PRINT*, 'Module FluidParams_Class.f90 : S/R Build '
+            PRINT*, 'Module ModelParameters_Class.f90 : S/R Build '
             PRINT*, '   Invalid MeshType : '//UpperCase(MeshType)
             PRINT*, '   Valid options are "Default" or "DoublyPeriodic"'
             STOP 'STOPPING!'
          ENDIF
          
          IF( TRIM( UpperCase( topographicShape ) ) =='DEFAULT' )THEN
-            thisParam % topographicShape = DefaultMesh
+            params % topographicShape = DefaultMesh
          ELSEIF( TRIM( UpperCase( topographicShape ) ) =='GAUSSIANHILL' )THEN
-            thisParam % topographicShape = Gaussian
+            params % topographicShape = Gaussian
          ENDIF
          
-         thisParam % QuadType      = QuadType
-         thisParam % polyDeg = polyDeg
-         thisParam % nXElem = nXElem
-         thisParam % nYElem = nYElem 
-         thisParam % nZElem = nZElem 
+         params % QuadType      = QuadType
+         params % polyDeg = polyDeg
+         params % nXElem = nXElem
+         params % nYElem = nYElem 
+         params % nZElem = nZElem 
          IF( nProcX == 0 .AND. nProcY == 0 .AND. nProcZ == 0)THEN
-            thisParam % nProc  = nProc
-            thisParam % nProcX = nProcX
-            thisParam % nProcY = nProcY
-            thisParam % nProcZ = nProcZ
+            params % nProc  = nProc
+            params % nProcX = nProcX
+            params % nProcY = nProcY
+            params % nProcZ = nProcZ
          ELSE
-            thisParam % nProc  = nProcX*nProcY*nProcZ
-            thisParam % nProcX = nProcX
-            thisParam % nProcY = nProcY
-            thisParam % nProcZ = nProcZ
+            params % nProc  = nProcX*nProcY*nProcZ
+            params % nProcX = nProcX
+            params % nProcY = nProcY
+            params % nProcZ = nProcZ
          ENDIF
-         thisParam % nPlot = nPlot
-         thisParam % dxPlot = 2.0_prec/REAL(nPlot,prec)
-         thisParam % xScale = xScale
-         thisParam % yScale = yScale
-         thisParam % zScale = zScale
+         params % nPlot = nPlot
+         params % dxPlot = 2.0_prec/REAL(nPlot,prec)
+         params % xScale = xScale
+         params % yScale = yScale
+         params % zScale = zScale
          ! SubgridScale
          IF( TRIM( UpperCase( SubGridModel) )=='LAPLACIAN' )THEN
-         thisParam % SubGridModel = Laplacian ! convert to the integer flag
+         params % SubGridModel = Laplacian ! convert to the integer flag
          ELSEIF( TRIM(UpperCase( SubGridModel) )=='SPECTRALEKE' )THEN
-            thisParam % SubGridModel = SpectralEKE
+            params % SubGridModel = SpectralEKE
          ELSEIF( TRIM(UpperCase( SubGridModel) )=='SPECTRALFILTERING' )THEN
-            thisParam % SubGridModel = SpectralFiltering
+            params % SubGridModel = SpectralFiltering
          ELSE
-            PRINT*, 'Module FluidParams_Class.f90 : S/R Build '
+            PRINT*, 'Module ModelParameters_Class.f90 : S/R Build '
             PRINT*, '   Invalid SubGridModel : '//UpperCase(SubGridModel)
             PRINT*, '   Valid options are "Laplacian", "SpectralEKE", or "SpectralFiltering"'
             STOP 'STOPPING!'
          ENDIF
          IF( TRIM( UpperCase( FilterType ) )=='TANHROLLOFF' )THEN
-           thisParam % filterType = tanhRollOff
+           params % filterType = tanhRollOff
          ELSEIF( TRIM( UpperCase( FilterType ) )=='MODALCUTOFF' )THEN
-           thisParam % filterType = modalCutoff
+           params % filterType = modalCutoff
          ENDIF
-         !thisParam % subGridModel = subGridModel
-         thisParam % viscosity       = viscosity
-         thisParam % viscLengthScale = viscLengthScale
-         thisParam % nCutoff         = nCutoff
+         !params % subGridModel = subGridModel
+         params % viscosity       = viscosity
+         params % viscLengthScale = viscLengthScale
+         params % nCutoff         = nCutoff
          ! PhysicalConstants
-         thisParam % fRotX  = fRotX
-         thisParam % fRotY  = fRotY
-         thisParam % fRotZ  = fRotZ
-         thisParam % Cd     = Cd
-         thisParam % dragScale = dragScale
-         thisParam % g  = g
-         thisParam % Cv = Cv
-         thisParam % R  = R
-         thisParam % T0 = T0
-         thisParam % dTdz = dTdz
-         thisParam % dTdx = dTdx
-         thisParam % dTdy = dTdy
-         thisParam % rho0 = rho0
-         thisParam % P0   = P0
-         thisParam % v0   = v0
+         params % fRotX  = fRotX
+         params % fRotY  = fRotY
+         params % fRotZ  = fRotZ
+         params % Cd     = Cd
+         params % dragScale = dragScale
+         params % g  = g
+         params % Cv = Cv
+         params % R  = R
+         params % T0 = T0
+         params % dTdz = dTdz
+         params % rho0 = rho0
+         params % P0   = P0
+         params % v0   = v0
 
          readSuccess = .TRUE.
       ELSE   
@@ -342,14 +357,80 @@ USE ConstantsDictionary
             WRITE( UNIT = nUnit, NML = PhysicalConstants )
          CLOSE( UNIT = nUnit ) 
 
-         PRINT(MsgFMT), 'S/R Build_FluidParams : runtime.params not found.' 
-         PRINT(MsgFMT), 'S/R Build_FluidParams : A sample runtime.params namelist file has been'
+         PRINT(MsgFMT), 'S/R Build_ModelParameters : runtime.params not found.' 
+         PRINT(MsgFMT), 'S/R Build_ModelParameters : A sample runtime.params namelist file has been'
          PRINT(MsgFMT), 'generated for you in your current directory.'
          readSuccess = .FALSE.
 
       ENDIF
-      
-      
- END SUBROUTINE Build_FluidParams
 
-END MODULE FluidParams_Class
+#ifdef HAVE_CUDA
+
+      ALLOCATE( params % fRotX_dev, & 
+                params % fRotY_dev, &
+                params % fRotZ_dev, &
+                params % Cd_dev, &
+                params % dragscale_dev, & 
+                params % g_dev, &
+                params % Cv_dev, &
+                params % R_dev, &
+                params % T0_dev, &
+                params % dTdz_dev, &
+                params % rho0_dev, &
+                params % P0_dev, & 
+                params % v0_dev ) 
+
+     CALL params % UpdateDevice( )
+#endif
+      
+      
+ END SUBROUTINE Build_ModelParameters
+
+ SUBROUTINE Trash_ModelParameters( params )
+ IMPLICIT NONE
+ CLASS( ModelParameters ), INTENT(inout) :: params
+
+#ifdef HAVE_CUDA
+
+      DEALLOCATE( params % fRotX_dev, & 
+                  params % fRotY_dev, &
+                  params % fRotZ_dev, &
+                  params % Cd_dev, &
+                  params % dragscale_dev, & 
+                  params % g_dev, &
+                  params % Cv_dev, &
+                  params % R_dev, &
+                  params % T0_dev, &
+                  params % dTdz_dev, &
+                  params % rho0_dev, &
+                  params % P0_dev, & 
+                  params % v0_dev ) 
+
+#endif
+
+ END SUBROUTINE Trash_ModelParameters
+ 
+
+#ifdef HAVE_CUDA
+ SUBROUTINE UpdateDevice_ModelParameters( params )
+ IMPLICIT NONE
+ CLASS( ModelParameters ), INTENT(inout) :: params
+
+ params % fRotX_dev     = params % fRotX
+ params % fRotY_dev     = params % fRotY
+ params % fRotZ_dev     = params % fRotZ
+ params % Cd_dev        = params % Cd
+ params % dragScale_dev = params % dragScale
+ params % g_dev         = params % g
+ params % Cv_dev        = params % Cv
+ params % R_dev         = params % R
+ params % T0_dev        = params % T0
+ params % dTdz_dev      = params % dTdz
+ params % rho0_dev      = params % rho0
+ params % P0_dev        = params % P0
+ params % v0_dev        = params % v0
+
+ END SUBROUTINE UpdateDevice_ModelParameters
+#endif
+
+END MODULE ModelParameters_Class

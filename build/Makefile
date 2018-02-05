@@ -207,15 +207,15 @@ TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRC
 	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
 
 MeshGenerator_3D.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o NodalDG_Class.o HexMesh_Class.o \
-                     TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o ${SRCDIR}geom/MeshGenerator_3D.f90
+                     TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o ${SRCDIR}geom/MeshGenerator_3D.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MeshGenerator_3D.f90
 
 MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
               LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
-              TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o
+              TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o
 	${FC} ${OPT}  ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
                       LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
-                      TopographicShapes.o FluidParams_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o -o $@
+                      TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o -o $@
 
 	
 # ---------------------------------------------------------------------- #
@@ -227,6 +227,9 @@ BodyForces_Class.o : ModelPrecision.o ${SRCDIR}fluid/BodyForces_Class.f90
 
 BoundaryConditions_Class.o : ModelPrecision.o ${SRCDIR}fluid/BoundaryConditions_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/BoundaryConditions_Class.f90
+
+ModelParameters_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}fluid/ModelParameters_Class.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/ModelParameters_Class.f90 -o $@
 
 MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o BoundaryConditions_Class.o BoundaryCommunicator_Class.o \
                    ${SRCDIR}fluid/MPILayer_Class.f90
@@ -267,7 +270,7 @@ CNOBJ += Timing.o \
          Element_Cuda_Class.o \
          HexMesh_Class.o \
          HexMesh_Cuda_Class.o \
-         FluidParams_Class.o \
+         ModelParameters_Class.o \
          BoundaryCommunicator_Class.o \
          BoundaryCommunicator_Cuda_Class.o \
          Fluid_Class.o
@@ -277,7 +280,7 @@ EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 RollOffFilter_Cuda_Class.o DGSEMSolutionStorage_3D_Cuda_Class.o \
                 HexMesh_Class.o BoundaryCommunicator_Class.o \
                 Face_Cuda_Class.o Element_Cuda_Class.o HexMesh_Cuda_Class.o BoundaryCommunicator_Cuda_Class.o \
-                FluidParams_Class.o
+                ModelParameters_Class.o
                 
 else
 
@@ -302,7 +305,7 @@ CNOBJ = ModelPrecision.o \
          MappedGeometry_3D_Class.o \
          HexElement_Class.o \
          HexMesh_Class.o \
-         FluidParams_Class.o \
+         ModelParameters_Class.o \
          BoundaryCommunicator_Class.o \
          Fluid_Class.o
 else
@@ -325,7 +328,7 @@ CNOBJ = ModelPrecision.o \
          MappedGeometry_3D_Class.o \
          HexElement_Class.o \
          HexMesh_Class.o \
-         FluidParams_Class.o \
+         ModelParameters_Class.o \
          BoundaryCommunicator_Class.o \
          Fluid_Class.o
 
@@ -336,31 +339,28 @@ EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
                 RollOffFilter_Class.o DGSEMSolutionStorage_3D_Class.o \
                 HexMesh_Class.o BoundaryCommunicator_Class.o \
                 Face_Class.o HexElement_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
-                FluidParams_Class.o
+                ModelParameters_Class.o
                 
 endif
-
-FluidParams_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}fluid/FluidParams_Class.f90
-	${FC} ${OPT} -c ${SRCDIR}fluid/FluidParams_Class.f90 -o $@
 	
 Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 ifdef MODDIR
-Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
+Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 else
-Fluid_InitialConditions.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
+Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 endif
 
-Fluid_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
+Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
 
-TestMPIStateExchange_Driver.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
+TestMPIStateExchange_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${LIB} ${INC} -o $@
 	
-Fluid_PickupToTecplot.o : ModelPrecision.o FluidParams_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
+Fluid_PickupToTecplot.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${LIB} ${INC} -o $@
 	
 SampleAlongRays.o : ModelPrecision.o Fluid_Class.o Ray_Class.o ${SRCDIR}fluid/SampleAlongRays.f90
@@ -396,7 +396,7 @@ SOBJ = ModelPrecision.o \
        Node_Class.o \
        HexMesh_Class.o \
        BoundaryCommunicator_Class.o \
-       FluidParams_Class.o \
+       ModelParameters_Class.o \
        Fluid_Class.o \
        Ray_Class.o \
        SampleAlongRays.o
