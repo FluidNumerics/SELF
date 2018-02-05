@@ -222,6 +222,9 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
 #                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
 
+BodyForces_Class.o : ModelPrecision.o ${SRCDIR}fluid/BodyForces_Class.f90	
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/BodyForces_Class.f90
+
 BoundaryConditions_Class.o : ModelPrecision.o ${SRCDIR}fluid/BoundaryConditions_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/BoundaryConditions_Class.f90
 
