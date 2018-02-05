@@ -30,12 +30,13 @@ MODULE BoundaryCommunicator_CLASS
 !
 
   TYPE BoundaryCommunicator
-    INTEGER              :: nBoundaries
+    INTEGER              :: nBoundaries, myRank, nProc
     INTEGER, ALLOCATABLE :: extProcIDs(:)
     INTEGER, ALLOCATABLE :: boundaryIDs(:)
     INTEGER, ALLOCATABLE :: unPackMap(:)
 
 #ifdef HAVE_CUDA
+    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev
     INTEGER, DEVICE, ALLOCATABLE :: nBoundaries_dev
     INTEGER, DEVICE, ALLOCATABLE :: extProcIDs_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: boundaryIDs_dev(:)
@@ -43,7 +44,7 @@ MODULE BoundaryCommunicator_CLASS
 #endif
 
 #ifdef HAVE_MPI
-    INTEGER :: myRank, nProc, nNeighbors
+    INTEGER :: nNeighbors
     INTEGER :: maxBufferSize
     INTEGER :: MPI_COMM, MPI_PREC, mpiErr
 
@@ -53,7 +54,7 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER, ALLOCATABLE :: rankTable(:)
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev, nNeighbors_dev, maxBufferSize_dev
+    INTEGER, DEVICE, ALLOCATABLE :: nNeighbors_dev, maxBufferSize_dev
     INTEGER, DEVICE, ALLOCATABLE :: bufferMap_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: neighborRank_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: bufferSize_dev(:)
@@ -119,6 +120,8 @@ CONTAINS
     INTEGER, INTENT(in)                      :: nBe
 
     myComm % nBoundaries = nBe
+    myComm % nProc       = 1
+    myComm % myRank      = 0
 
     ALLOCATE( myComm % extProcIDs(1:nBe) )
     ALLOCATE( myComm % boundaryIDs(1:nBe) )

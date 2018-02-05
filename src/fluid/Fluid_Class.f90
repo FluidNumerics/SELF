@@ -56,6 +56,7 @@ INCLUDE 'mpif.h'
       TYPE( BoundaryConditions )   :: stressBCs
 
       TYPE( NodalDGSolution_3D )   :: sgsCoeffs
+      TYPE( BoundaryConditions )   :: sgsBCs
 
 #ifdef HAVE_MPI
       TYPE( MPILayer )             :: mpiStateHandler
@@ -180,54 +181,45 @@ INCLUDE 'mpif.h'
    CLASS(Fluid), INTENT(inout) :: myDGSEM
    LOGICAL, INTENT(inout)      :: setupSuccess
    !
+   CHARACTER(4) :: rankChar
 #ifdef HAVE_CUDA
    INTEGER(kind=cuda_count_kind) :: freebytes, totalbytes
    INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 #endif   
 
       CALL myDGSEM % params % Build( setupSuccess )
+      myDGSEM % N              = myDGSEM % params % polyDeg
+      myDGSEM % nEq            = nEq
+      myDGSEM % simulationTime = myDGSEM % params % startTime
+
       IF( .NOT. SetupSuccess ) THEN
          PRINT(MsgFMT), 'S/R Build_Fluid : Halting before building,'
          RETURN
       ENDIF
 
-      myDGSEM % myRank = 0
-      myDGSEM % nProc  = 1
+      CALL myDGSEM % extComm % Build( )      
+      WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
+      CALL myDGSEM % extComm % ReadPickup( 'ExtComm.'//rankChar )
 
 #ifdef HAVE_MPI
-
-      IF( prec == sp )THEN
-         MPI_PREC = MPI_FLOAT
-      ELSE
-         MPI_PREC = MPI_DOUBLE
-      ENDIF
-
-      CALL MPI_INIT( mpiErr )
-      CALL MPI_COMM_RANK( MPI_COMM_WORLD, myDGSEM % myRank, mpiErr )
-      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myDGSEM % nProc, mpiErr )
-      PRINT*, '    S/R Build_Fluid : Greetings from Process ', myDGSEM % myRank+1, ' of ', myDGSEM % nProc
-
+      CALL myDGSEM % extComm % ConstructCommTables(  )
 #endif
 
 #ifdef HAVE_CUDA
 
-      iStat = cudaGetDeviceCount( nDevices )
-      cudaDeviceNumber = MOD( myDGSEM % myRank, nDevices )
-      PRINT*, '    S/R Build_Fluid : Rank :', myDGSEM % myRank, ': Getting Device # ', cudaDeviceNumber
-      iStat = cudaSetDevice( cudaDeviceNumber )
+      CALL myDGSEM % extComm % UpdateDevice( )
 
+      iStat = cudaGetDeviceCount( nDevices )
+      cudaDeviceNumber = MOD( myDGSEM % extComm % myRank, nDevices )
+      PRINT*, '    S/R Build_Fluid : Rank :', &
+              myDGSEM % extComm % myRank, ': Getting Device # ', cudaDeviceNumber
+      iStat = cudaSetDevice( cudaDeviceNumber )
 #endif
 
-
-      callid = 0
-      myDGSEM % N   = myDGSEM % params % polyDeg
-      myDGSEM % nEq = nEq
-      myDGSEM % simulationTime = myDGSEM % params % startTime
-
-      
       ! Construct the data structure that holds the derivative and interpolation matrices
       ! and the quadrature weights. This call will also perform the device copies.
-      CALL myDGSEM % dGStorage % Build( myDGSEM % N, myDGSEM % params % nPlot, GAUSS, DG )
+      CALL myDGSEM % dGStorage % Build( UniformPoints(-1.0_prec,1.0_prec,myDGSEM % params % nPlot), &
+                                        myDGSEM % N, myDGSEM % params % nPlot, GAUSS )
       
       ! Construct the roll-off filter matrix
       CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
@@ -237,23 +229,51 @@ INCLUDE 'mpif.h'
       ! Load the mesh from the pc-mesh file and copy the mesh to the GPU
       CALL myDGSEM % BuildHexMesh(  )
 
-      ALLOCATE( myDGSEM % drag(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
-      myDGSEM % drag = 0.0_prec
+      CALL myDGSEM % sourceTerms % Build( myDGSEM % N, &
+                                          myDGSEM % nEq, &
+                                          myDGSEM % mesh % nElems )
 
       ! Initialize the state and static "solutionstorage" data structures
-      CALL myDGSEM % state % Build( myDGSEM % N, nEq, &
+      CALL myDGSEM % state % Build( myDGSEM % N, &
+                                    myDGSEM % nEq, &
                                     myDGSEM % mesh % nElems )
+     
+      CALL myDGSEM % static % Build( myDGSEM % N, &
+                                     myDGSEM % nEq, &
+                                     myDGSEM % mesh % nElems )
                                     
       CALL myDGSEM % smoothState % Build( myDGSEM % N, nEq, &
                                           myDGSEM % mesh % nElems ) ! > Contains the smoothed SGS KE
-                                          
+    
+      CALL myDGSEM % stateBCs % Build( myDGSEM % N, &
+                                       myDGSEM % nEq, &
+                                       myDGSEM % extComm % nBoundaryFaces )                                           
+
+      ! Stress Tensor
+      CALL myDGSEM % stressTensor % Build( myDGSEM % N, &
+                                           (myDGSEM % nEq-1)*3, &
+                                           myDGSEM % mesh % nElems )
+
+      CALL myDGSEM % stressBCs % Build( myDGSEM % N, &
+                                        (myDGSEM % nEq-1)*3, &
+                                        myDGSEM % extComm % nBoundaryFaces )
+
+
+                                           
       ! The "sgsCoeffs" attribute contains coefficients for the 
       ! subgrid scale parameterization. Currently, these coefficients
       ! are the eddy viscosities for the momentum equations (assuming
       ! isotropic turbulence), and the eddy diffusivities for the 
       ! potential temperature and density equations.
-      CALL myDGSEM % sgsCoeffs % Build( myDGSEM % N, nEq-1, &
-                                          myDGSEM % mesh % nElems )  
+
+      CALL myDGSEM % sgsCoeffs % Build( myDGSEM % N, &
+                                        myDGSEM % nEq-1, &
+                                        myDGSEM % mesh % nElems )  
+
+      CALL myDGSEM % sgsBCs % Build( myDGSEM % N, &
+                                     myDGSEM % nEq-1, &
+                                     myDGSEM % mesh % nBoundaryFaces )  
+
       ! Initially set all of the SGS coefficients to the "viscosity". In the event
       ! the Laplacian model is used, this will be the laplacian coefficient that is
       ! used for the momentum, potential temperature, and density equations.
@@ -263,23 +283,10 @@ INCLUDE 'mpif.h'
       myDGSEM % sgsCoeffs % solution         = myDGSEM % params % viscosity
       myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % params % viscosity
 
-      CALL myDGSEM % static % Build( myDGSEM % N, nEq, &
-                                     myDGSEM % mesh % nElems )
-
-      ! Place conditionals on the construction of this attribute
-      CALL myDGSEM % stressTensor % Build( myDGSEM % N, (nEq-1)*3, &
-                                           myDGSEM % mesh % nElems )
-                                           
-#ifdef HAVE_CUDA
-
-! >>> Roll this into a "CUDA_Build" Routine
-
-      ALLOCATE( myDGSEM % drag_dev(0:myDGSEM % N, 0:myDGSEM % N, 0:myDGSEM % N, 1:myDGSEM % mesh % nElems) )
-      myDGSEM % drag_dev = 0.0_prec
+#ifdef HAVE_CUDA 
+     CALL myDGSEM % sgsCoeffs % UpdateDevice( )
+#endif
       
-      ! Copy values to the GPU variables
-      myDGSEM % sgsCoeffs % solution_dev         = myDGSEM % sgsCoeffs % solution
-      myDGSEM % sgsCoeffs % boundarySolution_dev = myDGSEM % sgsCoeffs % boundarySolution
 
       ! Set Device Constants
 ! Make device copies inside of the params class.
@@ -308,35 +315,11 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % ReadPickup( )
       
       
-#ifdef HAVE_CUDA
-      istat = cudaDeviceSynchronize( )
-      istat = cudaMemGetInfo( freebytes, totalbytes )
-      PRINT*, '                                                         '
-      PRINT*, '========================================================='
-      PRINT*, '=============== GPU Device memory status ================'
-      PRINT*, '                                                         '
-      PRINT*, 'Total: ', REAL(totalbytes)/10.0**9, ' GB'
-      PRINT*, 'Free : ', REAL(freebytes)/10.0**9, ' GB'
-      PRINT*, 'Used : ', REAL(totalbytes-freebytes)/10.0**9, ' GB'
-      PRINT*, '========================================================='
-      PRINT*, '                                                         '
-#endif
-
 #ifdef HAVE_MPI
-      CALL myDGSEM % extComm % ConstructCommTables(  )
-      ALLOCATE( stateReqHandle(1:myDGSEM % nNeighbors*2), &
-                stressReqHandle(1:myDGSEM % nNeighbors*2), &
-                SGSReqHandle(1:myDGSEM % nNeighbors*2), &
-                stateStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
-                stressStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2), &
-                SGSStats(MPI_STATUS_SIZE,1:myDGSEM % nNeighbors*2) )
-
-      myDGSEM % externalSGS = myDGSEM % params % viscosity
+      myDGSEM % sgsBCs % externalState = myDGSEM % params % viscosity
 #ifdef HAVE_CUDA
-      myDGSEM % externalSGS_dev = myDGSEM % externalSGS
+      CALL myDGSEM % sgsBCs % UpdateDevice( )
 #endif
-
-
 #endif
 
 
