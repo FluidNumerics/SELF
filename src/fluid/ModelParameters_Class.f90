@@ -70,6 +70,7 @@ USE ConstantsDictionary
       REAL(prec)    :: rC
 
 #ifdef HAVE_CUDA
+      REAL(prec), DEVICE, ALLOCATABLE    :: dt_dev
       REAL(prec), DEVICE, ALLOCATABLE    :: viscosity_dev
       REAL(prec), DEVICE, ALLOCATABLE    :: viscLengthScale_dev
       ! Physical
@@ -375,7 +376,8 @@ USE ConstantsDictionary
 
 #ifdef HAVE_CUDA
 
-      ALLOCATE( params % viscosity_dev, &
+      ALLOCATE( params % dt_dev, &
+                params % viscosity_dev, &
                 params % viscLengthScale_dev, &
                 params % fRotX_dev, & 
                 params % fRotY_dev, &
@@ -405,7 +407,8 @@ USE ConstantsDictionary
 
 #ifdef HAVE_CUDA
 
-      DEALLOCATE( params % viscosity_dev, &
+      DEALLOCATE( params % dt_dev, & 
+                  params % viscosity_dev, &
                   params % viscLengthScale_dev, &
                   params % fRotX_dev, & 
                   params % fRotY_dev, &
@@ -433,6 +436,7 @@ USE ConstantsDictionary
  IMPLICIT NONE
  CLASS( ModelParameters ), INTENT(inout) :: params
 
+ params % dt_dev              = params % dt
  params % viscosity_dev       = params % viscosity
  params % viscLengthScale_dev = params % viscLengthScale
 
