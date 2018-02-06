@@ -20,41 +20,33 @@ USE BoundaryCommunicator_Class
 
 #ifdef HAVE_CUDA
 USE cudafor
-#else
+#endif
 
 
 IMPLICIT NONE
 
 #ifdef HAVE_MPI
 INCLUDE 'mpif.h'
-
-    TYPE BodyForces
-      REAL(prec), ALLOCATABLE         :: drag(:,:,:,:)
-#ifdef HAVE_CUDA
-      REAL(prec), DEVICE, ALLOCATABLE :: drag_dev(:,:,:,:)
 #endif
-    END TYPE BodyForces
+
 
     TYPE Fluid
-      INTEGER                      :: nEq, N
-      REAL(prec)                   :: simulationTime
+
+      REAL(prec) :: simulationTime
+      REAL(prec) :: volume, mass, KE, PE, heat
+
       TYPE( FluidParams )          :: params
       TYPE( HexMesh )              :: mesh
       TYPE( BoundaryCommunicator ) :: extComm
       TYPE( nodalDG )              :: dGStorage
       TYPE( RollOffFilter )        :: filter
-
       TYPE( BodyForces )           :: sourceTerms
-
       TYPE( NodalDGSolution_3D )   :: static
-
       TYPE( NodalDGSolution_3D )   :: state
       TYPE( NodalDGSolution_3D )   :: smoothState
       TYPE( BoundaryConditions )   :: stateBCs
-
       TYPE( NodalDGSolution_3D )   :: stressTensor
       TYPE( BoundaryConditions )   :: stressBCs
-
       TYPE( NodalDGSolution_3D )   :: sgsCoeffs
       TYPE( BoundaryConditions )   :: sgsBCs
 
@@ -64,34 +56,20 @@ INCLUDE 'mpif.h'
       TYPE( MPILayer )             :: mpiSGSHandler
 #endif
 
-
-#ifdef DIAGNOSTICS
-      REAL(prec) :: volume, mass, KE, PE, heat
-#endif
-      ! ////////////////////////////////////////////////////////////// !
-
       CONTAINS
 
       PROCEDURE :: Build => Build_Fluid
       PROCEDURE :: Trash => Trash_Fluid
-      PROCEDURE, PRIVATE :: BuildHexMesh => BuildHexMesh_Fluid
-      
+
+      PROCEDURE :: BuildHexMesh => BuildHexMesh_Fluid
       PROCEDURE :: CalculateStaticState => CalculateStaticState_Fluid
+
       ! Time integrators
       PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
       PROCEDURE :: CrankNicholsonRHS     => CrankNicholsonRHS_Fluid
-#ifdef DIAGNOSTICS
-      PROCEDURE :: Diagnostics => Diagnostics_Fluid
-#endif
 
-      ! ////////////////////////// Equation Of State ////////////////////////////////////////////////////// !
-      PROCEDURE :: EquationOfState        => EquationOfState_Fluid
-      
-      ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
-      PROCEDURE :: GlobalTimeDerivative         => GlobalTimeDerivative_Fluid
-      
-      
-      !  /////////// Routines for interpolating state and static attributes to the element faces ////////// !
+      PROCEDURE :: GlobalTimeDerivative            => GlobalTimeDerivative_Fluid
+      PROCEDURE :: EquationOfState                 => EquationOfState_Fluid
       PROCEDURE :: CalculateStaticBoundarySolution => CalculateStaticBoundarySolution_Fluid
       PROCEDURE :: CalculateBoundarySolution       => CalculateBoundarySolution_Fluid
       PROCEDURE :: UpdateExternalState             => UpdateExternalState_Fluid
@@ -99,18 +77,6 @@ INCLUDE 'mpif.h'
       PROCEDURE :: BoundaryFaceFlux                => BoundaryFaceFlux_Fluid
       PROCEDURE :: MappedTimeDerivative            => MappedTimeDerivative_Fluid
       
-#ifdef HAVE_MPI
-      PROCEDURE :: ConstructCommTables             => ConstructCommTables_Fluid
-      PROCEDURE :: MPI_StateExchange               => MPI_StateExchange_Fluid
-      PROCEDURE :: FinalizeMPI_StateExchange       => FinalizeMPI_StateExchange_Fluid
-      PROCEDURE :: MPI_StressExchange              => MPI_StressExchange_Fluid
-      PROCEDURE :: FinalizeMPI_StressExchange      => FinalizeMPI_StressExchange_Fluid
-      PROCEDURE :: MPI_SGSExchange                 => MPI_SGSExchange_Fluid
-      PROCEDURE :: FinalizeMPI_SGSExchange         => FinalizeMPI_SGSExchange_Fluid
-#endif
-      ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
-      ! Routines for the fluid-stress model and
-      ! Routines for spectral filtering and calculating the sgs coefficients
       PROCEDURE :: CalculateSmoothedState   => CalculateSmoothedState_Fluid
       PROCEDURE :: CalculateSGSCoefficients => CalculateSGSCoefficients_Fluid
       PROCEDURE :: CalculateBoundarySGS     => CalculateBoundarySGS_Fluid
@@ -123,37 +89,18 @@ INCLUDE 'mpif.h'
       PROCEDURE :: BoundaryStressFlux      => BoundaryStressFlux_Fluid
       PROCEDURE :: StressDivergence        => StressDivergence_Fluid
       
-      !
-      
-      ! /////////////////////////////////////////////////////////////////////////////////////////////////// !
-#ifdef DIAGNOSTICS
+      PROCEDURE :: Diagnostics           => Diagnostics_Fluid
       PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
       PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
       PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
-#endif
+
       PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
-      PROCEDURE :: WriteSmoothedTecplot => WriteSmoothedTecplot_Fluid
-      PROCEDURE :: WriteSGSTecplot      => WriteSGSTecplot_Fluid
-      PROCEDURE :: WriteStressTensorTecplot => WriteStressTensorTecplot_Fluid
-      PROCEDURE :: WritePickup => WritePickup_Fluid
-      PROCEDURE :: ReadPickup => ReadPickup_Fluid
-      PROCEDURE :: FluidStateAtPlottingPoints => FluidStateAtPlottingPoints_Fluid
-      PROCEDURE :: ObtainPlottingMesh         => ObtainPlottingMesh_Fluid
+      PROCEDURE :: WritePickup  => WritePickup_Fluid
+      PROCEDURE :: ReadPickup   => ReadPickup_Fluid
 
     END TYPE Fluid
 
- INTEGER, PARAMETER    :: nEq = 6
 
-#ifdef HAVE_CUDA
- INTEGER, CONSTANT    :: nEq_dev
- INTEGER, CONSTANT    :: polyDeg_dev
- INTEGER, CONSTANT    :: nEl_dev
- INTEGER, CONSTANT    :: myRank_dev
- REAL(prec), CONSTANT :: R_dev, Cv_dev, P0_dev, hCapRatio_dev, rC_dev, g_dev
- REAL(prec), CONSTANT :: rk3_a_dev, rk3_g_dev, dt_dev
- REAL(prec), CONSTANT :: viscLengthScale_dev, dScale_dev, Cd_dev
- REAL(prec), CONSTANT :: fRotX_dev, fRotY_dev, fRotZ_dev
-#endif
  
 #ifdef HAVE_MPI
  INTEGER :: MPI_PREC
@@ -185,11 +132,11 @@ INCLUDE 'mpif.h'
 #ifdef HAVE_CUDA
    INTEGER(kind=cuda_count_kind) :: freebytes, totalbytes
    INTEGER                       :: iStat, cudaDeviceNumber, nDevices
+
+      CALL UpdateDeviceDictionary( )
 #endif   
 
       CALL myDGSEM % params % Build( setupSuccess )
-      myDGSEM % N              = myDGSEM % params % polyDeg
-      myDGSEM % nEq            = nEq
       myDGSEM % simulationTime = myDGSEM % params % startTime
 
       IF( .NOT. SetupSuccess ) THEN
@@ -209,11 +156,17 @@ INCLUDE 'mpif.h'
 
       CALL myDGSEM % extComm % UpdateDevice( )
 
+
+      ! Assuming the number of GPU's and the number of ranks per node is uniform,
+      ! each rank is assigned to it's own GPU. 
       iStat = cudaGetDeviceCount( nDevices )
       cudaDeviceNumber = MOD( myDGSEM % extComm % myRank, nDevices )
+
       PRINT*, '    S/R Build_Fluid : Rank :', &
               myDGSEM % extComm % myRank, ': Getting Device # ', cudaDeviceNumber
+
       iStat = cudaSetDevice( cudaDeviceNumber )
+
 #endif
 
       ! Construct the data structure that holds the derivative and interpolation matrices
@@ -221,19 +174,16 @@ INCLUDE 'mpif.h'
       CALL myDGSEM % dGStorage % Build( UniformPoints(-1.0_prec,1.0_prec,myDGSEM % params % nPlot), &
                                         myDGSEM % N, myDGSEM % params % nPlot, GAUSS )
       
-      ! Construct the roll-off filter matrix
       CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
                                      myDGSEM % dgStorage % quadratureWeights, &
                                      myDGSEM % N, myDGSEM % params % nCutoff )
                                      
-      ! Load the mesh from the pc-mesh file and copy the mesh to the GPU
       CALL myDGSEM % BuildHexMesh(  )
 
       CALL myDGSEM % sourceTerms % Build( myDGSEM % N, &
                                           myDGSEM % nEq, &
                                           myDGSEM % mesh % nElems )
 
-      ! Initialize the state and static "solutionstorage" data structures
       CALL myDGSEM % state % Build( myDGSEM % N, &
                                     myDGSEM % nEq, &
                                     myDGSEM % mesh % nElems )
@@ -249,7 +199,6 @@ INCLUDE 'mpif.h'
                                        myDGSEM % nEq, &
                                        myDGSEM % extComm % nBoundaryFaces )                                           
 
-      ! Stress Tensor
       CALL myDGSEM % stressTensor % Build( myDGSEM % N, &
                                            (myDGSEM % nEq-1)*3, &
                                            myDGSEM % mesh % nElems )
@@ -282,47 +231,17 @@ INCLUDE 'mpif.h'
       
       myDGSEM % sgsCoeffs % solution         = myDGSEM % params % viscosity
       myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % params % viscosity
+      myDGSEM % sgsBCs % externalState = myDGSEM % params % viscosity
 
 #ifdef HAVE_CUDA 
-     CALL myDGSEM % sgsCoeffs % UpdateDevice( )
+      CALL myDGSEM % sgsBCs % UpdateDevice( )
+      CALL myDGSEM % sgsCoeffs % UpdateDevice( )
 #endif
       
-
-      ! Set Device Constants
-! Make device copies inside of the params class.
-      R_dev         = myDGSEM % params % R
-      Cv_dev        = myDGSEM % params % Cv
-      P0_dev        = myDGSEM % params % P0
-      hCapRatio_dev = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
-      rC_dev        = myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
-      g_dev         = myDGSEM % params % g
-      dt_dev        = myDGSEM % params % dt
-      viscLengthScale_dev = myDGSEM % params % viscLengthScale
-      fRotX_dev     = myDGSEM % params % fRotX
-      fRotY_dev     = myDGSEM % params % fRotY
-      fRotZ_dev     = myDGSEM % params % fRotZ
-      dScale_dev    = myDGSEM % params % dragScale
-      Cd_dev        = myDGSEM % params % Cd
-
-      nEq_dev     = nEq
-      polydeg_dev = myDGSEM % N
-      nEl_dev     = myDGSEM % mesh % nElems
-      myRank_dev  = myDGSEM % myRank
-
-#endif
-
       ! Read the initial conditions, static state, and the boundary communicator
       CALL myDGSEM % ReadPickup( )
       
       
-#ifdef HAVE_MPI
-      myDGSEM % sgsBCs % externalState = myDGSEM % params % viscosity
-#ifdef HAVE_CUDA
-      CALL myDGSEM % sgsBCs % UpdateDevice( )
-#endif
-#endif
-
-
  END SUBROUTINE Build_Fluid
 !
   SUBROUTINE Trash_Fluid( myDGSEM )
@@ -332,65 +251,27 @@ INCLUDE 'mpif.h'
    ! LOCAL
    INTEGER :: i
    
-      PRINT*, 'S/R Trash_Fluid : Clearing memory.'
+      PRINT*, '    S/R Trash_Fluid : Clearing memory.'
+
+      CALL myDGSEM % params % Trash( )
+      CALL myDGSEM % mesh % Trash(  )
+      CALL myDGSEM % extComm % Trash( )
+      CALL myDGSEM % dGStorage % Trash( )
+      CALL myDGSEM % filter % Trash( )
+      CALL myDGSEM % sourceTerms % Trash( )
+      CALL myDGSEM % static % Trash( )
       CALL myDGSEM % state % Trash( )
       CALL myDGSEM % smoothState % Trash( )
-      CALL myDGSEM % sgsCoeffs % Trash( )
-      CALL myDGSEM % static % Trash( )
+      CALL myDGSEM % stateBCs % Trash( )
       CALL myDGSEM % stressTensor % Trash( )
-#ifdef HAVE_MPI      
-      DEALLOCATE( myDGSEM % mpiPackets % neighborRank )
-      DEALLOCATE( myDGSEM % mpiPackets % bufferSize )
-      DEALLOCATE( myDGSEM % mpiPackets % bufferMap )
-      DEALLOCATE( myDGSEM % mpiPackets % sendStateBuffer )
-      DEALLOCATE( myDGSEM % mpiPackets % recvStateBuffer )
-      DEALLOCATE( myDGSEM % mpiPackets % sendStressBuffer )
-      DEALLOCATE( myDGSEM % mpiPackets % recvStressBuffer )
-      DEALLOCATE( myDGSEM % mpiPackets % sendSGSBuffer )
-      DEALLOCATE( myDGSEM % mpiPackets % recvSGSBuffer )
-      DEALLOCATE( myDGSEM % mpiPackets % rankTable )
+      CALL myDGSEM % stressBCs % Trash( )
+      CALL myDGSEM % sgsCoeffs % Trash( )
+      CALL myDGSEM % sgsBCs % Trash( )
 
-      DEALLOCATE( stateReqHandle, &
-                  stressReqHandle, &
-                  SGSReqHandle, &
-                  stateStats, &
-                  stressStats, &
-                  SGSStats )
-#ifdef HAVE_CUDA
-      DEALLOCATE( myDGSEM % mpiPackets % sendStateBuffer_dev )
-      DEALLOCATE( myDGSEM % mpiPackets % recvStateBuffer_dev )
-      DEALLOCATE( myDGSEM % mpiPackets % sendStressBuffer_dev )
-      DEALLOCATE( myDGSEM % mpiPackets % recvStressBuffer_dev )
-      DEALLOCATE( myDGSEM % mpiPackets % sendSGSBuffer_dev )
-      DEALLOCATE( myDGSEM % mpiPackets % recvSGSBuffer_dev )
-      DEALLOCATE( myDGSEM % mpiPackets % neighborRank_dev, &
-                  myDGSEM % mpiPackets % bufferSize_dev, &
-                  myDGSEM % mpiPackets % bufferMap_dev, &
-                  myDGSEM % mpiPackets % rankTable_dev )
-#endif
-
-
-#endif
-      CALL myDGSEM % dGStorage % Trash( )
-      CALL myDGSEM % mesh % Trash( )
-      CALL myDGSEM % extComm % Trash( )
-      CALL myDGSEM % filter % Trash( ) 
-
-      DEALLOCATE( myDGSEM % drag )
-      
-      DEALLOCATE( myDGSEM % prescribedState )
-      DEALLOCATE( myDGSEM % externalState )
-      DEALLOCATE( myDGSEM % prescribedStress )
-      DEALLOCATE( myDGSEM % externalStress )
-      DEALLOCATE( myDGSEM % externalSGS )
-      
-#ifdef HAVE_CUDA
-      DEALLOCATE( myDGSEM % drag_dev )
-      DEALLOCATE( myDGSEM % prescribedState_dev )
-      DEALLOCATE( myDGSEM % externalState_dev )
-      DEALLOCATE( myDGSEM % prescribedStress_dev )
-      DEALLOCATE( myDGSEM % externalStress_dev )
-      DEALLOCATE( myDGSEM % externalSGS_dev )
+#ifdef HAVE_MPI
+      CALL myDGSEM % mpiStateHandler % Trash( )
+      CALL myDGSEM % mpiStressHandler % Trash( )
+      CALL myDGSEM % mpiSGSHandler % Trash( )
 #endif
 
 
