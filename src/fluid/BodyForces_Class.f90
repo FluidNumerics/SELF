@@ -1,90 +1,90 @@
-MODULE BodyForces_Class
+MODULE BodyForces_CLASS
 
-USE ModelPrecision
+  USE ModelPrecision
 
-IMPLICIT NONE
+  IMPLICIT NONE
 
 
 
-    TYPE BodyForces
-      
-      REAL(prec), ALLOCATABLE         :: drag(:,:,:,:)
+  TYPE BodyForces
 
-#ifdef HAVE_CUDA
-      REAL(prec), DEVICE, ALLOCATABLE :: drag_dev(:,:,:,:)
-#endif
-
-      CONTAINS
-
-        PROCEDURE :: Build => Build_BodyForces
-        PROCEDURE :: Trash => Trash_BodyForces
+    REAL(prec), ALLOCATABLE         :: drag(:,:,:,:)
 
 #ifdef HAVE_CUDA
-        PROCEDURE :: UpdateDevice => UpdateDevice_BodyForces        
-        PROCEDURE :: UpdateHost   => UpdateHost_BodyForces        
+    REAL(prec), DEVICE, ALLOCATABLE :: drag_dev(:,:,:,:)
 #endif
 
-    END TYPE BodyForces
+  CONTAINS
+
+    PROCEDURE :: Build => Build_BodyForces
+    PROCEDURE :: Trash => Trash_BodyForces
+
+#ifdef HAVE_CUDA
+    PROCEDURE :: UpdateDevice => UpdateDevice_BodyForces
+    PROCEDURE :: UpdateHost   => UpdateHost_BodyForces
+#endif
+
+  END TYPE BodyForces
 
 
 CONTAINS
 
-SUBROUTINE Build_BodyForces( myForces, N, nEquations, nElements )
-IMPLICIT NONE
-CLASS( BodyForces ), INTENT(out) :: myForces
-INTEGER, INTENT(in)              :: N, nEquations, nElements
+  SUBROUTINE Build_BodyForces( myForces, N, nEquations, nElements )
+    IMPLICIT NONE
+    CLASS( BodyForces ), INTENT(out) :: myForces
+    INTEGER, INTENT(in)              :: N, nEquations, nElements
 
 
-  ALLOCATE( myForces % drag(0:N,0:N,0:N,1:nElements ) )
+    ALLOCATE( myForces % drag(0:N,0:N,0:N,1:nElements ) )
 
-  myForces % drag = 0.0_prec
+    myForces % drag = 0.0_prec
 
 #ifdef HAVE_CUDA
 
-  ALLOCATE( myForces % drag_dev(0:N,0:N,0:N,1:nElements ) )
-  myForces % drag_dev = 0.0_prec
+    ALLOCATE( myForces % drag_dev(0:N,0:N,0:N,1:nElements ) )
+    myForces % drag_dev = 0.0_prec
 
 #endif
 
 
-END SUBROUTINE Build_BodyForces
+  END SUBROUTINE Build_BodyForces
 
-SUBROUTINE Trash_BodyForces( myForces )
-IMPLICIT NONE
-CLASS( BodyForces ), INTENT(inout) :: myForces
+  SUBROUTINE Trash_BodyForces( myForces )
+    IMPLICIT NONE
+    CLASS( BodyForces ), INTENT(inout) :: myForces
 
 
-  DEALLOCATE( myForces % drag )
-
-#ifdef HAVE_CUDA
-
-  DEALLOCATE( myForces % drag_dev )
-
-#endif
-END SUBROUTINE Trash_BodyForces
+    DEALLOCATE( myForces % drag )
 
 #ifdef HAVE_CUDA
 
-SUBROUTINE UpdateDevice_BodyForces( myForces )
-IMPLICIT NONE
-CLASS( BodyForces ), INTENT(inout) :: myForces
+    DEALLOCATE( myForces % drag_dev )
+
+#endif
+  END SUBROUTINE Trash_BodyForces
+
+#ifdef HAVE_CUDA
+
+  SUBROUTINE UpdateDevice_BodyForces( myForces )
+    IMPLICIT NONE
+    CLASS( BodyForces ), INTENT(inout) :: myForces
 
 
-myForces % drag_dev = myForces % drag
+    myForces % drag_dev = myForces % drag
 
 
-END SUBROUTINE UpdateDevice_BodyForces
+  END SUBROUTINE UpdateDevice_BodyForces
 
-SUBROUTINE UpdateHost_BodyForces( myForces )
-IMPLICIT NONE
-CLASS( BodyForces ), INTENT(inout) :: myForces
-
-
-myForces % drag = myForces % drag_dev
+  SUBROUTINE UpdateHost_BodyForces( myForces )
+    IMPLICIT NONE
+    CLASS( BodyForces ), INTENT(inout) :: myForces
 
 
-END SUBROUTINE UpdateHost_BodyForces
+    myForces % drag = myForces % drag_dev
+
+
+  END SUBROUTINE UpdateHost_BodyForces
 
 #endif
 
-END MODULE BodyForces_Class
+END MODULE BodyForces_CLASS
