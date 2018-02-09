@@ -10,13 +10,15 @@ MODULE Fluid_Class
   USE ModelPrecision
   USE ConstantsDictionary
   USE CommonRoutines
-  USE FluidParams_Class
+  USE ModelParameters_Class
   USE Lagrange_Class
-  USE dgStorage_Class
+  USE NodalDG_Class
   USE RollOffFilter_Class
   USE NodalDGSolution_3D_Class
   USE HexMesh_Class
   USE BoundaryCommunicator_Class
+  USE BoundaryConditions_Class
+  USE BodyForces_Class
 
 #ifdef HAVE_CUDA
   USE cudafor
@@ -35,10 +37,10 @@ MODULE Fluid_Class
     REAL(prec) :: simulationTime
     REAL(prec) :: volume, mass, KE, PE, heat
 
-    TYPE( FluidParams )          :: params
+    TYPE( ModelParameters )      :: params
     TYPE( HexMesh )              :: mesh
     TYPE( BoundaryCommunicator ) :: extComm
-    TYPE( nodalDG )              :: dGStorage
+    TYPE( NodalDG )              :: dGStorage
     TYPE( RollOffFilter )        :: filter
     TYPE( BodyForces )           :: sourceTerms
     TYPE( NodalDGSolution_3D )   :: static
@@ -101,18 +103,7 @@ MODULE Fluid_Class
   END TYPE Fluid
 
 
-
-#ifdef HAVE_MPI
-  INTEGER :: MPI_PREC
-  INTEGER, ALLOCATABLE :: stateReqHandle(:), stressReqHandle(:), SGSReqHandle(:)
-  INTEGER, ALLOCATABLE :: stateStats(:,:), stressStats(:,:), SGSStats(:,:)
-#endif
-
-  INTEGER :: callID
-
-#ifdef DIAGNOSTICS
   INTEGER, PARAMETER :: nDiagnostics = 5
-#endif
 
 CONTAINS
 !
@@ -248,8 +239,6 @@ CONTAINS
 
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
-    ! LOCAL
-    INTEGER :: i
 
     PRINT*, '    S/R Trash_Fluid : Clearing memory.'
 
@@ -294,9 +283,9 @@ CONTAINS
 
     ! Multiply the mesh positions to scale the size of the mesh
     CALL myDGSEM % mesh % ScaleTheMesh( myDGSEM % dgStorage % interp, &
-      myDGSEM % params % xScale, &
-      myDGSEM % params % yScale, &
-      myDGSEM % params % zScale )
+                                        myDGSEM % params % xScale, &
+                                        myDGSEM % params % yScale, &
+                                        myDGSEM % params % zScale )
 
   END SUBROUTINE BuildHexMesh_Fluid
 !
@@ -310,10 +299,10 @@ CONTAINS
 #ifdef HAVE_CUDA
     REAL(prec) :: t, dt
     REAL(prec),DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
-      0:myDGSEM % params % polyDeg,&
-      0:myDGSEM % params % polyDeg,&
-      1:myDGSEM % state % nEq,&
-      1:myDGSEM % mesh % elements % nElements)
+                             0:myDGSEM % params % polyDeg,&
+                             0:myDGSEM % params % polyDeg,&
+                             1:myDGSEM % state % nEq,&
+                             1:myDGSEM % mesh % elements % nElements)
     REAL(prec), DEVICE :: rk3_a_dev(1:3), rk3_g_dev(1:3)
     INTEGER            :: iT, m, iStat
     TYPE(dim3)         :: grid, tBlock
@@ -331,46 +320,46 @@ CONTAINS
     DO iT = 1, nT
 
       G3D  = 0.0_prec
-      DO m = 1,3 ! Loop over RK3 steps
+
+      DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        !
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
           myDGSEM % state % solution_dev, &
           myDGSEM % state % tendency_dev, &
           myDGSEM % stressTensor % tendency_dev )
 
-        ! Calculate the pressure
         CALL myDGSEM % EquationOfState( )
 
-      ENDDO ! m, loop over the RK3 steps
+      ENDDO
 
       myDGSEM % simulationTime = t0 + REAL(iT,prec)*dt
 
     ENDDO
 
-    ! Determine IF we need to take another step with reduced time step to get the solution
+    ! Determine if we need to take another step with reduced time step to get the solution
     ! at exactly t0+outputFrequency
     IF( .NOT. AlmostEqual( myDGSEM % simulationTime, t0+myDGSEM % params % outputFrequency ) )THEN
+
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
       G3D  = 0.0_prec
-      DO m = 1,3 ! Loop over RK3 steps
+
+      DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        !
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
           myDGSEM % state % solution_dev, &
           myDGSEM % state % tendency_dev, &
           myDGSEM % stressTensor % tendency_dev )
 
-        ! Calculate the pressure
         CALL myDGSEM % EquationOfState( )
 
-      ENDDO ! m, loop over the RK3 steps
+      ENDDO 
+
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
 
     ENDIF
@@ -378,10 +367,10 @@ CONTAINS
 #else
     REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
     REAL(prec) :: G3D(0:myDGSEM % params % polyDeg,&
-      0:myDGSEM % params % polyDeg,&
-      0:myDGSEM % params % polyDeg,&
-      1:myDGSEM % state % nEq,&
-      1:myDGSEM % mesh % elements % nElements)
+                      0:myDGSEM % params % polyDeg,&
+                      0:myDGSEM % params % polyDeg,&
+                      1:myDGSEM % state % nEq,&
+                      1:myDGSEM % mesh % elements % nElements)
     INTEGER    :: m, iEl, iT, i, j, k, iEq
 
     t0 = myDGSEM % simulationTime
@@ -423,13 +412,12 @@ CONTAINS
               ENDDO
             ENDDO
           ENDDO
-        ENDDO ! iEl, loop over all of the elements
+        ENDDO 
         !$OMP ENDDO
 
-        ! Calculate the internal energy and the pressure
         CALL myDGSEM % EquationOfState( )
 
-      ENDDO ! m, loop over the RK3 steps
+      ENDDO
 
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
 
@@ -455,7 +443,7 @@ CONTAINS
       ENDDO
       !$OMP ENDDO
 
-      DO m = 1,3 ! Loop over RK3 steps
+      DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
@@ -475,15 +463,15 @@ CONTAINS
               ENDDO
             ENDDO
           ENDDO
-        ENDDO ! iEl, loop over all of the elements
+        ENDDO
         !$OMP ENDDO
 
-        ! Calculate the internal energy and the pressure
         CALL myDGSEM % EquationOfState( )
 
-      ENDDO ! m, loop over the RK3 steps
+      ENDDO
 
       myDGSEM % simulationTime = myDGSEM % simulationTime +  dt
+
     ENDIF
 #endif
 
@@ -572,9 +560,9 @@ CONTAINS
     IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
       ! Will need to verIFy that this call works properly with "state" on input and output
       CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
-        myDGSEM % state % solution, &
-        myDGSEM % state % nEquations, &
-        myDGSEM % mesh % elements % nElements )
+                                        myDGSEM % state % solution, &
+                                        myDGSEM % state % nEquations, &
+                                        myDGSEM % mesh % elements % nElements )
 
     ENDIF
 
@@ -642,7 +630,7 @@ CONTAINS
 ! unresolved kinetic energy is diagnosed from a highpass spectral filter.
 !
     IF( myDGSEM % params % SubGridModel == SpectralEKE .OR. &
-      myDGSEM % params % SubGridModel == Laplacian ) THEN
+        myDGSEM % params % SubGridModel == Laplacian ) THEN
 
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
 
@@ -657,9 +645,9 @@ CONTAINS
 ! SUBROUTINE.
 
         CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
-          myDGSEM % smoothState % solution, &
-          myDGSEM % state % nEquations, &
-          myDGSEM % mesh % elements % nElements )
+                                          myDGSEM % smoothState % solution, &
+                                          myDGSEM % state % nEquations, &
+                                          myDGSEM % mesh % elements % nElements )
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -814,10 +802,10 @@ CONTAINS
     grid = dim3(myDGSEM % mesh % nElems, 1, 1)
 
     CALL CalculateSGSCoefficients_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-      myDGSEM % static % solution_dev, &
-      myDGSEM % smoothState % solution_dev, &
-      myDGSEM % filter % filterMat_dev, &
-      myDGSEM % sgsCoeffs % solution_dev )
+                                                               myDGSEM % static % solution_dev, &
+                                                               myDGSEM % smoothState % solution_dev, &
+                                                               myDGSEM % filter % filterMat_dev, &
+                                                               myDGSEM % sgsCoeffs % solution_dev )
 #else
     ! Local
     INTEGER :: iEl, i, j, k, m, ii, jj, kk
@@ -841,7 +829,7 @@ CONTAINS
               sgsKE = sgsKE + &
                 ( myDGSEM % state % solution(i,j,k,m,iEl)/&
                 (myDGSEM % state % solution(i,j,k,4,iEl)+myDGSEM % static % solution(i,j,k,4,iEl)) - &
-                myDGSEM % smoothState % solution(i,j,k,m,iEl)/&
+                 myDGSEM % smoothState % solution(i,j,k,m,iEl)/&
                 (myDGSEM % smoothState % solution(i,j,k,4,iEl)+myDGSEM % static % solution(i,j,k,4,iEl)) )**2
             ENDDO
             KE(i,j,k) = 0.5_prec*sgsKE
@@ -878,41 +866,43 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
-      4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
       1 )
-    grid = dim3(myDGSEM % nBoundaryFaces,nEq-1,1)
+    grid = dim3(myDGSEM % extComm % nBoundaryFaces,myDGSEM % state % nEquations-1,1)
 
     CALL UpdateExternalSGSCoeffs_CUDAKernel<<<grid, tBlock>>>( myDGSEM % extComm % boundaryIDs_dev, &       ! I
-      myDGSEM % mesh % faces_dev % elementIDs, &   ! I
-      myDGSEM % mesh % faces_dev % elementSides, & ! I
-      myDGSEM % extComm % extProcIDs_dev, &           ! I
-      myDGSEM % externalSGS_dev, &                    ! O
-      myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
-      myDGSEM % mesh % geom_dev % nHat_dev )           ! I
+                                                               myDGSEM % mesh % faces % elementIDs_dev, &   ! I
+                                                               myDGSEM % mesh % faces % elementSides_dev, & ! I
+                                                               myDGSEM % extComm % extProcIDs_dev, &           ! I
+                                                               myDGSEM % sgsBCs % externalState_dev, &                    ! O
+                                                               myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
+                                                               myDGSEM % mesh % elements % nHat_dev )           ! I
 #else
     ! Local
-    INTEGER    :: iEl, IFace, bFaceID, i, j, k, iEq
+    INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
     INTEGER    :: IFace2, p2
     INTEGER    :: e1, e2, s1, s2
 
     !$OMP DO
-    DO IFace = 1, myDGSEM % nBoundaryFaces
+    DO bID = 1, myDGSEM % extComm % nBoundaryFaces
 
-      IFace2 = myDGSEM % extComm % boundaryIDs( IFace ) ! Obtain the process-local face id for this boundary-face id
-      e1     = myDGSEM % mesh % Faces(IFace2) % elementIDs(1)
-      s1     = myDGSEM % mesh % Faces(IFace2) % elementSides(1)
-      e2     = myDGSEM % mesh % Faces(IFace2) % elementIDs(2)
-      p2     = myDGSEM % extComm % extProcIDs( IFace )
+      iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+      e1     = myDGSEM % mesh % Faces % elementIDs(1,iFace2)
+      s1     = myDGSEM % mesh % Faces % elementSides(1,iFace2)
+      e2     = myDGSEM % mesh % Faces % elementIDs(2,iFace2)
+      p2     = myDGSEM % extComm % extProcIDs( bID )
 
-      IF( p2 == myDGSEM % myRank )THEN ! Enforce no boundary flux due to the fluid stress
-        DO j = 0, myDGSEM % N
-          DO i = 0, myDGSEM % N
-            DO iEq = 1, myDGSEM % nEq-1
-              myDGSEM % externalSGS(i,j,iEq,IFace) = myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)
+      IF( p2 == myDGSEM % extComm % myRank )THEN ! Enforce no boundary flux due to the fluid stress
+
+        DO j = 0, myDGSEM % params % polyDeg
+          DO i = 0, myDGSEM % params % polyDeg
+            DO iEq = 1, myDGSEM % state % nEquations-1
+              myDGSEM % sgsBCs % externalState(i,j,iEq,bID) = myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
           ENDDO
         ENDDO
+
       ENDIF
 
     ENDDO
@@ -938,22 +928,22 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
-      4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
       1 )
-    grid = dim3(myDGSEM % nBoundaryFaces,1,1)
+    grid = dim3(myDGSEM % extComm % nBoundaryFaces,1,1)
 
     CALL UpdateExternalState_CUDAKernel<<<grid, tBlock>>>( myDGSEM % extComm % boundaryIDs_dev, &       ! I
-      myDGSEM % mesh % faces_dev % elementIDs, &   ! I
-      myDGSEM % mesh % faces_dev % elementSides, & ! I
-      myDGSEM % extComm % extProcIDs_dev, &           ! I
-      myDGSEM % externalState_dev, &               ! O
-      myDGSEM % state % boundarySolution_dev, &    ! I
-      myDGSEM % prescribedState_dev, &             ! I
-      myDGSEM % mesh % geom_dev % nHat_dev )           ! I
+                                                           myDGSEM % mesh % faces % elementIDs_dev, &   ! I
+                                                           myDGSEM % mesh % faces % elementSides_dev, & ! I
+                                                           myDGSEM % extComm % extProcIDs_dev, &           ! I
+                                                           myDGSEM % stateBCs % externalState_dev, &               ! O
+                                                           myDGSEM % state % boundarySolution_dev, &    ! I
+                                                           myDGSEM % stateBCs % prescribedState_dev, &             ! I
+                                                           myDGSEM % mesh % elements % nHat_dev )           ! I
 #else
     ! Local
-    INTEGER    :: iEl, IFace, bFaceID, i, j, k, iEq
+    INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
     INTEGER    :: IFace2, p2
     INTEGER    :: e1, e2, s1, s2
     REAL(prec) :: norm, un, ut, us, speed
@@ -962,15 +952,16 @@ CONTAINS
     REAL(prec) :: tx, ty, tz
 
     !$OMP DO
-    DO IFace = 1, myDGSEM % nBoundaryFaces
+    DO bID = 1, myDGSEM % extComm % nBoundaryFaces
 
-      IFace2 = myDGSEM % extComm % boundaryIDs( IFace ) ! Obtain the process-local face id for this boundary-face id
-      e1     = myDGSEM % mesh % Faces(IFace2) % elementIDs(1)
-      s1     = myDGSEM % mesh % Faces(IFace2) % elementSides(1)
-      e2     = myDGSEM % mesh % Faces(IFace2) % elementIDs(2)
-      p2     = myDGSEM % extComm % extProcIDs( IFace )
-      DO j = 0, myDGSEM % N
-        DO i = 0, myDGSEM % N
+      IFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+      p2     = myDGSEM % extComm % extProcIDs( bID )
+      e1     = myDGSEM % mesh % Faces % elementIDs(1,iFace2)
+      s1     = myDGSEM % mesh % Faces % elementSides(1,iFace2)
+      e2     = myDGSEM % mesh % Faces % elementIDs(2,iFace2)
+
+      DO j = 0, myDGSEM % params % polyDeg
+        DO i = 0, myDGSEM % params % polyDeg
 
           IF( e2 == PRESCRIBED .AND. p2 == myDGSEM % myRank )THEN
             DO iEq = 1, myDGSEM % nEq
