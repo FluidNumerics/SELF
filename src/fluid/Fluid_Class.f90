@@ -965,30 +965,30 @@ CONTAINS
 
           IF( e2 == PRESCRIBED .AND. p2 == myDGSEM % myRank )THEN
             DO iEq = 1, myDGSEM % nEq
-              myDGSEM % externalState(i,j,iEq,IFace) = myDGSEM % prescribedState(i,j,iEq,IFace)
+              myDGSEM % stateBCS % externalState(i,j,iEq,IFace) = myDGSEM % stateBCS % prescribedState(i,j,iEq,IFace)
             ENDDO
           ELSEIF( e2 == RADIATION .AND. p2 == myDGSEM % myRank )THEN
 
             ! momentum
             ! rho*u
-            myDGSEM % externalState(i,j,1,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,1,IFace) = 0.0_prec
             ! rho*v
-            myDGSEM % externalState(i,j,2,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,2,IFace) = 0.0_prec
             ! rho*w
-            myDGSEM % externalState(i,j,3,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,3,IFace) = 0.0_prec
             ! Density is set to the static density field
-            myDGSEM % externalState(i,j,4,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,4,IFace) = 0.0_prec
             ! Potential Temperature anomaly (multiplied by density) is set to its static state
-            myDGSEM % externalState(i,j,5,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,5,IFace) = 0.0_prec
             ! Pressure anomaly is set to zero
-            myDGSEM % externalState(i,j,6,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,6,IFace) = 0.0_prec
 
           ELSEIF( e2 == NO_NORMAL_FLOW .AND. p2 == myDGSEM % myRank )THEN
 
             ! normal
-            nx = myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)
-            ny = myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)
-            nz = myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)
+            nx = myDGSEM % mesh % elements % nHat(1,i,j,s1,e1)
+            ny = myDGSEM % mesh % elements % nHat(2,i,j,s1,e1)
+            nz = myDGSEM % mesh % elements % nHat(3,i,j,s1,e1)
             norm = sqrt( nx*nx + ny*ny + nz*nz )
             nx = nx/norm
             ny = ny/norm
@@ -1030,19 +1030,19 @@ CONTAINS
 
 
 
-            myDGSEM % externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
-            myDGSEM % externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
-            myDGSEM % externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
-            myDGSEM % externalState(i,j,4,IFace) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
-            myDGSEM % externalState(i,j,5,IFace) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % externalState(i,j,6,IFace) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
+            myDGSEM % stateBCS % externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
+            myDGSEM % stateBCS % externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
+            myDGSEM % stateBCS % externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
+            myDGSEM % stateBCS % externalState(i,j,4,IFace) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
+            myDGSEM % stateBCS % externalState(i,j,5,IFace) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
+            myDGSEM % stateBCS % externalState(i,j,6,IFace) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
 
           ELSEIF( e2 == DRAG_SLIP.AND. p2 == myDGSEM % myRank )THEN
 
             ! normal
-            nx = myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)
-            ny = myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)
-            nz = myDGSEM % mesh % geom(e1) % nHat(3,i,j,s1)
+            nx = myDGSEM % mesh % elements % nHat(1,i,j,s1,e1)
+            ny = myDGSEM % mesh % elements % nHat(2,i,j,s1,e1)
+            nz = myDGSEM % mesh % elements % nHat(3,i,j,s1,e1)
             norm = sqrt( nx*nx + ny*ny + nz*nz )
             nx = nx/norm
             ny = ny/norm
@@ -1091,12 +1091,12 @@ CONTAINS
               myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz )*&
               (1.0_prec-myDGSEM % params % Cd*myDGSEM % params % dragScale*speed)
 
-            myDGSEM % externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
-            myDGSEM % externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
-            myDGSEM % externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
-            myDGSEM % externalState(i,j,4,IFace) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
-            myDGSEM % externalState(i,j,5,IFace) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % externalState(i,j,6,IFace) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
+            myDGSEM % stateBCs % externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
+            myDGSEM % stateBCs % externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
+            myDGSEM % stateBCs % externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
+            myDGSEM % stateBCs % externalState(i,j,4,IFace) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
+            myDGSEM % stateBCs % externalState(i,j,5,IFace) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
+            myDGSEM % stateBCs % externalState(i,j,6,IFace) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
 
 
           ENDIF
@@ -1123,22 +1123,23 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % N+1)/4 ) ), &
-      4*(ceiling( REAL(myDGSEM % N+1)/4 ) ) , &
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg +1)/4 ) ), &
+      4*(ceiling( REAL(myDGSEM % params % polyDeg + 1)/4 ) ) , &
       1 )
-    grid = dim3(myDGSEM % mesh % nFaces,1,1)
+    grid = dim3(myDGSEM % mesh % faces % nFaces,1,1)
 
-    CALL InternalFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces_dev % elementIDs, &
-      myDGSEM % mesh % faces_dev % elementSides, &
-      myDGSEM % mesh % faces_dev % boundaryID, &
-      myDGSEM % mesh % faces_dev % iMap, &
-      myDGSEM % mesh % faces_dev % jMap, &
-      myDGSEM % mesh % geom_dev % nHat_dev, &
-      myDGSEM % state % boundarySolution_dev, &
-      myDGSEM % static % boundarySolution_dev, &
-      myDGSEM % externalState_dev, &
-      myDGSEM % state % boundaryFlux_dev, &
-      myDGSEM % stressTensor % boundaryFlux_dev )
+    CALL InternalFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs_dev, &
+                                                        myDGSEM % mesh % faces % elementSides_dev, &
+                                                        myDGSEM % mesh % faces % boundaryID_dev, &
+                                                        myDGSEM % mesh % faces % iMap_dev, &
+                                                        myDGSEM % mesh % faces % jMap_dev, &
+                                                        myDGSEM % mesh % elements % nHat_dev, &
+                                                        myDGSEM % state % boundarySolution_dev, &
+                                                        myDGSEM % static % boundarySolution_dev, &
+                                                        myDGSEM % stateBCs % externalState_dev, &
+                                                        myDGSEM % state % boundaryFlux_dev, &
+                                                        myDGSEM % stressTensor % boundaryFlux_dev )
+
 #else
     ! Local
     INTEGER :: iEl, IFace
@@ -1157,44 +1158,18 @@ CONTAINS
     DO IFace = 1, myDGSEM % mesh % nFaces
 
 
-      e1 = myDGSEM % mesh % faces(IFace) % elementIDs(1)
-      s1 = myDGSEM % mesh % faces(IFace) % elementSides(1)
-      e2 = myDGSEM % mesh % faces(IFace) % elementIDs(2)
-      s2 = ABS(myDGSEM % mesh % faces(IFace) % elementSides(2))
+      e1 = myDGSEM % mesh % faces % elementIDs(1,iFace)
+      s1 = myDGSEM % mesh % faces % elementSides(1,iFace)
+      e2 = myDGSEM % mesh % faces % elementIDs(2,iFace)
+      s2 = ABS(myDGSEM % mesh % faces % elementSides(2,iFace))
 
       IF( e2 > 0 )THEN
 
         DO j = 0, myDGSEM % N
           DO i = 0, myDGSEM % N
 
-            IF( i == 0 )THEN
-              IF( j == 0 )THEN
-                ii = (1-myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                  (myDGSEM % mesh % faces(IFace) % iStart) + &
-                  (myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                  (myDGSEM % mesh % faces(IFace) % jStart)
-                jj = (1-myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                  (myDGSEM % mesh % faces(IFace) % jStart) + &
-                  (myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                  (myDGSEM % mesh % faces(IFace) % iStart)
-              ELSE
-                ii = myDGSEM % mesh % faces(IFace) % swapDimensions*&
-                  (ii+myDGSEM % mesh % faces(IFace) % jInc) + &
-                  (1-myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                  myDGSEM % mesh % faces(IFace) % iStart
-                jj = (1-myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                  (jj+myDGSEM % mesh % faces(IFace) % jInc) +&
-                  myDGSEM % mesh % faces(IFace) % swapDimensions*&
-                  myDGSEM % mesh % faces(IFace) % jStart
-              ENDIF
-            ELSE
-              ii = (1-myDGSEM % mesh % faces(IFace) % swapDimensions)*&
-                (ii + myDGSEM % mesh % faces(IFace) % iInc) +&
-                myDGSEM % mesh % faces(IFace) % swapDimensions*ii
-              jj = myDGSEM % mesh % faces(IFace) % swapDimensions*&
-                (jj+myDGSEM % mesh % faces(IFace) % iInc) + &
-                (1-myDGSEM % mesh % faces(IFace) % swapDimensions)*jj
-            ENDIF
+            ii = myDGSEM % mesh % faces % iMap(i,j,iFace)
+            jj = myDGSEM % mesh % faces % jMap(i,j,iFace)
 
             norm = sqrt( myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(1,i,j,s1) + &
               myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1)*myDGSEM % mesh % geom(e1) % nHat(2,i,j,s1) + &
