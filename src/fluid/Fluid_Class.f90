@@ -13,7 +13,7 @@ MODULE Fluid_Class
   USE ModelParameters_Class
   USE Lagrange_Class
   USE NodalDG_Class
-  USE RollOffFilter_Class
+  USE SpectralFilter_Class
   USE NodalDGSolution_3D_Class
   USE HexMesh_Class
   USE BoundaryCommunicator_Class
@@ -41,7 +41,7 @@ MODULE Fluid_Class
     TYPE( HexMesh )              :: mesh
     TYPE( BoundaryCommunicator ) :: extComm
     TYPE( NodalDG )              :: dGStorage
-    TYPE( RollOffFilter )        :: filter
+    TYPE( SpectralFilter )       :: filter
     TYPE( BodyForces )           :: sourceTerms
     TYPE( NodalDGSolution_3D )   :: static
     TYPE( NodalDGSolution_3D )   :: state
@@ -103,7 +103,8 @@ MODULE Fluid_Class
   END TYPE Fluid
 
 
-  INTEGER, PARAMETER :: nDiagnostics = 5
+  INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
+  INTEGER, PARAMETER, PRIVATE :: nEquations   = 6
 
 CONTAINS
 !
@@ -135,7 +136,6 @@ CONTAINS
       RETURN
     ENDIF
 
-    CALL myDGSEM % extComm % Build( )
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
     CALL myDGSEM % extComm % ReadPickup( 'ExtComm.'//rankChar )
 
@@ -167,28 +167,25 @@ CONTAINS
 
     CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
       myDGSEM % dgStorage % quadratureWeights, &
-      myDGSEM % params % polyDeg, myDGSEM % params % nCutoff )
+      myDGSEM % params % polyDeg, myDGSEM % params % nCutoff, &
+      TanhRollOff )
 
     CALL myDGSEM % BuildHexMesh(  )
 
-    CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, &
-      myDGSEM % state % nEquations, &
+    CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
 
-    CALL myDGSEM % state % Build( myDGSEM % params % polyDeg, &
-      myDGSEM % state % nEquations, &
+    CALL myDGSEM % state % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
 
-    CALL myDGSEM % static % Build( myDGSEM % params % polyDeg, &
-      myDGSEM % state % nEquations, &
+    CALL myDGSEM % static % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
 
-    CALL myDGSEM % smoothState % Build( myDGSEM % params % polyDeg, nEq, &
-      myDGSEM % mesh % elements % nElements ) ! > CONTAINS the smoothed SGS KE
+    CALL myDGSEM % smoothState % Build( myDGSEM % params % polyDeg, nEquations, &
+      myDGSEM % mesh % elements % nElements )
 
-    CALL myDGSEM % stateBCs % Build( myDGSEM % params % polyDeg, &
-      myDGSEM % state % nEquations, &
-      myDGSEM % extComm % nBoundaryFaces )
+    CALL myDGSEM % stateBCs % Build( myDGSEM % params % polyDeg, nEquations, &
+      myDGSEM % extComm % nBoundaries )
 
     CALL myDGSEM % stressTensor % Build( myDGSEM % params % polyDeg, &
       (myDGSEM % state % nEquations-1)*3, &
@@ -196,8 +193,7 @@ CONTAINS
 
     CALL myDGSEM % stressBCs % Build( myDGSEM % params % polyDeg, &
       (myDGSEM % state % nEquations-1)*3, &
-      myDGSEM % extComm % nBoundaryFaces )
-
+      myDGSEM % extComm % nBoundaries )
 
 
     ! The "sgsCoeffs" attribute CONTAINS coefficients for the
@@ -212,7 +208,7 @@ CONTAINS
 
     CALL myDGSEM % sgsBCs % Build( myDGSEM % params % polyDeg, &
       myDGSEM % state % nEquations-1, &
-      myDGSEM % mesh % nBoundaryFaces )
+      myDGSEM % extComm % nBoundaries )
 
     ! Initially set all of the SGS coefficients to the "viscosity". In the event
     ! the Laplacian model is USEd, this will be the laplacian coefficient that is
@@ -273,13 +269,13 @@ CONTAINS
     ! Local
     CHARACTER(4) :: rankChar
 
-    WRITE( rankChar, '(I4.4)' )myDGSEM % myRank
+    WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
     PRINT*,'    Module Fluid_Class.f90 : S/R BuildHexMesh :'
 
     PRINT*,'      Reading mesh from '//TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar//'.smesh '
 
     ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
-    CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % SELMeshFile)//'.'//rankChar )
+    CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar )
 
     ! Multiply the mesh positions to scale the size of the mesh
     CALL myDGSEM % mesh % ScaleTheMesh( myDGSEM % dgStorage % interp, &
@@ -301,7 +297,7 @@ CONTAINS
     REAL(prec),DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
-                             1:myDGSEM % state % nEq,&
+                             1:myDGSEM % state % nEquations,&
                              1:myDGSEM % mesh % elements % nElements)
     REAL(prec), DEVICE :: rk3_a_dev(1:3), rk3_g_dev(1:3)
     INTEGER            :: iT, m, iStat
@@ -312,7 +308,7 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
       4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
       4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
-    grid = dim3(myDGSEM % mesh % elements % nElements, myDGSEM % state % nEq-1, 1)
+    grid = dim3(myDGSEM % mesh % elements % nElements, myDGSEM % state % nEquations-1, 1)
 
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
@@ -369,7 +365,7 @@ CONTAINS
     REAL(prec) :: G3D(0:myDGSEM % params % polyDeg,&
                       0:myDGSEM % params % polyDeg,&
                       0:myDGSEM % params % polyDeg,&
-                      1:myDGSEM % state % nEq,&
+                      1:myDGSEM % state % nEquations,&
                       1:myDGSEM % mesh % elements % nElements)
     INTEGER    :: m, iEl, iT, i, j, k, iEq
 
@@ -381,7 +377,7 @@ CONTAINS
 
       !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
-        DO iEq = 1, nEq-1
+        DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
@@ -400,7 +396,7 @@ CONTAINS
 
         !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
-          DO iEq = 1, nEq-1
+          DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
@@ -431,7 +427,7 @@ CONTAINS
 
       !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
-        DO iEq = 1, nEq-1
+        DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
@@ -451,14 +447,14 @@ CONTAINS
 
         !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
-          DO iEq = 1, nEq-1
+          DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
-                  G3D(i,j,k,iEq,iEl) = rk3(m)*G3D(i,j,k,iEq,iEl) + myDGSEM % state % tendency(i,j,k,iEq,iEl) +&
+                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + myDGSEM % state % tendency(i,j,k,iEq,iEl) +&
                     myDGSEM % stressTensor % tendency(i,j,k,iEq,iEl)
                   myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
-                    rk3(m)*dt*G3D(i,j,k,iEq,iEl)
+                    rk3_g(m)*dt*G3D(i,j,k,iEq,iEl)
                 ENDDO
               ENDDO
             ENDDO
@@ -554,7 +550,7 @@ CONTAINS
 ! ----------------------------------------------------------------------------- !
 !
 !  IF SpectralFiltering is USEd as the subgridscale model, THEN the spectral
-!  filtering matrix (specIFied in src/filtering/RollOffFilter_Class.f90) is USEd
+!  filtering matrix (specIFied in src/filtering/SpectralFilter_Class.f90) is USEd
 !  to smooth the solution variables before proceeding.
 
     IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
@@ -842,7 +838,7 @@ CONTAINS
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
-            DO m = 1, nEq-1
+            DO m = 1, myDGSEM % state % nEquations-1
 
               myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.09_prec*&
                 myDGSEM % params % viscLengthScale*sqrt( KE(i,j,k) )
@@ -869,7 +865,7 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   1 )
-    grid = dim3(myDGSEM % extComm % nBoundaryFaces,myDGSEM % state % nEquations-1,1)
+    grid = dim3(myDGSEM % extComm % nBoundaries,myDGSEM % state % nEquations-1,1)
 
     CALL UpdateExternalSGSCoeffs_CUDAKernel<<<grid, tBlock>>>( myDGSEM % extComm % boundaryIDs_dev, &       ! I
                                                                myDGSEM % mesh % faces % elementIDs_dev, &   ! I
@@ -881,11 +877,11 @@ CONTAINS
 #else
     ! Local
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
-    INTEGER    :: IFace2, p2
+    INTEGER    :: iFace2, p2
     INTEGER    :: e1, e2, s1, s2
 
     !$OMP DO
-    DO bID = 1, myDGSEM % extComm % nBoundaryFaces
+    DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
       e1     = myDGSEM % mesh % faces % elementIDs(1,iFace2)
@@ -931,7 +927,7 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   1 )
-    grid = dim3(myDGSEM % extComm % nBoundaryFaces,1,1)
+    grid = dim3(myDGSEM % extComm % nBoundaries,1,1)
 
     CALL UpdateExternalState_CUDAKernel<<<grid, tBlock>>>( myDGSEM % extComm % boundaryIDs_dev, &       ! I
                                                            myDGSEM % mesh % faces % elementIDs_dev, &   ! I
@@ -944,7 +940,7 @@ CONTAINS
 #else
     ! Local
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
-    INTEGER    :: IFace2, p2
+    INTEGER    :: iFace2, p2
     INTEGER    :: e1, e2, s1, s2
     REAL(prec) :: norm, un, ut, us, speed
     REAL(prec) :: nx, ny, nz
@@ -952,9 +948,9 @@ CONTAINS
     REAL(prec) :: tx, ty, tz
 
     !$OMP DO
-    DO bID = 1, myDGSEM % extComm % nBoundaryFaces
+    DO bID = 1, myDGSEM % extComm % nBoundaries
 
-      IFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+      iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
       p2     = myDGSEM % extComm % extProcIDs( bID )
       e1     = myDGSEM % mesh % Faces % elementIDs(1,iFace2)
       s1     = myDGSEM % mesh % Faces % elementSides(1,iFace2)
@@ -963,27 +959,27 @@ CONTAINS
       DO j = 0, myDGSEM % params % polyDeg
         DO i = 0, myDGSEM % params % polyDeg
 
-          IF( e2 == PRESCRIBED .AND. p2 == myDGSEM % myRank )THEN
+          IF( e2 == PRESCRIBED .AND. p2 == myDGSEM % extComm % myRank )THEN
             DO iEq = 1, myDGSEM % state % nEquations
-              myDGSEM % stateBCS % externalState(i,j,iEq,IFace) = myDGSEM % stateBCS % prescribedState(i,j,iEq,IFace)
+              myDGSEM % stateBCS % externalState(i,j,iEq,bID) = myDGSEM % stateBCS % prescribedState(i,j,iEq,bID)
             ENDDO
-          ELSEIF( e2 == RADIATION .AND. p2 == myDGSEM % myRank )THEN
+          ELSEIF( e2 == RADIATION .AND. p2 == myDGSEM % extComm % myRank )THEN
 
             ! momentum
             ! rho*u
-            myDGSEM % stateBCS % externalState(i,j,1,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,1,bID) = 0.0_prec
             ! rho*v
-            myDGSEM % stateBCS % externalState(i,j,2,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,2,bID) = 0.0_prec
             ! rho*w
-            myDGSEM % stateBCS % externalState(i,j,3,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,3,bID) = 0.0_prec
             ! Density is set to the static density field
-            myDGSEM % stateBCS % externalState(i,j,4,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,4,bID) = 0.0_prec
             ! Potential Temperature anomaly (multiplied by density) is set to its static state
-            myDGSEM % stateBCS % externalState(i,j,5,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,5,bID) = 0.0_prec
             ! Pressure anomaly is set to zero
-            myDGSEM % stateBCS % externalState(i,j,6,IFace) = 0.0_prec
+            myDGSEM % stateBCS % externalState(i,j,6,bID) = 0.0_prec
 
-          ELSEIF( e2 == NO_NORMAL_FLOW .AND. p2 == myDGSEM % myRank )THEN
+          ELSEIF( e2 == NO_NORMAL_FLOW .AND. p2 == myDGSEM % extComm % myRank )THEN
 
             ! normal
             nx = myDGSEM % mesh % elements % nHat(1,i,j,s1,e1)
@@ -1030,14 +1026,14 @@ CONTAINS
 
 
 
-            myDGSEM % stateBCS % externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
-            myDGSEM % stateBCS % externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
-            myDGSEM % stateBCS % externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
-            myDGSEM % stateBCS % externalState(i,j,4,IFace) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
-            myDGSEM % stateBCS % externalState(i,j,5,IFace) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % stateBCS % externalState(i,j,6,IFace) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
+            myDGSEM % stateBCS % externalState(i,j,1,bID) = -nx*un + us*sx + ut*tx ! u
+            myDGSEM % stateBCS % externalState(i,j,2,bID) = -ny*un + us*sy + ut*ty ! v
+            myDGSEM % stateBCS % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
+            myDGSEM % stateBCS % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
+            myDGSEM % stateBCS % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
+            myDGSEM % stateBCS % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
 
-          ELSEIF( e2 == DRAG_SLIP.AND. p2 == myDGSEM % myRank )THEN
+          ELSEIF( e2 == DRAG_SLIP.AND. p2 == myDGSEM % extComm % myRank )THEN
 
             ! normal
             nx = myDGSEM % mesh % elements % nHat(1,i,j,s1,e1)
@@ -1091,12 +1087,12 @@ CONTAINS
               myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz )*&
               (1.0_prec-myDGSEM % params % Cd*myDGSEM % params % dragScale*speed)
 
-            myDGSEM % stateBCs % externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
-            myDGSEM % stateBCs % externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
-            myDGSEM % stateBCs % externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
-            myDGSEM % stateBCs % externalState(i,j,4,IFace) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
-            myDGSEM % stateBCs % externalState(i,j,5,IFace) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % stateBCs % externalState(i,j,6,IFace) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
+            myDGSEM % stateBCs % externalState(i,j,1,bID) = -nx*un + us*sx + ut*tx ! u
+            myDGSEM % stateBCs % externalState(i,j,2,bID) = -ny*un + us*sy + ut*ty ! v
+            myDGSEM % stateBCs % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
+            myDGSEM % stateBCs % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
+            myDGSEM % stateBCs % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
+            myDGSEM % stateBCs % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
 
 
           ENDIF
@@ -1142,19 +1138,19 @@ CONTAINS
 
 #else
     ! Local
-    INTEGER :: iEl, IFace
+    INTEGER :: iEl, iFace
     INTEGER    :: i, j, k, m, iEq, jEq
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
     REAL(prec) :: nHat(1:3), norm
     REAL(prec) :: uOut, uIn, cIn, cOut, T
-    REAL(prec) :: jump(1:nEq-1), aS(1:nEq-1)
+    REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, hCapRatio, rC
 
     hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
 
     !$OMP DO PRIVATE( jump, aS )
-    DO IFace = 1, myDGSEM % mesh % nFaces
+    DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
       e1 = myDGSEM % mesh % faces % elementIDs(1,iFace)
@@ -1178,7 +1174,7 @@ CONTAINS
               nHat(k) = myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)/norm
             ENDDO
 
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
               jump(iEq)  = myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) - &
                            myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) !outState - inState
             ENDDO
@@ -1220,7 +1216,7 @@ CONTAINS
             fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
 
             ! Advective flux
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
               aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + &
                 myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
                 uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + &
@@ -1234,7 +1230,7 @@ CONTAINS
             ENDDO
 
 
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
               myDGSEM % state % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1)
               IF( iEq == 4 )THEN
@@ -1302,17 +1298,17 @@ CONTAINS
                                                         myDGSEM % stressTensor % boundaryFlux_dev )
 #else
     ! Local
-    INTEGER :: iEl, IFace
+    INTEGER :: iEl, iFace
     INTEGER    :: i, j, k, m, iEq, jEq
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
     REAL(prec) :: nHat(1:3), norm
     REAL(prec) :: uOut, uIn, cIn, cOut, T
-    REAL(prec) :: jump(1:nEq-1), aS(1:nEq-1)
+    REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, hCapRatio, rC
 
     !$OMP DO PRIVATE( jump, aS )
-    DO iFace = 1, myDGSEM % mesh % nFaces
+    DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
       e1 = myDGSEM % mesh % faces % elementIDs(1,iFace)
@@ -1337,7 +1333,7 @@ CONTAINS
             ENDDO
 
             bID  = ABS(myDGSEM % mesh % faces % boundaryID(iFace))
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
               jump(iEq)  = myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) - &
                            myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
@@ -1348,7 +1344,7 @@ CONTAINS
               (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % stateBCs % externalState(ii,jj,4,bID))
 
             cOut = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % externalState(ii,jj,6,bID)+&
+              ( (myDGSEM % stateBCs % externalState(ii,jj,6,bID)+&
               myDGSEM % static % boundarySolution(i,j,6,s1,e1) )/&
               myDGSEM % params % P0 )**myDGSEM % params % rC   )
 
@@ -1377,26 +1373,26 @@ CONTAINS
             fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
 
             ! Advective flux
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
               aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
-                uOut*( myDGSEM % externalState(ii,jj,iEq,bID) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) )
+                uOut*( myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) )
             ENDDO
 
             DO k = 1, 3
               ! Momentum flux due to pressure
               aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,6,s1,e1) + &
-                myDGSEM % externalState(ii,jj,6,bID))*nHat(k)
+                myDGSEM % stateBCs % externalState(ii,jj,6,bID))*nHat(k)
             ENDDO
 
 
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
               IF( iEq == 4 )THEN
                 DO k = 1, 3
                   jEq = k+(iEq-1)*3
                   ! Calculate the Bassi-Rebay flux for the stress tensor.
                   myDGSEM % stressTensor % boundaryFlux(i,j,jEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) +&
-                    myDGSEM % externalState(ii,jj,iEq,bID) )*&
+                    myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) )*&
                     myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
                 ENDDO
               ELSE
@@ -1406,8 +1402,8 @@ CONTAINS
                   myDGSEM % stressTensor % boundaryFlux(i,j,jEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
                     (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
                     myDGSEM % static % boundarySolution(i,j,4,s1,e1)) +&
-                    myDGSEM % externalState(ii,jj,iEq,bID)/&
-                    (myDGSEM % externalState(ii,jj,4,bID)+&
+                    myDGSEM % stateBCs % externalState(ii,jj,iEq,bID)/&
+                    (myDGSEM % stateBCs % externalState(ii,jj,4,bID)+&
                     myDGSEM % static % boundarySolution(i,j,4,s1,e1)) )*&
                     myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
                 ENDDO
@@ -1544,7 +1540,7 @@ CONTAINS
 
 #endif
 
-    CALL myDGSEM % state % Calculate_Weak_Divergence( myDGSEM % dgStorage )  
+     CALL myDGSEM % state % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )  
 
 #ifdef HAVE_CUDA
 
@@ -1663,7 +1659,7 @@ CONTAINS
 
     !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
-      DO iEq = 1, nEq-1
+      DO iEq = 1, myDGSEM % state % nEquations-1
         DO idir = 1, 3
 
           jEq = idir + (iEq-1)*3
@@ -1671,9 +1667,9 @@ CONTAINS
           DO k = 0, myDGSEM % params % polyDeg
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
-                myDGSEM % stress % flux(i,j,k,jEq,iEl) = 0.0_prec
-                myDGSEM % stress % flux(i,j,k,jEq,iEl) = 0.0_prec
-                myDGSEM % stress % flux(i,j,k,jEq,iEl) = 0.0_prec
+                myDGSEM % stressTensor % flux(1,i,j,k,jEq,iEl) = 0.0_prec
+                myDGSEM % stressTensor % flux(2,i,j,k,jEq,iEl) = 0.0_prec
+                myDGSEM % stressTensor % flux(3,i,j,k,jEq,iEl) = 0.0_prec
               ENDDO
             ENDDO
           ENDDO
@@ -1686,13 +1682,13 @@ CONTAINS
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
 
-                  myDGSEM % stress % flux(i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
+                  myDGSEM % stressTensor % flux(1,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
                     myDGSEM % state % solution(i,j,k,iEq,iEl)
 
-                  myDGSEM % stress % flux(i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,2,iEl)*&
+                  myDGSEM % stressTensor % flux(2,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,2,iEl)*&
                     myDGSEM % state % solution(i,j,k,iEq,iEl)
 
-                  myDGSEM % stress % flux(i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,3,iEl)*&
+                  myDGSEM % stressTensor % flux(3,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,3,iEl)*&
                     myDGSEM % state % solution(i,j,k,iEq,iEl)
 
                 ENDDO
@@ -1705,17 +1701,17 @@ CONTAINS
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
 
-                  myDGSEM % stress % flux(1,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
+                  myDGSEM % stressTensor % flux(1,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
                     myDGSEM % state % solution(i,j,k,iEq,iEl)/&
                     (myDGSEM % state % solution(i,j,k,4,iEl)+&
                     myDGSEM % static % solution(i,j,k,4,iEl) )
 
-                  myDGSEM % stress % flux(2,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,2,iEl)*&
+                  myDGSEM % stressTensor % flux(2,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,2,iEl)*&
                     myDGSEM % state % solution(i,j,k,iEq,iEl)/&
                     (myDGSEM % state % solution(i,j,k,4,iEl)+&
                     myDGSEM % static % solution(i,j,k,4,iEl) )
 
-                  myDGSEM % stress % flux(3,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,3,iEl)*&
+                  myDGSEM % stressTensor % flux(3,i,j,k,jEq,iEl) = myDGSEM % mesh % elements % Ja(i,j,k,idir,3,iEl)*&
                     myDGSEM % state % solution(i,j,k,iEq,iEl)/&
                     (myDGSEM % state % solution(i,j,k,4,iEl)+&
                     myDGSEM % static % solution(i,j,k,4,iEl) )
@@ -1732,7 +1728,7 @@ CONTAINS
     !$OMP ENDDO
 #endif
 
-    CALL myDGSEM % stress % Calculate_Weak_Divergence( myDGSEM % dgStorage ) 
+    CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage ) 
 
 #ifdef HAVE_CUDA
 
@@ -1742,7 +1738,7 @@ CONTAINS
 
     !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
-      DO iEq = 1, nEq-1
+      DO iEq = 1, myDGSEM % state % nEquations-1
         DO idir = 1, 3
 
           jEq = idir + (iEq-1)*3
@@ -1791,20 +1787,20 @@ CONTAINS
 
 #else
     ! Local
-    INTEGER    :: iEl, IFace, bFaceID, i, j, k, iEq
+    INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
     INTEGER    :: bID, p2
     INTEGER    :: e1, e2, s1, s2
 
     !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
-      IFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+      iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
       e1    = myDGSEM % mesh % faces % elementIDs(1,iFace)
       s1    = myDGSEM % mesh % faces % elementSides(1,iFace)
       e2    = myDGSEM % mesh % faces % elementIDs(2,iFace)
       p2    = myDGSEM % extComm % extProcIDs( bID )
 
-      IF( p2 == myDGSEM % myRank )THEN ! Enforce no boundary flux due to the fluid stress
+      IF( p2 == myDGSEM % extComm % myRank )THEN ! Enforce no boundary flux due to the fluid stress
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
             DO iEq = 1, myDGSEM % stressTensor % nEquations
@@ -1850,19 +1846,19 @@ CONTAINS
 #else
     ! Local
     REAL(prec) :: norm, rhoIn, rhoOut
-    INTEGER :: iEl, IFace
+    INTEGER :: iEl, iFace
     INTEGER    :: i, j, k, m, iEq, jEq
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
 
     !$OMP DO
-    DO IFace = 1, myDGSEM % mesh % nFaces
+    DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
-      e1 = myDGSEM % mesh % faces % elementIDs(1)
-      s1 = myDGSEM % mesh % faces % elementSides(1)
-      e2 = myDGSEM % mesh % faces % elementIDs(2)
-      s2 = ABS(myDGSEM % mesh % faces % elementSides(2))
+      e1 = myDGSEM % mesh % faces % elementIDs(1,iFace)
+      s1 = myDGSEM % mesh % faces % elementSides(1,iFace)
+      e2 = myDGSEM % mesh % faces % elementIDs(2,iFace)
+      s2 = ABS(myDGSEM % mesh % faces % elementSides(2,iFace))
 
       IF( e2 > 0 )THEN
 
@@ -1876,7 +1872,7 @@ CONTAINS
               myDGSEM % mesh % elements % nHat(2,i,j,s1,e1)**2 + &
               myDGSEM % mesh % elements % nHat(3,i,j,s1,e1)**2 )
 
-            DO iEq = 1, nEq-1
+            DO iEq = 1, myDGSEM % state % nEquations-1
 
               myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
                 0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(ii,jj,iEq,s2,e2)*myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)-&
@@ -1951,13 +1947,13 @@ CONTAINS
 #else
     ! Local
     REAL(prec) :: norm, rhoIn, rhoOut
-    INTEGER :: iEl, IFace
+    INTEGER :: iEl, iFace
     INTEGER    :: i, j, k, m, iEq, jEq
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
 
     !$OMP DO
-    DO IFace = 1, myDGSEM % mesh % nFaces
+    DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
       e1 = myDGSEM % mesh % faces % elementIDs(1,iFace)
@@ -1982,7 +1978,7 @@ CONTAINS
             IF( bID < 0 )THEN ! Physical Boundary
 
               bID = ABS(bID)
-              DO iEq = 1, nEq-1
+              DO iEq = 1, myDGSEM % state % nEquations-1
                 myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
                   0.5_prec*myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*&
                   ( myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) - myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
@@ -2009,7 +2005,7 @@ CONTAINS
                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
                                                                            0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
                                                                           ( rhoIn*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-                                                                            rhoOut*myDGSEM % stressBCs % externalStress(ii,jj,jEq,bID) )*&
+                                                                            rhoOut*myDGSEM % stressBCs % externalState(ii,jj,jEq,bID) )*&
                                                                           myDGSEM % mesh % elements % nHat(m,i,j,s1,e1)
                   ENDDO
 
@@ -2018,9 +2014,9 @@ CONTAINS
 
             ELSE ! Neighboring process
 
-              DO iEq = 1, nEq-1
+              DO iEq = 1, myDGSEM % state % nEquations-1
                 myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-                  0.5_prec*(myDGSEM % sgsBCs % externalState(ii,jj,iEq,bID)*myDGSEM % state % externalState(ii,jj,iEq,bID) -&
+                  0.5_prec*(myDGSEM % sgsBCs % externalState(ii,jj,iEq,bID)*myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) -&
                   myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
                   myDGSEM % params % viscLengthScale*norm
 
@@ -2038,7 +2034,7 @@ CONTAINS
 
                 ELSE
 
-                  rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % externalState(ii,jj,4,bID) )
+                  rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % stateBCs % externalState(ii,jj,4,bID) )
                   rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
                   DO m = 1, 3
@@ -2158,7 +2154,7 @@ CONTAINS
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
 
-            z = myDGSEM % mesh % elements(iEl) % z(i,j,k)
+            z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
             ! The static profile is determined from hydrostatic balance, the equation of state,
             ! and a prescribed potential temperature profile.
@@ -2215,13 +2211,13 @@ CONTAINS
 
     CLASS( Fluid ), INTENT(inout) :: myDGsem
     !LOCAL
-    REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:4,1:mesh % elements % nElements)
-    REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:mesh % elements % nElements)
-    REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:mesh % elements % nElements)
+    REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:4,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
-    REAL(prec), ALLOCATABLE, DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:4,1:mesh % elements % nElements)
-    REAL(prec), ALLOCATABLE, DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:mesh % elements % nElements)
-    REAL(prec), ALLOCATABLE, DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:mesh % elements % nElements)
+    REAL(prec), ALLOCATABLE, DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:4,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec), ALLOCATABLE, DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec), ALLOCATABLE, DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
     INTEGER, ALLOCATABLE, DEVICE     :: nDim_dev
 #endif
     INTEGER       :: i, j, k, iEl, iEq, fUnit
@@ -2263,18 +2259,18 @@ CONTAINS
 
     CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution, &
                                                                      sol, myDGSEM % state % nEquations, &
-                                                                     myDGSEM % elements % nElements )  
+                                                                     myDGSEM % mesh % elements % nElements )  
 
     CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution, &
                                                                      bsol, myDGSEM % static % nEquations, &
-                                                                     myDGSEM % elements % nElements )  
+                                                                     myDGSEM % mesh % elements % nElements )  
 
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % elements % x, &
+    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x, &
                                                                      x, 3, &
-                                                                     myDGSEM % elements % nElements )  
+                                                                     myDGSEM % mesh % elements % nElements )  
 #endif
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % myRank
+    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= 'State.'//rankChar//'.'//timeStampString//'.tec', &
@@ -2286,7 +2282,7 @@ CONTAINS
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
-      WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements(iEl) % elementID
+      WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements % elementID(iEl)
       WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % nPlot+1,&
                                                  ', J=',myDGSEM % params % nPlot+1,&
                                                  ', K=',myDGSEM % params % nPlot+1,',F=POINT'
@@ -2336,7 +2332,7 @@ CONTAINS
     myDGSEM % PE     = 0.0_prec
     myDGSEM % heat   = 0.0_prec
 
-    IF( myDGSEM % myRank == 0 )THEN
+    IF( myDGSEM % extComm % myRank == 0 )THEN
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
 
@@ -2378,7 +2374,7 @@ CONTAINS
     CLASS( Fluid ), INTENT(in) :: myDGSEM
     INTEGER, INTENT(in)        :: fileUnits(1:nDiagnostics)
 
-    IF( myDGSEM % myRank == 0 )THEN
+    IF( myDGSEM % extComm % myRank == 0 )THEN
       WRITE(fileUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
       WRITE(fileUnits(2),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % KE
       WRITE(fileUnits(3),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % PE
@@ -2394,7 +2390,7 @@ CONTAINS
     INTEGER, INTENT(in)            :: fileUnits(1:nDiagnostics)
 
 
-    IF( myDGSEM % myRank == 0 ) THEN
+    IF( myDGSEM % extComm % myRank == 0 ) THEN
       CLOSE( UNIT=fileUnits(1) )
       CLOSE( UNIT=fileUnits(2) )
       CLOSE( UNIT=fileUnits(3) )
@@ -2503,7 +2499,7 @@ CONTAINS
 
     N = myDGSEM % params % polyDeg
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % myRank
+    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
     PRINT(MsgFMT), ' S/R WritePickup_Fluid : Writing output file :  State.'//&
       rankChar//'.'//timeStampString//'.pickup'
 
@@ -2519,16 +2515,16 @@ CONTAINS
     thisRec = 1
     DO iEl = 1, myDGSEM % mesh % elements % nElements
 
-      DO iEq = 1, nEq
+      DO iEq = 1, myDGSEM % state % nEquations
         WRITE( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
         thisRec = thisRec+1
       ENDDO
-      DO iEq = 1, nEq
+      DO iEq = 1, myDGSEM % state % nEquations
         WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
         thisRec = thisRec+1
       ENDDO
 
-      WRITE( fUnit, REC=thisRec )myDGSEM % drag(:,:,:,iEl)
+      WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
       thisRec = thisRec+1
 
     ENDDO
@@ -2542,9 +2538,9 @@ CONTAINS
       STATUS ='REPLACE',&
       ACTION ='WRITE', &
       CONVERT='BIG_ENDIAN',&
-      RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(nEq)*(myDGSEM % nBoundaryFaces) )
-    WRITE( fUnit, rec = 1 ) myDGSEM % externalState
-    WRITE( fUnit, rec = 2 ) myDGSEM % prescribedState
+      RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
+    WRITE( fUnit, rec = 1 ) myDGSEM % stateBCs % externalState
+    WRITE( fUnit, rec = 2 ) myDGSEM % stateBCs % prescribedState
     CLOSE(fUnit)
 
 
@@ -2566,7 +2562,7 @@ CONTAINS
 
     N = myDGSEM % params % polyDeg
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % myRank
+    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
     INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
 
     IF( itExists )THEN
@@ -2585,16 +2581,16 @@ CONTAINS
       thisRec = 1
       DO iEl = 1, myDGSEM % mesh % elements % nElements
 
-        DO iEq = 1, nEq
+        DO iEq = 1, myDGSEM  % state % nEquations
           READ( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
           thisRec = thisRec+1
         ENDDO
-        DO iEq = 1, nEq
+        DO iEq = 1, myDGSEM % state % nEquations
           READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
           thisRec = thisRec+1
         ENDDO
 
-        READ( fUnit, REC=thisRec )myDGSEM % drag(:,:,:,iEl)
+        READ( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
         thisRec = thisRec+1
 
       ENDDO
@@ -2604,37 +2600,25 @@ CONTAINS
     ENDIF
 
 #ifdef HAVE_CUDA
-    myDGSEM % drag_dev       = myDGSEM % drag
-    myDGSEM % state % solution_dev  = myDGSEM % state % solution
-    myDGSEM % static % solution_dev = myDGSEM % static % solution
+    myDGSEM % sourceTerms % drag_dev = myDGSEM % drag
+    myDGSEM % state % solution_dev   = myDGSEM % state % solution
+    myDGSEM % static % solution_dev  = myDGSEM % static % solution
 #endif
 
     CALL myDGSEM % extComm % ReadPickup( 'ExtComm.'//rankChar )
-    myDGSEM % nBoundaryFaces = myDGSEM % extComm % nBoundaries
 
-    ALLOCATE( myDGSEM % externalState(0:N,0:N,1:nEq,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % externalStress(0:N,0:N,1:(nEq-1)*3,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % externalSGS(0:N,0:N,1:nEq-1,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % prescribedState(0:N,0:N,1:nEq,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % prescribedStress(0:N,0:N,1:(nEq-1)*3,1:myDGSEM % nBoundaryFaces) )
-    myDGSEM % externalState    = 0.0_prec
-    myDGSEM % externalStress   = 0.0_prec
-    myDGSEM % externalSGS      = 0.0_prec
-    myDGSEM % prescribedState  = 0.0_prec
-    myDGSEM % prescribedStress = 0.0_prec
+    CALL myDGSEM % stateBCs % Build( myDGSEM % params % polyDeg, &
+                                     myDGSEM % state % nEquations, &
+                                     myDGSEM % extComm % nBoundaries )
 
-#ifdef HAVE_CUDA
-    ALLOCATE( myDGSEM % externalState_dev(0:N,0:N,1:nEq,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % externalStress_dev(0:N,0:N,1:(nEq-1)*3,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % externalSGS_dev(0:N,0:N,1:nEq-1,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % prescribedState_dev(0:N,0:N,1:nEq,1:myDGSEM % nBoundaryFaces) )
-    ALLOCATE( myDGSEM % prescribedStress_dev(0:N,0:N,1:(nEq-1)*3,1:myDGSEM % nBoundaryFaces) )
-    myDGSEM % externalState_dev    = 0.0_prec
-    myDGSEM % externalStress_dev   = 0.0_prec
-    myDGSEM % externalSGS_dev      = 0.0_prec
-    myDGSEM % prescribedState_dev  = 0.0_prec
-    myDGSEM % prescribedStress_dev = 0.0_prec
-#endif
+    CALL myDGSEM % stressBCs % Build( myDGSEM % params % polyDeg, &
+                                      myDGSEM % state % nEquations, &
+                                      myDGSEM % extComm % nBoundaries )
+
+    CALL myDGSEM % sgsBCs % Build( myDGSEM % params % polyDeg, &
+                                   myDGSEM % state % nEquations, &
+                                   myDGSEM % extComm % nBoundaries )
+
 
     INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
 
@@ -2647,18 +2631,16 @@ CONTAINS
         STATUS ='OLD',&
         ACTION ='READ', &
         CONVERT='BIG_ENDIAN',&
-        RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(nEq)*(myDGSEM % nBoundaryFaces) )
-      READ( fUnit, rec = 1 ) myDGSEM % externalState
-      READ( fUnit, rec = 2 ) myDGSEM % prescribedState
+        RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
+      READ( fUnit, rec = 1 ) myDGSEM % stateBCs % externalState
+      READ( fUnit, rec = 2 ) myDGSEM % stateBCs % prescribedState
       CLOSE(fUnit)
 
-#ifdef HAVE_CUDA
-      ! Copy the external state and the prescribed-state to the device
-      myDGSEM % externalState_dev   = myDGSEM % externalState
-      myDGSEM % prescribedState_dev = myDGSEM % prescribedState
-#endif
-
     ENDIF
+
+#ifdef HAVE_CUDA
+      CALL myDGSEM % stateBCs % UpdateDevice( )
+#endif
 
     PRINT*, 'S/R ReadPickup : DOne.'
 
@@ -2671,14 +2653,14 @@ CONTAINS
 ! ============================================================================================================================ !
 !------------------------------------------- CUDA Kernels Below -------------------------------------------------------------- !
 ! ============================================================================================================================ !
-  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, solution, tendency, dIFfusiveTendency )
+ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, solution, tendency, diffusiveTendency )
 
   IMPLICIT NONE
   REAL(prec), DEVICE, INTENT(inout) :: G3D(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
   REAL(prec), DEVICE, INTENT(in)    :: a, g
   REAL(prec), DEVICE, INTENT(inout) :: solution(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
   REAL(prec), DEVICE, INTENT(in)    :: tendency(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
-  REAL(prec), DEVICE, INTENT(in)    :: dIFfusivetendency(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:15,1:nEl_dev)
+  REAL(prec), DEVICE, INTENT(in)    :: diffusivetendency(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:15,1:nEl_dev)
   ! Local
   INTEGER :: i, j, k, iEq, iEl
 
@@ -2689,123 +2671,84 @@ CONTAINS
   j = threadIdx % y - 1
   k = threadIdx % z - 1
 
-  G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + tendency(i,j,k,iEq,iEl) + dIFfusivetendency(i,j,k,iEq,iEl)
+  G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + tendency(i,j,k,iEq,iEl) + diffusivetendency(i,j,k,iEq,iEl)
   solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt_dev*g*G3D(i,j,k,iEq,iEl)
 
 END SUBROUTINE UpdateG3D_CUDAKernel
 !
 ATTRIBUTES(Global) SUBROUTINE CalculateSGSCoefficients_CUDAKernel( solution, static, smoothState, filterMat, sgsCoeffs )
 
-IMPLICIT NONE
-REAL(prec), DEVICE, INTENT(in)    :: solution(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
-REAL(prec), DEVICE, INTENT(in)    :: static(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
-REAL(prec), DEVICE, INTENT(inout) :: smoothState(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
-REAL(prec), DEVICE, INTENT(in)    :: filterMat(0:polydeg_dev,0:polydeg_dev)
-REAL(prec), DEVICE, INTENT(inout) :: sgsCoeffs(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev-1,1:nEl_dev)
- ! Local
-INTEGER :: iEl, i, j, k, m, ii, jj, kk
-REAL(prec) :: sgsKE, uijk, uij, ui
-#ifdef VIZ
-REAL(prec), SHARED :: KE(0:7,0:7,0:7)
-#endif
-
-iEl = blockIDx % x
-
-i = threadIdx % x-1
-j = threadIdx % y-1
-k = threadIdx % z-1
-
- ! Here, the SGS Kinetic energy is calculated using the
- ! "high wavenumber" component of the velocity field.
- ! This component is defined (here) as the dIFference
- ! between the full solution and the smoothed solution.
-
-sgsKE = 0.0_prec
-DO m = 1, 3
-  sgsKE = sgsKE + &
-    ( solution(i,j,k,m,iEl)/( solution(i,j,k,4,iEl) + static(i,j,k,4,iEl))- &
-    smoothState(i,j,k,m,iEl)/(smoothState(i,j,k,4,iEl)+static(i,j,k,4,iEl)) )**2
-ENDDO
-
-#ifdef VIZ
-KE(i,j,k) = 0.5_prec*sgsKE
-
-CALL syncthreads( )
-
- ! Smooth the subgrid scale Kinetic energy
-uijk = 0.0_prec
-DO kk = 0, polydeg_dev
-
-  uij = 0.0_prec
-  DO jj = 0, polydeg_dev
-
-    ui = 0.0_prec
-    DO ii = 0, polydeg_dev
-      ui = ui + filterMat(ii,i)*KE(ii,jj,kk)
-    ENDDO
-
-    uij = uij + filterMat(jj,j)*ui
+  IMPLICIT NONE
+  REAL(prec), DEVICE, INTENT(in)    :: solution(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+  REAL(prec), DEVICE, INTENT(in)    :: static(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+  REAL(prec), DEVICE, INTENT(inout) :: smoothState(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+  REAL(prec), DEVICE, INTENT(in)    :: filterMat(0:polydeg_dev,0:polydeg_dev)
+  REAL(prec), DEVICE, INTENT(inout) :: sgsCoeffs(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev-1,1:nEl_dev)
+   ! Local
+  INTEGER :: iEl, i, j, k, m, ii, jj, kk
+  REAL(prec) :: sgsKE, uijk, uij, ui
+  
+  iEl = blockIDx % x
+  
+  i = threadIdx % x-1
+  j = threadIdx % y-1
+  k = threadIdx % z-1
+  
+   ! Here, the SGS Kinetic energy is calculated using the
+   ! "high wavenumber" component of the velocity field.
+   ! This component is defined (here) as the dIFference
+   ! between the full solution and the smoothed solution.
+  
+  sgsKE = 0.0_prec
+  DO m = 1, 3
+    sgsKE = sgsKE + &
+      ( solution(i,j,k,m,iEl)/( solution(i,j,k,4,iEl) + static(i,j,k,4,iEl))- &
+      smoothState(i,j,k,m,iEl)/(smoothState(i,j,k,4,iEl)+static(i,j,k,4,iEl)) )**2
   ENDDO
-
-  uijk = uijk + filterMat(kk,k)*uij
-
-ENDDO
-
- ! Here, we store the smoothed SGS kinetic energy, in
- ! CASE we would like to visualize the DATA later
-smoothState(i,j,k,6,iEl) = ABS(uijk)
-#endif
-
- ! Now we calculate the viscosity and dIFfusivities (currently assumes isotropic and low mach number)
-DO m = 1, nEq_dev-1
-  !IF( m == 4 )THEN
-  !   sgsCoeffs(i,j,k,m,iEl) = 0.0_prec ! No density dIFfusion
-  !ELSE
-  ! This is the parameterization USEd in Jeremy Sauer's dissertation ... citation ?!
-  !** Note that the filtering process may not preserve positivity of the EKE.. hence
-  !   we need to take the absolute value of uijk
-  sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale_dev*sqrt( sgsKE )
-  ! ENDIF
-ENDDO
+  
+   ! Now we calculate the viscosity and dIFfusivities (currently assumes isotropic and low mach number)
+  DO m = 1, nEq_dev-1
+    sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale_dev*sqrt( sgsKE )
+  ENDDO
 
 END SUBROUTINE CalculateSGSCoefficients_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel( boundaryIDs, elementIDs, &
-  elementSides, procIDs, &
-  externalsgsCoeffs, &
-  sgsCoeffsBsols,nHat )
-IMPLICIT NONE
-INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces_dev)
-INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
-INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
-INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces_dev)
-REAL(prec), DEVICE, INTENT(out) :: externalsgsCoeffs(0:polydeg_dev,0:polydeg_dev,1:nEq_dev-1,1:nBoundaryFaces_dev)
-REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffsBsols(0:polydeg_dev,0:polydeg_dev,1:nEq_dev-1,1:6,1:nEl_dev)
-REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
- ! Local
-INTEGER    :: iEq, IFace, i, j, k
-INTEGER    :: IFace2, p2
-INTEGER    :: e1, e2, s1, s2, m
-
-IFace = blockIdx % x
-iEq   = blockIDx % y
- ! ////////////////////////////////////////////////////////////////////////// !
-i   = threadIdx % x-1
-j   = threadIdx % y-1
-
-IFace2 = boundaryIDs( IFace ) ! Obtain the process-local face id for this boundary-face id
-e1     = elementIDs(1,IFace2)
-s1     = elementSides(1,IFace2)
-e2     = elementIDs(2,IFace2)
-p2     = procIDs( IFace )
-
-IF( i <= polydeg_dev .AND. j <= polydeg_dev )THEN
-
-  IF( p2 == myRank_dev )THEN
-    externalsgsCoeffs(i,j,iEq,IFace) = sgsCoeffsBsols(i,j,iEq,s1,e1)
+ATTRIBUTES(Global) SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
+                                                                  externalsgsCoeffs, sgsCoeffsBsols, nHat, N, &
+                                                                  nBoundaryFaces, nFaces, nElements )
+  IMPLICIT NONE
+  INTEGER, DEVICE, INTENT(in)     :: N, nBoundaryFaces, nFaces, nElements
+  INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
+  INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
+  INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
+  INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
+  REAL(prec), DEVICE, INTENT(out) :: externalsgsCoeffs(0:N,0:N,1:nEq,1:nBoundaryFaces)
+  REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffsBsols(0:N,0:N,1:nEq,1:6,1:nElements)
+  REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
+   ! Local
+  INTEGER    :: iEq, iFace, i, j, k
+  INTEGER    :: iFace2, p2
+  INTEGER    :: e1, e2, s1, s2, m
+  
+  iFace = blockIdx % x
+  iEq   = blockIDx % y
+   ! ////////////////////////////////////////////////////////////////////////// !
+  i   = threadIdx % x-1
+  j   = threadIdx % y-1
+  
+  iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
+  e1     = elementIDs(1,iFace2)
+  s1     = elementSides(1,iFace2)
+  e2     = elementIDs(2,iFace2)
+  p2     = procIDs( iFace )
+  
+  IF( i <= N .AND. j <= N )THEN
+  
+    IF( p2 == myRank_dev )THEN
+      externalsgsCoeffs(i,j,iEq,iFace2) = sgsCoeffsBsols(i,j,iEq,s1,e1)
+    ENDIF
+  
   ENDIF
-
-ENDIF
 
 END SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel
 !
@@ -2824,38 +2767,38 @@ REAL(prec), DEVICE, INTENT(in)  :: stateBsols(0:polydeg_dev,0:polydeg_dev,1:nEq_
 REAL(prec), DEVICE, INTENT(in)  :: prescribedState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
 REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
  ! Local
-INTEGER    :: iEl, IFace, bFaceID, i, j, k, iEq
-INTEGER    :: IFace2, p2
+INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
+INTEGER    :: iFace2, p2
 INTEGER    :: e1, e2, s1, s2
 REAL(prec) :: norm, un, ut, us, speed
 REAL(prec) :: nx, ny, nz
 REAL(prec) :: sx, sy, sz
 REAL(prec) :: tx, ty, tz
 
-IFace = blockIdx % x
+iFace = blockIdx % x
 i     = threadIdx % x-1
 j     = threadIdx % y-1
 
-IF( IFace <= nBoundaryFaces_dev )THEN
+IF( iFace <= nBoundaryFaces_dev )THEN
 
-  IFace2 = boundaryIDs( IFace ) ! Obtain the process-local face id for this boundary-face id
-  e1     = elementIDs(1,IFace2)
-  s1     = elementSides(1,IFace2)
-  e2     = elementIDs(2,IFace2)
-  p2     = procIDs( IFace )
+  iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
+  e1     = elementIDs(1,iFace2)
+  s1     = elementSides(1,iFace2)
+  e2     = elementIDs(2,iFace2)
+  p2     = procIDs( iFace )
 
   IF( i <= polydeg_dev .AND. j <= polydeg_dev .AND. p2 == myRank_dev)THEN
 
     IF( e2 == PRESCRIBED )THEN
 
       DO iEq = 1, nEq_dev
-        externalState(i,j,iEq,IFace) = prescribedState(i,j,iEq,IFace)
+        externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)
       ENDDO
 
     ELSEIF( e2 == RADIATION )THEN
 
       DO iEq = 1, nEq_dev
-        externalState(i,j,iEq,IFace) = 0.0_prec
+        externalState(i,j,iEq,iFace) = 0.0_prec
       ENDDO
 
     ELSEIF( e2 == NO_NORMAL_FLOW )THEN
@@ -2904,12 +2847,12 @@ IF( IFace <= nBoundaryFaces_dev )THEN
         stateBsols(i,j,2,s1,e1)*ty  + &
         stateBsols(i,j,3,s1,e1)*tz
 
-      externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
-      externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
-      externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
-      externalState(i,j,4,IFace) =  stateBsols(i,j,4,s1,e1) ! rho
-      externalState(i,j,5,IFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-      externalState(i,j,6,IFace) =  stateBsols(i,j,6,s1,e1) ! P
+      externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
+      externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
+      externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
+      externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
+      externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
+      externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
 
     ELSEIF( e2 == DRAG_SLIP )THEN
 
@@ -2966,12 +2909,12 @@ IF( IFace <= nBoundaryFaces_dev )THEN
         stateBsols(i,j,3,s1,e1)*tz )*&
         (1.0_prec-Cd_dev*dScale_dev*speed)
 
-      externalState(i,j,1,IFace) = -nx*un + us*sx + ut*tx ! u
-      externalState(i,j,2,IFace) = -ny*un + us*sy + ut*ty ! v
-      externalState(i,j,3,IFace) = -nz*un + us*sz + ut*tz ! w
-      externalState(i,j,4,IFace) =  stateBsols(i,j,4,s1,e1) ! rho
-      externalState(i,j,5,IFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-      externalState(i,j,6,IFace) =  stateBsols(i,j,6,s1,e1) ! P
+      externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
+      externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
+      externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
+      externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
+      externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
+      externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
 
 
     ENDIF
@@ -3000,7 +2943,7 @@ REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:n
 REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
 REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
  ! Local
-INTEGER    :: iEl, IFace, jEq
+INTEGER    :: iEl, iFace, jEq
 INTEGER    :: i, j, k, iEq
 INTEGER    :: ii, jj, bID
 INTEGER    :: e1, s1, e2, s2
@@ -3009,18 +2952,18 @@ REAL(prec) :: jump(1:5), aS(1:5)
 REAL(prec) :: fac
 
 
-IFace = blockIdx % x
+iFace = blockIdx % x
 j     = threadIdx % y - 1
 i     = threadIdx % x -1
 
-e1 = elementIDs(1,IFace)
-s1 = elementSides(1,IFace)
-e2 = elementIDs(2,IFace)
-s2 = ABS(elementSides(2,IFace))
-bID  = ABS(boundaryIDs(IFace))
+e1 = elementIDs(1,iFace)
+s1 = elementSides(1,iFace)
+e2 = elementIDs(2,iFace)
+s2 = ABS(elementSides(2,iFace))
+bID  = ABS(boundaryIDs(iFace))
 
-ii = iMap(i,j,IFace)
-jj = jMap(i,j,IFace)
+ii = iMap(i,j,iFace)
+jj = jMap(i,j,iFace)
 
 norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
   nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
@@ -3130,7 +3073,7 @@ REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:n
 REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
 REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
  ! Local
-INTEGER    :: iEl, IFace, jEq
+INTEGER    :: iEl, iFace, jEq
 INTEGER    :: i, j, k, iEq
 INTEGER    :: ii, jj, bID
 INTEGER    :: e1, s1, e2, s2
@@ -3139,18 +3082,18 @@ REAL(prec) :: jump(1:5), aS(1:5)
 REAL(prec) :: fac
 
 
-IFace = blockIdx % x
+iFace = blockIdx % x
 j     = threadIdx % y - 1
 i     = threadIdx % x -1
 
-e1 = elementIDs(1,IFace)
-s1 = elementSides(1,IFace)
-e2 = elementIDs(2,IFace)
-s2 = ABS(elementSides(2,IFace))
-bID  = ABS(boundaryIDs(IFace))
+e1 = elementIDs(1,iFace)
+s1 = elementSides(1,iFace)
+e2 = elementIDs(2,iFace)
+s2 = ABS(elementSides(2,iFace))
+bID  = ABS(boundaryIDs(iFace))
 
-ii = iMap(i,j,IFace)
-jj = jMap(i,j,IFace)
+ii = iMap(i,j,iFace)
+jj = jMap(i,j,iFace)
 
 norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
   nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
@@ -3415,26 +3358,26 @@ REAL(prec), DEVICE, INTENT(in)  :: stressBsols(0:polydeg_dev,0:polydeg_dev,1:15,
 REAL(prec), DEVICE, INTENT(in)  :: prescribedStress(0:polydeg_dev,0:polydeg_dev,1:15,1:nBoundaryFaces_dev)
 REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
  ! Local
-INTEGER    :: iEq, IFace, i, j, k
-INTEGER    :: IFace2, p2
+INTEGER    :: iEq, iFace, i, j, k
+INTEGER    :: iFace2, p2
 INTEGER    :: e1, e2, s1, s2, m
 
-IFace = blockIdx % x
+iFace = blockIdx % x
 iEq   = blockIDx % y
  ! ////////////////////////////////////////////////////////////////////////// !
 i   = threadIdx % x-1
 j   = threadIdx % y-1
 
-IFace2 = boundaryIDs( IFace ) ! Obtain the process-local face id for this boundary-face id
-e1     = elementIDs(1,IFace2)
-s1     = elementSides(1,IFace2)
-e2     = elementIDs(2,IFace2)
-p2     = procIDs( IFace )
+iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
+e1     = elementIDs(1,iFace2)
+s1     = elementSides(1,iFace2)
+e2     = elementIDs(2,iFace2)
+p2     = procIDs( iFace )
 
 IF( i <= polydeg_dev .AND. j <= polydeg_dev )THEN
 
   IF( p2 == myRank_dev )THEN
-    externalStress(i,j,iEq,IFace) = -stressBsols(i,j,iEq,s1,e1)
+    externalStress(i,j,iEq,iFace) = -stressBsols(i,j,iEq,s1,e1)
   ENDIF
 
 ENDIF
@@ -3460,26 +3403,26 @@ REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,
 REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:polydeg_dev,0:polydeg_dev,1:15,1:nBoundaryFaces_dev)
 REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
  ! Local
-INTEGER    :: iEl, IFace
+INTEGER    :: iEl, iFace
 INTEGER    :: i, j, iEq
 INTEGER    :: ii, jj, bID
 INTEGER    :: e1, s1, e2, s2
 INTEGER    :: m, jEq
 REAL(prec) :: norm, rhoOut, rhoIn
 
-IFace = blockIdx % x
+iFace = blockIdx % x
 iEq   = blockIdx % y
 j     = threadIdx % y-1
 i     = threadIdx % x-1
 
-e1 = elementIDs(1,IFace)
-s1 = elementSides(1,IFace)
-e2 = elementIDs(2,IFace)
-s2 = ABS(elementSides(2,IFace))
-bID  = ABS(boundaryIDs(IFace))
+e1 = elementIDs(1,iFace)
+s1 = elementSides(1,iFace)
+e2 = elementIDs(2,iFace)
+s2 = ABS(elementSides(2,iFace))
+bID  = ABS(boundaryIDs(iFace))
 
-ii = iMap(i,j,IFace)
-jj = jMap(i,j,IFace)
+ii = iMap(i,j,iFace)
+jj = jMap(i,j,iFace)
 
 norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
 
@@ -3538,26 +3481,26 @@ REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,
 REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:polydeg_dev,0:polydeg_dev,1:15,1:nBoundaryFaces_dev)
 REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
  ! Local
-INTEGER    :: iEl, IFace
+INTEGER    :: iEl, iFace
 INTEGER    :: i, j, iEq
 INTEGER    :: ii, jj, bID
 INTEGER    :: e1, s1, e2, s2
 INTEGER    :: m, jEq
 REAL(prec) :: norm, rhoOut, rhoIn
 
-IFace = blockIdx % x
+iFace = blockIdx % x
 iEq   = blockIdx % y
 j     = threadIdx % y-1
 i     = threadIdx % x-1
 
-e1 = elementIDs(1,IFace)
-s1 = elementSides(1,IFace)
-e2 = elementIDs(2,IFace)
-s2 = ABS(elementSides(2,IFace))
-bID  = boundaryIDs(IFace)
+e1 = elementIDs(1,iFace)
+s1 = elementSides(1,iFace)
+e2 = elementIDs(2,iFace)
+s2 = ABS(elementSides(2,iFace))
+bID  = boundaryIDs(iFace)
 
-ii = iMap(i,j,IFace)
-jj = jMap(i,j,IFace)
+ii = iMap(i,j,iFace)
+jj = jMap(i,j,iFace)
 
 norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
 IF( e2 < 0 )THEN !Physical boundary
@@ -3746,7 +3689,7 @@ REAL(prec), DEVICE, INTENT(inout) :: sendBuffer(0:N,0:N,1:numEq,1:bufferSize,1:n
 REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:numEq,1:6,1:nElements)
  ! Local
 INTEGER :: bID, i, j, iEq
-INTEGER :: IFace, p2, neighborID, bufferID, elementID, sideID
+INTEGER :: iFace, p2, neighborID, bufferID, elementID, sideID
 
 bID = blockIdx % x
 i   = threadIdx % x - 1
@@ -3759,11 +3702,10 @@ IF( p2 /= myRank )THEN
 
   neighborID = rankToNeighbor(p2)
   bufferID   = boundaryToBuffer(bID)
-  IFace      = boundaryToFaceID(bID)
-  elementID  = faceToElement(1,IFace)
-  sideID     = faceToSide(1,IFace)
+  iFace      = boundaryToFaceID(bID)
+  elementID  = faceToElement(1,iFace)
+  sideID     = faceToSide(1,iFace)
 
-  !PRINT*, "ACCESS", i, j, iEq, bufferID, neighborID
   sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID)
 ENDIF
 

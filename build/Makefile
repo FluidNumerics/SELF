@@ -235,115 +235,10 @@ MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o Bou
                    ${SRCDIR}fluid/MPILayer_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
-ifeq (${CUDA},yes)
-
-CNOBJ = ModelPrecision.o \
-        ConstantsDictionary.o \
-        CommonRoutines.o
-
-ifeq (${TESTING},yes)
-CNOBJ += ModelDataInstances_Class.o
-endif
-
-CNOBJ += Timing.o \
-         LinkedList_Class.o \
-         HashTable_Class.o \
-         KeyRing_Class.o \
-         Quadrature.o \
-         Lagrange_Class.o \
-         Lagrange_Cuda_Class.o \
-         NodalStorage_Class.o \
-         NodalStorage_Cuda_Class.o \
-         RollOffFilter_Class.o \
-         RollOffFilter_Cuda_Class.o \
-         DGSEMSolutionStorage_3D_Class.o \
-         DGSEMSolutionStorage_3D_Cuda_Class.o \
-         Node_Class.o \
-         Node_Cuda_Class.o \
-         Face_Class.o \
-         Face_Cuda_Class.o \
-         Curve_Class.o \
-         Surface_Class.o \
-         MappedGeometry_3D_Class.o \
-         MappedGeometry_3D_Cuda_Class.o \
-         HexElement_Class.o \
-         Element_Cuda_Class.o \
-         HexMesh_Class.o \
-         HexMesh_Cuda_Class.o \
-         ModelParameters_Class.o \
-         BoundaryCommunicator_Class.o \
-         BoundaryCommunicator_Cuda_Class.o \
-         Fluid_Class.o
- 
-EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
-                Lagrange_Class.o Lagrange_Cuda_Class.o NodalStorage_Class.o NodalStorage_Cuda_Class.o\
-                RollOffFilter_Cuda_Class.o DGSEMSolutionStorage_3D_Cuda_Class.o \
-                HexMesh_Class.o BoundaryCommunicator_Class.o \
-                Face_Cuda_Class.o Element_Cuda_Class.o HexMesh_Cuda_Class.o BoundaryCommunicator_Cuda_Class.o \
-                ModelParameters_Class.o
-                
-else
-
-ifeq ($(TESTING),yes)
-CNOBJ = ModelPrecision.o \
-        ConstantsDictionary.o \
-        CommonRoutines.o \
-        Timing.o \
-        LinkedList_Class.o \
-        HashTable_Class.o \
-         KeyRing_Class.o \
-         ModelDataInstances_Class.o \
-         Quadrature.o \
-         Lagrange_Class.o \
-         NodalStorage_Class.o \
-         RollOffFilter_Class.o \
-         DGSEMSolutionStorage_3D_Class.o \
-         Node_Class.o \
-         Face_Class.o \
-         Curve_Class.o \
-         Surface_Class.o \
-         MappedGeometry_3D_Class.o \
-         HexElement_Class.o \
-         HexMesh_Class.o \
-         ModelParameters_Class.o \
-         BoundaryCommunicator_Class.o \
-         Fluid_Class.o
-else
-CNOBJ = ModelPrecision.o \
-        ConstantsDictionary.o \
-        CommonRoutines.o \
-        Timing.o \
-        LinkedList_Class.o \
-        HashTable_Class.o \
-         KeyRing_Class.o \
-         Quadrature.o \
-         Lagrange_Class.o \
-         NodalStorage_Class.o \
-         RollOffFilter_Class.o \
-         DGSEMSolutionStorage_3D_Class.o \
-         Node_Class.o \
-         Face_Class.o \
-         Curve_Class.o \
-         Surface_Class.o \
-         MappedGeometry_3D_Class.o \
-         HexElement_Class.o \
-         HexMesh_Class.o \
-         ModelParameters_Class.o \
-         BoundaryCommunicator_Class.o \
-         Fluid_Class.o
-
-endif
-         
-EUDEP = ModelPrecision.o ConstantsDictionary.o CommonRoutines.o \
-                Lagrange_Class.o NodalStorage_Class.o \
-                RollOffFilter_Class.o DGSEMSolutionStorage_3D_Class.o \
-                HexMesh_Class.o BoundaryCommunicator_Class.o \
-                Face_Class.o HexElement_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
-                ModelParameters_Class.o
-                
-endif
 	
-Fluid_Class.o : ${EUDEP} ${SRCDIR}fluid/Fluid_Class.f90 ModelDataInstances_Class.o
+Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
+                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o BoundaryConditions_Class.o \
+                BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 ifdef MODDIR
@@ -357,52 +252,12 @@ endif
 Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
 
-TestMPIStateExchange_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}Fluid/TestMPIStateExchange_Driver.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/TestMPIStateExchange_Driver.f90 ${LIB} ${INC} -o $@
-	
-Fluid_PickupToTecplot.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}Fluid/Fluid_PickupToTecplot.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_PickupToTecplot.f90 ${LIB} ${INC} -o $@
-	
-SampleAlongRays.o : ModelPrecision.o Fluid_Class.o Ray_Class.o ${SRCDIR}fluid/SampleAlongRays.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SampleAlongRays.f90 -o $@ 	
-
 initialize: ${CNOBJ} Fluid_InitialConditions.o
 	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
 
 integrate: ${CNOBJ} Fluid_Driver.o
 	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
 	
-pickuptoptecplot : ${CNOBJ} Fluid_PickupToTecplot.o
-	${FC} ${OPT} ${CNOBJ} Fluid_PickupToTecplot.o ${LIB} ${INC} -o $@
-	
-test_stateExchange: ${CNOBJ} TestMPIStateExchange_Driver.o
-	${FC} ${OPT} ${CNOBJ} TestMPIStateExchange_Driver.o ${LIB} ${INC} -o $@
-	
-	
-SOBJ = ModelPrecision.o \
-       ConstantsDictionary.o \
-       CommonRoutines.o \
-       Lagrange_Class.o \
-       Quadrature.o \
-       NodalStorage_Class.o \
-       RollOffFilter_Class.o \
-       DGSEMSolutionStorage_3D_Class.o \
-       LinkedList_Class.o \
-       KeyRing_Class.o \
-       Surface_Class.o \
-       MappedGeometry_3D_Class.o \
-       HexElement_Class.o \
-       Face_Class.o \
-       Node_Class.o \
-       HexMesh_Class.o \
-       BoundaryCommunicator_Class.o \
-       ModelParameters_Class.o \
-       Fluid_Class.o \
-       Ray_Class.o \
-       SampleAlongRays.o
-
-sars: ${SOBJ}
-	${FC} ${OPT} ${CPPFLAGS} ${SOBJ} -o $@ 	
 
 .PHONY : clean
 

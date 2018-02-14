@@ -388,8 +388,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     INTEGER       :: nBe
 
 
-    !PRINT *, 'S/R ReadPickup : Reading "'//TRIM(filename)//'.bcm"'
-
     OPEN( UNIT   = NEWUNIT(fUnit), &
       FILE   = TRIM(filename)//'.bcm', &
       FORM   ='FORMATTED',&
