@@ -9,11 +9,11 @@ PROGRAM MeshGenerator_3D
   USE ConstantsDictionary
   USE CommonRoutines
   USE Timing
-  USE NodalDG_CLASS
-  USE HexMesh_CLASS
+  USE NodalDG_Class
+  USE HexMesh_Class
   USE TopographicShapes
-  USE FluidParams_CLASS
-  USE BoundaryCommunicator_CLASS
+  USE ModelParameters_Class
+  USE BoundaryCommunicator_Class
 
 
   IMPLICIT NONE
@@ -21,7 +21,7 @@ PROGRAM MeshGenerator_3D
   TYPE( NodalDG )                           :: nodal
   TYPE( HexMesh )                           :: mesh
   TYPE( HexMesh ), ALLOCATABLE              :: procMesh(:)
-  TYPE( FluidParams )                       :: params
+  TYPE( ModelParameters )                   :: params
   TYPE( MultiTimers )                       :: timers
   TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
   INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
@@ -181,7 +181,7 @@ CONTAINS
     ! Now we need to write a peace-mesh file and and communicator file
     WRITE( pIDChar, '(I4.4)' ) procID
     CALL procmesh(procID) % WriteTecplot( 'mesh.'//pIDChar )
-    CALL procmesh(procID) % WriteSELFMeshFile( TRIM(params % PeaceMeshFile)//'.'//pIDChar )
+    CALL procmesh(procID) % WriteSELFMeshFile( TRIM(params % SELFMeshFile)//'.'//pIDChar )
 
 
   END SUBROUTINE FileIO
@@ -370,7 +370,7 @@ CONTAINS
 
     CALL procMesh(procID) % faces % Trash( )
     CALL procMesh(procID) % faces % Build( nLocalFaces, mesh % elements % N )
-    CALL bCom(procID) % Initialize( nBe )
+    CALL bCom(procID) % Build( nBe )
 
     IFaceLocal = 0
     nBe        = 0

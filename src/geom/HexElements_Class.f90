@@ -488,7 +488,7 @@ CONTAINS
 
     IMPLICIT NONE
     CLASS( HexElements ), INTENT(inout) :: myElements
-    TYPE( Lagrange ), INTENT(in)              :: interp
+    TYPE( Lagrange ), INTENT(in)        :: interp
     ! Local
     INTEGER    :: i, j, k, iEl, N
     REAL(prec) :: cv(1:3,1:3)
@@ -501,10 +501,9 @@ CONTAINS
 
     N = interp % N
 
-
-    xGradient(1:3,0:N,0:N,0:N,1:3,1:myElements % nElements) = CalculateGradient_3D_Lagrange( interp, &
-      myElements % x,&
-      3, myElements % nElements )
+    xGradient = CalculateGradient_3D_Lagrange( interp, &
+                                               myElements % x,&
+                                               3, myElements % nElements )
 
     DO iEl = 1, myElements % nElements
 

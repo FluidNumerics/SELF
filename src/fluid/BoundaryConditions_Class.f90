@@ -64,11 +64,11 @@ CONTAINS
   SUBROUTINE Trash_BoundaryConditions( myBCs )
 
     IMPLICIT NONE
-    CLASS( BoundaryConditions ), INTENT(out) :: myBCs
+    CLASS( BoundaryConditions ), INTENT(inout) :: myBCs
 
 
     DEALLOCATE( myBCS % prescribedState, &
-      myBCS % externalState )
+                myBCS % externalState )
 
 #ifdef HAVE_CUDA
 

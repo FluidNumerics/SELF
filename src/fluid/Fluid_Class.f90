@@ -158,7 +158,7 @@ CONTAINS
 
     ! Construct the DATA structure that holds the derivative and interpolation matrices
     ! and the quadrature weights. This call will also perform the device copies.
-    CALL myDGSEM % dGStorage % Build( UnIFormPoints(-1.0_prec,1.0_prec,myDGSEM % params % nPlot), &
+    CALL myDGSEM % dGStorage % Build( UniformPoints(-1.0_prec,1.0_prec,myDGSEM % params % nPlot), &
       myDGSEM % params % polyDeg, myDGSEM % params % nPlot, GAUSS )
 
     CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
@@ -2597,20 +2597,6 @@ CONTAINS
     myDGSEM % state % solution_dev   = myDGSEM % state % solution
     myDGSEM % static % solution_dev  = myDGSEM % static % solution
 #endif
-
-    CALL myDGSEM % extComm % ReadPickup( 'ExtComm.'//rankChar )
-
-    CALL myDGSEM % stateBCs % Build( myDGSEM % params % polyDeg, &
-                                     myDGSEM % state % nEquations, &
-                                     myDGSEM % extComm % nBoundaries )
-
-    CALL myDGSEM % stressBCs % Build( myDGSEM % params % polyDeg, &
-                                      myDGSEM % state % nEquations, &
-                                      myDGSEM % extComm % nBoundaries )
-
-    CALL myDGSEM % sgsBCs % Build( myDGSEM % params % polyDeg, &
-                                   myDGSEM % state % nEquations, &
-                                   myDGSEM % extComm % nBoundaries )
 
 
     INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
