@@ -68,28 +68,22 @@ MODULE Fluid_Class
 
     ! Time integrators
     PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
-    PROCEDURE :: CrankNicholsonRHS     => CrankNicholsonRHS_Fluid
+!    PROCEDURE :: CrankNicholsonRHS     => CrankNicholsonRHS_Fluid
 
     PROCEDURE :: GlobalTimeDerivative            => GlobalTimeDerivative_Fluid
     PROCEDURE :: EquationOfState                 => EquationOfState_Fluid
-    PROCEDURE :: CalculateStaticBoundarySolution => CalculateStaticBoundarySolution_Fluid
-    PROCEDURE :: CalculateBoundarySolution       => CalculateBoundarySolution_Fluid
     PROCEDURE :: UpdateExternalState             => UpdateExternalState_Fluid
     PROCEDURE :: InternalFaceFlux                => InternalFaceFlux_Fluid
     PROCEDURE :: BoundaryFaceFlux                => BoundaryFaceFlux_Fluid
     PROCEDURE :: MappedTimeDerivative            => MappedTimeDerivative_Fluid
 
-    PROCEDURE :: CalculateSmoothedState   => CalculateSmoothedState_Fluid
     PROCEDURE :: CalculateSGSCoefficients => CalculateSGSCoefficients_Fluid
-    PROCEDURE :: CalculateBoundarySGS     => CalculateBoundarySGS_Fluid
     PROCEDURE :: UpdateExternalSGS        => UpdateExternalSGS_Fluid
 
     PROCEDURE :: CalculateStressTensor   => CalculateStressTensor_Fluid
-    PROCEDURE :: CalculateBoundaryStress => CalculateBoundaryStress_Fluid
     PROCEDURE :: UpdateExternalStress    => UpdateExternalStress_Fluid
     PROCEDURE :: InternalStressFlux      => InternalStressFlux_Fluid
     PROCEDURE :: BoundaryStressFlux      => BoundaryStressFlux_Fluid
-    PROCEDURE :: StressDivergence        => StressDivergence_Fluid
 
     PROCEDURE :: Diagnostics           => Diagnostics_Fluid
     PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
@@ -2645,7 +2639,7 @@ CONTAINS
     PRINT*, 'S/R ReadPickup : DOne.'
 
     ! Interpolate the static state to the element boundaries
-    CALL myDGSEM % CalculateStaticBoundarySolution( )
+    CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
 
   END SUBROUTINE ReadPickup_Fluid
 !
