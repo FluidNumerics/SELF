@@ -1137,6 +1137,7 @@ CONTAINS
           nodes(8) = iX + (iY)*(nXElem+1) + (iZ)*(nXElem+1)*(nYElem+1)        ! NorthWest
 
           myHexMesh % elements % nodeIDs(1:8,iEl) = nodes
+          myHexMesh % elements % elementID(iEl) = iEl
 
           IF( iZ == 1 )THEN
             DO iSide = 1, 6 ! Loop over the sides of the quads
@@ -1186,7 +1187,6 @@ CONTAINS
                   ENDDO
                 ENDDO
               ENDIF
-              !PRINT*,'iSurf', iSurf
 
             ENDDO
 
@@ -1227,7 +1227,6 @@ CONTAINS
                   xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
                 ENDDO
               ENDDO
-              !PRINT*,'iSurf', iSurf
 
             ENDDO
 

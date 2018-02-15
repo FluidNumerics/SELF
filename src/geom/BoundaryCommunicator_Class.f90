@@ -128,7 +128,7 @@ CONTAINS
     ALLOCATE( myComm % unPackMap(1:nBe) )
 
     myComm % extProcIDs  = 0
-    myComm % boundaryIDs = 0
+    myComm % boundaryIDs = -1
     myComm % unPackMap   = 0
 
 #ifdef HAVE_CUDA
