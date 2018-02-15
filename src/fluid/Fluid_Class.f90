@@ -97,7 +97,9 @@ MODULE Fluid_Class
   END TYPE Fluid
 
 
+
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
+  INTEGER, PRIVATE            :: diagUnits(1:5)
   INTEGER, PARAMETER, PRIVATE :: nEquations   = 6
 
 CONTAINS
@@ -2312,10 +2314,9 @@ CONTAINS
 
   END SUBROUTINE WriteTecplot_Fluid
 !
-  SUBROUTINE OpenDiagnosticsFiles_Fluid( myDGSEM, fileUnits )
+  SUBROUTINE OpenDiagnosticsFiles_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid  ), INTENT(inout) :: myDGSEM
-    INTEGER, INTENT(out)           :: fileUnits(1:nDiagnostics)
     ! Local
     CHARACTER(13) :: timeStampString
 
@@ -2330,66 +2331,64 @@ CONTAINS
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
 
-      OPEN( UNIT=NewUnit(fileUnits(1)), &
+      OPEN( UNIT=NewUnit(diagUnits(1)), &
         FILE='Mass.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
         STATUS='REPLACE' )
-      WRITE(fileUnits(1),*) '#TotalMass'
+      WRITE(diagUnits(1),*) '#TotalMass'
 
-      OPEN( UNIT=NewUnit(fileUnits(2)), &
+      OPEN( UNIT=NewUnit(diagUnits(2)), &
         FILE='KineticEnergy.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
         STATUS='REPLACE' )
-      WRITE(fileUnits(2),*) '#TotalKineticEnergy'
+      WRITE(diagUnits(2),*) '#TotalKineticEnergy'
 
-      OPEN( UNIT=NewUnit(fileUnits(3)), &
+      OPEN( UNIT=NewUnit(diagUnits(3)), &
         FILE='PotentialEnergy.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
         STATUS='REPLACE' )
-      WRITE(fileUnits(3),*) '#TotalPotentialEnergy'
+      WRITE(diagUnits(3),*) '#TotalPotentialEnergy'
 
-      OPEN( UNIT=NewUnit(fileUnits(4)), &
+      OPEN( UNIT=NewUnit(diagUnits(4)), &
         FILE='Heat.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
         STATUS='REPLACE' )
-      WRITE(fileUnits(4),*) '#TotalHeat'
+      WRITE(diagUnits(4),*) '#TotalHeat'
 
-      OPEN( UNIT=NewUnit(fileUnits(5)), &
+      OPEN( UNIT=NewUnit(diagUnits(5)), &
         FILE='Volume.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
         STATUS='REPLACE' )
-      WRITE(fileUnits(5),*) '#TotalVolume'
+      WRITE(diagUnits(5),*) '#TotalVolume'
     ENDIF
 
   END SUBROUTINE OpenDiagnosticsFiles_Fluid
 !
-  SUBROUTINE WriteDiagnostics_Fluid( myDGSEM, fileUnits )
+  SUBROUTINE WriteDiagnostics_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(in) :: myDGSEM
-    INTEGER, INTENT(in)        :: fileUnits(1:nDiagnostics)
 
     IF( myDGSEM % extComm % myRank == 0 )THEN
-      WRITE(fileUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
-      WRITE(fileUnits(2),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % KE
-      WRITE(fileUnits(3),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % PE
-      WRITE(fileUnits(4),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % heat
-      WRITE(fileUnits(5),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % volume
+      WRITE(diagUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
+      WRITE(diagUnits(2),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % KE
+      WRITE(diagUnits(3),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % PE
+      WRITE(diagUnits(4),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % heat
+      WRITE(diagUnits(5),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % volume
     ENDIF
 
   END SUBROUTINE WriteDiagnostics_Fluid
 !
-  SUBROUTINE CloseDiagnosticsFiles_Fluid( myDGSEM, fileUnits )
+  SUBROUTINE CloseDiagnosticsFiles_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid  ), INTENT(inout) :: myDGSEM
-    INTEGER, INTENT(in)            :: fileUnits(1:nDiagnostics)
 
 
     IF( myDGSEM % extComm % myRank == 0 ) THEN
-      CLOSE( UNIT=fileUnits(1) )
-      CLOSE( UNIT=fileUnits(2) )
-      CLOSE( UNIT=fileUnits(3) )
-      CLOSE( UNIT=fileUnits(4) )
-      CLOSE( UNIT=fileUnits(5) )
+      CLOSE( UNIT=diagUnits(1) )
+      CLOSE( UNIT=diagUnits(2) )
+      CLOSE( UNIT=diagUnits(3) )
+      CLOSE( UNIT=diagUnits(4) )
+      CLOSE( UNIT=diagUnits(5) )
     ENDIF
 
   END SUBROUTINE CloseDiagnosticsFiles_Fluid

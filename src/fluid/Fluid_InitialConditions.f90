@@ -8,33 +8,16 @@
 
 PROGRAM Fluid_InitialConditions
 
-! src/COMMON/
   USE ModelPrecision
-! src/geom/
-!USE HexMesh_CLASS
-! src/highend/euler/
-  USE FluidParams_CLASS
-! src/highend/euler/mpi-cuda
-  USE Fluid_CLASS
+  USE ModelParameters_Class
+  USE Fluid_Class
 
   IMPLICIT NONE
 
   TYPE( Fluid ) :: myeu
-  INTEGER       :: mpiErr
-  CHARACTER(4)  :: rankChar
   LOGICAL       :: setupSuccess
+  CHARACTER(4)  :: rankChar
 
-#ifdef HAVE_MPI
-  ! MPI Initialization
-  CALL MPI_INIT( mpiErr )
-  CALL MPI_COMM_RANK( MPI_COMM_WORLD, myeu % myRank, mpiErr )
-  CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myeu % nProc, mpiErr )
-  ! Sanity check
-  PRINT*, 'Fluid_InitialConditions_MPI : Greetings from Process ', myeu % myRank, ' of ', myeu % nProc
-#else
-  myeu % myRank = 0
-  myeu % nProc  = 1
-#endif
   CALL myeu % Build( setupSuccess )
 
   IF( SetupSuccess )THEN
@@ -51,23 +34,16 @@ PROGRAM Fluid_InitialConditions
     ! Before we write the mesh to file again, we need to "unscale" the mesh so that, upon running the
     ! integrator, the mesh scaling is not applied a second time
     CALL myeu % mesh % ScaleTheMesh( myeu % dgStorage % interp, &
-      1.0_prec/myeu % params % xScale, &
-      1.0_prec/myeu % params % yScale, &
-      1.0_prec/myeu % params % zScale )
-    WRITE( rankChar, '(I4.4)' ) myeu % myRank
-    CALL myeu % mesh % WritePeaceMeshFile( TRIM(myeu % params % PeaceMeshFile)//'.'//rankChar )
-
-#ifdef HAVE_MPI
-    CALL MPI_BARRIER( )
-#endif
+                                     1.0_prec/myeu % params % xScale, &
+                                     1.0_prec/myeu % params % yScale, &
+                                     1.0_prec/myeu % params % zScale )
+    WRITE( rankChar, '(I4.4)' ) myeu % extComm % myRank
+    CALL myeu % mesh % WriteSELFMeshFile( TRIM(myeu % params % SELFMeshFile)//'.'//rankChar )
 
     CALL myeu % Trash( )
 
   ENDIF
 
-#ifdef HAVE_MPI
-  CALL MPI_FINALIZE( mpiErr )
-#endif
 
 CONTAINS
   SUBROUTINE ResetBoundaryConditions( myDGSEM )
@@ -77,17 +53,17 @@ CONTAINS
     INTEGER :: IFace, IFace2, e1, e2, s1, p2
 
 
-    DO IFace = 1, myDGSEM % nBoundaryFaces
+    DO IFace = 1, myDGSEM % extComm % nBoundaries
 
       IFace2 = myDGSEM % extComm % boundaryIDs( IFace )
-      e1    = myDGSEM % mesh % Faces(IFace2) % elementIDs(1)
-      s1    = myDGSEM % mesh % Faces(IFace2) % elementSides(1)
-      e2    = myDGSEM % mesh % Faces(IFace2) % elementIDs(2)
-      p2    = myDGSEM % extComm % extProcIDs( IFace )
+      e1    = myDGSEM % mesh % Faces % elementIDs(1,iFace2)
+      s1    = myDGSEM % mesh % Faces % elementSides(1,iFace2)
+      e2    = myDGSEM % mesh % Faces % elementIDs(2,iFace2)
+      p2    = myDGSEM % extComm % extProcIDs( iFace )
 
-      IF( e2 < 0 .AND. p2 == myeu % myRank )THEN
+      IF( e2 < 0 .AND. p2 == myeu % extComm % myRank )THEN
 
-        myDGSEM % mesh % faces(IFace2) % elementIDs(2) = NO_NORMAL_FLOW
+        myDGSEM % mesh % faces % elementIDs(2,iFace2) = NO_NORMAL_FLOW
 
       ENDIF
 
@@ -115,14 +91,14 @@ CONTAINS
     !$OMP END PARALLEL
 
     ! ////////////////////////////////////////////////////////////////////////////////// !
-    DO iEl = 1, myDGSEM % mesh % nElems
-      DO k = 0, myDGSEM % N
-        DO j = 0, myDGSEM % N
-          DO i = 0, myDGSEM % N
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      DO k = 0, myDGSEM % params % polyDeg
+        DO j = 0, myDGSEM % params % polyDeg
+          DO i = 0, myDGSEM % params % polyDeg
 
-            x = myDGSEM % mesh % geom(iEl) % x(i,j,k)
-            y = myDGSEM % mesh % geom(iEl) % y(i,j,k)
-            z = myDGSEM % mesh % geom(iEl) % z(i,j,k)
+            x = myDGSEM % mesh % elements % x(i,j,k,1,iEl)
+            y = myDGSEM % mesh % elements % x(i,j,k,2,iEl)
+            z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
             r = sqrt( ( x-0.5_prec*Lx )**2 + ( y-0.5_prec*Ly )**2 + ( z-0.25_prec*H )**2 )
 
@@ -132,8 +108,6 @@ CONTAINS
               myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
             ENDIF
 
-            ! Drag profile
-            !myDGSEM % dragProfile(i,j,k,iEl) = myDGSEM % params % Cd*exp( -z/myDGSEM % params % dragScale )
 
           ENDDO
         ENDDO
@@ -143,6 +117,7 @@ CONTAINS
 #ifdef HAVE_CUDA
     myDGSEM % state % solution_dev = myDGSEM % state % solution
 #endif
+
     !$OMP PARALLEL
     CALL myDGSEM % EquationOfState( )
     !$OMP END PARALLEL

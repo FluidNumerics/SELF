@@ -235,22 +235,30 @@ MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o Bou
                    ${SRCDIR}fluid/MPILayer_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
-	
 Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
                 SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o BoundaryConditions_Class.o \
                 BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 ifdef MODDIR
-Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o TopographicShapes.o ${MODDIR}/Fluid_InitialConditions.f90
+Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${MODDIR}/Fluid_InitialConditions.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 else
-Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o TopographicShapes.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
+Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 endif
 
+ifeq (${TIMING},yes)
+
+Fluid_Driver.o : ModelPrecision.o Timing.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
+
+else
+
 Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
+
+endif
 
 initialize: ${CNOBJ} Fluid_InitialConditions.o
 	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@

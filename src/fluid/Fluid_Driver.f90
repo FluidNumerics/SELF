@@ -12,7 +12,7 @@ PROGRAM Fluid_Driver
 #ifdef TIMING
   USE Timing
 #endif
-  USE FluidParams_Class
+  USE ModelParameters_Class
   USE Fluid_Class
 
   IMPLICIT NONE
@@ -20,14 +20,10 @@ PROGRAM Fluid_Driver
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 
   TYPE( Fluid )       :: myeu
-  INTEGER             :: mpiErr
   LOGICAL             :: setupSuccess
-
 #ifdef TIMING
   TYPE( MultiTimers ) :: timers
 #endif
-
-  INTEGER             :: diagUnits(1:nDiagnostics)
 
 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
@@ -58,13 +54,13 @@ CONTAINS
       RETURN
     ENDIF
 
-    CALL myeu % OpenDiagnosticsFiles( diagUnits )
+    CALL myeu % OpenDiagnosticsFiles( )
     CALL myeu % Diagnostics( )
-    CALL myeu % WriteDiagnostics( diagUnits )
+    CALL myeu % WriteDiagnostics( )
 
 
 #ifdef TIMING
-    IF( myeu % myRank == 0 )THEN
+    IF( myeu % extComm % myRank == 0 )THEN
       CALL timers % Build( )
       CALL timers % AddTimer( 'ForwardStepRK3', 1 )
     ENDIF
@@ -84,10 +80,10 @@ CONTAINS
     CALL myeu % Trash( )
 
 
-    CALL myeu % CloseDiagnosticsFiles( diagUnits )
+    CALL myeu % CloseDiagnosticsFiles( )
 
 #ifdef TIMING
-    IF( myeu % myRank == 0 )THEN
+    IF( myeu % extComm % myRank == 0 )THEN
       CALL timers % Write_MultiTimers( )
       CALL timers % Trash( )
     ENDIF
@@ -111,7 +107,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      IF( myeu % myRank == 0 )THEN
+      IF( myeu % extComm % myRank == 0 )THEN
         CALL timers % StartTimer( 1 )
       ENDIF
       !$OMP END MASTER
@@ -122,7 +118,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      IF( myeu % myRank == 0 )THEN
+      IF( myeu % extComm % myRank == 0 )THEN
         CALL timers % STOPTimer( 1 )
       ENDIF
       !$OMP END MASTER
@@ -139,7 +135,7 @@ CONTAINS
       !$OMP END MASTER
 
       CALL myeu % Diagnostics( )
-      CALL myeu % WriteDiagnostics( diagUnits )
+      CALL myeu % WriteDiagnostics( )
 
     ENDDO
     !$OMP END PARALLEL
