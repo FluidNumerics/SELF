@@ -47,6 +47,13 @@ MODULE MPILayer_CLASS
     REAL(prec), ALLOCATABLE :: recvBuffer(:,:,:,:,:)
 #endif
 
+    CONTAINS
+
+      PROCEDURE :: Build => Build_MPILayer
+      PROCEDURE :: Trash => Trash_MPILayer
+      PROCEDURE :: MPI_Exchange
+      PROCEDURE :: Finalize_MPI_Exchange
+
   END TYPE MPILayer
 
 CONTAINS
@@ -259,7 +266,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-#IFndef CUDA_DIRECT
+#ifndef CUDA_DIRECT
     myMPI % recvBuffer_dev = myMPI % recvBuffer
 #endif
     tBlock = dim3(4*(ceiling( REAL(myMPI % N+1)/4 ) ), &

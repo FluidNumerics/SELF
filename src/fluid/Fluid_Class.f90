@@ -19,6 +19,9 @@ MODULE Fluid_Class
   USE BoundaryCommunicator_Class
   USE BoundaryConditions_Class
   USE BodyForces_Class
+#ifdef HAVE_MPI
+  USE MPILayer_Class
+#endif
 
 #ifdef HAVE_CUDA
   USE cudafor
@@ -26,10 +29,6 @@ MODULE Fluid_Class
 
 
   IMPLICIT NONE
-
-#ifdef HAVE_MPI
-  INCLUDE 'mpif.h'
-#endif
 
 
   TYPE Fluid
@@ -581,7 +580,9 @@ CONTAINS
 ! communication costs.
 
 #ifdef HAVE_MPI
-    CALL myDGSEM % stateHandler MPI_Exchange( )
+    CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % state, &
+                                                   myDGSEM % mesh % faces, &
+                                                   myDGSEM % extComm )
 #endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -605,7 +606,9 @@ CONTAINS
     CALL myDGSEM % InternalFaceFlux( )
 
 #ifdef HAVE_MPI
-    CALL myDGSEM % stateHandler % FinalizeMPI_Exchange( )
+    CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % stateBCs, &
+                                                            myDGSEM % mesh % faces, &
+                                                            myDGSEM % extComm )
 #endif
 
     CALL myDGSEM % BoundaryFaceFlux( )
@@ -677,7 +680,9 @@ CONTAINS
 ! needed until StressFlux
 
 #ifdef HAVE_MPI
-        CALL myDGSEM % sgsHandler % MPI_Exchange( )
+        CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
+                                                     myDGSEM % mesh % faces, &
+                                                     myDGSEM % extComm )
 #endif
       ENDIF
 ! ----------------------------------------------------------------------------- !
@@ -692,7 +697,9 @@ CONTAINS
 
 #ifdef HAVE_MPI
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
-        CALL myDGSEM % sgsHandler % FinalizeMPI_Exchange( )
+        CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsBCs, &
+                                                              myDGSEM % mesh % faces, &
+                                                              myDGSEM % extComm )
       ENDIF
 #endif
 
@@ -715,7 +722,9 @@ CONTAINS
 ! at the same time as UpdateExternalStress.
 
 #ifdef HAVE_MPI
-      CALL myDGSEM % stressHandler % MPI_Exchange( )
+      CALL myDGSEM % mpiStressHandler % MPI_Exchange( myDGSEM % stressTensor, &
+                                                      myDGSEM % mesh % faces, &
+                                                      myDGSEM % extComm )
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -742,7 +751,9 @@ CONTAINS
 
       CALL myDGSEM % InternalStressFlux( )
 #ifdef HAVE_MPI
-      CALL myDGSEM % stressHandler % FinalizeMPI_Exchange( )
+      CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressBCs,&
+                                                               myDGSEM % mesh % faces, &
+                                                               myDGSEM % extComm )
 #endif
       CALL myDGSEM % BoundaryStressFlux( )
 
@@ -2468,11 +2479,11 @@ CONTAINS
     myDGSEM % heat   = heat
 
 #ifdef HAVE_MPI
-    CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
 #endif
 
   END SUBROUTINE Diagnostics_Fluid
