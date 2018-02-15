@@ -9,7 +9,6 @@
 PROGRAM Fluid_InitialConditions
 
   USE ModelPrecision
-  USE ModelParameters_Class
   USE Fluid_Class
 
   IMPLICIT NONE

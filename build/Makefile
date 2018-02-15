@@ -260,11 +260,38 @@ Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR
 
 endif
 
-initialize: ${CNOBJ} Fluid_InitialConditions.o
-	${FC} ${OPT} ${CNOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
+FLOBJ = ModelPrecision.o \
+        ConstantsDictionary.o \
+        CommonRoutines.o \
+        ModelParameters_Class.o \
+        Timing.o \
+        Lagrange_Class.o \
+        Quadrature.o \
+        NodalDG_Class.o \
+        SpectralFilter_Class.o \
+        NodalDGSolution_3D_Class.o \
+        LinkedList_Class.o \
+        KeyRing_Class.o \
+        Surfaces_Class.o \
+        HexElements_Class.o \
+        Faces_Class.o \
+        Nodes_Class.o \
+        HexMesh_Class.o \
+        BoundaryCommunicator_Class.o \
+        BoundaryConditions_Class.o \
+        BodyForces_Class.o
 
-integrate: ${CNOBJ} Fluid_Driver.o
-	${FC} ${OPT} ${CNOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
+ifeq (${MPI},yes)
+FLOBJ+=MPILayer_Class.o
+endif
+
+FLOBJ+=Fluid_Class.o
+
+initialize: ${FLOBJ} Fluid_InitialConditions.o
+	${FC} ${OPT} ${FLOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
+
+integrate: ${FLOBJ} Fluid_Driver.o
+	${FC} ${OPT} ${FLOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
 	
 
 .PHONY : clean
