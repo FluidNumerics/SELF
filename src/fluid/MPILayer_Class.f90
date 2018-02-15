@@ -104,9 +104,9 @@ CONTAINS
     PRINT*, '    S/R Trash_MPILayer : Clearing memory.'
 
     DEALLOCATE( myMPI % requestHandle, &
-      myMPI % requestStats, &
-      myMPI % recvBuffer, &
-      myMPI % sendBuffer )
+                myMPI % requestStats, &
+                myMPI % recvBuffer, &
+                myMPI % sendBuffer )
 
 #ifdef HAVE_CUDA
 

@@ -215,6 +215,12 @@ CONTAINS
     myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % params % viscosity
     myDGSEM % sgsBCs % externalState = myDGSEM % params % viscosity
 
+#ifdef HAVE_MPI
+    CALL myDGSEM % mpiStateHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % state % nEquations )
+    CALL myDGSEM % mpiStressHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % stressTensor % nEquations )
+    CALL myDGSEM % mpiSGSHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % sgsCoeffs % nEquations )
+#endif
+
 #ifdef HAVE_CUDA
     CALL myDGSEM % sgsBCs % UpdateDevice( )
     CALL myDGSEM % sgsCoeffs % UpdateDevice( )
