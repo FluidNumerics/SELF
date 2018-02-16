@@ -20,7 +20,6 @@ MODULE MPILayer_CLASS
 
   IMPLICIT NONE
 
-!INCLUDE 'mpif.h'
 
   TYPE MPILayer
 
@@ -186,7 +185,7 @@ CONTAINS
         extComm % MPI_PREC,   &
         extComm % neighborRank(iNeighbor), 0,  &
         extComm % MPI_COMM,   &
-        myMPI % requestHandle((iNeighbor-1)*2+1), iError )
+        myMPI % requestHandle(iNeighbor*2-1), iError )
 
       CALL MPI_ISEND( myMPI % sendBuffer(:,:,:,:,iNeighbor), &
         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
@@ -228,7 +227,7 @@ CONTAINS
         extComm % MPI_PREC,   &
         extComm % neighborRank(iNeighbor), 0,  &
         extComm % MPI_COMM,   &
-        myMPI % requestHandle((iNeighbor-1)*2+1), iError )
+        myMPI % requestHandle(iNeighbor*2-1), iError )
 
       CALL MPI_ISEND( myMPI % sendBuffer(:,:,:,:,iNeighbor), &
         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
@@ -259,10 +258,10 @@ CONTAINS
     TYPE(dim3) :: grid, tBlock
 #endif
 
-    CALL MPI_WaitAll(extComm % nNeighbors*2, &
-      myMPI % requestHandle, &
-      myMPI % requestStats, &
-      iError)
+    CALL MPI_WaitAll( extComm % nNeighbors*2, &
+                      myMPI % requestHandle, &
+                      myMPI % requestStats, &
+                      iError)
 
 #ifdef HAVE_CUDA
 

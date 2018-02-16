@@ -30,6 +30,7 @@ MODULE BoundaryCommunicator_CLASS
 !
 
   TYPE BoundaryCommunicator
+    LOGICAL              :: setup
     INTEGER              :: nBoundaries, myRank, nProc
     INTEGER, ALLOCATABLE :: extProcIDs(:)
     INTEGER, ALLOCATABLE :: boundaryIDs(:)
@@ -122,8 +123,6 @@ CONTAINS
     INTEGER, INTENT(in)                      :: nBe
 
     myComm % nBoundaries = nBe
-    myComm % nProc       = 1
-    myComm % myRank      = 0
 
     ALLOCATE( myComm % extProcIDs(1:nBe) )
     ALLOCATE( myComm % boundaryIDs(1:nBe) )
@@ -143,6 +142,9 @@ CONTAINS
     ALLOCATE( myComm % boundaryIDs_dev(1:nBe) )
     ALLOCATE( myComm % boundaryGlobalIDs_dev(1:nBe) )
     ALLOCATE( myComm % unPackMap_dev(1:nBe) )
+    ALLOCATE( myComm % myRank_dev, &
+              myComm % nProc_dev )
+
 
 #endif
 
@@ -156,9 +158,12 @@ CONTAINS
       myComm % MPI_PREC = MPI_DOUBLE
     ENDIF
 
-    CALL MPI_INIT( myComm % mpiErr )
-    CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
-    CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
+
+    IF( .NOT. myComm % setup )THEN
+      CALL MPI_INIT( myComm % mpiErr )
+      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
+      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
+    ENDIF
 
     PRINT*, '    S/R Build_CommunicationTable : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
 
@@ -184,8 +189,22 @@ CONTAINS
     myComm % nNeighbors_dev  = myComm % nNeighbors
 
 #endif
+
+#else
+
+    myComm % nProc       = 1
+    myComm % myRank      = 0
+
+#ifdef HAVE_CUDA
+
+    myComm % myRank_dev      = myComm % myRank
+    myComm % nProc_dev       = myComm % nProc
+
 #endif
 
+#endif
+
+myComm % setup = .TRUE.
 
   END SUBROUTINE Build_BoundaryCommunicator
 !
@@ -383,19 +402,32 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE ReadPickup_BoundaryCommunicator( myComm, filename )
+  SUBROUTINE ReadPickup_BoundaryCommunicator( myComm )
 
     IMPLICIT NONE
     CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
-    CHARACTER(*), INTENT(in)                     :: filename
     ! LOCAL
+    CHARACTER(4)  :: rankChar
     INTEGER       :: i
     INTEGER       :: fUnit
     INTEGER       :: nBe
 
+#ifdef HAVE_MPI
+      myComm % MPI_COMM = MPI_COMM_WORLD
+      CALL MPI_INIT( myComm % mpiErr )
+      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
+      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
+#else
+      myComm % myRank = 0
+      myComm % nProc  = 1
+#endif
+
+    myComm % setup = .TRUE.
+
+    WRITE( rankChar, '(I4.4)' ) myComm % myRank
 
     OPEN( UNIT   = NEWUNIT(fUnit), &
-      FILE   = TRIM(filename)//'.bcm', &
+      FILE   = 'ExtComm.'//rankChar//'.bcm', &
       FORM   ='FORMATTED',&
       ACCESS ='SEQUENTIAL',&
       STATUS ='OLD',&
@@ -433,7 +465,7 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 
     ! Count up the number of neighboring ranks
     myComm % rankTable = 0
-    sharedFaceCount     = 0
+    sharedFaceCount    = 0
     DO bID = 1, myComm % nBoundaries
 
       p2 = myComm % extProcIDS(bID)
@@ -446,7 +478,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
       ENDIF
 
     ENDDO
-
 
     myComm % nNeighbors = SUM( myComm % rankTable )
     PRINT*, '  S/R ConstructCommTables : Found', myComm % nNeighbors, 'neighbors for Rank', myComm % myRank+1

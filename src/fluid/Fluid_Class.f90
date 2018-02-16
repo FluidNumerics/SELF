@@ -115,7 +115,6 @@ CONTAINS
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     LOGICAL, INTENT(inout)      :: setupSuccess
     !
-    CHARACTER(4) :: rankChar
 #ifdef HAVE_CUDA
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
@@ -131,8 +130,7 @@ CONTAINS
       RETURN
     ENDIF
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-    CALL myDGSEM % extComm % ReadPickup( 'ExtComm.'//rankChar )
+    CALL myDGSEM % extComm % ReadPickup(  )
 
 #ifdef HAVE_MPI
     CALL myDGSEM % extComm % ConstructCommTables(  )
