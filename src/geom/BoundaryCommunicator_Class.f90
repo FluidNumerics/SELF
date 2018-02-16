@@ -33,6 +33,7 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER              :: nBoundaries, myRank, nProc
     INTEGER, ALLOCATABLE :: extProcIDs(:)
     INTEGER, ALLOCATABLE :: boundaryIDs(:)
+    INTEGER, ALLOCATABLE :: boundaryGlobalIDs(:)
     INTEGER, ALLOCATABLE :: unPackMap(:)
 
 #ifdef HAVE_CUDA
@@ -40,6 +41,7 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER, DEVICE, ALLOCATABLE :: nBoundaries_dev
     INTEGER, DEVICE, ALLOCATABLE :: extProcIDs_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: boundaryIDs_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: boundaryGlobalIDs_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: unPackMap_dev(:)
 #endif
 
@@ -125,6 +127,7 @@ CONTAINS
 
     ALLOCATE( myComm % extProcIDs(1:nBe) )
     ALLOCATE( myComm % boundaryIDs(1:nBe) )
+    ALLOCATE( myComm % boundaryGlobalIDs(1:nBe) )
     ALLOCATE( myComm % unPackMap(1:nBe) )
 
     myComm % extProcIDs  = 0
@@ -138,6 +141,7 @@ CONTAINS
 
     ALLOCATE( myComm % extProcIDs_dev(1:nBe) )
     ALLOCATE( myComm % boundaryIDs_dev(1:nBe) )
+    ALLOCATE( myComm % boundaryGlobalIDs_dev(1:nBe) )
     ALLOCATE( myComm % unPackMap_dev(1:nBe) )
 
 #endif
@@ -210,11 +214,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
 
-    DEALLOCATE( myComm % unPackMap, myComm % extProcIDs, myComm % boundaryIDs )
+    DEALLOCATE( myComm % unPackMap, myComm % extProcIDs, myComm % boundaryIDs, myComm % boundaryGlobalIDs  )
 
 #ifdef HAVE_CUDA
     DEALLOCATE( myComm % nBoundaries_dev )
-    DEALLOCATE( myComm % unPackMap_dev, myComm % extProcIDs_dev, myComm % boundaryIDs_dev )
+    DEALLOCATE( myComm % unPackMap_dev, myComm % extProcIDs_dev, myComm % boundaryIDs_dev, myComm % boundaryGlobalIDs_dev  )
 #endif
 
 #ifdef HAVE_MPI
@@ -251,6 +255,7 @@ CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
 myComm % unPackMap_dev = myComm % unPackMap
 myComm % extProcIDs_dev = myComm % extProcIDs
 myComm % boundaryIDs_dev = myComm % boundaryIDs
+myComm % boundaryGlobalIDs_dev = myComm % boundaryGlobalIDs
 
 #ifdef HAVE_MPI
 
@@ -272,6 +277,7 @@ CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
 myComm % unPackMap   = myComm % unPackMap_dev
 myComm % extProcIDs  = myComm % extProcIDs_dev
 myComm % boundaryIDs = myComm % boundaryIDs_dev
+myComm % boundaryGlobalIDs = myComm % boundaryGlobalIDs_dev
 
 #ifdef HAVE_MPI
 

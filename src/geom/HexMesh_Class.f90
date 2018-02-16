@@ -1,25 +1,23 @@
-! HexMesh_CLASS.f90
+! HexMesh_Class.f90
 !
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE HexMesh_CLASS
+MODULE HexMesh_Class
 
-! src/COMMON/
   USE ModelPrecision
   USE ConstantsDictionary
-  USE LinkedList_CLASS
-  USE KeyRing_CLASS
-! src/interp/
+  USE LinkedList_Class
+  USE KeyRing_Class
   USE Quadrature
-  USE Lagrange_CLASS
-! src/geom/
-  USE Surfaces_CLASS
-  USE HexElements_CLASS
-  USE Faces_CLASS
-  USE Nodes_CLASS
+  USE Lagrange_Class
+  USE Surfaces_Class
+  USE HexElements_Class
+  USE Faces_Class
+  USE Nodes_Class
+  USE ModelParameters_Class
 
   IMPLICIT NONE
 
@@ -73,6 +71,7 @@ MODULE HexMesh_CLASS
     PROCEDURE :: ConstructElementNeighbors    => ConstructElementNeighbors_HexMesh
     PROCEDURE :: DetermineOrientation         => DetermineOrientation_HexMesh
     PROCEDURE :: ScaleTheMesh                 => ScaleTheMesh_HexMesh
+    PROCEDURE :: PartitionElementsAndNodes
 
     ! Visualization I/O Routines
     PROCEDURE :: WriteTecplot         => WriteTecplot_Hexmesh
@@ -107,7 +106,7 @@ CONTAINS
 !==================================================================================================!
 !
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R Build
@@ -229,7 +228,7 @@ CONTAINS
 
   END SUBROUTINE Build_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R Trash
@@ -307,7 +306,7 @@ CONTAINS
 !==================================================================================================!
 !
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R ConstructFaces
@@ -324,7 +323,7 @@ CONTAINS
 !! the orientation of the secondary element relative to the primary element is determined.
 !!
 !! This routine depends on <BR>
-!!     Module HexMesh_CLASS : \ref DetermineOrientation_HexMesh
+!!     Module HexMesh_Class : \ref DetermineOrientation_HexMesh
 !!
 !! <H2> Usage : </H2>
 !! <B>TYPE</B>(DATATYPE) :: this <BR>
@@ -819,7 +818,7 @@ CONTAINS
 
   END SUBROUTINE ConstructDOublyPeriodicFaces_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R DetermineOrientation
@@ -927,7 +926,7 @@ CONTAINS
 
   END SUBROUTINE DetermineOrientation_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R ConstructElementNeighbors
@@ -968,7 +967,7 @@ CONTAINS
 
   END SUBROUTINE ConstructElementNeighbors_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R ScaleTheMesh_HexMesh
@@ -977,8 +976,8 @@ CONTAINS
 !! Scales the element geometry and corner node positions by the provided x-scale, y-scale, and z-scale.
 !!
 !! This routine depend on <BR>
-!!   Module \ref MappedGeometry_2D_CLASS, S/R ScaleGeometry_MappedGeometry_2D <BR>
-!!   Module \ref Node_CLASS, S/R ScalePosition_Node
+!!   Module \ref MappedGeometry_2D_Class, S/R ScaleGeometry_MappedGeometry_2D <BR>
+!!   Module \ref Node_Class, S/R ScalePosition_Node
 !!
 !! <H2> Usage : </H2>
 !! <B>TYPE</B>(HexMesh)    :: this <BR>
@@ -1017,7 +1016,7 @@ CONTAINS
 
   END SUBROUTINE ScaleTheMesh_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R ConstructStructuredMesh
@@ -1261,14 +1260,113 @@ CONTAINS
 #endif
 
   END SUBROUTINE ConstructStructuredMesh_HexMesh
+
+  SUBROUTINE PartitionElementsAndNodes( myMesh, params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
+    IMPLICIT NONE
+    CLASS( HexMesh ), INTENT(in)        :: myMesh
+    TYPE( ModelParameters ), INTENT(in) :: params
+    INTEGER, INTENT(in)                 :: nProc
+    INTEGER, INTENT(out)                :: partitions(1:myMesh % elements % nElements)
+    INTEGER, INTENT(out)                :: nElPerProc(0:nProc-1)
+    INTEGER, INTENT(out)                :: globalToLocal(1:myMesh % elements % nElements,1:2)
+    INTEGER, INTENT(out)                :: nodeLogic(1:myMesh % nodes % nNodes,0:nProc-1)
+    INTEGER, INTENT(out)                :: nNodePerProc(0:nProc-1)
+    INTEGER, INTENT(out)                :: globalToLocalNode(1:myMesh % nodes % nNodes,0:nProc-1)
+   
+    ! Local
+    INTEGER :: nxp, nyp, nzp
+    INTEGER :: iPz, iPy, iPx
+    INTEGER :: iZp, iYp, iXp
+    INTEGER :: iZ, iY, iX
+    INTEGER :: iNode, nID
+    INTEGER :: iEl, procID
+    
+
+      partitions        = 0
+      nElPerProc        = 0
+      globalToLocal     = 0
+      nodeLogic         = 0
+      nNodePerProc      = 0
+      globalToLocalNode = 0
+
+      IF( nProc > 1 )THEN
+         nxp = params % nXelem/params % nProcX
+         nyp = params % nYelem/params % nProcY
+         nzp = params % nZelem/params % nProcZ
+         DO iPz = 1, params % nProcZ
+            DO iPy = 1, params % nProcY
+               DO iPx = 1, params % nProcX
+               
+                  DO iZp = 1, nzp
+                     DO iYp = 1, nyp
+                        DO iXp = 1, nxp
+                        
+                           iX = iXp + (iPx-1)*nxp
+                           iY = iYp + (iPy-1)*nyp
+                           iZ = iZp + (iPz-1)*nzp
+                           
+                           iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
+                           partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
+                           
+                        ENDDO
+                     ENDDO
+                  ENDDO
+                  
+               ENDDO
+            ENDDO
+         ENDDO
+      
+         DO iEl = 1, myMesh % elements % nElements
+      
+            procID               = partitions(iEl)
+            nElPerProc(procID)   = nElPerProc(procID) + 1 ! Increment the local element ID for this process
+            globalToLocal(iEl,1) = nElPerProc(procID)     ! Store the local element ID on this process
+            globalToLocal(iEl,2) = procID                 ! Store the process ID
+         
+            DO iNode = 1, 8
+               nID = myMesh % elements % nodeIDs(iNode,iEl) 
+               nodeLogic(nID,procID) = 1
+            ENDDO
+         
+         ENDDO
+         DO nID = 1, myMesh % nodes % nNodes
+            nNodePerProc = nNodePerProc + nodeLogic(nID,:)
+            globalToLocalNode(nID,:) = nNodePerProc
+         ENDDO
 !
+         DO procID = 0, nProc-1
+            PRINT*, 'Process ID :',procID, ', nElems :', nElPerProc(procID)
+            PRINT*, 'Process ID :',procID, ', nNodes :', nNodePerProc(procID)
+         ENDDO
+
+      ELSE
+
+         DO iEl = 1, myMesh % elements % nElements
+            nElPerProc(0) = myMesh % elements % nElements
+            globalToLocal(iEl,1) = iEl ! Local ID is global ID
+            globalToLocal(iEl,2) = 0   ! process ID
+            
+            DO iNode = 1, 8
+               nID = myMesh % elements % nodeIDs(iNode,iEl) 
+               nodeLogic(nID,0) = 1
+            ENDDO
+         ENDDO
+         
+         DO nID = 1, myMesh % nodes % nNodes
+            nNodePerProc = nNodePerProc + nodeLogic(nID,:)
+            globalToLocalNode(nID,:) = nNodePerProc
+         ENDDO
+
+      ENDIF
+
+  END SUBROUTINE PartitionElementsAndNodes
 !
 !==================================================================================================!
 !--------------------------------- Mesh File I/O Routines -----------------------------------------!
 !==================================================================================================!
 !
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R ReadSELFMeshFile
@@ -1501,7 +1599,7 @@ CONTAINS
 
   END SUBROUTINE ReadSELFMeshFile_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R WriteSELFMeshFile
@@ -1690,7 +1788,7 @@ CONTAINS
 
   END SUBROUTINE WriteSELFMeshFile_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R ReadUCDMeshFile
@@ -1855,7 +1953,7 @@ CONTAINS
 
   END SUBROUTINE ReadUCDMeshFile_HexMesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R WriteTecplot
@@ -1942,7 +2040,7 @@ CONTAINS
 
   END SUBROUTINE WriteTecplot_Hexmesh
 !
-!> \addtogroup HexMesh_CLASS
+!> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
 ! S/R WriteMaterialTecplot
@@ -2022,4 +2120,4 @@ CONTAINS
 
   END SUBROUTINE WriteMaterialTecplot_Hexmesh
 !
-END MODULE HexMesh_CLASS
+END MODULE HexMesh_Class

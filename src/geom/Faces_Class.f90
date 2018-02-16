@@ -82,9 +82,9 @@ CONTAINS
     myFaces % elementIDs     = 0
     myFaces % elementSides   = 0
     myFaces % iStart         = 0
-    myFaces % iInc           = 0
+    myFaces % iInc           = 1
     myFaces % jStart         = 0
-    myFaces % jInc           = 0
+    myFaces % jInc           = 1
     myFaces % swapDimensions = 0
     myFaces % iMap           = 0
     myFaces % jMap           = 0
