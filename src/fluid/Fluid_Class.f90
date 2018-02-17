@@ -3316,319 +3316,257 @@ CONTAINS
   
   END SUBROUTINE CalculateStressTensorFlux_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE UpdateExternalStress_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
-                                                               externalStress, stressBsols, prescribedStress, nHat )
-IMPLICIT NONE
-INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
-INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(out) :: externalStress(0:N,0:N,1:15,1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(in)  :: stressBsols(0:N,0:N,1:15,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: prescribedStress(0:N,0:N,1:15,1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nEl)
- ! Local
-INTEGER    :: iEq, iFace, i, j, k
-INTEGER    :: iFace2, p2
-INTEGER    :: e1, e2, s1, s2, m
-
-iFace = blockIdx % x
-iEq   = blockIDx % y
- ! ////////////////////////////////////////////////////////////////////////// !
-i   = threadIdx % x-1
-j   = threadIdx % y-1
-
-iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
-e1     = elementIDs(1,iFace2)
-s1     = elementSides(1,iFace2)
-e2     = elementIDs(2,iFace2)
-p2     = procIDs( iFace )
-
-IF( i <= N .AND. j <= N )THEN
-
-  IF( p2 == myRank_dev )THEN
-    externalStress(i,j,iEq,iFace) = -stressBsols(i,j,iEq,s1,e1)
-  ENDIF
-
-ENDIF
-
-END SUBROUTINE UpdateExternalStress_CUDAKernel
-!
-ATTRIBUTES(Global) SUBROUTINE InternalStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
-  nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
-  externalState, externalStress, boundaryFlux )
-
-IMPLICIT NONE
-INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: iMap(0:N,0:N,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: jMap(0:N,0:N,1:nFaces)
-REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:N,0:N,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:N,0:N,1:nEq,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:N,0:N,1:15,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:N,0:N,1:5,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,1:nEq,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:N,0:N,1:15,1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:N,0:N,1:15,1:6,1:nEl)
- ! Local
-INTEGER    :: iEl, iFace
-INTEGER    :: i, j, iEq
-INTEGER    :: ii, jj, bID
-INTEGER    :: e1, s1, e2, s2
-INTEGER    :: m, jEq
-REAL(prec) :: norm, rhoOut, rhoIn
-
-iFace = blockIdx % x
-iEq   = blockIdx % y
-j     = threadIdx % y-1
-i     = threadIdx % x-1
-
-e1 = elementIDs(1,iFace)
-s1 = elementSides(1,iFace)
-e2 = elementIDs(2,iFace)
-s2 = ABS(elementSides(2,iFace))
-bID  = ABS(boundaryIDs(iFace))
-
-ii = iMap(i,j,iFace)
-jj = jMap(i,j,iFace)
-
-norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
-
-IF( e2 > 0 )THEN
-
-  boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryState(ii,jj,iEq,s2,e2)-&
-    sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
-
-  IF( iEq == 4 )THEN
-
-
-    DO m = 1, 3
-      jEq = m + (iEq-1)*3
-      boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-        0.5_prec*(sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
-        sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryStress(ii,jj,jEq,s2,e2) )*nHat(m,i,j,s1,e1)
-    ENDDO
-
-  ELSE
-
-    rhoIn = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
-    rhoOut = static(ii,jj,4,s2,e2) + boundaryState(ii,jj,4,s2,e2)
-
-    DO m = 1, 3
-      jEq = m + (iEq-1)*3
-      boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-        0.5_prec*(rhoIn*sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
-        rhoOut*sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryStress(ii,jj,jEq,s2,e2))*nHat(m,i,j,s1,e1)
-    ENDDO
-
-  ENDIF
-
-  boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
-
-ENDIF
-
-END SUBROUTINE InternalStressFlux_CUDAKernel
-!
-ATTRIBUTES(Global) SUBROUTINE BoundaryStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
-  nHat, boundaryState, static, boundaryStress, sgsCoeffs, externalSGS, &
-  externalState, externalStress, boundaryFlux )
-
-IMPLICIT NONE
-INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: iMap(0:N,0:N,1:nFaces)
-INTEGER, DEVICE, INTENT(in)     :: jMap(0:N,0:N,1:nFaces)
-REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:N,0:N,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:N,0:N,1:nEq,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:N,0:N,1:15,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:N,0:N,1:5,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: externalSGS(0:N,0:N,1:5,nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(in)  :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,1:nEq,1:6,1:nEl)
-REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:N,0:N,1:15,1:nBoundaryFaces)
-REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:N,0:N,1:15,1:6,1:nEl)
- ! Local
-INTEGER    :: iEl, iFace
-INTEGER    :: i, j, iEq
-INTEGER    :: ii, jj, bID
-INTEGER    :: e1, s1, e2, s2
-INTEGER    :: m, jEq
-REAL(prec) :: norm, rhoOut, rhoIn
-
-iFace = blockIdx % x
-iEq   = blockIdx % y
-j     = threadIdx % y-1
-i     = threadIdx % x-1
-
-e1 = elementIDs(1,iFace)
-s1 = elementSides(1,iFace)
-e2 = elementIDs(2,iFace)
-s2 = ABS(elementSides(2,iFace))
-bID  = boundaryIDs(iFace)
-
-ii = iMap(i,j,iFace)
-jj = jMap(i,j,iFace)
-
-norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
-IF( e2 < 0 )THEN !Physical boundary
-  IF( bID < 0 )THEN
-
-    bID = ABS(bID)
-    boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
-      (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
-
-    IF( iEq == 4 )THEN
-
-      DO m = 1, 3
-        jEq = m + (iEq-1)*3
-        boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-          0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*(boundaryStress(i,j,jEq,s1,e1)+&
-          externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
-      ENDDO
-
-    ELSE
-
-      rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
-      rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
-
-      DO m = 1, 3
-        jEq = m + (iEq-1)*3
-        boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-          0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*( rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
-          rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
-      ENDDO
-
+  ATTRIBUTES(Global) SUBROUTINE UpdateExternalStress_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
+                                                                 externalStress, stressBsols, prescribedStress, nHat, &
+                                                                 N, nDiffEq, nBoundaryFaces, nFaces, nElements )
+    IMPLICIT NONE
+    INTEGER, DEVICE, INTENT(in)     :: N, nDiffEq, nBoundaryFaces, nFaces, nElements
+    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
+    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(out) :: externalStress(0:N,0:N,1:nDiffEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: stressBsols(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: prescribedStress(0:N,0:N,1:nDiffEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
+     ! Local
+    INTEGER    :: iEq, iFace, i, j, k
+    INTEGER    :: iFace2, p2
+    INTEGER    :: e1, e2, s1, s2, m
+    
+    iFace = blockIdx % x
+    iEq   = blockIDx % y
+     ! ////////////////////////////////////////////////////////////////////////// !
+    i   = threadIdx % x-1
+    j   = threadIdx % y-1
+    
+    iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
+    e1     = elementIDs(1,iFace2)
+    s1     = elementSides(1,iFace2)
+    e2     = elementIDs(2,iFace2)
+    p2     = procIDs( iFace )
+    
+    IF( i <= N .AND. j <= N )THEN
+    
+      IF( p2 == myRank_dev )THEN
+        externalStress(i,j,iEq,iFace) = -stressBsols(i,j,iEq,s1,e1)
+      ENDIF
+    
     ENDIF
-
-  ELSE
-
-    boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( externalSGS(ii,jj,iEq,bID)*externalState(ii,jj,iEq,bID)-&
-      sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
-
-    IF( iEq == 4 )THEN
-
-      DO m = 1, 3
-        jEq = m + (iEq-1)*3
-        boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-          0.5_prec*( sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
-          externalSGS(ii,jj,iEq,bID)*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
-      ENDDO
-
-    ELSE
-
-      rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
-      rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
-
-      DO m = 1, 3
-        jEq = m + (iEq-1)*3
-        boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
-          0.5_prec*( sgsCoeffs(i,j,iEq,s1,e1)*rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
-          externalSGS(ii,jj,iEq,bID)*rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
-      ENDDO
-
+  
+  END SUBROUTINE UpdateExternalStress_CUDAKernel
+!
+  ATTRIBUTES(Global) SUBROUTINE InternalStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                               nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
+                                                               externalState, externalStress, boundaryFluxi, &
+                                                               N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements )
+  
+    IMPLICIT NONE
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements 
+    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: iMap(0:N,0:N,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: jMap(0:N,0:N,1:nFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:N,0:N,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:N,0:N,1:nSGSEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:N,0:N,1:nDiffEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+     ! Local
+    INTEGER    :: iEl, iFace
+    INTEGER    :: i, j, iEq
+    INTEGER    :: ii, jj, bID
+    INTEGER    :: e1, s1, e2, s2
+    INTEGER    :: m, jEq
+    REAL(prec) :: norm, rhoOut, rhoIn
+    
+    iFace = blockIdx % x
+    iEq   = blockIdx % y
+    j     = threadIdx % y-1
+    i     = threadIdx % x-1
+    
+    e1 = elementIDs(1,iFace)
+    s1 = elementSides(1,iFace)
+    e2 = elementIDs(2,iFace)
+    s2 = ABS(elementSides(2,iFace))
+    bID  = ABS(boundaryIDs(iFace))
+    
+    ii = iMap(i,j,iFace)
+    jj = jMap(i,j,iFace)
+    
+    norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
+    
+    IF( e2 > 0 )THEN
+    
+      boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryState(ii,jj,iEq,s2,e2)-&
+        sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+    
+      IF( iEq == 4 )THEN
+    
+    
+        DO m = 1, 3
+          jEq = m + (iEq-1)*3
+          boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+            0.5_prec*(sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
+            sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryStress(ii,jj,jEq,s2,e2) )*nHat(m,i,j,s1,e1)
+        ENDDO
+    
+      ELSE
+    
+        rhoIn = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
+        rhoOut = static(ii,jj,4,s2,e2) + boundaryState(ii,jj,4,s2,e2)
+    
+        DO m = 1, 3
+          jEq = m + (iEq-1)*3
+          boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+            0.5_prec*(rhoIn*sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
+            rhoOut*sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryStress(ii,jj,jEq,s2,e2))*nHat(m,i,j,s1,e1)
+        ENDDO
+    
+      ENDIF
+    
+      boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
+    
     ENDIF
-  ENDIF
-
-ENDIF
-
-END SUBROUTINE BoundaryStressFlux_CUDAKernel
+  
+  END SUBROUTINE InternalStressFlux_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE EquationOfState_CUDAKernel( solution, static )
- ! This routine calculates the anomalous pressure referenced to the static state.
- ! The pressure is calculated using the ideal gas law.
-IMPLICIT NONE
-REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nEl)
-REAL(prec), DEVICE, INTENT(in)    :: static(0:N,0:N,0:N,1:nEq,1:nEl)
- ! Local
-INTEGER :: i, j, k, iEl
-REAL(prec) :: rhoT
-
-iEl = blockIdx % x
-i   = threadIdx % x - 1
-j   = threadIdx % y - 1
-k   = threadIdx % z - 1
-
- ! Pressure = rho*e*R/Cv (Ideal Gas Law, P = rho*R*T, thermo ~> T = theta*(P/P0)^r)
- ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
- ! And P' = P - P_static
-rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
-solution(i,j,k,6,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,6,iEl)
-
-END SUBROUTINE EquationOfState_CUDAKernel
+  ATTRIBUTES(Global) SUBROUTINE BoundaryStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                               nHat, boundaryState, static, boundaryStress, sgsCoeffs, externalSGS, &
+                                                               externalState, externalStress, boundaryFlux, &
+                                                               N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements  )
+  
+    IMPLICIT NONE
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements 
+    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: iMap(0:N,0:N,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)     :: jMap(0:N,0:N,1:nFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:N,0:N,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryState(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:N,0:N,1:nSGSEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: externalSGS(0:N,0:N,1:nSGSEq,nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: externalStress(0:N,0:N,1:nDiffEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+     ! Local
+    INTEGER    :: iEl, iFace
+    INTEGER    :: i, j, iEq
+    INTEGER    :: ii, jj, bID
+    INTEGER    :: e1, s1, e2, s2
+    INTEGER    :: m, jEq
+    REAL(prec) :: norm, rhoOut, rhoIn
+    
+    iFace = blockIdx % x
+    iEq   = blockIdx % y
+    j     = threadIdx % y-1
+    i     = threadIdx % x-1
+    
+    e1 = elementIDs(1,iFace)
+    s1 = elementSides(1,iFace)
+    e2 = elementIDs(2,iFace)
+    s2 = ABS(elementSides(2,iFace))
+    bID  = boundaryIDs(iFace)
+    
+    ii = iMap(i,j,iFace)
+    jj = jMap(i,j,iFace)
+    
+    norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
+    IF( e2 < 0 )THEN !Physical boundary
+      IF( bID < 0 )THEN
+    
+        bID = ABS(bID)
+        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
+          (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+    
+        IF( iEq == 4 )THEN
+    
+          DO m = 1, 3
+            jEq = m + (iEq-1)*3
+            boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+              0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*(boundaryStress(i,j,jEq,s1,e1)+&
+              externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+          ENDDO
+    
+        ELSE
+    
+          rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
+          rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
+    
+          DO m = 1, 3
+            jEq = m + (iEq-1)*3
+            boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+              0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*( rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
+              rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+          ENDDO
+    
+        ENDIF
+    
+      ELSE
+    
+        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( externalSGS(ii,jj,iEq,bID)*externalState(ii,jj,iEq,bID)-&
+          sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+    
+        IF( iEq == 4 )THEN
+    
+          DO m = 1, 3
+            jEq = m + (iEq-1)*3
+            boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+              0.5_prec*( sgsCoeffs(i,j,iEq,s1,e1)*boundaryStress(i,j,jEq,s1,e1)+&
+              externalSGS(ii,jj,iEq,bID)*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+          ENDDO
+    
+        ELSE
+    
+          rhoIn  = static(i,j,4,s1,e1) + boundaryState(i,j,4,s1,e1)
+          rhoOut = static(i,j,4,s1,e1) + externalState(ii,jj,4,bID)
+    
+          DO m = 1, 3
+            jEq = m + (iEq-1)*3
+            boundaryFlux(i,j,iEq,s1,e1) = boundaryFlux(i,j,iEq,s1,e1) + &
+              0.5_prec*( sgsCoeffs(i,j,iEq,s1,e1)*rhoIn*boundaryStress(i,j,jEq,s1,e1)+&
+              externalSGS(ii,jj,iEq,bID)*rhoOut*externalStress(ii,jj,jEq,bID) )*nHat(m,i,j,s1,e1)
+          ENDDO
+    
+        ENDIF
+      ENDIF
+    
+    ENDIF
+  
+  END SUBROUTINE BoundaryStressFlux_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, faceToElement, faceToSide, boundaryToFaceID, &
-  boundaryToProcID, rankToNeighbor, boundaryToBuffer, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
-  bufferSize, nElements )
-IMPLICIT NONE
-INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
-INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
-INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
-INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
-INTEGER, DEVICE, INTENT(in)       :: rankToNeighbor(0:nRanks-1)
-INTEGER, DEVICE, INTENT(in)       :: boundaryToBuffer(1:nBoundaries)
-REAL(prec), DEVICE, INTENT(inout) :: sendBuffer(0:N,0:N,1:numEq,1:bufferSize,1:nNeighbors)
-REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:numEq,1:6,1:nElements)
- ! Local
-INTEGER :: bID, i, j, iEq
-INTEGER :: iFace, p2, neighborID, bufferID, elementID, sideID
-
-bID = blockIdx % x
-i   = threadIdx % x - 1
-j   = threadIdx % y - 1
-iEq = threadIdx % z
-
-p2 = boundaryToProcID(bID)
-
-IF( p2 /= myRank )THEN
-
-  neighborID = rankToNeighbor(p2)
-  bufferID   = boundaryToBuffer(bID)
-  iFace      = boundaryToFaceID(bID)
-  elementID  = faceToElement(1,iFace)
-  sideID     = faceToSide(1,iFace)
-
-  sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID)
-ENDIF
-
-END SUBROUTINE BoundaryToBuffer_CUDAKernel
-!
-ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalSolution, boundaryToFaceID, &
-  boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
-  bufferSize, nElements )
-IMPLICIT NONE
-INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
-INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
-INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
-INTEGER, DEVICE, INTENT(in)       :: rankTable(0:nRanks-1)
-INTEGER, DEVICE, INTENT(in)       :: unPackMap(1:nBoundaries)
-REAL(prec), DEVICE, INTENT(in)    :: recvBuffer(0:N,0:N,1:numEq,1:bufferSize,1:nNeighbors)
-REAL(prec), DEVICE, INTENT(inout) :: externalSolution(0:N,0:N,1:numEq,1:nBoundaries)
- ! Local
-INTEGER :: bID, i, j, iEq
-INTEGER :: p2
-
-bID = blockIdx % x
-i   = threadIdx % x - 1
-j   = threadIdx % y - 1
-iEq = threadIdx % z
-
-p2        = boundaryToProcID(bID)
-
-
-IF( p2 /= myRank )THEN
-  externalSolution(i,j,iEq,bID) = recvBuffer(i,j,iEq,unpackMap(bID),rankTable(p2))
-ENDIF
-
-
-END SUBROUTINE BufferToBoundary_CUDAKernel
-
+  ATTRIBUTES(Global) SUBROUTINE EquationOfState_CUDAKernel( solution, static, N, nEq, nElements )
+    ! This routine calculates the anomalous pressure referenced to the static state.
+    ! The pressure is calculated using the ideal gas law.
+    IMPLICIT NONE
+    INTEGER, DEVICE, INTENT(in)       :: N, nEq, nElements
+    REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)    :: static(0:N,0:N,0:N,1:nEq,1:nElements)
+     ! Local
+    INTEGER :: i, j, k, iEl
+    REAL(prec) :: rhoT
+    
+    iEl = blockIdx % x
+    i   = threadIdx % x - 1
+    j   = threadIdx % y - 1
+    k   = threadIdx % z - 1
+    
+     ! Pressure = rho*e*R/Cv (Ideal Gas Law, P = rho*R*T, thermo ~> T = theta*(P/P0)^r)
+     ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
+     ! And P' = P - P_static
+    rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
+    solution(i,j,k,6,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,6,iEl)
+  
+  END SUBROUTINE EquationOfState_CUDAKernel
 #endif
+
 END MODULE Fluid_Class
 
 
