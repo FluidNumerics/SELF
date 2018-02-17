@@ -323,9 +323,9 @@ CONTAINS
 
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt, &
                                                     myDGSEM % state % solution_dev, &
-                                                    myDGSEM % state % tendency_dev, &
+                                                    myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
-                                                    myDGSEM % stressTensor % tendency_dev, &
+                                                    myDGSEM % stressTensor % fluxDivergence_dev, &
                                                     myDGSEM % mesh % elements % J_dev, &
                                                     myDGSEM % params % polyDeg_dev, &
                                                     myDGSEM % state % nEquations_dev, &
@@ -354,9 +354,9 @@ CONTAINS
 
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt, &
                                                     myDGSEM % state % solution_dev, &
-                                                    myDGSEM % state % tendency_dev, &
+                                                    myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
-                                                    myDGSEM % stressTensor % tendency_dev, &
+                                                    myDGSEM % stressTensor % fluxDivergence_dev, &
                                                     myDGSEM % mesh % elements % J_dev, &
                                                     myDGSEM % params % polyDeg_dev, &
                                                     myDGSEM % state % nEquations_dev, &
@@ -411,10 +411,14 @@ CONTAINS
             DO k = 0, myDGSEM % params % polyDeg
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
-                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + myDGSEM % state % tendency(i,j,k,iEq,iEl) +&
-                    myDGSEM % stressTensor % tendency(i,j,k,iEq,iEl)
+
+                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) +&
+                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
+                    myDGSEM % state % source(i,j,k,iEq,iEl)
+
                   myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
                     rk3_g(m)*dt*G3D(i,j,k,iEq,iEl)
+
                 ENDDO
               ENDDO
             ENDDO
@@ -462,10 +466,14 @@ CONTAINS
             DO k = 0, myDGSEM % params % polyDeg
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
-                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + myDGSEM % state % tendency(i,j,k,iEq,iEl) +&
-                    myDGSEM % stressTensor % tendency(i,j,k,iEq,iEl)
+
+                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) +&
+                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
+                    myDGSEM % state % source(i,j,k,iEq,iEl)
+
                   myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
                     rk3_g(m)*dt*G3D(i,j,k,iEq,iEl)
+
                 ENDDO
               ENDDO
             ENDDO
@@ -966,7 +974,11 @@ CONTAINS
                                                            myDGSEM % stateBCs % externalState_dev, &               ! O
                                                            myDGSEM % state % boundarySolution_dev, &    ! I
                                                            myDGSEM % stateBCs % prescribedState_dev, &             ! I
-                                                           myDGSEM % mesh % elements % nHat_dev )           ! I
+                                                           myDGSEM % mesh % elements % nHat_dev, &
+                                                           myDGSEM % params % polydeg_dev, &
+                                                           myDGSEM % extComm % nBoundaries_dev, &
+                                                           myDGSEM % mesh % faces % nFaces_dev, &
+                                                           myDGSEM % mesh % elements % nElements_dev )           ! I
 #else
     ! Local
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
@@ -1164,7 +1176,12 @@ CONTAINS
                                                         myDGSEM % static % boundarySolution_dev, &
                                                         myDGSEM % stateBCs % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
-                                                        myDGSEM % stressTensor % boundaryFlux_dev )
+                                                        myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                        myDGSEM % params % polyDeg_dev, &
+                                                        myDGSEM % state % nEquations_dev, &
+                                                        myDGSEM % stressTensor % nEquations_dev, &
+                                                        myDGSEM % mesh % faces % nFaces_dev, &
+                                                        myDGSEM % mesh % elements % nElements_dev )
 
 #else
     ! Local
@@ -1325,7 +1342,12 @@ CONTAINS
                                                         myDGSEM % static % boundarySolution_dev, &
                                                         myDGSEM % stateBCs % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
-                                                        myDGSEM % stressTensor % boundaryFlux_dev )
+                                                        myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                        myDGSEM % params % polyDeg_dev, &
+                                                        myDGSEM % state % nEquations_dev, &
+                                                        myDGSEM % stressTensor % nEquations_dev, &
+                                                        myDGSEM % mesh % faces % nFaces_dev, &
+                                                        myDGSEM % mesh % elements % nElements_dev )
 #else
     ! Local
     INTEGER :: iEl, iFace
@@ -1483,15 +1505,13 @@ CONTAINS
     grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % state % nEquations-1,1)
 
     CALL CalculateFlux_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-                                                           myDGSEM % static % solution_dev, &
-                                                           myDGSEM % state % boundaryFlux_dev, &
-                                                           myDGSEM % sourceTerms % drag_dev, &
-                                                           myDGSEM % mesh % elements % Ja_dev, &
-                                                           myDGSEM % mesh % elements % J_dev, &
-                                                           myDGSEM % dgStorage % bMat_dev, &
-                                                           myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                           myDGSEM % dgStorage % dMatP_dev, &
-                                                           myDGSEM % state % tendency_dev )
+                                                    myDGSEM % static % solution_dev, &
+                                                    myDGSEM % mesh % elements % Ja_dev, &
+                                                    myDGSEM % mesh % elements % J_dev, &
+                                                    myDGSEM % state % flux_dev, &
+                                                    myDGSEM % params % polyDeg_dev, &
+                                                    myDGSEM % state % nEquations_dev, &
+                                                    myDGSEM % mesh % elements % nElements_dev )
 
 #else
 
@@ -1574,68 +1594,80 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    CALL AddSourceTerms_CUDAKernel<<<grid,tBlock>>>
+    CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+                                                           myDGSEM % static % solution_dev, &
+                                                           myDGSEM % state % source_dev, &
+                                                           myDGSEM % sourceTerms % drag_dev, &
+                                                           myDGSEM % mesh % elements % J_de, &
+                                                           myDGSEM % params % fRotX_dev, &
+                                                           myDGSEM % params % fRotY_dev, &
+                                                           myDGSEM % params % fRotZ_dev, &
+                                                           myDGSEM % params % g_dev, &
+                                                           myDGSEM % params % polydeg_dev, &
+                                                           myDGSEM % state % nEquations_dev, &
+                                                           myDGSEM % mesh % elements % nElements_dev )
+  
+ 
 
 #else
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
-        DO k = 0, myDGSEM % params % polyDeg
-          DO j = 0, myDGSEM % params % polyDeg
-            DO i = 0, myDGSEM % params % polyDeg
-
-              myDGSEM % state % tendency(i,j,k,iEq,iEl) = myDGSEM % state % tendency(i,j,k,iEq,iEl)/myDGSEM % mesh % elements % J(i,j,k,iEl)
-
-            ENDDO
-          ENDDO
-        ENDDO
-
         IF( iEq == 1 )THEN
+
           DO k = 0, myDGSEM % params % polyDeg
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
+
                 F = sqrt( myDGSEM % state % solution(i,j,k,1,iEl)**2 + &
                   myDGSEM % state % solution(i,j,k,2,iEl)**2 + &
                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
-                myDGSEM % state % tendency(i,j,k,1,iEl) = myDGSEM % state % tendency(i,j,k,1,iEl) -&
-                  myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,1,iEl)*F -&
-                  myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotY +&
-                  myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotZ
+
+                myDGSEM % state % source(i,j,k,1,iEl) = myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,1,iEl)*F -&
+                                                        myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotY +&
+                                                        myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotZ
+
               ENDDO
             ENDDO
           ENDDO
 
         ELSEIF( iEq == 2 )THEN
+
           DO k = 0, myDGSEM % params % polyDeg
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
+
                 F = sqrt( myDGSEM % state % solution(i,j,k,1,iEl)**2 + &
                   myDGSEM % state % solution(i,j,k,2,iEl)**2 + &
                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
-                myDGSEM % state % tendency(i,j,k,1,iEl) = myDGSEM % state % tendency(i,j,k,1,iEl) -&
-                  myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,2,iEl)*F - &
-                  myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotZ +&
-                  myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotX
+
+                myDGSEM % state % source(i,j,k,2,iEl) = myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,2,iEl)*F - &
+                                                        myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotZ +&
+                                                        myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotX
+
               ENDDO
             ENDDO
           ENDDO
 
         ELSEIF( iEq == 3 )THEN
+
           DO k = 0, myDGSEM % params % polyDeg
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
+
                 F = sqrt( myDGSEM % state % solution(i,j,k,1,iEl)**2 + &
                   myDGSEM % state % solution(i,j,k,2,iEl)**2 + &
                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
-                myDGSEM % state % tendency(i,j,k,3,iEl) = myDGSEM % state % tendency(i,j,k,3,iEl) -&
-                  myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,3,iEl)*F - &
-                  myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotX +&
-                  myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotY-&
-                  ( myDGSEM % state % solution(i,j,k,4,iEl) )*myDGSEM % params % g  !&
+
+                myDGSEM % state % source(i,j,k,3,iEl) = myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,3,iEl)*F - &
+                                                        myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotX +&
+                                                        myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotY-&
+                                                        ( myDGSEM % state % solution(i,j,k,4,iEl) )*myDGSEM % params % g  !&
+
               ENDDO
             ENDDO
           ENDDO
@@ -1674,15 +1706,14 @@ CONTAINS
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
     grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % state % nEquations-1,3)
 
-    CALL CalculateStressFlux_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-                                                            myDGSEM % static % solution_dev, &
-                                                            myDGSEM % dgStorage % dMatP_dev, &
-                                                            myDGSEM % dgStorage % bMat_dev, &
-                                                            myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                            myDGSEM % mesh % elements % Ja_dev, &
-                                                            myDGSEM % mesh % elements % J_dev, &
-                                                            myDGSEM % stressTensor % boundaryFlux_dev, &
-                                                            myDGSEM % stressTensor % solution_dev )
+    CALL CalculateStressTensorFlux_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+                                                                myDGSEM % static % solution_dev, &
+                                                                myDGSEM % mesh % elements % Ja_dev, &
+                                                                myDGSEM % stressTensor % flux_dev, &
+                                                                myDGSEM % params % polyDeg_dev, &
+                                                                myDGSEM % state % nEquations_dev, &
+                                                                myDGSEM % stressTensor % nEquations_dev, &
+                                                                myDGSEM % mesh % elements % nElements_dev )
 
 
 #else
@@ -1762,7 +1793,17 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    CALL CalculateStressTensor_CUDAKernel<<<grid,tBlock>>>( )
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
+    grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % stressTensor % nEquations,1)
+
+    CALL CalculateStressTensor_CUDAKernel<<<grid,tBlock>>>( myDGSEM % stressTensor % solution_dev, &
+                                                            myDGSEM % stressTensor % fluxDivergence_dev, &
+                                                            myDGSEM % mesh % elements % J_dev, &
+                                                            myDGSEM % params % polyDeg_dev, &
+                                                            myDGSEM % stressTensor % nEquations_dev, &
+                                                            myDGSEM % mesh % elements % nElements_dev )
 
 #else
 
@@ -1777,7 +1818,7 @@ CONTAINS
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
 
-                myDGSEM % stressTensor % solution(i,j,k,jEq,iEl) = myDGSEM % stressTensor % solution(i,j,k,jEq,iEl)/myDGSEM % mesh % elements % J(i,j,k,iEl)
+                myDGSEM % stressTensor % solution(i,j,k,jEq,iEl) = myDGSEM % stressTensor % fluxDivergence(i,j,k,jEq,iEl)/myDGSEM % mesh % elements % J(i,j,k,iEl)
 
               ENDDO
             ENDDO
@@ -1813,8 +1854,12 @@ CONTAINS
                                                             myDGSEM % stressBCs % externalState_dev, &                    ! O
                                                             myDGSEM % stressTensor % boundarySolution_dev, &   ! I
                                                             myDGSEM % stressBCs % prescribedState_dev, &                  ! I
-                                                            myDGSEM % mesh % elements % nHat_dev )             ! I
-
+                                                            myDGSEM % mesh % elements % nHat_dev, &
+                                                            myDGSEM % params % polyDeg_dev, &
+                                                            myDGSEM % stressTensor % nEquations_dev, &
+                                                            myDGSEM % extComm % nBoundaries_dev, &
+                                                            myDGSEM % faces % nFaces_dev, &
+                                                            myDGSEM % mesh % elements % nElements_dev )             ! I
 #else
     ! Local
     INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
@@ -1872,7 +1917,14 @@ CONTAINS
                                                           myDGSEM % sgsCoeffs % boundarySolution_dev, &
                                                           myDGSEM % stateBCs % externalState_dev, &
                                                           myDGSEM % stressBCs % externalState_dev, &
-                                                          myDGSEM % stressTensor % boundaryFlux_dev )
+                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % params % polyDeg_dev, &
+                                                          myDGSEM % state % nEquations_dev, &
+                                                          myDGSEM % stressTensor % nEquations_dev, &
+                                                          myDGSEM % sgsCoeffs % nEquations_dev, & 
+                                                          myDGSEM % extComm % nBoundaries_dev, &
+                                                          myDGSEM % mesh % faces % nFaces_dev, &
+                                                          myDGSEM % mesh % elements % nElements_dev )
 #else
     ! Local
     REAL(prec) :: norm, rhoIn, rhoOut
@@ -1973,7 +2025,14 @@ CONTAINS
                                                           myDGSEM % sgsBCS % externalState_dev, &
                                                           myDGSEM % stateBCs % externalState_dev, &
                                                           myDGSEM % stressBCs % externalState_dev, &
-                                                          myDGSEM % stressTensor % boundaryFlux_dev )
+                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % params % polyDeg_dev, &
+                                                          myDGSEM % state % nEquations_dev, &
+                                                          myDGSEM % stressTensor % nEquations_dev, &
+                                                          myDGSEM % sgsCoeffs % nEquations_dev, & 
+                                                          myDGSEM % extComm % nBoundaries_dev, &
+                                                          myDGSEM % mesh % faces % nFaces_dev, &
+                                                          myDGSEM % mesh % elements % nElements_dev )
 #else
     ! Local
     REAL(prec) :: norm, rhoIn, rhoOut
@@ -2114,7 +2173,10 @@ CONTAINS
     grid = dim3(myDGSEM % mesh % elements % nElements,1,1)
 
     CALL EquationOfState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-                                                      myDGSEM % static % solution_dev )
+                                                      myDGSEM % static % solution_dev, &
+                                                      myDGSEM % params % polyDeg_dev, &
+                                                      myDGSEM % state % nEquations_dev, &
+                                                      myDGSEM % mesh % nElements_dev )
 
 #else
     ! Local
@@ -3292,7 +3354,7 @@ CONTAINS
 
     ENDIF
   
-  END SUBROUTINE AddSourceTerms_CUDAKernel
+  END SUBROUTINE CalculateSourceTerms_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE CalculateStressTensorFlux_CUDAKernel( solution, static, Ja, stressFlux, N, nEq, nDiffEq, nElements )
   
@@ -3335,6 +3397,27 @@ CONTAINS
   
   END SUBROUTINE CalculateStressTensorFlux_CUDAKernel
 !
+  ATTRIBUTES(Global) SUBROUTINE CalculateStressTensor_CUDAKernel( stressTensor, stressFluxDivergence, Jac, N, nDiffEq, nElements )
+  
+    IMPLICIT NONE
+    INTEGER, DEVICE, INTENT(in)     :: N, nDiffEq, nElements 
+    REAL(prec), DEVICE, INTENT(out) :: stressTensor(0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: stressFluxDivergence(0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:N,0:N,0:N,1:nElements)
+    ! Local
+    INTEGER :: iEl, iEq, i, j, k
+
+    iEl = blockIDx % x
+    iEq = blockIDx % y
+    
+    i = threadIDx % x-1
+    j = threadIDx % y-1
+    k = threadIDx % z-1
+
+    stressTensor(i,j,k,iEq,iEl) = stressFluxDivergence(i,j,k,iEq,iEl)/Jac(i,j,k,iEl)
+
+  END SUBROUTINE CalculateStressTensor_CUDAKernel
+
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalStress_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
                                                                  externalStress, stressBsols, prescribedStress, nHat, &
                                                                  N, nDiffEq, nBoundaryFaces, nFaces, nElements )
@@ -3377,7 +3460,7 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE InternalStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                                nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
-                                                               externalState, externalStress, boundaryFluxi, &
+                                                               externalState, externalStress, boundaryFlux, &
                                                                N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements )
   
     IMPLICIT NONE
