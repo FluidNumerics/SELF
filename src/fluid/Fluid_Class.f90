@@ -909,6 +909,7 @@ CONTAINS
                                                                myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
                                                                myDGSEM % mesh % elements % nHat_dev, &
                                                                myDGSEM % params % polyDeg_dev, &
+                                                               myDGSEM % sgsCoeffs % nEquations_dev, &   ! I
                                                                myDGSEM % extComm % nBoundaries_dev, &
                                                                myDGSEM % mesh % faces % nFaces_dev, &
                                                                myDGSEM % mesh % elements % nElements_dev )           ! I
@@ -976,6 +977,7 @@ CONTAINS
                                                            myDGSEM % stateBCs % prescribedState_dev, &             ! I
                                                            myDGSEM % mesh % elements % nHat_dev, &
                                                            myDGSEM % params % polydeg_dev, &
+                                                           myDGSEM % state % nEquations_dev, &    ! I
                                                            myDGSEM % extComm % nBoundaries_dev, &
                                                            myDGSEM % mesh % faces % nFaces_dev, &
                                                            myDGSEM % mesh % elements % nElements_dev )           ! I
@@ -1180,6 +1182,7 @@ CONTAINS
                                                         myDGSEM % params % polyDeg_dev, &
                                                         myDGSEM % state % nEquations_dev, &
                                                         myDGSEM % stressTensor % nEquations_dev, &
+                                                        myDGSEM % extComm % nBoundaries_dev, &
                                                         myDGSEM % mesh % faces % nFaces_dev, &
                                                         myDGSEM % mesh % elements % nElements_dev )
 
@@ -1346,6 +1349,7 @@ CONTAINS
                                                         myDGSEM % params % polyDeg_dev, &
                                                         myDGSEM % state % nEquations_dev, &
                                                         myDGSEM % stressTensor % nEquations_dev, &
+                                                        myDGSEM % extComm % nBoundaries_dev, &    ! I
                                                         myDGSEM % mesh % faces % nFaces_dev, &
                                                         myDGSEM % mesh % elements % nElements_dev )
 #else
@@ -2307,10 +2311,10 @@ CONTAINS
     REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
     REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
-    REAL(prec), ALLOCATABLE, DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec), ALLOCATABLE, DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec), ALLOCATABLE, DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
-    INTEGER, ALLOCATABLE, DEVICE     :: nDim_dev
+    REAL(prec), DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec), DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec), DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
+    INTEGER,  DEVICE     :: nDim_dev
 #endif
     INTEGER       :: i, j, k, iEl, iEq, fUnit
     CHARACTER(5)  :: zoneID
@@ -2322,10 +2326,6 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    ALLOCATE( x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:4,1:mesh % elements % nElements), &
-              sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:mesh % elements % nElements), &
-              bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:mesh % elements % nElements), &
-              nDim_dev )
 
     nDim_dev = 3
 
@@ -2345,7 +2345,6 @@ CONTAINS
     sol = sol_dev
     bsol = bsol_dev
  
-    DEALLOCATE( x_dev, sol_dev, bsol_dev, nDim_dev )
     
 #else
 
@@ -2794,15 +2793,15 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
                                                                     externalsgsCoeffs, sgsCoeffsBsols, nHat, N, &
-                                                                    nBoundaryFaces, nFaces, nElements )
+                                                                    nSGSEq, nBoundaryFaces, nFaces, nElements )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nBoundaryFaces, nFaces, nElements
+    INTEGER, DEVICE, INTENT(in)     :: N, nSGSEq, nBoundaryFaces, nFaces, nElements
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(out) :: externalsgsCoeffs(0:N,0:N,1:nEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffsBsols(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: externalsgsCoeffs(0:N,0:N,1:nSGSEq,1:nBoundaryFaces)
+    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffsBsols(0:N,0:N,1:nSGSEq,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
      ! Local
     INTEGER    :: iEq, iFace, i, j, k
@@ -2833,9 +2832,9 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalState_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
                                                                 externalState, stateBsols, prescribedState, nHat, N, &
-                                                                nBoundaryFaces, nFaces, nElements)
+                                                                nEq, nBoundaryFaces, nFaces, nElements)
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nBoundaryFaces, nFaces, nElements
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nBoundaryFaces, nFaces, nElements
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
@@ -3007,10 +3006,10 @@ CONTAINS
   ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                              nHat, boundarySolution, boundarySolution_static, &
                                                              externalState, boundaryFlux, stressFlux, &
-                                                             N, nEq, nDiffEq, nFaces, nElements )
+                                                             N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nFaces, nElements 
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements 
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
@@ -3138,10 +3137,10 @@ CONTAINS
   ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                              nHat, boundarySolution, boundarySolution_static, &
                                                              externalState, boundaryFlux, stressFlux, &
-                                                             N, nEq, nDiffEq, nFaces, nElements  )
+                                                             N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements  )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nFaces, nElements 
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements 
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
@@ -3263,7 +3262,6 @@ CONTAINS
     INTEGER, DEVICE, INTENT(in)      :: N, nEq, nElements
     REAL(prec), DEVICE, INTENT(in)   :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)   :: static(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)   :: drag(0:N,0:N,0:N,1:nElements)
     REAL(prec), DEVICE, INTENT(in)   :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
     REAL(prec), DEVICE, INTENT(in)   :: Jac(0:N,0:N,0:N,1:nElements)
     REAL(prec), DEVICE, INTENT(out)  :: flux(1:3,0:N,0:N,0:N,1:nEq,1:nElements)
@@ -3360,10 +3358,10 @@ CONTAINS
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nElements 
-    REAL(prec), DEVICE, INTENT(in)  :: solution(0:N,0:N,0:N,1:nEq,1:nEl)
-    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nEl)
-    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nEl)
-    REAL(prec), DEVICE, INTENT(in)  :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nEl)
+    REAL(prec), DEVICE, INTENT(in)  :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
      ! Local
     INTEGER :: iEl, iEq, idir, i, j, k, m
     REAL(prec), SHARED :: contFlux(0:7,0:7,0:7,1:3)
