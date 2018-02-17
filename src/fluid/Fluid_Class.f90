@@ -292,7 +292,7 @@ CONTAINS
     ! LOCAL
     REAL(prec)                  :: t0
 #ifdef HAVE_CUDA
-    REAL(prec) :: t, dt
+    REAL(prec),DEVICE :: t, dt
     REAL(prec),DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
@@ -321,10 +321,16 @@ CONTAINS
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
-          myDGSEM % state % solution_dev, &
-          myDGSEM % state % tendency_dev, &
-          myDGSEM % stressTensor % tendency_dev )
+        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt, &
+                                                    myDGSEM % state % solution_dev, &
+                                                    myDGSEM % state % tendency_dev, &
+                                                    myDGSEM % state % source_dev, &
+                                                    myDGSEM % stressTensor % tendency_dev, &
+                                                    myDGSEM % mesh % elements % J_dev, &
+                                                    myDGSEM % params % polyDeg_dev, &
+                                                    myDGSEM % state % nEquations_dev, &
+                                                    myDGSEM % stressTensor % nEquations_dev, &
+                                                    myDGSEM % mesh % elements % nElements_dev )
 
         CALL myDGSEM % EquationOfState( )
 
@@ -346,10 +352,16 @@ CONTAINS
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
-          myDGSEM % state % solution_dev, &
-          myDGSEM % state % tendency_dev, &
-          myDGSEM % stressTensor % tendency_dev )
+        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt, &
+                                                    myDGSEM % state % solution_dev, &
+                                                    myDGSEM % state % tendency_dev, &
+                                                    myDGSEM % state % source_dev, &
+                                                    myDGSEM % stressTensor % tendency_dev, &
+                                                    myDGSEM % mesh % elements % J_dev, &
+                                                    myDGSEM % params % polyDeg_dev, &
+                                                    myDGSEM % state % nEquations_dev, &
+                                                    myDGSEM % stressTensor % nEquations_dev, &
+                                                    myDGSEM % mesh % elements % nElements_dev )
 
         CALL myDGSEM % EquationOfState( )
 
@@ -812,7 +824,10 @@ CONTAINS
                                                                myDGSEM % static % solution_dev, &
                                                                myDGSEM % smoothState % solution_dev, &
                                                                myDGSEM % filter % filterMat_dev, &
-                                                               myDGSEM % sgsCoeffs % solution_dev )
+                                                               myDGSEM % sgsCoeffs % solution_dev, &
+                                                               myDGSEM % params % polyDeg_dev, &
+                                                               myDGSEM % state % nEquations_dev, &
+                                                               myDGSEM % mesh % elements % nElements_dev )
 #else
     ! Local
     INTEGER :: iEl, i, j, k, m, ii, jj, kk
@@ -884,7 +899,11 @@ CONTAINS
                                                                myDGSEM % extComm % extProcIDs_dev, &           ! I
                                                                myDGSEM % sgsBCs % externalState_dev, &                    ! O
                                                                myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
-                                                               myDGSEM % mesh % elements % nHat_dev )           ! I
+                                                               myDGSEM % mesh % elements % nHat_dev, &
+                                                               myDGSEM % params % polyDeg_dev, &
+                                                               myDGSEM % extComm % nBoundaries_dev, &
+                                                               myDGSEM % mesh % faces % nFaces_dev, &
+                                                               myDGSEM % mesh % elements % nElements_dev )           ! I
 #else
     ! Local
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
@@ -2647,12 +2666,12 @@ CONTAINS
 ! ============================================================================================================================ !
 !------------------------------------------- CUDA Kernels Below -------------------------------------------------------------- !
 ! ============================================================================================================================ !
-  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, solution, tendency, source, diffusiveTendency, Jac, N, nEq, nDiffEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, dt, solution, tendency, source, diffusiveTendency, Jac, N, nEq, nDiffEq, nElements )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)       :: N, nEq, nDiffEq, nElements 
     REAL(prec), DEVICE, INTENT(inout) :: G3D(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: a, g
+    REAL(prec), DEVICE, INTENT(in)    :: a, g, dt
     REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)    :: Jac(0:N,0:N,0:N,1:nElements)
     REAL(prec), DEVICE, INTENT(in)    :: source(0:N,0:N,0:N,1:nEq,1:nElements)
@@ -2669,7 +2688,7 @@ CONTAINS
     k = threadIdx % z - 1
   
     G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( tendency(i,j,k,iEq,iEl) + diffusivetendency(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
-    solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt_dev*g*G3D(i,j,k,iEq,iEl)
+    solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
   
   END SUBROUTINE UpdateG3D_CUDAKernel
 !
