@@ -850,6 +850,7 @@ CONTAINS
                                                                myDGSEM % smoothState % solution_dev, &
                                                                myDGSEM % filter % filterMat_dev, &
                                                                myDGSEM % sgsCoeffs % solution_dev, &
+                                                               myDGSEM % params % viscLengthScale_dev, &
                                                                myDGSEM % params % polyDeg_dev, &
                                                                myDGSEM % state % nEquations_dev, &
                                                                myDGSEM % mesh % elements % nElements_dev )
@@ -925,6 +926,7 @@ CONTAINS
                                                                myDGSEM % sgsBCs % externalState_dev, &                    ! O
                                                                myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
                                                                myDGSEM % mesh % elements % nHat_dev, &
+                                                               myDGSEM % extComm % myRank_dev, &
                                                                myDGSEM % params % polyDeg_dev, &
                                                                myDGSEM % sgsCoeffs % nEquations_dev, &   ! I
                                                                myDGSEM % extComm % nBoundaries_dev, &
@@ -993,6 +995,9 @@ CONTAINS
                                                            myDGSEM % state % boundarySolution_dev, &    ! I
                                                            myDGSEM % stateBCs % prescribedState_dev, &             ! I
                                                            myDGSEM % mesh % elements % nHat_dev, &
+                                                           myDGSEM % extComm % myRank_dev, &
+                                                           myDGSEM % params % Cd_dev, &
+                                                           myDGSEM % params % dragScale_dev, &
                                                            myDGSEM % params % polydeg_dev, &
                                                            myDGSEM % state % nEquations_dev, &    ! I
                                                            myDGSEM % extComm % nBoundaries_dev, &
@@ -1196,6 +1201,9 @@ CONTAINS
                                                         myDGSEM % stateBCs % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                        myDGSEM % params % R_dev, &
+                                                        myDGSEM % params % P0_dev, &
+                                                        myDGSEM % params % Rc_dev, &
                                                         myDGSEM % params % polyDeg_dev, &
                                                         myDGSEM % state % nEquations_dev, &
                                                         myDGSEM % stressTensor % nEquations_dev, &
@@ -1363,6 +1371,9 @@ CONTAINS
                                                         myDGSEM % stateBCs % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                        myDGSEM % params % R_dev, &
+                                                        myDGSEM % params % P0_dev, &
+                                                        myDGSEM % params % Rc_dev, &
                                                         myDGSEM % params % polyDeg_dev, &
                                                         myDGSEM % state % nEquations_dev, &
                                                         myDGSEM % stressTensor % nEquations_dev, &
@@ -1866,7 +1877,7 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   1 )
-    grid = dim3(myDGSEM % nBoundaryFaces,myDGSEM % stressTensor % nEquations,1)
+    grid = dim3(myDGSEM % extComm % nBoundaries,myDGSEM % stressTensor % nEquations,1)
 
     CALL UpdateExternalStress_CUDAKernel<<<grid, tBlock>>>( myDGSEM % extComm % boundaryIDs_dev, &            ! I
                                                             myDGSEM % mesh % faces % elementIDs_dev, &         ! I
@@ -1876,10 +1887,11 @@ CONTAINS
                                                             myDGSEM % stressTensor % boundarySolution_dev, &   ! I
                                                             myDGSEM % stressBCs % prescribedState_dev, &                  ! I
                                                             myDGSEM % mesh % elements % nHat_dev, &
+                                                            myDGSEM % extComm % myRank_dev, &
                                                             myDGSEM % params % polyDeg_dev, &
                                                             myDGSEM % stressTensor % nEquations_dev, &
                                                             myDGSEM % extComm % nBoundaries_dev, &
-                                                            myDGSEM % faces % nFaces_dev, &
+                                                            myDGSEM % mesh % faces % nFaces_dev, &
                                                             myDGSEM % mesh % elements % nElements_dev )             ! I
 #else
     ! Local
@@ -1924,7 +1936,7 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   1 )
-    grid = dim3(myDGSEM % mesh % nFaces,myDGSEM % state % nEquations-1,1)
+    grid = dim3(myDGSEM % mesh % faces % nFaces,myDGSEM % state % nEquations-1,1)
 
     CALL InternalStressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs_dev, &
                                                           myDGSEM % mesh % faces % elementSides_dev, &
@@ -1939,6 +1951,7 @@ CONTAINS
                                                           myDGSEM % stateBCs % externalState_dev, &
                                                           myDGSEM % stressBCs % externalState_dev, &
                                                           myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % params % viscLengthScale_dev, &
                                                           myDGSEM % params % polyDeg_dev, &
                                                           myDGSEM % state % nEquations_dev, &
                                                           myDGSEM % stressTensor % nEquations_dev, &
@@ -2031,7 +2044,7 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   1 )
-    grid = dim3(myDGSEM % mesh % nFaces,myDGSEM % state % nEquations-1,1)
+    grid = dim3(myDGSEM % mesh % faces % nFaces,myDGSEM % state % nEquations-1,1)
 
     CALL BoundaryStressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs_dev, &
                                                           myDGSEM % mesh % faces % elementSides_dev, &
@@ -2047,6 +2060,7 @@ CONTAINS
                                                           myDGSEM % stateBCs % externalState_dev, &
                                                           myDGSEM % stressBCs % externalState_dev, &
                                                           myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % params % viscLengthScale_dev, &
                                                           myDGSEM % params % polyDeg_dev, &
                                                           myDGSEM % state % nEquations_dev, &
                                                           myDGSEM % stressTensor % nEquations_dev, &
@@ -2195,9 +2209,12 @@ CONTAINS
 
     CALL EquationOfState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                       myDGSEM % static % solution_dev, &
+                                                      myDGSEM % params % P0_dev, &
+                                                      myDGSEM % params % R_dev, &
+                                                      myDGSEM % params % hCapRatio_dev, &
                                                       myDGSEM % params % polyDeg_dev, &
                                                       myDGSEM % state % nEquations_dev, &
-                                                      myDGSEM % mesh % nElements_dev )
+                                                      myDGSEM % mesh % elements % nElements_dev )
 
 #else
     ! Local
@@ -2348,15 +2365,15 @@ CONTAINS
 
     CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution_dev, &
                                                                      sol_dev, myDGSEM % state % nEquations_dev, &
-                                                                     myDGSEM % elements % nElements_dev )  
+                                                                     myDGSEM % mesh % elements % nElements_dev )  
 
     CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution_dev, &
                                                                      bsol_dev, myDGSEM % static % nEquations_dev, &
-                                                                     myDGSEM % elements % nElements_dev )  
+                                                                     myDGSEM % mesh % elements % nElements_dev )  
 
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % elements % x_dev, &
+    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x_dev, &
                                                                      x_dev, nDim_dev, &
-                                                                     myDGSEM % elements % nElements_dev )  
+                                                                     myDGSEM % mesh % elements % nElements_dev )  
 
     x = x_dev
     sol = sol_dev
@@ -2705,7 +2722,7 @@ CONTAINS
     ENDIF
 
 #ifdef HAVE_CUDA
-    myDGSEM % sourceTerms % drag_dev = myDGSEM % drag
+    myDGSEM % sourceTerms % drag_dev = myDGSEM % sourceTerms % drag
     myDGSEM % state % solution_dev   = myDGSEM % state % solution
     myDGSEM % static % solution_dev  = myDGSEM % static % solution
 #endif
@@ -2770,10 +2787,11 @@ CONTAINS
   
   END SUBROUTINE UpdateG3D_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateSGSCoefficients_CUDAKernel( solution, static, smoothState, filterMat, sgsCoeffs, N, nEq, nElements  )
+  ATTRIBUTES(Global) SUBROUTINE CalculateSGSCoefficients_CUDAKernel( solution, static, smoothState, filterMat, sgsCoeffs, viscLengthScale, N, nEq, nElements  )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)       :: N, nEq, nElements 
+    REAL(prec), DEVICE, INTENT(in)    :: viscLengthScale
     REAL(prec), DEVICE, INTENT(in)    :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)    :: static(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(inout) :: smoothState(0:N,0:N,0:N,1:nEq,1:nElements)
@@ -2803,16 +2821,16 @@ CONTAINS
     
      ! Now we calculate the viscosity and dIFfusivities (currently assumes isotropic and low mach number)
     DO m = 1, nEq-1
-      sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale_dev*sqrt( sgsKE )
+      sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale*sqrt( sgsKE )
     ENDDO
   
   END SUBROUTINE CalculateSGSCoefficients_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
-                                                                    externalsgsCoeffs, sgsCoeffsBsols, nHat, N, &
+                                                                    externalsgsCoeffs, sgsCoeffsBsols, nHat, myRank, N, &
                                                                     nSGSEq, nBoundaryFaces, nFaces, nElements )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nSGSEq, nBoundaryFaces, nFaces, nElements
+    INTEGER, DEVICE, INTENT(in)     :: myRank, N, nSGSEq, nBoundaryFaces, nFaces, nElements
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
@@ -2839,7 +2857,7 @@ CONTAINS
     
     IF( i <= N .AND. j <= N )THEN
     
-      IF( p2 == myRank_dev )THEN
+      IF( p2 == myRank )THEN
         externalsgsCoeffs(i,j,iEq,iFace2) = sgsCoeffsBsols(i,j,iEq,s1,e1)
       ENDIF
     
@@ -2848,10 +2866,10 @@ CONTAINS
   END SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalState_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
-                                                                externalState, stateBsols, prescribedState, nHat, N, &
+                                                                externalState, stateBsols, prescribedState, nHat, myRank, cDrag, dragScale, N, &
                                                                 nEq, nBoundaryFaces, nFaces, nElements)
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nBoundaryFaces, nFaces, nElements
+    INTEGER, DEVICE, INTENT(in)     :: myRank, N, nEq, nBoundaryFaces, nFaces, nElements
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
@@ -2860,6 +2878,7 @@ CONTAINS
     REAL(prec), DEVICE, INTENT(in)  :: stateBsols(0:N,0:N,1:nEq,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: prescribedState(0:N,0:N,1:nEq,1:nBoundaryFaces)
     REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: cDrag, dragScale
      ! Local
     INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
     INTEGER    :: iFace2, p2
@@ -2881,7 +2900,7 @@ CONTAINS
       e2     = elementIDs(2,iFace2)
       p2     = procIDs( iFace )
     
-      IF( i <= N .AND. j <= N .AND. p2 == myRank_dev)THEN
+      IF( i <= N .AND. j <= N .AND. p2 == myRank )THEN
     
         IF( e2 == PRESCRIBED )THEN
     
@@ -2996,12 +3015,12 @@ CONTAINS
           us = ( stateBsols(i,j,1,s1,e1)*sx + &
             stateBsols(i,j,2,s1,e1)*sy + &
             stateBsols(i,j,3,s1,e1)*sz )*&
-            (1.0_prec-Cd_dev*dScale_dev*speed)
+            (1.0_prec-Cdrag*dragScale*speed)
     
           ut = ( stateBsols(i,j,1,s1,e1)*tx + &
             stateBsols(i,j,2,s1,e1)*ty + &
             stateBsols(i,j,3,s1,e1)*tz )*&
-            (1.0_prec-Cd_dev*dScale_dev*speed)
+            (1.0_prec-Cdrag*dragScale*speed)
     
           externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
           externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
@@ -3022,11 +3041,12 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                              nHat, boundarySolution, boundarySolution_static, &
-                                                             externalState, boundaryFlux, stressFlux, &
+                                                             externalState, boundaryFlux, stressFlux, R, P0, Rc, &
                                                              N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements 
+    REAL(prec), DEVICE, INTENT(in)  :: R, P0, Rc
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
@@ -3078,14 +3098,14 @@ CONTAINS
         (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
     
       ! Sound speed estimate for the external and internal states
-      cOut = sqrt( R_dev*T* &
-        ( (boundarySolution(ii,jj,6,s2,e2)+boundarySolution_static(ii,jj,6,s2,e2))/ P0_dev )**rC_dev   )
+      cOut = sqrt( R*T* &
+        ( (boundarySolution(ii,jj,6,s2,e2)+boundarySolution_static(ii,jj,6,s2,e2))/ P0 )**rC   )
     
       T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
         (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )
     
-      cIn  = sqrt( R_dev*T* &
-        ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
+      cIn  = sqrt( R*T* &
+        ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0 )**rC  )
     
       ! External normal velocity component
       uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
@@ -3153,11 +3173,12 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                              nHat, boundarySolution, boundarySolution_static, &
-                                                             externalState, boundaryFlux, stressFlux, &
+                                                             externalState, boundaryFlux, stressFlux, R, P0, Rc, &
                                                              N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements  )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements 
+    REAL(prec), DEVICE, INTENT(in)  :: R, P0, Rc
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
@@ -3208,14 +3229,14 @@ CONTAINS
       T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
         (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
       ! Sound speed estimate for the external and internal states
-      cOut = sqrt( R_dev*T* &
-        ( (externalState(ii,jj,6,bID)+boundarySolution_static(i,j,6,s1,e1))/ P0_dev )**rC_dev   )
+      cOut = sqrt( R*T* &
+        ( (externalState(ii,jj,6,bID)+boundarySolution_static(i,j,6,s1,e1))/ P0 )**rC )
     
       T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
         (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )
     
-      cIn  = sqrt( R_dev*T* &
-        ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
+      cIn  = sqrt( R*T* &
+        ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0 )**rC )
     
       ! External normal velocity component
       uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
@@ -3378,9 +3399,9 @@ CONTAINS
     REAL(prec), DEVICE, INTENT(in)  :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
      ! Local
-    INTEGER :: iEl, iEq, idir, i, j, k, m
+    INTEGER :: iEl, iEq, jEq, idir, i, j, k, m
     REAL(prec), SHARED :: contFlux(0:7,0:7,0:7,1:3)
     REAL(prec) :: strTens
     
@@ -3435,9 +3456,9 @@ CONTAINS
 
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalStress_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
                                                                  externalStress, stressBsols, prescribedStress, nHat, &
-                                                                 N, nDiffEq, nBoundaryFaces, nFaces, nElements )
+                                                                 myRank, N, nDiffEq, nBoundaryFaces, nFaces, nElements )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nDiffEq, nBoundaryFaces, nFaces, nElements
+    INTEGER, DEVICE, INTENT(in)     :: myRank, N, nDiffEq, nBoundaryFaces, nFaces, nElements
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
@@ -3465,7 +3486,7 @@ CONTAINS
     
     IF( i <= N .AND. j <= N )THEN
     
-      IF( p2 == myRank_dev )THEN
+      IF( p2 == myRank )THEN
         externalStress(i,j,iEq,iFace) = -stressBsols(i,j,iEq,s1,e1)
       ENDIF
     
@@ -3475,11 +3496,12 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE InternalStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                                nHat, boundaryState, static, boundaryStress, sgsCoeffs, &
-                                                               externalState, externalStress, boundaryFlux, &
+                                                               externalState, externalStress, boundaryFlux, viscLengthScale, &
                                                                N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements 
+    REAL(prec), DEVICE, INTENT(in)  :: viscLengthScale
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
@@ -3520,7 +3542,7 @@ CONTAINS
     IF( e2 > 0 )THEN
     
       boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( sgsCoeffs(ii,jj,iEq,s2,e2)*boundaryState(ii,jj,iEq,s2,e2)-&
-        sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+        sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale*norm
     
       IF( iEq == 4 )THEN
     
@@ -3554,11 +3576,12 @@ CONTAINS
 !
   ATTRIBUTES(Global) SUBROUTINE BoundaryStressFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                                nHat, boundaryState, static, boundaryStress, sgsCoeffs, externalSGS, &
-                                                               externalState, externalStress, boundaryFlux, &
+                                                               externalState, externalStress, boundaryFlux, viscLengthScale, &
                                                                N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements  )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nSGSEq, nBoundaryFaces, nFaces, nElements 
+    REAL(prec), DEVICE, INTENT(in)  :: viscLengthScale
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
@@ -3601,7 +3624,7 @@ CONTAINS
     
         bID = ABS(bID)
         boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*sgsCoeffs(i,j,iEq,s1,e1)*&
-          (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+          (externalState(ii,jj,iEq,bID)-boundaryState(i,j,iEq,s1,e1))/viscLengthScale*norm
     
         IF( iEq == 4 )THEN
     
@@ -3629,7 +3652,7 @@ CONTAINS
       ELSE
     
         boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( externalSGS(ii,jj,iEq,bID)*externalState(ii,jj,iEq,bID)-&
-          sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale_dev*norm
+          sgsCoeffs(i,j,iEq,s1,e1)*boundaryState(i,j,iEq,s1,e1))/viscLengthScale*norm
     
         IF( iEq == 4 )THEN
     
@@ -3659,11 +3682,12 @@ CONTAINS
   
   END SUBROUTINE BoundaryStressFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE EquationOfState_CUDAKernel( solution, static, N, nEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE EquationOfState_CUDAKernel( solution, static, P0, R, hCapRatio, N, nEq, nElements )
     ! This routine calculates the anomalous pressure referenced to the static state.
     ! The pressure is calculated using the ideal gas law.
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)       :: N, nEq, nElements
+    REAL(prec), DEVICE, INTENT(in)    :: P0, R, hCapRatio
     REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)    :: static(0:N,0:N,0:N,1:nEq,1:nElements)
      ! Local
@@ -3679,7 +3703,7 @@ CONTAINS
      ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
      ! And P' = P - P_static
     rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
-    solution(i,j,k,6,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,6,iEl)
+    solution(i,j,k,6,iEl) = P0*( rhoT*R/P0 )**hCapRatio - static(i,j,k,6,iEl)
   
   END SUBROUTINE EquationOfState_CUDAKernel
 #endif
