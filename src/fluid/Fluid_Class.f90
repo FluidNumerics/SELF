@@ -292,8 +292,9 @@ CONTAINS
     ! LOCAL
     REAL(prec)                  :: t0
 #ifdef HAVE_CUDA
-    REAL(prec),DEVICE :: t, dt
-    REAL(prec),DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
+    REAL(prec)         :: t, dt
+    REAL(prec), DEVICE :: t_dev, dt_dev
+    REAL(prec), DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
                              1:myDGSEM % state % nEquations,&
@@ -311,6 +312,7 @@ CONTAINS
 
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
+    dt_dev = dt
 
     DO iT = 1, nT
 
@@ -321,7 +323,7 @@ CONTAINS
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt, &
+        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt_dev, &
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
@@ -346,13 +348,14 @@ CONTAINS
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
       G3D  = 0.0_prec
+      dt_dev = dt
 
       DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt, &
+        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt_dev, &
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
@@ -574,10 +577,17 @@ CONTAINS
 
     IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
       ! Will need to verIFy that this call works properly with "state" on input and output
+#ifdef HAVE_CUDA
+      CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
+                                        myDGSEM % state % solution_dev, &
+                                        myDGSEM % state % nEquations_dev, &
+                                        myDGSEM % mesh % elements % nElements_dev )
+#else
       CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
                                         myDGSEM % state % solution, &
                                         myDGSEM % state % nEquations, &
                                         myDGSEM % mesh % elements % nElements )
+#endif
 
     ENDIF
 
@@ -663,10 +673,17 @@ CONTAINS
 ! attribute. This SUBROUTINE call has no dependence to any other within this
 ! SUBROUTINE.
 
+#ifdef HAVE_CUDA
+        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
+                                          myDGSEM % smoothState % solution_dev, &
+                                          myDGSEM % state % nEquations_dev, &
+                                          myDGSEM % mesh % elements % nElements_dev )
+#else
         CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
                                           myDGSEM % smoothState % solution, &
                                           myDGSEM % state % nEquations, &
                                           myDGSEM % mesh % elements % nElements )
+#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1335,7 +1352,7 @@ CONTAINS
       1 )
     grid = dim3(myDGSEM % mesh % faces % nFaces,1,1)
 
-    CALL BoundaryFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs, &
+    CALL BoundaryFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs_dev, &
                                                         myDGSEM % mesh % faces % elementSides_dev, &
                                                         myDGSEM % mesh % faces % boundaryID_dev, &
                                                         myDGSEM % mesh % faces % iMap_dev, &
@@ -1602,7 +1619,7 @@ CONTAINS
                                                            myDGSEM % static % solution_dev, &
                                                            myDGSEM % state % source_dev, &
                                                            myDGSEM % sourceTerms % drag_dev, &
-                                                           myDGSEM % mesh % elements % J_de, &
+                                                           myDGSEM % mesh % elements % J_dev, &
                                                            myDGSEM % params % fRotX_dev, &
                                                            myDGSEM % params % fRotY_dev, &
                                                            myDGSEM % params % fRotZ_dev, &
@@ -2727,17 +2744,17 @@ CONTAINS
 ! ============================================================================================================================ !
 !------------------------------------------- CUDA Kernels Below -------------------------------------------------------------- !
 ! ============================================================================================================================ !
-  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, dt, solution, tendency, source, diffusiveTendency, Jac, N, nEq, nDiffEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, dt, solution, fluxDivergence, source, diffusiveFluxDivergence, Jac, N, nEq, nDiffEq, nElements )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)       :: N, nEq, nDiffEq, nElements 
     REAL(prec), DEVICE, INTENT(inout) :: G3D(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)    :: a, g, dt
     REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: Jac(0:N,0:N,0:N,1:nElements)
     REAL(prec), DEVICE, INTENT(in)    :: source(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: tendency(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: diffusivetendency(0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)    :: fluxDivergence(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)    :: diffusiveFluxDivergence(0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)    :: Jac(0:N,0:N,0:N,1:nElements)
     ! Local
     INTEGER :: i, j, k, iEq, iEl
   
@@ -2748,7 +2765,7 @@ CONTAINS
     j = threadIdx % y - 1
     k = threadIdx % z - 1
   
-    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( tendency(i,j,k,iEq,iEl) + diffusivetendency(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
   
   END SUBROUTINE UpdateG3D_CUDAKernel

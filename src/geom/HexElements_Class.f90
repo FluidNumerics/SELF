@@ -52,18 +52,18 @@ MODULE HexElements_CLASS
     REAL(prec), ALLOCATABLE :: Ja(:,:,:,:,:,:)
 
 #ifdef HAVE_CUDA
-    INTEGER, ALLOCATABLE    :: N_dev, nElements_dev
-    INTEGER, ALLOCATABLE    :: elementID_dev(:)
-    INTEGER, ALLOCATABLE    :: nodeIDs_dev(:,:)
-    INTEGER, ALLOCATABLE    :: neighbors_dev(:,:)
-    REAL(prec), ALLOCATABLE :: nHat_dev(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: xBound_dev(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: x_dev(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: J_dev(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: dxds_dev(:,:,:,:), dxdp_dev(:,:,:,:), dxdq_dev(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: dyds_dev(:,:,:,:), dydp_dev(:,:,:,:), dydq_dev(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: dzds_dev(:,:,:,:), dzdp_dev(:,:,:,:), dzdq_dev(:,:,:,:)
-    REAL(prec), ALLOCATABLE :: Ja_dev(:,:,:,:,:,:)
+    INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nElements_dev
+    INTEGER, DEVICE, ALLOCATABLE    :: elementID_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE    :: nodeIDs_dev(:,:)
+    INTEGER, DEVICE, ALLOCATABLE    :: neighbors_dev(:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: nHat_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: xBound_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: x_dev(:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: J_dev(:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: dxds_dev(:,:,:,:), dxdp_dev(:,:,:,:), dxdq_dev(:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: dyds_dev(:,:,:,:), dydp_dev(:,:,:,:), dydq_dev(:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: dzds_dev(:,:,:,:), dzdp_dev(:,:,:,:), dzdq_dev(:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: Ja_dev(:,:,:,:,:,:)
 #endif
 
   CONTAINS
