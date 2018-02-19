@@ -299,7 +299,6 @@ CONTAINS
                              0:myDGSEM % params % polyDeg,&
                              1:myDGSEM % state % nEquations,&
                              1:myDGSEM % mesh % elements % nElements)
-    REAL(prec), DEVICE :: rk3_a_dev(1:3), rk3_g_dev(1:3)
     INTEGER            :: iT, m, iStat
     TYPE(dim3)         :: grid, tBlock
 
@@ -319,7 +318,6 @@ CONTAINS
       G3D  = 0.0_prec
 
       DO m = 1,3
-
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
@@ -565,6 +563,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     REAL(prec), INTENT(in)      :: tn
+#ifdef HAVE_CUDA
+    TYPE(dim3) :: tBlock, grid
+#endif
 
 
 ! ----------------------------------------------------------------------------- !
@@ -590,7 +591,6 @@ CONTAINS
 #endif
 
     ENDIF
-
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -600,7 +600,16 @@ CONTAINS
 !  boundary conditions, Riemann Fluxes, and MPI DATA exchanges that need to
 !  occur.
 
-    CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+    !CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % state % N+1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % state % N+1)/4 ) ) , &
+                  myDGSEM % state % nEquations )
+    grid = dim3(myDGSEM % state % nElements, 1, 1)  
+    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev,&
+                                                                         myDGSEM % state % boundarySolution_dev, &
+                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                         myDGSEM % state % N_dev, myDGSEM % state % nEquations_dev, &
+                                                                         myDGSEM % state % nElements_dev )
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -708,7 +717,16 @@ CONTAINS
 ! of each element so that the viscous flux can later be computed. This routine
 ! depends on the result of CalculateSGSCoefficients.
 
-        CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+    !    CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+        tBlock = dim3(4*(ceiling( REAL(myDGSEM % sgsCoeffs % N+1)/4 ) ), &
+                      4*(ceiling( REAL(myDGSEM % sgsCoeffs % N+1)/4 ) ) , &
+                      myDGSEM % sgsCoeffs % nEquations )
+        grid = dim3(myDGSEM % sgsCoeffs % nElements, 1, 1)  
+        CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev,&
+                                                                             myDGSEM % sgsCoeffs % boundarySolution_dev, &
+                                                                             myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                             myDGSEM % sgsCoeffs % N_dev, myDGSEM % sgsCoeffs % nEquations_dev, &
+                                                                             myDGSEM % sgsCoeffs % nElements_dev )
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -752,7 +770,16 @@ CONTAINS
 ! prepare for the calculation of the divergence of the viscous fluxes. This
 ! routine depends on the result of CalculateStressTensor.
 
-      CALL myDGSEM % stressTensor % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+    !  CALL myDGSEM % stressTensor % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % stressTensor % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % stressTensor % N+1)/4 ) ) , &
+                    myDGSEM % stressTensor % nEquations )
+      grid = dim3(myDGSEM % stressTensor % nElements, 1, 1)  
+      CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % solution_dev,&
+                                                                           myDGSEM % stressTensor % boundarySolution_dev, &
+                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                           myDGSEM % stressTensor % N_dev, myDGSEM % stressTensor % nEquations_dev, &
+                                                                           myDGSEM % stressTensor % nElements_dev )
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1747,7 +1774,6 @@ CONTAINS
                                                                 myDGSEM % stressTensor % nEquations_dev, &
                                                                 myDGSEM % mesh % elements % nElements_dev )
 
-
 #else
 
     !$OMP DO
@@ -2251,6 +2277,9 @@ CONTAINS
     ! Local
     INTEGER    :: i, j, k, iEl,iEq
     REAL(prec) :: z, H, P0, Cp, T, T0, dTdz, P, rC, g, R
+#ifdef HAVE_CUDA
+    INTEGER :: istat
+#endif
 
     R    = myDGSEM % params % R
     Cp   = (R + myDGSEM % params % Cv)
@@ -2261,6 +2290,8 @@ CONTAINS
     P0   = myDGSEM % params % P0
     dTdz = myDGSEM % params % dTdz
 
+    PRINT*, dTdz, AlmostEqual( dTdz,0.0_prec )
+ 
     ! /////////////////////  Build the Static/Background State ///////////////////////// !
 
     !$OMP DO
@@ -2291,12 +2322,11 @@ CONTAINS
             ! ** The potential temperature is assumed to vary linearly with z **
 
             T = T0 + dTdz*z ! Potential temperature
-            IF( dTdz == 0.0_prec )THEN
+            IF( AlmostEqual( dTdz, 0.0_prec ) )THEN
               P = P0*( 1.0_prec - g*z/(T0*Cp) )**(Cp/R)
             ELSE
               P = P0*( 1.0_prec - g*rC/R*log( (T/T0)**(1.0_prec/dTdz) ) )**(Cp/R)
             ENDIF
-
             ! Density
             myDGSEM % static % solution(i,j,k,4,iEl) = (P/( T*R*(P/P0)**rC) )
 
@@ -2312,8 +2342,10 @@ CONTAINS
 #ifdef HAVE_CUDA
     myDGSEM % static % solution_dev = myDGSEM % static % solution
 #endif
+
     ! This routine Calculates the pressure
     CALL myDGSEM % EquationOfState( )
+
 #ifdef HAVE_CUDA
     myDGSEM % state % solution = myDGSEM % state % solution_dev
 #endif
@@ -2327,11 +2359,13 @@ CONTAINS
 #ifdef HAVE_CUDA
     myDGSEM % static % solution_dev = myDGSEM % static % solution
     myDGSEM % state % solution_dev  = 0.0_prec
+    istat = cudaDeviceSynchronize( )
 #endif
 
     !$OMP MASTER
     myDGSEM % state % solution = 0.0_prec
     !$OMP END MASTER
+
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
@@ -2345,10 +2379,11 @@ CONTAINS
     REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
     REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
-    REAL(prec), DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec), DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec), DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
-    INTEGER,  DEVICE     :: nDim_dev
+!    REAL(prec), DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
+!    REAL(prec), DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
+!    REAL(prec), DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
+!    INTEGER,  DEVICE     :: nDim_dev
+    INTEGER :: istat
 #endif
     INTEGER       :: i, j, k, iEl, iEq, fUnit
     CHARACTER(5)  :: zoneID
@@ -2358,41 +2393,60 @@ CONTAINS
 
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
+!#ifdef HAVE_CUDA
+!
+!
+!    nDim_dev = 3
+!
+!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution_dev, &
+!                                                                     sol_dev, myDGSEM % state % nEquations_dev, &
+!                                                                     myDGSEM % mesh % elements % nElements_dev )  
+!
+!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution_dev, &
+!                                                                     bsol_dev, myDGSEM % static % nEquations_dev, &
+!                                                                     myDGSEM % mesh % elements % nElements_dev )  
+!
+!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x_dev, &
+!                                                                     x_dev, nDim_dev, &
+!                                                                     myDGSEM % mesh % elements % nElements_dev )  
+!
+!    x = x_dev
+!    sol = sol_dev
+!    bsol = bsol_dev
+!    istat = cudaDeviceSynchronize( )
+!
+!#else
+!
+!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution, &
+!                                                                     sol, myDGSEM % state % nEquations, &
+!                                                                     myDGSEM % mesh % elements % nElements )  
+!
+!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution, &
+!                                                                     bsol, myDGSEM % static % nEquations, &
+!                                                                     myDGSEM % mesh % elements % nElements )  
+!
+!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x, &
+!                                                                     x, 3, &
+!                                                                     myDGSEM % mesh % elements % nElements )  
+!#endif
+
 #ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % static % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
 
+    sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
+                                                myDGSEM % state % solution, &
+                                                myDGSEM % state % nEquations, &
+                                                myDGSEM % mesh % elements % nElements )
 
-    nDim_dev = 3
+    bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
+                                                 myDGSEM % static % nEquations, &
+                                                 myDGSEM % mesh % elements % nElements )
 
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution_dev, &
-                                                                     sol_dev, myDGSEM % state % nEquations_dev, &
-                                                                     myDGSEM % mesh % elements % nElements_dev )  
-
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution_dev, &
-                                                                     bsol_dev, myDGSEM % static % nEquations_dev, &
-                                                                     myDGSEM % mesh % elements % nElements_dev )  
-
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x_dev, &
-                                                                     x_dev, nDim_dev, &
-                                                                     myDGSEM % mesh % elements % nElements_dev )  
-
-    x = x_dev
-    sol = sol_dev
-    bsol = bsol_dev
- 
-    
-#else
-
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution, &
-                                                                     sol, myDGSEM % state % nEquations, &
-                                                                     myDGSEM % mesh % elements % nElements )  
-
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution, &
-                                                                     bsol, myDGSEM % static % nEquations, &
-                                                                     myDGSEM % mesh % elements % nElements )  
-
-    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x, &
-                                                                     x, 3, &
-                                                                     myDGSEM % mesh % elements % nElements )  
+    x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
+                                              3, &
+                                              myDGSEM % mesh % elements % nElements )
 #endif
 
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
@@ -2679,7 +2733,8 @@ CONTAINS
     INTEGER       :: iEq, N
     LOGICAL       :: itExists
     CHARACTER(13) :: timeStampString
-
+    TYPE(dim3) :: tBlock, grid
+   
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
     N = myDGSEM % params % polyDeg
@@ -2721,13 +2776,6 @@ CONTAINS
 
     ENDIF
 
-#ifdef HAVE_CUDA
-    myDGSEM % sourceTerms % drag_dev = myDGSEM % sourceTerms % drag
-    myDGSEM % state % solution_dev   = myDGSEM % state % solution
-    myDGSEM % static % solution_dev  = myDGSEM % static % solution
-#endif
-
-
     INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
 
     IF( itExists )THEN
@@ -2746,14 +2794,36 @@ CONTAINS
 
     ENDIF
 
+    PRINT*, 'S/R ReadPickup : Done.'
+
 #ifdef HAVE_CUDA
-      CALL myDGSEM % stateBCs % UpdateDevice( )
+    CALL myDGSEM % static % UpdateDevice( )
+    CALL myDGSEM % stateBCs % UpdateDevice( )
+    CALL myDGSEM % state % UpdateDevice( )
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 #endif
 
-    PRINT*, 'S/R ReadPickup : DOne.'
-
     ! Interpolate the static state to the element boundaries
-    CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+!    CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+!    CALL myDGSEM % dgStorage % CalculateFunctionsAtBoundaries_3D( myDGSEM % static % solution_dev, &
+!                                                                  myDGSEM % static % boundarySolution_dev, &
+!                                                                  myDGSEM % static % nEquations_dev, & 
+!                                                                  myDGSEM % static % nElements_dev )
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % static % N+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % static % N+1)/4 ) ) , &
+                    myDGSEM % static % nEquations )
+      grid = dim3(myDGSEM % static % nElements, 1, 1)  
+      CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev,&
+                                                                           myDGSEM % static % boundarySolution_dev, &
+                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                           myDGSEM % static % N_dev, myDGSEM % static % nEquations_dev, myDGSEM % static % nElements_dev )
+
+#ifdef HAVE_CUDA
+    CALL myDGSEM % static % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
+#endif
+
 
   END SUBROUTINE ReadPickup_Fluid
 !
@@ -3402,34 +3472,42 @@ CONTAINS
     REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
      ! Local
     INTEGER :: iEl, iEq, jEq, idir, i, j, k, m
-    REAL(prec), SHARED :: contFlux(0:7,0:7,0:7,1:3)
     REAL(prec) :: strTens
     
     
     iEl = blockIDx % x
     iEq = blockIDx % y
     idir = blockIDx % z
+    jEq = idir + (iEq-1)*3
     
     i = threadIDx % x-1
     j = threadIDx % y-1
     k = threadIDx % z-1
     
-    
-     ! Here the flux tensor in physical space is calculated and rotated to give the
-     ! contravariant flux tensor in the reference computational DOmain.
-    IF( iEq == 4 )THEN
-      DO m = 1, 3
-        contFlux(i,j,k,m) = Ja(i,j,k,idir,m,iEl)*solution(i,j,k,iEq,iEl)
-      ENDDO
-    ELSE
-      DO m = 1, 3
-        contFlux(i,j,k,m) = Ja(i,j,k,idir,m,iEl)*solution(i,j,k,iEq,iEl)/&
-          ( solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
-      ENDDO
+    IF( i <= N .AND. j <= N .AND. k <= N )THEN
+      IF( iEq == 4 )THEN
+
+        stressFlux(1,i,j,k,jEq,iEl) = Ja(i,j,k,idir,1,iEl)*solution(i,j,k,iEq,iEl)
+
+        stressFlux(2,i,j,k,jEq,iEl) = Ja(i,j,k,idir,2,iEl)*solution(i,j,k,iEq,iEl)
+
+        stressFlux(3,i,j,k,jEq,iEl) = Ja(i,j,k,idir,3,iEl)*solution(i,j,k,iEq,iEl)
+
+      ELSE
+
+        stressFlux(1,i,j,k,jEq,iEl) = Ja(i,j,k,idir,1,iEl)*solution(i,j,k,iEq,iEl)/&
+          (solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
+
+        stressFlux(2,i,j,k,jEq,iEl) = Ja(i,j,k,idir,2,iEl)*solution(i,j,k,iEq,iEl)/&
+          (solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
+
+        stressFlux(3,i,j,k,jEq,iEl) = Ja(i,j,k,idir,3,iEl)*solution(i,j,k,iEq,iEl)/&
+          (solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
+
+
+      ENDIF
+
     ENDIF
-    
-    jEq = idir + (iEq-1)*3
-    stressFlux(m,i,j,k,jEq,iEl) = contFlux(i,j,k,m)
   
   END SUBROUTINE CalculateStressTensorFlux_CUDAKernel
 !

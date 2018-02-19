@@ -20,11 +20,10 @@ PROGRAM Fluid_InitialConditions
   CALL myeu % Build( setupSuccess )
 
   IF( SetupSuccess )THEN
+
     CALL InitialCondition( myeu )
 
-    PRINT*, "Reset Boundary conditions"
     CALL ResetBoundaryConditions( myeu )
-    PRINT*, "DONE!"
 
     CALL myeu % WritePickup( )
 

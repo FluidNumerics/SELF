@@ -42,9 +42,6 @@
     REAL(prec), PARAMETER :: rk3_b(1:3) = (/ 0.0_prec, 1.0_prec/3.0_prec, 3.0_prec/4.0_prec /)
     REAL(prec), PARAMETER :: rk3_g(1:3) = (/ 1.0_prec/3.0_prec, 15.0_prec/16.0_prec, 8.0_prec/15.0_prec /)
 
-#ifdef HAVE_CUDA
-     REAL(prec), DEVICE, ALLOCATABLE :: rk3_a_dev(:), rk3_g_dev(:), rk3_b_dev(:)
-#endif
 
 
   !*************************************************************!
@@ -176,6 +173,7 @@
   CHARACTER(6), PARAMETER :: MsgFmt = '(4x,A)'
 
 #ifdef HAVE_CUDA
+  REAL(prec), DEVICE, ALLOCATABLE, PUBLIC :: rk3_a_dev(:), rk3_g_dev(:), rk3_b_dev(:)
 
 CONTAINS
 

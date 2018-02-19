@@ -1003,6 +1003,9 @@ CONTAINS
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     TYPE( Lagrange ), INTENT(in)    :: interp
     REAL(prec), INTENT(in)          :: xScale, yScale, zScale
+#ifdef HAVE_CUDA
+    INTEGER :: istat
+#endif
 
     CALL myHexMesh % elements % ScaleGeometry( interp, xScale, yScale, zScale )
     CALL myHexMesh % nodes % ScalePosition( xScale, yScale, zScale )
@@ -1011,6 +1014,7 @@ CONTAINS
 
     CALL myHexMesh % elements % UpdateDevice( )
     CALL myHexMesh % nodes % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 
 #endif
 

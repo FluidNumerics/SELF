@@ -256,23 +256,24 @@ IMPLICIT NONE
     CLASS( NodalDG ), INTENT(in) :: myNodal 
 #ifdef HAVE_CUDA
     INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
-    REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
     ! Local
     TYPE(dim3) :: grid, tBlock
   
+      PRINT*, 'HERE!' 
       tBlock = dim3(4*(ceiling( REAL(myNodal % N+1)/4 ) ), &
                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) , &
                     nVariables )
       grid = dim3(nElements, 1, 1)  
-      
+      PRINT*, 'HERE!' 
       CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( f, fAtBoundaries, &
                                                                            myNodal % boundaryInterpolationMatrix_dev, &
                                                                            myNodal % N_dev, nVariables, nElements )
       
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
-    REAL(prec), INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,nElements)
+    REAL(prec), INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,1:nElements)
     REAL(prec), INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
      
       fAtBoundaries = CalculateFunctionsAtBoundaries_3D_NodalDG( myNodal, f, nVariables, nElements )

@@ -501,6 +501,7 @@ CONTAINS
 
     N = interp % N
 
+    ! Forced call to the CPU Kernel for calculating gradient
     xGradient = CalculateGradient_3D_Lagrange( interp, &
                                                myElements % x,&
                                                3, myElements % nElements )
@@ -547,6 +548,7 @@ CONTAINS
       ENDDO
     ENDDO
 
+    ! Forced call to the CPU Kernel for calculating gradient
     Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
 
     ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
@@ -802,6 +804,9 @@ CONTAINS
     CLASS( HexElements ), INTENT(inout) :: myElements
     TYPE( Lagrange ), INTENT(in)              :: interp
     REAL(prec), INTENT(in)                    :: xScale, yScale, zScale
+#ifdef HAVE_CUDA
+    INTEGER :: istat
+#endif
 
     myElements % x(:,:,:,1,:) = xScale*( myElements % x(:,:,:,1,:) )
     myElements % x(:,:,:,2,:) = yScale*( myElements % x(:,:,:,2,:) )
@@ -816,6 +821,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     CALL myElements % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 #endif
 
   END SUBROUTINE ScaleGeometry_HexElements

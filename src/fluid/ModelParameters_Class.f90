@@ -70,6 +70,7 @@ MODULE ModelParameters_CLASS
     REAL(prec)    :: rC
 
 #ifdef HAVE_CUDA
+    INTEGER, DEVICE, ALLOCATABLE       :: polyDeg_dev
     REAL(prec), DEVICE, ALLOCATABLE    :: dt_dev
     REAL(prec), DEVICE, ALLOCATABLE    :: viscosity_dev
     REAL(prec), DEVICE, ALLOCATABLE    :: viscLengthScale_dev
@@ -376,7 +377,8 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    ALLOCATE( params % dt_dev, &
+    ALLOCATE( params % polyDeg_dev, &
+      params % dt_dev, &
       params % viscosity_dev, &
       params % viscLengthScale_dev, &
       params % fRotX_dev, &
@@ -407,7 +409,8 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    DEALLOCATE( params % dt_dev, &
+    DEALLOCATE( params % polyDeg_dev, &
+      params % dt_dev, &
       params % viscosity_dev, &
       params % viscLengthScale_dev, &
       params % fRotX_dev, &
@@ -436,6 +439,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS( ModelParameters ), INTENT(inout) :: params
 
+    params % polyDeg_dev         = params % polyDeg
     params % dt_dev              = params % dt
     params % viscosity_dev       = params % viscosity
     params % viscLengthScale_dev = params % viscLengthScale
