@@ -565,9 +565,21 @@ CONTAINS
     REAL(prec), INTENT(in)      :: tn
 #ifdef HAVE_CUDA
     TYPE(dim3) :: tBlock, grid
+    INTEGER    :: istat
 #endif
 
 
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -591,6 +603,17 @@ CONTAINS
 #endif
 
     ENDIF
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -601,6 +624,17 @@ CONTAINS
 !  occur.
 
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -628,6 +662,18 @@ CONTAINS
 
     CALL myDGSEM % UpdateExternalState( tn )
 
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
+
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -638,6 +684,8 @@ CONTAINS
 ! MPI_StateExchange must have been completed.
 
     CALL myDGSEM % InternalFaceFlux( )
+#ifdef HAVE_CUDA
+#endif
 
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % stateBCs, &
@@ -646,6 +694,8 @@ CONTAINS
 #endif
 
     CALL myDGSEM % BoundaryFaceFlux( )
+#ifdef HAVE_CUDA
+#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -735,6 +785,8 @@ CONTAINS
 ! This routine depends on the result of FaceFlux (stressTensor % boundaryFlux)
 
       CALL myDGSEM % CalculateStressTensor( )
+#ifdef HAVE_CUDA
+#endif
 
 #ifdef HAVE_MPI
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
@@ -2779,11 +2831,21 @@ CONTAINS
     ! Interpolate the static state to the element boundaries
     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
 
+
 #ifdef HAVE_CUDA
-    CALL myDGSEM % static % UpdateDevice( )
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % static % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
-
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
   END SUBROUTINE ReadPickup_Fluid
 !
