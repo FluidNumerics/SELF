@@ -261,12 +261,10 @@ IMPLICIT NONE
     ! Local
     TYPE(dim3) :: grid, tBlock
   
-      PRINT*, 'HERE!' 
       tBlock = dim3(4*(ceiling( REAL(myNodal % N+1)/4 ) ), &
                     4*(ceiling( REAL(myNodal % N+1)/4 ) ) , &
                     nVariables )
       grid = dim3(nElements, 1, 1)  
-      PRINT*, 'HERE!' 
       CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( f, fAtBoundaries, &
                                                                            myNodal % boundaryInterpolationMatrix_dev, &
                                                                            myNodal % N_dev, nVariables, nElements )
