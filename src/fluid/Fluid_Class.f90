@@ -1438,6 +1438,7 @@ CONTAINS
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev )
 
+
 #else
     ! Local
     INTEGER :: iEl, iFace
@@ -3287,11 +3288,11 @@ ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSi
 
  END SUBROUTINE InternalFaceFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
-                                                             nHat, boundarySolution, boundarySolution_static, &
-                                                             externalState, boundaryFlux, stressFlux )
-  
-    IMPLICIT NONE
+ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+                                                 nHat, boundarySolution, boundarySolution_static, &
+                                                 externalState, boundaryFlux, stressFlux )
+
+   IMPLICIT NONE
    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
@@ -3303,109 +3304,242 @@ ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSi
    REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
    REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
-     ! Local
-    INTEGER    :: iEl, iFace, jEq
-    INTEGER    :: i, j, k, iEq
-    INTEGER    :: ii, jj, bID
-    INTEGER    :: e1, s1, e2, s2
-    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-    REAL(prec) :: aS(1:nEq_dev-1)
-    REAL(prec) :: fac
+   ! Local
+   INTEGER    :: iEl, iFace, jEq
+   INTEGER    :: i, j, k, iEq
+   INTEGER    :: ii, jj, bID
+   INTEGER    :: e1, s1, e2, s2
+   REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+   REAL(prec) :: jump(1:5), aS(1:5)
+   REAL(prec) :: fac
 
 
-    iFace = blockIdx % x
-    j     = threadIdx % y - 1
-    i     = threadIdx % x -1
-    
-    e1 = elementIDs(1,iFace)
-    s1 = elementSides(1,iFace)
-    e2 = elementIDs(2,iFace)
-    s2 = ABS(elementSides(2,iFace))
-    bID  = ABS(boundaryIDs(iFace))
-    
-    ii = iMap(i,j,iFace)
-    jj = jMap(i,j,iFace)
-    
-    
-    IF( e2 < 0 )THEN
-    
-      norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
-        nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
-        nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+      iFace = blockIdx % x
+      j     = threadIdx % y - 1
+      i     = threadIdx % x -1
+     
+         e1 = elementIDs(1,iFace)
+         s1 = elementSides(1,iFace)
+         e2 = elementIDs(2,iFace)
+         s2 = ABS(elementSides(2,iFace))
+         bID  = ABS(boundaryIDs(iFace))
 
-      ! ------------------- Calculate Hyperbolic Wave Speeds ------------------------------ !
-    
-      T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
-        (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
-      ! Sound speed estimate for the external and internal states
-      cOut = sqrt( R_dev*T* &
-        ( (externalState(ii,jj,6,bID)+boundarySolution_static(i,j,6,s1,e1))/ P0_dev )**rC_dev )
-    
-      T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
-        (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )
-    
-      cIn  = sqrt( R_dev*T* &
-        ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev )
-    
-      ! External normal velocity component
-      uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1) + &
-        externalState(ii,jj,2,bID)*nHat(2,i,j,s1,e1) + &
-        externalState(ii,jj,3,bID)*nHat(3,i,j,s1,e1) )/&
-        ( externalState(ii,jj,4,bID) + boundarySolution_static(i,j,4,s1,e1) )/norm
-      ! Internal normal velocity component
-      uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1) + &
-        boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1) + &
-        boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1) )/&
-        ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )/norm
-    
-    
-      fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+               ii = iMap(i,j,iFace)
+               jj = jMap(i,j,iFace)
+               
+               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
 
-      ! ------------------------------------------------------------------------------------ !
-    
-      DO iEq = 1, nEq_dev-1
-        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
-                  uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
-      ENDDO
-    
-      ! Pressure !
-      DO k = 1, 3
-        aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1)+externalState(ii,jj,6,bID))*nHat(k,i,j,s1,e1)/norm
-      ENDDO
-    
-    
-      DO iEq = 1, nEq_dev-1
-
-        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*(externalState(ii,jj,iEq,bID)-boundarySolution(i,j,iEq,s1,e1)) )*norm
-
-        IF( iEq == 4 )THEN
-          DO k = 1, 3
-            jEq = k+(iEq-1)*3
-            ! Calculate the Bassi-Rebay flux for the stress tensor.
-            stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
-              externalState(ii,jj,iEq,bID)  )*&
-              nHat(k,i,j,s1,e1)
-          ENDDO
-        ELSE
-          DO k = 1, 3
-            jEq = k+(iEq-1)*3
-            ! Calculate the Bassi-Rebay flux for the stress tensor.
-            stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
-              (boundarySolution(i,j,4,s1,e1)+&
-              boundarySolution_static(i,j,4,s1,e1)) +&
-              externalState(ii,jj,iEq,bID)/&
-              (externalState(ii,jj,4,bID)+&
-              boundarySolution_static(i,j,4,s1,e1))  )*&
-              nHat(k,i,j,s1,e1)
-          ENDDO
-        ENDIF
-    
-      ENDDO
-    
-    ENDIF
+               
+               IF( e2 < 0 )THEN
+               
+                  
+                  DO iEq = 1, nEq_dev-1              
+                  jump(iEq)  = externalState(ii,jj,iEq,bID) - &
+                               boundarySolution(i,j,iEq,s1,e1) !outState - inState
+                  ENDDO
+                 
+                  T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
+                          (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
+                 ! Sound speed estimate for the external and internal states
+                  cOut = sqrt( R_dev*T* &
+                              ( (externalState(ii,jj,6,bID)+boundarySolution_static(i,j,6,s1,e1))/ P0_dev )**rC_dev   )
+                  
+                  T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
+                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
+                                   
+                  cIn  = sqrt( R_dev*T* &
+                              ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
+                               
+                  ! External normal velocity component
+                  uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
+                           externalState(ii,jj,2,bID)*nHat(2,i,j,s1,e1)/norm + &
+                           externalState(ii,jj,3,bID)*nHat(3,i,j,s1,e1)/norm )/& 
+                         ( externalState(ii,jj,4,bID) + boundarySolution_static(i,j,4,s1,e1) )
+                  ! Internal normal velocity component
+                  uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
+                           boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
+                           boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
+                         ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
 
 
-  END SUBROUTINE BoundaryFaceFlux_CUDAKernel
+                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+
+                  DO iEq = 1, nEq_dev-1
+                        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
+                                 uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
+                  ENDDO
+                  
+                  ! Pressure !
+                  DO k = 1, 3         
+                  aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1)+externalState(ii,jj,6,bID))*nHat(k,i,j,s1,e1)/norm
+                  ENDDO
+                  
+                          
+                  DO iEq = 1, nEq_dev-1
+                     boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+                     IF( iEq == 4 )THEN
+                        DO k = 1, 3
+                           jEq = k+(iEq-1)*3
+                           ! Calculate the Bassi-Rebay flux for the stress tensor.
+                           stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
+                                                                  externalState(ii,jj,iEq,bID)  )*& 
+                                                                  nHat(k,i,j,s1,e1)
+                        ENDDO
+                     ELSE
+                        DO k = 1, 3
+                           jEq = k+(iEq-1)*3
+                           ! Calculate the Bassi-Rebay flux for the stress tensor.
+                           stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
+                                                                  (boundarySolution(i,j,4,s1,e1)+&
+                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
+                                                                  externalState(ii,jj,iEq,bID)/&
+                                                                  (externalState(ii,jj,4,bID)+&
+                                                                   boundarySolution_static(i,j,4,s1,e1))  )*& 
+                                                                  nHat(k,i,j,s1,e1)
+                        ENDDO
+                     ENDIF
+                     
+                  ENDDO
+                  
+               ENDIF 
+
+
+ END SUBROUTINE BoundaryFaceFlux_CUDAKernel
+
+
+
+!  ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+!                                                             nHat, boundarySolution, boundarySolution_static, &
+!                                                             externalState, boundaryFlux, stressFlux )
+!  
+!    IMPLICIT NONE
+!   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+!   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+!   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
+!   INTEGER, DEVICE, INTENT(in)     :: iMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+!   INTEGER, DEVICE, INTENT(in)     :: jMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
+!   REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
+!   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+!   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+!   REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+!   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+!   REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
+!     ! Local
+!    INTEGER    :: iEl, iFace, jEq
+!    INTEGER    :: i, j, k, iEq
+!    INTEGER    :: ii, jj, bID
+!    INTEGER    :: e1, s1, e2, s2
+!    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+!    REAL(prec) :: aS(1:nEq_dev-1), jump(1:nEq_dev-1)
+!    REAL(prec) :: fac
+!
+!
+!      iFace = blockIdx % x
+!      j     = threadIdx % y - 1
+!      i     = threadIdx % x -1
+!     
+!         e1 = elementIDs(1,iFace)
+!         s1 = elementSides(1,iFace)
+!         e2 = elementIDs(2,iFace)
+!         s2 = ABS(elementSides(2,iFace))
+!         bID  = ABS(boundaryIDs(iFace))
+!
+!               ii = iMap(i,j,iFace)
+!               jj = jMap(i,j,iFace)
+!               
+!               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+!                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+!                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+!
+!               
+!               IF( e2 < 0 )THEN
+!               
+!                  DO iEq = 1, nEq_dev-1
+!                     jump(iEq)  = boundarySolution(ii,jj,iEq,s2,e2) - &
+!                                  boundarySolution(i,j,iEq,s1,e1) !outState - inState
+!                  ENDDO
+!
+!                  
+!                  T =   (boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
+!                          (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
+!                          
+!                  ! Sound speed estimate for the external and internal states
+!                  cOut = sqrt( R_dev*T* &
+!                              ( (boundarySolution(ii,jj,6,s2,e2)+boundarySolution_static(ii,jj,6,s2,e2))/ P0_dev )**rC_dev   )
+!                        
+!                  T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
+!                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )        
+!                             
+!                  cIn  = sqrt( R_dev*T* &
+!                              ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
+!                               
+!                  ! External normal velocity component
+!                  uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
+!                           boundarySolution(ii,jj,2,s2,e2)*nHat(2,i,j,s1,e1)/norm + &
+!                           boundarySolution(ii,jj,3,s2,e2)*nHat(3,i,j,s1,e1)/norm )/& 
+!                         ( boundarySolution(ii,jj,4,s2,e2) + boundarySolution_static(ii,jj,4,s2,e2) )
+!                           
+!                  ! Internal normal velocity component
+!                  uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
+!                           boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
+!                           boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
+!                         ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) ) 
+!                           
+!                  ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
+!                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+!                  !fac = max( abs(uIn),  abs(uOut) )
+!
+!                  ! Advective flux
+!                  DO iEq = 1, nEq_dev-1
+!                        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
+!                                 uOut*( boundarySolution(ii,jj,iEq,s2,e2) + boundarySolution_static(ii,jj,iEq,s2,e2) )
+!                  ENDDO
+!                  
+!                  DO k = 1, 3
+!                  ! Momentum flux due to pressure
+!                  aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1) + &
+!                                   boundarySolution(ii,jj,6,s2,e2))*nHat(k,i,j,s1,e1)/norm
+!                  ENDDO    
+!      
+!                         
+!                  DO iEq = 1, nEq_dev-1
+!                     boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+!                     boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
+!                     IF( iEq == 4 )THEN
+!                        DO k = 1, 3
+!                           jEq = k+(iEq-1)*3
+!                           ! Calculate the LDG flux for the stress tensor.
+!                           stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
+!                                                                  boundarySolution(ii,jj,iEq,s2,e2))*& 
+!                                                                  nHat(k,i,j,s1,e1)
+!                                                                                        
+!                           stressFlux(ii,jj,jEq,s2,e2) = -stressFlux(i,j,jEq,s1,e1)
+!                        ENDDO
+!                     ELSE
+!                        DO k = 1, 3
+!                           jEq = k+(iEq-1)*3
+!                           ! Calculate the LDG flux for the stress tensor.
+!                           stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
+!                                                                  (boundarySolution(i,j,4,s1,e1)+&
+!                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
+!                                                                  boundarySolution(ii,jj,iEq,s2,e2)/&
+!                                                                  (boundarySolution(ii,jj,4,s2,e2)+&
+!                                                                   boundarySolution_static(ii,jj,4,s2,e2)) )*& 
+!                                                                  nHat(k,i,j,s1,e1)
+!                                                                                        
+!                           stressFlux(ii,jj,jEq,s2,e2) = -stressFlux(i,j,jEq,s1,e1)
+!                        ENDDO
+!                     ENDIF
+!                     
+!                  ENDDO
+!             
+!               ENDIF 
+!
+!
+!`  END SUBROUTINE BoundaryFaceFlux_CUDAKernel
+
 !
   ATTRIBUTES(Global) SUBROUTINE CalculateFlux_CUDAKernel( solution, static, Ja, Jac, flux, N, nEq, nElements )
   
