@@ -282,6 +282,7 @@ CONTAINS
                                         myDGSEM % params % yScale, &
                                         myDGSEM % params % zScale )
 
+
   END SUBROUTINE BuildHexMesh_Fluid
 !
   SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT )
@@ -571,14 +572,24 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % static % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
     PRINT*, __LINE__
     PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
     PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
     PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
     PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
     PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
     PRINT*, '---------------------------------------------------------------------------------'
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -589,30 +600,40 @@ CONTAINS
 !  to smooth the solution variables before proceeding.
 
     IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
-      ! Will need to verIFy that this call works properly with "state" on input and output
+
 #ifdef HAVE_CUDA
       CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
                                         myDGSEM % state % solution_dev, &
                                         myDGSEM % state % nEquations_dev, &
-                                        myDGSEM % mesh % elements % nElements_dev )
+                                        myDGSEM % state % nElements_dev )
+
 #else
       CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
                                         myDGSEM % state % solution, &
                                         myDGSEM % state % nEquations, &
-                                        myDGSEM % mesh % elements % nElements )
+                                        myDGSEM % state % nElements )
 #endif
 
     ENDIF
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
     PRINT*, __LINE__
     PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
     PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
     PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
     PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
     PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
     PRINT*, '---------------------------------------------------------------------------------'
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -626,14 +647,24 @@ CONTAINS
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
     PRINT*, __LINE__
     PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
     PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
     PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
     PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
     PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
     PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
@@ -664,14 +695,23 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
     PRINT*, __LINE__
     PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
     PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
     PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
     PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
     PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
     PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
@@ -685,7 +725,25 @@ CONTAINS
 
     CALL myDGSEM % InternalFaceFlux( )
 #ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
 #endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % stateBCs, &
@@ -695,7 +753,25 @@ CONTAINS
 
     CALL myDGSEM % BoundaryFaceFlux( )
 #ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
 #endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -786,7 +862,25 @@ CONTAINS
 
       CALL myDGSEM % CalculateStressTensor( )
 #ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
 #endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 #ifdef HAVE_MPI
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
@@ -805,6 +899,26 @@ CONTAINS
 ! routine depends on the result of CalculateStressTensor.
 
       CALL myDGSEM % stressTensor % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -830,6 +944,26 @@ CONTAINS
 ! be run simultaneously with the MPI_StressExchange
 
       CALL myDGSEM % UpdateExternalStress( tn )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 
 ! ----------------------------------------------------------------------------- !
@@ -843,12 +977,52 @@ CONTAINS
 ! and the MPI_StressExchange.
 
       CALL myDGSEM % InternalStressFlux( )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 #ifdef HAVE_MPI
       CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressBCs,&
                                                                myDGSEM % mesh % faces, &
                                                                myDGSEM % extComm )
 #endif
       CALL myDGSEM % BoundaryStressFlux( )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -861,6 +1035,26 @@ CONTAINS
 ! simultaneously with the MappedTimeDerivative.
 
       CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
     ENDIF
 
@@ -875,6 +1069,26 @@ CONTAINS
 ! result of FaceFlux, but can be DOne at the same time as StressDivergence
 
     CALL myDGSEM % MappedTimeDerivative( )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % stressTensor % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+    PRINT*, __LINE__
+    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
+    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % solution ), MAXVAL( myDGSEM % stressTensor % solution )
+    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % flux ), MAXVAL( myDGSEM % stressTensor % flux )
+    PRINT*, MINVAL( myDGSEM % stressTensor % fluxDivergence ), MAXVAL( myDGSEM % stressTensor % fluxdivergence )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundarysolution ), MAXVAL( myDGSEM % stressTensor % boundarysolution )
+    PRINT*, MINVAL( myDGSEM % stressTensor % boundaryFlux ), MAXVAL( myDGSEM % stressTensor % boundaryFlux )
+    PRINT*, '---------------------------------------------------------------------------------'
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1237,20 +1451,18 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg +1)/4 ) ), &
-      4*(ceiling( REAL(myDGSEM % params % polyDeg + 1)/4 ) ) , &
-      1 )
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg + 1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg + 1)/4 ) ) , &
+                  1 )
     grid = dim3(myDGSEM % mesh % faces % nFaces,1,1)
 
     CALL InternalFaceFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs_dev, &
                                                         myDGSEM % mesh % faces % elementSides_dev, &
-                                                        myDGSEM % mesh % faces % boundaryID_dev, &
                                                         myDGSEM % mesh % faces % iMap_dev, &
                                                         myDGSEM % mesh % faces % jMap_dev, &
                                                         myDGSEM % mesh % elements % nHat_dev, &
                                                         myDGSEM % state % boundarySolution_dev, &
                                                         myDGSEM % static % boundarySolution_dev, &
-                                                        myDGSEM % stateBCs % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev, &
                                                         myDGSEM % params % R_dev, &
@@ -1259,9 +1471,8 @@ CONTAINS
                                                         myDGSEM % params % polyDeg_dev, &
                                                         myDGSEM % state % nEquations_dev, &
                                                         myDGSEM % stressTensor % nEquations_dev, &
-                                                        myDGSEM % extComm % nBoundaries_dev, &
                                                         myDGSEM % mesh % faces % nFaces_dev, &
-                                                        myDGSEM % mesh % elements % nElements_dev )
+                                                        myDGSEM % state % nElements_dev )
 
 #else
     ! Local
@@ -1272,9 +1483,7 @@ CONTAINS
     REAL(prec) :: nHat(1:3), norm
     REAL(prec) :: uOut, uIn, cIn, cOut, T
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
-    REAL(prec) :: fac, hCapRatio, rC
-
-    hCapRatio = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
+    REAL(prec) :: fac, rC
 
     !$OMP DO PRIVATE( jump, aS )
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
@@ -1682,7 +1891,6 @@ CONTAINS
                                                            myDGSEM % static % solution_dev, &
                                                            myDGSEM % state % source_dev, &
                                                            myDGSEM % sourceTerms % drag_dev, &
-                                                           myDGSEM % mesh % elements % J_dev, &
                                                            myDGSEM % params % fRotX_dev, &
                                                            myDGSEM % params % fRotY_dev, &
                                                            myDGSEM % params % fRotZ_dev, &
@@ -1879,13 +2087,20 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
-    grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % stressTensor % nEquations,1)
+    grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % sgsCoeffs % nEquations,1)
 
     CALL CalculateStressTensor_CUDAKernel<<<grid,tBlock>>>( myDGSEM % stressTensor % solution_dev, &
                                                             myDGSEM % stressTensor % fluxDivergence_dev, &
+                                                            myDGSEM % stressTensor % flux_dev, &
+                                                            myDGSEM % sgsCoeffs % solution_dev, &
+                                                            myDGSEM % state % solution_dev, &
+                                                            myDGSEM % static % solution_dev, &
                                                             myDGSEM % mesh % elements % J_dev, &
+                                                            myDGSEM % mesh % elements % Ja_dev, &
                                                             myDGSEM % params % polyDeg_dev, &
+                                                            myDGSEM % state % nEquations_dev, &
                                                             myDGSEM % stressTensor % nEquations_dev, &
+                                                            myDGSEM % sgsCoeffs % nEquations_dev, &
                                                             myDGSEM % mesh % elements % nElements_dev )
 
 #else
@@ -1902,6 +2117,29 @@ CONTAINS
               DO i = 0, myDGSEM % params % polyDeg
 
                 myDGSEM % stressTensor % solution(i,j,k,jEq,iEl) = myDGSEM % stressTensor % fluxDivergence(i,j,k,jEq,iEl)/myDGSEM % mesh % elements % J(i,j,k,iEl)
+
+                IF( iEq == 4 )THEN
+
+                  F = myDGSEM % stressTensor % solution(i,j,k,jEq,iEl)*&
+                      myDGSEM % sgsCoeffs % solution(i,j,k,iEq,iEl)
+
+                ELSE
+
+                  F = myDGSEM % stressTensor % solution(i,j,k,jEq,iEl)*&
+                     (myDGSEM % state % solution(i,j,k,4,iEl)+&
+                      myDGSEM % static % solution(i,j,k,4,iEl))*&
+                     myDGSEM % sgsCoeffs % solution(i,j,k,iEq,iEl)
+
+                ENDIF
+
+                myDGSEM % stressTensor % flux(1,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(1,i,j,k,iEq,iEl) +
+                                                                 myDGSEM % mesh % elements % Ja(i,j,k,idir,1)*F
+
+                myDGSEM % stressTensor % flux(2,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(2,i,j,k,iEq,iEl) +
+                                                                 myDGSEM % mesh % elements % Ja(i,j,k,idir,2)*F
+
+                myDGSEM % stressTensor % flux(3,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(3,i,j,k,iEq,iEl) +
+                                                                myDGSEM % mesh % elements % Ja(i,j,k,idir,3)*F
 
               ENDDO
             ENDDO
@@ -2832,21 +3070,6 @@ CONTAINS
     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
 
 
-#ifdef HAVE_CUDA
-    CALL myDGSEM % state % UpdateHost( )
-    CALL myDGSEM % static % UpdateHost( )
-    istat = cudaDeviceSynchronize( )
-#endif
-    PRINT*, __LINE__
-    PRINT*, MINVAL( myDGSEM % state % solution ), MAXVAL( myDGSEM % state % solution )
-    PRINT*, MINVAL( myDGSEM % static % solution ), MAXVAL( myDGSEM % static % solution )
-    PRINT*, MINVAL( myDGSEM % state % flux ), MAXVAL( myDGSEM % state % flux )
-    PRINT*, MINVAL( myDGSEM % state % fluxDivergence ), MAXVAL( myDGSEM % state % fluxdivergence )
-    PRINT*, MINVAL( myDGSEM % state % boundarysolution ), MAXVAL( myDGSEM % state % boundarysolution )
-    PRINT*, MINVAL( myDGSEM % static % boundarysolution ), MAXVAL( myDGSEM % static % boundarysolution )
-    PRINT*, MINVAL( myDGSEM % state % boundaryFlux ), MAXVAL( myDGSEM % state % boundaryFlux )
-    PRINT*, '---------------------------------------------------------------------------------'
-
   END SUBROUTINE ReadPickup_Fluid
 !
 #ifdef HAVE_CUDA
@@ -2873,9 +3096,14 @@ CONTAINS
     i = threadIdx % x - 1
     j = threadIdx % y - 1
     k = threadIdx % z - 1
+
+    IF( i <= N .AND. j <= N .AND. k <= N )THEN
   
-    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
-    solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
+      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+  
+      solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
+
+    ENDIF
   
   END SUBROUTINE UpdateG3D_CUDAKernel
 !
@@ -3131,106 +3359,107 @@ CONTAINS
 
   END SUBROUTINE UpdateExternalState_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+  ATTRIBUTES(Global) SUBROUTINE InternalFaceFlux_CUDAKernel( elementIDs, elementSides, iMap, jMap, &
                                                              nHat, boundarySolution, boundarySolution_static, &
-                                                             externalState, boundaryFlux, stressFlux, R, P0, Rc, &
-                                                             N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements )
+                                                             boundaryFlux, stressFlux, R, P0, Rc, &
+                                                             N, nEq, nDiffEq, nFaces, nElements )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nBoundaryFaces, nFaces, nElements 
-    REAL(prec), DEVICE, INTENT(in)  :: R, P0, Rc
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nFaces, nElements 
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: iMap(0:N,0:N,1:nFaces)
     INTEGER, DEVICE, INTENT(in)     :: jMap(0:N,0:N,1:nFaces)
     REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:N,0:N,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:N,0:N,1:nEq,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:N,0:N,1:nEq,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:N,0:N,1:nEq,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: boundaryFlux(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: stressFlux(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: R, P0, Rc
      ! Local
-    INTEGER    :: iEl, iFace, jEq
+    INTEGER    :: iFace, jEq
     INTEGER    :: i, j, k, iEq
-    INTEGER    :: ii, jj, bID
+    INTEGER    :: ii, jj
     INTEGER    :: e1, s1, e2, s2
     REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-    REAL(prec) :: jump(1:5), aS(1:5)
+    REAL(prec) :: aS(1:nEq-1)
     REAL(prec) :: fac
     
     
     iFace = blockIdx % x
+
     j     = threadIdx % y - 1
-    i     = threadIdx % x -1
-    
+    i     = threadIdx % x - 1
+   
     e1 = elementIDs(1,iFace)
     s1 = elementSides(1,iFace)
     e2 = elementIDs(2,iFace)
     s2 = ABS(elementSides(2,iFace))
-    bID  = ABS(boundaryIDs(iFace))
-    
-    ii = iMap(i,j,iFace)
-    jj = jMap(i,j,iFace)
-    
-    norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
-      nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
-      nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
-    
-    
-    IF( e2 > 0 )THEN
-    
-      DO iEq = 1, nEq-1
-        jump(iEq)  = boundarySolution(ii,jj,iEq,s2,e2) - &
-          boundarySolution(i,j,iEq,s1,e1) !outState - inState
-      ENDDO
-    
-    
-      T =   (boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
+
+    IF( i <= N .AND. j <= N .AND. e2 > 0 )THEN 
+
+      ii = iMap(i,j,iFace)
+      jj = jMap(i,j,iFace)
+  
+  
+      norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+                   nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+                   nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+
+      ! ------------------- Calculate Hyperbolic Wave Speeds ------------------------------ !
+
+      T = (boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
         (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
     
       ! Sound speed estimate for the external and internal states
       cOut = sqrt( R*T* &
         ( (boundarySolution(ii,jj,6,s2,e2)+boundarySolution_static(ii,jj,6,s2,e2))/ P0 )**rC   )
     
-      T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
+      T = (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
         (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )
     
       cIn  = sqrt( R*T* &
         ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0 )**rC  )
-    
+
       ! External normal velocity component
-      uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
-        boundarySolution(ii,jj,2,s2,e2)*nHat(2,i,j,s1,e1)/norm + &
-        boundarySolution(ii,jj,3,s2,e2)*nHat(3,i,j,s1,e1)/norm )/&
-        ( boundarySolution(ii,jj,4,s2,e2) + boundarySolution_static(ii,jj,4,s2,e2) )
+      uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1) + &
+               boundarySolution(ii,jj,2,s2,e2)*nHat(2,i,j,s1,e1) + &
+               boundarySolution(ii,jj,3,s2,e2)*nHat(3,i,j,s1,e1) )/&
+             ( boundarySolution(ii,jj,4,s2,e2) + boundarySolution_static(ii,jj,4,s2,e2) )/norm
     
       ! Internal normal velocity component
-      uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
-        boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
-        boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/&
-        ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
-    
+      uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1) + &
+               boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1) + &
+               boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1) )/&
+             ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )/norm
+
+   
       ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
       fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-    
+
+
+      ! ------------------------------------------------------------------------------------ !
+
       ! Advective flux
       DO iEq = 1, nEq-1
-        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
-          uOut*( boundarySolution(ii,jj,iEq,s2,e2) + boundarySolution_static(ii,jj,iEq,s2,e2) )
+        aS(iEq) = uIn*(  boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
+                  uOut*( boundarySolution(ii,jj,iEq,s2,e2) + boundarySolution_static(ii,jj,iEq,s2,e2) )
       ENDDO
     
+
       DO k = 1, 3
         ! Momentum flux due to pressure
-        aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1) + &
-          boundarySolution(ii,jj,6,s2,e2))*nHat(k,i,j,s1,e1)/norm
+        aS(k) = aS(k) + ( boundarySolution(i,j,6,s1,e1) + boundarySolution(ii,jj,6,s2,e2) )*nHat(k,i,j,s1,e1)/norm
       ENDDO
-    
-    
+
       DO iEq = 1, nEq-1
-        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+
+        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*( boundarySolution(ii,jj,iEq,s2,e2) - boundarySolution(i,j,iEq,s1,e1) ) )*norm
+
         boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
+
         IF( iEq == 4 )THEN
+
           DO k = 1, 3
             jEq = k+(iEq-1)*3
             ! Calculate the LDG flux for the stress tensor.
@@ -3240,7 +3469,9 @@ CONTAINS
     
             stressFlux(ii,jj,jEq,s2,e2) = -stressFlux(i,j,jEq,s1,e1)
           ENDDO
+
         ELSE
+
           DO k = 1, 3
             jEq = k+(iEq-1)*3
             ! Calculate the LDG flux for the stress tensor.
@@ -3254,13 +3485,13 @@ CONTAINS
     
             stressFlux(ii,jj,jEq,s2,e2) = -stressFlux(i,j,jEq,s1,e1)
           ENDDO
+
         ENDIF
     
       ENDDO
-    
+
     ENDIF
-  
-  
+
   END SUBROUTINE InternalFaceFlux_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
@@ -3280,15 +3511,15 @@ CONTAINS
     REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:N,0:N,1:nEq,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:N,0:N,1:nEq,1:6,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:N,0:N,1:nEq,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:N,0:N,1:nDiffEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: boundaryFlux(0:N,0:N,1:nEq,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: stressFlux(0:N,0:N,1:nDiffEq,1:6,1:nElements)
      ! Local
     INTEGER    :: iEl, iFace, jEq
     INTEGER    :: i, j, k, iEq
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
     REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-    REAL(prec) :: jump(1:5), aS(1:5)
+    REAL(prec) :: aS(1:nEq-1)
     REAL(prec) :: fac
 
 
@@ -3305,18 +3536,14 @@ CONTAINS
     ii = iMap(i,j,iFace)
     jj = jMap(i,j,iFace)
     
-    norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
-      nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
-      nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
-    
     
     IF( e2 < 0 )THEN
     
-    
-      DO iEq = 1, nEq-1
-        jump(iEq)  = externalState(ii,jj,iEq,bID) - &
-          boundarySolution(i,j,iEq,s1,e1) !outState - inState
-      ENDDO
+      norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+        nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+        nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+
+      ! ------------------- Calculate Hyperbolic Wave Speeds ------------------------------ !
     
       T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
         (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
@@ -3331,22 +3558,24 @@ CONTAINS
         ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0 )**rC )
     
       ! External normal velocity component
-      uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
-        externalState(ii,jj,2,bID)*nHat(2,i,j,s1,e1)/norm + &
-        externalState(ii,jj,3,bID)*nHat(3,i,j,s1,e1)/norm )/&
-        ( externalState(ii,jj,4,bID) + boundarySolution_static(i,j,4,s1,e1) )
+      uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1) + &
+        externalState(ii,jj,2,bID)*nHat(2,i,j,s1,e1) + &
+        externalState(ii,jj,3,bID)*nHat(3,i,j,s1,e1) )/&
+        ( externalState(ii,jj,4,bID) + boundarySolution_static(i,j,4,s1,e1) )/norm
       ! Internal normal velocity component
-      uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
-        boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
-        boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/&
-        ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
+      uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1) + &
+        boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1) + &
+        boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1) )/&
+        ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )/norm
     
     
       fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+
+      ! ------------------------------------------------------------------------------------ !
     
       DO iEq = 1, nEq-1
         aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
-          uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
+                  uOut*( externalState(ii,jj,iEq,bID) + boundarySolution_static(i,j,iEq,s1,e1) )
       ENDDO
     
       ! Pressure !
@@ -3356,7 +3585,9 @@ CONTAINS
     
     
       DO iEq = 1, nEq-1
-        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+
+        boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*(externalState(ii,jj,iEq,bID)-boundarySolution(i,j,iEq,s1,e1)) )*norm
+
         IF( iEq == 4 )THEN
           DO k = 1, 3
             jEq = k+(iEq-1)*3
@@ -3433,14 +3664,13 @@ CONTAINS
   
   END SUBROUTINE CalculateFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, source, drag, Jac, fRotX, fRotY, fRotZ, g, N, nEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, source, drag, fRotX, fRotY, fRotZ, g, N, nEq, nElements )
   
     IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: N, nEq, nElements
     REAL(prec), DEVICE, INTENT(in)  :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: drag(0:N,0:N,0:N,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:N,0:N,0:N,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fRotX, fRotY, fRotZ, g
     REAL(prec), DEVICE, INTENT(out) :: source(0:N,0:N,0:N,1:nEq,1:nElements)
      ! Local
@@ -3533,24 +3763,57 @@ CONTAINS
   
   END SUBROUTINE CalculateStressTensorFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateStressTensor_CUDAKernel( stressTensor, stressFluxDivergence, Jac, N, nDiffEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE CalculateStressTensor_CUDAKernel( stressTensor, stressFluxDivergence, stressFlux, sgsCoeffs, state, static, Jac, Ja, N, nEq, nDiffEq, nSGSEq, nElements )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nDiffEq, nElements 
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nSGSEq, nElements 
     REAL(prec), DEVICE, INTENT(out) :: stressTensor(0:N,0:N,0:N,1:nDiffEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: stressFluxDivergence(0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:N,0:N,0:N,1:nSGSEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: state(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: Jac(0:N,0:N,0:N,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
     ! Local
-    INTEGER :: iEl, iEq, i, j, k
+    INTEGER :: iEl, iEq, jEq, idir, i, j, k
+    REAL(prec) :: F
 
     iEl = blockIDx % x
     iEq = blockIDx % y
-    
+
     i = threadIDx % x-1
     j = threadIDx % y-1
     k = threadIDx % z-1
 
-    stressTensor(i,j,k,iEq,iEl) = stressFluxDivergence(i,j,k,iEq,iEl)/Jac(i,j,k,iEl)
+    stressFlux(1:3,i,j,k,iEq,iEl) = 0.0_prec
+
+    DO idir = 1, 3
+
+      jEq = idir + (iEq-1)*3
+      stressTensor(i,j,k,jEq,iEl) = stressFluxDivergence(i,j,k,jEq,iEl)/Jac(i,j,k,iEl)
+  
+      IF( iEq == 4 )THEN
+  
+        F = stressTensor(i,j,k,jEq,iEl)*&
+            sgsCoeffs(i,j,k,iEq,iEl)
+  
+      ELSE
+  
+        F = stressTensor(i,j,k,jEq,iEl)*&
+           (state(i,j,k,4,iEl)+&
+            static(i,j,k,4,iEl))*&
+           sgsCoeffs(i,j,k,iEq,iEl)
+  
+      ENDIF
+  
+      stressFlux(1,i,j,k,iEq,iEl) = stressFlux(1,i,j,k,iEq,iEl) + Ja(i,j,k,idir,1,iEl)*F
+  
+      stressFlux(2,i,j,k,iEq,iEl) = stressFlux(2,i,j,k,iEq,iEl) + Ja(i,j,k,idir,2,iEl)*F
+  
+      stressFlux(3,i,j,k,iEq,iEl) = stressFlux(3,i,j,k,iEq,iEl) + Ja(i,j,k,idir,3,iEl)*F
+
+    ENDDO
 
   END SUBROUTINE CalculateStressTensor_CUDAKernel
 
