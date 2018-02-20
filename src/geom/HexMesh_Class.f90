@@ -1402,6 +1402,9 @@ CONTAINS
     INTEGER :: nNodes, nElements, nFaces, N
     INTEGER :: IFace, iNode, iEl
     INTEGER :: fUnit, k, i, j, l, row, col, ii, jj
+#ifdef HAVE_CUDA
+    INTEGER :: istat
+#endif
 
 
     PRINT*, 'Mesh File : '//TRIM( filename )//'.mesh'
@@ -1599,6 +1602,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     CALL myHexMesh % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 #endif
 
   END SUBROUTINE ReadSELFMeshFile_HexMesh

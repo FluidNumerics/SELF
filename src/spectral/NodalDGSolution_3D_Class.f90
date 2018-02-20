@@ -229,10 +229,11 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-      CALL dgStorage % CalculateFunctionsAtBoundaries_3D( myDGS % solution_dev, &
-                                                          myDGS % boundarySolution_dev, &
-                                                          myDGS % nEquations_dev, & 
-                                                          myDGS % nElements_dev )
+      CALL CalculateFunctionsAtBoundaries_3D( dgStorage, &
+                                              myDGS % solution_dev, &
+                                              myDGS % boundarySolution_dev, &
+                                              myDGS % nEquations_dev, & 
+                                              myDGS % nElements_dev )
 #else
       CALL CalculateFunctionsAtBoundaries_3D( dgStorage, &
                                               myDGS % solution, &

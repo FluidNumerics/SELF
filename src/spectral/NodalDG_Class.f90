@@ -470,10 +470,10 @@ IMPLICIT NONE
               
               DO k = 0, myNodal % N
                
-                fAtBoundaries(i,j,iVar,1,iEl) = fAtBoundaries(i,j,iVar,1,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(k,i,j,iVar,iEl) ! South
-                fAtBoundaries(i,j,iVar,2,iEl) = fAtBoundaries(i,j,iVar,2,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,k,j,iVar,iEl) ! East
-                fAtBoundaries(i,j,iVar,3,iEl) = fAtBoundaries(i,j,iVar,3,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(k,i,j,iVar,iEl) ! North
-                fAtBoundaries(i,j,iVar,4,iEl) = fAtBoundaries(i,j,iVar,4,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,k,j,iVar,iEl) ! West
+                fAtBoundaries(i,j,iVar,1,iEl) = fAtBoundaries(i,j,iVar,1,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,k,j,iVar,iEl) ! South
+                fAtBoundaries(i,j,iVar,2,iEl) = fAtBoundaries(i,j,iVar,2,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(k,i,j,iVar,iEl) ! East
+                fAtBoundaries(i,j,iVar,3,iEl) = fAtBoundaries(i,j,iVar,3,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,k,j,iVar,iEl) ! North
+                fAtBoundaries(i,j,iVar,4,iEl) = fAtBoundaries(i,j,iVar,4,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(k,i,j,iVar,iEl) ! West
                 fAtBoundaries(i,j,iVar,5,iEl) = fAtBoundaries(i,j,iVar,5,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,j,k,iVar,iEl) ! Bottom
                 fAtBoundaries(i,j,iVar,6,iEl) = fAtBoundaries(i,j,iVar,6,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,j,k,iVar,iEl) ! Top
                
