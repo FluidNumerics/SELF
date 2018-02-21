@@ -676,8 +676,22 @@ CONTAINS
 !  element in order to prepare for computing the external state for enforcing
 !  boundary conditions, Riemann Fluxes, and MPI DATA exchanges that need to
 !  occur.
+#ifdef HAVE_CUDA
+
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                  myDGSEM % state % nEquations )
+    grid = dim3(myDGSEM % state % nElements, 1, 1)  
+    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
+                                                                         myDGSEM % state % boundarySolution_dev,  &
+                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                         myDGSEM % params % polydeg_dev, myDGSEM % state % nEquations_dev,&
+                                                                         myDGSEM % state % nElements_dev )
+#else
 
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -785,7 +799,23 @@ CONTAINS
 ! of each element so that the viscous flux can later be computed. This routine
 ! depends on the result of CalculateSGSCoefficients.
 
+#ifdef HAVE_CUDA
+
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                  myDGSEM % sgsCoeffs % nEquations )
+    grid = dim3(myDGSEM % sgsCoeffs % nElements, 1, 1)  
+    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
+                                                                         myDGSEM % sgsCoeffs % boundarySolution_dev,  &
+                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                         myDGSEM % params % polydeg_dev, myDGSEM % sgsCoeffs % nEquations_dev,&
+                                                                         myDGSEM % sgsCoeffs % nElements_dev )
+
+#else
+
         CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -829,7 +859,23 @@ CONTAINS
 ! prepare for the calculation of the divergence of the viscous fluxes. This
 ! routine depends on the result of CalculateStressTensor.
 
+#ifdef HAVE_CUDA
+
+      tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                    4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                    myDGSEM % stressTensor % nEquations )
+      grid = dim3(myDGSEM % stressTensor % nElements, 1, 1)  
+      CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % solution_dev, &
+                                                                           myDGSEM % stressTensor % boundarySolution_dev,  &
+                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                           myDGSEM % params % polydeg_dev, myDGSEM % stressTensor % nEquations_dev,&
+                                                                           myDGSEM % stressTensor % nElements_dev )
+
+#else
+  
       CALL myDGSEM % stressTensor % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -886,6 +932,7 @@ CONTAINS
 ! simultaneously with the MappedTimeDerivative.
 
       CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
+
 
     ENDIF
 
@@ -1604,6 +1651,30 @@ CONTAINS
                                                     myDGSEM % state % nEquations_dev, &
                                                     myDGSEM % mesh % elements % nElements_dev )
 
+
+      
+    CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % flux_dev, &
+                                                        myDGSEM % state % boundaryFlux_dev, &
+                                                        myDGSEM % state % fluxDivergence_dev, &
+                                                        myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                        myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+                                                        myDGSEM % dgStorage % quadratureWeights_dev, &
+                                                        myDGSEM % params % polydeg_dev, &
+                                                        myDGSEM % state % nEquations_dev, &
+                                                        myDGSEM % state % nElements_dev )
+
+    CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+                                                           myDGSEM % static % solution_dev, &
+                                                           myDGSEM % state % source_dev, &
+                                                           myDGSEM % sourceTerms % drag_dev, &
+                                                           myDGSEM % params % fRotX_dev, &
+                                                           myDGSEM % params % fRotY_dev, &
+                                                           myDGSEM % params % fRotZ_dev, &
+                                                           myDGSEM % params % g_dev, &
+                                                           myDGSEM % params % polydeg_dev, &
+                                                           myDGSEM % state % nEquations_dev, &
+                                                           myDGSEM % mesh % elements % nElements_dev )
+  
 #else
 
 
@@ -1679,27 +1750,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-#endif
-
      CALL myDGSEM % state % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )  
-
-#ifdef HAVE_CUDA
-
-    CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-                                                           myDGSEM % static % solution_dev, &
-                                                           myDGSEM % state % source_dev, &
-                                                           myDGSEM % sourceTerms % drag_dev, &
-                                                           myDGSEM % params % fRotX_dev, &
-                                                           myDGSEM % params % fRotY_dev, &
-                                                           myDGSEM % params % fRotZ_dev, &
-                                                           myDGSEM % params % g_dev, &
-                                                           myDGSEM % params % polydeg_dev, &
-                                                           myDGSEM % state % nEquations_dev, &
-                                                           myDGSEM % mesh % elements % nElements_dev )
-  
- 
-
-#else
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
@@ -1766,8 +1817,8 @@ CONTAINS
       ENDDO
     ENDDO
     !$OMP ENDDO
-
 #endif
+
 
   END SUBROUTINE MappedTimeDerivative_Fluid
 !
@@ -2795,6 +2846,9 @@ CONTAINS
     INTEGER       :: iEq, N
     LOGICAL       :: itExists
     CHARACTER(13) :: timeStampString
+#ifdef HAVE_CUDA
+    TYPE(dim3) :: tBlock, grid
+#endif
    
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
@@ -2863,11 +2917,22 @@ CONTAINS
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % sourceTerms % UpdateDevice( )
     istat = cudaDeviceSynchronize( )
-#endif
+
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                  myDGSEM % static % nEquations )
+    grid = dim3(myDGSEM % static % nElements, 1, 1)  
+    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
+                                                                         myDGSEM % static % boundarySolution_dev,  &
+                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                                         myDGSEM % params % polydeg_dev, myDGSEM % static % nEquations_dev,&
+                                                                         myDGSEM % static % nElements_dev )
+#else
 
     ! Interpolate the static state to the element boundaries
     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
 
+#endif
 
   END SUBROUTINE ReadPickup_Fluid
 !
