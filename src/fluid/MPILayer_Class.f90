@@ -1,17 +1,16 @@
-! MPILayer_CLASS.f90
+! MPILayer_Class.f90
 !
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE MPILayer_CLASS
+MODULE MPILayer_Class
 
   USE ModelPrecision
-  USE NodalDGSolution_3D_CLASS
-  USE Faces_CLASS
-  USE BoundaryConditions_CLASS
-  USE BoundaryCommunicator_CLASS
+  USE NodalDGSolution_3D_Class
+  USE Faces_Class
+  USE BoundaryCommunicator_Class
 
 #ifdef HAVE_CUDA
   USE cudafor
@@ -119,11 +118,11 @@ CONTAINS
 
   END SUBROUTINE Trash_MPILayer
 
-  SUBROUTINE MPI_Exchange( myMPI, fluidState, meshFaces, extComm )
+  SUBROUTINE MPI_Exchange( myMPI, state, meshFaces, extComm )
 
     IMPLICIT NONE
     CLASS( MPILayer ), INTENT(inout)         :: myMPI
-    TYPE( NodalDGSolution_3D ), INTENT(in)   :: fluidState
+    TYPE( NodalDGSolution_3D ), INTENT(in)   :: state
     TYPE( Faces ), INTENT(in)                :: meshFaces
     TYPE( BoundaryCommunicator ), INTENT(in) :: extComm
     ! Local
@@ -138,7 +137,7 @@ CONTAINS
     grid = dim3(extComm % nBoundaries,1,1)
 
     CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myMPI % sendBuffer_dev, &
-      fluidState % boundarySolution_dev, &
+      state % boundarySolution_dev, &
       meshFaces % elementIDs_dev, &
       meshFaces % elementSides_dev, &
       extComm % boundaryIDs_dev, &
@@ -147,9 +146,9 @@ CONTAINS
       extComm % bufferMap_dev,&
       meshFaces % nFaces_dev, extComm % nBoundaries_dev, &
       extComm % nProc_dev, extComm % myRank_dev, &
-      fluidState % N_dev, fluidState % nEquations_dev,&
+      state % N_dev, state % nEquations_dev,&
       extComm % nNeighbors_dev, extComm % maxBufferSize_dev, &
-      fluidState % nElements_dev )
+      state % nElements_dev )
 
 
 #ifdef CUDA_DIRECT
@@ -215,7 +214,7 @@ CONTAINS
         s1        = meshFaces % elementSides(1,IFace)
         iNeighbor = extComm % rankTable(p2)
 
-        myMPI % sendBuffer(:,:,:,extComm % bufferMap(bID), iNeighbor ) = fluidState % boundarySolution(:,:,:,s1,e1)
+        myMPI % sendBuffer(:,:,:,extComm % bufferMap(bID), iNeighbor ) = state % boundarySolution(:,:,:,s1,e1)
 
       ENDIF
     ENDDO
@@ -242,11 +241,11 @@ CONTAINS
 
   END SUBROUTINE MPI_Exchange
 !
-  SUBROUTINE Finalize_MPI_Exchange( myMPI, boundaryState, meshFaces, extComm )
+  SUBROUTINE Finalize_MPI_Exchange( myMPI, state, meshFaces, extComm )
 
     IMPLICIT NONE
     CLASS( MPILayer ), INTENT(inout)          :: myMPI
-    TYPE( BoundaryConditions ), INTENT(inout) :: boundaryState
+    TYPE( NodalDGSolution_3D ), INTENT(inout) :: state
     TYPE( Faces ), INTENT(in)                 :: meshFaces
     TYPE( BoundaryCommunicator ), INTENT(in)  :: extComm
     ! Local
@@ -274,7 +273,7 @@ CONTAINS
     grid = dim3(extComm % nBoundaries,1,1)
 
     CALL BufferToBoundary_CUDAKernel<<<grid, tBlock>>>( myMPI % recvBuffer_dev, &
-      boundaryState % externalState_dev, &
+      state % externalState_dev, &
       extComm % boundaryIDs_dev, &
       extComm % extProcIDs_dev, &
       extComm % rankTable_dev, &
@@ -296,7 +295,7 @@ CONTAINS
         iNeighbor = extComm % rankTable(p2)
         jUnpack   = extComm % unpackMap(bID)
 
-        boundaryState % externalState(:,:,:,bID) = myMPI % recvBuffer(:,:,:,jUnpack,iNeighbor)
+        state % externalState(:,:,:,bID) = myMPI % recvBuffer(:,:,:,jUnpack,iNeighbor)
 
       ENDIF
 
@@ -380,6 +379,6 @@ END SUBROUTINE BufferToBoundary_CUDAKernel
 
 #endif
 
-END MODULE MPILayer_CLASS
+END MODULE MPILayer_Class
 
 
