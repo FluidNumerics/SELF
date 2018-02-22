@@ -108,6 +108,31 @@ endif
 LIB+=${LAPACK_LIB}
 INC+=${LAPACK_INC}
 
+# ====================================================================== #
+
+COMM = ModelPrecision.o \
+       ConstantsDictionary.o \
+       LinkedList_Class.o \
+       KeyRing_Class.o \
+       HashTable_Class.o \
+       CommonRoutines.o \
+       Timing.o 
+
+SPEC = Quadrature.o \
+       Lagrange_Class.o \
+       NodalDG_Class.o \
+       NodalDGSolution_3D_Class.o \
+       SpectralFilter_Class.o 
+
+GEOM = Faces_Class.o \
+       Nodes_Class.o \
+       Surfaces_Class.o \
+       HexElements_Class.o \
+       BoundaryCommunicator_Class.o \
+       HexMesh_Class.o \
+       TopographicShapes.o \
+       ModelParameters_Class.o
+
 # ---------------------------------------------------------------------- #
 #                           ~/src/common/                                #
 # ---------------------------------------------------------------------- #
@@ -148,7 +173,7 @@ NodalDG_Class.o : ModelPrecision.o ConstantsDictionary.o  CommonRoutines.o \
                   Quadrature.o Lagrange_Class.o ${SRCDIR}spectral/NodalDG_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDG_Class.f90 -o $@
 
-NodalDGSolution_3D_Class.o : ModelPrecision.o NodalDG_Class.o ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90
+NodalDGSolution_3D_Class.o : ModelPrecision.o NodalDG_Class.o HexMesh_Class.o ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/NodalDGSolution_3D_Class.f90 -o $@
 	
 
@@ -159,18 +184,16 @@ SpectralFilter_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o
 
 # Test program
 
-spectral_tests : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o Spectral_Tests.o
-	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o Spectral_Tests.o -o $@
+spectral_tests : ${COMM} ${GEOM} ${SPEC} Spectral_Tests.o 
+	${FC} ${OPT} ${COMM} ${GEOM} ${SPEC} Spectral_Tests.o -o $@
+
+spectralfilter_tests : ${COMM} ${GEOM} ${SPEC} SpectralFilter_Tests.o
+	${FC} ${OPT} ${COMM} ${GEOM} ${SPEC} SpectralFilter_Tests.o -o $@
 
 
 Spectral_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o \
                    ${SRCDIR}spectral/testing/Spectral_Tests.F90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/Spectral_Tests.F90 -o $@
-
-
-spectralfilter_tests : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o SpectralFilter_Tests.o
-	${FC} ${OPT} ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o SpectralFilter_Tests.o -o $@
-
 
 SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o \
                    ${SRCDIR}spectral/testing/SpectralFilter_Tests.F90
@@ -179,6 +202,7 @@ SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o Noda
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #
 # ---------------------------------------------------------------------- #
+
 
 Edges_Class.o : ModelPrecision.o ${SRCDIR}geom/Edges_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Edges_Class.f90 -o $@

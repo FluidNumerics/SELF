@@ -9,6 +9,7 @@ MODULE NodalDGSolution_3D_Class
 
 USE ModelPrecision
 USE NodalDG_Class
+USE HexMesh_Class
 
 IMPLICIT NONE
 
@@ -87,6 +88,8 @@ IMPLICIT NONE
       PROCEDURE :: Calculate_Weak_Flux_Divergence
       PROCEDURE :: Calculate_Strong_Flux_Divergence
 
+      PROCEDURE :: Mapped_BassiRebay_Gradient
+
 #ifdef HAVE_CUDA
 
       PROCEDURE :: UpdateDevice => UpdateDevice_NodalDGSolution_3D
@@ -161,10 +164,11 @@ CONTAINS
       myDGS % tendency             = 0.0_prec
 
 #ifdef HAVE_CUDA
-      ALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev )
+      ALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev, myDGS % nBoundaryFaces_dev )
       myDGS % N_dev          = N
       myDGS % nEquations_dev = nEquations
       myDGS % nElements_dev  = nElements
+      myDGS % nBoundaryFaces_dev  = nBoundaryFaces
       
       ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundarySolution_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
@@ -228,7 +232,7 @@ CONTAINS
 
 
 #ifdef HAVE_CUDA
-      DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev )
+      DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev, myDGS % nBoundaryFaces_dev )
       DEALLOCATE( myDGS % solution_dev, &
                   myDGS % solutionGradient_dev, &
                   myDGS % boundaryGradientFlux_dev, &
@@ -438,6 +442,195 @@ CONTAINS
 
   END SUBROUTINE Calculate_Strong_Flux_Divergence
 
+! Algorithms for computing mapped derivative operations !
+
+ 
+  SUBROUTINE Mapped_BassiRebay_Gradient( nodalSolution, dgStorage, mesh )
+
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution 
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+    TYPE( HexMesh ), INTENT(in)                :: mesh
+
+
+      CALL BassiRebay_Gradient_InternalFaceFlux( nodalSolution, mesh )
+
+      CALL BassiRebay_Gradient_ExternalFaceFlux( nodalSolution, mesh )
+
+      CALL MappedGradientFluxDivergence( nodalSolution, dgStorage, mesh )
+
+
+  END SUBROUTINE Mapped_BassiRebay_Gradient
+
+
+  SUBROUTINE MappedGradientFluxDivergence( nodalSolution, dgStorage, mesh )
+   
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution 
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+    TYPE( HexMesh ), INTENT(in)                :: mesh
+    ! Local
+    INTEGER    :: ii, i, j, k, iEq, jEq, iEl, idir
+    REAL(prec) :: f(1:3,0:dgStorage % N,0:dgStorage % N, 0:dgStorage % N), df
+
+      DO iEl = 1, nodalSolution % nElements
+        DO iEq = 1, nodalSolution % nEquations
+          DO idir = 1, 3
+          
+            jEq = idir + (iEq-1)*3
+
+            DO k = 0, dgStorage % N
+              DO j = 0, dgStorage % N
+                DO i = 0, dgStorage % N   
+ 
+                  f(1,i,j,k) = nodalSolution % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,1,iEl)
+                  f(2,i,j,k) = nodalSolution % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,2,iEl)
+                  f(3,i,j,k) = nodalSolution % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,3,iEl)
+
+                ENDDO
+              ENDDO
+            ENDDO
+
+            DO k = 0, dgStorage % N
+              DO j = 0, dgStorage % N
+                DO i = 0, dgStorage % N   
+
+                  df = 0.0_prec
+                  DO ii = 0, dgStorage % N
+                    df = df + dgStorage % dgDerivativeMatrixTranspose(ii,i)*f(1,ii,j,k) + &
+                              dgStorage % dgDerivativeMatrixTranspose(ii,j)*f(2,i,ii,k) + &
+                              dgStorage % dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
+                  ENDDO
+                   
+                  nodalSolution % solutionGradient(idir,i,j,k,iEq,iEl) =  df+ ( nodalSolution % boundaryGradientFlux(i,k,jEq,1,iEl)*dgStorage % boundaryInterpolationMatrix(j,0) + &
+                                                                                nodalSolution % boundaryGradientFlux(i,k,jEq,3,iEl)*dgStorage % boundaryInterpolationMatrix(j,1) )/&
+                                                                              dgStorage % quadratureWeights(j) + &
+                                                                              ( nodalSolution % boundaryGradientFlux(j,k,jEq,4,iEl)*dgStorage % boundaryInterpolationMatrix(i,0) + &
+                                                                                nodalSolution % boundaryGradientFlux(j,k,jEq,2,iEl)*dgStorage % boundaryInterpolationMatrix(i,1) )/&
+                                                                              dgStorage % quadratureWeights(i) + &
+                                                                              ( nodalSolution % boundaryGradientFlux(i,j,jEq,5,iEl)*dgStorage % boundaryInterpolationMatrix(k,0) + &
+                                                                                nodalSolution % boundaryGradientFlux(i,j,jEq,6,iEl)*dgStorage % boundaryInterpolationMatrix(k,1) )/&
+                                                                              dgStorage % quadratureWeights(k) 
+
+                ENDDO  
+              ENDDO
+            ENDDO
+          ENDDO
+
+        ENDDO
+      ENDDO
+                            
+
+  END SUBROUTINE MappedGradientFluxDivergence
+
+! ================================================================================================ !
+! BassiRebay_Gradient_InternalFaceFlux
+!
+!  Uses the boundarySolution and the mesh boundary normal vectors to build the boundaryGradientFlux
+!  attribute on all internal faces of the mesh. At the element faces, the gradient-flux is taken 
+!  as the average of the two boundary states that are share the face.
+!
+! ================================================================================================ !
+
+  SUBROUTINE BassiRebay_Gradient_InternalFaceFlux( nodalSolution, mesh )
+
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution
+    TYPE( HexMesh ), INTENT(in)                :: mesh
+    ! Local
+    INTEGER :: iFace, e1, e2, s1, s2, iEq, i, j, ii, jj, idir, jEq
+   
+
+    DO iFace = 1, mesh % faces % nFaces
+
+      e1 = mesh % faces % elementIDs(1,iFace)
+      e2 = mesh % faces % elementIDs(2,iFace)
+      s1 = mesh % faces % elementSides(1,iFace)
+      s2 = ABS(mesh % faces % elementSides(2,iFace))
+
+      IF( e2 > 0 )THEN
+
+        DO iEq = 1, nodalSolution % nEquations
+          DO j = 0, nodalSolution % N
+            DO i = 0, nodalSolution % N
+          
+              ii = mesh % faces % iMap(i,j,iFace)
+              jj = mesh % faces % jMap(i,j,iFace)
+
+              DO idir = 1, 3        
+                jEq = idir + (iEq-1)*3
+                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
+                                                                                 nodalSolution % boundarySolution(ii,jj,iEq,s2,e2) )*&
+                                                                                 mesh % elements % nHat(idir,i,j,s1,e1)
+               
+                nodalSolution % boundaryGradientFlux(ii,jj,jEq,s2,e2) = -nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1)
+              ENDDO
+
+            ENDDO
+          ENDDO
+        ENDDO
+
+      ENDIF
+
+    ENDDO
+
+
+  END SUBROUTINE BassiRebay_Gradient_InternalFaceFlux
+
+! ================================================================================================ !
+! BassiRebay_Gradient_ExternalFaceFlux
+!
+!  Uses the boundarySolution, externalState, and the mesh boundary normal vectors to build the 
+!  boundaryGradientFlux attribute on all internal faces of the mesh. At the element faces, the 
+!  gradient-flux is taken as the average of the two boundary states that are share the face.
+!
+! ================================================================================================ !
+  SUBROUTINE BassiRebay_Gradient_ExternalFaceFlux( nodalSolution, mesh )
+
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution
+    TYPE( HexMesh ), INTENT(in)                :: mesh
+    ! Local
+    INTEGER :: iFace, e1, e2, s1, iEq, i, j, ii, jj, idir, jEq, bID
+
+
+    DO iFace = 1, mesh % faces % nFaces
+
+      e1 = mesh % faces % elementIDs(1,iFace)
+      e2 = mesh % faces % elementIDs(2,iFace)
+      s1 = mesh % faces % elementSides(1,iFace)
+      bID = ABS(mesh % faces % boundaryID(iFace))
+
+      IF( e2 > 0 )THEN
+
+        DO iEq = 1, nodalSolution % nEquations
+          DO j = 0, nodalSolution % N
+            DO i = 0, nodalSolution % N
+          
+              ii = mesh % faces % iMap(i,j,iFace)
+              jj = mesh % faces % jMap(i,j,iFace)
+
+              DO idir = 1, 3        
+                jEq = idir + (iEq-1)*3
+                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
+                                                                                 nodalSolution % externalState(ii,jj,iEq,bID) )*&
+                                                                                 mesh % elements % nHat(idir,i,j,s1,e1)
+               
+
+              ENDDO
+               
+
+            ENDDO
+          ENDDO
+        ENDDO
+
+      ENDIF
+
+    ENDDO
+
+
+  END SUBROUTINE BassiRebay_Gradient_ExternalFaceFlux
+
 #ifdef HAVE_CUDA
 
 ! ================================================================================================ !
@@ -521,3 +714,4 @@ CONTAINS
 #endif
 
 END MODULE NodalDGSolution_3D_Class
+

@@ -83,11 +83,13 @@ IMPLICIT NONE
 
     CALL referenceFunctions % Build( N          = nRef, &
                                      nEquations = 1, &
-                                     nElements  = 1 )
+                                     nElements  = 1, &
+                                     nBoundaryFaces = 1 )
 
     CALL interpolatedFunctions % Build( N          = nRef, &
                                         nEquations = 1, &
-                                        nElements  = 1 )
+                                        nElements  = 1, &
+                                        nBoundaryFaces = 1 )
                                      
 
     CALL F1_Case( )
@@ -135,7 +137,8 @@ CONTAINS
                                        
         CALL trialFunctions % Build( N          = i, &
                                      nEquations = 1, &
-                                     nElements  = 1 )  
+                                     nElements  = 1, &
+                                     nBoundaryFaces = 1 )  
                     
         ! The example function for case 1 is filled in the "solution" attribute of the trialFunctions data structure.
         CALL F1( trialInterpolant % interp, &
@@ -193,11 +196,13 @@ CONTAINS
                                        
         CALL trialFunctions % Build( N          = i, &
                                      nEquations = 1, &
-                                     nElements  = 1 )  
+                                     nElements  = 1, &
+                                     nBoundaryFaces = 1 )  
          
         CALL exact % Build( N          = i, &
                             nEquations = 1, &
-                            nElements  = 1 )  
+                            nElements  = 1, &
+                            nBoundaryFaces = 1 )  
         
         ! The example function for case 1 is filled in the "solution" attribute of the trialFunctions data structure.
         CALL F2( trialInterpolant % interp, &

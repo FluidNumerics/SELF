@@ -57,7 +57,8 @@ IMPLICIT NONE
 
     CALL filteredFunction % Build( N          = polyDegree, &
                                    nEquations = 1, &
-                                   nElements  = 1 )
+                                   nElements  = 1, &
+                                   nBoundaryFaces = 1 )
 
     DO filterID = 1, polyDegree
 
@@ -69,7 +70,8 @@ IMPLICIT NONE
   
         CALL Legendre % Build( N          = polyDegree, &
                                nEquations = 1, &
-                               nElements  = 1 )
+                               nElements  = 1, &
+                               nBoundaryFaces = 1 )
     
         DO i = 0, polyDegree
           CALL LegendrePolynomial( polyID, dgStorage % interp % interpolationPoints(i), &
