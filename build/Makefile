@@ -35,6 +35,7 @@ ifeq (${FC},gfortran)
   ifeq (${MPI},yes)
     $(info '+MPI')
     CPPFLAGS+=-DHAVE_MPI
+    FC=${MPIFC}
     LIB+=${MPI_LIB}
     INC+=${MPI_INC}
   endif
@@ -200,7 +201,7 @@ BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surfaces_Class.o HexElements_Class.o \
-                  Faces_Class.o Nodes_Class.o ${SRCDIR}geom/HexMesh_Class.f90
+                  Faces_Class.o Nodes_Class.o ModelParameters_Class.o ${SRCDIR}geom/HexMesh_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
@@ -225,18 +226,15 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
 BodyForces_Class.o : ModelPrecision.o ${SRCDIR}fluid/BodyForces_Class.f90	
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/BodyForces_Class.f90
 
-BoundaryConditions_Class.o : ModelPrecision.o ${SRCDIR}fluid/BoundaryConditions_Class.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/BoundaryConditions_Class.f90
-
 ModelParameters_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}fluid/ModelParameters_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/ModelParameters_Class.f90 -o $@
 
-MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o BoundaryConditions_Class.o BoundaryCommunicator_Class.o \
+MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o BoundaryCommunicator_Class.o \
                    ${SRCDIR}fluid/MPILayer_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
 Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
-                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o BoundaryConditions_Class.o \
+                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
                 BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
@@ -278,7 +276,6 @@ FLOBJ = ModelPrecision.o \
         Nodes_Class.o \
         HexMesh_Class.o \
         BoundaryCommunicator_Class.o \
-        BoundaryConditions_Class.o \
         BodyForces_Class.o
 
 ifeq (${MPI},yes)

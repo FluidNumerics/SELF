@@ -31,21 +31,46 @@ IMPLICIT NONE
 
   TYPE NodalDGSolution_3D
 
-    INTEGER                 :: N, nEquations, nElements
+    INTEGER                 :: N, nEquations, nElements, nBoundaryFaces
+
     REAL(prec), ALLOCATABLE :: solution(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: boundarySolution(:,:,:,:,:) 
+
+    ! Used for setting prescribed boundary conditions and
+    ! handling the computed external state on mesh boundary faces
+    REAL(prec), ALLOCATABLE :: prescribedState(:,:,:,:)
+    REAL(prec), ALLOCATABLE :: externalState(:,:,:,:)
+
+    ! Used for calculating the gradient of the solution variables
+    REAL(prec), ALLOCATABLE :: solutionGradient(:,:,:,:,:,:)
+    REAL(prec), ALLOCATABLE :: boundaryGradientFlux(:,:,:,:,:) 
+   
+    ! Conservative flux and boundary Riemann flux
+    REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: boundaryFlux(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: fluxDivergence(:,:,:,:,:)
+
+    ! Non-conservative source terms for the solution variables
     REAL(prec), ALLOCATABLE :: source(:,:,:,:,:)
+
+    ! For conveniently storing fluxDivergence + source
     REAL(prec), ALLOCATABLE :: tendency(:,:,:,:,:)
+
 
 #ifdef HAVE_CUDA
 
-    INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nEquations_dev, nElements_dev
+    INTEGER, DEVICE, ALLOCATABLE    :: N_dev, nEquations_dev, nElements_dev, nBoundaryFaces_dev
+
     REAL(prec), DEVICE, ALLOCATABLE :: solution_dev(:,:,:,:,:)
-    REAL(prec), DEVICE, ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: boundarySolution_dev(:,:,:,:,:) 
+
+    REAL(prec), DEVICE, ALLOCATABLE :: prescribedState_dev(:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: externalState_dev(:,:,:,:)
+
+    REAL(prec), DEVICE, ALLOCATABLE :: solutionGradient_dev(:,:,:,:,:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: boundaryGradientFlux_dev(:,:,:,:,:)  
+
+    REAL(prec), DEVICE, ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: boundaryFlux_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: fluxDivergence_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: source_dev(:,:,:,:,:)
@@ -101,30 +126,39 @@ CONTAINS
 !
 ! ================================================================================================ ! 
 
-  SUBROUTINE Build_NodalDGSolution_3D( myDGS, N, nEquations, nElements )
+  SUBROUTINE Build_NodalDGSolution_3D( myDGS, N, nEquations, nElements, nBoundaryFaces )
     IMPLICIT NONE
     CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
-    INTEGER, INTENT(in)                      :: N, nEquations, nElements
+    INTEGER, INTENT(in)                      :: N, nEquations, nElements, nBoundaryFaces
       
       myDGS % N          = N
       myDGS % nEquations = nEquations
       myDGS % nElements  = nElements
+      myDGS % nBoundaryFaces = nBoundaryFaces
 
       ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundarySolution(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % prescribedState(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
+                myDGS % externalState(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
+                myDGS % solutionGradient(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % boundaryGradientFlux(0:N,0:N,1:nEquations*3,1:6,1:nElements), &
+                myDGS % flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundaryFlux(0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % fluxDivergence(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % source(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % tendency(0:N,0:N,0:N,1:nEquations,1:nElements) )
       
-      myDGS % solution         = 0.0_prec
-      myDGS % flux             = 0.0_prec
-      myDGS % boundarySolution = 0.0_prec
-      myDGS % boundaryFlux     = 0.0_prec
-      myDGS % fluxDivergence   = 0.0_prec
-      myDGS % source           = 0.0_prec
-      myDGS % tendency         = 0.0_prec
+      myDGS % solution             = 0.0_prec
+      myDGS % boundarySolution     = 0.0_prec
+      myDGS % prescribedState      = 0.0_prec
+      myDGS % externalState        = 0.0_prec
+      myDGS % solutionGradient     = 0.0_prec
+      myDGS % boundaryGradientFlux = 0.0_prec
+      myDGS % flux                 = 0.0_prec
+      myDGS % boundaryFlux         = 0.0_prec
+      myDGS % fluxDivergence       = 0.0_prec
+      myDGS % source               = 0.0_prec
+      myDGS % tendency             = 0.0_prec
 
 #ifdef HAVE_CUDA
       ALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev )
@@ -133,20 +167,28 @@ CONTAINS
       myDGS % nElements_dev  = nElements
       
       ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundarySolution_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
+                myDGS % prescribedState_dev(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
+                myDGS % externalState_dev(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
+                myDGS % solutionGradient_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
+                myDGS % boundaryGradientFlux_dev(0:N,0:N,1:nEquations*3,1:6,1:nElements), &
+                myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundaryFlux_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % fluxDivergence_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % source_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % tendency_dev(0:N,0:N,0:N,1:nEquations,1:nElements) )
 
-      myDGS % solution_dev         = 0.0_prec
-      myDGS % flux_dev             = 0.0_prec
-      myDGS % boundarySolution_dev = 0.0_prec
-      myDGS % boundaryFlux_dev     = 0.0_prec
-      myDGS % fluxDivergence_dev   = 0.0_prec
-      myDGS % source_dev           = 0.0_prec
-      myDGS % tendency_dev         = 0.0_prec
+      myDGS % solution_dev             = 0.0_prec
+      myDGS % boundarySolution_dev     = 0.0_prec
+      myDGS % prescribedState_dev      = 0.0_prec
+      myDGS % externalState_dev        = 0.0_prec
+      myDGS % solutionGradient_dev     = 0.0_prec
+      myDGS % boundaryGradientFlux_dev = 0.0_prec
+      myDGS % flux_dev                 = 0.0_prec
+      myDGS % boundaryFlux_dev         = 0.0_prec
+      myDGS % fluxDivergence_dev       = 0.0_prec
+      myDGS % source_dev               = 0.0_prec
+      myDGS % tendency_dev             = 0.0_prec
 
 #endif
 
@@ -175,6 +217,8 @@ CONTAINS
     CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
 
       DEALLOCATE( myDGS % solution, &
+                  myDGS % solutionGradient, &
+                  myDGS % boundaryGradientFlux, &
                   myDGS % flux, &
                   myDGS % boundarySolution, &
                   myDGS % boundaryFlux, &
@@ -186,6 +230,8 @@ CONTAINS
 #ifdef HAVE_CUDA
       DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev )
       DEALLOCATE( myDGS % solution_dev, &
+                  myDGS % solutionGradient_dev, &
+                  myDGS % boundaryGradientFlux_dev, &
                   myDGS % flux_dev, &
                   myDGS % boundarySolution_dev, &
                   myDGS % boundaryFlux_dev, &
@@ -245,6 +291,54 @@ CONTAINS
 
   END SUBROUTINE Calculate_Solution_At_Boundaries
 
+! ================================================================================================ !
+! Calculate_Weak_Gradient
+!   Passes the solution and boundarySolution attributes to the routine \ref DG_Gradient_3D to calculate
+!   the solutionGradient attribute. This wrapper routine passes the device attributes when CUDA is 
+!   enabled. This routine assumes no mapping to physical space.
+!
+!   Usage : </H2> 
+!
+!     TYPE</B>(NodalDGSolution_3D) :: nodalSolution 
+!     TYPE</B>(NodalDG)            :: dgStorage 
+!
+!       CALL</B> nodalSolution % Calculate_Weak_Gradient( dgStorage ) 
+! 
+!   Input/Output : </H2>
+!
+!     nodalSolution  (in/out) 
+!       Instance of the \ref NodalDGSolution_3D structure that has been constructed. On output, the 
+!       solutionGradient attribute is updated.
+!
+!     dgStorage  (in) 
+!       Instance of the \ref NodalDG structure.
+!
+! ================================================================================================ ! 
+
+  SUBROUTINE Calculate_Weak_Gradient( myDGS, dgStorage )
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+
+#ifdef HAVE_CUDA
+      CALL DG_Gradient_3D( dgStorage, &
+                           myDGS % solution_dev, &
+                           myDGS % boundarySolution_dev, &
+                           myDGS % solutionGradient_dev, &
+                           myDGS % nEquations_dev, & 
+                           myDGS % nElements_dev )
+#else
+      CALL DG_Gradient_3D( dgStorage, &
+                           myDGS % solution, &
+                           myDGS % boundarySolution, &
+                           myDGS % solutionGradient, &
+                           myDGS % nEquations, & 
+                           myDGS % nElements )
+
+#endif
+
+  END SUBROUTINE Calculate_Weak_Gradient
+  
 ! ================================================================================================ !
 ! Calculate_Weak_Flux_Divergence
 !   Passes the flux and boundaryFlux attributes to the routine \ref DG_Divergence_3D to calculate
@@ -371,13 +465,17 @@ CONTAINS
     IMPLICIT NONE
     CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
 
-      myDGS % solution_dev         = myDGS % solution
-      myDGS % flux_dev             = myDGS % flux
-      myDGS % boundarySolution_dev = myDGS % boundarySolution
-      myDGS % boundaryFlux_dev     = myDGS % boundaryFlux
-      myDGS % fluxDivergence_dev   = myDGS % fluxDivergence
-      myDGS % source_dev           = myDGS % source
-      myDGS % tendency_dev         = myDGS % tendency
+      myDGS % solution_dev             = myDGS % solution
+      myDGS % boundarySolution_dev     = myDGS % boundarySolution
+      myDGS % prescribedState_dev      = myDGS % prescribedState
+      myDGS % externalState_dev        = myDGS % externalState
+      myDGS % solutionGradient_dev     = myDGS % solutionGradient
+      myDGS % boundaryGradientFlux_dev = myDGS % boundaryGradientFlux
+      myDGS % flux_dev                 = myDGS % flux
+      myDGS % boundaryFlux_dev         = myDGS % boundaryFlux
+      myDGS % fluxDivergence_dev       = myDGS % fluxDivergence
+      myDGS % source_dev               = myDGS % source
+      myDGS % tendency_dev             = myDGS % tendency
 
   END SUBROUTINE UpdateDevice_NodalDGSolution_3D
 
@@ -406,13 +504,17 @@ CONTAINS
     IMPLICIT NONE
     CLASS( NodalDGSolution_3D ), INTENT(inout) :: myDGS
 
-      myDGS % solution         = myDGS % solution_dev
-      myDGS % flux             = myDGS % flux_dev
-      myDGS % boundarySolution = myDGS % boundarySolution_dev
-      myDGS % boundaryFlux     = myDGS % boundaryFlux_dev
-      myDGS % fluxDivergence   = myDGS % fluxDivergence_dev
-      myDGS % source           = myDGS % source_dev
-      myDGS % tendency         = myDGS % tendency_dev
+      myDGS % solution             = myDGS % solution_dev
+      myDGS % boundarySolution     = myDGS % boundarySolution_dev
+      myDGS % prescribedState      = myDGS % prescribedState_dev
+      myDGS % externalState        = myDGS % externalState_dev
+      myDGS % solutionGradient     = myDGS % solutionGradient_dev
+      myDGS % boundaryGradientFlux = myDGS % boundaryGradientFlux_dev
+      myDGS % flux                 = myDGS % flux_dev
+      myDGS % boundaryFlux         = myDGS % boundaryFlux_dev
+      myDGS % fluxDivergence       = myDGS % fluxDivergence_dev
+      myDGS % source               = myDGS % source_dev
+      myDGS % tendency             = myDGS % tendency_dev
 
   END SUBROUTINE UpdateHost_NodalDGSolution_3D
 

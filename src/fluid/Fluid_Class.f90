@@ -17,7 +17,6 @@ MODULE Fluid_Class
   USE NodalDGSolution_3D_Class
   USE HexMesh_Class
   USE BoundaryCommunicator_Class
-  USE BoundaryConditions_Class
   USE BodyForces_Class
 #ifdef HAVE_MPI
   USE MPILayer_Class
@@ -45,11 +44,8 @@ MODULE Fluid_Class
     TYPE( NodalDGSolution_3D )   :: static
     TYPE( NodalDGSolution_3D )   :: state
     TYPE( NodalDGSolution_3D )   :: smoothState
-    TYPE( BoundaryConditions )   :: stateBCs
     TYPE( NodalDGSolution_3D )   :: stressTensor
-    TYPE( BoundaryConditions )   :: stressBCs
     TYPE( NodalDGSolution_3D )   :: sgsCoeffs
-    TYPE( BoundaryConditions )   :: sgsBCs
 
 #ifdef HAVE_MPI
     TYPE( MPILayer )             :: mpiStateHandler
@@ -182,24 +178,13 @@ CONTAINS
       myDGSEM % mesh % elements % nElements )
 
     CALL myDGSEM % state % Build( myDGSEM % params % polyDeg, nEquations, &
-      myDGSEM % mesh % elements % nElements )
+      myDGSEM % mesh % elements % nElements, myDGSEM % extComm % nBoundaries )
 
     CALL myDGSEM % static % Build( myDGSEM % params % polyDeg, nEquations, &
-      myDGSEM % mesh % elements % nElements )
+      myDGSEM % mesh % elements % nElements, myDGSEM % extComm % nBoundaries )
 
     CALL myDGSEM % smoothState % Build( myDGSEM % params % polyDeg, nEquations, &
-      myDGSEM % mesh % elements % nElements )
-
-    CALL myDGSEM % stateBCs % Build( myDGSEM % params % polyDeg, nEquations, &
-      myDGSEM % extComm % nBoundaries )
-
-    CALL myDGSEM % stressTensor % Build( myDGSEM % params % polyDeg, &
-      (myDGSEM % state % nEquations-1)*3, &
-      myDGSEM % mesh % elements % nElements )
-
-    CALL myDGSEM % stressBCs % Build( myDGSEM % params % polyDeg, &
-      (myDGSEM % state % nEquations-1)*3, &
-      myDGSEM % extComm % nBoundaries )
+      myDGSEM % mesh % elements % nElements, myDGSEM % extComm % nBoundaries )
 
 
     ! The "sgsCoeffs" attribute CONTAINS coefficients for the
@@ -210,11 +195,7 @@ CONTAINS
 
     CALL myDGSEM % sgsCoeffs % Build( myDGSEM % params % polyDeg, &
       myDGSEM % state % nEquations-1, &
-      myDGSEM % mesh % elements % nElements )
-
-    CALL myDGSEM % sgsBCs % Build( myDGSEM % params % polyDeg, &
-      myDGSEM % state % nEquations-1, &
-      myDGSEM % extComm % nBoundaries )
+      myDGSEM % mesh % elements % nElements, myDGSEM % extComm % nBoundaries )
 
     ! Initially set all of the SGS coefficients to the "viscosity". In the event
     ! the Laplacian model is USEd, this will be the laplacian coefficient that is
@@ -224,7 +205,7 @@ CONTAINS
 
     myDGSEM % sgsCoeffs % solution         = myDGSEM % params % viscosity
     myDGSEM % sgsCoeffs % boundarySolution = myDGSEM % params % viscosity
-    myDGSEM % sgsBCs % externalState = myDGSEM % params % viscosity
+    myDGSEM % sgsCoeffs % externalState = myDGSEM % params % viscosity
 
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % state % nEquations )
@@ -233,7 +214,7 @@ CONTAINS
 #endif
 
 #ifdef HAVE_CUDA
-    CALL myDGSEM % sgsBCs % UpdateDevice( )
+    CALL myDGSEM % sgsCoeffs % UpdateDevice( )
     CALL myDGSEM % sgsCoeffs % UpdateDevice( )
 #endif
 
@@ -284,11 +265,8 @@ CONTAINS
     CALL myDGSEM % static % Trash( )
     CALL myDGSEM % state % Trash( )
     CALL myDGSEM % smoothState % Trash( )
-    CALL myDGSEM % stateBCs % Trash( )
     CALL myDGSEM % stressTensor % Trash( )
-    CALL myDGSEM % stressBCs % Trash( )
     CALL myDGSEM % sgsCoeffs % Trash( )
-    CALL myDGSEM % sgsBCs % Trash( )
 
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Trash( )
@@ -731,7 +709,7 @@ CONTAINS
     CALL myDGSEM % InternalFaceFlux( )
 
 #ifdef HAVE_MPI
-    CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % stateBCs, &
+    CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % state, &
                                                             myDGSEM % mesh % faces, &
                                                             myDGSEM % extComm )
 #endif
@@ -845,7 +823,7 @@ CONTAINS
 
 #ifdef HAVE_MPI
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
-        CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsBCs, &
+        CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsCoeffs, &
                                                               myDGSEM % mesh % faces, &
                                                               myDGSEM % extComm )
       ENDIF
@@ -915,7 +893,7 @@ CONTAINS
       CALL myDGSEM % InternalStressFlux( )
 
 #ifdef HAVE_MPI
-      CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressBCs,&
+      CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressTensor,&
                                                                myDGSEM % mesh % faces, &
                                                                myDGSEM % extComm )
 #endif
@@ -1047,7 +1025,7 @@ CONTAINS
                                                                myDGSEM % mesh % faces % elementIDs_dev, &   ! I
                                                                myDGSEM % mesh % faces % elementSides_dev, & ! I
                                                                myDGSEM % extComm % extProcIDs_dev, &           ! I
-                                                               myDGSEM % sgsBCs % externalState_dev, &                    ! O
+                                                               myDGSEM % sgsCoeffs % externalState_dev, &                    ! O
                                                                myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
                                                                myDGSEM % mesh % elements % nHat_dev, &
                                                                myDGSEM % extComm % myRank_dev, &
@@ -1076,7 +1054,7 @@ CONTAINS
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
             DO iEq = 1, myDGSEM % state % nEquations-1
-              myDGSEM % sgsBCs % externalState(i,j,iEq,bID) = myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)
+              myDGSEM % sgsCoeffs % externalState(i,j,iEq,bID) = myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
           ENDDO
         ENDDO
@@ -1115,9 +1093,9 @@ CONTAINS
                                                            myDGSEM % mesh % faces % elementIDs_dev, &   ! I
                                                            myDGSEM % mesh % faces % elementSides_dev, & ! I
                                                            myDGSEM % extComm % extProcIDs_dev, &           ! I
-                                                           myDGSEM % stateBCs % externalState_dev, &               ! O
+                                                           myDGSEM % state % externalState_dev, &               ! O
                                                            myDGSEM % state % boundarySolution_dev, &    ! I
-                                                           myDGSEM % stateBCs % prescribedState_dev, &             ! I
+                                                           myDGSEM % state % prescribedState_dev, &             ! I
                                                            myDGSEM % mesh % elements % nHat_dev, &
                                                            myDGSEM % extComm % myRank_dev, &
                                                            myDGSEM % params % Cd_dev, &
@@ -1277,12 +1255,12 @@ CONTAINS
               myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz )*&
               (1.0_prec-myDGSEM % params % Cd*myDGSEM % params % dragScale*speed)
 
-            myDGSEM % stateBCs % externalState(i,j,1,bID) = -nx*un + us*sx + ut*tx ! u
-            myDGSEM % stateBCs % externalState(i,j,2,bID) = -ny*un + us*sy + ut*ty ! v
-            myDGSEM % stateBCs % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
-            myDGSEM % stateBCs % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
-            myDGSEM % stateBCs % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % stateBCs % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
+            myDGSEM % state % externalState(i,j,1,bID) = -nx*un + us*sx + ut*tx ! u
+            myDGSEM % state % externalState(i,j,2,bID) = -ny*un + us*sy + ut*ty ! v
+            myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
+            myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
+            myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
+            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
 
 
           ENDIF
@@ -1322,7 +1300,7 @@ CONTAINS
                                                         myDGSEM % mesh % elements % nHat_dev, &
                                                         myDGSEM % state % boundarySolution_dev, &
                                                         myDGSEM % static % boundarySolution_dev, &
-                                                        myDGSEM % stateBCs % externalState_dev, &
+                                                        myDGSEM % state % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev )
 
@@ -1481,7 +1459,7 @@ CONTAINS
                                                         myDGSEM % mesh % elements % nHat_dev, &
                                                         myDGSEM % state % boundarySolution_dev, &
                                                         myDGSEM % static % boundarySolution_dev, &
-                                                        myDGSEM % stateBCs % externalState_dev, &
+                                                        myDGSEM % state % externalState_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev )
 
@@ -1524,17 +1502,17 @@ CONTAINS
 
             bID  = ABS(myDGSEM % mesh % faces % boundaryID(iFace))
             DO iEq = 1, myDGSEM % state % nEquations-1
-              jump(iEq)  = myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) - &
+              jump(iEq)  = myDGSEM % state % externalState(ii,jj,iEq,bID) - &
                            myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
 
             ! Sound speed estimate for the external and internal states
 
-            T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % stateBCs % externalState(ii,jj,5,bID))/&
-              (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % stateBCs % externalState(ii,jj,4,bID))
+            T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % externalState(ii,jj,5,bID))/&
+              (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % externalState(ii,jj,4,bID))
 
             cOut = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % stateBCs % externalState(ii,jj,6,bID)+&
+              ( (myDGSEM % state % externalState(ii,jj,6,bID)+&
               myDGSEM % static % boundarySolution(i,j,6,s1,e1) )/&
               myDGSEM % params % P0 )**myDGSEM % params % rC   )
 
@@ -1547,10 +1525,10 @@ CONTAINS
               myDGSEM % params % P0 )**myDGSEM % params % rC  )
 
             ! External normal velocity component
-            uOut = ( myDGSEM % stateBCs % externalState(ii,jj,1,bID)*nHat(1) + &
-                     myDGSEM % stateBCs % externalState(ii,jj,2,bID)*nHat(2) + &
-                     myDGSEM % stateBCs % externalState(ii,jj,3,bID)*nHat(3) )/&
-                   ( myDGSEM % stateBCs % externalState(ii,jj,4,bID)+&
+            uOut = ( myDGSEM % state % externalState(ii,jj,1,bID)*nHat(1) + &
+                     myDGSEM % state % externalState(ii,jj,2,bID)*nHat(2) + &
+                     myDGSEM % state % externalState(ii,jj,3,bID)*nHat(3) )/&
+                   ( myDGSEM % state % externalState(ii,jj,4,bID)+&
                      myDGSEM % static % boundarySolution(i,j,4,s1,e1) )
 
             ! Internal normal velocity component
@@ -1565,39 +1543,39 @@ CONTAINS
             ! Advective flux
             DO iEq = 1, myDGSEM % state % nEquations-1
               aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
-                uOut*( myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) )
+                uOut*( myDGSEM % state % externalState(ii,jj,iEq,bID) + myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) )
             ENDDO
 
             DO k = 1, 3
               ! Momentum flux due to pressure
               aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,6,s1,e1) + &
-                myDGSEM % stateBCs % externalState(ii,jj,6,bID))*nHat(k)
+                myDGSEM % state % externalState(ii,jj,6,bID))*nHat(k)
             ENDDO
 
 
             DO iEq = 1, myDGSEM % state % nEquations-1
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-              IF( iEq == 4 )THEN
-                DO k = 1, 3
-                  jEq = k+(iEq-1)*3
-                  ! Calculate the Bassi-Rebay flux for the stress tensor.
-                  myDGSEM % stressTensor % boundaryFlux(i,j,jEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) +&
-                    myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) )*&
-                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
-                ENDDO
-              ELSE
-                DO k = 1, 3
-                  jEq = k+(iEq-1)*3
-                  ! Calculate the Bassi-Rebay flux for the stress tensor.
-                  myDGSEM % stressTensor % boundaryFlux(i,j,jEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
-                    (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
-                    myDGSEM % static % boundarySolution(i,j,4,s1,e1)) +&
-                    myDGSEM % stateBCs % externalState(ii,jj,iEq,bID)/&
-                    (myDGSEM % stateBCs % externalState(ii,jj,4,bID)+&
-                    myDGSEM % static % boundarySolution(i,j,4,s1,e1)) )*&
-                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
-                ENDDO
-              ENDIF
+              
+                     IF( iEq == 4 )THEN
+                           ! Calculate the Bassi-Rebay (LDG) flux for the stress tensor.
+                           myDGSEM % state % solutionGradientFlux(1:3,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) +&
+                                                                                             myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) )*&
+                                                                                             myDGSEM % mesh % geom(e1) % nHat(1:3,i,j,s1)
+                                                                                        
+                           myDGSEM % stressTensor % boundaryFlux(ii,jj,jEq,s2,e2) = -myDGSEM % stressTensor % boundaryFlux(i,j,jEq,s1,e1)
+                     ELSE
+                           ! Calculate the Bassi-Rebay (LDG) flux for the stress tensor.
+                           myDGSEM % state % solutionGradientFlux(1:3,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
+                                                                                             (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
+                                                                                              myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
+                                                                                             myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)/&
+                                                                                             (myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) +&
+                                                                                              myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)) )*&
+                                                                                             myDGSEM % mesh % geom(e1) % nHat(1:3,i,j,s1)
+                                                                                        
+                     ENDIF
+                     
+                     myDGSEM % state % solutionGradientFlux(1:3,ij,jj,iEq,s2,e2) = -myDGSEM % state % solutionGradientFlux(1:3,i,j,iEq,s1,e1)
             ENDDO
 
           ENDDO
@@ -2022,9 +2000,9 @@ CONTAINS
                                                             myDGSEM % mesh % faces % elementIDs_dev, &         ! I
                                                             myDGSEM % mesh % faces % elementSides_dev, &       ! I
                                                             myDGSEM % extComm % extProcIDs_dev, &              ! I
-                                                            myDGSEM % stressBCs % externalState_dev, &                    ! O
+                                                            myDGSEM % stressTensor % externalState_dev, &                    ! O
                                                             myDGSEM % stressTensor % boundarySolution_dev, &   ! I
-                                                            myDGSEM % stressBCs % prescribedState_dev, &                  ! I
+                                                            myDGSEM % stressTensor % prescribedState_dev, &                  ! I
                                                             myDGSEM % mesh % elements % nHat_dev, &
                                                             myDGSEM % extComm % myRank_dev, &
                                                             myDGSEM % params % polyDeg_dev, &
@@ -2051,7 +2029,7 @@ CONTAINS
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
             DO iEq = 1, myDGSEM % stressTensor % nEquations
-              myDGSEM % stressBCs % externalState(i,j,iEq,bID) = -myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
+              myDGSEM % stressTensor % externalState(i,j,iEq,bID) = -myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
           ENDDO
         ENDDO
@@ -2087,8 +2065,8 @@ CONTAINS
                                                           myDGSEM % static % boundarySolution_dev, &
                                                           myDGSEM % stressTensor % boundarySolution_dev, &
                                                           myDGSEM % sgsCoeffs % boundarySolution_dev, &
-                                                          myDGSEM % stateBCs % externalState_dev, &
-                                                          myDGSEM % stressBCs % externalState_dev, &
+                                                          myDGSEM % state % externalState_dev, &
+                                                          myDGSEM % stressTensor % externalState_dev, &
                                                           myDGSEM % stressTensor % boundaryFlux_dev, &
                                                           myDGSEM % params % viscLengthScale_dev, &
                                                           myDGSEM % params % polyDeg_dev, &
@@ -2195,9 +2173,9 @@ CONTAINS
                                                           myDGSEM % static % boundarySolution_dev, &
                                                           myDGSEM % stressTensor % boundarySolution_dev, &
                                                           myDGSEM % sgsCoeffs % boundarySolution_dev, &
-                                                          myDGSEM % sgsBCS % externalState_dev, &
-                                                          myDGSEM % stateBCs % externalState_dev, &
-                                                          myDGSEM % stressBCs % externalState_dev, &
+                                                          myDGSEM % sgsCoeffs % externalState_dev, &
+                                                          myDGSEM % state % externalState_dev, &
+                                                          myDGSEM % stressTensor % externalState_dev, &
                                                           myDGSEM % stressTensor % boundaryFlux_dev, &
                                                           myDGSEM % params % viscLengthScale_dev, &
                                                           myDGSEM % params % polyDeg_dev, &
@@ -2244,7 +2222,7 @@ CONTAINS
               DO iEq = 1, myDGSEM % state % nEquations-1
                 myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
                   0.5_prec*myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*&
-                  ( myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) - myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
+                  ( myDGSEM % state % externalState(ii,jj,iEq,bID) - myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
                   myDGSEM % params % viscLengthScale*norm
 
                 IF( iEq == 4 )THEN
@@ -2254,13 +2232,13 @@ CONTAINS
                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
                                                                            0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
                                                                            ( myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1) + &
-                                                                             myDGSEM % stressBCs % externalState(ii,jj,jEq,bID) )*&
+                                                                             myDGSEM % stressTensor % externalState(ii,jj,jEq,bID) )*&
                                                                            myDGSEM % mesh % elements % nHat(m,i,j,s1,e1)
                   ENDDO
 
                 ELSE
 
-                  rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % stateBCs % externalState(ii,jj,4,bID) )
+                  rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % externalState(ii,jj,4,bID) )
                   rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
                   DO m = 1, 3
@@ -2268,7 +2246,7 @@ CONTAINS
                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
                                                                            0.5_prec*myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
                                                                           ( rhoIn*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-                                                                            rhoOut*myDGSEM % stressBCs % externalState(ii,jj,jEq,bID) )*&
+                                                                            rhoOut*myDGSEM % stressTensor % externalState(ii,jj,jEq,bID) )*&
                                                                           myDGSEM % mesh % elements % nHat(m,i,j,s1,e1)
                   ENDDO
 
@@ -2279,7 +2257,7 @@ CONTAINS
 
               DO iEq = 1, myDGSEM % state % nEquations-1
                 myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = &
-                  0.5_prec*(myDGSEM % sgsBCs % externalState(ii,jj,iEq,bID)*myDGSEM % stateBCs % externalState(ii,jj,iEq,bID) -&
+                  0.5_prec*(myDGSEM % sgsCoeffs % externalState(ii,jj,iEq,bID)*myDGSEM % state % externalState(ii,jj,iEq,bID) -&
                   myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,s1,e1)*myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) )/&
                   myDGSEM % params % viscLengthScale*norm
 
@@ -2290,14 +2268,14 @@ CONTAINS
                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
                                                                            0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
                                                                            myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+ &
-                                                                           myDGSEM % sgsBCs % externalState(ii,jj,iEq,bID )*&
-                                                                           myDGSEM % stressBCs % externalState(ii,jj,jEq,bID) )*&
+                                                                           myDGSEM % sgsCoeffs % externalState(ii,jj,iEq,bID )*&
+                                                                           myDGSEM % stressTensor % externalState(ii,jj,jEq,bID) )*&
                                                                            myDGSEM % mesh % elements % nHat(m,i,j,s1,e1)
                   ENDDO
 
                 ELSE
 
-                  rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % stateBCs % externalState(ii,jj,4,bID) )
+                  rhoOut = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % externalState(ii,jj,4,bID) )
                   rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
                   DO m = 1, 3
@@ -2307,8 +2285,8 @@ CONTAINS
                     myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) + &
                                                                            0.5_prec*( myDGSEM % sgsCoeffs % boundarysolution(i,j,iEq,s1,e1)*&
                                                                            rhoIn*myDGSEM % stressTensor % boundarysolution(i,j,jEq,s1,e1)+&
-                                                                           myDGSEM % sgsBCs % externalState(ii,jj,iEq,bID)*&
-                                                                           rhoOut*myDGSEM % stressBCs % externalState(ii,jj,jEq,bID) )*&
+                                                                           myDGSEM % sgsCoeffs % externalState(ii,jj,iEq,bID)*&
+                                                                           rhoOut*myDGSEM % stressTensor % externalState(ii,jj,jEq,bID) )*&
                                                                            myDGSEM % mesh % elements % nHat(m,i,j,s1,e1)
 
                   ENDDO
@@ -2828,8 +2806,8 @@ CONTAINS
       ACTION ='WRITE', &
       CONVERT='BIG_ENDIAN',&
       RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
-    WRITE( fUnit, rec = 1 ) myDGSEM % stateBCs % externalState
-    WRITE( fUnit, rec = 2 ) myDGSEM % stateBCs % prescribedState
+    WRITE( fUnit, rec = 1 ) myDGSEM % state % externalState
+    WRITE( fUnit, rec = 2 ) myDGSEM % state % prescribedState
     CLOSE(fUnit)
 
 
@@ -2903,8 +2881,8 @@ CONTAINS
         ACTION ='READ', &
         CONVERT='BIG_ENDIAN',&
         RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
-      READ( fUnit, rec = 1 ) myDGSEM % stateBCs % externalState
-      READ( fUnit, rec = 2 ) myDGSEM % stateBCs % prescribedState
+      READ( fUnit, rec = 1 ) myDGSEM % state % externalState
+      READ( fUnit, rec = 2 ) myDGSEM % state % prescribedState
       CLOSE(fUnit)
 
     ENDIF
@@ -2913,7 +2891,6 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % static % UpdateDevice( )
-    CALL myDGSEM % stateBCs % UpdateDevice( )
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % sourceTerms % UpdateDevice( )
     istat = cudaDeviceSynchronize( )
