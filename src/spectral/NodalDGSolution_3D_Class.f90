@@ -221,10 +221,12 @@ CONTAINS
     CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
 
       DEALLOCATE( myDGS % solution, &
+                  myDGS % boundarySolution, &
+                  myDGS % prescribedState, &
+                  myDGS % externalState, &
                   myDGS % solutionGradient, &
                   myDGS % boundaryGradientFlux, &
                   myDGS % flux, &
-                  myDGS % boundarySolution, &
                   myDGS % boundaryFlux, &
                   myDGS % fluxDivergence, &
                   myDGS % source, &
@@ -234,10 +236,12 @@ CONTAINS
 #ifdef HAVE_CUDA
       DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev, myDGS % nBoundaryFaces_dev )
       DEALLOCATE( myDGS % solution_dev, &
+                  myDGS % boundarySolution_dev, &
+                  myDGS % prescribedState, &
+                  myDGS % externalState, &
                   myDGS % solutionGradient_dev, &
                   myDGS % boundaryGradientFlux_dev, &
                   myDGS % flux_dev, &
-                  myDGS % boundarySolution_dev, &
                   myDGS % boundaryFlux_dev, &
                   myDGS % fluxDivergence_dev, &
                   myDGS % source_dev, &
