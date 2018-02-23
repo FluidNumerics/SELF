@@ -536,6 +536,62 @@ CONTAINS
 
     ENDDO
 
+#ifdef SKEW_METRICS
+
+    !Ja_1
+    DO iEl = 1, myElements % nElements
+      DO k = 0, N
+        DO j = 0, N
+          DO i = 0, N
+            myElements % Ja(i,j,k,1,1,iEl) = myElements % dydp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) - &
+                                             myElements % dzdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,1,2,iEl) = myElements % dzdp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl) - &
+                                             myElements % dxdp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,1,3,iEl) = myElements % dxdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl) - &
+                                             myElements % dydp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    !Ja_2
+    DO iEl = 1, myElements % nElements
+      DO k = 0, N
+        DO j = 0, N
+          DO i = 0, N
+            myElements % Ja(i,j,k,2,1,iEl) = myElements % dydq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl) - &
+                                             myElements % dzdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,2,2,iEl) = myElements % dzdq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl) - &
+                                             myElements % dxdq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,2,3,iEl) = myElements % dxdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl) - &
+                                             myElements % dydq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    !Ja_3
+    DO iEl = 1, myElements % nElements
+      DO k = 0, N
+        DO j = 0, N
+          DO i = 0, N
+            myElements % Ja(i,j,k,3,1,iEl) = myElements % dyds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) - &
+                                             myElements % dzds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,3,2,iEl) = myElements % dzds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl) - &
+                                             myElements % dxds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,3,3,iEl) = myElements % dxds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl) - &
+                                             myElements % dyds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+#else
     ! Generate the contravariant metric tensor a la Kopriva (2006)
     !Ja_1
     DO iEl = 1, myElements % nElements
@@ -615,7 +671,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-
+#endif
 
     CALL myElements % GenerateBoundaryMetrics( interp )
 
