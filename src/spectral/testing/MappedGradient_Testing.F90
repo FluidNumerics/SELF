@@ -58,7 +58,7 @@ IMPLICIT NONE
               y = mesh % elements % x(i,j,k,2,iEl)
               z = mesh % elements % x(i,j,k,3,iEl)
 
-              state % solution(i,j,k,iEq,iEl) = exp( -(z-params % zScale)/(0.1_prec*params % zScale) ) 
+              state % solution(i,j,k,iEq,iEl) = 0.001*exp( -(z-params % zScale)/(0.1_prec*params % zScale) ) 
 
             ENDDO
           ENDDO
@@ -101,6 +101,44 @@ IMPLICIT NONE
 
     CALL mesh % WriteTecplot( )
 
+    CALL WriteToTecplot( mesh, state, dgStorage, params )
+
+    CALL state % Trash( )
+    CALL mesh % Trash( )
+    CALL dgStorage % Trash( )
+    CALL params % Trash( )
+
+CONTAINS
+
+ SUBROUTINE WriteToTecplot( mesh, state, dgStorage, params )
+ 
+    IMPLICIT NONE
+    TYPE( HexMesh ), INTENT(in)            :: mesh
+    TYPE( NodalDGSolution_3D ), INTENT(in) :: state
+    TYPE( NodalDG ), INTENT(in)            :: dgStorage
+    TYPE( ModelParameters ), INTENT(in)    :: params
+    !Local
+    INTEGER     :: i, j, k, iEl
+    REAL(prec)  :: x(0:params % nPlot,0:params % nPlot,0:params % nPlot,1:3,1:mesh % elements % nElements)
+    REAL(prec)  :: sol(0:params % nPlot,0:params % nPlot,0:params % nPlot,1:state % nEquations,1:mesh % elements % nElements)
+    REAL(prec)  :: solg(1:3,0:params % nPlot,0:params % nPlot,0:params % nPlot,1:state % nEquations, 1:mesh % elements % nElements)
+
+
+    sol = ApplyInterpolationMatrix_3D_Lagrange( dgStorage % interp, &
+                                                state % solution, &
+                                                state % nEquations, &
+                                                mesh % elements % nElements )
+
+    x = ApplyInterpolationMatrix_3D_Lagrange( dgStorage % interp, mesh % elements % x, &
+                                              3, mesh % elements % nElements )
+    
+    DO i = 1, 3 
+      solg(i,:,:,:,:,:) = ApplyInterpolationMatrix_3D_Lagrange( dgStorage % interp, &
+                                                                state % solutionGradient(i,:,:,:,:,:), &
+                                                                state % nEquations, &
+                                                                mesh % elements % nElements )
+    ENDDO
+
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= 'State.tec', &
       FORM='formatted', &
@@ -111,21 +149,21 @@ IMPLICIT NONE
     DO iEl = 1, mesh % elements % nElements
 
       WRITE(zoneID,'(I5.5)') mesh % elements % elementID(iEl)
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',params % polyDeg+1,&
-                                                 ', J=',params % polyDeg+1,&
-                                                 ', K=',params % polyDeg+1,',F=POINT'
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',params % nPlot+1,&
+                                                 ', J=',params % nPlot+1,&
+                                                 ', K=',params % nPlot+1,',F=POINT'
 
-      DO k = 0, params % polyDeg
-        DO j = 0, params % polyDeg
-          DO i = 0, params % polyDeg
+      DO k = 0, params % nPlot
+        DO j = 0, params % nPlot
+          DO i = 0, params % nPlot
 
-            WRITE(fUnit,'(17(E15.7,1x))') mesh % elements % x(i,j,k,1,iEl),&
-                                          mesh % elements % x(i,j,k,2,iEl),&
-                                          mesh % elements % x(i,j,k,3,iEl),&
-                                          state % solution(i,j,k,1,iEl), &
-                                          state % solutionGradient(1,i,j,k,1,iEl), &
-                                          state % solutionGradient(2,i,j,k,1,iEl), &
-                                          state % solutionGradient(3,i,j,k,1,iEl)
+            WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl),&
+                                          x(i,j,k,2,iEl),&
+                                          x(i,j,k,3,iEl),&
+                                          sol(i,j,k,1,iEl), &
+                                          solG(1,i,j,k,1,iEl), &
+                                          solG(2,i,j,k,1,iEl), &
+                                          solG(3,i,j,k,1,iEl)
                                           
           ENDDO
         ENDDO
@@ -134,10 +172,6 @@ IMPLICIT NONE
     ENDDO
 
     CLOSE(UNIT=fUnit)
-
-    CALL state % Trash( )
-    CALL mesh % Trash( )
-    CALL dgStorage % Trash( )
-    CALL params % Trash( )
+ END SUBROUTINE WriteToTecplot
 
 END PROGRAM MappedGradient_Testing
