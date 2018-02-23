@@ -77,6 +77,8 @@ MODULE HexMesh_Class
     PROCEDURE :: WriteTecplot         => WriteTecplot_Hexmesh
     PROCEDURE :: WriteMaterialTecplot => WriteMaterialTecplot_Hexmesh
 
+    PROCEDURE :: NumberOfBoundaryFaces
+
   END TYPE HexMesh
 
   INTEGER, PRIVATE, PARAMETER    :: BoundaryFlagStructured = NO_NORMAL_FLOW
@@ -1053,7 +1055,7 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE ConstructStructuredMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem, DOublyPeriodic  )
+  SUBROUTINE ConstructStructuredMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem, DoublyPeriodic  )
 
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout)  :: myHexMesh
@@ -1092,8 +1094,7 @@ CONTAINS
     ! curves for the element boundaries
 
     ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6*nElements), weights(0:gpolyDeg) )
-    s = UnIFormPoints(-1.0_prec,1.0_prec,gPolyDeg)
-!      CALL LegendreQuadrature( gPolyDeg, s, weights, GAUSS_LOBATTO )
+    CALL LegendreQuadrature( gPolyDeg, s, weights, GAUSS_LOBATTO )
 
     ! ---- Build the mesh (empty) ---- !
     CALL myHexMesh % Build( nNodes, nElements, nFaces, interp % N )
@@ -2128,4 +2129,25 @@ CONTAINS
 
   END SUBROUTINE WriteMaterialTecplot_Hexmesh
 !
+  FUNCTION NumberOfBoundaryFaces( mesh ) RESULT( nBFaces )
+  
+    IMPLICIT NONE
+    CLASS( HexMesh ) :: mesh
+    INTEGER          :: nBFaces
+    ! Local
+    INTEGER :: iFace
+
+    nBFaces = 0
+
+    DO iFace = 1, mesh % faces % nFaces
+
+      IF( mesh % faces % elementIDs(2,iFace) < 0 )THEN
+
+        nBFaces = nBFaces + 1 
+
+      ENDIF
+
+    ENDDO   
+    
+  END FUNCTION NumberOfBoundaryFaces
 END MODULE HexMesh_Class

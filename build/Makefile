@@ -190,6 +190,8 @@ spectral_tests : ${COMM} ${GEOM} ${SPEC} Spectral_Tests.o
 spectralfilter_tests : ${COMM} ${GEOM} ${SPEC} SpectralFilter_Tests.o
 	${FC} ${OPT} ${COMM} ${GEOM} ${SPEC} SpectralFilter_Tests.o -o $@
 
+mappedgradient : ${COMM} ${GEOM} ${SPEC} MappedGradient_Testing.o
+	${FC} ${OPT} ${COMM} ${GEOM} ${SPEC} MappedGradient_Testing.o -o $@
 
 Spectral_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o \
                    ${SRCDIR}spectral/testing/Spectral_Tests.F90
@@ -198,6 +200,9 @@ Spectral_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Cl
 SpectralFilter_Tests.o : ModelPrecision.o CommonRoutines.o Lagrange_Class.o NodalDG_Class.o NodalDGSolution_3D_Class.o SpectralFilter_Class.o \
                    ${SRCDIR}spectral/testing/SpectralFilter_Tests.F90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/SpectralFilter_Tests.F90 -o $@
+
+MappedGradient_Testing.o : ${COMM} ${SPEC} ${GEOM} ${SRCDIR}spectral/testing/MappedGradient_Testing.F90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}spectral/testing/MappedGradient_Testing.F90 -o $@ 
 
 # ---------------------------------------------------------------------- #
 #                            ~/src/geom/                                 #

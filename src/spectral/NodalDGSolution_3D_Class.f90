@@ -237,8 +237,8 @@ CONTAINS
       DEALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev, myDGS % nBoundaryFaces_dev )
       DEALLOCATE( myDGS % solution_dev, &
                   myDGS % boundarySolution_dev, &
-                  myDGS % prescribedState, &
-                  myDGS % externalState, &
+                  myDGS % prescribedState_dev, &
+                  myDGS % externalState_dev, &
                   myDGS % solutionGradient_dev, &
                   myDGS % boundaryGradientFlux_dev, &
                   myDGS % flux_dev, &
@@ -506,7 +506,7 @@ CONTAINS
                               dgStorage % dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
                   ENDDO
                    
-                  nodalSolution % solutionGradient(idir,i,j,k,iEq,iEl) =  df+ ( nodalSolution % boundaryGradientFlux(i,k,jEq,1,iEl)*dgStorage % boundaryInterpolationMatrix(j,0) + &
+                  nodalSolution % solutionGradient(idir,i,j,k,iEq,iEl) =  -(df+ ( nodalSolution % boundaryGradientFlux(i,k,jEq,1,iEl)*dgStorage % boundaryInterpolationMatrix(j,0) + &
                                                                                 nodalSolution % boundaryGradientFlux(i,k,jEq,3,iEl)*dgStorage % boundaryInterpolationMatrix(j,1) )/&
                                                                               dgStorage % quadratureWeights(j) + &
                                                                               ( nodalSolution % boundaryGradientFlux(j,k,jEq,4,iEl)*dgStorage % boundaryInterpolationMatrix(i,0) + &
@@ -514,7 +514,7 @@ CONTAINS
                                                                               dgStorage % quadratureWeights(i) + &
                                                                               ( nodalSolution % boundaryGradientFlux(i,j,jEq,5,iEl)*dgStorage % boundaryInterpolationMatrix(k,0) + &
                                                                                 nodalSolution % boundaryGradientFlux(i,j,jEq,6,iEl)*dgStorage % boundaryInterpolationMatrix(k,1) )/&
-                                                                              dgStorage % quadratureWeights(k) 
+                                                                              dgStorage % quadratureWeights(k))/mesh % elements % J(i,j,k,iEl)
 
                 ENDDO  
               ENDDO
@@ -605,7 +605,7 @@ CONTAINS
       s1 = mesh % faces % elementSides(1,iFace)
       bID = ABS(mesh % faces % boundaryID(iFace))
 
-      IF( e2 > 0 )THEN
+      IF( e2 < 0 )THEN
 
         DO iEq = 1, nodalSolution % nEquations
           DO j = 0, nodalSolution % N
@@ -616,10 +616,13 @@ CONTAINS
 
               DO idir = 1, 3        
                 jEq = idir + (iEq-1)*3
-                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
-                                                                                 nodalSolution % externalState(ii,jj,iEq,bID) )*&
+!                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
+!                                                                                 nodalSolution % externalState(ii,jj,iEq,bID) )*&
+!                                                                                 mesh % elements % nHat(idir,i,j,s1,e1)
+!               
+
+                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) =  nodalSolution % boundarySolution(i,j,iEq,s1,e1)*&
                                                                                  mesh % elements % nHat(idir,i,j,s1,e1)
-               
 
               ENDDO
                
