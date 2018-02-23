@@ -91,6 +91,9 @@ ifeq (${TIMING},yes)
   CPPFLAGS+=-DTIMING
 endif
 
+ifeq (${SKEW_METRICS},yes)
+  CPPFLAGS+=-DSKEW_METRICS
+endif
 ifeq (${INSITU_VIZ},yes)
   ifeq (${MPI},yes)
     $(info '>>> MPI with in-situ graphics is currently not supported.')
