@@ -44,7 +44,7 @@ IMPLICIT NONE
 
     ! Used for calculating the gradient of the solution variables
     REAL(prec), ALLOCATABLE :: solutionGradient(:,:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: boundaryGradientFlux(:,:,:,:,:) 
+    REAL(prec), ALLOCATABLE :: boundaryGradientFlux(:,:,:,:,:,:) 
    
     ! Conservative flux and boundary Riemann flux
     REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
@@ -69,7 +69,7 @@ IMPLICIT NONE
     REAL(prec), DEVICE, ALLOCATABLE :: externalState_dev(:,:,:,:)
 
     REAL(prec), DEVICE, ALLOCATABLE :: solutionGradient_dev(:,:,:,:,:,:)
-    REAL(prec), DEVICE, ALLOCATABLE :: boundaryGradientFlux_dev(:,:,:,:,:)  
+    REAL(prec), DEVICE, ALLOCATABLE :: boundaryGradientFlux_dev(:,:,:,:,:,:)  
 
     REAL(prec), DEVICE, ALLOCATABLE :: flux_dev(:,:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: boundaryFlux_dev(:,:,:,:,:)
@@ -144,7 +144,7 @@ CONTAINS
                 myDGS % prescribedState(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
                 myDGS % externalState(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
                 myDGS % solutionGradient(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundaryGradientFlux(0:N,0:N,1:nEquations*3,1:6,1:nElements), &
+                myDGS % boundaryGradientFlux(1:3,0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundaryFlux(0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % fluxDivergence(0:N,0:N,0:N,1:nEquations,1:nElements), &
@@ -175,7 +175,7 @@ CONTAINS
                 myDGS % prescribedState_dev(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
                 myDGS % externalState_dev(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
                 myDGS % solutionGradient_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundaryGradientFlux_dev(0:N,0:N,1:nEquations*3,1:6,1:nElements), &
+                myDGS % boundaryGradientFlux_dev(1:3,0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
                 myDGS % boundaryFlux_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
                 myDGS % fluxDivergence_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
@@ -474,15 +474,13 @@ CONTAINS
     TYPE( NodalDG ), INTENT(in)                :: dgStorage
     TYPE( HexMesh ), INTENT(in)                :: mesh
     ! Local
-    INTEGER    :: ii, i, j, k, iEq, jEq, iEl, idir
+    INTEGER    :: ii, i, j, k, iEq, iEl, idir
     REAL(prec) :: f(1:3,0:dgStorage % N,0:dgStorage % N, 0:dgStorage % N), df
 
       DO iEl = 1, nodalSolution % nElements
         DO iEq = 1, nodalSolution % nEquations
           DO idir = 1, 3
           
-            jEq = idir + (iEq-1)*3
-
             DO k = 0, dgStorage % N
               DO j = 0, dgStorage % N
                 DO i = 0, dgStorage % N   
@@ -506,15 +504,15 @@ CONTAINS
                               dgStorage % dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
                   ENDDO
                    
-                  nodalSolution % solutionGradient(idir,i,j,k,iEq,iEl) =  -(df+ ( nodalSolution % boundaryGradientFlux(i,k,jEq,1,iEl)*dgStorage % boundaryInterpolationMatrix(j,0) + &
-                                                                                nodalSolution % boundaryGradientFlux(i,k,jEq,3,iEl)*dgStorage % boundaryInterpolationMatrix(j,1) )/&
+                  nodalSolution % solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( nodalSolution % boundaryGradientFlux(idir,i,k,iEq,1,iEl)*dgStorage % boundaryInterpolationMatrix(j,0) + &
+                                                                                nodalSolution % boundaryGradientFlux(idir,i,k,iEq,3,iEl)*dgStorage % boundaryInterpolationMatrix(j,1) )/&
                                                                               dgStorage % quadratureWeights(j) + &
-                                                                              ( nodalSolution % boundaryGradientFlux(j,k,jEq,4,iEl)*dgStorage % boundaryInterpolationMatrix(i,0) + &
-                                                                                nodalSolution % boundaryGradientFlux(j,k,jEq,2,iEl)*dgStorage % boundaryInterpolationMatrix(i,1) )/&
+                                                                              ( nodalSolution % boundaryGradientFlux(idir,j,k,iEq,4,iEl)*dgStorage % boundaryInterpolationMatrix(i,0) + &
+                                                                                nodalSolution % boundaryGradientFlux(idir,j,k,iEq,2,iEl)*dgStorage % boundaryInterpolationMatrix(i,1) )/&
                                                                               dgStorage % quadratureWeights(i) + &
-                                                                              ( nodalSolution % boundaryGradientFlux(i,j,jEq,5,iEl)*dgStorage % boundaryInterpolationMatrix(k,0) + &
-                                                                                nodalSolution % boundaryGradientFlux(i,j,jEq,6,iEl)*dgStorage % boundaryInterpolationMatrix(k,1) )/&
-                                                                              dgStorage % quadratureWeights(k))/mesh % elements % J(i,j,k,iEl)
+                                                                              ( nodalSolution % boundaryGradientFlux(idir,i,j,iEq,5,iEl)*dgStorage % boundaryInterpolationMatrix(k,0) + &
+                                                                                nodalSolution % boundaryGradientFlux(idir,i,j,iEq,6,iEl)*dgStorage % boundaryInterpolationMatrix(k,1) )/&
+                                                                              dgStorage % quadratureWeights(k) )/mesh % elements % J(i,j,k,iEl)
 
                 ENDDO  
               ENDDO
@@ -562,12 +560,11 @@ CONTAINS
               jj = mesh % faces % jMap(i,j,iFace)
 
               DO idir = 1, 3        
-                jEq = idir + (iEq-1)*3
-                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
+                nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
                                                                                  nodalSolution % boundarySolution(ii,jj,iEq,s2,e2) )*&
                                                                                  mesh % elements % nHat(idir,i,j,s1,e1)
                
-                nodalSolution % boundaryGradientFlux(ii,jj,jEq,s2,e2) = -nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1)
+                nodalSolution % boundaryGradientFlux(idir,ii,jj,iEq,s2,e2) = -nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1)
               ENDDO
 
             ENDDO
@@ -595,7 +592,7 @@ CONTAINS
     CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution
     TYPE( HexMesh ), INTENT(in)                :: mesh
     ! Local
-    INTEGER :: iFace, e1, e2, s1, iEq, i, j, ii, jj, idir, jEq, bID
+    INTEGER :: iFace, e1, e2, s1, iEq, i, j, ii, jj, idir, bID
 
 
     DO iFace = 1, mesh % faces % nFaces
@@ -615,14 +612,13 @@ CONTAINS
               jj = mesh % faces % jMap(i,j,iFace)
 
               DO idir = 1, 3        
-                jEq = idir + (iEq-1)*3
-!                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
-!                                                                                 nodalSolution % externalState(ii,jj,iEq,bID) )*&
-!                                                                                 mesh % elements % nHat(idir,i,j,s1,e1)
-!               
-
-                nodalSolution % boundaryGradientFlux(i,j,jEq,s1,e1) =  nodalSolution % boundarySolution(i,j,iEq,s1,e1)*&
+                nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
+                                                                                 nodalSolution % externalState(ii,jj,iEq,bID) )*&
                                                                                  mesh % elements % nHat(idir,i,j,s1,e1)
+               
+
+              !  nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) =  nodalSolution % boundarySolution(i,j,iEq,s1,e1)*&
+              !                                                                   mesh % elements % nHat(idir,i,j,s1,e1)
 
               ENDDO
                

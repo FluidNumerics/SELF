@@ -496,8 +496,6 @@ CONTAINS
     REAL(prec) :: covT(0:interp % N, 0:interp % N, 0:interp % N, 1:3,1:3,1:myElements % nElements)
     REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
     REAL(prec) :: Dv(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
-    REAL(prec) :: Dv2(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
-    REAL(prec) :: Dv3(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
 
     N = interp % N
 
@@ -517,15 +515,15 @@ CONTAINS
             covT(i,j,k,3,1:3,iEl) = xGradient(1:3,i,j,k,3,iEl)
 
 
-            myElements % dxds(i,j,k,iEl) = covT(i,j,k,1,1,iEl)
-            myElements % dxdp(i,j,k,iEl) = covT(i,j,k,1,2,iEl)
-            myElements % dxdq(i,j,k,iEl) = covT(i,j,k,1,3,iEl)
-            myElements % dyds(i,j,k,iEl) = covT(i,j,k,2,1,iEl)
-            myElements % dydp(i,j,k,iEl) = covT(i,j,k,2,2,iEl)
-            myElements % dydq(i,j,k,iEl) = covT(i,j,k,2,3,iEl)
-            myElements % dzds(i,j,k,iEl) = covT(i,j,k,3,1,iEl)
-            myElements % dzdp(i,j,k,iEl) = covT(i,j,k,3,2,iEl)
-            myElements % dzdq(i,j,k,iEl) = covT(i,j,k,3,3,iEl)
+            myElements % dxds(i,j,k,iEl) = xGradient(1,i,j,k,1,iEl) !covT(i,j,k,1,1,iEl)
+            myElements % dxdp(i,j,k,iEl) = xGradient(2,i,j,k,1,iEl) !covT(i,j,k,1,2,iEl)
+            myElements % dxdq(i,j,k,iEl) = xGradient(3,i,j,k,1,iEl) !covT(i,j,k,1,3,iEl)
+            myElements % dyds(i,j,k,iEl) = xGradient(1,i,j,k,2,iEl) !covT(i,j,k,2,1,iEl)
+            myElements % dydp(i,j,k,iEl) = xGradient(2,i,j,k,2,iEl) !covT(i,j,k,2,2,iEl)
+            myElements % dydq(i,j,k,iEl) = xGradient(3,i,j,k,2,iEl) !covT(i,j,k,2,3,iEl)
+            myElements % dzds(i,j,k,iEl) = xGradient(1,i,j,k,3,iEl) !covT(i,j,k,3,1,iEl)
+            myElements % dzdp(i,j,k,iEl) = xGradient(2,i,j,k,3,iEl) !covT(i,j,k,3,2,iEl)
+            myElements % dzdq(i,j,k,iEl) = xGradient(3,i,j,k,3,iEl) !covT(i,j,k,3,3,iEl)
 
             cv = covT(i,j,k,1:3,1:3,iEl)
             myElements % J(i,j,k,iEl) = Determinant( cv, 3 )
@@ -546,10 +544,10 @@ CONTAINS
             myElements % Ja(i,j,k,1,1,iEl) = myElements % dydp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) - &
                                              myElements % dzdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl)
 
-            myElements % Ja(i,j,k,1,2,iEl) = myElements % dzdp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl) - &
+            myElements % Ja(i,j,k,2,1,iEl) = myElements % dzdp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl) - &
                                              myElements % dxdp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl)
 
-            myElements % Ja(i,j,k,1,3,iEl) = myElements % dxdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl) - &
+            myElements % Ja(i,j,k,3,1,iEl) = myElements % dxdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl) - &
                                              myElements % dydp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl)
           ENDDO
         ENDDO
@@ -561,13 +559,13 @@ CONTAINS
       DO k = 0, N
         DO j = 0, N
           DO i = 0, N
-            myElements % Ja(i,j,k,2,1,iEl) = myElements % dydq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl) - &
+            myElements % Ja(i,j,k,1,2,iEl) = myElements % dydq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl) - &
                                              myElements % dzdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl)
 
             myElements % Ja(i,j,k,2,2,iEl) = myElements % dzdq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl) - &
                                              myElements % dxdq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl)
 
-            myElements % Ja(i,j,k,2,3,iEl) = myElements % dxdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl) - &
+            myElements % Ja(i,j,k,3,2,iEl) = myElements % dxdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl) - &
                                              myElements % dydq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl)
           ENDDO
         ENDDO
@@ -579,10 +577,10 @@ CONTAINS
       DO k = 0, N
         DO j = 0, N
           DO i = 0, N
-            myElements % Ja(i,j,k,3,1,iEl) = myElements % dyds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) - &
+            myElements % Ja(i,j,k,1,3,iEl) = myElements % dyds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) - &
                                              myElements % dzds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl)
 
-            myElements % Ja(i,j,k,3,2,iEl) = myElements % dzds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl) - &
+            myElements % Ja(i,j,k,2,3,iEl) = myElements % dzds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl) - &
                                              myElements % dxds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl)
 
             myElements % Ja(i,j,k,3,3,iEl) = myElements % dxds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl) - &
@@ -606,7 +604,7 @@ CONTAINS
 
     ! Forced call to the CPU Kernel for calculating gradient
     Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
-
+    ! Ja(i,j,k,a,b,iEl) -- a-th direction of the b-th contravariant basis vector
     ! Take the curl to obtain the first dimension of each of the contravariant basis vectors
     ! The contravariant metric tensor stores each contravariant basis vector in each column
     ! of the tensor

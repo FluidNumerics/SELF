@@ -1064,7 +1064,7 @@ CONTAINS
     LOGICAL, INTENT(in)              :: DOublyPeriodic
     ! LOGICAL
     TYPE( Surfaces ) :: boundSurfs
-    REAL(prec) :: x, y, z, zb, zi, dxElem, dyElem, dzElem
+    REAL(prec) :: x, y, z, zb, zi, zu, zip1, dxElem, dyElem, dzElem
     REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
     REAL(prec) :: c1(1:3), c2(1:3)
     REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:), weights(:)
@@ -1102,9 +1102,13 @@ CONTAINS
 
     ! ---- Read in the corner nodes ---- !
     DO iZ = 1, nZElem + 1
+
       zi = dZElem*(REAL(iZ-1,prec))
+
       DO iY = 1, nYElem+1
+
         y = dYElem*(REAL(iY-1,prec))
+
         DO iX = 1, nXElem+1
 
           iNode = iX + (iY-1)*(nXElem+1) + (iZ-1)*(nXElem+1)*(nYElem+1)
@@ -1126,6 +1130,10 @@ CONTAINS
     CALL boundSurfs % Build( s, gPolyDeg, 6*nElements )
 
     DO iZ = 1, nZElem
+
+      zi   = dZElem*(REAL(iZ-1,prec))
+      zip1 = dZElem*(REAL(iZ,prec))
+
       DO iY = 1, nYElem
         DO iX = 1, nXElem
 
@@ -1135,6 +1143,7 @@ CONTAINS
           nodes(2) = iX + 1 + (iY-1)*(nXElem+1) + (iZ-1)*(nXElem+1)*(nYElem+1)! SouthEast
           nodes(3) = iX + 1 + (iY)*(nXElem+1) + (iZ-1)*(nXElem+1)*(nYElem+1)  ! NorthEast
           nodes(4) = iX + (iY)*(nXElem+1) + (iZ-1)*(nXElem+1)*(nYElem+1)      ! NorthWest
+
           nodes(5) = iX + (iY-1)*(nXElem+1) + (iZ)*(nXElem+1)*(nYElem+1)      ! Southwest
           nodes(6) = iX + 1 + (iY-1)*(nXElem+1) + (iZ)*(nXElem+1)*(nYElem+1)  ! SouthEast
           nodes(7) = iX + 1 + (iY)*(nXElem+1) + (iZ)*(nXElem+1)*(nYElem+1)    ! NorthEast
@@ -1142,59 +1151,6 @@ CONTAINS
 
           myHexMesh % elements % nodeIDs(1:8,iEl) = nodes
           myHexMesh % elements % elementID(iEl) = iEl
-
-          IF( iZ == 1 )THEN
-            DO iSide = 1, 6 ! Loop over the sides of the quads
-
-              iSurf = iSide + 6*(iEl-1)
-              ! To build the current face, we construct a plane that passes through
-              ! the four corner nodes. Here, we grab the global node ID's for the four
-              ! corner nodes.
-              n1 = nodes( myHexMesh % faceMap(1,iSide) )
-              n2 = nodes( myHexMesh % faceMap(2,iSide) )
-              n3 = nodes( myHexMesh % faceMap(3,iSide) )
-              n4 = nodes( myHexMesh % faceMap(4,iSide) )
-
-              x1(1) = myHexMesh % nodes % x(1,n1)
-              x1(2) = myHexMesh % nodes % x(2,n1)
-              x1(3) = myHexMesh % nodes % x(3,n1)
-
-              x2(1) = myHexMesh % nodes % x(1,n2)
-              x2(2) = myHexMesh % nodes % x(2,n2)
-              x2(3) = myHexMesh % nodes % x(3,n2)
-
-              x3(1) = myHexMesh % nodes % x(1,n3)
-              x3(2) = myHexMesh % nodes % x(2,n3)
-              x3(3) = myHexMesh % nodes % x(3,n3)
-
-              x4(1) = myHexMesh % nodes % x(1,n4)
-              x4(2) = myHexMesh % nodes % x(2,n4)
-              x4(3) = myHexMesh % nodes % x(3,n4)
-
-              IF( iSide == BOTTOM )THEN
-                DO j = 0, gPolyDeg
-                  DO i = 0, gPolyDeg
-                    ! Transfinite inerpolation with linear blending is USEd to construct the face
-                    c1(1:2) = ( 0.5_prec*(x2(1:2)-x1(1:2))*(1.0_prec+s(i)) + x1(1:2) )
-                    c2(1:2) = ( 0.5_prec*(x3(1:2)-x4(1:2))*(1.0_prec+s(i)) + x4(1:2) )
-                    xc(i,j,1:2,iSurf) = 0.5_prec*(c2(1:2)-c1(1:2))*(1.0_prec+s(j)) + c1(1:2)
-                    xc(i,j,3,iSurf)   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
-                  ENDDO
-                ENDDO
-              ELSE
-                DO j = 0, gPolyDeg
-                  DO i = 0, gPolyDeg
-                    ! Transfinite inerpolation with linear blending is USEd to construct the face
-                    c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 )
-                    c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-                    xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
-                  ENDDO
-                ENDDO
-              ENDIF
-
-            ENDDO
-
-          ELSE
 
             DO iSide = 1, 6 ! Loop over the sides of the quads
 
@@ -1225,17 +1181,99 @@ CONTAINS
 
               DO j = 0, gPolyDeg
                 DO i = 0, gPolyDeg
-                  ! Transfinite interpolation with linear blending is USEd to construct the face
+                  ! Transfinite inerpolation with linear blending is USEd to construct the face
                   c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 )
                   c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
                   xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+
                 ENDDO
               ENDDO
 
+                IF( iSide == BOTTOM )THEN
+  
+                  zu = zi
+                  DO j = 0, gPolyDeg
+                    DO i = 0, gPolyDeg
+  
+                      zb   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
+                      xc(i,j,3,iSurf) = zb*(1.0_prec-zu) + 1.0_prec*zu
+  
+                    ENDDO
+                  ENDDO
+  
+                ELSEIF( iSide == TOP )THEN
+  
+                  zu = zip1
+                  DO j = 0, gPolyDeg
+                    DO i = 0, gPolyDeg
+  
+                      zb   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
+                      xc(i,j,3,iSurf) = zb*(1.0_prec-zu) + 1.0_prec*zu
+  
+                    ENDDO
+                  ENDDO
+  
+  
+  
+                ELSE
+  
+                  DO j = 0, gPolyDeg
+                    DO i = 0, gPolyDeg
+  
+                      zu = 0.5_prec*( zi*( s(j) - 1.0_prec ) + zip1*( s(j) + 1.0_prec ) ) 
+                      zb   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
+                      xc(i,j,3,iSurf) = zb*(1.0_prec-zu) + 1.0_prec*zu
+  
+                    ENDDO
+                  ENDDO
+  
+                ENDIF
+  
+
             ENDDO
 
-
-          ENDIF
+!          ELSE
+!
+!            DO iSide = 1, 6 ! Loop over the sides of the quads
+!
+!              iSurf = iSide + 6*(iEl-1)
+!              ! To build the current face, we construct a plane that passes through
+!              ! the four corner nodes. Here, we grab the global node ID's for the four
+!              ! corner nodes.
+!              n1 = nodes( myHexMesh % faceMap(1,iSide) )
+!              n2 = nodes( myHexMesh % faceMap(2,iSide) )
+!              n3 = nodes( myHexMesh % faceMap(3,iSide) )
+!              n4 = nodes( myHexMesh % faceMap(4,iSide) )
+!
+!              x1(1) = myHexMesh % nodes % x(1,n1)
+!              x1(2) = myHexMesh % nodes % x(2,n1)
+!              x1(3) = myHexMesh % nodes % x(3,n1)
+!
+!              x2(1) = myHexMesh % nodes % x(1,n2)
+!              x2(2) = myHexMesh % nodes % x(2,n2)
+!              x2(3) = myHexMesh % nodes % x(3,n2)
+!
+!              x3(1) = myHexMesh % nodes % x(1,n3)
+!              x3(2) = myHexMesh % nodes % x(2,n3)
+!              x3(3) = myHexMesh % nodes % x(3,n3)
+!
+!              x4(1) = myHexMesh % nodes % x(1,n4)
+!              x4(2) = myHexMesh % nodes % x(2,n4)
+!              x4(3) = myHexMesh % nodes % x(3,n4)
+!
+!              DO j = 0, gPolyDeg
+!                DO i = 0, gPolyDeg
+!                  ! Transfinite interpolation with linear blending is USEd to construct the face
+!                  c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 )
+!                  c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
+!                  xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+!                ENDDO
+!              ENDDO
+!
+!            ENDDO
+!
+!
+!          ENDIF
 
         ENDDO
       ENDDO

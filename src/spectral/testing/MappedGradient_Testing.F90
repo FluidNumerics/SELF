@@ -17,7 +17,7 @@ IMPLICIT NONE
   TYPE( HexMesh )            :: mesh
 
   LOGICAL      :: readSuccess
-  INTEGER      :: i, j, k, iEq, iEl, iFace, e1, e2, s1, bID, fUnit
+  INTEGER      :: i, j, k, iEq, iEl, iFace, e1, e2, s1, bID, fUnit, idir
   REAL(prec)   :: x, y, z
   CHARACTER(5) :: zoneID
 
@@ -26,18 +26,10 @@ IMPLICIT NONE
     CALL dGStorage % Build( UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
                             params % polyDeg, params % nPlot, GAUSS )
 
-    IF( params % topographicShape == Gaussian )THEN
-       TopographicShape => GaussianHill
-    ELSE
-       TopographicShape => DefaultTopography
-    ENDIF
+    ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
+    CALL mesh % ReadSELFMeshFile( TRIM(params % SELFMeshFile)//'.0000' )
 
-    CALL mesh % ConstructStructuredMesh( dgStorage % interp, &
-                                         params % nXelem, &
-                                         params % nYelem, &
-                                         params % nZelem, &
-                                         .TRUE.  )
-
+    ! Multiply the mesh positions to scale the size of the mesh
     CALL mesh % ScaleTheMesh( dgStorage % interp, &
                               params % xScale, &
                               params % yScale, &
@@ -46,7 +38,29 @@ IMPLICIT NONE
     CALL state % Build( params % polyDeg, 1, &
                         mesh % elements % nElements, &
                         mesh % NumberOfBoundaryFaces( ) )
+
+    DO idir = 1, 3   
+    DO iEl = 1, state % nElements
+      DO iEq = 1, state % nEquations
+        DO k = 0, state % N
+          DO j = 0, state % N
+            DO i = 0, state % N
+
+              state % flux(1,i,j,k,iEq,iEl) = mesh % elements % Ja(i,j,k,idir,1,iEl)
+              state % flux(2,i,j,k,iEq,iEl) = mesh % elements % Ja(i,j,k,idir,2,iEl)
+              state % flux(3,i,j,k,iEq,iEl) = mesh % elements % Ja(i,j,k,idir,3,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    CALL state % Calculate_Strong_Flux_Divergence( dgStorage )
    
+    PRINT*, MAXVAL( ABS( state % fluxDivergence ) ) 
+    ENDDO
+
 
     DO iEl = 1, state % nElements
       DO iEq = 1, state % nEquations
@@ -58,7 +72,8 @@ IMPLICIT NONE
               y = mesh % elements % x(i,j,k,2,iEl)
               z = mesh % elements % x(i,j,k,3,iEl)
 
-              state % solution(i,j,k,iEq,iEl) = 0.001*exp( -(z-params % zScale)/(0.1_prec*params % zScale) ) 
+              !state % solution(i,j,k,iEq,iEl) = 0.001*exp( -(z-params % zScale)/(0.1_prec*params % zScale) ) 
+              state % solution(i,j,k,iEq,iEl) =  1000.0_prec!z*(10000.0_prec)/(params % zScale ) 
 
             ENDDO
           ENDDO
@@ -67,36 +82,34 @@ IMPLICIT NONE
     ENDDO
 
     CALL state % Calculate_Solution_At_Boundaries( dgStorage ) 
+    DO iFace = 1, mesh % faces % nFaces
 
-    
-!    DO iFace = 1, mesh % faces % nFaces
-!
-!      e1 = mesh % faces % elementIDs(1,iFace)
-!      e2 = mesh % faces % elementIDs(2,iFace)
-!      s1 = mesh % faces % elementSides(1,iFace)
-!      bID = ABS(mesh % faces % boundaryID(iFace))
-!
-!      IF( e2 < 0 )THEN
-!
-!        DO iEq = 1, state % nEquations
-!          DO j = 0, state % N
-!            DO i = 0, state % N
-!          
-!              state % externalState(i,j,iEq,bID) = state % boundarySolution(i,j,iEq,s1,e1)
-!
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!
-!      ENDIF
-!
-!    ENDDO
+      e1 = mesh % faces % elementIDs(1,iFace)
+      e2 = mesh % faces % elementIDs(2,iFace)
+      s1 = mesh % faces % elementSides(1,iFace)
+      bID = ABS(mesh % faces % boundaryID(iFace))
+
+      IF( e2 < 0 )THEN
+
+        DO iEq = 1, state % nEquations
+          DO j = 0, state % N
+            DO i = 0, state % N
+          
+              state % externalState(i,j,iEq,bID) = state % boundarySolution(i,j,iEq,s1,e1)
+
+            ENDDO
+          ENDDO
+        ENDDO
+
+      ENDIF
+
+    ENDDO
 
     CALL state % Mapped_BassiRebay_Gradient( dgStorage, mesh )
 
-    PRINT*, 'Max dp/dx',MAXVAL( state % solutionGradient(1,:,:,:,:,:) )
-    PRINT*, 'Max dp/dy',MAXVAL( state % solutionGradient(2,:,:,:,:,:) )
-    PRINT*, 'Max dp/dz',MAXVAL( state % solutionGradient(3,:,:,:,:,:) )
+    PRINT*, 'Max dp/dx',MAXVAL( ABS( state % solutionGradient(1,:,:,:,:,:) ) )
+    PRINT*, 'Max dp/dy',MAXVAL( ABS( state % solutionGradient(2,:,:,:,:,:) ) )
+    PRINT*, 'Max dp/dz',MAXVAL( ABS( state % solutionGradient(3,:,:,:,:,:) ) )
 
 
     CALL mesh % WriteTecplot( )
