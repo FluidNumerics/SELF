@@ -35,7 +35,7 @@ IMPLICIT NONE
   TYPE( NodalDG )            :: dgStorage
   TYPE( NodalDGSolution_3D ) :: Legendre
   TYPE( NodalDGSolution_3D ) :: filteredFunction
-  REAL(prec)                 :: L(0:polyDegree), Ls, transferFunction(1:polyDegree,1:polyDegree)
+  REAL(dp)                   :: L(0:polyDegree), Ls, transferFunction(1:polyDegree,1:polyDegree)
 !  REAL(prec)                 :: modalCoeffs(0:polyDegree,0:polyDegree,0:polyDegree)
   INTEGER                    :: i, j, k, filterID, polyID
 #ifdef HAVE_CUDA
@@ -74,8 +74,8 @@ IMPLICIT NONE
                                nBoundaryFaces = 1 )
     
         DO i = 0, polyDegree
-          CALL LegendrePolynomial( polyID, dgStorage % interp % interpolationPoints(i), &
-                                   L(i), Ls)
+          CALL LegendrePolynomial( polyID, REAL( dgStorage % interp % interpolationPoints(i), dp), &
+                                   L(i), Ls )
         ENDDO
        
         DO k = 0, polyDegree

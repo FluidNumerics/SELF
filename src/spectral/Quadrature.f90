@@ -188,53 +188,60 @@ IMPLICIT NONE
     REAL(prec) :: nodes(0:N)
     REAL(prec) :: weights(0:N)
     ! Local
-    REAL(prec) :: lN1, dlN1
-    REAL(prec) :: delta
-    INTEGER    :: j, kIt
+    REAL(dp) :: nodes_local(0:N)
+    REAL(dp) :: weights_local(0:N)
+    REAL(dp) :: lN1, dlN1
+    REAL(dp) :: delta
+    INTEGER  :: j, kIt
  
       IF( N == 0 ) then
 
-        nodes(0) = 0.0_prec
-        weights(0) = 2.0_prec
+        nodes_local(0) = 0.0_dp
+        weights_local(0) = 2.0_dp
 
       ELSEIF( N == 1 ) then
      
-        nodes(0) = -SQRT(1.0_prec/3.0_prec)
-        weights(0) = 1.0_prec
-        nodes(1) = -nodes(0)
-        weights(1) = weights(0)
+        nodes_local(0) = -SQRT(1.0_dp/3.0_dp)
+        weights_local(0) = 1.0_dp
+        nodes_local(1) = -nodes(0)
+        weights_local(1) = weights(0)
 
       ELSE
      
         DO j = 0, ( (N+1)/2 )
 
-          nodes(j) = -cos( (2.0_prec*REAL(j,prec) + 1.0_prec)*pi/(2.0_prec*REAL(N,prec) + 1.0_prec) )
+          nodes_local(j) = -cos( (2.0_dp*REAL(j,dp) + 1.0_dp)*pi/(2.0_dp*REAL(N,dp) + 1.0_dp) )
 
           DO kIt = 1, newtonMax
 
-            CALL LegendrePolynomial(N+1, nodes(j), lN1, dlN1)
+            CALL LegendrePolynomial(N+1, nodes_local(j), lN1, dlN1)
             delta = -lN1/dlN1
-            nodes(j) = nodes(j) + delta
-            IF( abs(delta) <= TOL*nodes(j) ) EXIT
+            nodes_local(j) = nodes_local(j) + delta
+            IF( abs(delta) <= TOL*nodes_local(j) ) EXIT
 
           ENDDO
 
-          CALL LegendrePolynomial(N+1, nodes(j), lN1, dlN1)
-          weights(j) = 2.0_prec/( (1.0_prec - nodes(j)*nodes(j))*dlN1*dlN1 )
-          weights(N - j) = weights(j)
-          nodes(N - j) = -nodes(j)
+          CALL LegendrePolynomial(N+1, nodes_local(j), lN1, dlN1)
+          weights_local(j) = 2.0_dp/( (1.0_dp - nodes_local(j)*nodes_local(j))*dlN1*dlN1 )
+          weights_local(N - j) = weights_local(j)
+          nodes_local(N - j) = -nodes_local(j)
 
         ENDDO
  
       ENDIF
 
-      IF( MOD(REAL(N,prec),2.0_prec) == 0.0_prec)then 
+      IF( MOD(REAL(N,dp),2.0_dp) == 0.0_dp)then 
          
-        CALL LegendrePolynomial(N+1, 0.0_prec, lN1, dlN1)
-        nodes(N/2) = 0.0_prec
-        weights(N/2) = 2.0/(dlN1*dlN1)
+        CALL LegendrePolynomial(N+1, 0.0_dp, lN1, dlN1)
+        nodes_local(N/2) = 0.0_dp
+        weights_local(N/2) = 2.0/(dlN1*dlN1)
 
       ENDIF
+
+      DO j = 0, N
+        nodes(j)   = REAL( nodes_local(j), prec )
+        weights(j) = REAL( weights_local(j), prec )
+      ENDDO
 
   END SUBROUTINE LegendreGauss
 
@@ -250,57 +257,64 @@ IMPLICIT NONE
     REAL(prec) :: nodes(0:N)
     REAL(prec) :: weights(0:N)
     ! Local
-    REAL(prec) :: delta, q, qprime, lN
-    INTEGER    :: j, kIt  
+    REAL(dp) :: nodes_local(0:N)
+    REAL(dp) :: weights_local(0:N)
+    REAL(dp) :: delta, q, qprime, lN
+    INTEGER  :: j, kIt  
  
       IF( N == 1 ) then
 
-        nodes(0) = -1.0_prec
-        weights(0) = 1.0_prec
-        nodes(1) = 1.0_prec
-        weights(1) = 1.0_prec
+        nodes_local(0) = -1.0_dp
+        weights_local(0) = 1.0_dp
+        nodes_local(1) = 1.0_dp
+        weights_local(1) = 1.0_dp
 
       ELSE
 
-        nodes(0) = -1.0_prec
-        weights(0) = 2.0_prec/(REAL(N,prec)*(REAL(N,prec) + 1.0_prec) )
-        nodes(N) = 1.0_prec
-        weights(N) = weights(0)
+        nodes_local(0) = -1.0_dp
+        weights_local(0) = 2.0_dp/(REAL(N,dp)*(REAL(N,dp) + 1.0_dp) )
+        nodes_local(N) = 1.0_dp
+        weights_local(N) = weights_local(0)
 
         DO j = 1, ( (N+1)/2 -1 )
 
-          nodes(j) = -COS( (REAL(j,prec) + 0.25_prec)*pi/REAL(N,prec) - &
-                             3.0_prec/(8.0_prec*REAL(N,prec)*pi*(REAL(j,prec) + 0.25_prec) ) )
+          nodes_local(j) = -COS( (REAL(j,dp) + 0.25_dp)*pi/REAL(N,dp) - &
+                             3.0_dp/(8.0_dp*REAL(N,dp)*pi*(REAL(j,dp) + 0.25_dp) ) )
 
           DO kIt = 1, newtonMax 
 
-            CALL LegendreQandL(N, nodes(j), q, qprime, lN)
+            CALL LegendreQandL(N, nodes_local(j), q, qprime, lN)
 
             delta = -q/qprime
-            nodes(j) = nodes(j) + delta
-            IF( ABS(delta) <= TOL*nodes(j) ) EXIT
+            nodes_local(j) = nodes_local(j) + delta
+            IF( ABS(delta) <= TOL*nodes_local(j) ) EXIT
 
           ENDDO
            
-          CALL LegendreQandL(N, nodes(j), q, qprime, lN)
+          CALL LegendreQandL(N, nodes_local(j), q, qprime, lN)
 
-          weights(j) = 2.0_prec/( REAL(N,prec)*(REAL(N,prec) + 1.0_prec)*lN*lN )
-          weights(N - j) = weights(j)
-          nodes(N - j) = -nodes(j)
+          weights_local(j) = 2.0_dp/( REAL(N,dp)*(REAL(N,dp) + 1.0_dp)*lN*lN )
+          weights_local(N - j) = weights_local(j)
+          nodes_local(N - j) = -nodes_local(j)
 
         ENDDO
 
       ENDIF
 
      
-      IF( MOD(REAL(N,prec),2.0_prec) == 0.0_prec )THEN
+      IF( MOD(REAL(N,dp),2.0_dp) == 0.0_dp )THEN
          
-        CALL LegendreQandL(N, 0.0_prec, q, qprime, lN)
+        CALL LegendreQandL(N, 0.0_dp, q, qprime, lN)
 
-        nodes(N/2) = 0.0_prec
-        weights(N/2) = 2.0_prec/( REAL(N,prec)*(REAL(N,prec) + 1.0_prec)*lN*lN )
+        nodes_local(N/2) = 0.0_dp
+        weights_local(N/2) = 2.0_dp/( REAL(N,dp)*(REAL(N,dp) + 1.0_dp)*lN*lN )
 
       ENDIF
+
+      DO j = 0, N
+        nodes(j)   = REAL( nodes_local(j), prec )
+        weights(j) = REAL( weights_local(j), prec )
+      ENDDO
 
   END SUBROUTINE LegendreGaussLobatto
 
@@ -312,36 +326,37 @@ IMPLICIT NONE
 
   SUBROUTINE LegendrePolynomial(N, x, lAtX, dLdxAtX)
     IMPLICIT NONE
-    INTEGER       :: N
-    REAL(prec)    :: x
-    REAL(prec)    :: lAtX, dLdxAtX
+    INTEGER     :: N
+    REAL(dp)    :: x
+    REAL(dp)    :: lAtX, dLdxAtX
     ! Local
-    REAL(prec) :: lNm1, lNm2, dlNm1, dlNm2
-    INTEGER :: i
+    REAL(dp) :: lNm1, lNm2, dlNm1, dlNm2
+    INTEGER  :: i
+
 
       IF( N == 0 )then
  
-        lAtX = 1.0_prec    
-        dLdxAtX = 0.0_prec 
+        lAtX = 1.0_dp    
+        dLdxAtX = 0.0_dp 
       
       ELSEIF( N == 1)then
 
         lAtX = x            
-        dLdxAtX = 1.0_prec  
+        dLdxAtX = 1.0_dp  
 
       ELSE 
   
-        lnM2 = 1.0_prec 
+        lnM2 = 1.0_dp 
         lnM1 = x
-        dlnM2 = 0.0_prec
-        dlnM1 = 1.0_prec
+        dlnM2 = 0.0_dp
+        dlnM1 = 1.0_dp
 
         DO i = 2,N
         
-          lAtX = ((2.0_prec*REAL(i,prec) - 1.0_prec)*x*lnM1 -&
-                  (REAL(i,prec) - 1.0_prec)*lnM2)/(REAL(i,prec))
+          lAtX = ((2.0_dp*REAL(i,dp) - 1.0_dp)*x*lnM1 -&
+                  (REAL(i,dp) - 1.0_dp)*lnM2)/(REAL(i,dp))
 
-          dldxAtX = dlnM2 + (2.0_prec*REAL(i,prec)-1.0_prec)*lnM1
+          dldxAtX = dlnM2 + (2.0_dp*REAL(i,dp)-1.0_dp)*lnM1
           lnM2 = lnM1
           lnM1 = lAtX
           dlnM2 = dlnM1
@@ -350,6 +365,7 @@ IMPLICIT NONE
         ENDDO
 
       ENDIF
+
 
   END SUBROUTINE LegendrePolynomial
 
@@ -362,21 +378,21 @@ IMPLICIT NONE
   SUBROUTINE LegendreQandL(N, x, q, qprime, lN)
     IMPLICIT NONE
     INTEGER    :: N
-    REAL(prec) :: x
-    REAL(prec) :: lN, q, qprime
+    REAL(dp) :: x
+    REAL(dp) :: lN, q, qprime
     ! Local
-    REAL(prec) :: lNm1, lNm2, dlNm1, dlNm2, dlN, lN1, dlN1
+    REAL(dp) :: lNm1, lNm2, dlNm1, dlNm2, dlN, lN1, dlN1
     INTEGER    :: i
 
-      lNm2 = 1.0_prec
+      lNm2 = 1.0_dp
       lNm1 = x
-      dlNm2 = 0.0_prec
-      dlNm1 = 1.0_prec
+      dlNm2 = 0.0_dp
+      dlNm1 = 1.0_dp
 
       DO i = 2, N
 
-        lN = (2.0_prec*i - 1.0_prec)/(REAL(i,prec))*x*lNm1 - (REAL(i,prec) - 1.0_prec)/(REAL(i,prec))*lNm2
-        dlN = dlNm2 + (2.0_prec*REAL(i,prec) - 1.0_prec)*lNm1
+        lN = (2.0_dp*i - 1.0_dp)/(REAL(i,dp))*x*lNm1 - (REAL(i,dp) - 1.0_dp)/(REAL(i,dp))*lNm2
+        dlN = dlNm2 + (2.0_dp*REAL(i,dp) - 1.0_dp)*lNm1
         lNm2 = lNm1
         lNm1 = lN
         dlNm2 = dlNm1
@@ -385,8 +401,8 @@ IMPLICIT NONE
       ENDDO
 
       i = N + 1
-      lN1 = (2.0_prec*i - 1.0_prec)/(REAL(i,prec))*x*lN - (REAL(i,prec) - 1.0_prec)/(REAL(i,prec))*lNm2
-      dlN1 = dlNm2 + (2.0_prec*REAL(i,prec) - 1.0_prec)*lNm1
+      lN1 = (2.0_dp*i - 1.0_dp)/(REAL(i,dp))*x*lN - (REAL(i,dp) - 1.0_dp)/(REAL(i,dp))*lNm2
+      dlN1 = dlNm2 + (2.0_dp*REAL(i,dp) - 1.0_dp)*lNm1
       q = lN1 - lNm2
       qprime = dlN1 - dlNm2
 

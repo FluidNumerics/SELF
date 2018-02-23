@@ -106,55 +106,62 @@ CONTAINS
     REAL(prec), INTENT(in)               :: interpWeights(0:N)
     INTEGER, INTENT(in)                  :: filterType
     ! Local
-    REAL(prec) :: Lnorm, Li, Ls, sc, r
-    REAL(prec) :: Pfilt(0:N,0:N), V(0:N,0:N), VInv(0:N,0:N)
-    INTEGER    :: row, col 
+    REAL(dp) :: interpNodes_dp(0:N)
+    REAL(dp) :: interpWeights_dp(0:N)
+    REAL(dp) :: Lnorm, Li, Ls, sc, r
+    REAL(dp) :: Pfilt(0:N,0:N), V(0:N,0:N), VInv(0:N,0:N)
+    INTEGER  :: row, col 
    
+      DO col = 0, N
+        interpNodes_dp(col)   = REAL( interpNodes(col), prec )
+        interpWeights_dp(col) = REAL( interpWeights(col), prec )
+      ENDDO
+
       thisFilter % N       = N
 
       ALLOCATE( thisFilter % filterMat(0:N,0:N), &
                 thisFilter % nodalToModal(0:N,0:N) )
 
-      thisFilter % filterMat = 0.0_prec
+      thisFilter % filterMat = 0.0_dp
 
-      Pfilt = 0.0_prec
-      V     = 0.0_prec
-      VInv  = 0.0_prec
+      Pfilt = 0.0_dp
+      V     = 0.0_dp
+      VInv  = 0.0_dp
 
       DO row = 0, N 
  
-        r = real(row,prec)
+        r = real(row,dp)
 
         IF( filterType == ModalCutoff )THEN
 
           IF( row <= nCutoff )THEN
-            Pfilt(row,row) = 1.0_prec
+            Pfilt(row,row) = 1.0_dp
           ENDIF
 
         ELSEIF( filterType == TanhRollOff )THEN
 
-          Pfilt(row,row) = 0.5_prec*(1.0_prec - tanh( (r- REAL(nCutoff,prec)) ) )
+          Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- REAL(nCutoff,dp)) ) )
 
         ENDIF
 
-        Lnorm = 0.0_prec
+        Lnorm = 0.0_dp
 
         DO col = 0, N
 
-          CALL LegendrePolynomial( row, interpNodes(col), Li, Ls)
+          CALL LegendrePolynomial( row, interpNodes_dp(col), Li, Ls)
 
-          Lnorm = Lnorm + Li*Li*interpWeights(col)
-          thisFilter % nodalToModal(row,col) = Li*interpWeights(col)
+          Lnorm = Lnorm + Li*Li*interpWeights_dp(col)
+          thisFilter % nodalToModal(row,col) = REAL( Li*interpWeights_dp(col), prec )
           VInv(col,row) = Li
              
         ENDDO
 
-        thisFilter % nodalToModal(row,0:N) = thisFilter % nodalToModal(row,0:N)/Lnorm
+        thisFilter % nodalToModal(row,0:N) = thisFilter % nodalToModal(row,0:N)/REAL( Lnorm, prec )
 
       ENDDO
 
       Pfilt = MATMUL( Pfilt, thisFilter % nodalToModal )
-      thisFilter % filterMat = TRANSPOSE( MATMUL( VInv, Pfilt ) )
+      thisFilter % filterMat = REAL( TRANSPOSE( MATMUL( VInv, Pfilt ) ), prec )
 
 #ifdef HAVE_CUDA
       ALLOCATE( thisFilter % N_dev, &

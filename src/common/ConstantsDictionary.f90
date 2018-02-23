@@ -15,7 +15,7 @@
   ! ************************************************************!
   !                                                             !
   ! ------------------------------------------------------------!
-    REAL(prec), PARAMETER :: pi   = 4.0_prec*atan(1.0_prec)
+    REAL(prec), PARAMETER :: pi   = 4.0_dp*atan(1.0_dp)
     REAL(prec), PARAMETER :: TOL  = epsilon(1.0_prec)
 
 
