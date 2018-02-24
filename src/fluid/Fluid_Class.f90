@@ -99,6 +99,7 @@ MODULE Fluid_Class
 
 #ifdef HAVE_CUDA
  INTEGER, CONSTANT    :: nEq_dev
+ INTEGER, CONSTANT    :: nStress_dev
  INTEGER, CONSTANT    :: polyDeg_dev
  INTEGER, CONSTANT    :: nEl_dev
  INTEGER, CONSTANT    :: myRank_dev
@@ -245,6 +246,7 @@ CONTAINS
       Cd_dev        = myDGSEM % params % Cd
 
       nEq_dev     = myDGSEM % state % nEquations
+      nStress_dev = myDGSEM % stressTensor % nEquations
       polydeg_dev = myDGSEM % params % polyDeg
       nEl_dev     = myDGSEM % mesh % elements % nElements
       nFaces_dev     = myDGSEM % mesh % faces % nFaces
@@ -885,15 +887,13 @@ CONTAINS
                     4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
       grid = dim3(myDGSEM % state % nEquations, myDGSEM % stressTensor % nElements, 1)  
 
-      CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
+      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
                                                           myDGSEM % stressTensor % boundaryFlux_dev, &
                                                           myDGSEM % stressTensor % fluxDivergence_dev, &
                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
                                                           myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
                                                           myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                          myDGSEM % dgStorage % N_dev, &
-                                                          myDGSEM % stressTensor % nEquations_dev, &
-                                                          myDGSEM % stressTensor % nElements_dev )
+                                                          myDGSEM % mesh % elements % J_dev )
 
 #else
       CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
@@ -1619,16 +1619,24 @@ CONTAINS
                                                     myDGSEM % state % nEquations_dev, &
                                                     myDGSEM % mesh % elements % nElements_dev )
 
-    CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % flux_dev, &
-                                                        myDGSEM % state % boundaryFlux_dev, &
-                                                        myDGSEM % state % fluxDivergence_dev, &
-                                                        myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                        myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
-                                                        myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                        myDGSEM % params % polydeg_dev, &
-                                                        myDGSEM % state % nEquations_dev, &
-                                                        myDGSEM % state % nElements_dev )
+    CALL State_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % flux_dev, &
+                                                               myDGSEM % state % boundaryFlux_dev, &
+                                                               myDGSEM % state % fluxDivergence_dev, &
+                                                               myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                               myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+                                                               myDGSEM % dgStorage % quadratureWeights_dev, &
+                                                               myDGSEM % mesh % elements % J_dev ) 
 
+!    CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % flux_dev, &
+!                                                        myDGSEM % state % boundaryFlux_dev, &
+!                                                        myDGSEM % state % fluxDivergence_dev, &
+!                                                        myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+!                                                        myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+!                                                        myDGSEM % dgStorage % quadratureWeights_dev, &
+!                                                        myDGSEM % params % polydeg_dev, &
+!                                                        myDGSEM % state % nEquations_dev, &
+!                                                        myDGSEM % state % nElements_dev )
+!
     CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                            myDGSEM % static % solution_dev, &
                                                            myDGSEM % state % source_dev, &
@@ -1823,17 +1831,15 @@ CONTAINS
                                                                 myDGSEM % stressTensor % nEquations_dev, &
                                                                 myDGSEM % mesh % elements % nElements_dev )
 
-    grid = dim3(myDGSEM % stressTensor % nEquations,myDGSEM % mesh % elements % nElements,3)
+    grid = dim3(myDGSEM % state % nEquations,myDGSEM % mesh % elements % nElements,3)
     
-    CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
+    CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
                                                         myDGSEM % stressTensor % boundaryFlux_dev, &
                                                         myDGSEM % stressTensor % fluxDivergence_dev, &
                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
                                                         myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
                                                         myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                        myDGSEM % dgStorage % N_dev, &
-                                                        myDGSEM % stressTensor % nEquations_dev, &
-                                                        myDGSEM % stressTensor % nElements_dev )
+                                                        myDGSEM % mesh % elements % J_dev )
 
     grid = dim3(myDGSEM % sgsCoeffs % nEquations,myDGSEM % mesh % elements % nElements,1)
 
@@ -2932,7 +2938,7 @@ CONTAINS
 
     IF( i <= N .AND. j <= N .AND. k <= N )THEN
   
-      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - ( fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + ( diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
   
       solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
@@ -3905,7 +3911,115 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
     solution(i,j,k,6,iEl) = P0*( rhoT*R/P0 )**hCapRatio - static(i,j,k,6,iEl)
   
   END SUBROUTINE EquationOfState_CUDAKernel
+  ATTRIBUTES(Global) SUBROUTINE State_Mapped_DG_Divergence_3D_CUDAKernel( f, fnAtBoundaries, divF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, Jac )
+    IMPLICIT NONE
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:polydeg_dev,0:1)
+    REAL(prec), DEVICE, INTENT(in)  :: dgDerivativeMatrixTranspose(0:polydeg_dev,0:polydeg_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:polydeg_dev)
+    REAL(prec), DEVICE, INTENT(out) :: divF(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+    ! Local
+    INTEGER            :: i, j, k, iVar, iEl, ii
+    REAL(prec)         :: df
+    REAL(prec), SHARED :: fLocal(1:3,0:7,0:7,0:7)
+    
+    
+      iVar = blockIDx % x
+      iEl  = blockIDx % y
+      
+      i = threadIdx % x - 1
+      j = threadIdx % y - 1
+      k = threadIdx % z - 1
+    
+    
+      IF( i <= polyDeg_dev .AND. j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      
+        fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
+        
+      ENDIF
+      
+      CALL syncthreads( )
+      
+      IF( i <= polyDeg_dev .AND. j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      
+        df = 0.0_prec
+        DO ii = 0, polydeg_dev
+          df = df + dgDerivativeMatrixTranspose(ii,i)*fLocal(1,ii,j,k) + &
+                    dgDerivativeMatrixTranspose(ii,j)*fLocal(2,i,ii,k) + &
+                    dgDerivativeMatrixTranspose(ii,k)*fLocal(3,i,j,ii)
+        ENDDO
+       
+        divF(i,j,k,iVar,iEl) = ( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
+                                        fnAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
+                                      quadratureWeights(j) + &
+                                      ( fnAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &
+                                        fnAtBoundaries(j,k,iVar,2,iEl)*boundaryMatrix(i,1) )/&
+                                      quadratureWeights(i) + &
+                                      ( fnAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
+                                        fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
+                                      quadratureWeights(k) )/Jac(i,j,k,iEl)
+                                      
+      ENDIF
+
+  END SUBROUTINE State_Mapped_DG_Divergence_3D_CUDAKernel
+
+  ATTRIBUTES(Global) SUBROUTINE Stress_Mapped_DG_Divergence_3D_CUDAKernel( f, fnAtBoundaries, divF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, Jac )
+    IMPLICIT NONE
+    REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nStress_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:polydeg_dev,0:polydeg_dev,1:nStress_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:polydeg_dev,0:1)
+    REAL(prec), DEVICE, INTENT(in)  :: dgDerivativeMatrixTranspose(0:polydeg_dev,0:polydeg_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:polydeg_dev)
+    REAL(prec), DEVICE, INTENT(out) :: divF(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nStress_dev,1:nEl_dev)
+    ! Local
+    INTEGER            :: i, j, k, iVar, iEl, ii
+    REAL(prec)         :: df
+    REAL(prec), SHARED :: fLocal(1:3,0:7,0:7,0:7)
+    
+    
+      iVar = blockIDx % x
+      iEl  = blockIDx % y
+      
+      i = threadIdx % x - 1
+      j = threadIdx % y - 1
+      k = threadIdx % z - 1
+    
+    
+      IF( i <= polyDeg_dev .AND. j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      
+        fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
+        
+      ENDIF
+      
+      CALL syncthreads( )
+      
+      IF( i <= polyDeg_dev .AND. j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      
+        df = 0.0_prec
+        DO ii = 0, polydeg_dev
+          df = df + dgDerivativeMatrixTranspose(ii,i)*fLocal(1,ii,j,k) + &
+                    dgDerivativeMatrixTranspose(ii,j)*fLocal(2,i,ii,k) + &
+                    dgDerivativeMatrixTranspose(ii,k)*fLocal(3,i,j,ii)
+        ENDDO
+       
+        divF(i,j,k,iVar,iEl) = ( df+ ( fnAtBoundaries(i,k,iVar,1,iEl)*boundaryMatrix(j,0) + &
+                                        fnAtBoundaries(i,k,iVar,3,iEl)*boundaryMatrix(j,1) )/&
+                                      quadratureWeights(j) + &
+                                      ( fnAtBoundaries(j,k,iVar,4,iEl)*boundaryMatrix(i,0) + &
+                                        fnAtBoundaries(j,k,iVar,2,iEl)*boundaryMatrix(i,1) )/&
+                                      quadratureWeights(i) + &
+                                      ( fnAtBoundaries(i,j,iVar,5,iEl)*boundaryMatrix(k,0) + &
+                                        fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
+                                      quadratureWeights(k) )/Jac(i,j,k,iEl)
+                                      
+      ENDIF
+
+  END SUBROUTINE Stress_Mapped_DG_Divergence_3D_CUDAKernel
 #endif
+
 
 END MODULE Fluid_Class
 
