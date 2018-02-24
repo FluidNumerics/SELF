@@ -57,7 +57,7 @@ else ifeq (${FC},pgfortran)
   ifeq (${CUDA},yes)
   
     $(info '+CUDA-Fortran')
-    OPT+=-Mcuda=${GPU_ARCH}
+    OPT+=-Mcuda=${GPU_ARCH},cuda9.0
     ifeq (${PTX_INFO},yes)
       OPT+=,ptxinfo
     endif
