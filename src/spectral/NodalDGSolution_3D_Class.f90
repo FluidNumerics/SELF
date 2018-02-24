@@ -604,28 +604,48 @@ CONTAINS
 
       IF( e2 < 0 )THEN
 
-        DO iEq = 1, nodalSolution % nEquations
-          DO j = 0, nodalSolution % N
-            DO i = 0, nodalSolution % N
-          
-              ii = mesh % faces % iMap(i,j,iFace)
-              jj = mesh % faces % jMap(i,j,iFace)
-
-              DO idir = 1, 3        
-                nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
-                                                                                 nodalSolution % externalState(ii,jj,iEq,bID) )*&
-                                                                                 mesh % elements % nHat(idir,i,j,s1,e1)
-               
-
-              !  nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) =  nodalSolution % boundarySolution(i,j,iEq,s1,e1)*&
-              !                                                                   mesh % elements % nHat(idir,i,j,s1,e1)
-
+        IF( bID == 0 )THEN
+          DO iEq = 1, nodalSolution % nEquations
+            DO j = 0, nodalSolution % N
+              DO i = 0, nodalSolution % N
+            
+                ii = mesh % faces % iMap(i,j,iFace)
+                jj = mesh % faces % jMap(i,j,iFace)
+  
+                DO idir = 1, 3        
+  
+                  nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) =  nodalSolution % boundarySolution(i,j,iEq,s1,e1)*&
+                                                                                   mesh % elements % nHat(idir,i,j,s1,e1)
+  
+                ENDDO
+                 
+  
               ENDDO
-               
-
             ENDDO
           ENDDO
-        ENDDO
+
+        ELSE
+
+          DO iEq = 1, nodalSolution % nEquations
+            DO j = 0, nodalSolution % N
+              DO i = 0, nodalSolution % N
+            
+                ii = mesh % faces % iMap(i,j,iFace)
+                jj = mesh % faces % jMap(i,j,iFace)
+  
+                DO idir = 1, 3        
+                  nodalSolution % boundaryGradientFlux(idir,i,j,iEq,s1,e1) = 0.5_prec*( nodalSolution % boundarySolution(i,j,iEq,s1,e1) +&
+                                                                                   nodalSolution % externalState(ii,jj,iEq,bID) )*&
+                                                                                   mesh % elements % nHat(idir,i,j,s1,e1)
+                 
+                ENDDO
+                 
+  
+              ENDDO
+            ENDDO
+          ENDDO
+
+        ENDIF
 
       ENDIF
 

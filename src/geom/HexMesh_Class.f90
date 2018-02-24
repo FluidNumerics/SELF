@@ -1232,49 +1232,6 @@ CONTAINS
 
             ENDDO
 
-!          ELSE
-!
-!            DO iSide = 1, 6 ! Loop over the sides of the quads
-!
-!              iSurf = iSide + 6*(iEl-1)
-!              ! To build the current face, we construct a plane that passes through
-!              ! the four corner nodes. Here, we grab the global node ID's for the four
-!              ! corner nodes.
-!              n1 = nodes( myHexMesh % faceMap(1,iSide) )
-!              n2 = nodes( myHexMesh % faceMap(2,iSide) )
-!              n3 = nodes( myHexMesh % faceMap(3,iSide) )
-!              n4 = nodes( myHexMesh % faceMap(4,iSide) )
-!
-!              x1(1) = myHexMesh % nodes % x(1,n1)
-!              x1(2) = myHexMesh % nodes % x(2,n1)
-!              x1(3) = myHexMesh % nodes % x(3,n1)
-!
-!              x2(1) = myHexMesh % nodes % x(1,n2)
-!              x2(2) = myHexMesh % nodes % x(2,n2)
-!              x2(3) = myHexMesh % nodes % x(3,n2)
-!
-!              x3(1) = myHexMesh % nodes % x(1,n3)
-!              x3(2) = myHexMesh % nodes % x(2,n3)
-!              x3(3) = myHexMesh % nodes % x(3,n3)
-!
-!              x4(1) = myHexMesh % nodes % x(1,n4)
-!              x4(2) = myHexMesh % nodes % x(2,n4)
-!              x4(3) = myHexMesh % nodes % x(3,n4)
-!
-!              DO j = 0, gPolyDeg
-!                DO i = 0, gPolyDeg
-!                  ! Transfinite interpolation with linear blending is USEd to construct the face
-!                  c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 )
-!                  c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
-!                  xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
-!                ENDDO
-!              ENDDO
-!
-!            ENDDO
-!
-!
-!          ENDIF
-
         ENDDO
       ENDDO
     ENDDO ! iEl, cycle over the elements

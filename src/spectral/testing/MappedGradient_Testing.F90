@@ -26,8 +26,17 @@ IMPLICIT NONE
     CALL dGStorage % Build( UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
                             params % polyDeg, params % nPlot, GAUSS )
 
-    ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
-    CALL mesh % ReadSELFMeshFile( TRIM(params % SELFMeshFile)//'.0000' )
+    IF( params % topographicShape == Gaussian )THEN
+       TopographicShape => GaussianHill
+    ELSE
+       TopographicShape => DefaultTopography
+    ENDIF
+
+    CALL mesh % ConstructStructuredMesh( dgStorage % interp, &
+                                         params % nXelem, &
+                                         params % nYelem, &
+                                         params % nZelem, &
+                                         .TRUE.  )
 
     ! Multiply the mesh positions to scale the size of the mesh
     CALL mesh % ScaleTheMesh( dgStorage % interp, &
@@ -74,6 +83,9 @@ IMPLICIT NONE
 
               !state % solution(i,j,k,iEq,iEl) = 0.001*exp( -(z-params % zScale)/(0.1_prec*params % zScale) ) 
               state % solution(i,j,k,iEq,iEl) =  1000.0_prec!z*(10000.0_prec)/(params % zScale ) 
+              !state % solutionGradient(1,i,j,k,iEq,iEl) = state % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,2,1,iEl)
+              !state % solutionGradient(2,i,j,k,iEq,iEl) = state % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,2,2,iEl)
+              !state % solutionGradient(3,i,j,k,iEq,iEl) = state % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,2,3,iEl)
 
             ENDDO
           ENDDO
@@ -82,28 +94,29 @@ IMPLICIT NONE
     ENDDO
 
     CALL state % Calculate_Solution_At_Boundaries( dgStorage ) 
-    DO iFace = 1, mesh % faces % nFaces
-
-      e1 = mesh % faces % elementIDs(1,iFace)
-      e2 = mesh % faces % elementIDs(2,iFace)
-      s1 = mesh % faces % elementSides(1,iFace)
-      bID = ABS(mesh % faces % boundaryID(iFace))
-
-      IF( e2 < 0 )THEN
-
-        DO iEq = 1, state % nEquations
-          DO j = 0, state % N
-            DO i = 0, state % N
-          
-              state % externalState(i,j,iEq,bID) = state % boundarySolution(i,j,iEq,s1,e1)
-
-            ENDDO
-          ENDDO
-        ENDDO
-
-      ENDIF
-
-    ENDDO
+!
+!    DO iFace = 1, mesh % faces % nFaces
+!
+!      e1 = mesh % faces % elementIDs(1,iFace)
+!      e2 = mesh % faces % elementIDs(2,iFace)
+!      s1 = mesh % faces % elementSides(1,iFace)
+!      bID = ABS(mesh % faces % boundaryID(iFace))
+!
+!      IF( e2 < 0 .AND. bID /= 0 )THEN
+!
+!        DO iEq = 1, state % nEquations
+!          DO j = 0, state % N
+!            DO i = 0, state % N
+!          
+!              state % externalState(i,j,iEq,bID) = state % boundarySolution(i,j,iEq,s1,e1)
+!
+!            ENDDO
+!          ENDDO
+!        ENDDO
+!
+!      ENDIF
+!
+!    ENDDO
 
     CALL state % Mapped_BassiRebay_Gradient( dgStorage, mesh )
 

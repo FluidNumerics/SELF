@@ -493,7 +493,6 @@ CONTAINS
     INTEGER    :: i, j, k, iEl, N
     REAL(prec) :: cv(1:3,1:3)
     REAL(prec) :: xGradient(1:3,0:interp % N,0:interp % N,0:interp % N,1:3,1:myElements % nElements)
-    REAL(prec) :: covT(0:interp % N, 0:interp % N, 0:interp % N, 1:3,1:3,1:myElements % nElements)
     REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
     REAL(prec) :: Dv(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
 
@@ -510,22 +509,19 @@ CONTAINS
         DO j = 0, N
           DO i = 0, N
 
-            covT(i,j,k,1,1:3,iEl) = xGradient(1:3,i,j,k,1,iEl)
-            covT(i,j,k,2,1:3,iEl) = xGradient(1:3,i,j,k,2,iEl)
-            covT(i,j,k,3,1:3,iEl) = xGradient(1:3,i,j,k,3,iEl)
+            myElements % dxds(i,j,k,iEl) = xGradient(1,i,j,k,1,iEl) 
+            myElements % dxdp(i,j,k,iEl) = xGradient(2,i,j,k,1,iEl) 
+            myElements % dxdq(i,j,k,iEl) = xGradient(3,i,j,k,1,iEl) 
+            myElements % dyds(i,j,k,iEl) = xGradient(1,i,j,k,2,iEl) 
+            myElements % dydp(i,j,k,iEl) = xGradient(2,i,j,k,2,iEl) 
+            myElements % dydq(i,j,k,iEl) = xGradient(3,i,j,k,2,iEl) 
+            myElements % dzds(i,j,k,iEl) = xGradient(1,i,j,k,3,iEl) 
+            myElements % dzdp(i,j,k,iEl) = xGradient(2,i,j,k,3,iEl) 
+            myElements % dzdq(i,j,k,iEl) = xGradient(3,i,j,k,3,iEl) 
 
-
-            myElements % dxds(i,j,k,iEl) = xGradient(1,i,j,k,1,iEl) !covT(i,j,k,1,1,iEl)
-            myElements % dxdp(i,j,k,iEl) = xGradient(2,i,j,k,1,iEl) !covT(i,j,k,1,2,iEl)
-            myElements % dxdq(i,j,k,iEl) = xGradient(3,i,j,k,1,iEl) !covT(i,j,k,1,3,iEl)
-            myElements % dyds(i,j,k,iEl) = xGradient(1,i,j,k,2,iEl) !covT(i,j,k,2,1,iEl)
-            myElements % dydp(i,j,k,iEl) = xGradient(2,i,j,k,2,iEl) !covT(i,j,k,2,2,iEl)
-            myElements % dydq(i,j,k,iEl) = xGradient(3,i,j,k,2,iEl) !covT(i,j,k,2,3,iEl)
-            myElements % dzds(i,j,k,iEl) = xGradient(1,i,j,k,3,iEl) !covT(i,j,k,3,1,iEl)
-            myElements % dzdp(i,j,k,iEl) = xGradient(2,i,j,k,3,iEl) !covT(i,j,k,3,2,iEl)
-            myElements % dzdq(i,j,k,iEl) = xGradient(3,i,j,k,3,iEl) !covT(i,j,k,3,3,iEl)
-
-            cv = covT(i,j,k,1:3,1:3,iEl)
+            cv(1,1:3) = xGradient(1:3,i,j,k,1,iEl)
+            cv(2,1:3) = xGradient(1:3,i,j,k,2,iEl)
+            cv(3,1:3) = xGradient(1:3,i,j,k,3,iEl)
             myElements % J(i,j,k,iEl) = Determinant( cv, 3 )
 
           ENDDO
@@ -590,13 +586,15 @@ CONTAINS
       ENDDO
     ENDDO
 #else
-    ! Generate the contravariant metric tensor a la Kopriva (2006)
+    ! Generate the contravariant basis vectors using the curl form ( Kopriva, 2006 )
     !Ja_1
     DO iEl = 1, myElements % nElements
       DO k = 0, N
         DO j = 0, N
           DO i = 0, N
-            v(i,j,k,1:3,iEl)  = -myElements % x(i,j,k,3,iEl)*covT(i,j,k,2,1:3,iEl)
+            v(i,j,k,1,iEl)  = -myElements % x(i,j,k,3,iEl)*myElements % dyds(i,j,k,iEl)
+            v(i,j,k,2,iEl)  = -myElements % x(i,j,k,3,iEl)*myElements % dydp(i,j,k,iEl)
+            v(i,j,k,3,iEl)  = -myElements % x(i,j,k,3,iEl)*myElements % dydq(i,j,k,iEl)
           ENDDO
         ENDDO
       ENDDO
@@ -625,7 +623,9 @@ CONTAINS
       DO k = 0, N
         DO j = 0, N
           DO i = 0, N
-            v(i,j,k,1:3,iEl)  = -myElements % x(i,j,k,1,iEl)*covT(i,j,k,3,1:3,iEl)
+            v(i,j,k,1,iEl)  = -myElements % x(i,j,k,1,iEl)*myElements % dzds(i,j,k,iEl)
+            v(i,j,k,2,iEl)  = -myElements % x(i,j,k,1,iEl)*myElements % dzdp(i,j,k,iEl)
+            v(i,j,k,3,iEl)  = -myElements % x(i,j,k,1,iEl)*myElements % dzdq(i,j,k,iEl)
           ENDDO
         ENDDO
       ENDDO
@@ -650,7 +650,9 @@ CONTAINS
       DO k = 0, N
         DO j = 0, N
           DO i = 0, N
-            v(i,j,k,1:3,iEl)  = -myElements % x(i,j,k,2,iEl)*covT(i,j,k,1,1:3,iEl)
+            v(i,j,k,1,iEl)  = -myElements % x(i,j,k,2,iEl)*myElements % dxds(i,j,k,iEl)
+            v(i,j,k,2,iEl)  = -myElements % x(i,j,k,2,iEl)*myElements % dxdp(i,j,k,iEl)
+            v(i,j,k,3,iEl)  = -myElements % x(i,j,k,2,iEl)*myElements % dxdq(i,j,k,iEl)
           ENDDO
         ENDDO
       ENDDO

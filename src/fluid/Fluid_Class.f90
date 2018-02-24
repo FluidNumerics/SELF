@@ -2526,6 +2526,7 @@ CONTAINS
     CALL myDGSEM % static % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 
+#endif
     sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
                                                 myDGSEM % state % solution, &
                                                 myDGSEM % state % nEquations, &
@@ -2538,7 +2539,6 @@ CONTAINS
     x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
                                               3, &
                                               myDGSEM % mesh % elements % nElements )
-#endif
 
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
