@@ -100,6 +100,7 @@ MODULE Fluid_Class
 #ifdef HAVE_CUDA
  INTEGER, CONSTANT    :: nEq_dev
  INTEGER, CONSTANT    :: nStress_dev
+ INTEGER, CONSTANT    :: nSGS_dev
  INTEGER, CONSTANT    :: polyDeg_dev
  INTEGER, CONSTANT    :: nEl_dev
  INTEGER, CONSTANT    :: myRank_dev
@@ -247,6 +248,7 @@ CONTAINS
 
       nEq_dev     = myDGSEM % state % nEquations
       nStress_dev = myDGSEM % stressTensor % nEquations
+      nSGS_dev = myDGSEM % sgsCoeffs % nEquations
       polydeg_dev = myDGSEM % params % polyDeg
       nEl_dev     = myDGSEM % mesh % elements % nElements
       nFaces_dev     = myDGSEM % mesh % faces % nFaces
@@ -629,14 +631,12 @@ CONTAINS
 
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  myDGSEM % state % nEquations )
-    grid = dim3(myDGSEM % state % nElements, 1, 1)  
+                  1 )
+    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
 
-    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
+    CALL CalculateStateAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
                                                                          myDGSEM % state % boundarySolution_dev,  &
-                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                                         myDGSEM % params % polydeg_dev, myDGSEM % state % nEquations_dev,&
-                                                                         myDGSEM % state % nElements_dev )
+                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 #else
 
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
@@ -753,13 +753,11 @@ CONTAINS
 
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  myDGSEM % sgsCoeffs % nEquations )
-    grid = dim3(myDGSEM % sgsCoeffs % nElements, 1, 1)  
-    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
-                                                                         myDGSEM % sgsCoeffs % boundarySolution_dev,  &
-                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                                         myDGSEM % params % polydeg_dev, myDGSEM % sgsCoeffs % nEquations_dev,&
-                                                                         myDGSEM % sgsCoeffs % nElements_dev )
+                  1 )
+    grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1)  
+    CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
+                                                                   myDGSEM % sgsCoeffs % boundarySolution_dev,  &
+                                                                   myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
 #else
 
@@ -813,13 +811,11 @@ CONTAINS
 
       tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                     4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                    myDGSEM % stressTensor % nEquations )
-      grid = dim3(myDGSEM % stressTensor % nElements, 1, 1)  
-      CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % solution_dev, &
+                    1 )
+      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % stressTensor % nElements, 1)  
+      CALL CalculateStressAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % solution_dev, &
                                                                            myDGSEM % stressTensor % boundarySolution_dev,  &
-                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                                           myDGSEM % params % polydeg_dev, myDGSEM % stressTensor % nEquations_dev,&
-                                                                           myDGSEM % stressTensor % nElements_dev )
+                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
 #else
   
@@ -4018,6 +4014,113 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
       ENDIF
 
   END SUBROUTINE Stress_Mapped_DG_Divergence_3D_CUDAKernel
+  ATTRIBUTES(Global) SUBROUTINE CalculateStateAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix ) 
+    IMPLICIT NONE
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:polydeg_dev,0:1)
+    REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+    ! Local
+    INTEGER    :: iEq, iEl, i, j, k
+    REAL(prec) :: bSol(1:6)
+
+      iEq = blockIdx % x
+      iEl = blockIdx % y
+
+      k   = threadIdx % y-1
+      j   = threadIdx % x-1
+      
+      IF( j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      bSol(1:6) = 0.0_prec
+
+      DO i = 0, polydeg_dev
+
+        bSol(1) = bSol(1) + boundaryMatrix(i,0)*f(j,i,k,iEq,iEl) ! south
+        bSol(2) = bSol(2) + boundaryMatrix(i,1)*f(i,j,k,iEq,iEl) ! east
+        bSol(3) = bSol(3) + boundaryMatrix(i,1)*f(j,i,k,iEq,iEl) ! north
+        bSol(4) = bSol(4) + boundaryMatrix(i,0)*f(i,j,k,iEq,iEl) ! west
+        bSol(5) = bSol(5) + boundaryMatrix(i,0)*f(j,k,i,iEq,iEl) ! botom
+        bSol(6) = bSol(6) + boundaryMatrix(i,1)*f(j,k,i,iEq,iEl) ! top
+
+      ENDDO
+               
+      DO i = 1, 6
+        fAtBoundaries(j,k,iEq,i,iEl) = bSol(i)
+      ENDDO
+      
+      ENDIF
+      
+  END SUBROUTINE CalculateStateAtBoundaries_3D_CUDAKernel
+  ATTRIBUTES(Global) SUBROUTINE CalculateSGSAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix ) 
+    IMPLICIT NONE
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nSGS_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:polydeg_dev,0:1)
+    REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:polydeg_dev,0:polydeg_dev,1:nSGS_dev,1:6,1:nEl_dev)
+    ! Local
+    INTEGER    :: iEq, iEl, i, j, k
+    REAL(prec) :: bSol(1:6)
+
+      iEq = blockIdx % x
+      iEl = blockIdx % y
+
+      k   = threadIdx % y-1
+      j   = threadIdx % x-1
+      
+      IF( j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      bSol(1:6) = 0.0_prec
+
+      DO i = 0, polydeg_dev
+
+        bSol(1) = bSol(1) + boundaryMatrix(i,0)*f(j,i,k,iEq,iEl) ! south
+        bSol(2) = bSol(2) + boundaryMatrix(i,1)*f(i,j,k,iEq,iEl) ! east
+        bSol(3) = bSol(3) + boundaryMatrix(i,1)*f(j,i,k,iEq,iEl) ! north
+        bSol(4) = bSol(4) + boundaryMatrix(i,0)*f(i,j,k,iEq,iEl) ! west
+        bSol(5) = bSol(5) + boundaryMatrix(i,0)*f(j,k,i,iEq,iEl) ! botom
+        bSol(6) = bSol(6) + boundaryMatrix(i,1)*f(j,k,i,iEq,iEl) ! top
+
+      ENDDO
+               
+      DO i = 1, 6
+        fAtBoundaries(j,k,iEq,i,iEl) = bSol(i)
+      ENDDO
+      
+      ENDIF
+      
+  END SUBROUTINE CalculateSGSAtBoundaries_3D_CUDAKernel
+  ATTRIBUTES(Global) SUBROUTINE CalculateStressAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix ) 
+    IMPLICIT NONE
+    REAL(prec), DEVICE, INTENT(in)  :: f(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nStress_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: boundaryMatrix(0:polydeg_dev,0:1)
+    REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:polydeg_dev,0:polydeg_dev,1:nStress_dev,1:6,1:nEl_dev)
+    ! Local
+    INTEGER    :: iEq, iEl, i, j, k
+    REAL(prec) :: bSol(1:6)
+
+      iEq = blockIdx % x
+      iEl = blockIdx % y
+
+      k   = threadIdx % y-1
+      j   = threadIdx % x-1
+      
+      IF( j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
+      bSol(1:6) = 0.0_prec
+
+      DO i = 0, polydeg_dev
+
+        bSol(1) = bSol(1) + boundaryMatrix(i,0)*f(j,i,k,iEq,iEl) ! south
+        bSol(2) = bSol(2) + boundaryMatrix(i,1)*f(i,j,k,iEq,iEl) ! east
+        bSol(3) = bSol(3) + boundaryMatrix(i,1)*f(j,i,k,iEq,iEl) ! north
+        bSol(4) = bSol(4) + boundaryMatrix(i,0)*f(i,j,k,iEq,iEl) ! west
+        bSol(5) = bSol(5) + boundaryMatrix(i,0)*f(j,k,i,iEq,iEl) ! botom
+        bSol(6) = bSol(6) + boundaryMatrix(i,1)*f(j,k,i,iEq,iEl) ! top
+      ENDDO
+               
+      DO i = 1, 6
+        fAtBoundaries(j,k,iEq,i,iEl) = bSol(i)
+      ENDDO
+      
+      ENDIF
+      
+  END SUBROUTINE CalculateStressAtBoundaries_3D_CUDAKernel
 #endif
 
 
