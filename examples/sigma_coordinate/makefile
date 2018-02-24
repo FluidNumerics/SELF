@@ -3,7 +3,8 @@ SHELL=/bin/bash
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 INITDIR=$(shell pwd)
 
-.PHONY: mappedgradient 
+.PHONY: mappedgradient \
+        MeshGen_3D 
 
 MeshGen_3D :
 	make --directory=${SELFDIR}/build/ MeshGen_3D

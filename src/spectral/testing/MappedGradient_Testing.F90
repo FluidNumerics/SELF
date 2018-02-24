@@ -81,11 +81,7 @@ IMPLICIT NONE
               y = mesh % elements % x(i,j,k,2,iEl)
               z = mesh % elements % x(i,j,k,3,iEl)
 
-              !state % solution(i,j,k,iEq,iEl) = 0.001*exp( -(z-params % zScale)/(0.1_prec*params % zScale) ) 
-              state % solution(i,j,k,iEq,iEl) =  1000.0_prec!z*(10000.0_prec)/(params % zScale ) 
-              !state % solutionGradient(1,i,j,k,iEq,iEl) = state % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,2,1,iEl)
-              !state % solutionGradient(2,i,j,k,iEq,iEl) = state % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,2,2,iEl)
-              !state % solutionGradient(3,i,j,k,iEq,iEl) = state % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,2,3,iEl)
+              state % solution(i,j,k,iEq,iEl) = -(10000.0_prec)/(params % zScale**2 )*(z-params % zScale)**2
 
             ENDDO
           ENDDO
@@ -94,31 +90,32 @@ IMPLICIT NONE
     ENDDO
 
     CALL state % Calculate_Solution_At_Boundaries( dgStorage ) 
-!
-!    DO iFace = 1, mesh % faces % nFaces
-!
-!      e1 = mesh % faces % elementIDs(1,iFace)
-!      e2 = mesh % faces % elementIDs(2,iFace)
-!      s1 = mesh % faces % elementSides(1,iFace)
-!      bID = ABS(mesh % faces % boundaryID(iFace))
-!
-!      IF( e2 < 0 .AND. bID /= 0 )THEN
-!
-!        DO iEq = 1, state % nEquations
-!          DO j = 0, state % N
-!            DO i = 0, state % N
-!          
-!              state % externalState(i,j,iEq,bID) = state % boundarySolution(i,j,iEq,s1,e1)
-!
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!
-!      ENDIF
-!
-!    ENDDO
 
-    CALL state % Mapped_BassiRebay_Gradient( dgStorage, mesh )
+    DO iFace = 1, mesh % faces % nFaces
+
+      e1 = mesh % faces % elementIDs(1,iFace)
+      e2 = mesh % faces % elementIDs(2,iFace)
+      s1 = mesh % faces % elementSides(1,iFace)
+      bID = ABS(mesh % faces % boundaryID(iFace))
+
+      IF( e2 < 0 .AND. bID /= 0 )THEN
+
+        DO iEq = 1, state % nEquations
+          DO j = 0, state % N
+            DO i = 0, state % N
+          
+              state % externalState(i,j,iEq,bID) = state % boundarySolution(i,j,iEq,s1,e1)
+
+            ENDDO
+          ENDDO
+        ENDDO
+
+      ENDIF
+
+    ENDDO
+
+!    CALL state % Mapped_BassiRebay_Gradient( dgStorage, mesh )
+    CALL state % Mapped_Strong_Gradient( dgStorage, mesh ) 
 
     PRINT*, 'Max dp/dx',MAXVAL( ABS( state % solutionGradient(1,:,:,:,:,:) ) )
     PRINT*, 'Max dp/dy',MAXVAL( ABS( state % solutionGradient(2,:,:,:,:,:) ) )

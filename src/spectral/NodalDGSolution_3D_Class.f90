@@ -89,6 +89,7 @@ IMPLICIT NONE
       PROCEDURE :: Calculate_Strong_Flux_Divergence
 
       PROCEDURE :: Mapped_BassiRebay_Gradient
+      PROCEDURE :: Mapped_Strong_Gradient
 
 #ifdef HAVE_CUDA
 
@@ -448,7 +449,55 @@ CONTAINS
 
 ! Algorithms for computing mapped derivative operations !
 
+  SUBROUTINE Mapped_Strong_Gradient( nodalSolution, dgStorage, mesh ) 
+
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution 
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+    TYPE( HexMesh ), INTENT(in)                :: mesh
+    !
+    INTEGER    :: ii, i, j, k, iEq, iEl, idir
+    REAL(prec) :: f(1:3,0:dgStorage % N,0:dgStorage % N, 0:dgStorage % N), df
+
+      DO iEl = 1, nodalSolution % nElements
+        DO iEq = 1, nodalSolution % nEquations
+          DO idir = 1, 3
+          
+            DO k = 0, dgStorage % N
+              DO j = 0, dgStorage % N
+                DO i = 0, dgStorage % N   
  
+                  f(1,i,j,k) = nodalSolution % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,1,iEl)
+                  f(2,i,j,k) = nodalSolution % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,2,iEl)
+                  f(3,i,j,k) = nodalSolution % solution(i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,3,iEl)
+
+                ENDDO
+              ENDDO
+            ENDDO
+
+            DO k = 0, dgStorage % N
+              DO j = 0, dgStorage % N
+                DO i = 0, dgStorage % N   
+
+                  df = 0.0_prec
+                  DO ii = 0, dgStorage % N
+                    df = df + dgStorage % interp % derivativeMatrixTranspose(ii,i)*f(1,ii,j,k) + &
+                              dgStorage % interp % derivativeMatrixTranspose(ii,j)*f(2,i,ii,k) + &
+                              dgStorage % interp % derivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
+                  ENDDO
+
+                  nodalSolution % solutionGradient(idir,i,j,k,iEq,iEl) = df/mesh % elements % J(i,j,k,iEl)
+
+                ENDDO
+              ENDDO
+            ENDDO
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE Mapped_Strong_Gradient
+
   SUBROUTINE Mapped_BassiRebay_Gradient( nodalSolution, dgStorage, mesh )
 
     IMPLICIT NONE
