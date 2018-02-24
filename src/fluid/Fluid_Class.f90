@@ -1608,7 +1608,8 @@ CONTAINS
     tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
                   4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
-    grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % state % nEquations-1,1)
+    !grid = dim3(myDGSEM % mesh % elements % nElements,myDGSEM % state % nEquations-1,1)
+    grid = dim3(myDGSEM % state % nEquations-1,myDGSEM % mesh % elements % nElements,1)
 
     CALL CalculateFlux_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                     myDGSEM % static % solution_dev, &
@@ -1619,8 +1620,18 @@ CONTAINS
                                                     myDGSEM % state % nEquations_dev, &
                                                     myDGSEM % mesh % elements % nElements_dev )
 
-
-      
+!    CALL MappedTimeDerivative_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+!                                                             myDGSEM % static % solution_dev, &
+!                                                             myDGSEM % state % flux_dev, &
+!                                                             myDGSEM % state % boundaryFlux_dev, &
+!                                                             myDGSEM % sourceTerms % drag_dev, &
+!                                                             myDGSEM % mesh % elements % Ja_dev, &
+!                                                             myDGSEM % mesh % elements % J_dev, &
+!                                                             myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+!                                                             myDGSEM % dgStorage % quadratureWeights_dev, &
+!                                                             myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+!                                                             myDGSEM % state % tendency_dev )
+!      
     CALL DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % flux_dev, &
                                                         myDGSEM % state % boundaryFlux_dev, &
                                                         myDGSEM % state % fluxDivergence_dev, &
@@ -2934,8 +2945,11 @@ CONTAINS
 
     IF( i <= N .AND. j <= N .AND. k <= N )THEN
   
-      !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
-      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( fluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+!      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - ( fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+      !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + fluxDivergence(i,j,k,iEq,iEl) ! + ( diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl)! + source(i,j,k,iEq,iEl)
+      !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl)/Jac(i,j,k,iEl) ! + ( diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl)! + source(i,j,k,iEq,iEl)
+      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl)/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+      !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + ( diffusivefluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl)  + source(i,j,k,iEq,iEl)
   
       solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
@@ -3445,140 +3459,109 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
 
 
  END SUBROUTINE BoundaryFaceFlux_CUDAKernel
+!
+ ATTRIBUTES(Global) SUBROUTINE MappedTimeDerivative_CUDAKernel( solution, static, flux, boundaryFlux, drag, &
+                                                                Ja, Jac, bMat, qWeight, dMatP, tendency )
+
+   IMPLICIT NONE
+   REAL(prec), DEVICE, INTENT(in)  :: solution(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: static(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: flux(1:3,0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: drag(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: Ja(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:3,1:3,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: Jac(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: bMat(0:polydeg_dev,0:1)
+   REAL(prec), DEVICE, INTENT(in)  :: qWeight(0:polydeg_dev)
+   REAL(prec), DEVICE, INTENT(in)  :: dMatP(0:polydeg_dev,0:polydeg_dev)
+   REAL(prec), DEVICE, INTENT(out) :: tendency(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
+   ! Local
+   INTEGER            :: i, j, k, row, col
+   INTEGER, SHARED    :: iEl, iEq
+   REAL(prec), SHARED :: contFlux(0:7,0:7,0:7,1:3)
+   REAL(prec)         :: tend, F
+
+      iEq = blockIDx % x
+      iEl = blockIDx % y
+      
+      i = threadIdx % x - 1
+      j = threadIdx % y - 1
+      k = threadIdx % z - 1
+
+      ! Here the flux tensor in physical space is calculated and rotated to give the 
+      ! contravariant flux tensor in the reference computational domain.
+ !     DO col = 1, 3
+ !        contFlux(i,j,k,col) = 0.0_prec
+ !        DO row = 1, 3
+ !        !//////////////////////////////// Advection ///////////////////////////////////////!
+ !              contFlux(i,j,k,col) = contFlux(i,j,k,col) +&
+ !                                    Ja(i,j,k,row,col,iEl)*&
+ !                                    solution(i,j,k,row,iEl)*&
+ !                                     (solution(i,j,k,iEq,iEl) + static(i,j,k,iEq,iEl))/&    ! Density weighted variable being advected
+ !                                 (solution(i,j,k,4,iEl) + static(i,j,k,4,iEl) )      
+ !        ENDDO
+ !    ! //////////////////// Pressure (Momentum only) /////////////////////////// !
+ !        IF( iEq <= 3 )THEN
+ !           contFlux(i,j,k,col) = contFlux(i,j,k,col) + Ja(i,j,k,iEq,col,iEl)*solution(i,j,k,6,iEl)
+ !        ENDIF
+ !        
+ !     ENDDO                                  
+ !           
+ !     CALL syncthreads( )
+      ! Now, the flux divergence is computed by multiplying the internally calculated fluxes by the
+      ! DG-Derivative matrix and adding the boundary weighted fluxes.
+      
+      tend = 0.0_prec
+      DO row = 0, polydeg_dev
+         tend = tend + dMatP(row,i)*flux(1,row,j,k,iEq,iEl) + &
+                       dMatP(row,j)*flux(2,i,row,k,iEq,iEl) + &
+                       dMatP(row,k)*flux(3,i,j,row,iEq,iEl)
+      ENDDO
+       
+      tend = -( tend + &
+                ( boundaryFlux(i,k,iEq,1,iEl)*bmat(j,0) + &
+                  boundaryFlux(i,k,iEq,3,iEl)*bMat(j,1) )/&
+                qWeight(j) + &
+                ( boundaryFlux(j,k,iEq,4,iEl)*bMat(i,0) + &
+                  boundaryFlux(j,k,iEq,2,iEl)*bMat(i,1) )/&
+                qWeight(i) + &
+                ( boundaryFlux(i,j,iEq,5,iEl)*bMat(k,0) + &
+                  boundaryFlux(i,j,iEq,6,iEl)*bMat(k,1) )/&
+                qWeight(k) )/Jac(i,j,k,iEl)
+                      
+             
+      tendency(i,j,k,iEq,iEl) = tend
+      F = sqrt( solution(i,j,k,1,iEl)**2 + &
+                solution(i,j,k,2,iEl)**2 + &
+                solution(i,j,k,3,iEl)**2 ) /&
+                  (solution(i,j,k,4,iEl) + static(i,j,k,4,iEl))
+                  
+      IF( iEq == 1 )THEN
+         tendency(i,j,k,1,iEl) = tendency(i,j,k,1,iEl) -&
+                                 drag(i,j,k,iEl)*solution(i,j,k,1,iEl)*F-&
+                                 solution(i,j,k,3,iEl)*fRotY_dev +&
+                                 solution(i,j,k,2,iEl)*fRotz_dev 
+      
+      ELSEIF( iEq == 2 )THEN
+         tendency(i,j,k,2,iEl) = tendency(i,j,k,2,iEl) -&
+                                 drag(i,j,k,iEl)*solution(i,j,k,2,iEl)*F -&
+                                 solution(i,j,k,1,iEl)*fRotZ_dev +&
+                                 solution(i,j,k,3,iEl)*fRotX_dev 
+      ELSEIF( iEq == 3 )THEN ! Add in the buoyancy acceleration
+         tendency(i,j,k,3,iEl) = tendency(i,j,k,3,iEl) -&
+                                 drag(i,j,k,iEl)*solution(i,j,k,3,iEl)*F -&
+                                 solution(i,j,k,2,iEl)*fRotX_dev +&
+                                 solution(i,j,k,1,iEl)*fRotY_dev -&
+                                 solution(i,j,k,4,iEl)*g_dev
+      ENDIF
+         
+
+      
+       
+ END SUBROUTINE MappedTimeDerivative_CUDAKernel
 
 
 
-!  ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
-!                                                             nHat, boundarySolution, boundarySolution_static, &
-!                                                             externalState, boundaryFlux, stressFlux )
-!  
-!    IMPLICIT NONE
-!   INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
-!   INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
-!   INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
-!   INTEGER, DEVICE, INTENT(in)     :: iMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
-!   INTEGER, DEVICE, INTENT(in)     :: jMap(0:polydeg_dev,0:polydeg_dev,1:nFaces_dev)
-!   REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
-!   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-!   REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-!   REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
-!   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-!   REAL(prec), DEVICE, INTENT(out) :: stressFlux(0:polydeg_dev,0:polydeg_dev,1:15,1:6,1:nEl_dev)
-!     ! Local
-!    INTEGER    :: iEl, iFace, jEq
-!    INTEGER    :: i, j, k, iEq
-!    INTEGER    :: ii, jj, bID
-!    INTEGER    :: e1, s1, e2, s2
-!    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-!    REAL(prec) :: aS(1:nEq_dev-1), jump(1:nEq_dev-1)
-!    REAL(prec) :: fac
-!
-!
-!      iFace = blockIdx % x
-!      j     = threadIdx % y - 1
-!      i     = threadIdx % x -1
-!     
-!         e1 = elementIDs(1,iFace)
-!         s1 = elementSides(1,iFace)
-!         e2 = elementIDs(2,iFace)
-!         s2 = ABS(elementSides(2,iFace))
-!         bID  = ABS(boundaryIDs(iFace))
-!
-!               ii = iMap(i,j,iFace)
-!               jj = jMap(i,j,iFace)
-!               
-!               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
-!                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
-!                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
-!
-!               
-!               IF( e2 < 0 )THEN
-!               
-!                  DO iEq = 1, nEq_dev-1
-!                     jump(iEq)  = boundarySolution(ii,jj,iEq,s2,e2) - &
-!                                  boundarySolution(i,j,iEq,s1,e1) !outState - inState
-!                  ENDDO
-!
-!                  
-!                  T =   (boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
-!                          (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
-!                          
-!                  ! Sound speed estimate for the external and internal states
-!                  cOut = sqrt( R_dev*T* &
-!                              ( (boundarySolution(ii,jj,6,s2,e2)+boundarySolution_static(ii,jj,6,s2,e2))/ P0_dev )**rC_dev   )
-!                        
-!                  T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
-!                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )        
-!                             
-!                  cIn  = sqrt( R_dev*T* &
-!                              ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
-!                               
-!                  ! External normal velocity component
-!                  uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
-!                           boundarySolution(ii,jj,2,s2,e2)*nHat(2,i,j,s1,e1)/norm + &
-!                           boundarySolution(ii,jj,3,s2,e2)*nHat(3,i,j,s1,e1)/norm )/& 
-!                         ( boundarySolution(ii,jj,4,s2,e2) + boundarySolution_static(ii,jj,4,s2,e2) )
-!                           
-!                  ! Internal normal velocity component
-!                  uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
-!                           boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
-!                           boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
-!                         ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) ) 
-!                           
-!                  ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
-!                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-!                  !fac = max( abs(uIn),  abs(uOut) )
-!
-!                  ! Advective flux
-!                  DO iEq = 1, nEq_dev-1
-!                        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
-!                                 uOut*( boundarySolution(ii,jj,iEq,s2,e2) + boundarySolution_static(ii,jj,iEq,s2,e2) )
-!                  ENDDO
-!                  
-!                  DO k = 1, 3
-!                  ! Momentum flux due to pressure
-!                  aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1) + &
-!                                   boundarySolution(ii,jj,6,s2,e2))*nHat(k,i,j,s1,e1)/norm
-!                  ENDDO    
-!      
-!                         
-!                  DO iEq = 1, nEq_dev-1
-!                     boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-!                     boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
-!                     IF( iEq == 4 )THEN
-!                        DO k = 1, 3
-!                           jEq = k+(iEq-1)*3
-!                           ! Calculate the LDG flux for the stress tensor.
-!                           stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
-!                                                                  boundarySolution(ii,jj,iEq,s2,e2))*& 
-!                                                                  nHat(k,i,j,s1,e1)
-!                                                                                        
-!                           stressFlux(ii,jj,jEq,s2,e2) = -stressFlux(i,j,jEq,s1,e1)
-!                        ENDDO
-!                     ELSE
-!                        DO k = 1, 3
-!                           jEq = k+(iEq-1)*3
-!                           ! Calculate the LDG flux for the stress tensor.
-!                           stressFlux(i,j,jEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
-!                                                                  (boundarySolution(i,j,4,s1,e1)+&
-!                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
-!                                                                  boundarySolution(ii,jj,iEq,s2,e2)/&
-!                                                                  (boundarySolution(ii,jj,4,s2,e2)+&
-!                                                                   boundarySolution_static(ii,jj,4,s2,e2)) )*& 
-!                                                                  nHat(k,i,j,s1,e1)
-!                                                                                        
-!                           stressFlux(ii,jj,jEq,s2,e2) = -stressFlux(i,j,jEq,s1,e1)
-!                        ENDDO
-!                     ENDIF
-!                     
-!                  ENDDO
-!             
-!               ENDIF 
-!
-!
-!`  END SUBROUTINE BoundaryFaceFlux_CUDAKernel
-
-!
   ATTRIBUTES(Global) SUBROUTINE CalculateFlux_CUDAKernel( solution, static, Ja, Jac, flux, N, nEq, nElements )
   
     IMPLICIT NONE
@@ -3589,13 +3572,12 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
     REAL(prec), DEVICE, INTENT(in)   :: Jac(0:N,0:N,0:N,1:nElements)
     REAL(prec), DEVICE, INTENT(out)  :: flux(1:3,0:N,0:N,0:N,1:nEq,1:nElements)
      ! Local
-    INTEGER            :: i, j, k, row, col
+    INTEGER            :: i, j, k, row
     INTEGER            :: iEl, iEq
-    REAL(prec), SHARED :: contFlux(0:7,0:7,0:7,1:3)
     REAL(prec)         :: tend, F
     
-    iEl = blockIDx % x
-    iEq = blockIDx % y
+    iEq = blockIDx % x
+    iEl = blockIDx % y
     
     i = threadIdx % x - 1
     j = threadIdx % y - 1
@@ -3609,17 +3591,17 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
     ! contravariant flux tensor in the reference computational DOmain.
 
     !//////////////////////////////// Advection ///////////////////////////////////////!
-    DO col = 1, 3
+    DO row = 1, 3
 
-      F = solution(i,j,k,col,iEl)*( solution(i,j,k,iEq,iEl) + static(i,j,k,iEq,iEl) )/&
+      F = solution(i,j,k,row,iEl)*( solution(i,j,k,iEq,iEl) + static(i,j,k,iEq,iEl) )/&
                                   ( solution(i,j,k,4,iEl) + static(i,j,k,4,iEl) )
 
 
-      flux(1,i,j,k,iEq,iEl) = flux(1,i,j,k,iEq,iEl) + Ja(i,j,k,col,1,iEl)*F
+      flux(1,i,j,k,iEq,iEl) = flux(1,i,j,k,iEq,iEl) + Ja(i,j,k,row,1,iEl)*F
 
-      flux(2,i,j,k,iEq,iEl) = flux(2,i,j,k,iEq,iEl) + Ja(i,j,k,col,2,iEl)*F
+      flux(2,i,j,k,iEq,iEl) = flux(2,i,j,k,iEq,iEl) + Ja(i,j,k,row,2,iEl)*F
 
-      flux(3,i,j,k,iEq,iEl) = flux(3,i,j,k,iEq,iEl) + Ja(i,j,k,col,3,iEl)*F
+      flux(3,i,j,k,iEq,iEl) = flux(3,i,j,k,iEq,iEl) + Ja(i,j,k,row,3,iEl)*F
 
     ENDDO
 
@@ -3632,7 +3614,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
       flux(2,i,j,k,iEq,iEl) = flux(2,i,j,k,iEq,iEl) + Ja(i,j,k,iEq,2,iEl)*solution(i,j,k,6,iEl)
 
       flux(3,i,j,k,iEq,iEl) = flux(3,i,j,k,iEq,iEl) + Ja(i,j,k,iEq,3,iEl)*solution(i,j,k,6,iEl)
-
 
     ENDIF
   
@@ -3652,8 +3633,8 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFaceFlux_CUDAKernel( elementIDs, elementSi
     INTEGER    :: iEl, iEq
     REAL(prec) :: F
     
-    iEl = blockIDx % x
-    iEq = blockIDx % y
+    iEq = blockIDx % x
+    iEl = blockIDx % y
     
     i = threadIdx % x - 1
     j = threadIdx % y - 1
