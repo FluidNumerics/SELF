@@ -1601,14 +1601,7 @@ CONTAINS
     CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                            myDGSEM % static % solution_dev, &
                                                            myDGSEM % state % source_dev, &
-                                                           myDGSEM % sourceTerms % drag_dev, &
-                                                           myDGSEM % params % fRotX_dev, &
-                                                           myDGSEM % params % fRotY_dev, &
-                                                           myDGSEM % params % fRotZ_dev, &
-                                                           myDGSEM % params % g_dev, &
-                                                           myDGSEM % params % polydeg_dev, &
-                                                           myDGSEM % state % nEquations_dev, &
-                                                           myDGSEM % mesh % elements % nElements_dev )
+                                                           myDGSEM % sourceTerms % drag_dev )
   
 #else
 
@@ -3466,15 +3459,13 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
   
   END SUBROUTINE CalculateFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, source, drag, fRotX, fRotY, fRotZ, g, N, nEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, source, drag )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nElements
-    REAL(prec), DEVICE, INTENT(in)  :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: drag(0:N,0:N,0:N,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: fRotX, fRotY, fRotZ, g
-    REAL(prec), DEVICE, INTENT(out) :: source(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)  :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: drag(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(out) :: source(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
      ! Local
     INTEGER    :: i, j, k, row, col
     INTEGER    :: iEl, iEq
@@ -3496,21 +3487,21 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     IF( iEq == 1 )THEN
 
       source(i,j,k,1,iEl) = drag(i,j,k,iEl)*solution(i,j,k,1,iEl)*F-&
-                            solution(i,j,k,3,iEl)*fRotY +&
-                            solution(i,j,k,2,iEl)*fRotz
+                            solution(i,j,k,3,iEl)*fRotY_dev +&
+                            solution(i,j,k,2,iEl)*fRotz_dev
     
     ELSEIF( iEq == 2 )THEN
 
       source(i,j,k,2,iEl) = drag(i,j,k,iEl)*solution(i,j,k,2,iEl)*F -&
-                            solution(i,j,k,1,iEl)*fRotZ +&
-                            solution(i,j,k,3,iEl)*fRotX
+                            solution(i,j,k,1,iEl)*fRotZ_dev +&
+                            solution(i,j,k,3,iEl)*fRotX_dev
 
     ELSEIF( iEq == 3 )THEN ! Add in the buoyancy acceleration
 
       source(i,j,k,3,iEl) = drag(i,j,k,iEl)*solution(i,j,k,3,iEl)*F -&
-                            solution(i,j,k,2,iEl)*fRotX +&
-                            solution(i,j,k,1,iEl)*fRotY -&
-                            solution(i,j,k,4,iEl)*g
+                            solution(i,j,k,2,iEl)*fRotX_dev +&
+                            solution(i,j,k,1,iEl)*fRotY_dev -&
+                            solution(i,j,k,4,iEl)*g_dev
 
     ENDIF
   
