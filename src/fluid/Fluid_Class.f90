@@ -355,7 +355,6 @@ CONTAINS
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
                                                     myDGSEM % stressTensor % fluxDivergence_dev )
-
         CALL myDGSEM % EquationOfState( )
 
       ENDDO
@@ -622,14 +621,14 @@ CONTAINS
 !  occur.
 #ifdef HAVE_CUDA
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 , &
                   1 )
     grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
 
     CALL CalculateStateAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
-                                                                         myDGSEM % state % boundarySolution_dev,  &
-                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+                                                                     myDGSEM % state % boundarySolution_dev,  &
+                                                                     myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 #else
 
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
@@ -1249,8 +1248,8 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg + 1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg + 1)/4 ) ) , &
+    tBlock = dim3(myDGSEM % params % polyDeg + 1, &
+                  myDGSEM % params % polyDeg + 1, &
                   1 )
     grid = dim3(myDGSEM % mesh % faces % nFaces,1,1)
 
@@ -1771,11 +1770,10 @@ CONTAINS
 
 
 #ifdef HAVE_CUDA
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 )
     grid = dim3(myDGSEM % sgsCoeffs % nEquations,myDGSEM % mesh % elements % nElements,1)
-
 
     CALL CalculateSolutionGradient_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solutionGradient_dev, &
                                                                 myDGSEM % state % solution_dev, &
@@ -1786,7 +1784,7 @@ CONTAINS
                                                                 myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
                                                                 myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
                                                                 myDGSEM % dgStorage % quadratureWeights_dev )
-
+!PRINT*, cudaGetErrorString( cudaGetLastError( ) )
 #else
 
     !$OMP DO
@@ -3402,6 +3400,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     INTEGER            :: i, j, k, row
     INTEGER            :: iEl, iEq
     REAL(prec)         :: tend, F
+    REAL(prec)         :: flux_local(1:3)
     
     iEq = blockIDx % x
     iEl = blockIDx % y
@@ -3410,9 +3409,12 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     j = threadIdx % y - 1
     k = threadIdx % z - 1
 
-    flux(1,i,j,k,iEq,iEl) = 0.0_prec
-    flux(2,i,j,k,iEq,iEl) = 0.0_prec
-    flux(3,i,j,k,iEq,iEl) = 0.0_prec
+    !flux(1,i,j,k,iEq,iEl) = 0.0_prec
+    !flux(2,i,j,k,iEq,iEl) = 0.0_prec
+    !flux(3,i,j,k,iEq,iEl) = 0.0_prec
+    flux_local(1) = 0.0_prec
+    flux_local(2) = 0.0_prec
+    flux_local(3) = 0.0_prec
 
     ! Here the flux tensor in physical space is calculated and rotated to give the
     ! contravariant flux tensor in the reference computational DOmain.
@@ -3424,11 +3426,11 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                                   ( solution(i,j,k,4,iEl) + static(i,j,k,4,iEl) )
 
 
-      flux(1,i,j,k,iEq,iEl) = flux(1,i,j,k,iEq,iEl) + Ja(i,j,k,row,1,iEl)*F
+      flux_local(1) = flux_local(1) + Ja(i,j,k,row,1,iEl)*F
 
-      flux(2,i,j,k,iEq,iEl) = flux(2,i,j,k,iEq,iEl) + Ja(i,j,k,row,2,iEl)*F
+      flux_local(2) = flux_local(2) + Ja(i,j,k,row,2,iEl)*F
 
-      flux(3,i,j,k,iEq,iEl) = flux(3,i,j,k,iEq,iEl) + Ja(i,j,k,row,3,iEl)*F
+      flux_local(3) = flux_local(3) + Ja(i,j,k,row,3,iEl)*F
 
     ENDDO
 
@@ -3436,11 +3438,11 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
     IF( iEq <= 3 )THEN
 
-      flux(1,i,j,k,iEq,iEl) = flux(1,i,j,k,iEq,iEl) + Ja(i,j,k,iEq,1,iEl)*solution(i,j,k,6,iEl)
+      flux(1,i,j,k,iEq,iEl) = flux_local(1) + Ja(i,j,k,iEq,1,iEl)*solution(i,j,k,6,iEl)
 
-      flux(2,i,j,k,iEq,iEl) = flux(2,i,j,k,iEq,iEl) + Ja(i,j,k,iEq,2,iEl)*solution(i,j,k,6,iEl)
+      flux(2,i,j,k,iEq,iEl) = flux_local(2) + Ja(i,j,k,iEq,2,iEl)*solution(i,j,k,6,iEl)
 
-      flux(3,i,j,k,iEq,iEl) = flux(3,i,j,k,iEq,iEl) + Ja(i,j,k,iEq,3,iEl)*solution(i,j,k,6,iEl)
+      flux(3,i,j,k,iEq,iEl) = flux_local(3) + Ja(i,j,k,iEq,3,iEl)*solution(i,j,k,6,iEl)
 
     ENDIF
   
@@ -3799,6 +3801,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       ENDIF
 
   END SUBROUTINE Stress_Mapped_DG_Divergence_3D_CUDAKernel
+!
   ATTRIBUTES(Global) SUBROUTINE CalculateStateAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix ) 
     IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(in)  :: f(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
@@ -3814,7 +3817,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       k   = threadIdx % y-1
       j   = threadIdx % x-1
       
-      IF( j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
       bSol(1:6) = 0.0_prec
 
       DO i = 0, polydeg_dev
@@ -3832,7 +3834,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
         fAtBoundaries(j,k,iEq,i,iEl) = bSol(i)
       ENDDO
       
-      ENDIF
       
   END SUBROUTINE CalculateStateAtBoundaries_3D_CUDAKernel
   ATTRIBUTES(Global) SUBROUTINE CalculateSGSAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix ) 
@@ -3928,19 +3929,19 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     REAL(prec), DEVICE, INTENT(in)  :: quadratureWeights(0:polyDeg_dev) 
     ! Local
     INTEGER            :: iEq, iEl, idir, i, j, k, ii
-    REAL(prec), SHARED :: f(1:3,0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev)
+    REAL(prec), SHARED :: f(1:3,0:7,0:7,0:7)
     REAL(prec)         :: df
     
-
  
     iEq  = blockIdx % x
     iEl  = blockIdx % y
+    idir = blockIdx % z
 
     i   = threadIdx % x-1
     j   = threadIdx % y-1
     k   = threadIdx % z-1
 
-    DO idir = 1, 3
+  !  DO idir = 1, 3
 
       IF( iEq == 4 )THEN
 
@@ -3987,7 +3988,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                                                                     boundaryGradientFlux(idir,i,j,iEq,6,iEl)*boundaryInterpolationMatrix(k,1) )/&
                                                                         quadratureWeights(k) )/Jac(i,j,k,iEl)
 
-    ENDDO
+   ! ENDDO
 
   END SUBROUTINE CalculateSolutionGradient_CUDAKernel
 
