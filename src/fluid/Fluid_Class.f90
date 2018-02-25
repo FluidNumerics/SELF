@@ -1054,8 +1054,8 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
                   1 )
     grid = dim3(myDGSEM % extComm % nBoundaries,1,1)
 
@@ -1066,15 +1066,7 @@ CONTAINS
                                                            myDGSEM % state % externalState_dev, &               ! O
                                                            myDGSEM % state % boundarySolution_dev, &    ! I
                                                            myDGSEM % state % prescribedState_dev, &             ! I
-                                                           myDGSEM % mesh % elements % nHat_dev, &
-                                                           myDGSEM % extComm % myRank_dev, &
-                                                           myDGSEM % params % Cd_dev, &
-                                                           myDGSEM % params % dragScale_dev, &
-                                                           myDGSEM % params % polydeg_dev, &
-                                                           myDGSEM % state % nEquations_dev, &    ! I
-                                                           myDGSEM % extComm % nBoundaries_dev, &
-                                                           myDGSEM % mesh % faces % nFaces_dev, &
-                                                           myDGSEM % mesh % elements % nElements_dev )           ! I
+                                                           myDGSEM % mesh % elements % nHat_dev )
 #else
     ! Local
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
@@ -3010,19 +3002,16 @@ CONTAINS
   END SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalState_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
-                                                                externalState, stateBsols, prescribedState, nHat, myRank, cDrag, dragScale, N, &
-                                                                nEq, nBoundaryFaces, nFaces, nElements)
+                                                                externalState, stateBsols, prescribedState, nHat )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: myRank, N, nEq, nBoundaryFaces, nFaces, nElements
-    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
-    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(out) :: externalState(0:N,0:N,1:nEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(in)  :: stateBsols(0:N,0:N,1:nEq,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: prescribedState(0:N,0:N,1:nEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: cDrag, dragScale
+    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(out) :: externalState(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: stateBsols(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: prescribedState(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:polyDeg_dev,0:polyDeg_dev,1:6,1:nEl_dev)
      ! Local
     INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
     INTEGER    :: iFace2, p2
@@ -3036,25 +3025,23 @@ CONTAINS
     i     = threadIdx % x-1
     j     = threadIdx % y-1
     
-    IF( iFace <= nBoundaryFaces )THEN
-    
       iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
       e1     = elementIDs(1,iFace2)
       s1     = elementSides(1,iFace2)
       e2     = elementIDs(2,iFace2)
       p2     = procIDs( iFace )
     
-      IF( i <= N .AND. j <= N .AND. p2 == myRank )THEN
+      IF( p2 == myRank_dev )THEN
     
         IF( e2 == PRESCRIBED )THEN
     
-          DO iEq = 1, nEq
+          DO iEq = 1, nEq_dev
             externalState(i,j,iEq,iFace) = prescribedState(i,j,iEq,iFace)
           ENDDO
     
         ELSEIF( e2 == RADIATION )THEN
     
-          DO iEq = 1, nEq
+          DO iEq = 1, nEq_dev
             externalState(i,j,iEq,iFace) = 0.0_prec
           ENDDO
     
@@ -3111,76 +3098,72 @@ CONTAINS
           externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
           externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
     
-        ELSEIF( e2 == DRAG_SLIP )THEN
+     !   ELSEIF( e2 == DRAG_SLIP )THEN
     
-          ! normal
-          nx = nHat(1,i,j,s1,e1) !**
-          ny = nHat(2,i,j,s1,e1)
-          nz = nHat(3,i,j,s1,e1)
-          norm = sqrt( nx*nx + ny*ny + nz*nz )
-          nx = nx/norm
-          ny = ny/norm
-          nz = nz/norm
+     !     ! normal
+     !     nx = nHat(1,i,j,s1,e1) !**
+     !     ny = nHat(2,i,j,s1,e1)
+     !     nz = nHat(3,i,j,s1,e1)
+     !     norm = sqrt( nx*nx + ny*ny + nz*nz )
+     !     nx = nx/norm
+     !     ny = ny/norm
+     !     nz = nz/norm
     
-          ! tangent (built by performing 90 deg rotation in y - IF zero, performs rotation in x)
-          IF( nz == 0.0_prec .AND. ny == 0.0_prec )THEN ! rotate about y-axis
-            sx = -nz
-            sy = 0.0_prec
-            sz = nx
-          ELSE
-            sx = 0.0_prec
-            sy = nz
-            sz = -ny
-          ENDIF
+     !     ! tangent (built by performing 90 deg rotation in y - IF zero, performs rotation in x)
+     !     IF( nz == 0.0_prec .AND. ny == 0.0_prec )THEN ! rotate about y-axis
+     !       sx = -nz
+     !       sy = 0.0_prec
+     !       sz = nx
+     !     ELSE
+     !       sx = 0.0_prec
+     !       sy = nz
+     !       sz = -ny
+     !     ENDIF
     
-          norm = sqrt( sx*sx + sy*sy + sz*sz )
-          sx = sx/norm
-          sy = sy/norm
-          sz = sz/norm
+     !     norm = sqrt( sx*sx + sy*sy + sz*sz )
+     !     sx = sx/norm
+     !     sy = sy/norm
+     !     sz = sz/norm
     
-          !binormal
-          tx = sy*nz - sz*ny
-          ty = nx*sz - nz*sx
-          tz = sx*ny - nx*sy
-          norm = sqrt( tx*tx + ty*ty + tz*tz )
-          tx = tx/norm
-          ty = ty/norm
-          tz = tz/norm
+     !     !binormal
+     !     tx = sy*nz - sz*ny
+     !     ty = nx*sz - nz*sx
+     !     tz = sx*ny - nx*sy
+     !     norm = sqrt( tx*tx + ty*ty + tz*tz )
+     !     tx = tx/norm
+     !     ty = ty/norm
+     !     tz = tz/norm
     
-          speed = ( stateBsols(i,j,1,s1,e1)**2 +&
-            stateBsols(i,j,2,s1,e1)**2 +&
-            stateBsols(i,j,3,s1,e1)**2 )/&
-            stateBsols(i,j,4,s1,e1)
+     !     speed = ( stateBsols(i,j,1,s1,e1)**2 +&
+     !       stateBsols(i,j,2,s1,e1)**2 +&
+     !       stateBsols(i,j,3,s1,e1)**2 )/&
+     !       stateBsols(i,j,4,s1,e1)
     
-          un = stateBsols(i,j,1,s1,e1)*nx + &
-            stateBsols(i,j,2,s1,e1)*ny + &
-            stateBsols(i,j,3,s1,e1)*nz
+     !     un = stateBsols(i,j,1,s1,e1)*nx + &
+     !       stateBsols(i,j,2,s1,e1)*ny + &
+     !       stateBsols(i,j,3,s1,e1)*nz
     
-          us = ( stateBsols(i,j,1,s1,e1)*sx + &
-            stateBsols(i,j,2,s1,e1)*sy + &
-            stateBsols(i,j,3,s1,e1)*sz )*&
-            (1.0_prec-Cdrag*dragScale*speed)
+     !     us = ( stateBsols(i,j,1,s1,e1)*sx + &
+     !       stateBsols(i,j,2,s1,e1)*sy + &
+     !       stateBsols(i,j,3,s1,e1)*sz )*&
+     !       (1.0_prec-Cdrag*dragScale*speed)
     
-          ut = ( stateBsols(i,j,1,s1,e1)*tx + &
-            stateBsols(i,j,2,s1,e1)*ty + &
-            stateBsols(i,j,3,s1,e1)*tz )*&
-            (1.0_prec-Cdrag*dragScale*speed)
+     !     ut = ( stateBsols(i,j,1,s1,e1)*tx + &
+     !       stateBsols(i,j,2,s1,e1)*ty + &
+     !       stateBsols(i,j,3,s1,e1)*tz )*&
+     !       (1.0_prec-Cdrag*dragScale*speed)
     
-          externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
-          externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
-          externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
-          externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
-          externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-          externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
+     !     externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
+     !     externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
+     !     externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
+     !     externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
+     !     externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
+     !     externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
     
     
         ENDIF
-    
       ENDIF
     
-    ENDIF
-
-
   END SUBROUTINE UpdateExternalState_CUDAKernel
 !
 ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
