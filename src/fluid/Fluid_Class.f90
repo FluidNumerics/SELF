@@ -2080,7 +2080,7 @@ CONTAINS
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
             DO iEq = 1, myDGSEM % stressTensor % nEquations
-              myDGSEM % stressTensor % externalState(i,j,iEq,bID) = -myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
+              myDGSEM % stressTensor % externalState(i,j,iEq,bID) = myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
           ENDDO
         ENDDO
@@ -2800,8 +2800,8 @@ CONTAINS
     ! LOCAL
     CHARACTER(4)  :: rankChar
     INTEGER       :: iEl, istat
-    INTEGER       :: thisRec, fUnit
-    INTEGER       :: iEq, N
+    INTEGER       :: thisRec, fUnit, i, j 
+    INTEGER       :: iEq, N, iFace, e1, s1, bID
     LOGICAL       :: itExists
     CHARACTER(13) :: timeStampString
 #ifdef HAVE_CUDA
@@ -2884,11 +2884,34 @@ CONTAINS
                                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
                                                                          myDGSEM % params % polydeg_dev, myDGSEM % static % nEquations_dev,&
                                                                          myDGSEM % static % nElements_dev )
+
+   CALL myDGSEM % static % UpdateHost( )
 #else
 
     ! Interpolate the static state to the element boundaries
     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
 
+#endif
+
+  ! Update the static external states
+  DO bID = 1, myDGSEM % extComm % nBoundaries
+
+    iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+    e1    = myDGSEM % mesh % faces % elementIDs(1,iFace)
+    s1    = myDGSEM % mesh % faces % elementSides(1,iFace)
+
+    DO j = 0, myDGSEM % params % polyDeg
+      DO i = 0, myDGSEM % params % polyDeg
+        DO iEq = 1, myDGSEM % static % nEquations
+          myDGSEM % static % externalState(i,j,iEq,bID) = myDGSEM % static % boundarySolution(i,j,iEq,s1,e1)
+        ENDDO
+      ENDDO
+    ENDDO
+
+  ENDDO
+
+#ifdef HAVE_CUDA
+  CALL myDGSEM % static % UpdateDevice( )
 #endif
 
   END SUBROUTINE ReadPickup_Fluid
@@ -3670,7 +3693,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     IF( i <= N .AND. j <= N )THEN
     
       IF( p2 == myRank )THEN
-        externalStress(i,j,iEq,iFace) = -stressBsols(i,j,iEq,s1,e1)
+        externalStress(i,j,iEq,iFace) = stressBsols(i,j,iEq,s1,e1)
       ENDIF
     
     ENDIF
