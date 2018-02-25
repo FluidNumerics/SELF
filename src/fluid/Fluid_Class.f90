@@ -2011,8 +2011,8 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
                   1 )
     grid = dim3(myDGSEM % extComm % nBoundaries,myDGSEM % stressTensor % nEquations,1)
 
@@ -2022,14 +2022,7 @@ CONTAINS
                                                             myDGSEM % extComm % extProcIDs_dev, &              ! I
                                                             myDGSEM % stressTensor % externalState_dev, &                    ! O
                                                             myDGSEM % stressTensor % boundarySolution_dev, &   ! I
-                                                            myDGSEM % stressTensor % prescribedState_dev, &                  ! I
-                                                            myDGSEM % mesh % elements % nHat_dev, &
-                                                            myDGSEM % extComm % myRank_dev, &
-                                                            myDGSEM % params % polyDeg_dev, &
-                                                            myDGSEM % stressTensor % nEquations_dev, &
-                                                            myDGSEM % extComm % nBoundaries_dev, &
-                                                            myDGSEM % mesh % faces % nFaces_dev, &
-                                                            myDGSEM % mesh % elements % nElements_dev )             ! I
+                                                            myDGSEM % stressTensor % prescribedState_dev )
 #else
     ! Local
     INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
@@ -3507,146 +3500,36 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
   
   END SUBROUTINE CalculateSourceTerms_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateStressTensorFlux_CUDAKernel( solution, static, Ja, stressFlux, N, nEq, nDiffEq, nElements )
-  
-    IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nElements 
-    REAL(prec), DEVICE, INTENT(in)  :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
-     ! Local
-    INTEGER :: iEl, iEq, jEq, idir, i, j, k, m
-    REAL(prec) :: strTens
-    
-    
-    iEq = blockIDx % x
-    iEl = blockIDx % y
-    idir = blockIDx % z
-    jEq = idir + (iEq-1)*3
-    
-    i = threadIDx % x-1
-    j = threadIDx % y-1
-    k = threadIDx % z-1
-    
-    IF( i <= N .AND. j <= N .AND. k <= N )THEN
-      IF( iEq == 4 )THEN
-
-        stressFlux(1,i,j,k,jEq,iEl) = Ja(i,j,k,idir,1,iEl)*solution(i,j,k,iEq,iEl)
-
-        stressFlux(2,i,j,k,jEq,iEl) = Ja(i,j,k,idir,2,iEl)*solution(i,j,k,iEq,iEl)
-
-        stressFlux(3,i,j,k,jEq,iEl) = Ja(i,j,k,idir,3,iEl)*solution(i,j,k,iEq,iEl)
-
-      ELSE
-
-        stressFlux(1,i,j,k,jEq,iEl) = Ja(i,j,k,idir,1,iEl)*solution(i,j,k,iEq,iEl)/&
-          (solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
-
-        stressFlux(2,i,j,k,jEq,iEl) = Ja(i,j,k,idir,2,iEl)*solution(i,j,k,iEq,iEl)/&
-          (solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
-
-        stressFlux(3,i,j,k,jEq,iEl) = Ja(i,j,k,idir,3,iEl)*solution(i,j,k,iEq,iEl)/&
-          (solution(i,j,k,4,iEl)+static(i,j,k,4,iEl) )
-
-
-      ENDIF
-
-    ENDIF
-  
-  END SUBROUTINE CalculateStressTensorFlux_CUDAKernel
-!
-  ATTRIBUTES(Global) SUBROUTINE CalculateStressTensor_CUDAKernel( stressTensor, stressFluxDivergence, stressFlux, sgsCoeffs, state, static, Jac, Ja, N, nEq, nDiffEq, nSGSEq, nElements )
-  
-    IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nDiffEq, nSGSEq, nElements 
-    REAL(prec), DEVICE, INTENT(out) :: stressTensor(0:N,0:N,0:N,1:nDiffEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: stressFluxDivergence(0:N,0:N,0:N,1:nDiffEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffs(0:N,0:N,0:N,1:nSGSEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:N,0:N,0:N,1:nDiffEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: state(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: static(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:N,0:N,0:N,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
-    ! Local
-    INTEGER :: iEl, iEq, jEq, idir, i, j, k
-    REAL(prec) :: F
-
-    iEq = blockIDx % x
-    iEl = blockIDx % y
-
-    i = threadIDx % x-1
-    j = threadIDx % y-1
-    k = threadIDx % z-1
-
-    stressFlux(1:3,i,j,k,iEq,iEl) = 0.0_prec
-
-    DO idir = 1, 3
-
-      jEq = idir + (iEq-1)*3
-      stressTensor(i,j,k,jEq,iEl) = stressFluxDivergence(i,j,k,jEq,iEl)/Jac(i,j,k,iEl)
-  
-      IF( iEq == 4 )THEN
-  
-        F = stressTensor(i,j,k,jEq,iEl)*&
-            sgsCoeffs(i,j,k,iEq,iEl)
-  
-      ELSE
-  
-        F = stressTensor(i,j,k,jEq,iEl)*&
-           (state(i,j,k,4,iEl)+&
-            static(i,j,k,4,iEl))*&
-           sgsCoeffs(i,j,k,iEq,iEl)
-  
-      ENDIF
-  
-      stressFlux(1,i,j,k,iEq,iEl) = stressFlux(1,i,j,k,iEq,iEl) + Ja(i,j,k,idir,1,iEl)*F
-  
-      stressFlux(2,i,j,k,iEq,iEl) = stressFlux(2,i,j,k,iEq,iEl) + Ja(i,j,k,idir,2,iEl)*F
-  
-      stressFlux(3,i,j,k,iEq,iEl) = stressFlux(3,i,j,k,iEq,iEl) + Ja(i,j,k,idir,3,iEl)*F
-
-    ENDDO
-
-  END SUBROUTINE CalculateStressTensor_CUDAKernel
-
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalStress_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
-                                                                 externalStress, stressBsols, prescribedStress, nHat, &
-                                                                 myRank, N, nDiffEq, nBoundaryFaces, nFaces, nElements )
+                                                                 externalStress, stressBsols, prescribedStress )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: myRank, N, nDiffEq, nBoundaryFaces, nFaces, nElements
-    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
-    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(out) :: externalStress(0:N,0:N,1:nDiffEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(in)  :: stressBsols(0:N,0:N,1:nDiffEq,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: prescribedStress(0:N,0:N,1:nDiffEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
+    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(out) :: externalStress(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: stressBsols(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: prescribedStress(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:nBoundaryFaces_dev)
      ! Local
-    INTEGER    :: iEq, iFace, i, j, k
-    INTEGER    :: iFace2, p2
-    INTEGER    :: e1, e2, s1, s2, m
+    INTEGER    :: iEq, bID, i, j, k
+    INTEGER    :: iFace, p2
+    INTEGER    :: e1, s1, s2, m
     
-    iFace = blockIdx % x
+    bID = blockIdx % x
     iEq   = blockIDx % y
      ! ////////////////////////////////////////////////////////////////////////// !
     i   = threadIdx % x-1
     j   = threadIdx % y-1
     
-    iFace2 = boundaryIDs( iFace ) ! Obtain the process-local face id for this boundary-face id
-    e1     = elementIDs(1,iFace2)
-    s1     = elementSides(1,iFace2)
-    e2     = elementIDs(2,iFace2)
-    p2     = procIDs( iFace )
+    iFace = boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+    e1    = elementIDs(1,iFace )
+    s1    = elementSides(1,iFace)
+    p2    = procIDs( iFace )
     
-    IF( i <= N .AND. j <= N )THEN
-    
-      IF( p2 == myRank )THEN
-        externalStress(i,j,iEq,iFace) = stressBsols(i,j,iEq,s1,e1)
+      IF( p2 == myRank_dev )THEN
+        externalStress(i,j,iEq,bID) = stressBsols(i,j,iEq,s1,e1)
       ENDIF
     
-    ENDIF
   
   END SUBROUTINE UpdateExternalStress_CUDAKernel
 !
