@@ -332,9 +332,10 @@ CONTAINS
     TYPE(dim3)         :: grid, tBlock
 
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
+    tBlock = dim3( myDGSEM % params % polyDeg+1, &
+                   myDGSEM % params % polyDeg+1, &
+                   myDGSEM % params % polyDeg+1  )
+
     grid = dim3(myDGSEM % state % nElements, myDGSEM % state % nEquations-1, 1)
 
     t0 = myDGSEM % simulationTime
@@ -353,12 +354,7 @@ CONTAINS
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
-                                                    myDGSEM % stressTensor % fluxDivergence_dev, &
-                                                    myDGSEM % mesh % elements % J_dev, &
-                                                    myDGSEM % params % polyDeg_dev, &
-                                                    myDGSEM % state % nEquations_dev, &
-                                                    myDGSEM % stressTensor % nEquations_dev, &
-                                                    myDGSEM % mesh % elements % nElements_dev )
+                                                    myDGSEM % stressTensor % fluxDivergence_dev )
 
         CALL myDGSEM % EquationOfState( )
 
@@ -385,12 +381,7 @@ CONTAINS
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
-                                                    myDGSEM % stressTensor % fluxDivergence_dev, &
-                                                    myDGSEM % mesh % elements % J_dev, &
-                                                    myDGSEM % params % polyDeg_dev, &
-                                                    myDGSEM % state % nEquations_dev, &
-                                                    myDGSEM % stressTensor % nEquations_dev, &
-                                                    myDGSEM % mesh % elements % nElements_dev )
+                                                    myDGSEM % stressTensor % fluxDivergence_dev )
 
         CALL myDGSEM % EquationOfState( )
 
@@ -2920,17 +2911,15 @@ CONTAINS
 ! ============================================================================================================================ !
 !------------------------------------------- CUDA Kernels Below -------------------------------------------------------------- !
 ! ============================================================================================================================ !
-  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, dt, solution, fluxDivergence, source, diffusiveFluxDivergence, Jac, N, nEq, nDiffEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, dt, solution, fluxDivergence, source, diffusiveFluxDivergence )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)       :: N, nEq, nDiffEq, nElements 
-    REAL(prec), DEVICE, INTENT(inout) :: G3D(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: G3D(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)    :: a, g, dt
-    REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: source(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: fluxDivergence(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: diffusiveFluxDivergence(0:N,0:N,0:N,1:nDiffEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: Jac(0:N,0:N,0:N,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: source(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: fluxDivergence(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: diffusiveFluxDivergence(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:nEl_dev)
     ! Local
     INTEGER :: i, j, k, iEq, iEl
   
@@ -2940,14 +2929,11 @@ CONTAINS
     i = threadIdx % x - 1
     j = threadIdx % y - 1
     k = threadIdx % z - 1
-
-    IF( i <= N .AND. j <= N .AND. k <= N )THEN
   
-      G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + ( diffusiveFluxDivergence(i,j,k,iEq,iEl) )/Jac(i,j,k,iEl) + source(i,j,k,iEq,iEl)
+    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
   
-      solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
+    solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
-    ENDIF
   
   END SUBROUTINE UpdateG3D_CUDAKernel
 !
