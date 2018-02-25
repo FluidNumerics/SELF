@@ -916,20 +916,16 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 , &
+                  myDGSEM % params % polyDeg+1 )
     grid = dim3(myDGSEM % mesh % elements % nElements, 1, 1)
 
     CALL CalculateSGSCoefficients_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                                myDGSEM % static % solution_dev, &
                                                                myDGSEM % smoothState % solution_dev, &
                                                                myDGSEM % filter % filterMat_dev, &
-                                                               myDGSEM % sgsCoeffs % solution_dev, &
-                                                               myDGSEM % params % viscLengthScale_dev, &
-                                                               myDGSEM % params % polyDeg_dev, &
-                                                               myDGSEM % state % nEquations_dev, &
-                                                               myDGSEM % mesh % elements % nElements_dev )
+                                                               myDGSEM % sgsCoeffs % solution_dev )
 #else
     ! Local
     INTEGER :: iEl, i, j, k, m, ii, jj, kk
@@ -2937,16 +2933,14 @@ CONTAINS
   
   END SUBROUTINE UpdateG3D_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateSGSCoefficients_CUDAKernel( solution, static, smoothState, filterMat, sgsCoeffs, viscLengthScale, N, nEq, nElements  )
+  ATTRIBUTES(Global) SUBROUTINE CalculateSGSCoefficients_CUDAKernel( solution, static, smoothState, filterMat, sgsCoeffs  )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)       :: N, nEq, nElements 
-    REAL(prec), DEVICE, INTENT(in)    :: viscLengthScale
-    REAL(prec), DEVICE, INTENT(in)    :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: static(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(inout) :: smoothState(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: filterMat(0:N,0:N)
-    REAL(prec), DEVICE, INTENT(inout) :: sgsCoeffs(0:N,0:N,0:N,1:nEq-1,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)    :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(inout) :: smoothState(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: filterMat(0:polyDeg_dev,0:polyDeg_dev)
+    REAL(prec), DEVICE, INTENT(inout) :: sgsCoeffs(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nSGS_dev,1:nEl_dev)
      ! Local
     INTEGER :: iEl, i, j, k, m, ii, jj, kk
     REAL(prec) :: sgsKE, uijk, uij, ui
@@ -2970,8 +2964,8 @@ CONTAINS
     ENDDO
     
      ! Now we calculate the viscosity and dIFfusivities (currently assumes isotropic and low mach number)
-    DO m = 1, nEq-1
-      sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale*sqrt( sgsKE )
+    DO m = 1, nSGS_dev
+      sgsCoeffs(i,j,k,m,iEl) = 0.09_prec*viscLengthScale_dev*sqrt( sgsKE )
     ENDDO
   
   END SUBROUTINE CalculateSGSCoefficients_CUDAKernel
