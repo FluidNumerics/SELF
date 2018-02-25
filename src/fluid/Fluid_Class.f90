@@ -2267,13 +2267,7 @@ CONTAINS
     grid = dim3(myDGSEM % mesh % elements % nElements,1,1)
 
     CALL EquationOfState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
-                                                      myDGSEM % static % solution_dev, &
-                                                      myDGSEM % params % P0_dev, &
-                                                      myDGSEM % params % R_dev, &
-                                                      myDGSEM % params % hCapRatio_dev, &
-                                                      myDGSEM % params % polyDeg_dev, &
-                                                      myDGSEM % state % nEquations_dev, &
-                                                      myDGSEM % mesh % elements % nElements_dev )
+                                                      myDGSEM % static % solution_dev )
 
 #else
     ! Local
@@ -3675,14 +3669,12 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
   
   END SUBROUTINE BoundaryFace_StressFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE EquationOfState_CUDAKernel( solution, static, P0, R, hCapRatio, N, nEq, nElements )
+  ATTRIBUTES(Global) SUBROUTINE EquationOfState_CUDAKernel( solution, static )
     ! This routine calculates the anomalous pressure referenced to the static state.
     ! The pressure is calculated using the ideal gas law.
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)       :: N, nEq, nElements
-    REAL(prec), DEVICE, INTENT(in)    :: P0, R, hCapRatio
-    REAL(prec), DEVICE, INTENT(inout) :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)    :: static(0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
      ! Local
     INTEGER :: i, j, k, iEl
     REAL(prec) :: rhoT
@@ -3696,9 +3688,10 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
      ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
      ! And P' = P - P_static
     rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
-    solution(i,j,k,6,iEl) = P0*( rhoT*R/P0 )**hCapRatio - static(i,j,k,6,iEl)
+    solution(i,j,k,6,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,6,iEl)
   
   END SUBROUTINE EquationOfState_CUDAKernel
+!
   ATTRIBUTES(Global) SUBROUTINE State_Mapped_DG_Divergence_3D_CUDAKernel( f, fnAtBoundaries, divF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, Jac )
     IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nEl_dev)
