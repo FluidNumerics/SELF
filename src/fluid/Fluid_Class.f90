@@ -1579,19 +1579,16 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 )
     grid = dim3(myDGSEM % state % nEquations-1,myDGSEM % mesh % elements % nElements,1)
 
     CALL CalculateFlux_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                     myDGSEM % static % solution_dev, &
                                                     myDGSEM % mesh % elements % Ja_dev, &
                                                     myDGSEM % mesh % elements % J_dev, &
-                                                    myDGSEM % state % flux_dev, &
-                                                    myDGSEM % params % polyDeg_dev, &
-                                                    myDGSEM % state % nEquations_dev, &
-                                                    myDGSEM % mesh % elements % nElements_dev )
+                                                    myDGSEM % state % flux_dev )
 
     CALL State_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % flux_dev, &
                                                                myDGSEM % state % boundaryFlux_dev, &
@@ -3413,15 +3410,14 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
  END SUBROUTINE BoundaryFace_StateFlux_CUDAKernel
 !
- ATTRIBUTES(Global) SUBROUTINE CalculateFlux_CUDAKernel( solution, static, Ja, Jac, flux, N, nEq, nElements )
+ ATTRIBUTES(Global) SUBROUTINE CalculateFlux_CUDAKernel( solution, static, Ja, Jac, flux )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)      :: N, nEq, nElements
-    REAL(prec), DEVICE, INTENT(in)   :: solution(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)   :: static(0:N,0:N,0:N,1:nEq,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)   :: Ja(0:N,0:N,0:N,1:3,1:3,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)   :: Jac(0:N,0:N,0:N,1:nElements)
-    REAL(prec), DEVICE, INTENT(out)  :: flux(1:3,0:N,0:N,0:N,1:nEq,1:nElements)
+    REAL(prec), DEVICE, INTENT(in)   :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)   :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)   :: Ja(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:3,1:3,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)   :: Jac(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(out)  :: flux(1:3,0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
      ! Local
     INTEGER            :: i, j, k, row
     INTEGER            :: iEl, iEq
