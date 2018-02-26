@@ -2823,7 +2823,6 @@ CONTAINS
 
     ENDIF
 
-    PRINT*, 'S/R ReadPickup : Done.'
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % static % UpdateDevice( )
@@ -2831,15 +2830,14 @@ CONTAINS
     CALL myDGSEM % sourceTerms % UpdateDevice( )
     istat = cudaDeviceSynchronize( )
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  myDGSEM % static % nEquations )
-    grid = dim3(myDGSEM % static % nElements, 1, 1)  
-    CALL CalculateFunctionsAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 , &
+                  1 )
+    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
+
+    CALL CalculateStateAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
                                                                          myDGSEM % static % boundarySolution_dev,  &
-                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                                         myDGSEM % params % polydeg_dev, myDGSEM % static % nEquations_dev,&
-                                                                         myDGSEM % static % nElements_dev )
+                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
    CALL myDGSEM % static % UpdateHost( )
 #else
@@ -2869,6 +2867,9 @@ CONTAINS
 #ifdef HAVE_CUDA
   CALL myDGSEM % static % UpdateDevice( )
 #endif
+
+    PRINT*, 'S/R ReadPickup : Done.'
+
 
   END SUBROUTINE ReadPickup_Fluid
 !
