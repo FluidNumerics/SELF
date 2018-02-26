@@ -85,7 +85,7 @@ CONTAINS
     myMPI % nVars_dev = nVars
 
     ALLOCATE( myMPI % recvBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &
-      myMPI % sendBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
+               myMPI % sendBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
     myMPI % recvBuffer_dev = 0.0_prec
     myMPI % sendBuffer_dev = 0.0_prec
 
@@ -121,37 +121,34 @@ CONTAINS
   SUBROUTINE MPI_Exchange( myMPI, state, meshFaces, extComm )
 
     IMPLICIT NONE
-    CLASS( MPILayer ), INTENT(inout)         :: myMPI
-    TYPE( NodalDGSolution_3D ), INTENT(in)   :: state
-    TYPE( Faces ), INTENT(in)                :: meshFaces
-    TYPE( BoundaryCommunicator ), INTENT(in) :: extComm
+    CLASS( MPILayer ), INTENT(inout)          :: myMPI
+    TYPE( NodalDGSolution_3D ), INTENT(inout) :: state
+    TYPE( Faces ), INTENT(in)                 :: meshFaces
+    TYPE( BoundaryCommunicator ), INTENT(in)  :: extComm
     ! Local
     INTEGER    :: iNeighbor, iError
 #ifdef HAVE_CUDA
     TYPE(dim3) :: grid, tBlock
 
 
-    tBlock = dim3(4*(ceiling( REAL(myMPI % N+1)/4 ) ), &
-      4*(ceiling( REAL(myMPI % N+1)/4 ) ) , &
-      myMPI % nVars )
-    grid = dim3(extComm % nBoundaries,1,1)
+    tBlock = dim3( state % N+1, state % N+1, 1 )
+    grid = dim3( state % nEquations, extComm % nBoundaries, 1 )
 
     CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myMPI % sendBuffer_dev, &
-      state % boundarySolution_dev, &
-      meshFaces % elementIDs_dev, &
-      meshFaces % elementSides_dev, &
-      extComm % boundaryIDs_dev, &
-      extComm % extProcIDs_dev, &
-      extComm % rankTable_dev,&
-      extComm % bufferMap_dev,&
-      meshFaces % nFaces_dev, extComm % nBoundaries_dev, &
-      extComm % nProc_dev, extComm % myRank_dev, &
-      state % N_dev, state % nEquations_dev,&
-      extComm % nNeighbors_dev, extComm % maxBufferSize_dev, &
-      state % nElements_dev )
+                                                        state % boundarySolution_dev, &
+                                                        meshFaces % elementIDs_dev, &
+                                                        meshFaces % elementSides_dev, &
+                                                        extComm % boundaryIDs_dev, &
+                                                        extComm % extProcIDs_dev, &
+                                                        extComm % rankTable_dev,&
+                                                        extComm % bufferMap_dev,&
+                                                        meshFaces % nFaces_dev, extComm % nBoundaries_dev, &
+                                                        extComm % nProc_dev, extComm % myRank_dev, &
+                                                        state % N_dev, state % nEquations_dev,&
+                                                        extComm % nNeighbors_dev, extComm % maxBufferSize_dev, &
+                                                        state % nElements_dev )
 
-
-#ifdef CUDA_DIRECT
+#ifdef GPU_DIRECT
     iError = cudaDeviceSynchronize( )
     DO iNeighbor = 1, extComm % nNeighbors
 
@@ -173,7 +170,6 @@ CONTAINS
     ENDDO
 
 #else
-
     myMPI % sendBuffer= myMPI % sendBuffer_dev
     iError = cudaDeviceSynchronize( )
 
@@ -264,13 +260,13 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-#ifndef CUDA_DIRECT
+#ifndef GPU_DIRECT
     myMPI % recvBuffer_dev = myMPI % recvBuffer
 #endif
-    tBlock = dim3(4*(ceiling( REAL(myMPI % N+1)/4 ) ), &
-      4*(ceiling( REAL(myMPI % N+1)/4 ) ) , &
-      myMPI % nVars )
-    grid = dim3(extComm % nBoundaries,1,1)
+    tBlock = dim3(myMPI % N+1, &
+                  myMPI % N+1, &
+                  1 )
+    grid = dim3( myMPI % nVars, extComm % nBoundaries,1)
 
     CALL BufferToBoundary_CUDAKernel<<<grid, tBlock>>>( myMPI % recvBuffer_dev, &
       state % externalState_dev, &
@@ -311,8 +307,8 @@ CONTAINS
     boundaryToProcID, rankToNeighbor, boundaryToBuffer, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
     bufferSize, nElements )
   IMPLICIT NONE
-  INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-  INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
+  INTEGER, DEVICE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
+  INTEGER, DEVICE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
   INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
   INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
   INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
@@ -325,10 +321,11 @@ CONTAINS
   INTEGER :: bID, i, j, iEq
   INTEGER :: IFace, p2, neighborID, bufferID, elementID, sideID
 
-  bID = blockIdx % x
+  iEq = blockIdx % x
+  bID = blockIdx % y
+
   i   = threadIdx % x - 1
   j   = threadIdx % y - 1
-  iEq = threadIdx % z
 
   p2 = boundaryToProcID(bID)
 
@@ -340,7 +337,7 @@ CONTAINS
     elementID  = faceToElement(1,IFace)
     sideID     = faceToSide(1,IFace)
 
-    !PRINT*, "ACCESS", i, j, iEq, bufferID, neighborID
+!PRINT*, 'ACCESS', myRank, i,j,iEq,sideID, elementID
     sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID)
   ENDIF
 
@@ -350,8 +347,8 @@ ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalS
   boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
   bufferSize )
 IMPLICIT NONE
-INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, bufferSize
+INTEGER, DEVICE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
+INTEGER, DEVICE, INTENT(in)        :: N, numEq, nNeighbors, bufferSize
 INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
 INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
 INTEGER, DEVICE, INTENT(in)       :: rankTable(0:nRanks-1)
@@ -362,10 +359,11 @@ REAL(prec), DEVICE, INTENT(inout) :: externalSolution(0:N,0:N,1:numEq,1:nBoundar
 INTEGER :: bID, i, j, iEq
 INTEGER :: p2
 
-bID = blockIdx % x
+iEq = blockIdx % x
+bID = blockIdx % y
+
 i   = threadIdx % x - 1
 j   = threadIdx % y - 1
-iEq = threadIdx % z
 
 p2        = boundaryToProcID(bID)
 
