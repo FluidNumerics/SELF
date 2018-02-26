@@ -3832,6 +3832,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       
       
   END SUBROUTINE CalculateStateAtBoundaries_3D_CUDAKernel
+!
   ATTRIBUTES(Global) SUBROUTINE CalculateSGSAtBoundaries_3D_CUDAKernel( f, fAtBoundaries, boundaryMatrix ) 
     IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(in)  :: f(0:polydeg_dev,0:polydeg_dev,0:polydeg_dev,1:nSGS_dev,1:nEl_dev)
@@ -3926,7 +3927,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     ! Local
     INTEGER            :: iEq, iEl, idir, i, j, k, ii
     REAL(prec), SHARED :: f(1:3,0:7,0:7,0:7)
-    REAL(prec)         :: df
+    REAL(prec)         :: df, bgf(1:6)
     
  
     iEq  = blockIdx % x
@@ -3937,58 +3938,69 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     j   = threadIdx % y-1
     k   = threadIdx % z-1
 
-    !DO idir = 1, 3
-
-      IF( iEq == 4 )THEN
+!      IF( iEq == 4 )THEN
 
         f(1,i,j,k) = solution(i,j,k,iEq,iEl)*Ja(i,j,k,idir,1,iEl)
         f(2,i,j,k) = solution(i,j,k,iEq,iEl)*Ja(i,j,k,idir,2,iEl)
         f(3,i,j,k) = solution(i,j,k,iEq,iEl)*Ja(i,j,k,idir,3,iEl)
 
-      ELSE
-
-        f(1,i,j,k) = Ja(i,j,k,idir,1,iEl)*&
-                     solution(i,j,k,iEq,iEl)/&
-                     (solution(i,j,k,4,iEl)+&
-                     static(i,j,k,4,iEl) )
-
-
-        f(2,i,j,k) = Ja(i,j,k,idir,2,iEl)*&
-                     solution(i,j,k,iEq,iEl)/&
-                     (solution(i,j,k,4,iEl)+&
-                     static(i,j,k,4,iEl) )
-
-        f(3,i,j,k) = Ja(i,j,k,idir,3,iEl)*&
-                     solution(i,j,k,iEq,iEl)/&
-                     (solution(i,j,k,4,iEl)+&
-                     static(i,j,k,4,iEl) )
-
-      ENDIF
-
-    !ENDDO
+!      ELSE
+!
+!        f(1,i,j,k) = Ja(i,j,k,idir,1,iEl)*&
+!                     solution(i,j,k,iEq,iEl)/&
+!                     (solution(i,j,k,4,iEl)+&
+!                     static(i,j,k,4,iEl) )
+!
+!
+!        f(2,i,j,k) = Ja(i,j,k,idir,2,iEl)*&
+!                     solution(i,j,k,iEq,iEl)/&
+!                     (solution(i,j,k,4,iEl)+&
+!                     static(i,j,k,4,iEl) )
+!
+!        f(3,i,j,k) = Ja(i,j,k,idir,3,iEl)*&
+!                     solution(i,j,k,iEq,iEl)/&
+!                     (solution(i,j,k,4,iEl)+&
+!                     static(i,j,k,4,iEl) )
+!
+!      ENDIF
 
       CALL syncthreads( )
  
-    !DO idir = 1, 3
-
       df = 0.0_prec
       DO ii = 0, polyDeg_dev
         df = df + dgDerivativeMatrixTranspose(ii,i)*f(1,ii,j,k) + &
                   dgDerivativeMatrixTranspose(ii,j)*f(2,i,ii,k) + &
                   dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
       ENDDO
+ 
+      bgf(1) = boundaryGradientFlux(idir,i,k,ieq,1,iEl)
+      bgf(2) = boundaryGradientFlux(idir,i,k,ieq,2,iEl)
+      bgf(3) = boundaryGradientFlux(idir,i,k,ieq,3,iEl)
+      bgf(4) = boundaryGradientFlux(idir,i,k,ieq,4,iEl)
+      bgf(5) = boundaryGradientFlux(idir,i,k,ieq,5,iEl)
+      bgf(6) = boundaryGradientFlux(idir,i,k,ieq,6,iEl)
 
-      solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( boundaryGradientFlux(idir,i,k,iEq,1,iEl)*boundaryInterpolationMatrix(j,0) + &
-                                                      boundaryGradientFlux(idir,i,k,iEq,3,iEl)*boundaryInterpolationMatrix(j,1) )/&
+      solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( bgf(1)*boundaryInterpolationMatrix(j,0) + &
+                                                      bgf(3)*boundaryInterpolationMatrix(j,1) )/&
                                                     quadratureWeights(j) + &
-                                                    ( boundaryGradientFlux(idir,j,k,iEq,4,iEl)*boundaryInterpolationMatrix(i,0) + &
-                                                      boundaryGradientFlux(idir,j,k,iEq,2,iEl)*boundaryInterpolationMatrix(i,1) )/&
+                                                    ( bgf(4)*boundaryInterpolationMatrix(i,0) + &
+                                                      bgf(2)*boundaryInterpolationMatrix(i,1) )/&
                                                     quadratureWeights(i) + &
-                                                    ( boundaryGradientFlux(idir,i,j,iEq,5,iEl)*boundaryInterpolationMatrix(k,0) + &
-                                                      boundaryGradientFlux(idir,i,j,iEq,6,iEl)*boundaryInterpolationMatrix(k,1) )/&
+                                                    ( bgf(5)*boundaryInterpolationMatrix(k,0) + &
+                                                      bgf(6)*boundaryInterpolationMatrix(k,1) )/&
                                                     quadratureWeights(k) )/Jac(i,j,k,iEl)
-    !ENDDO
 
+
+!      solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( boundaryGradientFlux(idir,i,k,iEq,1,iEl)*boundaryInterpolationMatrix(j,0) + &
+!                                                      boundaryGradientFlux(idir,i,k,iEq,3,iEl)*boundaryInterpolationMatrix(j,1) )/&
+!                                                    quadratureWeights(j) + &
+!                                                    ( boundaryGradientFlux(idir,j,k,iEq,4,iEl)*boundaryInterpolationMatrix(i,0) + &
+!                                                      boundaryGradientFlux(idir,j,k,iEq,2,iEl)*boundaryInterpolationMatrix(i,1) )/&
+!                                                    quadratureWeights(i) + &
+!                                                    ( boundaryGradientFlux(idir,i,j,iEq,5,iEl)*boundaryInterpolationMatrix(k,0) + &
+!                                                      boundaryGradientFlux(idir,i,j,iEq,6,iEl)*boundaryInterpolationMatrix(k,1) )/&
+!                                                    quadratureWeights(k) )/Jac(i,j,k,iEl)
+!
 
   END SUBROUTINE CalculateSolutionGradient_CUDAKernel
 
