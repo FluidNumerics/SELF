@@ -57,16 +57,17 @@ else ifeq (${FC},pgfortran)
   ifeq (${CUDA},yes)
   
     $(info '+CUDA-Fortran')
-    OPT+=-Mcuda=${GPU_ARCH},cuda9.0
+    OPT+=-Mcuda=${GPU_ARCH}
+#,${CUDA_VERSION}
     ifeq (${PTX_INFO},yes)
       OPT+=,ptxinfo
     endif
 
     CPPFLAGS+=-DHAVE_CUDA
 
-    ifeq (${CUDA_DIRECT},yes)
-      $(info '+CUDA-DIRECT')
-      CPPFLAGS+=-DCUDA_DIRECT
+    ifeq (${GPU_DIRECT},yes)
+      $(info '+GPU-DIRECT')
+      CPPFLAGS+=-DGPU_DIRECT
     endif
 
   endif
@@ -299,10 +300,10 @@ FLOBJ = ModelPrecision.o \
         Quadrature.o \
         NodalDG_Class.o \
         SpectralFilter_Class.o \
+        Surfaces_Class.o \
         NodalDGSolution_3D_Class.o \
         LinkedList_Class.o \
         KeyRing_Class.o \
-        Surfaces_Class.o \
         HexElements_Class.o \
         Faces_Class.o \
         Nodes_Class.o \
