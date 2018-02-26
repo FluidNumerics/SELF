@@ -2894,7 +2894,7 @@ CONTAINS
     k = threadIdx % z - 1
   
     G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
-!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) +  source(i,j,k,iEq,iEl)
+    !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) +  source(i,j,k,iEq,iEl)
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
@@ -3239,7 +3239,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                   DO iEq = 1, nEq_dev-1
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
                      boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
-!                     IF( iEq == 4 )THEN
+                     IF( iEq == 4 )THEN
                         DO k = 1, 3
                            ! Calculate the LDG flux for the stress tensor.
                            stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
@@ -3249,21 +3249,21 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                            stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
                         ENDDO
 
-!                     ELSE
-!                        DO k = 1, 3
-!                           ! Calculate the LDG flux for the stress tensor.
-!                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
-!                                                                  (boundarySolution(i,j,4,s1,e1)+&
-!                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
-!                                                                  boundarySolution(ii,jj,iEq,s2,e2)/&
-!                                                                  (boundarySolution(ii,jj,4,s2,e2)+&
-!                                                                   boundarySolution_static(ii,jj,4,s2,e2)) )*& 
-!                                                                  nHat(k,i,j,s1,e1)
-!                                                                                        
-!                           stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
-!
-!                        ENDDO
-!                     ENDIF
+                     ELSE
+                        DO k = 1, 3
+                           ! Calculate the LDG flux for the stress tensor.
+                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
+                                                                  (boundarySolution(i,j,4,s1,e1)+&
+                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
+                                                                  boundarySolution(ii,jj,iEq,s2,e2)/&
+                                                                  (boundarySolution(ii,jj,4,s2,e2)+&
+                                                                   boundarySolution_static(ii,jj,4,s2,e2)) )*& 
+                                                                  nHat(k,i,j,s1,e1)
+                                                                                        
+                           stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
+
+                        ENDDO
+                     ENDIF
                      
                   ENDDO
              
@@ -3363,25 +3363,25 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                           
                   DO iEq = 1, nEq_dev-1
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-!                     IF( iEq == 4 )THEN
+                     IF( iEq == 4 )THEN
                         DO k = 1, 3
                            ! Calculate the Bassi-Rebay flux for the stress tensor.
                            stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
                                                                   externalState(ii,jj,iEq,bID)  )*& 
                                                                   nHat(k,i,j,s1,e1)
                         ENDDO
-!                     ELSE
-!                        DO k = 1, 3
-!                           ! Calculate the Bassi-Rebay flux for the stress tensor.
-!                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
-!                                                                  (boundarySolution(i,j,4,s1,e1)+&
-!                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
-!                                                                  externalState(ii,jj,iEq,bID)/&
-!                                                                  (externalState(ii,jj,4,bID)+&
-!                                                                   boundarySolution_static(i,j,4,s1,e1))  )*& 
-!                                                                  nHat(k,i,j,s1,e1)
-!                        ENDDO
-!                     ENDIF
+                     ELSE
+                        DO k = 1, 3
+                           ! Calculate the Bassi-Rebay flux for the stress tensor.
+                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
+                                                                  (boundarySolution(i,j,4,s1,e1)+&
+                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
+                                                                  externalState(ii,jj,iEq,bID)/&
+                                                                  (externalState(ii,jj,4,bID)+&
+                                                                   boundarySolution_static(i,j,4,s1,e1))  )*& 
+                                                                  nHat(k,i,j,s1,e1)
+                        ENDDO
+                     ENDIF
                      
                   ENDDO
                   
@@ -3561,7 +3561,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     s1 = elementSides(1,iFace)
     e2 = elementIDs(2,iFace)
     s2 = ABS(elementSides(2,iFace))
- !   bID  = ABS(boundaryIDs(iFace))
     
     ii = iMap(i,j,iFace)
     jj = jMap(i,j,iFace)
@@ -3569,7 +3568,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
     IF( e2 > 0 )THEN
 
-!      IF( iEq == 4 )THEN
+      IF( iEq == 4 )THEN
 
         boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( boundaryStress(i,j,iEq,s1,e1)- &
                                                        boundaryStress(ii,jj,iEq,s2,e2) +&
@@ -3578,20 +3577,20 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
 
 
-!      ELSE
-!
-!        rhoOut = (staticBoundarySolution(ii,jj,4,s2,e2)+boundarySolution(ii,jj,4,s2,e2) )
-!        rhoIn  = (staticBoundarySolution(i,j,4,s1,e1)+boundarySolution(i,j,4,s1,e1) )
-!
-!        boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( rhoIn*boundaryStress(i,j,iEq,s1,e1)-&
-!                                                       rhoOut*boundaryStress(ii,jj,iEq,s2,e2) )
-!
-!
-!      ENDIF
+      ELSE
 
-!      boundaryStressFlux(i,j,iEq,s1,e1) = boundaryStressFlux(i,j,iEq,s1,e1) +&
-!                                          0.5_prec*( boundaryViscosity(ii,jj,iEq,s2,e2)*boundarySolution(ii,jj,iEq,s2,e2)-&
-!                                                     boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm
+        rhoOut = (staticBoundarySolution(ii,jj,4,s2,e2)+boundarySolution(ii,jj,4,s2,e2) )
+        rhoIn  = (staticBoundarySolution(i,j,4,s1,e1)+boundarySolution(i,j,4,s1,e1) )
+
+        boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( rhoIn*boundaryStress(i,j,iEq,s1,e1)-&
+                                                       rhoOut*boundaryStress(ii,jj,iEq,s2,e2) )
+
+
+      ENDIF
+
+      boundaryStressFlux(i,j,iEq,s1,e1) = boundaryStressFlux(i,j,iEq,s1,e1) +&
+                                          0.5_prec*( boundaryViscosity(ii,jj,iEq,s2,e2)*boundarySolution(ii,jj,iEq,s2,e2)-&
+                                                     boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm
 
 
       boundaryStressFlux(ii,jj,iEq,s2,e2) = -boundaryStressFlux(i,j,iEq,s1,e1)
@@ -3645,7 +3644,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
     IF( e2 < 0 )THEN
 
- !     IF( iEq == 4 )THEN
+      IF( iEq == 4 )THEN
 
         boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( boundaryStress(i,j,iEq,s1,e1) - &
                                                        externalStress(ii,jj,iEq,bID) + &
@@ -3654,21 +3653,21 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
 
 
-!      ELSE
-!
-!        rhoOut = (externalStaticSolution(ii,jj,4,bID)+externalSolution(ii,jj,4,bID) )
-!        rhoIn  = (staticBoundarySolution(i,j,4,s1,e1)+boundarySolution(i,j,4,s1,e1) )
-!
-!        boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( rhoIn*boundaryStress(i,j,iEq,s1,e1)-&
-!                                                       rhoOut*externalStress(ii,jj,iEq,bID) )
-!
-!
-!      ENDIF
+      ELSE
 
-!      boundaryStressFlux(i,j,iEq,s1,e1) = boundaryStressFlux(i,j,iEq,s1,e1) +&
-!                                          0.5_prec*( externalViscosity(ii,jj,iEq,bID)*externalSolution(ii,jj,iEq,bID)-&
-!                                                     boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm
-!
+        rhoOut = (externalStaticSolution(ii,jj,4,bID)+externalSolution(ii,jj,4,bID) )
+        rhoIn  = (staticBoundarySolution(i,j,4,s1,e1)+boundarySolution(i,j,4,s1,e1) )
+
+        boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( rhoIn*boundaryStress(i,j,iEq,s1,e1)-&
+                                                       rhoOut*externalStress(ii,jj,iEq,bID) )
+
+
+      ENDIF
+
+      boundaryStressFlux(i,j,iEq,s1,e1) = boundaryStressFlux(i,j,iEq,s1,e1) +&
+                                          0.5_prec*( externalViscosity(ii,jj,iEq,bID)*externalSolution(ii,jj,iEq,bID)-&
+                                                     boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm
+
 
 
     ENDIF
