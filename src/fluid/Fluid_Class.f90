@@ -2893,7 +2893,8 @@ CONTAINS
     j = threadIdx % y - 1
     k = threadIdx % z - 1
   
-    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl)
     !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) +  source(i,j,k,iEq,iEl)
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
@@ -3883,9 +3884,8 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       iEq = blockIdx % x
       iEl = blockIdx % y
 
-      k   = threadIdx % y-1
-      j   = threadIdx % x-1
-      
+      i   = threadIdx % x-1
+      j   = threadIdx % y-1
             
       fAtBoundaries(1:3,1:6) = 0.0_prec
       
@@ -3937,31 +3937,31 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     j   = threadIdx % y-1
     k   = threadIdx % z-1
 
-!      IF( iEq == 4 )THEN
+      IF( iEq == 4 )THEN
 
         f(1,i,j,k) = solution(i,j,k,iEq,iEl)*Ja(i,j,k,idir,1,iEl)
         f(2,i,j,k) = solution(i,j,k,iEq,iEl)*Ja(i,j,k,idir,2,iEl)
         f(3,i,j,k) = solution(i,j,k,iEq,iEl)*Ja(i,j,k,idir,3,iEl)
 
-!      ELSE
-!
-!        f(1,i,j,k) = Ja(i,j,k,idir,1,iEl)*&
-!                     solution(i,j,k,iEq,iEl)/&
-!                     (solution(i,j,k,4,iEl)+&
-!                     static(i,j,k,4,iEl) )
-!
-!
-!        f(2,i,j,k) = Ja(i,j,k,idir,2,iEl)*&
-!                     solution(i,j,k,iEq,iEl)/&
-!                     (solution(i,j,k,4,iEl)+&
-!                     static(i,j,k,4,iEl) )
-!
-!        f(3,i,j,k) = Ja(i,j,k,idir,3,iEl)*&
-!                     solution(i,j,k,iEq,iEl)/&
-!                     (solution(i,j,k,4,iEl)+&
-!                     static(i,j,k,4,iEl) )
-!
-!      ENDIF
+      ELSE
+
+        f(1,i,j,k) = Ja(i,j,k,idir,1,iEl)*&
+                     solution(i,j,k,iEq,iEl)/&
+                     (solution(i,j,k,4,iEl)+&
+                     static(i,j,k,4,iEl) )
+
+
+        f(2,i,j,k) = Ja(i,j,k,idir,2,iEl)*&
+                     solution(i,j,k,iEq,iEl)/&
+                     (solution(i,j,k,4,iEl)+&
+                     static(i,j,k,4,iEl) )
+
+        f(3,i,j,k) = Ja(i,j,k,idir,3,iEl)*&
+                     solution(i,j,k,iEq,iEl)/&
+                     (solution(i,j,k,4,iEl)+&
+                     static(i,j,k,4,iEl) )
+
+      ENDIF
 
       CALL syncthreads( )
  
@@ -3989,17 +3989,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                                                       bgf(6)*boundaryInterpolationMatrix(k,1) )/&
                                                     quadratureWeights(k) )/Jac(i,j,k,iEl)
 
-
-!      solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( boundaryGradientFlux(idir,i,k,iEq,1,iEl)*boundaryInterpolationMatrix(j,0) + &
-!                                                      boundaryGradientFlux(idir,i,k,iEq,3,iEl)*boundaryInterpolationMatrix(j,1) )/&
-!                                                    quadratureWeights(j) + &
-!                                                    ( boundaryGradientFlux(idir,j,k,iEq,4,iEl)*boundaryInterpolationMatrix(i,0) + &
-!                                                      boundaryGradientFlux(idir,j,k,iEq,2,iEl)*boundaryInterpolationMatrix(i,1) )/&
-!                                                    quadratureWeights(i) + &
-!                                                    ( boundaryGradientFlux(idir,i,j,iEq,5,iEl)*boundaryInterpolationMatrix(k,0) + &
-!                                                      boundaryGradientFlux(idir,i,j,iEq,6,iEl)*boundaryInterpolationMatrix(k,1) )/&
-!                                                    quadratureWeights(k) )/Jac(i,j,k,iEl)
-!
 
   END SUBROUTINE CalculateSolutionGradient_CUDAKernel
 
