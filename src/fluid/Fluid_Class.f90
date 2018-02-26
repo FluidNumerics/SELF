@@ -679,213 +679,213 @@ CONTAINS
 
     CALL myDGSEM % BoundaryFace_StateFlux( )
 
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
+!
+! IF the SpectralEKE or Laplacian subgridscale models are USEd, a Laplacian-like
+! operator is USEd to dIFfUSE momentum and heat. When the Laplacian model is
+! USEd a fixed viscosity is specIFied in runtime.params and a Rayleigh number of
+! 1 is assumed (viscosity = dIFfusivity). When the SpectralEKE model is USEd,
+! the viscosity coefficient is diagnosed using a Smagorinksy closure, where the
+! unresolved kinetic energy is diagnosed from a highpass spectral filter.
+!
+    IF( myDGSEM % params % SubGridModel == SpectralEKE .OR. &
+        myDGSEM % params % SubGridModel == Laplacian ) THEN
+
+      IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
+!
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
+!
+! In the Spectral-EKE model, the under-resolved state is diagnosed from a high
+! pass spectral filter (the dIFference between the state and smoothed state).
+! Here, we first calculate the smoothed state and store it in the smoothedState
+! attribute. This SUBROUTINE call has no dependence to any other within this
+! SUBROUTINE.
+
+#ifdef HAVE_CUDA
+        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
+                                          myDGSEM % smoothState % solution_dev, &
+                                          myDGSEM % state % nEquations_dev, &
+                                          myDGSEM % mesh % elements % nElements_dev )
+#else
+        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
+                                          myDGSEM % smoothState % solution, &
+                                          myDGSEM % state % nEquations, &
+                                          myDGSEM % mesh % elements % nElements )
+#endif
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
+!
+! The high passed solution is USEd to diagnose an isotropic viscosity
+! coefficient, similar to a Smagorinksy closure and similar to the closure in
+!
+!  J. Sauer (2013), "Towards Improved Capability and Confidence in Coupled
+!  Atmospheric and Wildland Fire Modeling"
+!
+! The main dIFference in this work, is in the diagnosis of the SGS Kinetic
+! Energy from the high pass filtered solution.
+! This routine depends on the results from CalculateSmoothedState.
+
+        CALL myDGSEM % CalculateSGSCoefficients( )
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
+! The viscosity coefficient that is calculated is now interpolated to the faces
+! of each element so that the viscous flux can later be computed. This routine
+! depends on the result of CalculateSGSCoefficients.
+
+#ifdef HAVE_CUDA
+
+    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                  1 )
+    grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1)  
+    CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
+                                                                   myDGSEM % sgsCoeffs % boundarySolution_dev,  &
+                                                                   myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+
+#else
+
+        CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+#endif
+
 !! ----------------------------------------------------------------------------- !
 !! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 !! ----------------------------------------------------------------------------- !
 !!
-!! IF the SpectralEKE or Laplacian subgridscale models are USEd, a Laplacian-like
-!! operator is USEd to dIFfUSE momentum and heat. When the Laplacian model is
-!! USEd a fixed viscosity is specIFied in runtime.params and a Rayleigh number of
-!! 1 is assumed (viscosity = dIFfusivity). When the SpectralEKE model is USEd,
-!! the viscosity coefficient is diagnosed using a Smagorinksy closure, where the
-!! unresolved kinetic energy is diagnosed from a highpass spectral filter.
-!!
-!    IF( myDGSEM % params % SubGridModel == SpectralEKE .OR. &
-!        myDGSEM % params % SubGridModel == Laplacian ) THEN
-!
-!      IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
-!!
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! In the Spectral-EKE model, the under-resolved state is diagnosed from a high
-!! pass spectral filter (the dIFference between the state and smoothed state).
-!! Here, we first calculate the smoothed state and store it in the smoothedState
-!! attribute. This SUBROUTINE call has no dependence to any other within this
-!! SUBROUTINE.
-!
-!#ifdef HAVE_CUDA
-!        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
-!                                          myDGSEM % smoothState % solution_dev, &
-!                                          myDGSEM % state % nEquations_dev, &
-!                                          myDGSEM % mesh % elements % nElements_dev )
-!#else
-!        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
-!                                          myDGSEM % smoothState % solution, &
-!                                          myDGSEM % state % nEquations, &
-!                                          myDGSEM % mesh % elements % nElements )
-!#endif
-!
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! The high passed solution is USEd to diagnose an isotropic viscosity
-!! coefficient, similar to a Smagorinksy closure and similar to the closure in
-!!
-!!  J. Sauer (2013), "Towards Improved Capability and Confidence in Coupled
-!!  Atmospheric and Wildland Fire Modeling"
-!!
-!! The main dIFference in this work, is in the diagnosis of the SGS Kinetic
-!! Energy from the high pass filtered solution.
-!! This routine depends on the results from CalculateSmoothedState.
-!
-!        CALL myDGSEM % CalculateSGSCoefficients( )
-!
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!! The viscosity coefficient that is calculated is now interpolated to the faces
-!! of each element so that the viscous flux can later be computed. This routine
-!! depends on the result of CalculateSGSCoefficients.
-!
-!#ifdef HAVE_CUDA
-!
-!    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-!                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-!                  1 )
-!    grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1)  
-!    CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
-!                                                                   myDGSEM % sgsCoeffs % boundarySolution_dev,  &
-!                                                                   myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-!
-!#else
-!
-!        CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-!
-!#endif
-!
-!!! ----------------------------------------------------------------------------- !
-!!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!!! ----------------------------------------------------------------------------- !
-!!!
-!!! The viscosity coefficients are exchanged with neighboring ranks that share
-!!! COMMON faces. MPI_SGSExchange can be run simulataneously with
-!!! CalculateStressTensor, CalculateBoundaryStress, UpdateExternalStress, and the
-!!! MPI_StressExchange. The viscosity coefficients that are exchanged are not
-!!! needed until StressFlux
-!!
-!!#ifdef HAVE_MPI
-!!        CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
-!!                                                     myDGSEM % mesh % faces, &
-!!                                                     myDGSEM % extComm )
-!!#endif
-!      ENDIF
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! Now, the internal solution and the boundaryGradientFlux can be pieced
-!! together to calculate gradients in the velocity and potential temperature.
-!! This routine depends on the result of FaceFlux ( state % boundaryGradientFlux )
-!
-!      CALL myDGSEM % CalculateSolutionGradient( )
-!
-!!`#ifdef HAVE_MPI
-!!`      IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
-!!`        CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsCoeffs, &
-!!`                                                              myDGSEM % mesh % faces, &
-!!`                                                              myDGSEM % extComm )
-!!`      ENDIF
-!!`#endif
-!
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! The solution gradient values are interpolated to the faces of each element and
-!! projected onto the face normal direction. This
-!! routine depends on the result of CalculateStressTensor.
-!
-!
-!      CALL myDGSEM % CalculateNormalStressAtBoundaries( )
-!
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! Stress tensor values are exchanged with neighboring ranks along shared faces.
-!! This routine depends on the result of CalculateBoundaryStress, but can be run
-!! at the same time as UpdateExternalStress.
+!! The viscosity coefficients are exchanged with neighboring ranks that share
+!! COMMON faces. MPI_SGSExchange can be run simulataneously with
+!! CalculateStressTensor, CalculateBoundaryStress, UpdateExternalStress, and the
+!! MPI_StressExchange. The viscosity coefficients that are exchanged are not
+!! needed until StressFlux
 !
 !#ifdef HAVE_MPI
-!      CALL myDGSEM % mpiStressHandler % MPI_Exchange( myDGSEM % stressTensor, &
-!                                                      myDGSEM % mesh % faces, &
-!                                                      myDGSEM % extComm )
+!        CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
+!                                                     myDGSEM % mesh % faces, &
+!                                                     myDGSEM % extComm )
 !#endif
+      ENDIF
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!!  Using the solution gradient and the eddy-viscosities/diffusivities, the
-!!  stress flux is calculated
+! Now, the internal solution and the boundaryGradientFlux can be pieced
+! together to calculate gradients in the velocity and potential temperature.
+! This routine depends on the result of FaceFlux ( state % boundaryGradientFlux )
+
+      CALL myDGSEM % CalculateSolutionGradient( )
+
+!`#ifdef HAVE_MPI
+!`      IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
+!`        CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsCoeffs, &
+!`                                                              myDGSEM % mesh % faces, &
+!`                                                              myDGSEM % extComm )
+!`      ENDIF
+!`#endif
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
-!      CALL myDGSEM % CalculateStressFlux( )
+! The solution gradient values are interpolated to the faces of each element and
+! projected onto the face normal direction. This
+! routine depends on the result of CalculateStressTensor.
+
+
+      CALL myDGSEM % CalculateNormalStressAtBoundaries( )
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
+! Stress tensor values are exchanged with neighboring ranks along shared faces.
+! This routine depends on the result of CalculateBoundaryStress, but can be run
+! at the same time as UpdateExternalStress.
+
+#ifdef HAVE_MPI
+      CALL myDGSEM % mpiStressHandler % MPI_Exchange( myDGSEM % stressTensor, &
+                                                      myDGSEM % mesh % faces, &
+                                                      myDGSEM % extComm )
+#endif
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! Now that the stress tensor is available on element faces, boundary conditions
-!! can be applied by setting the external stress tensor state. This routine
-!! depends on the result of CalculateBoundaryStress. Note that this routine can
-!! be run simultaneously with the MPI_StressExchange
+!  Using the solution gradient and the eddy-viscosities/diffusivities, the
+!  stress flux is calculated
+
+      CALL myDGSEM % CalculateStressFlux( )
+
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
-!      CALL myDGSEM % UpdateExternalStress( tn )
+! Now that the stress tensor is available on element faces, boundary conditions
+! can be applied by setting the external stress tensor state. This routine
+! depends on the result of CalculateBoundaryStress. Note that this routine can
+! be run simultaneously with the MPI_StressExchange
+
+      CALL myDGSEM % UpdateExternalStress( tn )
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! Using the boundary and the external state for the stress tensor, the viscous
-!! fluxes are estimated using a Bassi-Rebay flux that averages neighboring values
-!! of the stress tensor plus the jump in the solution weighted by a spatial
-!! wave-number. This routine depends on the result of the UpdateExternalStress
-!! and the MPI_StressExchange.
+! Using the boundary and the external state for the stress tensor, the viscous
+! fluxes are estimated using a Bassi-Rebay flux that averages neighboring values
+! of the stress tensor plus the jump in the solution weighted by a spatial
+! wave-number. This routine depends on the result of the UpdateExternalStress
+! and the MPI_StressExchange.
+
+      CALL myDGSEM % InternalFace_StressFlux( )
+
+#ifdef HAVE_MPI
+      CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressTensor,&
+                                                               myDGSEM % mesh % faces, &
+                                                               myDGSEM % extComm )
+#endif
+      CALL myDGSEM % BoundaryFace_StressFlux( )
+
+! ----------------------------------------------------------------------------- !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>><><><><><><><><>< !
+! ----------------------------------------------------------------------------- !
 !
-!      CALL myDGSEM % InternalFace_StressFlux( )
+! With the boundary stress flux and the internal stress tensor values, the
+! divergence of the stress tensor can be calculated, giving the viscous tendency
+! for the momentum and the potential temperature. This routine depends on the
+! result of StressFlux (and the dependencies of StressFlux), but can be DOne
+! simultaneously with the MappedTimeDerivative.
 !
-!#ifdef HAVE_MPI
-!      CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressTensor,&
-!                                                               myDGSEM % mesh % faces, &
-!                                                               myDGSEM % extComm )
-!#endif
-!      CALL myDGSEM % BoundaryFace_StressFlux( )
-!
-!! ----------------------------------------------------------------------------- !
-!! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>><><><><><><><><>< !
-!! ----------------------------------------------------------------------------- !
-!!
-!! With the boundary stress flux and the internal stress tensor values, the
-!! divergence of the stress tensor can be calculated, giving the viscous tendency
-!! for the momentum and the potential temperature. This routine depends on the
-!! result of StressFlux (and the dependencies of StressFlux), but can be DOne
-!! simultaneously with the MappedTimeDerivative.
-!!
-!#ifdef HAVE_CUDA
-!      tBlock = dim3(myDGSEM % params % polyDeg+1, &
-!                    myDGSEM % params % polyDeg+1, &
-!                    myDGSEM % params % polyDeg+1 )
-!
-!      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % state % nElements, 1)  
-!
-!      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
-!                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
-!                                                          myDGSEM % stressTensor % fluxDivergence_dev, &
-!                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-!                                                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
-!                                                          myDGSEM % dgStorage % quadratureWeights_dev, &
-!                                                          myDGSEM % mesh % elements % J_dev )
-!
-!#else
-!      CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
-!#endif
-!
-!
-!    ENDIF
+#ifdef HAVE_CUDA
+      tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1 )
+
+      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % state % nElements, 1)  
+
+      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
+                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % stressTensor % fluxDivergence_dev, &
+                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+                                                          myDGSEM % dgStorage % quadratureWeights_dev, &
+                                                          myDGSEM % mesh % elements % J_dev )
+
+#else
+      CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
+#endif
+
+
+    ENDIF
 
 
 ! ----------------------------------------------------------------------------- !
@@ -1762,8 +1762,9 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 #else
-    INTEGER :: iEl, iEq, idir, i, j, k, m
-    REAL(prec) :: F
+    INTEGER :: iEl, iEq, idir, i, j, k, m, ii
+    REAL(prec) :: f(1:3,0:myDGSEM % params % polydeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg)
+    REAL(prec) :: df
 #endif
 
 
@@ -1783,7 +1784,6 @@ CONTAINS
                                                                 myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
                                                                 myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
                                                                 myDGSEM % dgStorage % quadratureWeights_dev )
-!PRINT*, cudaGetErrorString( cudaGetLastError( ) )
 #else
 
     !$OMP DO
@@ -1876,7 +1876,7 @@ CONTAINS
     TYPE(dim3) :: grid, tBlock
 #else
     INTEGER :: iEl, iEq, idir, i, j, k, m
-    REAL(prec) :: F
+    REAL(prec) :: fAtBoundaries(1:3,1:6)
 #endif
   
 #ifdef HAVE_CUDA
@@ -2112,7 +2112,7 @@ CONTAINS
 
               IF( iEq == 4 )THEN
 
-                myDGSEM % stressTensor % boundaryFlux(m,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)- &
+                myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)- &
                                                                                     myDGSEM % stressTensor % boundarySolution(ii,jj,iEq,s2,e2) )
 
               ELSE
@@ -2213,7 +2213,7 @@ CONTAINS
               IF( iEq == 4 )THEN
 
                
-                  myDGSEM % stressTensor % boundaryFlux(m,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)- &
+                  myDGSEM % stressTensor % boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)- &
                                                                                       myDGSEM % stressTensor % externalState(ii,jj,iEq,bID) )
                 
 
