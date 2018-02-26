@@ -1956,6 +1956,8 @@ CONTAINS
 
     CALL CalculateStressFlux_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solutionGradient_dev, &
                                                           myDGSEM % sgsCoeffs % solution_dev, &
+                                                          myDGSEM % state % solution_dev, &
+                                                          myDGSEM % static % solution_dev, &
                                                           myDGSEM % mesh % elements % Ja_dev, &
                                                           myDGSEM % stressTensor % flux_dev )
 
@@ -2153,10 +2155,10 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
                   1 )
-    grid = dim3(myDGSEM % mesh % faces % nFaces,myDGSEM % state % nEquations-1,1)
+    grid = dim3(myDGSEM % mesh % faces % nFaces,myDGSEM % stressTensor % nEquations,1)
 
     CALL BoundaryFace_StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % boundarySolution_dev, &
                                                                myDGSEM % state % externalState_dev, &
@@ -2893,8 +2895,8 @@ CONTAINS
     j = threadIdx % y - 1
     k = threadIdx % z - 1
   
-!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
-    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl)
+    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl)
     !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) +  source(i,j,k,iEq,iEl)
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
@@ -3572,9 +3574,9 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       IF( iEq == 4 )THEN
 
         boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( boundaryStress(i,j,iEq,s1,e1)- &
-                                                       boundaryStress(ii,jj,iEq,s2,e2) +&
-                                                       ( boundaryViscosity(ii,jj,iEq,s2,e2)*boundarySolution(ii,jj,iEq,s2,e2)-&
-                                                         boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm )
+                                                       boundaryStress(ii,jj,iEq,s2,e2) )! +&
+                                                      ! ( boundaryViscosity(ii,jj,iEq,s2,e2)*boundarySolution(ii,jj,iEq,s2,e2)-&
+                                                      !   boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm )
 
 
 
@@ -3648,9 +3650,9 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       IF( iEq == 4 )THEN
 
         boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( boundaryStress(i,j,iEq,s1,e1) - &
-                                                       externalStress(ii,jj,iEq,bID) + &
-                                                       ( externalViscosity(ii,jj,iEq,bID)*externalSolution(ii,jj,iEq,bID)-&
-                                                         boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm )
+                                                       externalStress(ii,jj,iEq,bID) )! + &
+                                                      ! ( externalViscosity(ii,jj,iEq,bID)*externalSolution(ii,jj,iEq,bID)-&
+                                                      !   boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm )
 
 
 
@@ -3774,7 +3776,9 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       j = threadIdx % y - 1
       k = threadIdx % z - 1
     
-      fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
+      fLocal(1,i,j,k) = f(1,i,j,k,iVar,iEl)
+      fLocal(2,i,j,k) = f(2,i,j,k,iVar,iEl)
+      fLocal(3,i,j,k) = f(3,i,j,k,iVar,iEl)
       
       CALL syncthreads( )
       
@@ -3926,7 +3930,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     ! Local
     INTEGER            :: iEq, iEl, idir, i, j, k, ii
     REAL(prec), SHARED :: f(1:3,0:7,0:7,0:7)
-    REAL(prec)         :: df, bgf(1:6)
+    REAL(prec)         :: df!, bgf(1:6)
     
  
     iEq  = blockIdx % x
@@ -3972,36 +3976,31 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                   dgDerivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
       ENDDO
  
-      bgf(1) = boundaryGradientFlux(idir,i,k,ieq,1,iEl)
-      bgf(2) = boundaryGradientFlux(idir,i,k,ieq,2,iEl)
-      bgf(3) = boundaryGradientFlux(idir,i,k,ieq,3,iEl)
-      bgf(4) = boundaryGradientFlux(idir,i,k,ieq,4,iEl)
-      bgf(5) = boundaryGradientFlux(idir,i,k,ieq,5,iEl)
-      bgf(6) = boundaryGradientFlux(idir,i,k,ieq,6,iEl)
-
-      solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( bgf(1)*boundaryInterpolationMatrix(j,0) + &
-                                                      bgf(3)*boundaryInterpolationMatrix(j,1) )/&
+      solutionGradient(idir,i,j,k,iEq,iEl) =  ( df+ ( boundaryGradientFlux(idir,i,k,ieq,1,iel)*boundaryInterpolationMatrix(j,0) + &
+                                                      boundaryGradientFlux(idir,i,k,ieq,3,iel)*boundaryInterpolationMatrix(j,1) )/&
                                                     quadratureWeights(j) + &
-                                                    ( bgf(4)*boundaryInterpolationMatrix(i,0) + &
-                                                      bgf(2)*boundaryInterpolationMatrix(i,1) )/&
+                                                    ( boundaryGradientFlux(idir,j,k,ieq,4,iel)*boundaryInterpolationMatrix(i,0) + &
+                                                      boundaryGradientFlux(idir,j,k,ieq,2,iel)*boundaryInterpolationMatrix(i,1) )/&
                                                     quadratureWeights(i) + &
-                                                    ( bgf(5)*boundaryInterpolationMatrix(k,0) + &
-                                                      bgf(6)*boundaryInterpolationMatrix(k,1) )/&
+                                                    ( boundaryGradientFlux(idir,i,j,ieq,5,iel)*boundaryInterpolationMatrix(k,0) + &
+                                                      boundaryGradientFlux(idir,i,j,ieq,6,iel)*boundaryInterpolationMatrix(k,1) )/&
                                                     quadratureWeights(k) )/Jac(i,j,k,iEl)
 
 
   END SUBROUTINE CalculateSolutionGradient_CUDAKernel
 
-  ATTRIBUTES(Global) SUBROUTINE CalculateStressFlux_CUDAKernel( solutionGradient, viscosity, Ja, stressFlux )
+  ATTRIBUTES(Global) SUBROUTINE CalculateStressFlux_CUDAKernel( solutionGradient, viscosity, state, static, Ja, stressFlux )
 
     IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(in)  :: solutionGradient(1:3,0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)  :: viscosity(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nSGS_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: state(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)  :: Ja(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:3,1:3,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:nEl_dev)
     ! Local
     INTEGER    :: iEl, iEq, i, j, k, idir
-    REAL(prec) :: sf(1:3)
+    REAL(prec) :: sf(1:3), rho
 
     iEq  = blockIdx % x
     iEl  = blockIdx % y
@@ -4014,15 +4013,33 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     sf(2) = 0.0_prec
     sf(3) = 0.0_prec
 
-    DO idir = 1, 3
 
-      sf(1) = sf(1) + Ja(i,j,k,idir,1,iEl)*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl)
+    IF( iEq == 4 )THEN
 
-      sf(2) = sf(2) + Ja(i,j,k,idir,2,iEl)*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl) 
+      DO idir = 1, 3
+  
+        sf(1) = sf(1) + Ja(i,j,k,idir,1,iEl)*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl)
+  
+        sf(2) = sf(2) + Ja(i,j,k,idir,2,iEl)*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl) 
+  
+        sf(3) = sf(3) + Ja(i,j,k,idir,3,iEl)*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl) 
+  
+      ENDDO
 
-      sf(3) = sf(3) + Ja(i,j,k,idir,3,iEl)*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl) 
+    ELSE
 
-    ENDDO
+      rho = state(i,j,k,4,iEl) + static(i,j,k,4,iEl)
+      DO idir = 1, 3
+  
+        sf(1) = sf(1) + Ja(i,j,k,idir,1,iEl)*rho*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl)
+  
+        sf(2) = sf(2) + Ja(i,j,k,idir,2,iEl)*rho*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl) 
+  
+        sf(3) = sf(3) + Ja(i,j,k,idir,3,iEl)*rho*solutionGradient(idir,i,j,k,iEq,iEl)*viscosity(i,j,k,iEq,iEl) 
+  
+      ENDDO
+
+    ENDIF
 
     stressflux(1,i,j,k,iEq,iEl) = sf(1)
     stressflux(2,i,j,k,iEq,iEl) = sf(2)
