@@ -2261,9 +2261,9 @@ CONTAINS
     TYPE(dim3) :: grid, tBlock
 
     ! How should we pick the thread and block size
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) )
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 )
     grid = dim3(myDGSEM % mesh % elements % nElements,1,1)
 
     CALL EquationOfState_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
@@ -2867,7 +2867,7 @@ CONTAINS
   ENDDO
 
 #ifdef HAVE_CUDA
-  CALL myDGSEM % static % UpdateDevice( )
+  myDGSEM % static % externalState_dev = myDGSEM % static % externalState
 #endif
 
   END SUBROUTINE ReadPickup_Fluid
@@ -2896,8 +2896,6 @@ CONTAINS
     k = threadIdx % z - 1
   
     G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
-!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl)
-    !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) +  source(i,j,k,iEq,iEl)
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
@@ -3077,67 +3075,67 @@ CONTAINS
           externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
           externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
     
-     !   ELSEIF( e2 == DRAG_SLIP )THEN
-    
-     !     ! normal
-     !     nx = nHat(1,i,j,s1,e1) !**
-     !     ny = nHat(2,i,j,s1,e1)
-     !     nz = nHat(3,i,j,s1,e1)
-     !     norm = sqrt( nx*nx + ny*ny + nz*nz )
-     !     nx = nx/norm
-     !     ny = ny/norm
-     !     nz = nz/norm
-    
-     !     ! tangent (built by performing 90 deg rotation in y - IF zero, performs rotation in x)
-     !     IF( nz == 0.0_prec .AND. ny == 0.0_prec )THEN ! rotate about y-axis
-     !       sx = -nz
-     !       sy = 0.0_prec
-     !       sz = nx
-     !     ELSE
-     !       sx = 0.0_prec
-     !       sy = nz
-     !       sz = -ny
-     !     ENDIF
-    
-     !     norm = sqrt( sx*sx + sy*sy + sz*sz )
-     !     sx = sx/norm
-     !     sy = sy/norm
-     !     sz = sz/norm
-    
-     !     !binormal
-     !     tx = sy*nz - sz*ny
-     !     ty = nx*sz - nz*sx
-     !     tz = sx*ny - nx*sy
-     !     norm = sqrt( tx*tx + ty*ty + tz*tz )
-     !     tx = tx/norm
-     !     ty = ty/norm
-     !     tz = tz/norm
-    
-     !     speed = ( stateBsols(i,j,1,s1,e1)**2 +&
-     !       stateBsols(i,j,2,s1,e1)**2 +&
-     !       stateBsols(i,j,3,s1,e1)**2 )/&
-     !       stateBsols(i,j,4,s1,e1)
-    
-     !     un = stateBsols(i,j,1,s1,e1)*nx + &
-     !       stateBsols(i,j,2,s1,e1)*ny + &
-     !       stateBsols(i,j,3,s1,e1)*nz
-    
-     !     us = ( stateBsols(i,j,1,s1,e1)*sx + &
-     !       stateBsols(i,j,2,s1,e1)*sy + &
-     !       stateBsols(i,j,3,s1,e1)*sz )*&
-     !       (1.0_prec-Cdrag*dragScale*speed)
-    
-     !     ut = ( stateBsols(i,j,1,s1,e1)*tx + &
-     !       stateBsols(i,j,2,s1,e1)*ty + &
-     !       stateBsols(i,j,3,s1,e1)*tz )*&
-     !       (1.0_prec-Cdrag*dragScale*speed)
-    
-     !     externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
-     !     externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
-     !     externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
-     !     externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
-     !     externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-     !     externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
+   !     ELSEIF( e2 == DRAG_SLIP )THEN
+   ! 
+   !       ! normal
+   !       nx = nHat(1,i,j,s1,e1) !**
+   !       ny = nHat(2,i,j,s1,e1)
+   !       nz = nHat(3,i,j,s1,e1)
+   !       norm = sqrt( nx*nx + ny*ny + nz*nz )
+   !       nx = nx/norm
+   !       ny = ny/norm
+   !       nz = nz/norm
+   ! 
+   !       ! tangent (built by performing 90 deg rotation in y - IF zero, performs rotation in x)
+   !       IF( nz == 0.0_prec .AND. ny == 0.0_prec )THEN ! rotate about y-axis
+   !         sx = -nz
+   !         sy = 0.0_prec
+   !         sz = nx
+   !       ELSE
+   !         sx = 0.0_prec
+   !         sy = nz
+   !         sz = -ny
+   !       ENDIF
+   ! 
+   !       norm = sqrt( sx*sx + sy*sy + sz*sz )
+   !       sx = sx/norm
+   !       sy = sy/norm
+   !       sz = sz/norm
+   ! 
+   !       !binormal
+   !       tx = sy*nz - sz*ny
+   !       ty = nx*sz - nz*sx
+   !       tz = sx*ny - nx*sy
+   !       norm = sqrt( tx*tx + ty*ty + tz*tz )
+   !       tx = tx/norm
+   !       ty = ty/norm
+   !       tz = tz/norm
+   ! 
+   !       speed = ( stateBsols(i,j,1,s1,e1)**2 +&
+   !         stateBsols(i,j,2,s1,e1)**2 +&
+   !         stateBsols(i,j,3,s1,e1)**2 )/&
+   !         stateBsols(i,j,4,s1,e1)
+   ! 
+   !       un = stateBsols(i,j,1,s1,e1)*nx + &
+   !         stateBsols(i,j,2,s1,e1)*ny + &
+   !         stateBsols(i,j,3,s1,e1)*nz
+   ! 
+   !       us = ( stateBsols(i,j,1,s1,e1)*sx + &
+   !         stateBsols(i,j,2,s1,e1)*sy + &
+   !         stateBsols(i,j,3,s1,e1)*sz )*&
+   !         (1.0_prec-Cd_dev*dScale_dev*speed)
+   ! 
+   !       ut = ( stateBsols(i,j,1,s1,e1)*tx + &
+   !         stateBsols(i,j,2,s1,e1)*ty + &
+   !         stateBsols(i,j,3,s1,e1)*tz )*&
+   !         (1.0_prec-Cd_dev*dScale_dev*speed)
+   ! 
+   !       externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
+   !       externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
+   !       externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
+   !       externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
+   !       externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
+   !       externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
     
     
         ENDIF
@@ -3721,17 +3719,11 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
       i = threadIdx % x - 1
       j = threadIdx % y - 1
       k = threadIdx % z - 1
-    
-    
-      IF( i <= polyDeg_dev .AND. j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
       
-        fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
-        
-      ENDIF
+      fLocal(1:3,i,j,k) = f(1:3,i,j,k,iVar,iEl)
       
       CALL syncthreads( )
       
-      IF( i <= polyDeg_dev .AND. j <= polyDeg_dev .AND. k <= polyDeg_dev )THEN
       
         df = 0.0_prec
         DO ii = 0, polydeg_dev
@@ -3750,7 +3742,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                                         fnAtBoundaries(i,j,iVar,6,iEl)*boundaryMatrix(k,1) )/&
                                       quadratureWeights(k) )/Jac(i,j,k,iEl)
                                       
-      ENDIF
 
   END SUBROUTINE State_Mapped_DG_Divergence_3D_CUDAKernel
 
