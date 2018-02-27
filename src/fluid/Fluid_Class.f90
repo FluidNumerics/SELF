@@ -65,22 +65,22 @@ MODULE Fluid_Class
     PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
 !    PROCEDURE :: CrankNicholsonRHS     => CrankNicholsonRHS_Fluid
 
-    PROCEDURE :: GlobalTimeDerivative            => GlobalTimeDerivative_Fluid
-    PROCEDURE :: EquationOfState                 => EquationOfState_Fluid
-    PROCEDURE :: UpdateExternalState             => UpdateExternalState_Fluid
-    PROCEDURE :: InternalFace_StateFlux                => InternalFace_StateFlux_Fluid
-    PROCEDURE :: BoundaryFace_StateFlux                => BoundaryFace_StateFlux_Fluid
-    PROCEDURE :: MappedTimeDerivative            => MappedTimeDerivative_Fluid
+    PROCEDURE :: GlobalTimeDerivative   => GlobalTimeDerivative_Fluid
+    PROCEDURE :: EquationOfState        => EquationOfState_Fluid
+    PROCEDURE :: UpdateExternalState    => UpdateExternalState_Fluid
+    PROCEDURE :: InternalFace_StateFlux => InternalFace_StateFlux_Fluid
+    PROCEDURE :: BoundaryFace_StateFlux => BoundaryFace_StateFlux_Fluid
+    PROCEDURE :: MappedTimeDerivative   => MappedTimeDerivative_Fluid
 
     PROCEDURE :: CalculateSGSCoefficients => CalculateSGSCoefficients_Fluid
     PROCEDURE :: UpdateExternalSGS        => UpdateExternalSGS_Fluid
 
-    PROCEDURE :: CalculateSolutionGradient => CalculateSolutionGradient_Fluid
+    PROCEDURE :: CalculateSolutionGradient         => CalculateSolutionGradient_Fluid
     PROCEDURE :: CalculateNormalStressAtBoundaries => CalculateNormalStressAtBoundaries_Fluid
-    PROCEDURE :: CalculateStressFlux   => CalculateStressFlux_Fluid
-    PROCEDURE :: UpdateExternalStress    => UpdateExternalStress_Fluid
-    PROCEDURE :: InternalFace_StressFlux      => InternalFace_StressFlux_Fluid
-    PROCEDURE :: BoundaryFace_StressFlux      => BoundaryFace_StressFlux_Fluid
+    PROCEDURE :: CalculateStressFlux               => CalculateStressFlux_Fluid
+    PROCEDURE :: UpdateExternalStress              => UpdateExternalStress_Fluid
+    PROCEDURE :: InternalFace_StressFlux           => InternalFace_StressFlux_Fluid
+    PROCEDURE :: BoundaryFace_StressFlux           => BoundaryFace_StressFlux_Fluid
 
     PROCEDURE :: Diagnostics           => Diagnostics_Fluid
     PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
@@ -109,7 +109,6 @@ MODULE Fluid_Class
  INTEGER, CONSTANT    :: nFaces_dev
  INTEGER, CONSTANT    :: nBoundaryFaces_dev
  REAL(prec), CONSTANT :: R_dev, Cv_dev, P0_dev, hCapRatio_dev, rC_dev, g_dev
-! REAL(prec), CONSTANT :: rk3_a_dev, rk3_g_dev, dt_dev
  REAL(prec), CONSTANT :: viscLengthScale_dev, dScale_dev, Cd_dev
  REAL(prec), CONSTANT :: fRotX_dev, fRotY_dev, fRotZ_dev
 #endif
@@ -177,6 +176,7 @@ CONTAINS
       TanhRollOff )
 
     CALL myDGSEM % BuildHexMesh(  )
+
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
@@ -985,10 +985,10 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 
-    tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                  4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1, &
                   1 )
-    grid = dim3(myDGSEM % extComm % nBoundaries,myDGSEM % state % nEquations-1,1)
+    grid = dim3(myDGSEM % extComm % nBoundaries,myDGSEM % sgsCoeffs % nEquations,1)
 
     CALL UpdateExternalSGSCoeffs_CUDAKernel<<<grid, tBlock>>>( myDGSEM % extComm % boundaryIDs_dev, &       ! I
                                                                myDGSEM % mesh % faces % elementIDs_dev, &   ! I
@@ -996,13 +996,7 @@ CONTAINS
                                                                myDGSEM % extComm % extProcIDs_dev, &           ! I
                                                                myDGSEM % sgsCoeffs % externalState_dev, &                    ! O
                                                                myDGSEM % sgsCoeffs % boundarySolution_dev, &   ! I
-                                                               myDGSEM % mesh % elements % nHat_dev, &
-                                                               myDGSEM % extComm % myRank_dev, &
-                                                               myDGSEM % params % polyDeg_dev, &
-                                                               myDGSEM % sgsCoeffs % nEquations_dev, &   ! I
-                                                               myDGSEM % extComm % nBoundaries_dev, &
-                                                               myDGSEM % mesh % faces % nFaces_dev, &
-                                                               myDGSEM % mesh % elements % nElements_dev )           ! I
+                                                               myDGSEM % mesh % elements % nHat_dev )
 #else
     ! Local
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
@@ -2942,17 +2936,15 @@ CONTAINS
   END SUBROUTINE CalculateSGSCoefficients_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalSGSCoeffs_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
-                                                                    externalsgsCoeffs, sgsCoeffsBsols, nHat, myRank, N, &
-                                                                    nSGSEq, nBoundaryFaces, nFaces, nElements )
+                                                                    externalsgsCoeffs, sgsCoeffsBsols, nHat )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: myRank, N, nSGSEq, nBoundaryFaces, nFaces, nElements
-    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces)
-    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(out) :: externalsgsCoeffs(0:N,0:N,1:nSGSEq,1:nBoundaryFaces)
-    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffsBsols(0:N,0:N,1:nSGSEq,1:6,1:nElements)
-    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:N,0:N,1:6,1:nElements)
+    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(out) :: externalsgsCoeffs(0:polydeg_dev,0:polydeg_dev,1:nSGS_dev,1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: sgsCoeffsBsols(0:polydeg_dev,0:polydeg_dev,1:nSGS_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
      ! Local
     INTEGER    :: iEq, iFace, i, j, k
     INTEGER    :: iFace2, p2
@@ -2970,9 +2962,9 @@ CONTAINS
     e2     = elementIDs(2,iFace2)
     p2     = procIDs( iFace )
     
-    IF( i <= N .AND. j <= N )THEN
+    IF( i <= polydeg_dev .AND. j <= polydeg_dev )THEN
     
-      IF( p2 == myRank )THEN
+      IF( p2 == myRank_dev )THEN
         externalsgsCoeffs(i,j,iEq,iFace2) = sgsCoeffsBsols(i,j,iEq,s1,e1)
       ENDIF
     

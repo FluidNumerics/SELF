@@ -132,9 +132,6 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    ALLOCATE( myComm % nBoundaries_dev )
-    myComm % nBoundaries_dev = nBe
-
     ALLOCATE( myComm % extProcIDs_dev(1:nBe) )
     ALLOCATE( myComm % boundaryIDs_dev(1:nBe) )
     ALLOCATE( myComm % boundaryGlobalIDs_dev(1:nBe) )
@@ -212,7 +209,6 @@ myComm % setup = .TRUE.
     DEALLOCATE( myComm % unPackMap, myComm % extProcIDs, myComm % boundaryIDs, myComm % boundaryGlobalIDs  )
 
 #ifdef HAVE_CUDA
-    DEALLOCATE( myComm % nBoundaries_dev )
     DEALLOCATE( myComm % unPackMap_dev, myComm % extProcIDs_dev, myComm % boundaryIDs_dev, myComm % boundaryGlobalIDs_dev  )
 #endif
 
@@ -228,8 +224,7 @@ myComm % setup = .TRUE.
     DEALLOCATE( myComm % neighborRank_dev, &
       myComm % bufferSize_dev, &
       myComm % bufferMap_dev, &
-      myComm % rankTable_dev, &
-      myComm % maxBufferSize_dev )
+      myComm % rankTable_dev )
 
 #endif
 
@@ -257,7 +252,6 @@ myComm % boundaryGlobalIDs_dev = myComm % boundaryGlobalIDs
 myComm % neighborRank_dev = myComm % neighborRank
 mycomm % bufferSize_dev   = myComm % bufferSize
 myComm % rankTable_dev    = myComm % rankTable
-myComm % maxBufferSize_dev = myComm % maxBufferSize
 
 #endif
 
@@ -279,7 +273,6 @@ myComm % boundaryGlobalIDs = myComm % boundaryGlobalIDs_dev
 myComm % neighborRank  = myComm % neighborRank_dev
 mycomm % bufferSize    = myComm % bufferSize_dev
 myComm % rankTable     = myComm % rankTable_dev
-myComm % maxBufferSize = myComm % maxBufferSize_dev
 
 #endif
 
