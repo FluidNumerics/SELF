@@ -120,7 +120,7 @@ CONTAINS
 
     IMPLICIT NONE
     CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
-    INTEGER, INTENT(in)                      :: nBe
+    INTEGER, INTENT(in)                        :: nBe
 
     myComm % nBoundaries = nBe
 
@@ -168,24 +168,18 @@ CONTAINS
     PRINT*, '    S/R Build_CommunicationTable : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
 
     ALLOCATE( myComm % bufferMap(1:myComm % nBoundaries), &
-      myComm % rankTable(0:myComm % nProc-1) )
+              myComm % rankTable(0:myComm % nProc-1) )
 
 #ifdef HAVE_CUDA
 
     ALLOCATE( myComm % bufferMap_dev(1:myComm % nBoundaries), &
-      myComm % rankTable_dev(0:myComm % nProc-1) )
-
-#endif
-
-#ifdef HAVE_CUDA
+              myComm % rankTable_dev(0:myComm % nProc-1) )
 
     ALLOCATE( myComm % myRank_dev, &
-      myComm % nProc_dev, &
-      myComm % nNeighbors_dev, &
-      myComm % maxBufferSize_dev )
+              myComm % nProc_dev, &
+              myComm % nNeighbors_dev, &
+              myComm % maxBufferSize_dev )
 
-    myComm % myRank_dev      = myComm % myRank
-    myComm % nProc_dev       = myComm % nProc
     myComm % nNeighbors_dev  = myComm % nNeighbors
 
 #endif
@@ -195,15 +189,15 @@ CONTAINS
     myComm % nProc       = 1
     myComm % myRank      = 0
 
+
+#endif
+
 #ifdef HAVE_CUDA
 
     myComm % myRank_dev      = myComm % myRank
     myComm % nProc_dev       = myComm % nProc
 
 #endif
-
-#endif
-
 myComm % setup = .TRUE.
 
   END SUBROUTINE Build_BoundaryCommunicator
@@ -365,8 +359,8 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     DO i = 1, myComm % nBoundaries
 
       WRITE( fUnit, * ) myComm % boundaryIDs(i), &
-        myComm % extProcIDs(i), &
-        myComm % unPackMap(i)
+                        myComm % extProcIDs(i), &
+                        myComm % unPackMap(i)
 
     ENDDO
 
@@ -440,8 +434,8 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     DO i = 1, myComm % nBoundaries
 
       READ( fUnit, * ) myComm % boundaryIDs(i), &
-        myComm % extProcIDs(i), &
-        myComm % unPackMap(i)
+                       myComm % extProcIDs(i), &
+                       myComm % unPackMap(i)
 
     ENDDO
 
@@ -483,8 +477,8 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     PRINT*, '  S/R ConstructCommTables : Found', myComm % nNeighbors, 'neighbors for Rank', myComm % myRank+1
 
     ALLOCATE( myComm % neighborRank(1:myComm % nNeighbors), &
-      myComm % bufferSize(1:myComm % nNeighbors), &
-      bufferCounter(1:myComm % nNeighbors) )
+              myComm % bufferSize(1:myComm % nNeighbors), &
+              bufferCounter(1:myComm % nNeighbors) )
 
 
     ! For each neighbor, set the neighbor's rank
@@ -514,8 +508,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     myComm % maxBufferSize = maxFaceCount
     bufferCounter = 0
 
-
-
     myComm % bufferMap = 0
 
     DO bID = 1, myComm % nBoundaries
@@ -541,12 +533,13 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 
 #ifdef HAVE_CUDA
     ALLOCATE( myComm % neighborRank_dev(1:myComm % nNeighbors), &
-      myComm % bufferSize_dev(1:myComm % nNeighbors) )
+              myComm % bufferSize_dev(1:myComm % nNeighbors) )
 
     myComm % rankTable_dev    = myComm % rankTable
     myComm % neighborRank_dev = myComm % neighborRank
     myComm % bufferSize_dev   = myComm % bufferSize
     myComm % bufferMap_dev    = myComm % bufferMap
+    myComm % nNeighbors_dev   = myComm % nNeighbors
 #endif
 
   END SUBROUTINE ConstructCommTables
