@@ -1916,7 +1916,7 @@ CONTAINS
 
               DO k = 1, 6
 
-                myDGSEM % stressTensor % boundarySolution(i,j,iEq,k,iEl) = myDGSEM % sgsCoeffs % boundarySolution(i,j,k,iEq,iEl)*&
+                myDGSEM % stressTensor % boundarySolution(i,j,iEq,k,iEl) = myDGSEM % sgsCoeffs % boundarySolution(i,j,iEq,k,iEl)*&
                                                                            ( fAtBoundaries(1,k)*myDGSEM % mesh % elements % nHat(1,i,j,k,iEL) + &
                                                                              fAtBoundaries(2,k)*myDGSEM % mesh % elements % nHat(2,i,j,k,iEL) + &
                                                                              fAtBoundaries(3,k)*myDGSEM % mesh % elements % nHat(3,i,j,k,iEL) )
@@ -2219,7 +2219,7 @@ CONTAINS
 
               ELSE
 
-                rhoOut = (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)+myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) )
+                rhoOut = (myDGSEM % static % externalState(ii,jj,4,bID)+myDGSEM % state % externalState(ii,jj,4,bID) )
                 rhoIn  = (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
                 
@@ -2835,7 +2835,7 @@ CONTAINS
                   1 )
     grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
 
-    CALL CalculateStateAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
+    CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
                                                                          myDGSEM % static % boundarySolution_dev,  &
                                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
