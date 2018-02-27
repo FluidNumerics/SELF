@@ -38,8 +38,6 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER, ALLOCATABLE :: unPackMap(:)
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE :: myRank_dev, nProc_dev
-    INTEGER, DEVICE, ALLOCATABLE :: nBoundaries_dev
     INTEGER, DEVICE, ALLOCATABLE :: extProcIDs_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: boundaryIDs_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: boundaryGlobalIDs_dev(:)
@@ -57,7 +55,6 @@ MODULE BoundaryCommunicator_CLASS
     INTEGER, ALLOCATABLE :: rankTable(:)
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE :: nNeighbors_dev, maxBufferSize_dev
     INTEGER, DEVICE, ALLOCATABLE :: bufferMap_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: neighborRank_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: bufferSize_dev(:)
@@ -142,8 +139,6 @@ CONTAINS
     ALLOCATE( myComm % boundaryIDs_dev(1:nBe) )
     ALLOCATE( myComm % boundaryGlobalIDs_dev(1:nBe) )
     ALLOCATE( myComm % unPackMap_dev(1:nBe) )
-    ALLOCATE( myComm % myRank_dev, &
-              myComm % nProc_dev )
 
 
 #endif
@@ -175,13 +170,6 @@ CONTAINS
     ALLOCATE( myComm % bufferMap_dev(1:myComm % nBoundaries), &
               myComm % rankTable_dev(0:myComm % nProc-1) )
 
-    ALLOCATE( myComm % myRank_dev, &
-              myComm % nProc_dev, &
-              myComm % nNeighbors_dev, &
-              myComm % maxBufferSize_dev )
-
-    myComm % nNeighbors_dev  = myComm % nNeighbors
-
 #endif
 
 #else
@@ -192,12 +180,6 @@ CONTAINS
 
 #endif
 
-#ifdef HAVE_CUDA
-
-    myComm % myRank_dev      = myComm % myRank
-    myComm % nProc_dev       = myComm % nProc
-
-#endif
 myComm % setup = .TRUE.
 
   END SUBROUTINE Build_BoundaryCommunicator
@@ -431,6 +413,8 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 
     CALL myComm % Build( nBe )
 
+    PRINT*, '  Rank ',myComm % myRank,' Reading ExtComm.'//rankChar//'.bcm', myComm % nBoundaries
+
     DO i = 1, myComm % nBoundaries
 
       READ( fUnit, * ) myComm % boundaryIDs(i), &
@@ -539,7 +523,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     myComm % neighborRank_dev = myComm % neighborRank
     myComm % bufferSize_dev   = myComm % bufferSize
     myComm % bufferMap_dev    = myComm % bufferMap
-    myComm % nNeighbors_dev   = myComm % nNeighbors
 #endif
 
   END SUBROUTINE ConstructCommTables

@@ -142,11 +142,11 @@ CONTAINS
                                                         extComm % extProcIDs_dev, &
                                                         extComm % rankTable_dev,&
                                                         extComm % bufferMap_dev,&
-                                                        meshFaces % nFaces_dev, extComm % nBoundaries_dev, &
-                                                        extComm % nProc_dev, extComm % myRank_dev, &
-                                                        state % N_dev, state % nEquations_dev,&
-                                                        extComm % nNeighbors_dev, extComm % maxBufferSize_dev, &
-                                                        state % nElements_dev )
+                                                        meshFaces % nFaces, extComm % nBoundaries, &
+                                                        extComm % nProc, extComm % myRank, &
+                                                        state % N, state % nEquations_dev,&
+                                                        extComm % nNeighbors, extComm % maxBufferSize, &
+                                                        state % nElements )
 
 #ifdef GPU_DIRECT
     iError = cudaDeviceSynchronize( )
@@ -274,11 +274,11 @@ CONTAINS
       extComm % extProcIDs_dev, &
       extComm % rankTable_dev, &
       extComm % unPackMap_dev, &
-      meshFaces % nFaces_dev, &
-      extComm % nBoundaries_dev, &
-      extComm % nProc_dev, extComm % myRank_dev, &
-      myMPI % N_dev, myMPI % nVars_dev, extComm % nNeighbors_dev, &
-      extComm % maxBufferSize_dev )
+      meshFaces % nFaces, &
+      extComm % nBoundaries, &
+      extComm % nProc, extComm % myRank, &
+      myMPI % N, myMPI % nVars, extComm % nNeighbors, &
+      extComm % maxBufferSize )
 
 #else
 
@@ -307,8 +307,8 @@ CONTAINS
     boundaryToProcID, rankToNeighbor, boundaryToBuffer, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
     bufferSize, nElements )
   IMPLICIT NONE
-  INTEGER, DEVICE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-  INTEGER, DEVICE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
+  INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
+  INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
   INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
   INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
   INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
@@ -337,7 +337,6 @@ CONTAINS
     elementID  = faceToElement(1,IFace)
     sideID     = faceToSide(1,IFace)
 
-!PRINT*, 'ACCESS', myRank, i,j,iEq,sideID, elementID
     sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID)
   ENDIF
 
@@ -347,8 +346,8 @@ ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalS
   boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
   bufferSize )
 IMPLICIT NONE
-INTEGER, DEVICE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-INTEGER, DEVICE, INTENT(in)        :: N, numEq, nNeighbors, bufferSize
+INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
+INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, bufferSize
 INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
 INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
 INTEGER, DEVICE, INTENT(in)       :: rankTable(0:nRanks-1)
