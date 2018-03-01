@@ -32,8 +32,6 @@ MODULE MPILayer_Class
     INTEGER, ALLOCATABLE :: requestStats(:,:)
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE :: nVars_dev, N_dev
-
     REAL(prec), DEVICE, ALLOCATABLE :: sendBuffer_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: recvBuffer_dev(:,:,:,:,:)
 
@@ -80,12 +78,8 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    ALLOCATE( myMPI % nVars_dev, myMPI % N_dev )
-    myMPI % N_dev     = N
-    myMPI % nVars_dev = nVars
-
     ALLOCATE( myMPI % recvBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &
-               myMPI % sendBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
+              myMPI % sendBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
     myMPI % recvBuffer_dev = 0.0_prec
     myMPI % sendBuffer_dev = 0.0_prec
 
@@ -108,10 +102,8 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-    DEALLOCATE( myMPI % nVars_dev, myMPI % N_dev )
 
-    DEALLOCATE( myMPI % recvBuffer_dev, &
-      myMPI % sendBuffer_dev )
+    DEALLOCATE( myMPI % recvBuffer_dev, myMPI % sendBuffer_dev )
 
 #endif
 
@@ -144,7 +136,7 @@ CONTAINS
                                                         extComm % bufferMap_dev,&
                                                         meshFaces % nFaces, extComm % nBoundaries, &
                                                         extComm % nProc, extComm % myRank, &
-                                                        state % N, state % nEquations_dev,&
+                                                        state % N, state % nEquations,&
                                                         extComm % nNeighbors, extComm % maxBufferSize, &
                                                         state % nElements )
 
@@ -306,41 +298,42 @@ CONTAINS
   ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, faceToElement, faceToSide, boundaryToFaceID, &
     boundaryToProcID, rankToNeighbor, boundaryToBuffer, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
     bufferSize, nElements )
-  IMPLICIT NONE
-  INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-  INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
-  INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
-  INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
-  INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
-  INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
-  INTEGER, DEVICE, INTENT(in)       :: rankToNeighbor(0:nRanks-1)
-  INTEGER, DEVICE, INTENT(in)       :: boundaryToBuffer(1:nBoundaries)
-  REAL(prec), DEVICE, INTENT(inout) :: sendBuffer(0:N,0:N,1:numEq,1:bufferSize,1:nNeighbors)
-  REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:numEq,1:6,1:nElements)
-  ! Local
-  INTEGER :: bID, i, j, iEq
-  INTEGER :: IFace, p2, neighborID, bufferID, elementID, sideID
 
-  iEq = blockIdx % x
-  bID = blockIdx % y
+    IMPLICIT NONE
+    INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
+    INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
+    REAL(prec), DEVICE, INTENT(out)   :: sendBuffer(0:N,0:N,1:numEq,1:bufferSize,1:nNeighbors)
+    REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:numEq,1:6,1:nElements)
+    INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
+    INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
+    INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
+    INTEGER, DEVICE, INTENT(in)       :: rankToNeighbor(0:nRanks-1)
+    INTEGER, DEVICE, INTENT(in)       :: boundaryToBuffer(1:nBoundaries)
+    ! Local
+    INTEGER :: bID, i, j, iEq
+    INTEGER :: IFace, p2, neighborID, bufferID, elementID, sideID
 
-  i   = threadIdx % x - 1
-  j   = threadIdx % y - 1
+    iEq = blockIdx % x
+    bID = blockIdx % y
 
-  p2 = boundaryToProcID(bID)
+    i   = threadIdx % x - 1
+    j   = threadIdx % y - 1
+
+    p2 = boundaryToProcID(bID)
 
   IF( p2 /= myRank )THEN
 
     neighborID = rankToNeighbor(p2)
     bufferID   = boundaryToBuffer(bID)
-    IFace      = boundaryToFaceID(bID)
-    elementID  = faceToElement(1,IFace)
-    sideID     = faceToSide(1,IFace)
+    iFace      = boundaryToFaceID(bID)
+    elementID  = faceToElement(1,iFace)
+    sideID     = faceToSide(1,iFace)
 
     sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID)
   ENDIF
 
-END SUBROUTINE BoundaryToBuffer_CUDAKernel
+  END SUBROUTINE BoundaryToBuffer_CUDAKernel
 !
 ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalSolution, boundaryToFaceID, &
   boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &

@@ -11,6 +11,9 @@ MODULE BoundaryCommunicator_CLASS
   USE ModelPrecision
   USE ConstantsDictionary
   USE CommonRoutines
+#ifdef HAVE_CUDA
+  USE cudafor
+#endif
 
 
   IMPLICIT NONE
@@ -67,6 +70,7 @@ MODULE BoundaryCommunicator_CLASS
 
     PROCEDURE :: Build => Build_BoundaryCommunicator
     PROCEDURE :: Trash => Trash_BoundaryCommunicator
+    PROCEDURE :: SetRanks
 
 #ifdef HAVE_CUDA
     PROCEDURE :: UpdateDevice => UpdateDevice_BoundaryCommunicator
@@ -119,6 +123,8 @@ CONTAINS
     CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
     INTEGER, INTENT(in)                        :: nBe
 
+    CALL myComm % SetRanks( )
+
     myComm % nBoundaries = nBe
 
     ALLOCATE( myComm % extProcIDs(1:nBe) )
@@ -140,24 +146,8 @@ CONTAINS
 
 #endif
 
+
 #ifdef HAVE_MPI
-
-    myComm % MPI_COMM = MPI_COMM_WORLD
-
-    IF( prec == sp )THEN
-      myComm % MPI_PREC = MPI_FLOAT
-    ELSE
-      myComm % MPI_PREC = MPI_DOUBLE
-    ENDIF
-
-
-    IF( .NOT. myComm % setup )THEN
-      CALL MPI_INIT( myComm % mpiErr )
-      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
-      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
-    ENDIF
-
-    PRINT*, '    S/R Build_CommunicationTable : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
 
     ALLOCATE( myComm % bufferMap(1:myComm % nBoundaries), &
               myComm % rankTable(0:myComm % nProc-1) )
@@ -168,12 +158,6 @@ CONTAINS
               myComm % rankTable_dev(0:myComm % nProc-1) )
 
 #endif
-
-#else
-
-    myComm % nProc       = 1
-    myComm % myRank      = 0
-
 
 #endif
 
@@ -381,17 +365,7 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     INTEGER       :: fUnit
     INTEGER       :: nBe
 
-#ifdef HAVE_MPI
-      myComm % MPI_COMM = MPI_COMM_WORLD
-      CALL MPI_INIT( myComm % mpiErr )
-      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
-      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
-#else
-      myComm % myRank = 0
-      myComm % nProc  = 1
-#endif
-
-    myComm % setup = .TRUE.
+    CALL myComm % SetRanks( )
 
     WRITE( rankChar, '(I4.4)' ) myComm % myRank
 
@@ -418,8 +392,63 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 
     CLOSE(fUnit)
 
+#ifdef HAVE_MPI
+    CALL myComm % ConstructCommTables(  )
+#endif
+
+#ifdef HAVE_CUDA
+    CALL myComm % UpdateDevice( )
+#endif
+
   END SUBROUTINE ReadPickup_BoundaryCommunicator
 !
+  SUBROUTINE SetRanks( myComm )
+    IMPLICIT NONE
+    CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
+    ! Local
+#ifdef HAVE_CUDA
+    INTEGER :: iStat, cudaDeviceNumber, nDevices
+#endif
+
+    IF( .NOT. myComm % setup )THEN
+#ifdef HAVE_MPI
+      myComm % MPI_COMM = MPI_COMM_WORLD
+
+      IF( prec == sp )THEN
+        myComm % MPI_PREC=MPI_FLOAT
+      ELSE
+        myComm % MPI_PREC=MPI_DOUBLE
+      ENDIF
+
+      CALL MPI_INIT( myComm % mpiErr )
+      CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
+      CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
+      PRINT*, '    S/R SetRanks : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
+
+#ifdef HAVE_CUDA
+
+      ! Assuming the number of GPU's and the number of ranks per node is unIForm,
+      ! each rank is assigned to it's own GPU.
+      iStat = cudaGetDeviceCount( nDevices )
+      cudaDeviceNumber = MOD( myComm % myRank, nDevices )
+  
+      PRINT*, '    S/R SetRanks : Rank :', myComm % myRank, ': Getting Device # ', cudaDeviceNumber
+  
+      iStat = cudaSetDevice( cudaDeviceNumber )
+
+#endif
+
+#else
+      myComm % myRank = 0
+      myComm % nProc  = 1
+#endif
+
+      myComm % setup = .TRUE.
+
+    ENDIF
+
+  END SUBROUTINE SetRanks
+
 #ifdef HAVE_MPI
   SUBROUTINE ConstructCommTables( myComm )
 

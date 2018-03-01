@@ -106,8 +106,11 @@ MODULE Fluid_Class
  INTEGER, CONSTANT    :: polyDeg_dev
  INTEGER, CONSTANT    :: nEl_dev
  INTEGER, CONSTANT    :: myRank_dev
+ INTEGER, CONSTANT    :: nProc_dev
+ INTEGER, CONSTANT    :: nNeighbors_dev
  INTEGER, CONSTANT    :: nFaces_dev
  INTEGER, CONSTANT    :: nBoundaryFaces_dev
+ INTEGER, CONSTANT    :: bufferSize_dev
  REAL(prec), CONSTANT :: R_dev, Cv_dev, P0_dev, hCapRatio_dev, rC_dev, g_dev
  REAL(prec), CONSTANT :: viscLengthScale_dev, dScale_dev, Cd_dev
  REAL(prec), CONSTANT :: fRotX_dev, fRotY_dev, fRotZ_dev
@@ -144,26 +147,6 @@ CONTAINS
 
     CALL myDGSEM % extComm % ReadPickup(  )
 
-#ifdef HAVE_MPI
-    CALL myDGSEM % extComm % ConstructCommTables(  )
-#endif
-
-#ifdef HAVE_CUDA
-
-    CALL myDGSEM % extComm % UpdateDevice( )
-
-
-    ! Assuming the number of GPU's and the number of ranks per node is unIForm,
-    ! each rank is assigned to it's own GPU.
-    iStat = cudaGetDeviceCount( nDevices )
-    cudaDeviceNumber = MOD( myDGSEM % extComm % myRank, nDevices )
-
-    PRINT*, '    S/R Build_Fluid : Rank :', &
-      myDGSEM % extComm % myRank, ': Getting Device # ', cudaDeviceNumber
-
-    iStat = cudaSetDevice( cudaDeviceNumber )
-
-#endif
 
     ! Construct the DATA structure that holds the derivative and interpolation matrices
     ! and the quadrature weights. This call will also perform the device copies.
@@ -255,6 +238,11 @@ CONTAINS
       nFaces_dev     = myDGSEM % mesh % faces % nFaces
       nBoundaryFaces_dev     = myDGSEM % extComm % nBoundaries
       myRank_dev  = myDGSEM % extComm % myRank
+      nProc_dev   = myDGSEM % extComm % nProc
+#ifdef HAVE_MPI
+      nNeighbors_dev = myDGSEM % extComm % nNeighbors
+      bufferSize_dev = myDGSEM % extComm % maxbufferSize
+#endif      
 
 #endif
 
@@ -264,6 +252,10 @@ CONTAINS
 
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
+
+#ifdef HAVE_MPI
+    CALL MPI_BARRIER( myDGSEM % extComm % mpi_comm )
+#endif
 
     PRINT*, '    S/R Trash_Fluid : Clearing memory.'
 
@@ -4038,6 +4030,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     stressflux(3,i,j,k,iEq,iEl) = sf(3)
 
   END SUBROUTINE CalculateStressFlux_CUDAKernel
+
 #endif
 
 
