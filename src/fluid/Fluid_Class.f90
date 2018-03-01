@@ -134,7 +134,6 @@ CONTAINS
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 
-    CALL UpdateDeviceDictionary( )
 #endif
 
     CALL myDGSEM % params % Build( setupSuccess )
@@ -145,8 +144,15 @@ CONTAINS
       RETURN
     ENDIF
 
+    ! This call to the extComm % ReadPickup reads in the external communicator
+    ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
+    ! the device for each rank is also set here.
     CALL myDGSEM % extComm % ReadPickup(  )
 
+    
+#ifdef HAVE_CUDA
+    CALL UpdateDeviceDictionary( )
+#endif
 
     ! Construct the DATA structure that holds the derivative and interpolation matrices
     ! and the quadrature weights. This call will also perform the device copies.
@@ -1408,7 +1414,7 @@ CONTAINS
                                                               myDGSEM % static % boundarySolution_dev, &
                                                               myDGSEM % state % externalState_dev, &
                                                               myDGSEM % state % boundaryFlux_dev, &
-                                                              myDGSEM % stressTensor % boundaryFlux_dev )
+                                                              myDGSEM % state % boundaryGradientFlux_dev )
 
 
 #else
@@ -3503,7 +3509,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     INTEGER    :: e1, s1, s2, m
     
     bID = blockIdx % x
-    iEq   = blockIDx % y
+    iEq = blockIDx % y
      ! ////////////////////////////////////////////////////////////////////////// !
     i   = threadIdx % x-1
     j   = threadIdx % y-1
@@ -3511,7 +3517,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     iFace = boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
     e1    = elementIDs(1,iFace )
     s1    = elementSides(1,iFace)
-    p2    = procIDs( iFace )
+    p2    = procIDs( bID )
     
       IF( p2 == myRank_dev )THEN
         externalStress(i,j,iEq,bID) = stressBsols(i,j,iEq,s1,e1)
