@@ -216,9 +216,6 @@ CONTAINS
     CALL myDGSEM % sgsCoeffs % UpdateDevice( )
 #endif
 
-    ! Read the initial conditions, static state, and the boundary communicator
-    CALL myDGSEM % ReadPickup( )
-
 #ifdef HAVE_CUDA
 
       ! Set Device Constants
@@ -251,6 +248,9 @@ CONTAINS
 #endif      
 
 #endif
+
+    ! Read the initial conditions, static state, and the boundary communicator
+    CALL myDGSEM % ReadPickup( )
 
   END SUBROUTINE Build_Fluid
 !
@@ -2888,8 +2888,7 @@ CONTAINS
     j = threadIdx % y - 1
     k = threadIdx % z - 1
   
-    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) ! + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
-    !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
