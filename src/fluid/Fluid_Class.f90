@@ -675,7 +675,7 @@ CONTAINS
                                                             myDGSEM % extComm )
 #endif
 
-!    CALL myDGSEM % BoundaryFace_StateFlux( )
+    CALL myDGSEM % BoundaryFace_StateFlux( )
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -2889,6 +2889,7 @@ CONTAINS
     k = threadIdx % z - 1
   
     G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
 
@@ -2972,14 +2973,14 @@ CONTAINS
   ATTRIBUTES(Global) SUBROUTINE UpdateExternalState_CUDAKernel( boundaryIDs, elementIDs, elementSides, procIDs, &
                                                                 externalState, stateBsols, prescribedState, nHat )
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nBoundaryFaces_dev)
-    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
-    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
-    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces_dev)
+    INTEGER, DEVICE, INTENT(in)       :: boundaryIDs(1:nBoundaryFaces_dev)
+    INTEGER, DEVICE, INTENT(in)       :: elementIDs(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)       :: elementSides(1:2,1:nFaces_dev)
+    INTEGER, DEVICE, INTENT(in)       :: procIDs(1:nBoundaryFaces_dev)
     REAL(prec), DEVICE, INTENT(inout) :: externalState(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
-    REAL(prec), DEVICE, INTENT(in)  :: stateBsols(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-    REAL(prec), DEVICE, INTENT(in)  :: prescribedState(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
-    REAL(prec), DEVICE, INTENT(in)  :: nhat(1:3,0:polyDeg_dev,0:polyDeg_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: stateBsols(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: prescribedState(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: nhat(1:3,0:polyDeg_dev,0:polyDeg_dev,1:6,1:nEl_dev)
      ! Local
     INTEGER    :: iEl, iFace, bFaceID, i, j, k, iEq
     INTEGER    :: iFace2, p2
@@ -3147,8 +3148,8 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    REAL(prec), DEVICE, INTENT(in)  :: nHat(1:3,0:polydeg_dev,0:polydeg_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-   REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(inout) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(inout) :: stressFlux(1:3,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    ! Local
 
    INTEGER    :: iEl, iFace
@@ -3277,8 +3278,8 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
    REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: boundarySolution_static(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    REAL(prec), DEVICE, INTENT(in)  :: externalState(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:nBoundaryFaces_dev)
-   REAL(prec), DEVICE, INTENT(out) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
-   REAL(prec), DEVICE, INTENT(out) :: stressFlux(1:3,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(inout) :: boundaryFlux(0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
+   REAL(prec), DEVICE, INTENT(inout) :: stressFlux(1:3,0:polydeg_dev,0:polydeg_dev,1:nEq_dev,1:6,1:nEl_dev)
    ! Local
    INTEGER    :: iEl, iFace
    INTEGER    :: i, j, k, iEq
@@ -3540,7 +3541,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
     INTEGER, DEVICE, INTENT(in)     :: iMap(0:polyDeg_dev,0:polyDeg_dev,1:nFaces_dev)
     INTEGER, DEVICE, INTENT(in)     :: jMap(0:polyDeg_dev,0:polyDeg_dev,1:nFaces_dev)
-    REAL(prec), DEVICE, INTENT(out) :: boundaryStressFlux(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(inout) :: boundaryStressFlux(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
      ! Local
     INTEGER    :: iEl, iFace
     INTEGER    :: i, j, iEq
@@ -3615,7 +3616,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
     INTEGER, DEVICE, INTENT(in)     :: boundaryIDs(1:nFaces_dev)
     INTEGER, DEVICE, INTENT(in)     :: iMap(0:polyDeg_dev,0:polyDeg_dev,1:nFaces_dev)
     INTEGER, DEVICE, INTENT(in)     :: jMap(0:polyDeg_dev,0:polyDeg_dev,1:nFaces_dev)
-    REAL(prec), DEVICE, INTENT(out) :: boundaryStressFlux(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(inout) :: boundaryStressFlux(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
      ! Local
     INTEGER    :: iEl, iFace
     INTEGER    :: i, j, iEq
