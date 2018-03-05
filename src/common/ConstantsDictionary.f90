@@ -3,16 +3,8 @@
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
-! ConstantsDictionary.f90 is part of the Spectral Element Libraries in Fortran (SELF).
-!
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-!> \file ConstantsDictionary.f90
-!! Contains the \ref ConstantsDictionary module
-
-!> \defgroup ConstantsDictionary ConstantsDictionary
-!! This module defines a set of mathematical constants, time integrator parameters, and boundary 
-!! condition flags.
 
  MODULE ConstantsDictionary
 
@@ -23,16 +15,13 @@
   ! ************************************************************!
   !                                                             !
   ! ------------------------------------------------------------!
-    REAL(prec), PARAMETER :: pi   = 4.0_prec*atan(1.0_prec)
-    REAL(prec), PARAMETER :: ZERO = 0.0_prec
-    REAL(prec), PARAMETER :: ONE  = 1.0_prec
-    REAL(prec), PARAMETER :: TWO  = 2.0_prec
-    REAL(prec), PARAMETER :: HALF = 0.5_prec
+    REAL(prec), PARAMETER :: pi   = 4.0_dp*atan(1.0_dp)
     REAL(prec), PARAMETER :: TOL  = epsilon(1.0_prec)
 
 
     REAL(prec), PARAMETER :: fillValue = -9999.99_prec
     INTEGER, PARAMETER    :: fillValueInt = -99999
+
   !*************************************************************!
   ! ----------------- ROOT FINDER CONSTANTS --------------------!
   ! ************************************************************!
@@ -52,6 +41,8 @@
     REAL(prec), PARAMETER :: rk3_a(1:3) = (/ 0.0_prec, -5.0_prec/9.0_prec, -153.0_prec/128.0_prec /)
     REAL(prec), PARAMETER :: rk3_b(1:3) = (/ 0.0_prec, 1.0_prec/3.0_prec, 3.0_prec/4.0_prec /)
     REAL(prec), PARAMETER :: rk3_g(1:3) = (/ 1.0_prec/3.0_prec, 15.0_prec/16.0_prec, 8.0_prec/15.0_prec /)
+
+
 
   !*************************************************************!
   ! ------------------- PHYSICAL CONSTANTS ---------------------!
@@ -156,23 +147,18 @@
    INTEGER, PARAMETER :: GAUSS_LOBATTO = -1
    INTEGER, PARAMETER :: DG = 2000
    INTEGER, PARAMETER :: CG = 2001
-   INTEGER, PARAMETER :: LEGENDRE_BASIS = 2100
-   INTEGER, PARAMETER :: CHEBYSHEV_BASIS = 2101
+  !==============================================!
+  ! ----------------- Filter ------------------- !
+  !==============================================!
+   INTEGER, PARAMETER :: ModalCutoff = 3000
+   INTEGER, PARAMETER :: TanhRollOff = 3001 
   !
   !==============================================!
   ! ---------------- Geometry ------------------ !
   !==============================================!
    INTEGER, PARAMETER      :: maxNodalValence = 16
-   INTEGER, PARAMETER      :: Quad2D = 1000
    INTEGER, PARAMETER      :: Hex3D  = 1001
   
-  !==============================================!
-  !==============================================!
-  ! --------- Special plotting flags ----------- !
-  !==============================================!
-   INTEGER, PARAMETER :: surf2din3d = 500
-   INTEGER, PARAMETER :: keepItFlat = 501
-
   !==============================================!
   ! --------------- Mesh ----------------------- !
   !==============================================!
@@ -183,9 +169,30 @@
 
 
 ! Misc. INTEGER and CHARACTER flag definitions
-  INTEGER, PARAMETER      :: NONE = 0
   CHARACTER(1), PARAMETER :: nada = ' '
-
   CHARACTER(6), PARAMETER :: MsgFmt = '(4x,A)'
+
+#ifdef HAVE_CUDA
+  REAL(prec), DEVICE, ALLOCATABLE, PUBLIC :: rk3_a_dev(:), rk3_g_dev(:), rk3_b_dev(:)
+
+CONTAINS
+
+  SUBROUTINE UpdateDeviceDictionary( )
+
+    ALLOCATE( rk3_a_dev(1:3), rk3_g_dev(1:3), rk3_b_dev(1:3) )
+
+    rk3_a_dev(1:3) = rk3_a
+    rk3_g_dev(1:3) = rk3_g
+    rk3_b_dev(1:3) = rk3_b
+
+  END SUBROUTINE UpdateDeviceDictionary
+
+  SUBROUTINE TrashDeviceDictionary( )
+
+    DEALLOCATE( rk3_a_dev, rk3_g_dev, rk3_b_dev )
+
+  END SUBROUTINE TrashDeviceDictionary
+
+#endif
 
  END MODULE ConstantsDictionary

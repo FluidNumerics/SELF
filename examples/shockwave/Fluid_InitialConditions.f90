@@ -146,7 +146,7 @@ USE Fluid_Class
                   y = myDGSEM % mesh % geom(iEl) % y(i,j,k)
                   z = myDGSEM % mesh % geom(iEl) % z(i,j,k)
                   
-                  r =  ( x-0.2_prec*Lx )**2 + ( y-0.2_prec*Ly )**2  + ( z-0.5_prec*H )**2
+                  r =  ( x-0.2_prec*Lx )**2 + ( y-0.2_prec*Ly )**2  + ( z-0.1_prec*H )**2
                 
 
 !                  pulseShape = 0.15625_prec*( 1.0_prec + tanh( (x-(0.1_prec*Lx-rPulse))/rPulse ) )*&
