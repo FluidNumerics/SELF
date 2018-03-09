@@ -3,7 +3,7 @@
  
 SELF-Fluids is accelerated on GPUs with CUDA Fortran. CUDA, MPI only, and MPI+CUDA flavors of SELF-Fluids executables are possible.
  
- # Thermal Bubble Demonstration
+# Thermal Bubble Demonstration
  
  This example can be found in the `examples/thermalbubble/` directory of the SELF-Fluids repository. The initial conditions consist of a warm motionless ball of fluid in a neutrally stable background environment. As warm fluid begins to rise, a ring vortex (like a smoke ring) forms and accelerates the fluid upwards.
  
@@ -24,7 +24,7 @@ The wall times, speedup, and scaling efficiency are shown for the single GPU and
 | 8	| no	| 2502.976	| 7.609	| 95.11 % |
 | 64	| no |	514.882	| 36.988 |	30.73 % |
 
- # Boundary Layer Turbulence
+# Boundary Layer Turbulence
  
  This example can be found in the `examples/boundarylayer/` directory of the SELF-Fluids repository. The initial conditions consist of a neutrally stable fluid in a doubly periodic domain moving uniformly at 10 m/s. At the bottom of the domain, a drag force slows down the fluid resulting in an unstable shear. This evenutally becomes turbulent as depicted in the video below, showing the spatially and temporally varying vertical velocity component.
  
