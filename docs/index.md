@@ -11,7 +11,7 @@ SELF-Fluids is accelerated on GPUs with CUDA Fortran. CUDA, MPI only, and MPI+CU
  
 ## Strong Scaling with and without GPUs
 
-The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and two Tesla K40 GPU's per node. For the cases with GPU's, two MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps.
+The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and two Tesla K40 GPU's per node. For the cases with GPU's, two MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps of the 20x20x20 (polynomial degree 7) thermal bubble test case
 
 | No. Ranks	| GPU	| Wall Time |	Speedup	| Scaling Efficiency |
 | --- | --- | --- | --- | --- |
