@@ -11,7 +11,7 @@ SELF-Fluids is accelerated on GPUs with CUDA Fortran. CUDA, MPI only, and MPI+CU
  
 ## Strong Scaling with and without GPUs
 
-The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and two Tesla K40 GPU's per node. For the cases with GPU's, two MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps of the 20x20x20 (polynomial degree 7) thermal bubble test case
+The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and eight Tesla P100 GPU's per node. For the cases with GPU's, eight MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps of the 20x20x20 (polynomial degree 7) thermal bubble test case
 
 | No. Ranks	| GPU	| Wall Time |	Speedup	| Scaling Efficiency |
 | --- | --- | --- | --- | --- |
@@ -23,6 +23,13 @@ The wall times, speedup, and scaling efficiency are shown for the single GPU and
 | 4	| no	| 5201.868	| 3.661	| 91.53 % |
 | 8	| no	| 2502.976	| 7.609	| 95.11 % |
 | 64	| no |	514.882	| 36.988 |	30.73 % |
+
+# Dam-Break (Lock Exchange)
+This example can be found in the `examples/boundarylayer/` directory of the SELF-Fluids repository. The initial conditions consist of warm fluid occupying the left half of the domain and cold, dense fluid occupying the right half. This setup results in a pressure gradient that becomes stronger with depth that accelerates the dense fluid to the left. Mass conservation requires that the lighter fluid flows to the right near the surface. Along the interface, a strong shear velocity profile is set up. This shear is unstable to perturbations, such as round off errors, and after a short period of time we can see the effects of Kelvin-Helmholtz (KH). Eventually, the KH "rollers" also become unstable, and the fluid transitions to turbulence.
+
+This demo was run entirely on a System76 laptop equipped with a single GTX1060 GPU. The resolution of this simulation is effectively 0.5 m and the Greshol number (ratio of buoyancy acceleration to viscous acceleration) is O( 10^7 ).
+
+ [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/tMPLm3TORN8/0.jpg)](https://www.youtube.com/watch?v=tMPLm3TORN8)
 
 # Boundary Layer Turbulence
  
