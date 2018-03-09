@@ -24,3 +24,8 @@ Table 1: The wall times, speedup, and scaling efficiency are shown for the singl
 | 4	| no	| 5201.868	| 3.661	| 91.53 % |
 | 8	| no	| 2502.976	| 7.609	| 95.11 % |
 | 64	| no |	514.882	| 36.988 |	30.73 % |
+
+ ## Boundary Layer Turbulence
+ This example can be found in the `examples/boundarylayer/` directory of the SELF-Fluids repository. The initial conditions consist of a neutrally stable fluid in a doubly periodic domain moving uniformly at 10 m/s. At the bottom of the domain, a drag force slows down the fluid resulting in an unstable shear. This evenutally becomes turbulent as depicted in the video below, showing the spatially and temporally varying vertical velocity component.
+ 
+ [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/74vc87gVgWk/0.jpg)](https://www.youtube.com/watch?v=74vc87gVgWk)
