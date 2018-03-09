@@ -99,9 +99,9 @@ CONTAINS
             z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
             IF( x <= 0.5_prec*Lx )THEN
-               T = 0.25_prec
+               T = 2.5_prec
             ELSE
-               T = -0.25_prec
+               T = -2.5_prec
             ENDIF
             Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
             myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
