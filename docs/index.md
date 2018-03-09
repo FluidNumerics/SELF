@@ -4,13 +4,14 @@
 SELF-Fluids is accelerated on GPUs with CUDA Fortran. CUDA, MPI only, and MPI+CUDA flavors of SELF-Fluids executables are possible.
  
  ## Thermal Bubble Demonstration
+ 
  This example can be found in the `examples/thermalbubble/` directory of the SELF-Fluids repository. The initial conditions consist of a warm motionless ball of fluid in a neutrally stable background environment. As warm fluid begins to rise, a ring vortex (like a smoke ring) forms and accelerates the fluid upwards.
  
  [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/NVToKGeOy94/0.jpg)](https://www.youtube.com/watch?v=NVToKGeOy94)
  
 ## Strong Scaling with and without GPUs
 
-Table 1: The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and two Tesla K40 GPU's per node. For the cases with GPU's, two MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps.
+The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and two Tesla K40 GPU's per node. For the cases with GPU's, two MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps.
 
 | No. Ranks	| GPU	| Wall Time |	Speedup	| Scaling Efficiency |
 | --- | --- | --- | --- | --- |
