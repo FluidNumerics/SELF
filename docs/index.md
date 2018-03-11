@@ -1,11 +1,38 @@
-## About
- The Spectral Element Libraries in Fortran (SELF) are a set of Fortran modules that define data structures and type-bound procedures that can be used to develop Spectral Element discretizations for partial differential equations. SELF-Fluids is a Forran 2003 class and accompanying programs that can be used to solve for the Compressible Navier Stokes using the Spectral Element Method.
+# About
+ The Spectral Element Libraries in Fortran (SELF) are a set of Fortran modules that define data structures and type-bound procedures that can be used to develop Spectral Element discretizations for partial differential equations. SELF-Fluids is a an extended set of modules built on top of SELF to solve Compressible Navier Stokes using the Spectral Element Method on CPUs and GPUs.
  
-SELF-Fluids can be accelerated with CUDA Fortran and also supports multi-threading with OpenMP. MPI only, MPI+CUDA, and MPI+OpenMP flavors of SELF-Fluids are possible, though scaling tests are currently being conducted to improve the MPI implementation. 
+SELF-Fluids is accelerated on GPUs with CUDA Fortran. CUDA, MPI only, and MPI+CUDA flavors of SELF-Fluids executables are possible.
  
+# Thermal Bubble Demonstration
  
+ This example can be found in the `examples/thermalbubble/` directory of the SELF-Fluids repository. The initial conditions consist of a warm motionless ball of fluid in a neutrally stable background environment. As warm fluid begins to rise, a ring vortex (like a smoke ring) forms and accelerates the fluid upwards.
  
- ## Documentation
+ [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/NVToKGeOy94/0.jpg)](https://www.youtube.com/watch?v=NVToKGeOy94)
  
-Documentation is in progress and will be posted here soon. Source code is kept private, but interested researchers should contact Joe at schoonover.numerics@gmail.com for precompiled libraries and executables.
+## Strong Scaling with and without GPUs
+
+The wall times, speedup, and scaling efficiency are shown for the single GPU and select MPI configurations. The system used for this study has sixteen cores per node and eight Tesla P100 GPU's per node. For the cases with GPU's, eight MPI ranks per node were used, with one rank assigned to each GPU. Identical affinity is used in the MPI-only configurations for 2, 4, and 8 rank configurations. These results are based on the ten averages of instrumented wall times for computing 1,000 simulation time steps of the 20x20x20 (polynomial degree 7) thermal bubble test case
+
+| No. Ranks	| GPU	| Wall Time |	Speedup	| Scaling Efficiency |
+| --- | --- | --- | --- | --- |
+| 1 |	yes	| 554.419 |	34.350	| – |
+| 2	| yes	| 301.585	| 63.148	| 91.92 % |
+| 4	| yes	| 152.702	| 124.717	| 90.77 % |
+| 8	| yes	| 77.8016	| 244.785	| 89.08 % |
+| 2	| no	| 10127.85	| 1.880	| 94.02 % |
+| 4	| no	| 5201.868	| 3.661	| 91.53 % |
+| 8	| no	| 2502.976	| 7.609	| 95.11 % |
+| 64	| no |	514.882	| 36.988 |	30.73 % |
+
+# Dam-Break (Lock Exchange)
+This example can be found in the `examples/lock_exchange/` directory of the SELF-Fluids repository. The initial conditions consist of warm fluid occupying the left half of the domain and cold, dense fluid occupying the right half. This setup results in a pressure gradient that becomes stronger with depth that accelerates the dense fluid to the left. Mass conservation requires that the lighter fluid flows to the right near the surface. Along the interface, a strong shear velocity profile is set up. This shear is unstable to perturbations, such as round off errors, and after a short period of time we can see the effects of Kelvin-Helmholtz (KH). Eventually, the KH "rollers" also become unstable, and the fluid transitions to turbulence.
+
+This demo was run entirely on a System76 laptop equipped with a single GTX1060 GPU. The resolution of this simulation is effectively 0.5 m and the Greshol number (ratio of buoyancy acceleration to viscous acceleration) is O( 10^7 ).
+
+ [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/tMPLm3TORN8/0.jpg)](https://www.youtube.com/watch?v=tMPLm3TORN8)
+
+# Boundary Layer Turbulence
  
+ This example can be found in the `examples/boundarylayer/` directory of the SELF-Fluids repository. The initial conditions consist of a neutrally stable fluid in a doubly periodic domain moving uniformly at 10 m/s. At the bottom of the domain, a drag force slows down the fluid resulting in an unstable shear. This evenutally becomes turbulent as depicted in the video below, showing the spatially and temporally varying vertical velocity component.
+ 
+ [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/74vc87gVgWk/0.jpg)](https://www.youtube.com/watch?v=74vc87gVgWk)
