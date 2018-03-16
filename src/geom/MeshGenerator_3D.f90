@@ -57,22 +57,31 @@ PROGRAM MeshGenerator_3D
             TopographicShape => DefaultTopography
          ENDIF
          ! Build the Geometry
-            IF( params % MeshType == DoublyPeriodic )THEN
-               PRINT*,' Loading doubly periodic mesh.'
-               CALL mesh % ConstructStructuredMesh( nodal % interp, &
-                 params % nXelem, &
-                 params % nYelem, &
-                 params % nZelem, &
-                 .TRUE. )
-            ELSE
-               PRINT*,' Loading default mesh.'
-               CALL mesh % ConstructStructuredMesh( nodal % interp, &
-                 params % nXelem, &
-                 params % nYelem, &
-                 params % nZelem, &
-                 .FALSE. )
-            ENDIF
-   
+         IF( TRIM( params % UCDMeshFile ) == '' )THEN
+
+           IF( params % MeshType == DoublyPeriodic )THEN
+              PRINT*,' Loading doubly periodic mesh.'
+              CALL mesh % ConstructStructuredMesh( nodal % interp, &
+                params % nXelem, &
+                params % nYelem, &
+                params % nZelem, &
+                .TRUE. )
+           ELSE
+              PRINT*,' Loading default mesh.'
+              CALL mesh % ConstructStructuredMesh( nodal % interp, &
+                params % nXelem, &
+                params % nYelem, &
+                params % nZelem, &
+                .FALSE. )
+           ENDIF
+
+         ELSE   
+
+           CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
+STOP
+
+         ENDIF
+
          nElems = mesh % elements % nElements
          nProc  = params % nProcX*params % nProcY*params % nProcZ
          IF( nProc == 0 )THEN

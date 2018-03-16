@@ -64,6 +64,7 @@ MODULE HexMesh_Class
     PROCEDURE :: ReadSELFMeshFile    => ReadSELFMeshFile_HexMesh
     PROCEDURE :: WriteSELFMeshFile   => WriteSELFMeshFile_HexMesh
     PROCEDURE :: ReadUCDMeshFile     => ReadUCDMeshFile_HexMesh
+    PROCEDURE :: ReadTrellisUCDMeshFile => ReadTrellisUCDMeshFile_HexMesh
 
     ! Connectivity Routines
     PROCEDURE :: ConstructFaces               => ConstructFaces_HexMesh
@@ -1791,6 +1792,141 @@ CONTAINS
     CLOSE( fUnit )
 
   END SUBROUTINE WriteSELFMeshFile_HexMesh
+
+  SUBROUTINE ReadTrellisUCDMeshFile_HexMesh( myHexMesh, interp, filename )
+
+    IMPLICIT NONE
+    CLASS( HexMesh ), INTENT(out)   :: myHexMesh
+    TYPE( Lagrange ), INTENT(in)    :: interp
+    CHARACTER(*), INTENT(in)        :: filename
+    ! Local 
+    INTEGER :: fUnit, readStatus, nNodes, nElements, id
+    LOGICAL :: workingOnNodes, workingOnElements, withinFile
+    CHARACTER(100) :: lineInTheFile
+
+    OPEN( UNIT    = NEWUNIT(fUnit), &
+      FILE    = TRIM( filename ), &
+      FORM    = 'FORMATTED',&
+      STATUS  = 'OLD', &
+      ACCESS  = 'SEQUENTIAL' )
+
+    withinFile        = .TRUE.
+    workingOnNodes    = .FALSE.
+    workingOnElements = .FALSE.
+
+    nNodes    = 0
+    nElements = 0
+    DO WHILE ( withinFile )
+
+      READ( fUnit, '(A100)', IOSTAT=readStatus ) lineInTheFile
+
+      IF( readStatus == 0 )THEN
+        
+        IF( lineInTheFile(1:5) == '*NODE' ) THEN
+
+          workingOnNodes    = .TRUE.
+          workingOnElements = .FALSE.
+
+        ELSEIF( lineInTheFile(1:5) == '*ELEM' ) THEN
+
+          workingOnNodes    = .FALSE.
+          workingOnElements = .TRUE.
+
+        ELSEIF( lineInTheFile(1:2) == '**' ) THEN
+
+          ! Skip comment lines
+          workingOnNodes    = .FALSE.
+          workingOnElements = .FALSE.
+
+        ELSE
+
+          IF( workingOnNodes )THEN
+
+            nNodes = nNodes + 1       
+
+          ELSEIF( workingOnElements )THEN
+
+            nElements = nElements + 1
+
+          ENDIF
+
+
+        ENDIF
+
+      ELSE
+
+        withinFile = .FALSE.
+
+      ENDIF
+
+    ENDDO
+
+    REWIND( fUnit )
+
+    CALL myHexMesh % Build( nNodes, nElements, 1, interp % N ) 
+
+    withinFile        = .TRUE.
+    workingOnNodes    = .FALSE.
+    workingOnElements = .FALSE.
+   
+    nNodes    = 0
+    nElements = 0
+
+    DO WHILE ( withinFile )
+
+      READ( fUnit, '(A100)', IOSTAT=readStatus ) lineInTheFile
+
+      IF( readStatus == 0 )THEN
+        
+        IF( lineInTheFile(1:5) == '*NODE' ) THEN
+
+          workingOnNodes    = .TRUE.
+          workingOnElements = .FALSE.
+
+        ELSEIF( lineInTheFile(1:5) == '*ELEM' ) THEN
+
+          workingOnNodes    = .FALSE.
+          workingOnElements = .TRUE.
+
+        ELSEIF( lineInTheFile(1:2) == '**' ) THEN
+
+          ! Skip comment lines
+          workingOnNodes    = .FALSE.
+          workingOnElements = .FALSE.
+
+        ELSE
+
+          IF( workingOnNodes )THEN
+
+            nNodes = nNodes + 1       
+            READ( lineInTheFile, '(I,3(",",2x,E14.6))' ), id, myHexMesh % nodes % x(1:3,nNodes)
+
+          ELSEIF( workingOnElements )THEN
+
+            nElements = nElements + 1
+            READ( lineInTheFile, '(9(2x,I))' ), id, myHexMesh % elements % nodeIDs(1:8,nElements)
+            PRINT*, myHexMesh % elements % nodeIDs(1:8,nElements)
+
+          ENDIF
+
+
+        ENDIF
+
+      ELSE
+
+        withinFile = .FALSE.
+
+      ENDIF
+
+    ENDDO
+
+    CLOSE( fUnit )
+
+    PRINT*, 'nNodes = ', nNodes
+    PRINT*, 'nElements = ', nElements
+
+  END SUBROUTINE ReadTrellisUCDMeshFile_HexMesh
+
 !
 !> \addtogroup HexMesh_Class
 !! @{
