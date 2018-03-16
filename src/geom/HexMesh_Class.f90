@@ -1800,9 +1800,17 @@ CONTAINS
     TYPE( Lagrange ), INTENT(in)    :: interp
     CHARACTER(*), INTENT(in)        :: filename
     ! Local 
-    INTEGER :: fUnit, readStatus, nNodes, nElements, id
+    INTEGER :: fUnit, readStatus, nNodes, nElements, id, gPolyDeg
+    INTEGER :: n1, n2, n3, n4, iEl, iSurf, iSide, i, j
     LOGICAL :: workingOnNodes, workingOnElements, withinFile
     CHARACTER(100) :: lineInTheFile
+    TYPE( Surfaces ) :: boundSurfs
+    REAL(prec) :: x, y, z, zb, zi, zu, zip1, dxElem, dyElem, dzElem
+    REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
+    REAL(prec) :: c1(1:3), c2(1:3)
+    REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:), weights(:)
+
+
 
     OPEN( UNIT    = NEWUNIT(fUnit), &
       FILE    = TRIM( filename ), &
@@ -1905,7 +1913,6 @@ CONTAINS
 
             nElements = nElements + 1
             READ( lineInTheFile, '(9(2x,I))' ), id, myHexMesh % elements % nodeIDs(1:8,nElements)
-            PRINT*, myHexMesh % elements % nodeIDs(1:8,nElements)
 
           ENDIF
 
@@ -1922,8 +1929,73 @@ CONTAINS
 
     CLOSE( fUnit )
 
-    PRINT*, 'nNodes = ', nNodes
-    PRINT*, 'nElements = ', nElements
+    PRINT*, 'nNodes = ', myHexMesh % nodes % nNodes
+    PRINT*, 'nElements = ', myHexMesh % elements % nElements
+
+    gPolyDeg = interp % N
+    ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6*nElements), weights(0:gpolyDeg) )
+    CALL LegendreQuadrature( gPolyDeg, s, weights, GAUSS_LOBATTO )
+
+    xc = 0.0_prec
+    CALL boundSurfs % Build( s, gPolyDeg, 6*nElements )
+
+    DO iEl = 1, nElements
+
+      myHexMesh % elements % elementID(iEl) = iEl
+
+      DO iSide = 1, 6 ! Loop over the sides of the quads
+
+        iSurf = iSide + 6*(iEl-1)
+        ! To build the current face, we construct a plane that passes through
+        ! the four corner nodes. Here, we grab the global node ID's for the four
+        ! corner nodes.
+        n1 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(1,iSide),iEl )
+        n2 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(2,iSide),iEl )
+        n3 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(3,iSide),iEl )
+        n4 = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(4,iSide),iEl )
+
+        x1(1) = myHexMesh % nodes % x(1,n1)
+        x1(2) = myHexMesh % nodes % x(2,n1)
+        x1(3) = myHexMesh % nodes % x(3,n1)
+
+        x2(1) = myHexMesh % nodes % x(1,n2)
+        x2(2) = myHexMesh % nodes % x(2,n2)
+        x2(3) = myHexMesh % nodes % x(3,n2)
+
+        x3(1) = myHexMesh % nodes % x(1,n3)
+        x3(2) = myHexMesh % nodes % x(2,n3)
+        x3(3) = myHexMesh % nodes % x(3,n3)
+
+        x4(1) = myHexMesh % nodes % x(1,n4)
+        x4(2) = myHexMesh % nodes % x(2,n4)
+        x4(3) = myHexMesh % nodes % x(3,n4)
+
+        DO j = 0, gPolyDeg
+          DO i = 0, gPolyDeg
+            ! Transfinite inerpolation with linear blending is USEd to construct the face
+            c1 = ( 0.5_prec*(x2-x1)*(1.0_prec+s(i)) + x1 )
+            c2 = ( 0.5_prec*(x3-x4)*(1.0_prec+s(i)) + x4 )
+            xc(i,j,1:3,iSurf) = 0.5_prec*(c2-c1)*(1.0_prec+s(j)) + c1
+
+          ENDDO
+        ENDDO
+
+      ENDDO
+
+    ENDDO
+
+    CALL boundSurfs % Set_Surfaces( xc )
+    CALL myHexMesh % elements % GenerateMesh( interp, boundSurfs )
+    CALL myHexMesh % elements % GenerateMetrics( interp )
+
+!    CALL myHexMesh % ConstructFaces( )
+
+!    PRINT*, 'nFaces    : ', myHexMesh % faces % nFaces
+
+!    CALL myHexMesh % ConstructElementNeighbors( )
+
+    DEALLOCATE( s, xc, weights )
+    CALL boundSurfs % Trash( )
 
   END SUBROUTINE ReadTrellisUCDMeshFile_HexMesh
 

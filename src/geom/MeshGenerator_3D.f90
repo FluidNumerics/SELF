@@ -78,7 +78,8 @@ PROGRAM MeshGenerator_3D
          ELSE   
 
            CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
-STOP
+           CALL mesh % WriteTecplot( 'mesh' )
+           STOP
 
          ENDIF
 
@@ -114,6 +115,7 @@ STOP
          faceProcOwners  = -1
          faceBoundaryIDs = 0
          faceProcTable   = -5000
+
          CALL mesh % PartitionElementsAndNodes( params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
          
    
