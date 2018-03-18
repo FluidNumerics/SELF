@@ -72,7 +72,7 @@ MODULE HexMesh_Class
     PROCEDURE :: ConstructElementNeighbors    => ConstructElementNeighbors_HexMesh
     PROCEDURE :: DetermineOrientation         => DetermineOrientation_HexMesh
     PROCEDURE :: ScaleTheMesh                 => ScaleTheMesh_HexMesh
-    PROCEDURE :: PartitionElementsAndNodes
+    PROCEDURE :: PartitionStructuredElementsAndNodes
 
     ! Visualization I/O Routines
     PROCEDURE :: WriteTecplot         => WriteTecplot_Hexmesh
@@ -1262,7 +1262,7 @@ CONTAINS
 
   END SUBROUTINE ConstructStructuredMesh_HexMesh
 
-  SUBROUTINE PartitionElementsAndNodes( myMesh, params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
+  SUBROUTINE PartitionStructuredElementsAndNodes( myMesh, params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(in)        :: myMesh
     TYPE( ModelParameters ), INTENT(in) :: params
@@ -1360,7 +1360,7 @@ CONTAINS
 
       ENDIF
 
-  END SUBROUTINE PartitionElementsAndNodes
+  END SUBROUTINE PartitionStructuredElementsAndNodes
 !
 !==================================================================================================!
 !--------------------------------- Mesh File I/O Routines -----------------------------------------!
@@ -1988,11 +1988,11 @@ CONTAINS
     CALL myHexMesh % elements % GenerateMesh( interp, boundSurfs )
     CALL myHexMesh % elements % GenerateMetrics( interp )
 
-!    CALL myHexMesh % ConstructFaces( )
+    CALL myHexMesh % ConstructFaces( )
 
-!    PRINT*, 'nFaces    : ', myHexMesh % faces % nFaces
+    PRINT*, 'nFaces    : ', myHexMesh % faces % nFaces
 
-!    CALL myHexMesh % ConstructElementNeighbors( )
+    CALL myHexMesh % ConstructElementNeighbors( )
 
     DEALLOCATE( s, xc, weights )
     CALL boundSurfs % Trash( )

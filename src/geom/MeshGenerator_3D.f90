@@ -49,7 +49,7 @@ PROGRAM MeshGenerator_3D
          CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
                              N = params % polyDeg, &
                              nTargetPoints = params % nPlot, &
-                             quadrature = GAUSS )
+                             quadrature = GAUSS_LOBATTO )
    
          IF( params % topographicShape == Gaussian )THEN
             TopographicShape => GaussianHill
@@ -79,7 +79,6 @@ PROGRAM MeshGenerator_3D
 
            CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
            CALL mesh % WriteTecplot( 'mesh' )
-           STOP
 
          ENDIF
 
@@ -116,8 +115,16 @@ PROGRAM MeshGenerator_3D
          faceBoundaryIDs = 0
          faceProcTable   = -5000
 
-         CALL mesh % PartitionElementsAndNodes( params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
-         
+ !        IF( TRIM( params % UCDMeshFile ) == '' )THEN
+
+           CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
+                                                            globalToLocal, nodeLogic, nNodePerProc, &
+                                                            globalToLocalNode, nProc )
+
+ !        ELSE
+
+
+ !        ENDIF        
    
             
          ! Now we generate the local mesh for each process
