@@ -99,7 +99,7 @@ IMPLICIT NONE
 #endif
 
   END TYPE NodalDGSolution_3D
-    
+
 CONTAINS
 
 ! ================================================================================================ !
@@ -134,23 +134,39 @@ CONTAINS
     IMPLICIT NONE
     CLASS(NodalDGSolution_3D), INTENT(inout) :: myDGS
     INTEGER, INTENT(in)                      :: N, nEquations, nElements, nBoundaryFaces
+    ! Local
+    INTEGER :: nUse
+
+     nUse = N
+#ifdef HAVE_CUDA
+
+     IF( N > 7 )THEN
+
+       PRINT*, 'Module NodalDGSolution_3D_Class : S/R Build_NodalDGSolution_3D :'
+       PRINT*, '  WARNING : Polynomial degree > 7 with CUDA not permitted. '
+       PRINT*, '            Forcing polynomial degree = 7.'
+       nUse = 7
+
+     ENDIF
+       
+#endif
       
-      myDGS % N          = N
+      myDGS % N          = Nuse
       myDGS % nEquations = nEquations
       myDGS % nElements  = nElements
       myDGS % nBoundaryFaces = nBoundaryFaces
 
-      ALLOCATE( myDGS % solution(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundarySolution(0:N,0:N,1:nEquations,1:6,1:nElements), &
-                myDGS % prescribedState(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
-                myDGS % externalState(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
-                myDGS % solutionGradient(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundaryGradientFlux(1:3,0:N,0:N,1:nEquations,1:6,1:nElements), &
-                myDGS % flux(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundaryFlux(0:N,0:N,1:nEquations,1:6,1:nElements), &
-                myDGS % fluxDivergence(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % source(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % tendency(0:N,0:N,0:N,1:nEquations,1:nElements) )
+      ALLOCATE( myDGS % solution(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % boundarySolution(0:nUse,0:nUse,1:nEquations,1:6,1:nElements), &
+                myDGS % prescribedState(0:nUse,0:nUse,1:nEquations,1:nBoundaryFaces), &
+                myDGS % externalState(0:nUse,0:nUse,1:nEquations,1:nBoundaryFaces), &
+                myDGS % solutionGradient(1:3,0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % boundaryGradientFlux(1:3,0:nUse,0:nUse,1:nEquations,1:6,1:nElements), &
+                myDGS % flux(1:3,0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % boundaryFlux(0:nUse,0:nUse,1:nEquations,1:6,1:nElements), &
+                myDGS % fluxDivergence(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % source(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % tendency(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements) )
       
       myDGS % solution             = 0.0_prec
       myDGS % boundarySolution     = 0.0_prec
@@ -166,22 +182,22 @@ CONTAINS
 
 #ifdef HAVE_CUDA
       ALLOCATE( myDGS % N_dev, myDGS % nEquations_dev, myDGS % nElements_dev, myDGS % nBoundaryFaces_dev )
-      myDGS % N_dev          = N
+      myDGS % N_dev          = nUse
       myDGS % nEquations_dev = nEquations
       myDGS % nElements_dev  = nElements
       myDGS % nBoundaryFaces_dev  = nBoundaryFaces
       
-      ALLOCATE( myDGS % solution_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundarySolution_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
-                myDGS % prescribedState_dev(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
-                myDGS % externalState_dev(0:N,0:N,1:nEquations,1:nBoundaryFaces), &
-                myDGS % solutionGradient_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundaryGradientFlux_dev(1:3,0:N,0:N,1:nEquations,1:6,1:nElements), &
-                myDGS % flux_dev(1:3,0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % boundaryFlux_dev(0:N,0:N,1:nEquations,1:6,1:nElements), &
-                myDGS % fluxDivergence_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % source_dev(0:N,0:N,0:N,1:nEquations,1:nElements), &
-                myDGS % tendency_dev(0:N,0:N,0:N,1:nEquations,1:nElements) )
+      ALLOCATE( myDGS % solution_dev(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % boundarySolution_dev(0:nUse,0:nUse,1:nEquations,1:6,1:nElements), &
+                myDGS % prescribedState_dev(0:nUse,0:nUse,1:nEquations,1:nBoundaryFaces), &
+                myDGS % externalState_dev(0:nUse,0:nUse,1:nEquations,1:nBoundaryFaces), &
+                myDGS % solutionGradient_dev(1:3,0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % boundaryGradientFlux_dev(1:3,0:nUse,0:nUse,1:nEquations,1:6,1:nElements), &
+                myDGS % flux_dev(1:3,0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % boundaryFlux_dev(0:nUse,0:nUse,1:nEquations,1:6,1:nElements), &
+                myDGS % fluxDivergence_dev(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % source_dev(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements), &
+                myDGS % tendency_dev(0:nUse,0:nUse,0:nUse,1:nEquations,1:nElements) )
 
       myDGS % solution_dev             = 0.0_prec
       myDGS % boundarySolution_dev     = 0.0_prec
@@ -449,6 +465,59 @@ CONTAINS
 
 ! Algorithms for computing mapped derivative operations !
 
+  SUBROUTINE Mapped_Strong_FluxDivergence( nodalSolution, dgStorage, mesh )
+   
+    IMPLICIT NONE
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution 
+    TYPE( NodalDG ), INTENT(in)                :: dgStorage
+    TYPE( HexMesh ), INTENT(in)                :: mesh
+    ! Local
+    INTEGER    :: ii, i, j, k, iEq, iEl, idir
+    REAL(prec) :: f(1:3,0:dgStorage % N,0:dgStorage % N, 0:dgStorage % N), df
+
+      DO iEl = 1, nodalSolution % nElements
+        DO iEq = 1, nodalSolution % nEquations
+
+          f = 0.0_prec
+          DO idir = 1, 3
+          
+            DO k = 0, dgStorage % N
+              DO j = 0, dgStorage % N
+                DO i = 0, dgStorage % N   
+ 
+                  f(1,i,j,k) = f(1,i,j,k) + nodalSolution % flux(idir,i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,1,iEl)
+                  f(2,i,j,k) = f(2,i,j,k) + nodalSolution % flux(idir,i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,2,iEl)
+                  f(3,i,j,k) = f(3,i,j,k) + nodalSolution % flux(idir,i,j,k,iEq,iEl)*mesh % elements % Ja(i,j,k,idir,3,iEl)
+
+                ENDDO
+              ENDDO
+            ENDDO
+
+          ENDDO
+
+            DO k = 0, dgStorage % N
+              DO j = 0, dgStorage % N
+                DO i = 0, dgStorage % N   
+
+                  df = 0.0_prec
+                  DO ii = 0, dgStorage % N
+                    df = df + dgStorage % interp % derivativeMatrixTranspose(ii,i)*f(1,ii,j,k) + &
+                              dgStorage % interp % derivativeMatrixTranspose(ii,j)*f(2,i,ii,k) + &
+                              dgStorage % interp % derivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
+                  ENDDO
+                   
+                  nodalSolution % fluxDivergence(i,j,k,iEq,iEl) = df/mesh % elements % J(i,j,k,iEl)
+
+                ENDDO  
+              ENDDO
+            ENDDO
+          ENDDO
+
+      ENDDO
+                            
+
+  END SUBROUTINE Mapped_Strong_FluxDivergence
+
   SUBROUTINE Mapped_Strong_Gradient( nodalSolution, dgStorage, mesh ) 
 
     IMPLICIT NONE
@@ -704,6 +773,53 @@ CONTAINS
   END SUBROUTINE BassiRebay_Gradient_ExternalFaceFlux
 
 #ifdef HAVE_CUDA
+
+  ATTRIBUTES( Global ) SUBROUTINE Mapped_Strong_FluxDivergence_CUDAKernel( flux, Ja, Jac, derivativeMatrixTranspose, fluxDivergence, N, nEq, nEl )
+
+    IMPLICIT NONE
+    INTEGER, DEVICE, INTENT(in)     :: N, nEq, nEl
+    REAL(prec), DEVICE, INTENT(in)  :: flux(1:3,0:N,0:N,0:N,1:nEq,1:nEl) 
+    REAL(prec), DEVICE, INTENT(in)  :: Ja(0:N,0:N,0:N,1:3,1:3,1:nEl) 
+    REAL(prec), DEVICE, INTENT(in)  :: Jac(0:N,0:N,0:N,1:nEl) 
+    REAL(prec), DEVICE, INTENT(in)  :: derivativeMatrixTranspose(0:N,0:N) 
+    REAL(prec), DEVICE, INTENT(out) :: fluxDivergence(0:N,0:N,0:N,1:nEq,1:nEl) 
+    ! Local
+    INTEGER            :: iEl, iEq, i, j, k, idir, ii
+    REAL(prec)         :: df
+    REAL(prec), SHARED :: f(1:3,0:7,0:7,0:7)
+
+      iEl = blockIDx % x
+      iEq = blockIDx % y
+
+      i = threadIDx % x-1
+      j = threadIDx % y-1
+      k = threadIDx % z-1
+
+      f(1,i,j,k) = 0.0_prec
+      f(2,i,j,k) = 0.0_prec
+      f(3,i,j,k) = 0.0_prec
+
+      DO idir = 1, 3
+
+        f(1,i,j,k) = f(1,i,j,k) + flux(idir,i,j,k,iEq,iEl)*Ja(i,j,k,idir,1,iEl)
+        f(2,i,j,k) = f(2,i,j,k) + flux(idir,i,j,k,iEq,iEl)*Ja(i,j,k,idir,2,iEl)
+        f(3,i,j,k) = f(3,i,j,k) + flux(idir,i,j,k,iEq,iEl)*Ja(i,j,k,idir,3,iEl)
+
+      ENDDO
+
+      CALL syncthreads( )
+
+      df = 0.0_prec
+      DO ii = 0, N
+        df = df + derivativeMatrixTranspose(ii,i)*f(1,ii,j,k) + &
+                  derivativeMatrixTranspose(ii,j)*f(2,i,ii,k) + &
+                  derivativeMatrixTranspose(ii,k)*f(3,i,j,ii)
+      ENDDO
+                   
+      fluxDivergence(i,j,k,iEq,iEl) = df/Jac(i,j,k,iEl)
+
+
+  END SUBROUTINE Mapped_Strong_FluxDivergence_CUDAKernel
 
 ! ================================================================================================ !
 ! UpdateDevice_NodalDGSolution_3D 

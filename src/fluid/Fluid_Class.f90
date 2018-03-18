@@ -1255,7 +1255,6 @@ CONTAINS
                                                               myDGSEM % static % boundarySolution_dev, &
                                                               myDGSEM % state % boundaryFlux_dev, &
                                                               myDGSEM % state % boundaryGradientFlux_dev )
-!PRINT*, cudaGetErrorString( cudaGetLastError( ) )
 
 #else
     ! Local
@@ -1352,7 +1351,7 @@ CONTAINS
             DO iEq = 1, myDGSEM % state % nEquations-1
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
               myDGSEM % state % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1)
-!              IF( iEq == 4 )THEN
+              IF( iEq == 4 )THEN
 
                 DO k = 1, 3
                   ! Calculate the LDG flux for the stress tensor.
@@ -1363,20 +1362,20 @@ CONTAINS
                   myDGSEM % state % boundaryGradientFlux(k,ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1)
                 ENDDO
 
-!              ELSE
-!                DO k = 1, 3
-!                  ! Calculate the LDG flux for the stress tensor.
-!                  myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
-!                    (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
-!                    myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
-!                    myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)/&
-!                    (myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) +&
-!                    myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)) )*&
-!                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
-!
-!                  myDGSEM % state % boundaryGradientFlux(k,ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1)
-!                ENDDO
-!              ENDIF
+              ELSE
+                DO k = 1, 3
+                  ! Calculate the LDG flux for the stress tensor.
+                  myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
+                    (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
+                    myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
+                    myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)/&
+                    (myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) +&
+                    myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)) )*&
+                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
+
+                  myDGSEM % state % boundaryGradientFlux(k,ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1)
+                ENDDO
+              ENDIF
             ENDDO
           ENDDO
         ENDDO
@@ -1511,23 +1510,23 @@ CONTAINS
               
               DO k = 1, 3
 
-!                IF( iEq == 4 )THEN
+                IF( iEq == 4 )THEN
                   ! Calculate the Bassi-Rebay (LDG) flux for the stress tensor.
                   myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) +&
                                                                                     myDGSEM % state % externalState(ii,jj,iEq,bID) )*&
                                                                                     myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
                                                                                    
-!                ELSE
-!                  ! Calculate the Bassi-Rebay (LDG) flux for the stress tensor.
-!                  myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
-!                                                                                    (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
-!                                                                                     myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
-!                                                                                    myDGSEM % state % externalState(ii,jj,iEq,bID)/&
-!                                                                                    (myDGSEM % state % externalState(ii,jj,4,bID) +&
-!                                                                                     myDGSEM % static % boundarySolution(i,j,4,s1,e1)) )*&
-!                                                                                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
-!                                                                               
-!                ENDIF
+                ELSE
+                  ! Calculate the Bassi-Rebay (LDG) flux for the stress tensor.
+                  myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
+                                                                                    (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
+                                                                                     myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
+                                                                                    myDGSEM % state % externalState(ii,jj,iEq,bID)/&
+                                                                                    (myDGSEM % state % externalState(ii,jj,4,bID) +&
+                                                                                     myDGSEM % static % boundarySolution(i,j,4,s1,e1)) )*&
+                                                                                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
+                                                                               
+                ENDIF
                      
               ENDDO
             ENDDO
