@@ -2465,7 +2465,7 @@ CONTAINS
 
 #ifdef PASSIVE_TRACERS
 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Pressure",'//&
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure",'//&
       ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
 
 #else
@@ -2489,18 +2489,21 @@ CONTAINS
 
             ! Sound speed estimate for the external and internal states
             c = sqrt( myDGSEM % params % R*T*( ( sol(i,j,k,nEquations,iEl) + bsol(i,j,k,nEquations,iEl) )/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio   )
-
             WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), x(i,j,k,2,iEl), x(i,j,k,3,iEl),&
               sol(i,j,k,1,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,4,iEl), &
               (sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl))/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+#ifdef PASSIVE_TRACERS
+              sol(i,j,k,6,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+#endif
               sol(i,j,k,nEquations,iEl), &
               bsol(i,j,k,4,iEl), &
               bsol(i,j,k,5,iEl)/( bsol(i,j,k,4,iEl) ),&
               bsol(i,j,k,nEquations,iEl),&
               myDGSEM % sourceTerms % drag(i,j,k,iEl), c
+
 
           ENDDO
         ENDDO
