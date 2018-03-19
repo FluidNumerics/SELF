@@ -58,7 +58,6 @@ else ifeq (${FC},pgfortran)
   
     $(info '+CUDA-Fortran')
     OPT+=-Mcuda=${GPU_ARCH}
-#,${CUDA_VERSION}
     ifeq (${PTX_INFO},yes)
       OPT+=,ptxinfo
     endif
@@ -95,6 +94,11 @@ endif
 ifeq (${SKEW_METRICS},yes)
   CPPFLAGS+=-DSKEW_METRICS
 endif
+
+ifeq (${PASSIVE_TRACERS},yes)
+  CPPFLAGS+=-DPASSIVE_TRACERS
+endif
+
 ifeq (${INSITU_VIZ},yes)
   ifeq (${MPI},yes)
     $(info '>>> MPI with in-situ graphics is currently not supported.')
