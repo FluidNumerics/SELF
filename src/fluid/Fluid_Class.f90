@@ -1146,6 +1146,10 @@ CONTAINS
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
 
+#ifdef PASSIVE_TRACERS
+            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) 
+#endif
+
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) ! P
 
           ELSEIF( e2 == INFLOW .AND. p2 == myDGSEM % extComm % myRank )THEN
@@ -1202,6 +1206,9 @@ CONTAINS
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % prescribedState(i,j,4,bID) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % prescribedState(i,j,5,bID) ! potential temperature
+#ifdef PASSIVE_TRACERS
+            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % prescribedState(i,j,6,bID) ! potential temperature
+#endif
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % prescribedState(i,j,nEquations,bID) ! P
 
           ENDIF
@@ -3072,6 +3079,9 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
           externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
+#ifdef PASSIVE_TRACERS
+          externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! tracer
+#endif
           externalState(i,j,nEq_dev,iFace) =  stateBsols(i,j,nEq_dev,s1,e1) ! P
     
         ELSEIF( e2 == INFLOW )THEN
@@ -3127,6 +3137,9 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  prescribedState(i,j,4,iFace) ! rho
           externalState(i,j,5,iFace) =  prescribedState(i,j,5,iFace) ! potential temperature
+#ifdef PASSIVE_TRACERS
+          externalState(i,j,6,iFace) =  prescribedState(i,j,6,iFace) ! tracer
+#endif
           externalState(i,j,nEq_dev,iFace) =  prescribedState(i,j,nEq_dev,iFace) ! P
     
         ENDIF
