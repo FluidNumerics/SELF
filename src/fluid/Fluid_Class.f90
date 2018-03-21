@@ -2309,8 +2309,6 @@ CONTAINS
     P0   = myDGSEM % params % P0
     dTdz = myDGSEM % params % dTdz
 
-    PRINT*, dTdz, AlmostEqual( dTdz,0.0_prec )
- 
     ! /////////////////////  Build the Static/Background State ///////////////////////// !
 
     !$OMP DO
