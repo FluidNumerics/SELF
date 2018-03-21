@@ -1249,7 +1249,6 @@ CONTAINS
                                                               myDGSEM % static % boundarySolution_dev, &
                                                               myDGSEM % state % boundaryFlux_dev, &
                                                               myDGSEM % state % boundaryGradientFlux_dev )
-!PRINT*, cudaGetErrorString( cudaGetLastError( ) )
 
 #else
     ! Local

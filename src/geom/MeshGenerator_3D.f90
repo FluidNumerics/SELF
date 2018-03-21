@@ -49,7 +49,7 @@ PROGRAM MeshGenerator_3D
          CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
                              N = params % polyDeg, &
                              nTargetPoints = params % nPlot, &
-                             quadrature = GAUSS )
+                             quadrature = GAUSS_LOBATTO )
    
          IF( params % topographicShape == Gaussian )THEN
             TopographicShape => GaussianHill
@@ -57,22 +57,31 @@ PROGRAM MeshGenerator_3D
             TopographicShape => DefaultTopography
          ENDIF
          ! Build the Geometry
-            IF( params % MeshType == DoublyPeriodic )THEN
-               PRINT*,' Loading doubly periodic mesh.'
-               CALL mesh % ConstructStructuredMesh( nodal % interp, &
-                 params % nXelem, &
-                 params % nYelem, &
-                 params % nZelem, &
-                 .TRUE. )
-            ELSE
-               PRINT*,' Loading default mesh.'
-               CALL mesh % ConstructStructuredMesh( nodal % interp, &
-                 params % nXelem, &
-                 params % nYelem, &
-                 params % nZelem, &
-                 .FALSE. )
-            ENDIF
-   
+         IF( TRIM( params % UCDMeshFile ) == '' )THEN
+
+           IF( params % MeshType == DoublyPeriodic )THEN
+              PRINT*,' Loading doubly periodic mesh.'
+              CALL mesh % ConstructStructuredMesh( nodal % interp, &
+                params % nXelem, &
+                params % nYelem, &
+                params % nZelem, &
+                .TRUE. )
+           ELSE
+              PRINT*,' Loading default mesh.'
+              CALL mesh % ConstructStructuredMesh( nodal % interp, &
+                params % nXelem, &
+                params % nYelem, &
+                params % nZelem, &
+                .FALSE. )
+           ENDIF
+
+         ELSE   
+
+           CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
+           CALL mesh % WriteTecplot( 'mesh' )
+
+         ENDIF
+
          nElems = mesh % elements % nElements
          nProc  = params % nProcX*params % nProcY*params % nProcZ
          IF( nProc == 0 )THEN
@@ -105,8 +114,17 @@ PROGRAM MeshGenerator_3D
          faceProcOwners  = -1
          faceBoundaryIDs = 0
          faceProcTable   = -5000
-         CALL mesh % PartitionElementsAndNodes( params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
-         
+
+ !        IF( TRIM( params % UCDMeshFile ) == '' )THEN
+
+           CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
+                                                            globalToLocal, nodeLogic, nNodePerProc, &
+                                                            globalToLocalNode, nProc )
+
+ !        ELSE
+
+
+ !        ENDIF        
    
             
          ! Now we generate the local mesh for each process
