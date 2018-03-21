@@ -85,6 +85,9 @@ CONTAINS
                   r = ( (x-0.5_prec*myDGSEM % params % xScale)**2 + (y-0.5_prec*myDGSEM % params % yScale)**2 )
                   myDGSEM % state % prescribedState(i,j,1,iFace) = exp( -r/(800.0_prec) )*myDGSEM % params % v0*&
                                                                     myDGSEM % static % boundarySolution(i,j,4,s1,e1) ! Set the normal momentum (positive inwards)
+#ifdef PASSIVE_TRACERS
+                  myDGSEM % state % prescribedState(i,j,6,iFace) = myDGSEM % static % boundarySolution(i,j,4,s1,e1)*1.0_prec
+#endif
                  
                 ENDDO
               ENDDO

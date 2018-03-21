@@ -94,9 +94,9 @@ MODULE Fluid_Class
   END TYPE Fluid
 
 
-
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
   INTEGER, PRIVATE            :: diagUnits(1:5)
+
 #ifdef PASSIVE_TRACERS
   INTEGER, PARAMETER, PRIVATE :: nEquations   = 7
 #else
@@ -139,7 +139,6 @@ CONTAINS
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 
 #endif
-
     CALL myDGSEM % params % Build( setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
@@ -905,7 +904,6 @@ CONTAINS
 ! ----------------------------------------------------------------------------- !
 
 
-
   END SUBROUTINE GlobalTimeDerivative_Fluid
 !
   SUBROUTINE CalculateSGSCoefficients_Fluid( myDGSEM )
@@ -1347,21 +1345,9 @@ CONTAINS
 
             DO iEq = 1, myDGSEM % state % nEquations-1
 
-#ifdef PASSIVE_TRACERS
-
-              IF( iEq > 5 )THEN
-                myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - MAX( uOut, uIn)*jump(iEq) )*norm
-              ELSE
-                myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-              ENDIF
-
-#else
-
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-
-#endif
-
               myDGSEM % state % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1)
+
               IF( iEq == 4 )THEN
 
                 DO k = 1, 3
@@ -1518,20 +1504,9 @@ CONTAINS
 
 
             DO iEq = 1, myDGSEM % state % nEquations-1
-#ifdef PASSIVE_TRACERS
-
-              IF( iEq > 5 )THEN
-                myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - MAX( uOut, uIn)*jump(iEq) )*norm
-              ELSE
-                myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-              ENDIF
-
-#else
 
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
 
-#endif
-              
               DO k = 1, 3
 
                 IF( iEq == 4 )THEN
@@ -1755,17 +1730,6 @@ CONTAINS
             ENDDO
           ENDDO
    
-        ELSEIF( iEq == 4 )THEN
-
-          DO k = 0, myDGSEM % params % polyDeg
-            DO j = 0, myDGSEM % params % polyDeg
-              DO i = 0, myDGSEM % params % polyDeg
-
-                myDGSEM % state % source(i,j,k,4,iEl) = ( myDGSEM % static % source(i,j,k,4,iEl) -  myDGSEM % state % solution(i,j,k,4,iEl) )/(10.0_prec*myDGSEM % params % dt )
-
-              ENDDO
-            ENDDO
-          ENDDO
         ENDIF
 
       ENDDO
@@ -2902,8 +2866,8 @@ CONTAINS
     j = threadIdx % y - 1
     k = threadIdx % z - 1
   
-    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
-!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+    !G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
+    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) 
   
     solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt_dev*g*G3D(i,j,k,iEq,iEl)
 
@@ -3170,7 +3134,11 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+#ifdef PASSIVE_TRACERS
+   REAL(prec) :: jump(1:6), aS(1:6)
+#else
    REAL(prec) :: jump(1:5), aS(1:5)
+#endif
    REAL(prec) :: fac
 
 
@@ -3242,20 +3210,10 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
       
                          
                   DO iEq = 1, nEq_dev-1
-#ifdef PASSIVE_TRACERS
-                     IF( iEq > 5 )THEN
 
-                       boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - MAX( uIn, uOut )*jump(iEq) )*norm
-
-                     ELSE
-
-                       boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-
-                     ENDIF
-#else
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-#endif
                      boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
+
                      IF( iEq == 4 )THEN
                         DO k = 1, 3
                            ! Calculate the LDG flux for the stress tensor.
@@ -3289,7 +3247,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
 
  END SUBROUTINE InternalFace_StateFlux_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                                  nHat, boundarySolution, boundarySolution_static, &
                                                                  externalState, boundaryFlux, stressFlux )
 
@@ -3311,7 +3269,11 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+#ifdef PASSIVE_TRACERS
+   REAL(prec) :: jump(1:6), aS(1:6)
+#else
    REAL(prec) :: jump(1:5), aS(1:5)
+#endif
    REAL(prec) :: fac
 
 
@@ -3337,8 +3299,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                
                   
                   DO iEq = 1, nEq_dev-1              
-                  jump(iEq)  = externalState(ii,jj,iEq,bID) - &
-                               boundarySolution(i,j,iEq,s1,e1) !outState - inState
+                  jump(iEq)  = externalState(ii,jj,iEq,bID)-boundarySolution(i,j,iEq,s1,e1)
                   ENDDO
                  
                   T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
@@ -3380,29 +3341,13 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                           
                   DO iEq = 1, nEq_dev-1
 
-#ifdef PASSIVE_TRACERS
-
-                     IF( iEq > 5 )THEN
-
-                       boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - MAX( uIn, uOut )*jump(iEq) )*norm
-
-                     ELSE
-
-                       boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-
-                     ENDIF
-
-#else
-
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-
-#endif
 
                      IF( iEq == 4 )THEN
                         DO k = 1, 3
                            ! Calculate the Bassi-Rebay flux for the stress tensor.
                            stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
-                                                                  externalState(ii,jj,iEq,bID)  )*& 
+                                                                    externalState(ii,jj,iEq,bID)  )*& 
                                                                   nHat(k,i,j,s1,e1)
                         ENDDO
                      ELSE
@@ -3533,10 +3478,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                             solution(i,j,k,1,iEl)*fRotY_dev -&
                             solution(i,j,k,4,iEl)*g_dev
 
-    ELSEIF( iEq == 4 )THEN
-    
-      source(i,j,k,4,iEl) = ( staticSource(i,j,k,4,iEl) - solution(i,j,k,4,iEl) )/( 10.0_prec*dt_dev )
-
     ENDIF
   
   END SUBROUTINE CalculateSourceTerms_CUDAKernel
@@ -3618,8 +3559,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
         boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( boundaryStress(i,j,iEq,s1,e1)- &
                                                        boundaryStress(ii,jj,iEq,s2,e2) )! +&
-                                                      ! ( boundaryViscosity(ii,jj,iEq,s2,e2)*boundarySolution(ii,jj,iEq,s2,e2)-&
-                                                      !   boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm )
 
 
 
