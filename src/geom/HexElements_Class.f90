@@ -867,9 +867,9 @@ CONTAINS
     myElements % x(:,:,:,1,:) = xScale*( myElements % x(:,:,:,1,:) )
     myElements % x(:,:,:,2,:) = yScale*( myElements % x(:,:,:,2,:) )
     myElements % x(:,:,:,3,:) = zScale*( myElements % x(:,:,:,3,:) )
-    myElements % xBound(:,:,:,1,:) = xScale*( myElements % xBound(:,:,:,1,:) )
-    myElements % xBound(:,:,:,2,:) = yScale*( myElements % xBound(:,:,:,2,:) )
-    myElements % xBound(:,:,:,3,:) = zScale*( myElements % xBound(:,:,:,3,:) )
+    myElements % xBound(:,:,1,:,:) = xScale*( myElements % xBound(:,:,1,:,:) )
+    myElements % xBound(:,:,2,:,:) = yScale*( myElements % xBound(:,:,2,:,:) )
+    myElements % xBound(:,:,3,:,:) = zScale*( myElements % xBound(:,:,3,:,:) )
 
     ! Update the boundary metrics -- normals and normal lengths
     CALL myElements % GenerateMetrics( interp )

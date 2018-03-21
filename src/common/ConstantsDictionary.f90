@@ -114,6 +114,7 @@
    INTEGER, PARAMETER :: RADIATION      = -101
    INTEGER, PARAMETER :: PRESCRIBED     = -102
    INTEGER, PARAMETER :: DRAG_SLIP      = -103
+   INTEGER, PARAMETER :: INFLOW         = -104
   !
   !==============================================!
   ! ---------- Continuous Galerkin ------------- !

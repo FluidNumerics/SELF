@@ -94,10 +94,14 @@ MODULE Fluid_Class
   END TYPE Fluid
 
 
-
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
   INTEGER, PRIVATE            :: diagUnits(1:5)
+
+#ifdef PASSIVE_TRACERS
+  INTEGER, PARAMETER, PRIVATE :: nEquations   = 7
+#else
   INTEGER, PARAMETER, PRIVATE :: nEquations   = 6
+#endif
 
 #ifdef HAVE_CUDA
  INTEGER, CONSTANT    :: nEq_dev
@@ -111,7 +115,7 @@ MODULE Fluid_Class
  INTEGER, CONSTANT    :: nFaces_dev
  INTEGER, CONSTANT    :: nBoundaryFaces_dev
  INTEGER, CONSTANT    :: bufferSize_dev
- REAL(prec), CONSTANT :: R_dev, Cv_dev, P0_dev, hCapRatio_dev, rC_dev, g_dev
+ REAL(prec), CONSTANT :: R_dev, Cv_dev, P0_dev, hCapRatio_dev, rC_dev, g_dev, dt_dev
  REAL(prec), CONSTANT :: viscLengthScale_dev, dScale_dev, Cd_dev
  REAL(prec), CONSTANT :: fRotX_dev, fRotY_dev, fRotZ_dev
 #endif
@@ -135,7 +139,6 @@ CONTAINS
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 
 #endif
-
     CALL myDGSEM % params % Build( setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
@@ -225,7 +228,7 @@ CONTAINS
       hCapRatio_dev = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
       rC_dev        = myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
       g_dev         = myDGSEM % params % g
-      !dt_dev        = myDGSEM % params % dt
+      dt_dev        = myDGSEM % params % dt
       viscLengthScale_dev = myDGSEM % params % viscLengthScale
       fRotX_dev     = myDGSEM % params % fRotX
       fRotY_dev     = myDGSEM % params % fRotY
@@ -319,7 +322,7 @@ CONTAINS
     REAL(prec)                  :: t0
 #ifdef HAVE_CUDA
     REAL(prec)         :: t, dt
-    REAL(prec), DEVICE :: t_dev, dt_dev
+    REAL(prec), DEVICE :: t_dev
     REAL(prec), DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
@@ -337,7 +340,6 @@ CONTAINS
 
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
-    dt_dev = dt
 
     DO iT = 1, nT
 
@@ -347,7 +349,7 @@ CONTAINS
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt_dev, &
+        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
@@ -373,7 +375,7 @@ CONTAINS
         t = myDGSEM % simulationTime + rk3_b(m)*dt
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), dt_dev, &
+        CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
@@ -902,7 +904,6 @@ CONTAINS
 ! ----------------------------------------------------------------------------- !
 
 
-
   END SUBROUTINE GlobalTimeDerivative_Fluid
 !
   SUBROUTINE CalculateSGSCoefficients_Fluid( myDGSEM )
@@ -1086,19 +1087,9 @@ CONTAINS
             ENDDO
           ELSEIF( e2 == RADIATION .AND. p2 == myDGSEM % extComm % myRank )THEN
 
-            ! momentum
-            ! rho*u
-            myDGSEM % state % externalState(i,j,1,bID) = 0.0_prec
-            ! rho*v
-            myDGSEM % state % externalState(i,j,2,bID) = 0.0_prec
-            ! rho*w
-            myDGSEM % state % externalState(i,j,3,bID) = 0.0_prec
-            ! Density is set to the static density field
-            myDGSEM % state % externalState(i,j,4,bID) = 0.0_prec
-            ! Potential Temperature anomaly (multiplied by density) is set to its static state
-            myDGSEM % state % externalState(i,j,5,bID) = 0.0_prec
-            ! Pressure anomaly is set to zero
-            myDGSEM % state % externalState(i,j,6,bID) = 0.0_prec
+            DO iEq = 1, myDGSEM % state % nEquations
+              myDGSEM % state % externalState(i,j,iEq,bID) = 0.0_prec
+            ENDDO
 
           ELSEIF( e2 == NO_NORMAL_FLOW .AND. p2 == myDGSEM % extComm % myRank )THEN
 
@@ -1152,9 +1143,14 @@ CONTAINS
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
 
-          ELSEIF( e2 == DRAG_SLIP.AND. p2 == myDGSEM % extComm % myRank )THEN
+#ifdef PASSIVE_TRACERS
+            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) 
+#endif
+
+            myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) ! P
+
+          ELSEIF( e2 == INFLOW .AND. p2 == myDGSEM % extComm % myRank )THEN
 
             ! normal
             nx = myDGSEM % mesh % elements % nHat(1,i,j,s1,e1)
@@ -1189,34 +1185,32 @@ CONTAINS
             ty = ty/norm
             tz = tz/norm
 
-            speed = sqrt( myDGSEM % state % boundarySolution(i,j,1,s1,e1)**2 + &
-              myDGSEM % state % boundarySolution(i,j,2,s1,e1)**2 + &
-              myDGSEM % state % boundarySolution(i,j,3,s1,e1)**2 )/&
-              myDGSEM % state % boundarySolution(i,j,4,s1,e1)
-
             un = myDGSEM % state % boundarySolution(i,j,1,s1,e1)*nx + &
-              myDGSEM % state % boundarySolution(i,j,2,s1,e1)*ny + &
-              myDGSEM % state % boundarySolution(i,j,3,s1,e1)*nz
+                 myDGSEM % state % boundarySolution(i,j,2,s1,e1)*ny + &
+                 myDGSEM % state % boundarySolution(i,j,3,s1,e1)*nz + &
+                 myDGSEM % state % prescribedState(i,j,1,bID)
+           
+            us = myDGSEM % state % boundarySolution(i,j,1,s1,e1)*sx    + &
+              myDGSEM % state % boundarySolution(i,j,2,s1,e1)*sy    + &
+              myDGSEM % state % boundarySolution(i,j,3,s1,e1)*sz
+            ut = myDGSEM % state % boundarySolution(i,j,1,s1,e1)*tx  + &
+              myDGSEM % state % boundarySolution(i,j,2,s1,e1)*ty  + &
+              myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz
 
-            us = ( myDGSEM % state % boundarySolution(i,j,1,s1,e1)*sx + &
-              myDGSEM % state % boundarySolution(i,j,2,s1,e1)*sy + &
-              myDGSEM % state % boundarySolution(i,j,3,s1,e1)*sz )*&
-              (1.0_prec-myDGSEM % params % Cd*myDGSEM % params % dragScale*speed)
 
-            ut = ( myDGSEM % state % boundarySolution(i,j,1,s1,e1)*tx + &
-              myDGSEM % state % boundarySolution(i,j,2,s1,e1)*ty + &
-              myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz )*&
-              (1.0_prec-myDGSEM % params % Cd*myDGSEM % params % dragScale*speed)
 
             myDGSEM % state % externalState(i,j,1,bID) = -nx*un + us*sx + ut*tx ! u
             myDGSEM % state % externalState(i,j,2,bID) = -ny*un + us*sy + ut*ty ! v
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
-            myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
-            myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) ! P
-
+            myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % prescribedState(i,j,4,bID) ! rho
+            myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % prescribedState(i,j,5,bID) ! potential temperature
+#ifdef PASSIVE_TRACERS
+            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % prescribedState(i,j,6,bID) ! potential temperature
+#endif
+            myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % prescribedState(i,j,nEquations,bID) ! P
 
           ENDIF
+
         ENDDO
       ENDDO
     ENDDO
@@ -1302,8 +1296,8 @@ CONTAINS
 
             ! Sound speed estimate for the external and internal states
             cOut = sqrt( myDGSEM % params % R *T* &
-              ( (myDGSEM % state % boundarySolution(ii,jj,6,s2,e2)+&
-              myDGSEM % static % boundarySolution(ii,jj,6,s2,e2))/&
+              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
+              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
               myDGSEM % params % P0 )**myDGSEM % params % rC   )
 
             T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + &
@@ -1312,8 +1306,8 @@ CONTAINS
               myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
             cIn  = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % state % boundarySolution(i,j,6,s1,e1)+&
-              myDGSEM % static % boundarySolution(i,j,6,s1,e1))/&
+              ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
+              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1))/&
               myDGSEM % params % P0 )**myDGSEM % params % rC  )
 
             ! External normal velocity component
@@ -1343,14 +1337,16 @@ CONTAINS
 
             DO k = 1, 3
               ! Momentum flux due to pressure
-              aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,6,s1,e1) + &
-                myDGSEM % state % boundarySolution(ii,jj,6,s2,e2))*nHat(k)
+              aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) + &
+                myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2))*nHat(k)
             ENDDO
 
 
             DO iEq = 1, myDGSEM % state % nEquations-1
+
               myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
               myDGSEM % state % boundaryFlux(ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1)
+
               IF( iEq == 4 )THEN
 
                 DO k = 1, 3
@@ -1376,6 +1372,7 @@ CONTAINS
                   myDGSEM % state % boundaryGradientFlux(k,ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1)
                 ENDDO
               ENDIF
+
             ENDDO
           ENDDO
         ENDDO
@@ -1464,16 +1461,16 @@ CONTAINS
               (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % externalState(ii,jj,4,bID))
 
             cOut = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % state % externalState(ii,jj,6,bID)+&
-              myDGSEM % static % boundarySolution(i,j,6,s1,e1) )/&
+              ( (myDGSEM % state % externalState(ii,jj,nEquations,bID)+&
+              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
               myDGSEM % params % P0 )**myDGSEM % params % rC   )
 
             T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
                 (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1))
 
             cIn  = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % state % boundarySolution(i,j,6,s1,e1)+&
-              myDGSEM % static % boundarySolution(i,j,6,s1,e1) )/&
+              ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
+              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
               myDGSEM % params % P0 )**myDGSEM % params % rC  )
 
             ! External normal velocity component
@@ -1500,14 +1497,15 @@ CONTAINS
 
             DO k = 1, 3
               ! Momentum flux due to pressure
-              aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,6,s1,e1) + &
-                myDGSEM % state % externalState(ii,jj,6,bID))*nHat(k)
+              aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) + &
+                myDGSEM % state % externalState(ii,jj,nEquations,bID))*nHat(k)
             ENDDO
 
 
             DO iEq = 1, myDGSEM % state % nEquations-1
-              myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-              
+
+              myDGSEM % state % boundaryFlux(i,j,iEq,s1,e1) =  0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+
               DO k = 1, 3
 
                 IF( iEq == 4 )THEN
@@ -1589,6 +1587,7 @@ CONTAINS
 
     CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
                                                            myDGSEM % static % solution_dev, &
+                                                           myDGSEM % static % source_dev, &
                                                            myDGSEM % state % source_dev, &
                                                            myDGSEM % sourceTerms % drag_dev )
   
@@ -1648,15 +1647,15 @@ CONTAINS
 
                 myDGSEM % state % flux(1,i,j,k,iEq,iEl) = myDGSEM % state % flux(1,i,j,k,iEq,iEl) + &
                   myDGSEM % mesh % elements % Ja(i,j,k,iEq,1,iEl)*&
-                  myDGSEM % state % solution(i,j,k,6,iEl)
+                  myDGSEM % state % solution(i,j,k,nEquations,iEl)
 
                 myDGSEM % state % flux(2,i,j,k,iEq,iEl) = myDGSEM % state % flux(2,i,j,k,iEq,iEl) + &
                   myDGSEM % mesh % elements % Ja(i,j,k,iEq,2,iEl)*&
-                  myDGSEM % state % solution(i,j,k,6,iEl)
+                  myDGSEM % state % solution(i,j,k,nEquations,iEl)
 
                 myDGSEM % state % flux(3,i,j,k,iEq,iEl) = myDGSEM % state % flux(3,i,j,k,iEq,iEl) + &
                   myDGSEM % mesh % elements % Ja(i,j,k,iEq,3,iEl)*&
-                  myDGSEM % state % solution(i,j,k,6,iEl)
+                  myDGSEM % state % solution(i,j,k,nEquations,iEl)
 
               ENDDO
             ENDDO
@@ -1729,6 +1728,7 @@ CONTAINS
               ENDDO
             ENDDO
           ENDDO
+   
         ENDIF
 
       ENDDO
@@ -2276,8 +2276,8 @@ CONTAINS
             ! THEN P = (rho*theta*R/P0^rC)^(Cp/Cv)
             ! And P' = P - P_static
             rhoT = (myDGSEM % static % solution(i,j,k,5,iEl) + myDGSEM % state % solution(i,j,k,5,iEl) )
-            myDGSEM % state % solution(i,j,k,6,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
-                                                      myDGSEM % static % solution(i,j,k,6,iEl)
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
+                                                      myDGSEM % static % solution(i,j,k,nEquations,iEl)
 
           ENDDO
         ENDDO
@@ -2308,8 +2308,6 @@ CONTAINS
     P0   = myDGSEM % params % P0
     dTdz = myDGSEM % params % dTdz
 
-    PRINT*, dTdz, AlmostEqual( dTdz,0.0_prec )
- 
     ! /////////////////////  Build the Static/Background State ///////////////////////// !
 
     !$OMP DO
@@ -2370,7 +2368,7 @@ CONTAINS
 
     !$OMP MASTER
     DO iEl = 1, myDGSEM % mesh % elements % nElements
-      myDGSEM % static % solution(:,:,:,6,iEl) = myDGSEM % state % solution(:,:,:,6,iEl)
+      myDGSEM % static % solution(:,:,:,nEquations,iEl) = myDGSEM % state % solution(:,:,:,nEquations,iEl)
     ENDDO
     !$OMP END MASTER
 
@@ -2397,10 +2395,6 @@ CONTAINS
     REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
     REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
-!    REAL(prec), DEVICE  :: x_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
-!    REAL(prec), DEVICE  :: sol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
-!    REAL(prec), DEVICE  :: bsol_dev(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
-!    INTEGER,  DEVICE     :: nDim_dev
     INTEGER :: istat
 #endif
     INTEGER       :: i, j, k, iEl, iEq, fUnit
@@ -2410,43 +2404,6 @@ CONTAINS
     CHARACTER(13) :: timeStampString
 
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
-!#ifdef HAVE_CUDA
-!
-!
-!    nDim_dev = 3
-!
-!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution_dev, &
-!                                                                     sol_dev, myDGSEM % state % nEquations_dev, &
-!                                                                     myDGSEM % mesh % elements % nElements_dev )  
-!
-!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution_dev, &
-!                                                                     bsol_dev, myDGSEM % static % nEquations_dev, &
-!                                                                     myDGSEM % mesh % elements % nElements_dev )  
-!
-!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x_dev, &
-!                                                                     x_dev, nDim_dev, &
-!                                                                     myDGSEM % mesh % elements % nElements_dev )  
-!
-!    x = x_dev
-!    sol = sol_dev
-!    bsol = bsol_dev
-!    istat = cudaDeviceSynchronize( )
-!
-!#else
-!
-!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % state % solution, &
-!                                                                     sol, myDGSEM % state % nEquations, &
-!                                                                     myDGSEM % mesh % elements % nElements )  
-!
-!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % static % solution, &
-!                                                                     bsol, myDGSEM % static % nEquations, &
-!                                                                     myDGSEM % mesh % elements % nElements )  
-!
-!    CALL myDGSEM % dgStorage % interp % ApplyInterpolationMatrix_3D( myDGSEM % mesh % elements % x, &
-!                                                                     x, 3, &
-!                                                                     myDGSEM % mesh % elements % nElements )  
-!#endif
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
@@ -2474,8 +2431,17 @@ CONTAINS
       FORM='formatted', &
       STATUS='replace')
 
+#ifdef PASSIVE_TRACERS
+
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure",'//&
+      ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
+
+#else
+
     WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Pressure",'//&
-      ' "u_b", "v_b", "w_b", "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
+      ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
+
+#endif
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
@@ -2490,21 +2456,23 @@ CONTAINS
             T =   (bsol(i,j,k,5,iEl) + sol(i,j,k,5,iEl))/(bsol(i,j,k,4,iEl)+sol(i,j,k,4,iEl) )
 
             ! Sound speed estimate for the external and internal states
-            c = sqrt( myDGSEM % params % R*T*( ( sol(i,j,k,6,iEl) + bsol(i,j,k,6,iEl) )/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio   )
+            c = sqrt( myDGSEM % params % R*T*( ( sol(i,j,k,nEquations,iEl) + bsol(i,j,k,nEquations,iEl) )/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio   )
             WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), x(i,j,k,2,iEl), x(i,j,k,3,iEl),&
               sol(i,j,k,1,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,4,iEl), &
               (sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl))/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,6,iEl), &
-              bsol(i,j,k,1,iEl)/( bsol(i,j,k,4,iEl) ), &
-              bsol(i,j,k,2,iEl)/( bsol(i,j,k,4,iEl) ), &
-              bsol(i,j,k,3,iEl)/( bsol(i,j,k,4,iEl) ), &
+#ifdef PASSIVE_TRACERS
+              sol(i,j,k,6,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+#endif
+              sol(i,j,k,nEquations,iEl), &
               bsol(i,j,k,4,iEl), &
               bsol(i,j,k,5,iEl)/( bsol(i,j,k,4,iEl) ),&
-              bsol(i,j,k,6,iEl),&
+              bsol(i,j,k,nEquations,iEl),&
               myDGSEM % sourceTerms % drag(i,j,k,iEl), c
+
+
           ENDDO
         ENDDO
       ENDDO
@@ -2717,6 +2685,10 @@ CONTAINS
         WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
         thisRec = thisRec+1
       ENDDO
+      DO iEq = 1, myDGSEM % state % nEquations
+        WRITE( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
+        thisRec = thisRec+1
+      ENDDO
 
       WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
       thisRec = thisRec+1
@@ -2784,6 +2756,10 @@ CONTAINS
         ENDDO
         DO iEq = 1, myDGSEM % state % nEquations
           READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
+          thisRec = thisRec+1
+        ENDDO
+        DO iEq = 1, myDGSEM % state % nEquations
+          READ( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
           thisRec = thisRec+1
         ENDDO
 
@@ -2868,11 +2844,11 @@ CONTAINS
 ! ============================================================================================================================ !
 !------------------------------------------- CUDA Kernels Below -------------------------------------------------------------- !
 ! ============================================================================================================================ !
-  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, dt, solution, fluxDivergence, source, diffusiveFluxDivergence )
+  ATTRIBUTES(Global) SUBROUTINE UpdateG3D_CUDAKernel( G3D, a, g, solution, fluxDivergence, source, diffusiveFluxDivergence )
   
     IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(inout) :: G3D(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
-    REAL(prec), DEVICE, INTENT(in)    :: a, g, dt
+    REAL(prec), DEVICE, INTENT(in)    :: a, g
     REAL(prec), DEVICE, INTENT(inout) :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)    :: source(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)    :: fluxDivergence(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
@@ -2888,9 +2864,8 @@ CONTAINS
     k = threadIdx % z - 1
   
     G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - fluxDivergence(i,j,k,iEq,iEl) + diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
-!    G3D(i,j,k,iEq,iEl)      = a*G3D(i,j,k,iEq,iEl) - diffusiveFluxDivergence(i,j,k,iEq,iEl) + source(i,j,k,iEq,iEl)
   
-    solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt*g*G3D(i,j,k,iEq,iEl)
+    solution(i,j,k,iEq,iEl) = solution(i,j,k,iEq,iEl) + dt_dev*g*G3D(i,j,k,iEq,iEl)
 
   
   END SUBROUTINE UpdateG3D_CUDAKernel
@@ -3064,72 +3039,71 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
           externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-          externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
+#ifdef PASSIVE_TRACERS
+          externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! tracer
+#endif
+          externalState(i,j,nEq_dev,iFace) =  stateBsols(i,j,nEq_dev,s1,e1) ! P
     
-   !     ELSEIF( e2 == DRAG_SLIP )THEN
-   ! 
-   !       ! normal
-   !       nx = nHat(1,i,j,s1,e1) !**
-   !       ny = nHat(2,i,j,s1,e1)
-   !       nz = nHat(3,i,j,s1,e1)
-   !       norm = sqrt( nx*nx + ny*ny + nz*nz )
-   !       nx = nx/norm
-   !       ny = ny/norm
-   !       nz = nz/norm
-   ! 
-   !       ! tangent (built by performing 90 deg rotation in y - IF zero, performs rotation in x)
-   !       IF( nz == 0.0_prec .AND. ny == 0.0_prec )THEN ! rotate about y-axis
-   !         sx = -nz
-   !         sy = 0.0_prec
-   !         sz = nx
-   !       ELSE
-   !         sx = 0.0_prec
-   !         sy = nz
-   !         sz = -ny
-   !       ENDIF
-   ! 
-   !       norm = sqrt( sx*sx + sy*sy + sz*sz )
-   !       sx = sx/norm
-   !       sy = sy/norm
-   !       sz = sz/norm
-   ! 
-   !       !binormal
-   !       tx = sy*nz - sz*ny
-   !       ty = nx*sz - nz*sx
-   !       tz = sx*ny - nx*sy
-   !       norm = sqrt( tx*tx + ty*ty + tz*tz )
-   !       tx = tx/norm
-   !       ty = ty/norm
-   !       tz = tz/norm
-   ! 
-   !       speed = ( stateBsols(i,j,1,s1,e1)**2 +&
-   !         stateBsols(i,j,2,s1,e1)**2 +&
-   !         stateBsols(i,j,3,s1,e1)**2 )/&
-   !         stateBsols(i,j,4,s1,e1)
-   ! 
-   !       un = stateBsols(i,j,1,s1,e1)*nx + &
-   !         stateBsols(i,j,2,s1,e1)*ny + &
-   !         stateBsols(i,j,3,s1,e1)*nz
-   ! 
-   !       us = ( stateBsols(i,j,1,s1,e1)*sx + &
-   !         stateBsols(i,j,2,s1,e1)*sy + &
-   !         stateBsols(i,j,3,s1,e1)*sz )*&
-   !         (1.0_prec-Cd_dev*dScale_dev*speed)
-   ! 
-   !       ut = ( stateBsols(i,j,1,s1,e1)*tx + &
-   !         stateBsols(i,j,2,s1,e1)*ty + &
-   !         stateBsols(i,j,3,s1,e1)*tz )*&
-   !         (1.0_prec-Cd_dev*dScale_dev*speed)
-   ! 
-   !       externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
-   !       externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
-   !       externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
-   !       externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
-   !       externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-   !       externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! P
+        ELSEIF( e2 == INFLOW )THEN
     
+          ! normal
+          nx = nHat(1,i,j,s1,e1) !**
+          ny = nHat(2,i,j,s1,e1)
+          nz = nHat(3,i,j,s1,e1)
+          norm = sqrt( nx*nx + ny*ny + nz*nz )
+          nx = nx/norm
+          ny = ny/norm
+          nz = nz/norm
+    
+          ! tangent (built by performing 90 deg rotation in y - IF zero, performs rotation in x)
+          IF( nz == 0.0_prec .AND. ny == 0.0_prec )THEN ! rotate about y-axis
+            sx = -nz
+            sy = 0.0_prec
+            sz = nx
+          ELSE
+            sx = 0.0_prec
+            sy = nz
+            sz = -ny
+          ENDIF
+    
+          norm = sqrt( sx*sx + sy*sy + sz*sz )
+          sx = sx/norm
+          sy = sy/norm
+          sz = sz/norm
+    
+          !binormal
+          tx = sy*nz - sz*ny
+          ty = nx*sz - nz*sx
+          tz = sx*ny - nx*sy
+          norm = sqrt( tx*tx + ty*ty + tz*tz )
+          tx = tx/norm
+          ty = ty/norm
+          tz = tz/norm
+    
+          un = stateBsols(i,j,1,s1,e1)*nx + &
+               stateBsols(i,j,2,s1,e1)*ny + &
+               stateBsols(i,j,3,s1,e1)*nz + &
+               prescribedState(i,j,1,iFace)
+
+          us = stateBsols(i,j,1,s1,e1)*sx    + &
+            stateBsols(i,j,2,s1,e1)*sy    + &
+            stateBsols(i,j,3,s1,e1)*sz
+          ut = stateBsols(i,j,1,s1,e1)*tx  + &
+            stateBsols(i,j,2,s1,e1)*ty  + &
+            stateBsols(i,j,3,s1,e1)*tz
+    
+          externalState(i,j,1,iFace) = -nx*un + us*sx + ut*tx ! u
+          externalState(i,j,2,iFace) = -ny*un + us*sy + ut*ty ! v
+          externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
+          externalState(i,j,4,iFace) =  prescribedState(i,j,4,iFace) ! rho
+          externalState(i,j,5,iFace) =  prescribedState(i,j,5,iFace) ! potential temperature
+#ifdef PASSIVE_TRACERS
+          externalState(i,j,6,iFace) =  prescribedState(i,j,6,iFace) ! tracer
+#endif
+          externalState(i,j,nEq_dev,iFace) =  prescribedState(i,j,nEq_dev,iFace) ! P
     
         ENDIF
+
       ENDIF
     
   END SUBROUTINE UpdateExternalState_CUDAKernel
@@ -3156,7 +3130,11 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+#ifdef PASSIVE_TRACERS
+   REAL(prec) :: jump(1:6), aS(1:6)
+#else
    REAL(prec) :: jump(1:5), aS(1:5)
+#endif
    REAL(prec) :: fac
 
 
@@ -3191,13 +3169,13 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                           
                   ! Sound speed estimate for the external and internal states
                   cOut = sqrt( R_dev*T* &
-                              ( (boundarySolution(ii,jj,6,s2,e2)+boundarySolution_static(ii,jj,6,s2,e2))/ P0_dev )**rC_dev   )
+                              ( (boundarySolution(ii,jj,nEq_dev,s2,e2)+boundarySolution_static(ii,jj,nEq_dev,s2,e2))/ P0_dev )**rC_dev   )
                         
                   T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
                           (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )        
                              
                   cIn  = sqrt( R_dev*T* &
-                              ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
+                              ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
                                
                   ! External normal velocity component
                   uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
@@ -3222,14 +3200,16 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                   
                   DO k = 1, 3
                   ! Momentum flux due to pressure
-                  aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1) + &
-                                   boundarySolution(ii,jj,6,s2,e2))*nHat(k,i,j,s1,e1)/norm
+                  aS(k) = aS(k) + (boundarySolution(i,j,nEq_dev,s1,e1) + &
+                                   boundarySolution(ii,jj,nEq_dev,s2,e2))*nHat(k,i,j,s1,e1)/norm
                   ENDDO    
       
                          
                   DO iEq = 1, nEq_dev-1
+
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
                      boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
+
                      IF( iEq == 4 )THEN
                         DO k = 1, 3
                            ! Calculate the LDG flux for the stress tensor.
@@ -3263,7 +3243,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
 
  END SUBROUTINE InternalFace_StateFlux_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
+ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                                  nHat, boundarySolution, boundarySolution_static, &
                                                                  externalState, boundaryFlux, stressFlux )
 
@@ -3285,7 +3265,11 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
+#ifdef PASSIVE_TRACERS
+   REAL(prec) :: jump(1:6), aS(1:6)
+#else
    REAL(prec) :: jump(1:5), aS(1:5)
+#endif
    REAL(prec) :: fac
 
 
@@ -3311,21 +3295,20 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                
                   
                   DO iEq = 1, nEq_dev-1              
-                  jump(iEq)  = externalState(ii,jj,iEq,bID) - &
-                               boundarySolution(i,j,iEq,s1,e1) !outState - inState
+                  jump(iEq)  = externalState(ii,jj,iEq,bID)-boundarySolution(i,j,iEq,s1,e1)
                   ENDDO
                  
                   T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
                           (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
                  ! Sound speed estimate for the external and internal states
                   cOut = sqrt( R_dev*T* &
-                              ( (externalState(ii,jj,6,bID)+boundarySolution_static(i,j,6,s1,e1))/ P0_dev )**rC_dev   )
+                              ( (externalState(ii,jj,nEq_dev,bID)+boundarySolution_static(i,j,nEq_dev,s1,e1))/ P0_dev )**rC_dev   )
                   
                   T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
                           (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
                                    
                   cIn  = sqrt( R_dev*T* &
-                              ( (boundarySolution(i,j,6,s1,e1)+boundarySolution_static(i,j,6,s1,e1))/P0_dev )**rC_dev  )
+                              ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
                                
                   ! External normal velocity component
                   uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
@@ -3348,17 +3331,19 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
                   
                   ! Pressure !
                   DO k = 1, 3         
-                  aS(k) = aS(k) + (boundarySolution(i,j,6,s1,e1)+externalState(ii,jj,6,bID))*nHat(k,i,j,s1,e1)/norm
+                  aS(k) = aS(k) + (boundarySolution(i,j,nEq_dev,s1,e1)+externalState(ii,jj,nEq_dev,bID))*nHat(k,i,j,s1,e1)/norm
                   ENDDO
                   
                           
                   DO iEq = 1, nEq_dev-1
+
                      boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+
                      IF( iEq == 4 )THEN
                         DO k = 1, 3
                            ! Calculate the Bassi-Rebay flux for the stress tensor.
                            stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
-                                                                  externalState(ii,jj,iEq,bID)  )*& 
+                                                                    externalState(ii,jj,iEq,bID)  )*& 
                                                                   nHat(k,i,j,s1,e1)
                         ENDDO
                      ELSE
@@ -3428,11 +3413,11 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
     IF( iEq <= 3 )THEN
 
-      flux(1,i,j,k,iEq,iEl) = flux_local(1) + Ja(i,j,k,iEq,1,iEl)*solution(i,j,k,6,iEl)
+      flux(1,i,j,k,iEq,iEl) = flux_local(1) + Ja(i,j,k,iEq,1,iEl)*solution(i,j,k,nEq_dev,iEl)
 
-      flux(2,i,j,k,iEq,iEl) = flux_local(2) + Ja(i,j,k,iEq,2,iEl)*solution(i,j,k,6,iEl)
+      flux(2,i,j,k,iEq,iEl) = flux_local(2) + Ja(i,j,k,iEq,2,iEl)*solution(i,j,k,nEq_dev,iEl)
 
-      flux(3,i,j,k,iEq,iEl) = flux_local(3) + Ja(i,j,k,iEq,3,iEl)*solution(i,j,k,6,iEl)
+      flux(3,i,j,k,iEq,iEl) = flux_local(3) + Ja(i,j,k,iEq,3,iEl)*solution(i,j,k,nEq_dev,iEl)
 
     ELSE
 
@@ -3444,13 +3429,14 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
   
   END SUBROUTINE CalculateFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, source, drag )
+  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, staticSource, source, drag )
   
     IMPLICIT NONE
-    REAL(prec), DEVICE, INTENT(in)  :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
-    REAL(prec), DEVICE, INTENT(in)  :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
-    REAL(prec), DEVICE, INTENT(in)  :: drag(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEl_dev)
-    REAL(prec), DEVICE, INTENT(out) :: source(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: drag(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: staticSource(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(inout) :: source(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
      ! Local
     INTEGER    :: i, j, k, row, col
     INTEGER    :: iEl, iEq
@@ -3569,8 +3555,6 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
 
         boundaryStressFlux(i,j,iEq,s1,e1) = 0.5_prec*( boundaryStress(i,j,iEq,s1,e1)- &
                                                        boundaryStress(ii,jj,iEq,s2,e2) )! +&
-                                                      ! ( boundaryViscosity(ii,jj,iEq,s2,e2)*boundarySolution(ii,jj,iEq,s2,e2)-&
-                                                      !   boundaryViscosity(i,j,iEq,s1,e1)*boundarySolution(i,j,iEq,s1,e1) )/viscLengthScale_dev*norm )
 
 
 
@@ -3690,7 +3674,7 @@ ATTRIBUTES(Global) SUBROUTINE BoundaryFace_StateFlux_CUDAKernel( elementIDs, ele
      ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
      ! And P' = P - P_static
     rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
-    solution(i,j,k,6,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,6,iEl)
+    solution(i,j,k,nEq_dev,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
   
   END SUBROUTINE EquationOfState_CUDAKernel
 !
