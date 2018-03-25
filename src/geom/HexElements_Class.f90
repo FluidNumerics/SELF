@@ -882,6 +882,84 @@ CONTAINS
 
   END SUBROUTINE ScaleGeometry_HexElements
 !
+  SUBROUTINE CalculateComputationalCoordinates( myElements, interp, x, s, elements, nCoordinates )
+    IMPLICIT NONE
+    CLASS( HexElements ), INTENT(in) :: myElements
+    TYPE( Lagrange ), INTENT(in)     :: interp
+    INTEGER, INTENT(in)              :: nCoordinates
+    REAL(prec), INTENT(in)           :: x(1:3,1:nCoordinates)
+    REAL(prec), INTENT(out)          :: s(1:3,1:nCoordinates)
+    INTEGER, INTENT(out)             :: elements(1:nCoordinates)
+    ! Local
+    INTEGER    :: i, iEl, kIt, row, col
+    REAL(prec) :: r(1:3), si(1:3), xi(1:3), delta(1:3), A(1:3,1:3), Ainv(1:3,1:3), dMag 
+    LOGICAL    :: converged
+
+      elements = 0
+      s = 0.0_prec
+
+      DO i = 1, nCoordinates
+
+        DO iEl = 1, myElements % nElements
+
+          si(1:3) = 0.0_prec
+
+          converged = .FALSE.
+
+          DO kIt = 1, newtonMax
+
+            xi(1) = interp % Interpolate_3D( myElements % x(1,:,:,:,iEl), si )
+            xi(2) = interp % Interpolate_3D( myElements % x(2,:,:,:,iEl), si )
+            xi(3) = interp % Interpolate_3D( myElements % x(3,:,:,:,iEl), si )
+              
+            A(1,1) = interp % Interpolate_3D( myElements % dxds(:,:,:,iEl), si )
+            A(1,2) = interp % Interpolate_3D( myElements % dxdp(:,:,:,iEl), si )
+            A(1,3) = interp % Interpolate_3D( myElements % dxdq(:,:,:,iEl), si )
+
+            A(2,1) = interp % Interpolate_3D( myElements % dyds(:,:,:,iEl), si )
+            A(2,2) = interp % Interpolate_3D( myElements % dydp(:,:,:,iEl), si )
+            A(2,3) = interp % Interpolate_3D( myElements % dydq(:,:,:,iEl), si )
+
+            A(3,1) = interp % Interpolate_3D( myElements % dzds(:,:,:,iEl), si )
+            A(3,2) = interp % Interpolate_3D( myElements % dzdp(:,:,:,iEl), si )
+            A(3,3) = interp % Interpolate_3D( myElements % dzdq(:,:,:,iEl), si )
+
+            Ainv = Invert_3x3( A )
+            
+            r(1:3) = x(1:3,i) - xi(1:3) 
+
+            dMag = 0.0_prec
+            DO row = 1, 3
+              delta(row) = 0.0_prec
+              DO col = 1, 3
+                delta(row) = delta(row) + Ainv(row,col)*r(col)
+              ENDDO
+              dMag = dMag + delta(row)**2
+            ENDDO
+
+            si(1:3) = si(1:3) + delta(1:3)
+
+            IF( SQRT(dMag) <= TOL*MAXVAL(si) ) THEN
+              converged = .TRUE.
+              EXIT
+            ENDIF
+
+          ENDDO
+
+          IF( converged .AND. MAXVAL( ABS(si) ) <= 1.0_prec  )THEN
+
+            s(1:3,i)    = si(1:3)
+            elements(i) = iEl
+            EXIT
+            
+          ENDIF
+      
+        ENDDO
+
+      ENDDO
+
+  END SUBROUTINE CalculateComputationalCoordinates
+!
   FUNCTION TransfiniteInterpolation( boundingSurfaces, iEl, a, b, c ) RESULT( P )
     ! TransfiniteInterpolation
     !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the
