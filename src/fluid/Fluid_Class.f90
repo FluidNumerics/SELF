@@ -133,12 +133,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     LOGICAL, INTENT(inout)      :: setupSuccess
-    !
+    ! Local
 #ifdef HAVE_CUDA
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
-
 #endif
+
     CALL myDGSEM % params % Build( setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
@@ -159,7 +159,7 @@ CONTAINS
 
     ! Construct the DATA structure that holds the derivative and interpolation matrices
     ! and the quadrature weights. This call will also perform the device copies.
-    CALL myDGSEM % dGStorage % Build( UniformPoints(-1.0_prec,1.0_prec,myDGSEM % params % nPlot), &
+    CALL myDGSEM % dGStorage % Build( UniformPoints(-1.0_prec, 1.0_prec,myDGSEM % params % nPlot), &
       myDGSEM % params % polyDeg, myDGSEM % params % nPlot, GAUSS )
 
     CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
@@ -2643,6 +2643,19 @@ CONTAINS
     CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
     CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
 #endif
+
+    IF( myDGSEM % KE /= myDGSEM % KE .OR. myDGSEM % KE/myDGSEM % volume > HUGE(prec) )THEN
+
+      PRINT*, '  Model bust at simulation time : ', myDGSEM % simulationTime
+      PRINT*, '  Total Kinetic Energy :', myDGSEM % KE
+      PRINT*, '  Consider reducing the time step or increasing dissipation.'
+
+      CALL myDGSEM % WriteDiagnostics( )
+      CALL myDGSEM % CloseDiagnosticsFiles( )
+      CALL myDGSEM % Trash( )
+
+      STOP
+    ENDIF
 
   END SUBROUTINE Diagnostics_Fluid
 !
