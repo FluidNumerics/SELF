@@ -113,10 +113,10 @@ CONTAINS
 
             T = myDGSEM % params % dTdz*z
 
-            IF( z > 0.1_prec*H .AND. z < 0.9_prec*H ) THEN
-              CALL RANDOM_NUMBER( r )
-              T = T + 2.0_prec*(r-0.5_prec)*0.25_prec
-            ENDIF
+           ! IF( z > 0.1_prec*H .AND. z < 0.9_prec*H ) THEN
+           !   CALL RANDOM_NUMBER( r )
+           !   T = T + 2.0_prec*(r-0.5_prec)*0.25_prec
+           ! ENDIF
 
             Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
             myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)

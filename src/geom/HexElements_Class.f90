@@ -82,6 +82,8 @@ MODULE HexElements_CLASS
     PROCEDURE :: ScaleGeometry => ScaleGeometry_HexElements
     PROCEDURE :: ResetInternalMesh => ResetInternalMesh_HexElements
 
+    PROCEDURE :: CalculateComputationalCoordinates
+
   END TYPE HexElements
 
 
