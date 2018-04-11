@@ -34,6 +34,9 @@ MODULE ModelParameters_CLASS
     INTEGER       :: TopographicShape
     INTEGER       :: QuadTYPE
     INTEGER       :: polyDeg
+    INTEGER       :: nvX
+    INTEGER       :: nvY
+    INTEGER       :: nvZ
     INTEGER       :: nXElem
     INTEGER       :: nYElem
     INTEGER       :: nZElem
@@ -141,6 +144,9 @@ CONTAINS
     INTEGER       :: nYElem
     INTEGER       :: nZElem
     INTEGER       :: nProc
+    INTEGER       :: nvX
+    INTEGER       :: nvY
+    INTEGER       :: nvZ
     INTEGER       :: nProcX
     INTEGER       :: nProcY
     INTEGER       :: nProcZ
@@ -174,7 +180,7 @@ CONTAINS
 
     NAMELIST / TimeManagement / units, dt, startTime, endTime, outputFrequency, jacobianStepSize
     NAMELIST / SpaceManagement / SpecMeshFile, SELFMeshFile, UCDMeshFile, MeshTYPE, topographicShape, QuadTYPE, polyDeg, &
-      nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
+      nvX, nvY, nvZ, nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
       nPlot, xScale, yScale, zScale
     NAMELIST / SubgridScale / SubGridModel, filterTYPE, viscosity, viscLengthScale, nCutoff
     NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, rho0, P0, v0
@@ -196,6 +202,9 @@ CONTAINS
     topographicShape = 'Default'
     QuadTYPE      = GAUSS
     polyDeg       = 5
+    nvX           = 3
+    nvY           = 3
+    nvZ           = 3
     nXElem        = 5
     nYElem        = 5
     nZElem        = 5
@@ -299,6 +308,9 @@ CONTAINS
 
       params % QuadTYPE      = QuadTYPE
       params % polyDeg = polyDeg
+      params % nvX    = nvX
+      params % nvY    = nvY
+      params % nvZ    = nvZ
       params % nXElem = nXElem
       params % nYElem = nYElem
       params % nZElem = nZElem

@@ -274,7 +274,7 @@ MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o Bou
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
 Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
-                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
+                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o Voxels_Class.o \
                 BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
@@ -315,6 +315,7 @@ FLOBJ = ModelPrecision.o \
         Faces_Class.o \
         Nodes_Class.o \
         HexMesh_Class.o \
+        Voxels_Class.o \
         BoundaryCommunicator_Class.o \
         BodyForces_Class.o
 
