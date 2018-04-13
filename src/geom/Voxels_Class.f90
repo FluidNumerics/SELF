@@ -14,19 +14,11 @@ USE HexElements_Class
 
 IMPLICIT NONE
 
-  TYPE CharWrapper
-    CHARACTER(20) :: text
-  END TYPE CharWrapper
-
   TYPE Voxels
-    INTEGER    :: nX, nY, nZ, nVoxels, nVars
+    INTEGER    :: nX, nY, nZ, nVoxels
     REAL(prec), ALLOCATABLE :: x(:), y(:), z(:) 
     INTEGER, ALLOCATABLE    :: elementIDs(:) 
     REAL(prec), ALLOCATABLE :: compCoords(:,:) 
-
-    REAL(prec), ALLOCATABLE        :: variable(:,:,:,:)
-    TYPE(CharWrapper), ALLOCATABLE :: variableName(:)
-
 
     CONTAINS
 
@@ -40,11 +32,10 @@ IMPLICIT NONE
 
 CONTAINS
 
- SUBROUTINE Build_Voxels( myVoxels, nVars, nX, nY, nZ, x0, y0, z0, Lx, Ly, Lz )
+ SUBROUTINE Build_Voxels( myVoxels, nX, nY, nZ, x0, y0, z0, Lx, Ly, Lz )
 
    IMPLICIT NONE
    CLASS( Voxels ), INTENT(out) :: myVoxels
-   INTEGER, INTENT(in)          :: nVars
    INTEGER, INTENT(in)          :: nX, nY, nZ
    REAL(prec), INTENT(in)       :: x0, y0, z0
    REAL(prec), INTENT(in)       :: Lx, Ly, Lz
@@ -55,7 +46,6 @@ CONTAINS
      myVoxels % nX = nX
      myVoxels % nY = nY
      myVoxels % nZ = nZ
-     myVoxels % nVars = nVars
 
      nEl = nX*nY*nZ
      myVoxels % nVoxels = nEl
@@ -64,9 +54,7 @@ CONTAINS
                myVoxels % y(0:nY-1), &
                myVoxels % z(0:nZ-1), &
                myVoxels % elementIDs(1:nEl), &
-               myVoxels % compCoords(1:3,1:nEl), &
-               myVoxels % variable(0:nX-1,0:nY-1,0:nZ-1,1:nVars), &
-               myVoxels % variableName(1:nVars) )
+               myVoxels % compCoords(1:3,1:nEl) )
 
      myVoxels % x = UniformPoints( x0, x0+Lx, nX )
      myVoxels % y = UniformPoints( y0, y0+Ly, nY )
@@ -85,9 +73,7 @@ CONTAINS
                  myVoxels % y, &
                  myVoxels % z, &
                  myVoxels % elementIDs, &
-                 myVoxels % compCoords, &
-                 myVoxels % variable, &
-                 myVoxels % variableName )
+                 myVoxels % compCoords )
 
  END SUBROUTINE Trash_Voxels
 !

@@ -18,7 +18,6 @@ MODULE Fluid_Class
   USE HexMesh_Class
   USE BoundaryCommunicator_Class
   USE BodyForces_Class
-  USE Voxels_Class
 #ifdef HAVE_MPI
   USE MPILayer_Class
 #endif
@@ -41,8 +40,6 @@ MODULE Fluid_Class
     TYPE( BoundaryCommunicator ) :: extComm
     TYPE( NodalDG )              :: dGStorage
     TYPE( SpectralFilter )       :: filter
-
-    ! ------- SEM_Fluid ------- !
     TYPE( BodyForces )           :: sourceTerms
     TYPE( NodalDGSolution_3D )   :: static
     TYPE( NodalDGSolution_3D )   :: state
@@ -55,8 +52,6 @@ MODULE Fluid_Class
     TYPE( MPILayer )             :: mpiStressHandler
 !    TYPE( MPILayer )             :: mpiSGSHandler
 #endif
-    TYPE( Voxels )               :: renderedData 
-    ! ------- SEM_Fluid ------- !
 
   CONTAINS
 
@@ -139,7 +134,6 @@ CONTAINS
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     LOGICAL, INTENT(inout)      :: setupSuccess
     ! Local
-    REAL(prec) :: x0, y0, z0, Lx, Ly, Lz
 #ifdef HAVE_CUDA
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
@@ -174,33 +168,6 @@ CONTAINS
       TanhRollOff )
 
     CALL myDGSEM % BuildHexMesh(  )
-
-    x0 = MINVAL( myDGSEM % mesh % elements % x(1,:,:,:,:) )
-    y0 = MINVAL( myDGSEM % mesh % elements % x(2,:,:,:,:) )
-    z0 = MINVAL( myDGSEM % mesh % elements % x(3,:,:,:,:) )
-
-    Lx = MAXVAL( myDGSEM % mesh % elements % x(1,:,:,:,:) ) - x0
-    Ly = MAXVAL( myDGSEM % mesh % elements % x(2,:,:,:,:) ) - y0
-    Lz = MAXVAL( myDGSEM % mesh % elements % x(3,:,:,:,:) ) - z0
-
-    x0 = x0 - 0.01_prec*Lx
-    y0 = y0 - 0.01_prec*Ly
-    z0 = z0 - 0.01_prec*Lz
-    Lx = 1.02_prec*Lx
-    Ly = 1.02_prec*Ly
-    Lz = 1.02_prec*Lz
-
-    PRINT*, '  Module Fluid_Class.f90 : S/R Build_Fluid '
-    PRINT*, '    Detected Voxel Brick Limits '
-    PRINT*, '    x = [',x0,',',x0 + Lx,']'
-    PRINT*, '    y = [',y0,',',y0 + Ly,']'
-    PRINT*, '    z = [',z0,',',z0 + Lz,']'
-
-    CALL myDGSEM % renderedData % Build( nEquations, &
-                                         myDGSEM % params % nvX, & 
-                                         myDGSEM % params % nvY, & 
-                                         myDGSEM % params % nvZ, &
-                                         x0, y0, z0, Lx, Ly, Lz ) 
 
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
@@ -318,7 +285,6 @@ CONTAINS
     CALL myDGSEM % mpiStressHandler % Trash( )
 !    CALL myDGSEM % mpiSGSHandler % Trash( )
 #endif
-    CALL myDGSEM % renderedData % Trash( )
 
 
   END SUBROUTINE Trash_Fluid
