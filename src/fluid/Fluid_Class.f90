@@ -165,7 +165,9 @@ CONTAINS
     CALL myDGSEM % filter % Build( myDGSEM % dgStorage % interp % interpolationPoints,&
       myDGSEM % dgStorage % quadratureWeights, &
       myDGSEM % params % polyDeg, myDGSEM % params % nCutoff, &
-      TanhRollOff )
+      myDGSEM % params % filter_a, &
+      myDGSEM % params % filter_b, &
+      myDGSEM % params % filterType )
 
     CALL myDGSEM % BuildHexMesh(  )
 
@@ -346,17 +348,30 @@ CONTAINS
       G3D  = 0.0_prec
 
       DO m = 1,3
-        t = myDGSEM % simulationTime + rk3_b(m)*dt
-        CALL myDGSEM % GlobalTimeDerivative( t )
 
+        t = myDGSEM % simulationTime + rk3_b(m)*dt
+
+        CALL myDGSEM % EquationOfState( )
+
+        IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
+
+          CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
+                                            myDGSEM % state % solution_dev, &
+                                            myDGSEM % state % nEquations_dev, &
+                                            myDGSEM % state % nElements_dev )
+
+        ENDIF
+
+        CALL myDGSEM % GlobalTimeDerivative( t )
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
                                                     myDGSEM % stressTensor % fluxDivergence_dev )
-        CALL myDGSEM % EquationOfState( )
 
       ENDDO
+
+
 
       myDGSEM % simulationTime = t0 + REAL(iT,prec)*dt
 
@@ -373,15 +388,25 @@ CONTAINS
       DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
-        CALL myDGSEM % GlobalTimeDerivative( t )
 
+        CALL myDGSEM % EquationOfState( )
+
+        IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
+
+          CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
+                                            myDGSEM % state % solution_dev, &
+                                            myDGSEM % state % nEquations_dev, &
+                                            myDGSEM % state % nElements_dev )
+
+        ENDIF
+
+        CALL myDGSEM % GlobalTimeDerivative( t )
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
                                                     myDGSEM % state % solution_dev, &
                                                     myDGSEM % state % fluxDivergence_dev, &
                                                     myDGSEM % state % source_dev, &
                                                     myDGSEM % stressTensor % fluxDivergence_dev )
 
-        CALL myDGSEM % EquationOfState( )
 
       ENDDO 
 
@@ -421,6 +446,18 @@ CONTAINS
       DO m = 1,3 ! Loop over RK3 steps
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
+
+        CALL myDGSEM % EquationOfState( )
+
+        IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
+
+          CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
+                                            myDGSEM % state % solution, &
+                                            myDGSEM % state % nEquations, &
+                                            myDGSEM % state % nElements )
+
+        ENDIF
+
         CALL myDGSEM % GlobalTimeDerivative( t )
 
         !$OMP DO
@@ -444,7 +481,6 @@ CONTAINS
         ENDDO 
         !$OMP ENDDO
 
-        CALL myDGSEM % EquationOfState( )
 
       ENDDO
 
@@ -475,6 +511,18 @@ CONTAINS
       DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
+
+        CALL myDGSEM % EquationOfState( )
+
+        IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
+
+          CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
+                                            myDGSEM % state % solution, &
+                                            myDGSEM % state % nEquations, &
+                                            myDGSEM % state % nElements )
+
+        ENDIF
+
         CALL myDGSEM % GlobalTimeDerivative( t )
 
 
@@ -498,8 +546,6 @@ CONTAINS
           ENDDO
         ENDDO
         !$OMP ENDDO
-
-        CALL myDGSEM % EquationOfState( )
 
       ENDDO
 
@@ -584,31 +630,6 @@ CONTAINS
     TYPE(dim3) :: tBlock, grid
     INTEGER    :: istat
 #endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-!  IF SpectralFiltering is USEd as the subgridscale model, THEN the spectral
-!  filtering matrix (specIFied in src/filtering/SpectralFilter_Class.f90) is USEd
-!  to smooth the solution variables before proceeding.
-
-    IF( myDGSEM % params % SubGridModel == SpectralFiltering )THEN
-
-#ifdef HAVE_CUDA
-      CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
-                                        myDGSEM % state % solution_dev, &
-                                        myDGSEM % state % nEquations_dev, &
-                                        myDGSEM % state % nElements_dev )
-
-#else
-      CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
-                                        myDGSEM % state % solution, &
-                                        myDGSEM % state % nEquations, &
-                                        myDGSEM % state % nElements )
-#endif
-
-    ENDIF
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !

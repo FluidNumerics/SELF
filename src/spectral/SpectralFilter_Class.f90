@@ -97,11 +97,12 @@ CONTAINS
 !   
 ! ========================================================================================================= !
 
-  SUBROUTINE Build_SpectralFilter( thisFilter, interpNodes, interpWeights, N, nCutoff, filterType )
+  SUBROUTINE Build_SpectralFilter( thisFilter, interpNodes, interpWeights, N, nCutoff, nthCoeff, nm1Coeff, filterType )
 
     IMPLICIT NONE
     CLASS(SpectralFilter), INTENT(inout) :: thisFilter
     INTEGER, INTENT(in)                  :: N, nCutoff
+    REAL(prec), INTENT(in)               :: nthCoeff, nm1Coeff 
     REAL(prec), INTENT(in)               :: interpNodes(0:N)
     REAL(prec), INTENT(in)               :: interpWeights(0:N)
     INTEGER, INTENT(in)                  :: filterType
@@ -140,9 +141,24 @@ CONTAINS
 
         ELSEIF( filterType == TanhRollOff )THEN
 
-          Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- REAL(nCutoff,dp)) ) )
+          IF( row < N-2 )THEN
+            Pfilt(row,row) = 1.0_prec
+          ELSE
+            Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- nm1Coeff)*nthCoeff ) )
+          ENDIF
+
+        ELSEIF( filterType == RampFilter )THEN
+
+          IF( row == N-1 )THEN
+            Pfilt(row,row) = nm1Coeff 
+          ELSEIF( row == N )THEN
+            Pfilt(row,row) = nthCoeff
+          ELSE
+            Pfilt(row,row) = 1.0_prec
+          ENDIF
 
         ENDIF
+
 
         Lnorm = 0.0_dp
 
@@ -172,7 +188,6 @@ CONTAINS
       thisFilter % N_dev            = N
       thisFilter % nodalToModal_dev = thisFilter % nodalToModal
 #endif
-
 
   END SUBROUTINE Build_SpectralFilter
 
