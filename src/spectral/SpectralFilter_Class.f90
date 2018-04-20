@@ -97,12 +97,12 @@ CONTAINS
 !   
 ! ========================================================================================================= !
 
-  SUBROUTINE Build_SpectralFilter( thisFilter, interpNodes, interpWeights, N, nCutoff, nthCoeff, nm1Coeff, filterType )
+  SUBROUTINE Build_SpectralFilter( thisFilter, interpNodes, interpWeights, N, nCutoff, filter_a, filter_b, filterType )
 
     IMPLICIT NONE
     CLASS(SpectralFilter), INTENT(inout) :: thisFilter
     INTEGER, INTENT(in)                  :: N, nCutoff
-    REAL(prec), INTENT(in)               :: nthCoeff, nm1Coeff 
+    REAL(prec), INTENT(in)               :: filter_a, filter_b 
     REAL(prec), INTENT(in)               :: interpNodes(0:N)
     REAL(prec), INTENT(in)               :: interpWeights(0:N)
     INTEGER, INTENT(in)                  :: filterType
@@ -135,24 +135,26 @@ CONTAINS
 
         IF( filterType == ModalCutoff )THEN
 
-          IF( row <= nCutoff )THEN
+    !      IF( row <= nCutoff )THEN
             Pfilt(row,row) = 1.0_dp
-          ENDIF
+    !      ELSE
+    !        Pfilt(row,row)  = filter_b
+    !      ENDIF
 
         ELSEIF( filterType == TanhRollOff )THEN
 
           IF( row < N-2 )THEN
             Pfilt(row,row) = 1.0_prec
           ELSE
-            Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- nm1Coeff)*nthCoeff ) )
+            Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- filter_b)*filter_a ) )
           ENDIF
 
         ELSEIF( filterType == RampFilter )THEN
 
           IF( row == N-1 )THEN
-            Pfilt(row,row) = nm1Coeff 
+            Pfilt(row,row) = filter_b 
           ELSEIF( row == N )THEN
-            Pfilt(row,row) = nthCoeff
+            Pfilt(row,row) = filter_a
           ELSE
             Pfilt(row,row) = 1.0_prec
           ENDIF
@@ -188,6 +190,7 @@ CONTAINS
       thisFilter % N_dev            = N
       thisFilter % nodalToModal_dev = thisFilter % nodalToModal
 #endif
+
 
   END SUBROUTINE Build_SpectralFilter
 
