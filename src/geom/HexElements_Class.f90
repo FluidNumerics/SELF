@@ -138,7 +138,7 @@ CONTAINS
       myElements % J(0:N,0:N,0:N,1:nElements), &
       myElements % x(0:N,0:N,0:N,1:3,1:nElements), &
       myElements % xBound(0:N,0:N,1:3,1:6,1:nElements), &
-      myElements % boundaryLengthScale(0:N,0:N,1:6,1:nElements)
+      myElements % boundaryLengthScale(0:N,0:N,1:6,1:nElements), &
       myElements % nHat(1:3,0:N,0:N,1:6,1:nElements) )
 
     myElements % dxds   = 0.0_prec
@@ -175,6 +175,7 @@ CONTAINS
       myElements % J_dev(0:N,0:N,0:N,1:nElements), &
       myElements % x_dev(0:N,0:N,0:N,1:3,1:nElements), &
       myElements % xBound_dev(0:N,0:N,1:3,1:6,1:nElements), &
+      myElements % boundaryLengthScale_dev(0:N,0:N,1:6,1:nElements), &
       myElements % nHat_dev(1:3,0:N,0:N,1:6,1:nElements) )
 
     myElements % N_dev =  N
@@ -193,6 +194,8 @@ CONTAINS
     myElements % Ja_dev     = 0.0_prec
     myElements % x_dev      = 0.0_prec
     myElements % xBound_dev = 0.0_prec
+    myElements % nHat_dev   = 0.0_prec
+    myElements % boundaryLengthScale_dev = 0.0_prec
 
 #endif
 
@@ -264,7 +267,7 @@ CONTAINS
       myElements % J_dev, &
       myElements % x_dev, &
       myElements % xBound_dev, &
-      myElements % boundaryLengthScale, &
+      myElements % boundaryLengthScale_dev, &
       myElements % nHat_dev )
 
 #endif
