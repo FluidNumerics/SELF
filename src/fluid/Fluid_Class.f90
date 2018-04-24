@@ -1705,7 +1705,7 @@ CONTAINS
                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
 
-                myDGSEM % state % source(i,j,k,1,iEl) = myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,1,iEl)*F -&
+                myDGSEM % state % source(i,j,k,1,iEl) = -myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,1,iEl)*F -&
                                                         myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotY +&
                                                         myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotZ
 
@@ -1724,7 +1724,7 @@ CONTAINS
                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
 
-                myDGSEM % state % source(i,j,k,2,iEl) = myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,2,iEl)*F - &
+                myDGSEM % state % source(i,j,k,2,iEl) = -myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,2,iEl)*F - &
                                                         myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotZ +&
                                                         myDGSEM % state % solution(i,j,k,3,iEl)*myDGSEM % params % fRotX
 
@@ -1743,7 +1743,7 @@ CONTAINS
                   myDGSEM % state % solution(i,j,k,3,iEl)**2 )/&
                   ( myDGSEM % static % solution(i,j,k,4,iEl) + myDGSEM % state % solution(i,j,k,4,iEl) )
 
-                myDGSEM % state % source(i,j,k,3,iEl) = myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,3,iEl)*F - &
+                myDGSEM % state % source(i,j,k,3,iEl) = -myDGSEM % sourceTerms % drag(i,j,k,iEl)*myDGSEM % state % solution(i,j,k,3,iEl)*F - &
                                                         myDGSEM % state % solution(i,j,k,2,iEl)*myDGSEM % params % fRotX +&
                                                         myDGSEM % state % solution(i,j,k,1,iEl)*myDGSEM % params % fRotY-&
                                                         ( myDGSEM % state % solution(i,j,k,4,iEl) )*myDGSEM % params % g  !&
@@ -3495,19 +3495,19 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
     
     IF( iEq == 1 )THEN
 
-      source(i,j,k,1,iEl) = drag(i,j,k,iEl)*solution(i,j,k,1,iEl)*F-&
+      source(i,j,k,1,iEl) = -drag(i,j,k,iEl)*solution(i,j,k,1,iEl)*F-&
                             solution(i,j,k,3,iEl)*fRotY_dev +&
                             solution(i,j,k,2,iEl)*fRotz_dev
     
     ELSEIF( iEq == 2 )THEN
 
-      source(i,j,k,2,iEl) = drag(i,j,k,iEl)*solution(i,j,k,2,iEl)*F -&
+      source(i,j,k,2,iEl) = -drag(i,j,k,iEl)*solution(i,j,k,2,iEl)*F -&
                             solution(i,j,k,1,iEl)*fRotZ_dev +&
                             solution(i,j,k,3,iEl)*fRotX_dev
 
     ELSEIF( iEq == 3 )THEN ! Add in the buoyancy acceleration
 
-      source(i,j,k,3,iEl) = drag(i,j,k,iEl)*solution(i,j,k,3,iEl)*F -&
+      source(i,j,k,3,iEl) = -drag(i,j,k,iEl)*solution(i,j,k,3,iEl)*F -&
                             solution(i,j,k,2,iEl)*fRotX_dev +&
                             solution(i,j,k,1,iEl)*fRotY_dev -&
                             solution(i,j,k,4,iEl)*g_dev

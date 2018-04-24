@@ -3,31 +3,30 @@ SHELL=/bin/bash
 SELFDIR=$(shell pwd | sed 's/\SELF-Fluids.*/SELF-Fluids/')
 INITDIR=$(shell pwd)
 
-.PHONY: DecomposeStructuredHexMesh \
-        GenerateHexMesh \
+.PHONY: MeshGen_3D \
         initialize \
-        integrate 
+        integrate \
+        test_stateExchange
 
-DecomposeStructuredHexMesh :
-	make --directory=${SELFDIR}/build/ DecomposeStructuredHexMesh
-	mv ${SELFDIR}/build/DecomposeStructuredHexMesh ../run/
-	make --directory=${SELFDIR}/build/ clean
-
-GenerateHexMesh :
-	make --directory=${SELFDIR}/build/ GenerateHexMesh
-	mv ${SELFDIR}/build/GenerateHexMesh ../run/
-	make --directory=${SELFDIR}/build/ clean
+MeshGen_3D :
+	make --directory=${SELFDIR}/build/ MeshGen_3D
+	mv ${SELFDIR}/build/MeshGen_3D ./
 
 initialize :
 	@echo 'Found SELF installation directory : '${SELFDIR}
 	@echo 'Using modifications in directory : '${INITDIR}
 	make MODDIR=${INITDIR} -C ${SELFDIR}/build/ initialize
-	mv ${SELFDIR}/build/initialize ../run/
+	mv ${SELFDIR}/build/initialize ./
 
 integrate :
 	@echo 'Found SELF installation directory : '${SELFDIR}
 	make -C ${SELFDIR}/build/ integrate
-	mv ${SELFDIR}/build/integrate ../run/
+	mv ${SELFDIR}/build/integrate ./
+
+test_stateExchange :
+	@echo 'Found SELF installation directory : '${SELFDIR}
+	make -C ${SELFDIR}/build/ test_stateExchange
+	mv ${SELFDIR}/build/test_stateExchange ./
 
 clean :
 	make -C ${SELFDIR}/build/ clean
