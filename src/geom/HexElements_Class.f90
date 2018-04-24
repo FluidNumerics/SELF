@@ -42,6 +42,7 @@ MODULE HexElements_CLASS
     INTEGER, ALLOCATABLE    :: elementID(:)
     INTEGER, ALLOCATABLE    :: nodeIDs(:,:)
     INTEGER, ALLOCATABLE    :: neighbors(:,:)
+    REAL(prec), ALLOCATABLE :: boundaryLengthScale(:,:,:,:)
     REAL(prec), ALLOCATABLE :: nHat(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: xBound(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: x(:,:,:,:,:)
@@ -56,6 +57,7 @@ MODULE HexElements_CLASS
     INTEGER, DEVICE, ALLOCATABLE    :: elementID_dev(:)
     INTEGER, DEVICE, ALLOCATABLE    :: nodeIDs_dev(:,:)
     INTEGER, DEVICE, ALLOCATABLE    :: neighbors_dev(:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: boundaryLengthScale_dev(:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: nHat_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: xBound_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: x_dev(:,:,:,:,:)
@@ -136,6 +138,7 @@ CONTAINS
       myElements % J(0:N,0:N,0:N,1:nElements), &
       myElements % x(0:N,0:N,0:N,1:3,1:nElements), &
       myElements % xBound(0:N,0:N,1:3,1:6,1:nElements), &
+      myElements % boundaryLengthScale(0:N,0:N,1:6,1:nElements), &
       myElements % nHat(1:3,0:N,0:N,1:6,1:nElements) )
 
     myElements % dxds   = 0.0_prec
@@ -172,6 +175,7 @@ CONTAINS
       myElements % J_dev(0:N,0:N,0:N,1:nElements), &
       myElements % x_dev(0:N,0:N,0:N,1:3,1:nElements), &
       myElements % xBound_dev(0:N,0:N,1:3,1:6,1:nElements), &
+      myElements % boundaryLengthScale_dev(0:N,0:N,1:6,1:nElements), &
       myElements % nHat_dev(1:3,0:N,0:N,1:6,1:nElements) )
 
     myElements % N_dev =  N
@@ -190,6 +194,8 @@ CONTAINS
     myElements % Ja_dev     = 0.0_prec
     myElements % x_dev      = 0.0_prec
     myElements % xBound_dev = 0.0_prec
+    myElements % nHat_dev   = 0.0_prec
+    myElements % boundaryLengthScale_dev = 0.0_prec
 
 #endif
 
@@ -238,6 +244,7 @@ CONTAINS
       myElements % J, &
       myElements % x, &
       myElements % xBound, &
+      myElements % boundaryLengthScale, &
       myElements % nHat )
 
 #ifdef HAVE_CUDA
@@ -260,6 +267,7 @@ CONTAINS
       myElements % J_dev, &
       myElements % x_dev, &
       myElements % xBound_dev, &
+      myElements % boundaryLengthScale_dev, &
       myElements % nHat_dev )
 
 #endif
@@ -290,6 +298,7 @@ CONTAINS
     myElements % x_dev = myElements % x
     myElements % xBound_dev = myElements % xBound
     myElements % nHat_dev   = myElements % nHat
+    myElements % boundaryLengthScale_dev = myElements % boundaryLengthScale
 
 
   END SUBROUTINE UpdateDevice_HexElements
@@ -315,8 +324,8 @@ CONTAINS
     myElements % x = myElements % x_dev
     myElements % xBound = myElements % xBound_dev
     myElements % nHat   = myElements % nHat_dev
-
-
+    myElements % boundaryLengthScale = myElements % boundaryLengthScale_dev
+   
   END SUBROUTINE UpdateHost_HexElements
 #endif
 
@@ -749,6 +758,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,3,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,bottom,iEl) = -signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,bottom,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           node = (/ s(i), p, s(j) /)
           Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
@@ -761,6 +771,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,2,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,south,iEl)= -signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,south,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           ! west boundary
           node = (/ p, s(i), s(j) /)
@@ -774,6 +785,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,1,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,west,iEl) = -signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,west,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           p = 1.0_prec  ! top, north, and east boundaries
 
@@ -789,6 +801,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,3,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,top,iEl) = signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,top,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           !north boundary
           node = (/ s(i), p, s(j) /)
@@ -802,6 +815,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,2,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,north,iEl) = signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,north,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           ! east boundary
           node = (/ p, s(i), s(j) /)
@@ -815,6 +829,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,1,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,east,iEl) = signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,east,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
         ENDDO
       ENDDO

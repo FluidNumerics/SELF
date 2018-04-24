@@ -1536,6 +1536,8 @@ CONTAINS
       DO l = 1, 6
         DO j = 0, N
           DO i = 0, N
+            READ( fUnit, rec=k ) myHexMesh % elements % boundaryLengthScale(i,j,l,iEl)
+            k = k+1
             READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,1,l,iEl)
             k = k+1
             READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,2,l,iEl)
@@ -1772,6 +1774,8 @@ CONTAINS
       DO l = 1, 6
         DO j = 0, N
           DO i = 0, N
+            WRITE( fUnit, rec=k ) myHexMesh % elements % boundaryLengthScale(i,j,l,iEl)
+            k = k+1
             WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,1,l,iEl)
             k = k+1
             WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,2,l,iEl)

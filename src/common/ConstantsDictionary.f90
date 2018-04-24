@@ -153,6 +153,7 @@
   !==============================================!
    INTEGER, PARAMETER :: ModalCutoff = 3000
    INTEGER, PARAMETER :: TanhRollOff = 3001 
+   INTEGER, PARAMETER :: RampFilter  = 3002 
   !
   !==============================================!
   ! ---------------- Geometry ------------------ !

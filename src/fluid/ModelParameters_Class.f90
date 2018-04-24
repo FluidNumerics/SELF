@@ -48,10 +48,12 @@ MODULE ModelParameters_CLASS
     REAL(prec)    :: zScale
     ! SubsgridScale
     INTEGER       :: SubGridModel
+    LOGICAL       :: SpectralFilter
     INTEGER       :: filterTYPE
     REAL(prec)    :: viscosity
     REAL(prec)    :: viscLengthScale
     INTEGER       :: nCutoff
+    REAL(prec)    :: filter_a, filter_b
     ! Physical
     REAL(prec)    :: fRotX  ! coriolis parameter (x-component)
     REAL(prec)    :: fRotY  ! "                " (y-component)
@@ -149,11 +151,13 @@ CONTAINS
     REAL(prec)    :: yScale
     REAL(prec)    :: zScale
     ! SubgridScale
+    LOGICAL       :: SpectralFilter
     CHARACTER(20) :: SubGridModel
     CHARACTER(20) :: filterTYPE
     REAL(prec)    :: viscosity
     REAL(prec)    :: viscLengthScale
     INTEGER       :: nCutoff
+    REAL(prec)    :: filter_a, filter_b
     ! Physical
     REAL(prec)    :: fRotX
     REAL(prec)    :: fRotY
@@ -176,7 +180,7 @@ CONTAINS
     NAMELIST / SpaceManagement / SpecMeshFile, SELFMeshFile, UCDMeshFile, MeshTYPE, topographicShape, QuadTYPE, polyDeg, &
       nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
       nPlot, xScale, yScale, zScale
-    NAMELIST / SubgridScale / SubGridModel, filterTYPE, viscosity, viscLengthScale, nCutoff
+    NAMELIST / SubgridScale / SubGridModel, SpectralFilter, filterTYPE, viscosity, viscLengthScale, nCutoff, filter_a, filter_b
     NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, rho0, P0, v0
 
     readSuccess = .FALSE.
@@ -208,11 +212,14 @@ CONTAINS
     yScale        = 1.0_prec
     zScale        = 1.0_prec
     ! SubgridScale
+    SpectralFilter  = .FALSE.
     SubGridModel    = 'Laplacian'
-    filterTYPE      = 'TanhRollOff'
+    filterTYPE      = 'TanhRolloff'
     viscosity       = 0.0_prec  ! (m^2/s)
     viscLengthScale = 1.0_prec  ! (m)
     nCutoff = 5
+    filter_a = 8.0_prec
+    filter_b = 1.0_prec
     ! PhysicalConstants
     fRotX          = 0.0_prec ! 1/s
     fRotY          = 0.0_prec ! 1/s
@@ -335,11 +342,16 @@ CONTAINS
         params % filterTYPE = tanhRollOff
       ELSEIF( TRIM( UpperCASE( FilterTYPE ) )=='MODALCUTOFF' )THEN
         params % filterTYPE = modalCutoff
+      ELSEIF( TRIM( UpperCASE( FilterTYPE ) )=='RAMPFILTER' )THEN
+        params % filterTYPE = rampFilter
       ENDIF
       !params % subGridModel = subGridModel
+      params % SpectralFilter  = SpectralFilter
       params % viscosity       = viscosity
       params % viscLengthScale = viscLengthScale
       params % nCutoff         = nCutoff
+      params % filter_a        = filter_a
+      params % filter_b        = filter_b
       ! PhysicalConstants
       params % fRotX  = fRotX
       params % fRotY  = fRotY

@@ -103,6 +103,7 @@ CONTAINS
             ELSE
                T = -2.5_prec
             ENDIF
+           ! T = -2.5_prec*tanh( (x-0.5_prec*Lx)/(20.0_prec) )
             Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
             myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
 

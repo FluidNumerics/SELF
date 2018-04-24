@@ -45,6 +45,8 @@ ifeq (${FC},gfortran)
 else ifeq (${FC},pgfortran)
 
   $(info 'Compiling with PGI Compilers')
+
+  KIEEE=-Kieee
   CPPFLAGS=-Mpreprocess 
 
   ifeq (${DEBUG},yes)
@@ -161,7 +163,7 @@ HashTable_Class.o : ConstantsDictionary.o LinkedList_Class.o ${SRCDIR}common/Has
 	${FC} ${OPT} -c ${SRCDIR}common/HashTable_Class.f90 -o $@
 
 CommonRoutines.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/CommonRoutines.f90
-	${FC} ${OPT} -c ${SRCDIR}common/CommonRoutines.f90 -o $@
+	${FC} ${OPT} ${KIEEE} -c ${SRCDIR}common/CommonRoutines.f90 -o $@
 
 Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}common/Timing.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/Timing.f90 -o $@
