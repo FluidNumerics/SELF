@@ -93,7 +93,7 @@ CONTAINS
     H  = myDGSEM % params % zScale
 
     zc = 0.5_prec*H
-    Hz = 0.02_prec*H
+    Hz = 0.01_prec*H
 
     myDGSEM % state % solution = 0.0_prec
 
