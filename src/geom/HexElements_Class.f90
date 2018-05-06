@@ -977,6 +977,204 @@ CONTAINS
 
   END SUBROUTINE CalculateComputationalCoordinates
 !
+  FUNCTION TransfiniteMetricTerms( boundingSurfaces, iEl, a, b, c ) RESULT( dXdS )
+    IMPLICIT NONE
+    TYPE( Surfaces )  :: boundingSurfaces
+    INTEGER           :: iEl
+    REAL(prec)        :: a, b, c
+    REAL(prec)        :: dXdS(1:3,1:3)
+    ! Local
+    REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
+    REAL(prec)  :: sSurfSlope(1:3,1:2), nSurfSlope(1:3,1:2), eSurfSlope(1:3,1:2), wSurfSlope(1:3,1:2), bSurfSlope(1:3,1:2), tSurfSlope(1:3,1:2)
+    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
+    REAL(prec)  :: q1(1:3), q2(1:3), r1(1:3), r2(1:3)
+    REAL(prec)  :: PL(1:3), PR(1:3)
+    REAL(prec)  :: dP1dS(1:3,1:3)
+    REAL(prec)  :: dP2dS(1:3,1:3)
+    REAL(prec)  :: dP3dS(1:3,1:3)
+
+    ! Use the formula for transfinite interpolation with linear blending to 
+    ! Calculate the covariant metric tensor
+
+    ! Calculate the Linear Blending weights.
+    l1 = LinearBlend( a )
+    l2 = LinearBlend( b )
+    l3 = LinearBlend( c )
+
+    ! The bounding surfaces need to be evaluated at the provided computational coordinates
+    wSurf = boundingSurfaces % Evaluate( (/b, c/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/b, c/), east + (iEl-1)*6 )   ! east
+    sSurf = boundingSurfaces % Evaluate( (/a, c/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, c/), north + (iEl-1)*6 )  ! north
+    bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
+    tSurf = boundingSurfaces % Evaluate( (/a, b/), top + (iEl-1)*6 )    ! top
+
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, c/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, c/), east + (iEl-1)*6 )   ! east
+    sSurfSlope = boundingSurfaces % EvaluateSlope( (/a, c/), south + (iEl-1)*6 )  ! south
+    nSurfSlope = boundingSurfaces % EvaluateSlope( (/a, c/), north + (iEl-1)*6 )  ! north
+    bSurfSlope = boundingSurfaces % EvaluateSlope( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
+    tSurfSlope = boundingSurfaces % EvaluateSlope( (/a, b/), top + (iEl-1)*6 )    ! top
+
+
+    dP1dS(1:3,1) = 0.5_prec*( wSurf - eSurf ) 
+    dP2dS(1:3,2) = 0.5_prec*( nSurf - sSurf ) 
+    dP3dS(1:3,3) = 0.5_prec*( tSurf - bSurf ) 
+
+    dP1dS(1:3,2) = l1(1)*wSurfSlope(1:3,1) + l1(2)*eSurfSlope(1:3,1)
+    dP1dS(1:3,3) = l1(1)*wSurfSlope(1:3,2) + l1(2)*eSurfSlope(1:3,2)
+
+    dP2dS(1:3,1) = l1(1)*sSurfSlope(1:3,1) + l1(2)*nSurfSlope(1:3,1)
+    dP2dS(1:3,3) = l1(1)*sSurfSlope(1:3,2) + l1(2)*nSurfSlope(1:3,2)
+    
+    dP3dS(1:3,1) = l1(1)*bSurfSlope(1:3,1) + l1(2)*tSurfSlope(1:3,1)
+    dP3dS(1:3,2) = l1(1)*bSurfSlope(1:3,2) + l1(2)*tSurfSlope(1:3,2)
+
+
+    dXdS(1:3,1:3) = dP1dS(1:3,1:3) + dP2dS(1:3,1:3) + dP3dS(1:3,1:3)
+
+   
+    ! Modify dXdS(1:3,1) due to boolean sum
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/1.0_prec, c/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/1.0_prec, c/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) - 0.5_prec*( l2(1)*(r1-q1) + l2(2)*(r2-q2) ) 
+
+    q1 = boundingSurfaces % Evaluate( (/b,-1.0_prec/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/b,-1.0_prec/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/b,1.0_prec/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/b,1.0_prec/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) - 0.5_prec*( l3(1)*(r1-q1) + l3(2)*(r2-q2) ) 
+   
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec,-1.0_prec/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec,-1.0_prec/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/1.0_prec,-1.0_prec/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/1.0_prec,-1.0_prec/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) + 0.5_prec*l3(1)*( l2(1)*(r1-q1) + l2(2)*(r2-q2) ) 
+
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec,1.0_prec/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec,1.0_prec/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/1.0_prec,1.0_prec/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/1.0_prec,1.0_prec/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) + 0.5_prec*l3(2)*( l2(1)*(r1-q1) + l2(2)*(r2-q2) ) 
+
+
+    ! Modify dXdS(1:3,2) due to boolean sum
+    q1 = boundingSurfaces % Evaluate( (/1.0_prec, c/), west + (iEl-1)*6 )  ! south
+    r1 = boundingSurfaces % Evaluate( (/1.0_prec, c/), east + (iEl-1)*6 )  ! north
+
+    PR = l1(1)*q1 + l1(2)*r1 
+
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), west + (iEl-1)*6 )  ! south
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), east + (iEl-1)*6 )  ! north
+
+    PL = l1(1)*q1 + l1(2)*r1 
+
+    dXdS(1:3,2) = dXdS(1:3,2) - 0.5_prec*( PR - PL )
+
+    ! >>> dP1dS2 contribution
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,2) = l1(1)*wSurfSlope(1:3,1) + l1(2)*eSurfSlope(1:3,1)
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(1)*dP1dS(1:3,2)
+
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,2) = l1(1)*wSurfSlope(1:3,1) + l1(2)*eSurfSlope(1:3,1)
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(2)*dP1dS(1:3,2)
+  
+    ! >>> dP2dS2 contribution
+    sSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), north + (iEl-1)*6 )  ! north
+    dP2dS(1:3,2) = 0.5_prec*( nSurf - sSurf ) 
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(1)*dP2dS(1:3,2)
+
+    sSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), north + (iEl-1)*6 )  ! north
+    dP2dS(1:3,2) = 0.5_prec*( nSurf - sSurf ) 
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(2)*dP2dS(1:3,2)
+
+    ! >>> 
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l1(1)*wSurf + l1(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l1(1)*wSurf + l1(2)*eSurf
+
+    dXdS(1:3,2) = dXdS(1:3,2) - 0.5_prec*( l3(1)*PL + l3(2)*PR )
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l1(1)*wSurf + l1(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l1(1)*wSurf + l1(2)*eSurf
+
+    dXdS(1:3,2) = dXdS(1:3,2) + 0.5_prec*( l3(1)*PL + l3(2)*PR )
+
+
+    ! Modify dXdS(1:3,3) due to boolean sum
+
+    ! >>> dP1dS2 contribution
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,3) = l1(1)*wSurfSlope(1:3,2) + l1(2)*eSurfSlope(1:3,2)
+
+    dXdS(1:3,3) = dXdS(1:3,3) - l3(1)*dP1dS(1:3,3)
+
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,3) = l1(1)*wSurfSlope(1:3,2) + l1(2)*eSurfSlope(1:3,2)
+
+    dXdS(1:3,3) = dXdS(1:3,3) - l3(2)*dP1dS(1:3,3)
+
+    !
+    sSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), north + (iEl-1)*6 )  ! north
+    PR = l2(1)*sSurf + l2(2)*nSurf
+
+    sSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), north + (iEl-1)*6 )  ! north
+    PL = l2(1)*sSurf + l2(2)*nSurf
+
+    dXdS(1:3,3) = dXdS(1:3,3) + 0.5_prec*( PR - PL )
+
+
+    ! >>> 
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l2(1)*wSurf + l2(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l2(1)*wSurf + l2(2)*eSurf
+
+    dXdS(1:3,3) = dXdS(1:3,3) - 0.5_prec*( l3(1)*PL + l3(2)*PR )
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l2(1)*wSurf + l2(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l2(1)*wSurf + l2(2)*eSurf
+
+    dXdS(1:3,3) = dXdS(1:3,3) + 0.5_prec*( l3(1)*PL + l3(2)*PR )
+    
+  END FUNCTION TransfiniteMetricTerms
+!
   FUNCTION TransfiniteInterpolation( boundingSurfaces, iEl, a, b, c ) RESULT( P )
     ! TransfiniteInterpolation
     !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the

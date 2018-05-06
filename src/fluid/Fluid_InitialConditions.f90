@@ -98,10 +98,10 @@ CONTAINS
             y = myDGSEM % mesh % elements % x(i,j,k,2,iEl)
             z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
-            r = sqrt( ( x-0.5_prec*Lx )**2 + ( y-0.5_prec*Ly )**2 + ( z-0.25_prec*H )**2 )
+            r = sqrt( ( x-0.5_prec*Lx )**2 + ( z-0.25_prec*H )**2 )
 
             IF( r <= 250.0_prec )THEN
-              T = 0.25_prec*(1.0_prec + cos( pi*r/250.0_prec ) ) ! Potential temperature anomaly
+              T = 0.5_prec*(1.0_prec + cos( pi*r/250.0_prec ) ) ! Potential temperature anomaly
               Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
               myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
             ENDIF
