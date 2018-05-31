@@ -467,9 +467,10 @@ CONTAINS
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
 
-                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) +&
+                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) - ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) -&
                     myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
                     myDGSEM % state % source(i,j,k,iEq,iEl)
+
 
                   myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
                     rk3_g(m)*dt*G3D(i,j,k,iEq,iEl)
@@ -534,7 +535,7 @@ CONTAINS
               DO j = 0, myDGSEM % params % polyDeg
                 DO i = 0, myDGSEM % params % polyDeg
 
-                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) + ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) +&
+                  G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) - ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) -&
                     myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
                     myDGSEM % state % source(i,j,k,iEq,iEl)
 
@@ -566,58 +567,58 @@ CONTAINS
 !
 ! Crank Nicholson time integrator routines
 
-! SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, snk, explicitTendency )
-!   IMPLICIT NONE
-!   CLASS(Fluid), INTENT(inout) :: myDGSEM
-!   REAL(prec), INTENT(in)      :: snk(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec), INTENT(in)      :: explicitTendency(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   ! Local
-!   REAL(prec)   :: r(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: ds(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: v(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: p(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: t(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: rho, alpha, omega, beta
+ SUBROUTINE CrankNicholsonBiCGStab_Fluid( myDGSEM, snk, explicitTendency )
+   IMPLICIT NONE
+   CLASS(Fluid), INTENT(inout) :: myDGSEM
+   REAL(prec), INTENT(in)      :: snk(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec), INTENT(in)      :: explicitTendency(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   ! Local
+   REAL(prec)   :: r(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: ds(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: v(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: p(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: t(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: rho, alpha, omega, beta
+
+      ! Calculate the initial residual
+      ! Assumes an initial guess of ds=0
+      !r = explicitTendency + myDGSEM % CrankNicholsonRHS( snk )
+
+
+
+ END SUBROUTINE CrankNicholsonBiCGStab_Fluid
 !
-!      ! Calculate the initial residual
-!      ! Assumes an initial guess of ds=0
-!      r = explicitTendency + myDGSEM % CrankNicholsonRHS( snk )
+ FUNCTION CrankNicholsonRHS_Fluid( myDGSEM, snk ) RESULT( b )
+   ! Given
+   IMPLICIT NONE
+   CLASS(Fluid) :: myDGSEM
+   REAL(prec)   :: snk(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: b(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+
+
+      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
+      b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
+
+
+ END FUNCTION CrankNicholsonRHS_Fluid
 !
-!
-!
-! END SUBROUTINE CrankNicholsonBiCGStab_Fluid
-!!
-! FUNCTION CrankNicholsonRHS_Fluid( myDGSEM, snk ) RESULT( b )
-!   ! Given
-!   IMPLICIT NONE
-!   CLASS(Fluid) :: myDGSEM
-!   REAL(prec)   :: snk(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: b(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!
-!
-!      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
-!      b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
-!
-!
-! END FUNCTION CrankNicholsonRHS_Fluid
-!!
-! FUNCTION CrankNicholsonJacobianAction_Fluid( myDGSEM, s, ds, Fs ) RESULT( Jds )
-!   IMPLICIT NONE
-!   CLASS(Fluid) :: myDGSEM
-!   REAL(prec)   :: s(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: ds(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: Fs(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!   REAL(prec)   :: Jds(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEq, 1:myDGSEM % mesh % elements % nElements)
-!
-!
-!      myDGSEM % state % solution = s + myDGSEM % params % jacobianStepSize*ds
-!
-!      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
-!
-!      ! J*ds = (I - (dt/2)* dF/ds )*ds
-!      Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % state % tendency - Fs )/myDGSEM % params % jacobianStepSize
-!
-! END FUNCTION CrankNicholsonJacobianAction_Fluid
+ FUNCTION CrankNicholsonJacobianAction_Fluid( myDGSEM, s, ds, Fs ) RESULT( Jds )
+   IMPLICIT NONE
+   CLASS(Fluid) :: myDGSEM
+   REAL(prec)   :: s(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: ds(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: Fs(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+   REAL(prec)   :: Jds(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
+
+
+      myDGSEM % state % solution = s + myDGSEM % params % jacobianStepSize*ds
+
+      CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
+
+      ! J*ds = (I - (dt/2)* dF/ds )*ds
+      Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % state % tendency - Fs )/myDGSEM % params % jacobianStepSize
+
+ END FUNCTION CrankNicholsonJacobianAction_Fluid
 !
 ! ============================================================================= !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1216,6 +1217,7 @@ CONTAINS
             us = myDGSEM % state % boundarySolution(i,j,1,s1,e1)*sx    + &
               myDGSEM % state % boundarySolution(i,j,2,s1,e1)*sy    + &
               myDGSEM % state % boundarySolution(i,j,3,s1,e1)*sz
+
             ut = myDGSEM % state % boundarySolution(i,j,1,s1,e1)*tx  + &
               myDGSEM % state % boundarySolution(i,j,2,s1,e1)*ty  + &
               myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz
@@ -1228,7 +1230,7 @@ CONTAINS
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % prescribedState(i,j,4,bID) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % prescribedState(i,j,5,bID) ! potential temperature
 #ifdef PASSIVE_TRACERS
-            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % prescribedState(i,j,6,bID) ! potential temperature
+            myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % prescribedState(i,j,6,bID)
 #endif
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % prescribedState(i,j,nEquations,bID) ! P
 
@@ -1334,28 +1336,27 @@ CONTAINS
               myDGSEM % params % P0 )**myDGSEM % params % rC  )
 
             ! External normal velocity component
-
             uOut = ( myDGSEM % state % boundarySolution(ii,jj,1,s2,e2)*nHat(1) + &
-              myDGSEM % state % boundarySolution(ii,jj,2,s2,e2)*nHat(2) + &
-              myDGSEM % state % boundarySolution(ii,jj,3,s2,e2)*nHat(3) )/&
-              ( myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) + &
-              myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) )
+                     myDGSEM % state % boundarySolution(ii,jj,2,s2,e2)*nHat(2) + &
+                     myDGSEM % state % boundarySolution(ii,jj,3,s2,e2)*nHat(3) )/&
+                     ( myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) + &
+                     myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) )
 
             ! Internal normal velocity component
             uIn  = ( myDGSEM % state % boundarySolution(i,j,1,s1,e1)*nHat(1) + &
-              myDGSEM % state % boundarySolution(i,j,2,s1,e1)*nHat(2) + &
-              myDGSEM % state % boundarySolution(i,j,3,s1,e1)*nHat(3) )/&
-              ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + &
-              myDGSEM % static % boundarySolution(i,j,4,s1,e1) )
+                     myDGSEM % state % boundarySolution(i,j,2,s1,e1)*nHat(2) + &
+                     myDGSEM % state % boundarySolution(i,j,3,s1,e1)*nHat(3) )/&
+                     ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + &
+                     myDGSEM % static % boundarySolution(i,j,4,s1,e1) )
 
             fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
 
             ! Advective flux
             DO iEq = 1, myDGSEM % state % nEquations-1
               aS(iEq) = uIn*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1) + &
-                myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
-                uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + &
-                myDGSEM % static % boundarySolution(ii,jj,iEq,s2,e2) )
+                              myDGSEM % static % boundarySolution(i,j,iEq,s1,e1) ) +&
+                       uOut*( myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2) + &
+                              myDGSEM % static % boundarySolution(ii,jj,iEq,s2,e2) )
             ENDDO
 
             DO k = 1, 3
@@ -1385,12 +1386,12 @@ CONTAINS
                 DO k = 1, 3
                   ! Calculate the LDG flux for the stress tensor.
                   myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( myDGSEM % state % boundarySolution(i,j,iEq,s1,e1)/&
-                    (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
-                    myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
-                    myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)/&
-                    (myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) +&
-                    myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)) )*&
-                    myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
+                                                                                       (myDGSEM % state % boundarySolution(i,j,4,s1,e1) +&
+                                                                                        myDGSEM % static % boundarySolution(i,j,4,s1,e1))+&
+                                                                                       myDGSEM % state % boundarySolution(ii,jj,iEq,s2,e2)/&
+                                                                                       (myDGSEM % state % boundarySolution(ii,jj,4,s2,e2) +&
+                                                                                        myDGSEM % static % boundarySolution(ii,jj,4,s2,e2)) )*&
+                                                                                       myDGSEM % mesh % elements % nHat(k,i,j,s1,e1)
 
                   myDGSEM % state % boundaryGradientFlux(k,ii,jj,iEq,s2,e2) = -myDGSEM % state % boundaryGradientFlux(k,i,j,iEq,s1,e1)
                 ENDDO
@@ -2407,6 +2408,7 @@ CONTAINS
     myDGSEM % state % solution = 0.0_prec
     !$OMP END MASTER
 
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,4,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,4,:) )
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
@@ -2651,6 +2653,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+
     ENDDO
 
     heat = heat*myDGSEM % params % Cv
@@ -2674,6 +2677,12 @@ CONTAINS
       PRINT*, '  Model bust at simulation time : ', myDGSEM % simulationTime
       PRINT*, '  Total Kinetic Energy :', myDGSEM % KE
       PRINT*, '  Consider reducing the time step or increasing dissipation.'
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,1,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,1,:) )
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,2,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,2,:) )
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,3,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,3,:) )
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,4,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,4,:) )
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,5,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,5,:) )
+      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,6,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,6,:) )
 
       CALL myDGSEM % WriteDiagnostics( )
       CALL myDGSEM % CloseDiagnosticsFiles( )
@@ -2845,6 +2854,7 @@ CONTAINS
                                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
    CALL myDGSEM % static % UpdateHost( )
+   istat = cudaDeviceSynchronize( )
 #else
 
     ! Interpolate the static state to the element boundaries
@@ -2871,6 +2881,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
   myDGSEM % static % externalState_dev = myDGSEM % static % externalState
+  istat = cudaDeviceSynchronize( )
 #endif
 
     PRINT*, 'S/R ReadPickup : Done.'
