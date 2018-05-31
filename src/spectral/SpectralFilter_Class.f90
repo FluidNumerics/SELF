@@ -135,11 +135,11 @@ CONTAINS
 
         IF( filterType == ModalCutoff )THEN
 
-    !      IF( row <= nCutoff )THEN
+          IF( row <= nCutoff )THEN
             Pfilt(row,row) = 1.0_dp
-    !      ELSE
-    !        Pfilt(row,row)  = filter_b
-    !      ENDIF
+          ELSE
+            Pfilt(row,row) = 0.0_dp
+          ENDIF
 
         ELSEIF( filterType == TanhRollOff )THEN
 

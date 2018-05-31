@@ -125,6 +125,8 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+PRINT*, MINVAL( myDGSEM % sourceTerms % drag ), MAXVAL( myDGSEM % sourceTerms % drag )
+PRINT*, MINVAL( myDGSEM % mesh % elements % x(:,:,3,:) ), MAXVAL( myDGSEM % mesh % elements % x(:,:,3,:) )
 
 #ifdef HAVE_CUDA
     myDGSEM % state % solution_dev = myDGSEM % state % solution

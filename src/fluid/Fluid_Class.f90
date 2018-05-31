@@ -2421,6 +2421,8 @@ CONTAINS
     REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
     REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
     REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: drag(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1, 1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: drag_init(0:myDGSEM % params % polydeg,0:myDGSEM % params % polydeg,0:myDGSEM % params % polydeg,1, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
     INTEGER :: istat
 #endif
@@ -2438,6 +2440,8 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 
 #endif
+
+    drag_init(:,:,:,1,:) = myDGSEM % sourceTerms % drag
     sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
                                                 myDGSEM % state % solution, &
                                                 myDGSEM % state % nEquations, &
@@ -2445,6 +2449,10 @@ CONTAINS
 
     bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
                                                  myDGSEM % static % nEquations, &
+                                                 myDGSEM % mesh % elements % nElements )
+
+    drag = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, drag_init, &
+                                                 1, &
                                                  myDGSEM % mesh % elements % nElements )
 
     x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
@@ -2491,13 +2499,13 @@ CONTAINS
               sol(i,j,k,4,iEl), &
               (sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl))/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
 #ifdef PASSIVE_TRACERS
-              sol(i,j,k,6,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+              ( bsol(i,j,k,6,iEl) + sol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
 #endif
               sol(i,j,k,nEquations,iEl), &
               bsol(i,j,k,4,iEl), &
               bsol(i,j,k,5,iEl)/( bsol(i,j,k,4,iEl) ),&
               bsol(i,j,k,nEquations,iEl),&
-              myDGSEM % sourceTerms % drag(i,j,k,iEl), c
+              drag(i,j,k,1,iEl), c
 
 
           ENDDO
