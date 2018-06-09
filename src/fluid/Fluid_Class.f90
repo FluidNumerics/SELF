@@ -34,7 +34,7 @@ MODULE Fluid_Class
 
     REAL(prec) :: simulationTime
     REAL(prec) :: volume, mass, KE, PE, heat
-
+  
     TYPE( ModelParameters )      :: params
     TYPE( HexMesh )              :: mesh
     TYPE( BoundaryCommunicator ) :: extComm
@@ -50,7 +50,7 @@ MODULE Fluid_Class
 #ifdef HAVE_MPI
     TYPE( MPILayer )             :: mpiStateHandler
     TYPE( MPILayer )             :: mpiStressHandler
-!    TYPE( MPILayer )             :: mpiSGSHandler
+    TYPE( MPILayer )             :: mpiSGSHandler
 #endif
 
   CONTAINS
@@ -139,6 +139,7 @@ CONTAINS
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 #endif
 
+
     CALL myDGSEM % params % Build( setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
@@ -152,7 +153,6 @@ CONTAINS
     ! the device for each rank is also set here.
     CALL myDGSEM % extComm % ReadPickup(  )
 
-    
 #ifdef HAVE_CUDA
     CALL UpdateDeviceDictionary( )
 #endif
@@ -214,14 +214,11 @@ CONTAINS
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % state % nEquations )
     CALL myDGSEM % mpiStressHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % stressTensor % nEquations )
-!    CALL myDGSEM % mpiSGSHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % sgsCoeffs % nEquations )
+    CALL myDGSEM % mpiSGSHandler % Build( myDGSEM % extComm, myDGSEM % params % polyDeg, myDGSEM % sgsCoeffs % nEquations )
 #endif
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % sgsCoeffs % UpdateDevice( )
-#endif
-
-#ifdef HAVE_CUDA
 
       ! Set Device Constants
       R_dev         = myDGSEM % params % R
@@ -285,9 +282,8 @@ CONTAINS
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Trash( )
     CALL myDGSEM % mpiStressHandler % Trash( )
-!    CALL myDGSEM % mpiSGSHandler % Trash( )
+    CALL myDGSEM % mpiSGSHandler % Trash( )
 #endif
-
 
   END SUBROUTINE Trash_Fluid
 !
@@ -332,7 +328,19 @@ CONTAINS
                              1:myDGSEM % mesh % elements % nElements)
     INTEGER            :: iT, m, iStat
     TYPE(dim3)         :: fgrid, grid, tBlock
+#else
+    REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
+    REAL(prec) :: G3D(0:myDGSEM % params % polyDeg,&
+                      0:myDGSEM % params % polyDeg,&
+                      0:myDGSEM % params % polyDeg,&
+                      1:myDGSEM % state % nEquations,&
+                      1:myDGSEM % mesh % elements % nElements)
+    INTEGER    :: m, iEl, iT, i, j, k, iEq
 
+#endif
+
+
+#ifdef HAVE_CUDA
 
     tBlock = dim3( myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1, &
@@ -346,17 +354,9 @@ CONTAINS
 
     DO iT = 1, nT
 
-
       G3D  = 0.0_prec
 
       DO m = 1,3
-
-        IF( myDGSEM % params % SpectralFilter )THEN
-
-          CALL FilterState_CUDAKernel<<<fgrid,tblock>>>( myDGSEM % state % solution_dev, &
-                                                         myDGSEM % filter % filterMat_dev )
-
-        ENDIF
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
@@ -370,8 +370,6 @@ CONTAINS
 
 
       ENDDO
-
-
 
       myDGSEM % simulationTime = t0 + REAL(iT,prec)*dt
 
@@ -387,12 +385,6 @@ CONTAINS
 
       DO m = 1,3
 
-        IF( myDGSEM % params % SpectralFilter )THEN
-
-          CALL FilterState_CUDAKernel<<<fgrid,tblock>>>( myDGSEM % state % solution_dev, &
-                                                         myDGSEM % filter % filterMat_dev )
-
-        ENDIF
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
@@ -415,13 +407,6 @@ CONTAINS
     ENDIF
 
 #else
-    REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
-    REAL(prec) :: G3D(0:myDGSEM % params % polyDeg,&
-                      0:myDGSEM % params % polyDeg,&
-                      0:myDGSEM % params % polyDeg,&
-                      1:myDGSEM % state % nEquations,&
-                      1:myDGSEM % mesh % elements % nElements)
-    INTEGER    :: m, iEl, iT, i, j, k, iEq
 
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
@@ -442,15 +427,6 @@ CONTAINS
         ENDDO
       ENDDO
       !$OMP ENDDO
-
-      IF( myDGSEM % params % SpectralFilter )THEN
-  
-        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
-                                          myDGSEM % state % solution, &
-                                          myDGSEM % state % nEquations, &
-                                          myDGSEM % state % nElements )
-  
-      ENDIF
 
       DO m = 1,3 ! Loop over RK3 steps
 
@@ -493,15 +469,6 @@ CONTAINS
     ! at exactly t0+outputFrequency
     IF( .NOT. AlmostEqual( myDGSEM % simulationTime, t0+myDGSEM % params % outputFrequency ) )THEN
 
-      IF( myDGSEM % params % SpectralFilter )THEN
-  
-        CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution, &
-                                          myDGSEM % state % solution, &
-                                          myDGSEM % state % nEquations, &
-                                          myDGSEM % state % nElements )
-  
-      ENDIF
-
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
 
       !$OMP DO
@@ -524,9 +491,7 @@ CONTAINS
 
         CALL myDGSEM % EquationOfState( )
 
-
         CALL myDGSEM % GlobalTimeDerivative( t )
-
 
         !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -548,7 +513,6 @@ CONTAINS
           ENDDO
         ENDDO
         !$OMP ENDDO
-
 
       ENDDO
 
@@ -870,7 +834,6 @@ CONTAINS
 ! wave-number. This routine depends on the result of the UpdateExternalStress
 ! and the MPI_StressExchange.
 
-      CALL myDGSEM % InternalFace_StressFlux( )
 
 #ifdef HAVE_MPI
       CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressTensor,&

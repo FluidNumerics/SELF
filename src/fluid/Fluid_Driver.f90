@@ -9,9 +9,6 @@
 PROGRAM Fluid_Driver
 
   USE ModelPrecision
-#ifdef TIMING
-  USE Timing
-#endif
   USE ModelParameters_Class
   USE Fluid_Class
 
@@ -21,9 +18,6 @@ PROGRAM Fluid_Driver
 
   TYPE( Fluid )       :: myeu
   LOGICAL             :: setupSuccess
-#ifdef TIMING
-  TYPE( MultiTimers ) :: timers
-#endif
 
 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
@@ -58,15 +52,6 @@ CONTAINS
     CALL myeu % Diagnostics( )
     CALL myeu % WriteDiagnostics( )
 
-
-#ifdef TIMING
-    IF( myeu % extComm % myRank == 0 )THEN
-      CALL timers % Build( )
-      CALL timers % AddTimer( 'ForwardStepRK3', 1 )
-    ENDIF
-#endif
-
-
     PRINT(MsgFMT), 'Setup Complete'
 
   END SUBROUTINE Setup
@@ -83,12 +68,6 @@ CONTAINS
 
     CALL myeu % CloseDiagnosticsFiles( )
 
-#ifdef TIMING
-    IF( myeu % extComm % myRank == 0 )THEN
-      CALL timers % Write_MultiTimers( )
-      CALL timers % Trash( )
-    ENDIF
-#endif
 
   END SUBROUTINE Cleanup
 
@@ -105,26 +84,7 @@ CONTAINS
     !$OMP PARALLEL
     DO iT = 1, myeu % params % nDumps ! Loop over time-steps
 
-
-#ifdef TIMING
-      !$OMP MASTER
-      IF( myeu % extComm % myRank == 0 )THEN
-        CALL timers % StartTimer( 1 )
-      ENDIF
-      !$OMP END MASTER
-#endif
-
-
       CALL myeu % ForwardStepRK3( myeu % params % nStepsPerDump ) ! Forward Step
-
-#ifdef TIMING
-      !$OMP MASTER
-      IF( myeu % extComm % myRank == 0 )THEN
-        CALL timers % STOPTimer( 1 )
-      ENDIF
-      !$OMP END MASTER
-#endif
-
 
 #ifdef HAVE_CUDA
       myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
