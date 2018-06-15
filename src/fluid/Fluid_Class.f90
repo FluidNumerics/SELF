@@ -100,9 +100,9 @@ MODULE Fluid_Class
   INTEGER, PRIVATE            :: diagUnits(1:5)
 
 #ifdef PASSIVE_TRACERS
-  INTEGER, PARAMETER, PRIVATE :: nEquations   = 7
+  INTEGER, PARAMETER :: nEquations   = 7
 #else
-  INTEGER, PARAMETER, PRIVATE :: nEquations   = 6
+  INTEGER, PARAMETER :: nEquations   = 6
 #endif
 
 #ifdef HAVE_CUDA
