@@ -7,7 +7,6 @@ PROGRAM MeshGenerator_3D
  USE ModelPrecision
  USE ConstantsDictionary
  USE CommonRoutines
- USE Timing
  USE NodalDG_Class
  USE HexMesh_Class
  USE TopographicShapes
@@ -21,7 +20,6 @@ PROGRAM MeshGenerator_3D
  TYPE( HexMesh )                           :: mesh
  TYPE( HexMesh )                           :: procMesh
  TYPE( ModelParameters )                   :: params
- TYPE( MultiTimers )                       :: timers
  TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
  INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
  INTEGER                      :: procID
@@ -41,10 +39,6 @@ PROGRAM MeshGenerator_3D
       CALL params % Build( setupSuccess )
 
       IF( setupSuccess )THEN
-
-         CALL timers % Build( )
-         
-         CALL timers % AddTimer( 'Total Time', 1 )
          ! Build an interpolant
          CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
                              N = params % polyDeg, &
@@ -101,9 +95,6 @@ PROGRAM MeshGenerator_3D
          nodeLogic     = 0
          nNodePerProc  = 0
          
-
-         CALL timers % StartTimer( 1 )
-   
          ALLOCATE( partitions(1:nElems) )
          ALLOCATE( bcom(0:nProc-1) ) 
          ALLOCATE( faceProcCount(1:mesh % faces % nFaces), &
@@ -421,8 +412,6 @@ PROGRAM MeshGenerator_3D
          WRITE( pIDChar, '(I4.4)' ) procID
          CALL bCom(procID) % WritePickup( 'ExtComm.'//pIDChar )
       ENDDO
-   
-         CALL timers % StopTimer( 1 )
          
 ! ----------------------------------------------------------------------------- !
 
@@ -436,7 +425,6 @@ PROGRAM MeshGenerator_3D
       materials = REAL( partitions, prec )
       CALL mesh % WriteMaterialTecplot( materials )
       
-      CALL timers % Write_MultiTimers( )
 
       ! Clean up memory !
       DEALLOCATE( materials, &
@@ -447,8 +435,6 @@ PROGRAM MeshGenerator_3D
       
       CALL mesh % Trash( )
       CALL nodal % Trash( )
-      CALL timers % Trash( )
-
 
       ENDIF
 
