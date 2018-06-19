@@ -93,8 +93,8 @@ ifeq (${TIMING},yes)
   CPPFLAGS+=-DTIMING
 endif
 
-ifeq (${SKEW_METRICS},yes)
-  CPPFLAGS+=-DSKEW_METRICS
+ifeq (${CURL_INVARIANT},yes)
+  CPPFLAGS+=-DCURL_INVARIANT
 endif
 
 ifeq (${PASSIVE_TRACERS},yes)
