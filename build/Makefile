@@ -23,7 +23,7 @@ ifeq (${FC},gfortran)
   ifeq (${DEBUG},yes)
     OPT+=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
   else
-    OPT+=-Ofast -ffree-line-length-none
+    OPT+=-O3 -ffree-line-length-none
   endif
 
   ifeq (${OPENMP},yes)

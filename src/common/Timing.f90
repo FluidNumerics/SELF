@@ -718,29 +718,20 @@ USE OMP_LIB
          k = k+1
 
          CALL theTimers % GetName( tName )
-         WRITE(fUnit,*) tName, theTimers % current % accumulatedTime/theTimers % current % nObs
+         IF( AlmostEqual( theTimers % current % nObs, 0.0_prec) )THEN
+
+           WRITE(fUnit,*) tName, theTimers % current % accumulatedTime
+
+         ELSE
+
+           WRITE(fUnit,*) tName, theTimers % current % accumulatedTime/theTimers % current % nObs
+        
+         ENDIF
          CALL theTimers % MoveToNext( )
 
       ENDDO
       CLOSE(fUnit)
 
-
-      theTimers % current => theTimers % head
-      
-      PRINT*, '====================== Timing Results ======================'
-      PRINT*, ' '
-      
-      DO WHILE( ASSOCIATED(theTimers % current) )
-
-         CALL theTimers % GetName( tName )
-         WRITE(fUnit,*) tName, theTimers % current % accumulatedTime/theTimers % current % nObs
-         CALL theTimers % MoveToNext( )
-         CALL theTimers % MoveToNext( )
-
-      ENDDO
-
-      PRINT*, '------------------------------------------------------------'
-      PRINT*,' Timing Results saved to  "Timing.Stats" '
 
  END SUBROUTINE Write_MultiTimers
 

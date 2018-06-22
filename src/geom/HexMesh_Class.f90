@@ -1070,7 +1070,7 @@ CONTAINS
     REAL(prec) :: c1(1:3), c2(1:3)
     REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:), weights(:)
 
-    INTEGER :: nNodes, nElements, nFaces, gPolyDeg
+    INTEGER :: nNodes, nElements, nFaces, gPolyDeg, nSurf
     INTEGER :: nodes(1:8)
     INTEGER :: n1, n2, n3, n4
     INTEGER :: iNode, iEl, iSide, iX, iY, iZ, i, j, iSurf
@@ -1084,6 +1084,7 @@ CONTAINS
     nElements = (nXElem)*(nYElem)*(nZElem)
     nFaces    = (nXElem)*(nYElem)*(nZElem+1) + (nXElem)*(nZElem)*(nYElem+1) + (nYElem)*(nZElem)*(nXElem+1)
     gPolyDeg  = interp % N
+    nSurf     = 6*nElements
     ! ************************************************************************* !
 
     PRINT*, 'nNodes    : ', nNodes
@@ -1094,7 +1095,7 @@ CONTAINS
     ! These are the points USEd to define the parametric
     ! curves for the element boundaries
 
-    ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6*nElements), weights(0:gpolyDeg) )
+    ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:nSurf), weights(0:gpolyDeg) )
     CALL LegendreQuadrature( gPolyDeg, s, weights, GAUSS_LOBATTO )
 
     ! ---- Build the mesh (empty) ---- !
@@ -1128,7 +1129,7 @@ CONTAINS
 
     ! DO the element information
     xc = 0.0_prec
-    CALL boundSurfs % Build( s, gPolyDeg, 6*nElements )
+    CALL boundSurfs % Build( s, gPolyDeg, nSurf )
 
     DO iZ = 1, nZElem
 
@@ -1911,12 +1912,12 @@ CONTAINS
           IF( workingOnNodes )THEN
 
             nNodes = nNodes + 1       
-            READ( lineInTheFile, '(I,3(",",2x,E14.6))' ), id, myHexMesh % nodes % x(1:3,nNodes)
+            READ( lineInTheFile, '(I6,3(",",2x,E14.6))' ), id, myHexMesh % nodes % x(1:3,nNodes)
 
           ELSEIF( workingOnElements )THEN
 
             nElements = nElements + 1
-            READ( lineInTheFile, '(9(2x,I))' ), id, myHexMesh % elements % nodeIDs(1:8,nElements)
+            READ( lineInTheFile, '(9(2x,I6))' ), id, myHexMesh % elements % nodeIDs(1:8,nElements)
 
           ENDIF
 

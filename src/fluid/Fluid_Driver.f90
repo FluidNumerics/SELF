@@ -48,8 +48,6 @@ CONTAINS
       RETURN
     ENDIF
 
-    CALL myeu % OpenDiagnosticsFiles( )
-    CALL myeu % Diagnostics( )
     CALL myeu % WriteDiagnostics( )
 
     PRINT(MsgFMT), 'Setup Complete'
@@ -64,10 +62,6 @@ CONTAINS
     IMPLICIT NONE
 
     CALL myeu % Trash( )
-
-
-    CALL myeu % CloseDiagnosticsFiles( )
-
 
   END SUBROUTINE Cleanup
 
