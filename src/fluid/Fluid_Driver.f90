@@ -75,7 +75,6 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
-    !$OMP PARALLEL
     DO iT = 1, myeu % params % nDumps ! Loop over time-steps
 
       CALL myeu % ForwardStepRK3( myeu % params % nStepsPerDump ) ! Forward Step
@@ -84,16 +83,13 @@ CONTAINS
       myeu % state % solution = myeu % state % solution_dev ! Update the host from the GPU
 #endif
 
-      !$OMP MASTER
       CALL myeu % WritePickup( )
       CALL myeu % WriteTecplot( )
-      !$OMP END MASTER
 
       CALL myeu % Diagnostics( )
       CALL myeu % WriteDiagnostics( )
 
     ENDDO
-    !$OMP END PARALLEL
 
 
   END SUBROUTINE MainLoop

@@ -452,7 +452,6 @@ CONTAINS
 
     DO iT = 1, nT
 
-      !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
@@ -464,7 +463,6 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
-      !$OMP ENDDO
 
       DO m = 1,3 ! Loop over RK3 steps
 
@@ -474,7 +472,6 @@ CONTAINS
         CALL myDGSEM % EquationOfState( )
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
@@ -494,7 +491,6 @@ CONTAINS
             ENDDO
           ENDDO
         ENDDO 
-        !$OMP ENDDO
 
       ENDDO
 
@@ -509,7 +505,6 @@ CONTAINS
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
 
-      !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
@@ -521,7 +516,6 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
-      !$OMP ENDDO
 
       DO m = 1,3
 
@@ -531,7 +525,6 @@ CONTAINS
 
         CALL myDGSEM % GlobalTimeDerivative( t )
 
-        !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
@@ -550,7 +543,6 @@ CONTAINS
             ENDDO
           ENDDO
         ENDDO
-        !$OMP ENDDO
 
       ENDDO
 
@@ -1120,7 +1112,6 @@ CONTAINS
     REAL(prec) :: KE(0:myDGSEM % params % polyDeg,0:myDGSEM % params % polyDeg,0:myDGSEM % params % polyDeg)
 
 
-    !$OMP DO PRIVATE( KE )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
 
       ! Here, the SGS Kinetic energy is calculated using the
@@ -1159,7 +1150,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -1191,7 +1181,6 @@ CONTAINS
     INTEGER    :: iFace2, p2
     INTEGER    :: e1, e2, s1, s2
 
-    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -1213,7 +1202,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -1258,7 +1246,6 @@ CONTAINS
     REAL(prec) :: sx, sy, sz
     REAL(prec) :: tx, ty, tz
 
-    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -1404,7 +1391,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -1451,7 +1437,6 @@ CONTAINS
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, rC
 
-    !$OMP DO PRIVATE( jump, aS )
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1569,7 +1554,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
 
 
 #endif
@@ -1613,7 +1597,6 @@ CONTAINS
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, hCapRatio, rC
 
-    !$OMP DO PRIVATE( jump, aS )
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1724,7 +1707,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
 
 
 #endif
@@ -1783,7 +1765,6 @@ CONTAINS
 #else
 
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
@@ -1922,7 +1903,6 @@ CONTAINS
 
       ENDDO
     ENDDO
-    !$OMP ENDDO
 #endif
 
 
@@ -1966,7 +1946,6 @@ CONTAINS
                                                                 myDGSEM % dgStorage % quadratureWeights_dev )
 #else
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2042,7 +2021,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
 #endif
 
   END SUBROUTINE CalculateSolutionGradient_Fluid
@@ -2074,7 +2052,6 @@ CONTAINS
 
 #else
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2109,7 +2086,6 @@ CONTAINS
 
       ENDDO
     ENDDO
-    !$OMP ENDDO
   
 
 #endif
@@ -2143,7 +2119,6 @@ CONTAINS
 
 #else
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2175,7 +2150,6 @@ CONTAINS
 
       ENDDO
     ENDDO
-    !$OMP ENDDO 
 
 #endif
 
@@ -2209,7 +2183,6 @@ CONTAINS
     INTEGER    :: bID, p2
     INTEGER    :: e1, e2, s1, s2
 
-    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -2229,7 +2202,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -2268,7 +2240,6 @@ CONTAINS
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
 
-    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -2322,7 +2293,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -2366,7 +2336,6 @@ CONTAINS
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
 
-    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -2427,7 +2396,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -2457,7 +2425,6 @@ CONTAINS
     REAL(prec) :: hCapRatio, rC, rhoT
 
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
@@ -2474,7 +2441,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
 
 #endif
 
@@ -2501,7 +2467,6 @@ CONTAINS
 
     ! /////////////////////  Build the Static/Background State ///////////////////////// !
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations
         DO k = 0, myDGSEM % params % polyDeg
@@ -2514,9 +2479,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
 
-    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
@@ -2544,7 +2507,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
 
 #ifdef HAVE_CUDA
     myDGSEM % static % solution_dev = myDGSEM % static % solution
@@ -2557,11 +2519,9 @@ CONTAINS
     myDGSEM % state % solution = myDGSEM % state % solution_dev
 #endif
 
-    !$OMP MASTER
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       myDGSEM % static % solution(:,:,:,nEquations,iEl) = myDGSEM % state % solution(:,:,:,nEquations,iEl)
     ENDDO
-    !$OMP END MASTER
 
 #ifdef HAVE_CUDA
     myDGSEM % static % solution_dev = myDGSEM % static % solution
@@ -2569,9 +2529,7 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 #endif
 
-    !$OMP MASTER
     myDGSEM % state % solution = 0.0_prec
-    !$OMP END MASTER
 
       PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,4,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,4,:) )
 
