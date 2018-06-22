@@ -2703,31 +2703,36 @@ CONTAINS
       OPEN( UNIT=NewUnit(diagUnits(1)), &
         FILE='Mass.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
-        STATUS='REPLACE' )
+        STATUS='REPLACE', &
+        ACCESS='APPEND' )
       WRITE(diagUnits(1),*) '#TotalMass'
 
       OPEN( UNIT=NewUnit(diagUnits(2)), &
         FILE='KineticEnergy.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
-        STATUS='REPLACE' )
+        STATUS='REPLACE', &
+        ACCESS='APPEND' )
       WRITE(diagUnits(2),*) '#TotalKineticEnergy'
 
       OPEN( UNIT=NewUnit(diagUnits(3)), &
         FILE='PotentialEnergy.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
-        STATUS='REPLACE' )
+        STATUS='REPLACE', &
+        ACCESS='APPEND' )
       WRITE(diagUnits(3),*) '#TotalPotentialEnergy'
 
       OPEN( UNIT=NewUnit(diagUnits(4)), &
         FILE='Heat.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
-        STATUS='REPLACE' )
+        STATUS='REPLACE', &
+        ACCESS='APPEND' )
       WRITE(diagUnits(4),*) '#TotalHeat'
 
       OPEN( UNIT=NewUnit(diagUnits(5)), &
         FILE='Volume.'//timeStampString//'.curve', &
         FORM='FORMATTED', &
-        STATUS='REPLACE' )
+        STATUS='REPLACE', &
+        ACCESS='APPEND' )
       WRITE(diagUnits(5),*) '#TotalVolume'
     ENDIF
 
@@ -2735,7 +2740,9 @@ CONTAINS
 !
   SUBROUTINE WriteDiagnostics_Fluid( myDGSEM )
     IMPLICIT NONE
-    CLASS( Fluid ), INTENT(in) :: myDGSEM
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM
+
+    CALL myDGSEM % OpenDiagnosticsFiles( )
 
     IF( myDGSEM % extComm % myRank == 0 )THEN
       WRITE(diagUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
@@ -2744,6 +2751,8 @@ CONTAINS
       WRITE(diagUnits(4),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % heat
       WRITE(diagUnits(5),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % volume
     ENDIF
+
+    CALL myDGSEM % CloseDiagnosticsFiles( )
 
   END SUBROUTINE WriteDiagnostics_Fluid
 !
@@ -2858,7 +2867,6 @@ CONTAINS
       PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,6,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,6,:) )
 
       CALL myDGSEM % WriteDiagnostics( )
-      CALL myDGSEM % CloseDiagnosticsFiles( )
       CALL myDGSEM % Trash( )
 
       STOP
