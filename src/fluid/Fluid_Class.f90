@@ -2104,7 +2104,7 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 #else
-    INTEGER :: iEl, iEq, i, j, k, idir, ii 
+    INTEGER :: iEl, iEq, i, j, k, idir, jdir, ii 
 #endif
 
 
@@ -2124,18 +2124,38 @@ CONTAINS
 
 #else
 
+    ! FLOPS = 3*[ (polyDeg+1)^3 ]*[3]*[5]*[nElements]
+    ! # of array reads = 12*[ (polyDeg+1)^3 ]*[3]*[5]*[nElements] 
+    !
+    ! > For the thermal bubble demo @ single precisions, default settings,
+    !     FLOPS = 3,456,000
+    !     reads = 13,824,000
+    !     writes = 1,152,000
+    !
+    !     Oryx, Intel I7, TPP ~ 12.84 GFLOPs/s, (Peak compute bandwidth of 51.31 GB/s @ single precision)
+    !
+    !     Current serial runtime is 0.776 s, 
+    !         >> Performance is          4.45 FLOPs/s
+    !         >> read/write bandwidth of 19.30 MB/s
+    !
+    !      Performance ~ Arithmetic Intensity * Bandwidth
+    !      FLOPS/s ~ FLOPS/Bytes * ( Bytes/second )
+    !      Theoretical arithmetic intensity for this routine is  ~ 0.231 (FLOPS/Byte)
+    !
+    !
+    !
+
+    myDGSEM % stressTensor % flux = 0.0_prec
     !$OMP PARALLEL
     !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
+        DO k = 0, myDGSEM % params % polyDeg
+          DO j = 0, myDGSEM % params % polyDeg
+            DO i = 0, myDGSEM % params % polyDeg
 
-        myDGSEM % stressTensor % flux = 0.0_prec
-
-        DO idir = 1, 3
-
-          DO k = 0, myDGSEM % params % polyDeg
-            DO j = 0, myDGSEM % params % polyDeg
-              DO i = 0, myDGSEM % params % polyDeg
+              
+              DO idir = 1, 3
 
                 myDGSEM % stressTensor % flux(1,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(1,i,j,k,iEq,iEl) + myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
                                           myDGSEM % state % solutionGradient(idir,i,j,k,iEq,iEl)*&
@@ -2150,11 +2170,10 @@ CONTAINS
                                           myDGSEM % sgsCoeffs % solution(i,j,k,iEq,iEl) 
 
               ENDDO
+
             ENDDO
           ENDDO
-
         ENDDO
-
       ENDDO
     ENDDO
     !$OMP ENDDO
