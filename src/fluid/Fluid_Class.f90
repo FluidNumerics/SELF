@@ -1246,6 +1246,9 @@ CONTAINS
     REAL(prec) :: sx, sy, sz
     REAL(prec) :: tx, ty, tz
 
+
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE( iEl, bID, bFaceID, i, j, k, iEq, iFace2, p2, e1, e2, s1, s2, norm, un, ut, us, speed, nx, ny, nz, sx, sy, sz, tx, ty, tz )
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -1391,6 +1394,8 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
+    !$OMP END PARALLEL
 
 #endif
 
