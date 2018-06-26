@@ -1765,6 +1765,8 @@ CONTAINS
 #else
 
 
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE ( F )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
@@ -1835,9 +1837,13 @@ CONTAINS
 
       ENDDO
     ENDDO
+    !$OMP ENDDO
+    !$OMP END PARALLEL
 
      CALL myDGSEM % state % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )  
 
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE( F )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
@@ -1903,6 +1909,8 @@ CONTAINS
 
       ENDDO
     ENDDO
+    !$OMP ENDDO
+    !$OMP END PARALLEL
 #endif
 
 
