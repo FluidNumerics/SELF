@@ -1946,8 +1946,8 @@ CONTAINS
                                                                 myDGSEM % dgStorage % quadratureWeights_dev )
 #else
 
-    !$OMP PARALLEL
-    !$OMP DO
+    !!$OMP PARALLEL
+    !!$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2023,8 +2023,8 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
-    !$OMP END PARALLEL
+    !!$OMP ENDDO
+    !!$OMP END PARALLEL
 
 #endif
 
@@ -2057,6 +2057,9 @@ CONTAINS
 
 #else
 
+
+    !!$OMP PARALLEL
+    !!$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2091,6 +2094,8 @@ CONTAINS
 
       ENDDO
     ENDDO
+    !!$OMP ENDDO
+    !!$OMP END PARALLEL
   
 
 #endif
@@ -2105,6 +2110,7 @@ CONTAINS
     TYPE(dim3) :: grid, tBlock
 #else
     INTEGER :: iEl, iEq, i, j, k, idir, jdir, ii 
+    REAL(prec) :: flux(1:3)
 #endif
 
 
@@ -2145,31 +2151,33 @@ CONTAINS
     !
     !
 
-    myDGSEM % stressTensor % flux = 0.0_prec
     !$OMP PARALLEL
-    !$OMP DO
+    !$OMP DO PRIVATE( flux )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
         DO k = 0, myDGSEM % params % polyDeg
           DO j = 0, myDGSEM % params % polyDeg
             DO i = 0, myDGSEM % params % polyDeg
 
-              
+              flux(1:3) = 0.0_prec
+
               DO idir = 1, 3
 
-                myDGSEM % stressTensor % flux(1,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(1,i,j,k,iEq,iEl) + myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
+
+                flux(1) = flux(1) + myDGSEM % mesh % elements % Ja(i,j,k,idir,1,iEl)*&
                                           myDGSEM % state % solutionGradient(idir,i,j,k,iEq,iEl)*&
                                           myDGSEM % sgsCoeffs % solution(i,j,k,iEq,iEl)
 
-                myDGSEM % stressTensor % flux(2,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(2,i,j,k,iEq,iEl) + myDGSEM % mesh % elements % Ja(i,j,k,idir,2,iEl)*&
+                flux(2) = flux(2) + myDGSEM % mesh % elements % Ja(i,j,k,idir,2,iEl)*&
                                           myDGSEM % state % solutionGradient(idir,i,j,k,iEq,iEl)*&
                                           myDGSEM % sgsCoeffs % solution(i,j,k,iEq,iEl) 
 
-                myDGSEM % stressTensor % flux(3,i,j,k,iEq,iEl) = myDGSEM % stressTensor % flux(3,i,j,k,iEq,iEl) + myDGSEM % mesh % elements % Ja(i,j,k,idir,3,iEl)*&
+                flux(3) = flux(3) + myDGSEM % mesh % elements % Ja(i,j,k,idir,3,iEl)*&
                                           myDGSEM % state % solutionGradient(idir,i,j,k,iEq,iEl)*&
                                           myDGSEM % sgsCoeffs % solution(i,j,k,iEq,iEl) 
-
               ENDDO
+
+              myDGSEM % stressTensor % flux(1:3,i,j,k,iEq,iEl) = flux(1:3)
 
             ENDDO
           ENDDO
