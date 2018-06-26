@@ -461,6 +461,9 @@ IMPLICIT NONE
     ! Local
     INTEGER :: i, j, k, iVar, iEl
 
+
+      !$OMP PARALLEL
+      !$OMP DO
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO j = 0, myNodal % N
@@ -483,6 +486,8 @@ IMPLICIT NONE
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO
+      !$OMP END PARALLEL
 
   END FUNCTION CalculateFunctionsAtBoundaries_3D_NodalDG
  
