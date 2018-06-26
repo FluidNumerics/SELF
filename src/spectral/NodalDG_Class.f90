@@ -460,27 +460,30 @@ IMPLICIT NONE
     REAL(prec)      :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
     ! Local
     INTEGER :: i, j, k, iVar, iEl
+    REAL(prec) :: fb(1:6)
 
 
       !$OMP PARALLEL
-      !$OMP DO
+      !$OMP DO PRIVATE( fb )
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO j = 0, myNodal % N
             DO i = 0, myNodal % N
             
-              fAtBoundaries(i,j,iVar,1:6,iEl) = 0.0_prec
+              fb(1:6) = 0.0_prec
               
               DO k = 0, myNodal % N
                
-                fAtBoundaries(i,j,iVar,1,iEl) = fAtBoundaries(i,j,iVar,1,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,k,j,iVar,iEl) ! South
-                fAtBoundaries(i,j,iVar,2,iEl) = fAtBoundaries(i,j,iVar,2,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(k,i,j,iVar,iEl) ! East
-                fAtBoundaries(i,j,iVar,3,iEl) = fAtBoundaries(i,j,iVar,3,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,k,j,iVar,iEl) ! North
-                fAtBoundaries(i,j,iVar,4,iEl) = fAtBoundaries(i,j,iVar,4,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(k,i,j,iVar,iEl) ! West
-                fAtBoundaries(i,j,iVar,5,iEl) = fAtBoundaries(i,j,iVar,5,iEl) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,j,k,iVar,iEl) ! Bottom
-                fAtBoundaries(i,j,iVar,6,iEl) = fAtBoundaries(i,j,iVar,6,iEl) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,j,k,iVar,iEl) ! Top
+                fb(1) = fb(1) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,k,j,iVar,iEl) ! South
+                fb(2) = fb(2) + myNodal % boundaryInterpolationMatrix(k,1)*f(k,i,j,iVar,iEl) ! East
+                fb(3) = fb(3) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,k,j,iVar,iEl) ! North
+                fb(4) = fb(4) + myNodal % boundaryInterpolationMatrix(k,0)*f(k,i,j,iVar,iEl) ! West
+                fb(5) = fb(5) + myNodal % boundaryInterpolationMatrix(k,0)*f(i,j,k,iVar,iEl) ! Bottom
+                fb(6) = fb(6) + myNodal % boundaryInterpolationMatrix(k,1)*f(i,j,k,iVar,iEl) ! Top
                
               ENDDO
+
+              fAtBoundaries(i,j,iVar,1:6,iEl) = fb(1:6)
               
             ENDDO
           ENDDO
