@@ -2228,9 +2228,9 @@ CONTAINS
       p2    = myDGSEM % extComm % extProcIDs( bID )
 
       IF( p2 == myDGSEM % extComm % myRank )THEN ! Enforce no boundary flux due to the fluid stress
-        DO j = 0, myDGSEM % params % polyDeg
-          DO i = 0, myDGSEM % params % polyDeg
-            DO iEq = 1, myDGSEM % stressTensor % nEquations
+        DO iEq = 1, myDGSEM % stressTensor % nEquations
+          DO j = 0, myDGSEM % params % polyDeg
+            DO i = 0, myDGSEM % params % polyDeg
               myDGSEM % stressTensor % externalState(i,j,iEq,bID) = myDGSEM % stressTensor % boundarySolution(i,j,iEq,s1,e1)
             ENDDO
           ENDDO
