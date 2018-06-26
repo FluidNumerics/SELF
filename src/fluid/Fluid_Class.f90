@@ -2058,8 +2058,8 @@ CONTAINS
 #else
 
 
-    !!$OMP PARALLEL
-    !!$OMP DO
+    !$OMP PARALLEL
+    !$OMP DO PRIVATE( fAtBoundaries )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2094,8 +2094,8 @@ CONTAINS
 
       ENDDO
     ENDDO
-    !!$OMP ENDDO
-    !!$OMP END PARALLEL
+    !$OMP ENDDO
+    !$OMP END PARALLEL
   
 
 #endif
