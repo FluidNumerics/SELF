@@ -970,7 +970,9 @@ CONTAINS
       CALL myDGSEM % timers % StartTimer( 16 )
 #endif
 
+      !$OMP PARALLEL
       CALL myDGSEM % CalculateStressFlux( )
+      !$OMP END PARALLEL
 
 #ifdef TIMING
       CALL myDGSEM % timers % StopTimer( 16 )
@@ -2165,8 +2167,7 @@ CONTAINS
     !
     !
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE( flux )
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
         DO k = 0, myDGSEM % params % polyDeg
@@ -2198,8 +2199,6 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-    !$OMP ENDDO
-    !$OMP END PARALLEL
 
 #endif
 
