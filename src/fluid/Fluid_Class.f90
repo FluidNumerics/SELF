@@ -990,8 +990,10 @@ CONTAINS
 #ifdef TIMING
       CALL myDGSEM % timers % StartTimer( 17 )
 #endif
-
+     
+      !$OMP PARALLEL
       CALL myDGSEM % UpdateExternalStress( tn )
+      !$OMP END PARALLEL
 
 #ifdef TIMING
       CALL myDGSEM % timers % StopTimer( 17 )
@@ -2232,6 +2234,7 @@ CONTAINS
     INTEGER    :: bID, p2
     INTEGER    :: e1, e2, s1, s2
 
+    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -2251,6 +2254,7 @@ CONTAINS
       ENDIF
 
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
