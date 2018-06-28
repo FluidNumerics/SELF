@@ -893,7 +893,9 @@ CONTAINS
       CALL myDGSEM % timers % StartTimer( 12 )
 #endif
 
+      !$OMP PARALLEL
       CALL myDGSEM % CalculateSolutionGradient( )
+      !$OMP END PARALLEL
 
 #ifdef TIMING
       CALL myDGSEM % timers % StopTimer( 12 )
@@ -927,7 +929,9 @@ CONTAINS
       CALL myDGSEM % timers % StartTimer( 14 )
 #endif
 
+      !$OMP PARALLEL
       CALL myDGSEM % CalculateNormalStressAtBoundaries( )
+      !$OMP END PARALLEL
 
 #ifdef TIMING
       CALL myDGSEM % timers % StopTimer( 14 )
@@ -1179,7 +1183,7 @@ CONTAINS
     INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
     INTEGER    :: iFace2, p2
     INTEGER    :: e1, e2, s1, s2
-
+    
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -1960,8 +1964,7 @@ CONTAINS
                                                                 myDGSEM % dgStorage % quadratureWeights_dev )
 #else
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE( f, df )
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2038,7 +2041,6 @@ CONTAINS
       ENDDO
     ENDDO
     !$OMP ENDDO
-    !$OMP END PARALLEL
 
 #endif
 
@@ -2072,8 +2074,7 @@ CONTAINS
 #else
 
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE( fAtBoundaries )
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2109,7 +2110,6 @@ CONTAINS
       ENDDO
     ENDDO
     !$OMP ENDDO
-    !$OMP END PARALLEL
   
 
 #endif
