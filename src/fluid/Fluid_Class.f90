@@ -700,7 +700,9 @@ CONTAINS
     CALL myDGSEM % timers % StartTimer( 4 )
 #endif
 
+    !$OMP PARALLEL
     CALL myDGSEM % UpdateExternalState( tn )
+    !$OMP END PARALLEL
 
 #ifdef TIMING
     CALL myDGSEM % timers % StopTimer( 4 )
@@ -718,8 +720,9 @@ CONTAINS
 #ifdef TIMING
     CALL myDGSEM % timers % StartTimer( 5 )
 #endif
-
+    !$OMP PARALLEL
     CALL myDGSEM % InternalFace_StateFlux( )
+    !$OMP END PARALLEL
 
 #ifdef TIMING
     CALL myDGSEM % timers % StopTimer( 5 )
@@ -1247,8 +1250,7 @@ CONTAINS
     REAL(prec) :: tx, ty, tz
 
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE( iEl, bID, bFaceID, i, j, k, iEq, iFace2, p2, e1, e2, s1, s2, norm, un, ut, us, speed, nx, ny, nz, sx, sy, sz, tx, ty, tz )
+    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -1395,7 +1397,6 @@ CONTAINS
       ENDDO
     ENDDO
     !$OMP ENDDO
-    !$OMP END PARALLEL
 
 #endif
 
@@ -1442,6 +1443,7 @@ CONTAINS
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, rC
 
+    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1559,6 +1561,7 @@ CONTAINS
       ENDIF
 
     ENDDO
+    !$OMP ENDDO
 
 
 #endif
