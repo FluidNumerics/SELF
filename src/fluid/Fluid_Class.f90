@@ -747,7 +747,9 @@ CONTAINS
     CALL myDGSEM % timers % StartTimer( 7 )
 #endif
 
+    !$OMP PARALLEL
     CALL myDGSEM % BoundaryFace_StateFlux( )
+    !$OMP END PARALLEL
 
 #ifdef TIMING
     CALL myDGSEM % timers % StopTimer( 7 )
@@ -1605,8 +1607,7 @@ CONTAINS
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, hCapRatio, rC
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE( e1, s1, e2, s2, ii, jj, i, j, m, iEq, nHat, bID, jump, as, fac, hCapRatio, rC, uOut, uIn, cIn, cOut, T, norm )
+    !$OMP DO 
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1718,7 +1719,6 @@ CONTAINS
 
     ENDDO
     !$OMP ENDDO
-    !$OMP END PARALLEL
 
 
 #endif
