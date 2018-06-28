@@ -818,8 +818,9 @@ CONTAINS
 #ifdef TIMING
         CALL myDGSEM % timers % StartTimer( 9 )
 #endif
-
+        !$OMP PARALLEL
         CALL myDGSEM % CalculateSGSCoefficients( )
+        !$OMP END PARALLEL
 
 #ifdef TIMING
         CALL myDGSEM % timers % StopTimer( 9 )
@@ -1117,12 +1118,13 @@ CONTAINS
     REAL(prec) :: KE(0:myDGSEM % params % polyDeg,0:myDGSEM % params % polyDeg,0:myDGSEM % params % polyDeg)
 
 
-    DO iEl = 1, myDGSEM % mesh % elements % nElements
+    ! Here, the SGS Kinetic energy is calculated using the
+    ! "high wavenumber" component of the velocity field.
+    ! This component is defined (here) as the dIFference
+    ! between the full solution and the smoothed solution.
 
-      ! Here, the SGS Kinetic energy is calculated using the
-      ! "high wavenumber" component of the velocity field.
-      ! This component is defined (here) as the dIFference
-      ! between the full solution and the smoothed solution.
+    !$OMP DO
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
@@ -1135,26 +1137,18 @@ CONTAINS
                  myDGSEM % smoothState % solution(i,j,k,m,iEl)/&
                 (myDGSEM % smoothState % solution(i,j,k,4,iEl)+myDGSEM % static % solution(i,j,k,4,iEl)) )**2
             ENDDO
-            KE(i,j,k) = 0.5_prec*sgsKE
 
-          ENDDO
-        ENDDO
-      ENDDO
-
-      ! Now we calculate the viscosity and dIFfusivities (currently assumes isotropic and low mach number)
-      DO k = 0, myDGSEM % params % polyDeg
-        DO j = 0, myDGSEM % params % polyDeg
-          DO i = 0, myDGSEM % params % polyDeg
-            DO m = 1, myDGSEM % state % nEquations-1
-
-              myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.09_prec*&
-                myDGSEM % params % viscLengthScale*sqrt( KE(i,j,k) )
+            DO m = 1, nEquations-1
+            
+              myDGSEM % sgsCoeffs % solution(i,j,k,m,iEl) = 0.09_prec*myDGSEM % params % viscLengthScale*sqrt( 0.5_prec*sgsKE )
 
             ENDDO
+
           ENDDO
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
