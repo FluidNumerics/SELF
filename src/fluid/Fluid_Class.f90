@@ -469,7 +469,9 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
+        !$OMP PARALLEL
         CALL myDGSEM % EquationOfState( )
+        !$OMP END PARALLEL
         CALL myDGSEM % GlobalTimeDerivative( t )
 
         DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -521,8 +523,9 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
+        !$OMP PARALLEL
         CALL myDGSEM % EquationOfState( )
-
+        !$OMP END PARALLEL
         CALL myDGSEM % GlobalTimeDerivative( t )
 
         DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -2481,7 +2484,7 @@ CONTAINS
     INTEGER :: iEl, i, j, k
     REAL(prec) :: hCapRatio, rC, rhoT
 
-
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
@@ -2498,7 +2501,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-
+    !$OMP ENDDO
 #endif
 
   END SUBROUTINE EquationOfState_Fluid
@@ -2570,7 +2573,9 @@ CONTAINS
 #endif
 
     ! This routine Calculates the pressure
+    !$OMP PARALLEL
     CALL myDGSEM % EquationOfState( )
+    !$OMP END PARALLEL
 
 #ifdef HAVE_CUDA
     myDGSEM % state % solution = myDGSEM % state % solution_dev
@@ -2587,8 +2592,6 @@ CONTAINS
 #endif
 
     myDGSEM % state % solution = 0.0_prec
-
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,4,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,4,:) )
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
