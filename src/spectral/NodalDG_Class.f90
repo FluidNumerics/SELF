@@ -503,8 +503,7 @@ IMPLICIT NONE
     INTEGER    :: ii, i, j, k, iVar, iEl
     REAL(prec) :: df
 
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE ( df )
+      !$OMP DO
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO k = 0, myNodal % N
@@ -534,8 +533,6 @@ IMPLICIT NONE
         ENDDO
       ENDDO
       !$OMP ENDDO
-      !$OMP END PARALLEL
-                            
 
   END FUNCTION DG_Divergence_3D_NodalDG
 

@@ -870,9 +870,9 @@ CONTAINS
                                                                        myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
 #else
-
+        !$OMP PARALLEL
         CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-
+        !$OMP END PARALLEL
 #endif
 
 #ifdef TIMING
@@ -1087,7 +1087,9 @@ CONTAINS
                                                           myDGSEM % mesh % elements % J_dev )
 
 #else
+      !$OMP PARALLEL
       CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
+      !$OMP END PARALLEL
 #endif
 
 #ifdef TIMING
@@ -1111,7 +1113,9 @@ CONTAINS
       CALL myDGSEM % timers % StartTimer( 21 )
 #endif
 
+    !$OMP PARALLEL
     CALL myDGSEM % MappedTimeDerivative( )
+    !$OMP END PARALLEL
 
 #ifdef TIMING
       CALL myDGSEM % timers % StopTimer( 21 )
@@ -1802,8 +1806,7 @@ CONTAINS
 #else
 
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE ( F )
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
@@ -1875,12 +1878,10 @@ CONTAINS
       ENDDO
     ENDDO
     !$OMP ENDDO
-    !$OMP END PARALLEL
 
      CALL myDGSEM % state % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )  
 
-    !$OMP PARALLEL
-    !$OMP DO PRIVATE( F )
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
@@ -1947,7 +1948,6 @@ CONTAINS
       ENDDO
     ENDDO
     !$OMP ENDDO
-    !$OMP END PARALLEL
 #endif
 
 
