@@ -450,9 +450,10 @@ CONTAINS
     dt = myDGSEM % params % dt
 
 
+    !$OMP PARALLEL
     DO iT = 1, nT
 
-      !$OMP PARALLEL
+
       !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
@@ -466,19 +467,15 @@ CONTAINS
         ENDDO
       ENDDO
       !$OMP ENDDO 
-      !$OMP END PARALLEL
 
       DO m = 1,3 ! Loop over RK3 steps
 
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
-        !$OMP PARALLEL
         CALL myDGSEM % EquationOfState( )
         CALL myDGSEM % GlobalTimeDerivative( t )
-        !$OMP END PARALLEL
 
-        !$OMP PARALLEL
         !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
@@ -500,12 +497,12 @@ CONTAINS
           ENDDO
         ENDDO 
         !$OMP ENDDO
-        !$OMP END PARALLEL
 
       ENDDO
 
-
+      !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
+      !$OMP END MASTER
 
     ENDDO
 
@@ -515,7 +512,6 @@ CONTAINS
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
 
-      !$OMP PARALLEL
       !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
@@ -529,18 +525,14 @@ CONTAINS
         ENDDO
       ENDDO
       !$OMP ENDDO
-      !$OMP END PARALLEL
 
       DO m = 1,3
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
-        !$OMP PARALLEL
         CALL myDGSEM % EquationOfState( )
         CALL myDGSEM % GlobalTimeDerivative( t )
-        !$OMP END PARALLEL
 
-        !$OMP PARALLEL
         !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
@@ -561,13 +553,15 @@ CONTAINS
           ENDDO
         ENDDO
         !$OMP ENDDO
-        !$OMP END PARALLEL
 
       ENDDO
 
+      !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime +  dt
+      !$OMP END MASTER
 
     ENDIF
+    !$OMP END PARALLEL
 #endif
 
 #ifdef TIMING
