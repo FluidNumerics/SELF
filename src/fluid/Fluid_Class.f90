@@ -475,8 +475,8 @@ CONTAINS
 
         !$OMP PARALLEL
         CALL myDGSEM % EquationOfState( )
-        !$OMP END PARALLEL
         CALL myDGSEM % GlobalTimeDerivative( t )
+        !$OMP END PARALLEL
 
         !$OMP PARALLEL
         !$OMP DO
@@ -537,8 +537,8 @@ CONTAINS
 
         !$OMP PARALLEL
         CALL myDGSEM % EquationOfState( )
-        !$OMP END PARALLEL
         CALL myDGSEM % GlobalTimeDerivative( t )
+        !$OMP END PARALLEL
 
         !$OMP PARALLEL
         !$OMP DO
@@ -649,7 +649,6 @@ CONTAINS
     INTEGER    :: istat
 #endif
 
-    !$OMP PARALLEL
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1193,7 +1192,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-    !$OMP END PARALLEL
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
