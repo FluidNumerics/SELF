@@ -452,6 +452,8 @@ CONTAINS
 
     DO iT = 1, nT
 
+      !$OMP PARALLEL
+      !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
@@ -463,6 +465,8 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO 
+      !$OMP END PARALLEL
 
       DO m = 1,3 ! Loop over RK3 steps
 
@@ -474,6 +478,8 @@ CONTAINS
         !$OMP END PARALLEL
         CALL myDGSEM % GlobalTimeDerivative( t )
 
+        !$OMP PARALLEL
+        !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
@@ -493,6 +499,8 @@ CONTAINS
             ENDDO
           ENDDO
         ENDDO 
+        !$OMP ENDDO
+        !$OMP END PARALLEL
 
       ENDDO
 
@@ -507,6 +515,8 @@ CONTAINS
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
 
+      !$OMP PARALLEL
+      !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
@@ -518,6 +528,8 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO
+      !$OMP END PARALLEL
 
       DO m = 1,3
 
@@ -528,6 +540,8 @@ CONTAINS
         !$OMP END PARALLEL
         CALL myDGSEM % GlobalTimeDerivative( t )
 
+        !$OMP PARALLEL
+        !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
@@ -546,6 +560,8 @@ CONTAINS
             ENDDO
           ENDDO
         ENDDO
+        !$OMP ENDDO
+        !$OMP END PARALLEL
 
       ENDDO
 
