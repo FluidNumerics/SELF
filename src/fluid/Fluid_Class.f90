@@ -649,6 +649,7 @@ CONTAINS
     INTEGER    :: istat
 #endif
 
+    !$OMP PARALLEL
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -659,7 +660,9 @@ CONTAINS
 !  occur.
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 2 )
+    !$OMP END MASTER
 #endif
 
 #ifdef HAVE_CUDA
@@ -674,14 +677,14 @@ CONTAINS
                                                                   myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 #else
 
-    !$OMP PARALLEL
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-    !$OMP END PARALLEL
 
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 2 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -696,17 +699,23 @@ CONTAINS
 ! communication costs.
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 3 )
+    !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+    !$OMP MASTER
     CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % state, &
                                                    myDGSEM % mesh % faces, &
                                                    myDGSEM % extComm )
+    !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 3 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -718,15 +727,17 @@ CONTAINS
 ! routine is dependent on the result of CalculateBoundarySolution
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 4 )
+    !$OMP END MASTER
 #endif
 
-    !$OMP PARALLEL
     CALL myDGSEM % UpdateExternalState( tn )
-    !$OMP END PARALLEL
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 4 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -739,41 +750,52 @@ CONTAINS
 ! MPI_StateExchange must have been completed.
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 5 )
+    !$OMP END MASTER
 #endif
-    !$OMP PARALLEL
+
     CALL myDGSEM % InternalFace_StateFlux( )
-    !$OMP END PARALLEL
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 5 )
+    !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 6 )
+    !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+    !$OMP MASTER
     CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % state, &
                                                             myDGSEM % mesh % faces, &
                                                             myDGSEM % extComm )
+    !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 6 )
+    !$OMP END MASTER
 #endif
 
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 7 )
+    !$OMP END MASTER
 #endif
 
-    !$OMP PARALLEL
     CALL myDGSEM % BoundaryFace_StateFlux( )
-    !$OMP END PARALLEL
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 7 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -803,7 +825,9 @@ CONTAINS
 ! SUBROUTINE.
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 8 )
+        !$OMP END MASTER
 #endif
 
 #ifdef HAVE_CUDA
@@ -819,7 +843,9 @@ CONTAINS
 #endif
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 8 )
+        !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -837,14 +863,16 @@ CONTAINS
 ! This routine depends on the results from CalculateSmoothedState.
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 9 )
+        !$OMP END MASTER
 #endif
-        !$OMP PARALLEL
         CALL myDGSEM % CalculateSGSCoefficients( )
-        !$OMP END PARALLEL
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 9 )
+        !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -855,7 +883,9 @@ CONTAINS
 ! depends on the result of CalculateSGSCoefficients.
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 10 )
+        !$OMP END MASTER
 #endif
 
 #ifdef HAVE_CUDA
@@ -870,13 +900,13 @@ CONTAINS
                                                                        myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 
 #else
-        !$OMP PARALLEL
         CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-        !$OMP END PARALLEL
 #endif
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 10 )
+        !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -891,16 +921,25 @@ CONTAINS
 !
 
 #ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 11 )
+        !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+        !$OMP MASTER
         CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
                                                      myDGSEM % mesh % faces, &
                                                      myDGSEM % extComm )
+        !$OMP END MASTER
 #endif
 
+#ifdef TIMING
+        !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 11 )
+        !$OMP END MASTER
+#endif
+
       ENDIF
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -911,31 +950,39 @@ CONTAINS
 ! This routine depends on the result of FaceFlux ( state % boundaryGradientFlux )
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 12 )
+      !$OMP END MASTER
 #endif
 
-      !$OMP PARALLEL
       CALL myDGSEM % CalculateSolutionGradient( )
-      !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 12 )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 13 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
         CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsCoeffs, &
                                                               myDGSEM % mesh % faces, &
                                                               myDGSEM % extComm )
       ENDIF
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 13 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -947,15 +994,17 @@ CONTAINS
 ! routine depends on the result of CalculateStressTensor.
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 14 )
+      !$OMP END MASTER
 #endif
 
-      !$OMP PARALLEL
       CALL myDGSEM % CalculateNormalStressAtBoundaries( )
-      !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 14 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -967,17 +1016,23 @@ CONTAINS
 ! at the same time as UpdateExternalStress.
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 15 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
       CALL myDGSEM % mpiStressHandler % MPI_Exchange( myDGSEM % stressTensor, &
                                                       myDGSEM % mesh % faces, &
                                                       myDGSEM % extComm )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 15 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -988,15 +1043,17 @@ CONTAINS
 !  stress flux is calculated
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 16 )
+      !$OMP END MASTER
 #endif
 
-      !$OMP PARALLEL
       CALL myDGSEM % CalculateStressFlux( )
-      !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 16 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1009,15 +1066,17 @@ CONTAINS
 ! be run simultaneously with the MPI_StressExchange
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 17 )
+      !$OMP END MASTER
 #endif
      
-      !$OMP PARALLEL
       CALL myDGSEM % UpdateExternalStress( tn )
-      !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 17 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1031,29 +1090,37 @@ CONTAINS
 ! and the MPI_StressExchange.
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 18 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
       CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressTensor,&
                                                                myDGSEM % mesh % faces, &
                                                                myDGSEM % extComm )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 18 )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 19 )
+      !$OMP END MASTER
 #endif
 
-      !$OMP PARALLEL
       CALL myDGSEM % BoundaryFace_StressFlux( )
-      !$OMP END PARALLEL
   
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 19 )
+      !$OMP END MASTER
 #endif      
 
 ! ----------------------------------------------------------------------------- !
@@ -1068,7 +1135,9 @@ CONTAINS
 !
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 20 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_CUDA
@@ -1087,17 +1156,18 @@ CONTAINS
                                                           myDGSEM % mesh % elements % J_dev )
 
 #else
-      !$OMP PARALLEL
       CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
-      !$OMP END PARALLEL
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 20 )
+      !$OMP END MASTER
 #endif
 
 
     ENDIF
+
 
 
 ! ----------------------------------------------------------------------------- !
@@ -1110,17 +1180,20 @@ CONTAINS
 ! result of FaceFlux, but can be DOne at the same time as StressDivergence
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 21 )
+      !$OMP END MASTER
 #endif
 
-    !$OMP PARALLEL
     CALL myDGSEM % MappedTimeDerivative( )
-    !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 21 )
+      !$OMP END MASTER
 #endif
 
+    !$OMP END PARALLEL
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !

@@ -422,8 +422,7 @@ CONTAINS
     REAL(prec) :: uij, ui
  
      
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE( i, j, k, iVar, iEl, ii, jj, kk, uij, ui )
+      !$OMP DO
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO k = 0, thisFilter % N
@@ -459,7 +458,6 @@ CONTAINS
         ENDDO
       ENDDO
       !$OMP ENDDO
-      !$OMP END PARALLEL
 
          
   END FUNCTION Filter3D_SpectralFilter
