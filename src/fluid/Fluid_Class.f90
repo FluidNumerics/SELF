@@ -1027,8 +1027,10 @@ CONTAINS
       CALL myDGSEM % timers % StartTimer( 19 )
 #endif
 
+      !$OMP PARALLEL
       CALL myDGSEM % BoundaryFace_StressFlux( )
-      
+      !$OMP END PARALLEL
+  
 #ifdef TIMING
       CALL myDGSEM % timers % StopTimer( 19 )
 #endif      
@@ -2389,6 +2391,7 @@ CONTAINS
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
 
+    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -2449,6 +2452,7 @@ CONTAINS
       ENDIF
 
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
