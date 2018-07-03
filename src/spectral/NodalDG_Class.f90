@@ -463,8 +463,7 @@ IMPLICIT NONE
     REAL(prec) :: fb(1:6)
 
 
-      !$OMP PARALLEL
-      !$OMP DO PRIVATE( fb )
+      !$OMP DO
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO j = 0, myNodal % N
@@ -490,7 +489,6 @@ IMPLICIT NONE
         ENDDO
       ENDDO
       !$OMP ENDDO
-      !$OMP END PARALLEL
 
   END FUNCTION CalculateFunctionsAtBoundaries_3D_NodalDG
  

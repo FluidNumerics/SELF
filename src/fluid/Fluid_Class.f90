@@ -674,7 +674,9 @@ CONTAINS
                                                                   myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
 #else
 
+    !$OMP PARALLEL
     CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+    !$OMP END PARALLEL
 
 #endif
 
