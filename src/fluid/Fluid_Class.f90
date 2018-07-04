@@ -503,6 +503,7 @@ CONTAINS
       !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
       !$OMP END MASTER
+      !$OMP BARRIER
 
     ENDDO
 
