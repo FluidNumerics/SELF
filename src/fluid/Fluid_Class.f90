@@ -373,8 +373,11 @@ CONTAINS
 #endif
 
 
+    !$OMP PARALLEL
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 1 )
+    !$OMP END MASTER
 #endif
 
 
@@ -446,11 +449,11 @@ CONTAINS
 
 #else
 
+
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
 
 
-    !$OMP PARALLEL
     DO iT = 1, nT
 
 
@@ -560,14 +563,17 @@ CONTAINS
       !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime +  dt
       !$OMP END MASTER
+      !$OMP BARRIER
 
     ENDIF
-    !$OMP END PARALLEL
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 1 )
+    !$OMP END MASTER
 #endif
+    !$OMP END PARALLEL
 
   END SUBROUTINE ForwardStepRK3_Fluid
 !
