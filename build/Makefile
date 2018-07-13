@@ -285,7 +285,7 @@ MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o Bou
                    ${SRCDIR}fluid/MPILayer_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
-Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
+Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
                 SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
                 BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
@@ -315,6 +315,9 @@ Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR
 
 endif
 
+SELF_Fluids_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o Fluid_EquationParser_Class.o ${SRCDIR}fluid/SELF_Fluids_Driver.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SELF_Fluids_Driver.f90 ${LIB} ${INC} -o $@
+
 FLOBJ = ModelPrecision.o \
         ConstantsDictionary.o \
         CommonRoutines.o \
@@ -333,19 +336,18 @@ FLOBJ = ModelPrecision.o \
         Nodes_Class.o \
         HexMesh_Class.o \
         BoundaryCommunicator_Class.o \
-        BodyForces_Class.o
+        BodyForces_Class.o \
+        FortranParser_parameters.o \
+        FortranParser.o \
+        Fluid_EquationParser_Class.o \
+        Fluid_Class.o
 
 ifeq (${MPI},yes)
 FLOBJ+=MPILayer_Class.o
 endif
 
-FLOBJ+=Fluid_Class.o
-
-initialize: ${FLOBJ} Fluid_InitialConditions.o
-	${FC} ${OPT} ${FLOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
-
-integrate: ${FLOBJ} Fluid_Driver.o
-	${FC} ${OPT} ${FLOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
+sfluid: ${FLOBJ} SELF_Fluids_Driver.o
+	${FC} ${OPT} ${FLOBJ} SELF_Fluids_Driver.o ${LIB} ${INC} -o $@
 	
 
 .PHONY : clean

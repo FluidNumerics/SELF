@@ -130,11 +130,12 @@ CONTAINS
 !==================================================================================================!
 !
 !
-  SUBROUTINE Build_Fluid( myDGSEM, setupSuccess )
+  SUBROUTINE Build_Fluid( myDGSEM, pickupExists, setupSuccess )
 
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     LOGICAL, INTENT(inout)      :: setupSuccess
+    LOGICAL, INTENT(out)        :: pickupExists
     ! Local
 #ifdef HAVE_CUDA
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
@@ -153,7 +154,7 @@ CONTAINS
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
     ! the device for each rank is also set here.
-    CALL myDGSEM % extComm % ReadPickup(  )
+    CALL myDGSEM % extComm % ReadPickup( )
 
 #ifdef HAVE_CUDA
     CALL UpdateDeviceDictionary( )
@@ -254,7 +255,7 @@ CONTAINS
 #endif
 
     ! Read the initial conditions, static state, and the boundary communicator
-    CALL myDGSEM % ReadPickup( )
+    CALL myDGSEM % ReadPickup( pickupExists )
 
 #ifdef TIMING
     ! Setup timers
@@ -612,7 +613,9 @@ CONTAINS
    REAL(prec)   :: b(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
 
 
+      !$OMP PARALLEL
       CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
+      !$OMP END PARALLEL
       b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
 
 
@@ -629,7 +632,9 @@ CONTAINS
 
       myDGSEM % state % solution = s + myDGSEM % params % jacobianStepSize*ds
 
+      !$OMP PARALLEL
       CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
+      !$OMP END PARALLEL
 
       ! J*ds = (I - (dt/2)* dF/ds )*ds
       Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % state % tendency - Fs )/myDGSEM % params % jacobianStepSize
@@ -3048,16 +3053,16 @@ CONTAINS
 
   END SUBROUTINE WritePickup_Fluid
 !
-  SUBROUTINE ReadPickup_Fluid( myDGSEM )
+  SUBROUTINE ReadPickup_Fluid( myDGSEM, itExists )
 
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    LOGICAL, INTENT(out)          :: itExists
     ! LOCAL
     CHARACTER(4)  :: rankChar
     INTEGER       :: iEl, istat
     INTEGER       :: thisRec, fUnit, i, j 
     INTEGER       :: iEq, N, iFace, e1, s1, bID
-    LOGICAL       :: itExists
     CHARACTER(13) :: timeStampString
 #ifdef HAVE_CUDA
     TYPE(dim3) :: tBlock, grid
