@@ -262,6 +262,16 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
 
 	
 # ---------------------------------------------------------------------- #
+#                          ~/src/FortranParser/src
+# ---------------------------------------------------------------------- #
+
+FortranParser_parameters.o : ${SRCDIR}FortranParser/src/FortranParser_parameters.f90
+	${FC} ${OPT} -c ${SRCDIR}FortranParser/src/FortranParser_parameters.f90 -o $@
+
+FortranParser.o : FortranParser_parameters.o ${SRCDIR}FortranParser/src/FortranParser.f90
+	${FC} ${OPT} -c ${SRCDIR}FortranParser/src/FortranParser.f90 -o $@
+
+# ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
 
@@ -279,6 +289,11 @@ Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelPar
                 SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
                 BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
+
+
+Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o FortranParser.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}fluid/Fluid_EquationParser_Class.f90 -o $@
+
 
 ifdef MODDIR
 Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${MODDIR}/Fluid_InitialConditions.f90
