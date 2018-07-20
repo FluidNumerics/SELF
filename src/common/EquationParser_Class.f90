@@ -19,8 +19,9 @@ IMPLICIT NONE
 
   INTEGER, PARAMETER :: Error_Message_Length = 256
   INTEGER, PARAMETER :: Max_Equation_Length  = 512 
+  INTEGER, PARAMETER :: Max_Function_Length  = 5
   INTEGER, PARAMETER :: Max_Variable_Length  = 12 
-  INTEGER, PARAMETER :: Token_Length         = 32
+  INTEGER, PARAMETER :: Token_Length         = 48
   INTEGER, PARAMETER :: Stack_Length         = 64
 
   ! Token types 
@@ -35,13 +36,18 @@ IMPLICIT NONE
 
   INTEGER, PARAMETER, PRIVATE :: nSeparators = 7
 
+  TYPE String
+    CHARACTER(10) :: str
+  END TYPE String
+
   CHARACTER(1), DIMENSION(7), PRIVATE  :: separators = (/ "+", "-", "*", "/", "(", ")", "^" /) 
   CHARACTER(1), DIMENSION(5), PRIVATE  :: operators  = (/ "+", "-", "*", "/", "^" /) 
   CHARACTER(1), DIMENSION(10), PRIVATE :: numbers    = (/ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" /) 
-  CHARACTER(4), DIMENSION(12), PRIVATE :: functions  = (/ "cos ", "sin ", "tan ", "tanh", "sqrt", "abs ", "exp ", "ln  ", "log ", "acos", "asin", "atan" /) 
-  CHARACTER(1), DIMENSION(4), PRIVATE  :: variables  = (/ "x", "y", "z", "t" /) 
+  TYPE(String), DIMENSION(12), PRIVATE :: functions 
+  CHARACTER(1), DIMENSION(4), PRIVATE  :: variables  = (/ "x", "y", "z", "t" /)
 
   ! Private Types !
+
   TYPE Token  
     CHARACTER(Token_Length) :: tokenString
     INTEGER                 :: tokenType
@@ -60,6 +66,9 @@ IMPLICIT NONE
       PROCEDURE :: Push      => Push_TokenStack
       PROCEDURE :: Pop       => Pop_TokenStack
       PROCEDURE :: Peek      => Peek_TokenStack
+
+      PROCEDURE :: IsEmpty   => IsEmpty_TokenStack
+      PROCEDURE :: TopToken
   
   END TYPE TokenStack
 
@@ -79,6 +88,8 @@ IMPLICIT NONE
 
       PROCEDURE :: CleanEquation
       PROCEDURE :: Tokenize
+
+      PROCEDURE :: Print_InFixTokens
 
   END TYPE EquationParser
 
@@ -103,6 +114,18 @@ CONTAINS
     CHARACTER(Error_Message_Length) :: errorMsg
     LOGICAL                         :: equationIsClean, tokenized, success
 
+      functions(1) % str = "cos"
+      functions(2) % str = "sin"
+      functions(3) % str = "tan"
+      functions(4) % str = "tanh"
+      functions(5) % str = "sqrt"
+      functions(6) % str = "abs"
+      functions(7) % str = "exp"
+      functions(8) % str = "ln"
+      functions(9) % str = "log"
+      functions(10) % str = "acos"
+      functions(11) % str = "asin"
+      functions(12) % str = "atan"
 
       parser % equation = equation
       errorMsg = " "
@@ -112,7 +135,10 @@ CONTAINS
       IF( equationIsClean )THEN
 
         CALL parser % Tokenize( tokenized, errorMsg )
- 
+
+           PRINT*, TRIM( errorMsg )
+        CALL parser % Print_InfixTokens( )
+STOP 
         IF( tokenized )THEN
 
 !          CALL parser % ConvertToPostFix( )
@@ -125,6 +151,7 @@ CONTAINS
 
         ELSE
 
+           PRINT*, TRIM( errorMsg )
            success = .false.
 
         ENDIF
@@ -172,6 +199,8 @@ CONTAINS
   
       equationCleaned = .TRUE.
 
+      PRINT*, TRIM(parser % infixformula )
+
   END SUBROUTINE CleanEquation
 
   SUBROUTINE Tokenize( parser, tokenized, errorMsg )
@@ -181,6 +210,8 @@ CONTAINS
     ! Local
     INTEGER                         :: i, j 
  
+
+      PRINT*, 'Tokenizing...'
       tokenized = .FALSE.
       errorMsg  = " "
 
@@ -208,8 +239,9 @@ CONTAINS
 
         ELSEIF( IsNumber( parser % inFixFormula(i:i) ) )THEN
 
- 
           parser % inFix % top_index = parser % inFix % top_index + 1
+          parser % inFix % tokens( parser % inFix % top_index ) % tokenString = ''
+
           j = 0
           DO WHILE( IsNumber( parser % inFixFormula(i+j:i+j) ) )
 
@@ -251,10 +283,10 @@ CONTAINS
 
         ELSEIF( IsFunction( parser % inFixFormula(i:i) ) )THEN
 
-
           parser % inFix % top_index = parser % inFix % top_index + 1
+          parser % inFix % tokens( parser % inFix % top_index ) % tokenString = ''
 
-          j = FindLastFunctionIndex( parser % inFixFormula(i:i+Max_Equation_Length) )
+          j = FindLastFunctionIndex( parser % inFixFormula(i:i+Max_Function_Length-1) )
 
           parser % inFix % tokens( parser % inFix % top_index ) % tokenString = parser % inFixFormula(i:i+j)
           parser % inFix % tokens( parser % inFix % top_index ) % tokenType   = Function_Token 
@@ -274,6 +306,8 @@ CONTAINS
           errorMsg = "Invalid Token : "//&
                      TRIM( parser % inFixFormula(i:i) )
 
+          RETURN
+
         ENDIF
 
       ENDDO
@@ -282,80 +316,121 @@ CONTAINS
 
   END SUBROUTINE Tokenize
 
-!  SUBROUTINE ConvertToPostFix( parser )
-!    CLASS( EquationParser ), INTENT(inout) :: parser
-!    ! Local
-!    CHARACTER(Error_Message_Length) :: errorMsg
-!    TYPE( TokenStack )              :: operator_stack
-!    CHARACTER(Max_Equation_Length)  :: postFix
-!    INTEGER                         :: i, j
-!    
-!      success = .FALSE. 
-!
-!      CALL operator_stack % Construct( Stack_Length )
-!  
-!      DO i = 1, parser % infix % top
-!     
-!         
-!        IF( parser % inFix % tokens(i) % tokenType == Variable_Token .OR.
-!            parser % inFix % tokens(i) % tokenType == Number_Token )THEN
-!
-!          
-!          CALL parser % postFix % push( parser % inFix % tokens(i) )
-!
-!  
-!        ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token .OR. &
-!                parser % inFix % tokens(i) % tokenType == Function_Token )THEN
-!
-!              
-!          DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. operator_stack % TopToken( ) % tokenString /= "(" .AND. &&
-!                    Priority( TRIM( operator_stack % TopToken( ) % tokenString ) ) >  Priority( TRIM( parser % inFix % tokens(i) % tokenString ) ) )
-!     
-!            CALL parser % postFix % push( operator_stack % token % TopToken( ) )
-!            CALL operator_stack % pop( )
-!
-!          ENDDO
-!
-!          CALL operator_stack % push( parser % inFix % tokens(i) )
-!
-!
-!        ELSEIF( parser % inFix % tokens(i) % tokenType == OpeningParentheses_Token )THEN
-!
-!          CALL operator_stack % push( )
-!
-!
-!        ELSEIF( parser % inFix % tokens(i) % tokenType == ClosingParentheses_Token )THEN
-!
-!
-!          DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. operator_stack % TopToken( ) % tokenString /= "(" )
-!            
-!            CALL parser % postFix % push( parser % inFix % tokens(i) )
-!            CALL operator_stack % pop( )
-!
-!          ENDDO
-!
-!          ! Pop the opening parenthesis
-!          CALL operator_stack % pop( )
-!
-!        ENDIF
-!
-!      ENDDO
-!
-!      ! Pop the remaining operators
-!      DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) )
-!        
-!        CALL parser % postFix % push( parser % inFix % tokens(i) )
-!        CALL operator_stack % pop( )
-!   
-!      ENDDO
-!      
-!  END SUBROUTINE ConvertToPostFix
+  SUBROUTINE Print_InfixTokens( parser )
+    CLASS( EquationParser ), INTENT(in) :: parser
+    ! Local
+    INTEGER :: i
+
+      DO i = 1, parser % inFix % top_index
+        PRINT*, TRIM( parser % inFix % tokens(i) % tokenString )
+      ENDDO
+
+
+  END SUBROUTINE Print_InfixTokens
+
+  SUBROUTINE ConvertToPostFix( parser )
+    CLASS( EquationParser ), INTENT(inout) :: parser
+    ! Local
+    CHARACTER(Error_Message_Length) :: errorMsg
+    TYPE( TokenStack )              :: operator_stack
+    TYPE( Token )                   :: tok
+    CHARACTER(Max_Equation_Length)  :: postFix
+    INTEGER                         :: i, j
+    
+      !success = .FALSE. 
+
+      CALL operator_stack % Construct( Stack_Length )
+  
+      DO i = 1, parser % infix % top_index
+     
+         
+        IF( parser % inFix % tokens(i) % tokenType == Variable_Token .OR. &
+            parser % inFix % tokens(i) % tokenType == Number_Token )THEN
+
+          
+          CALL parser % postFix % push( parser % inFix % tokens(i) )
+
+  
+        ELSEIF( parser % inFix % tokens(i) % tokenType == Function_Token )THEN
+
+          CALL operator_stack % push( parser % inFix % tokens(i) )
+
+        ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token )THEN
+
+          tok = operator_stack % TopToken( )
+              
+          DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" .AND. &
+                    Priority( TRIM(tok % tokenString) ) >  Priority( TRIM(parser % inFix % tokens(i) % tokenString) ) )
+     
+            CALL parser % postFix % push( operator_stack % TopToken( ) )
+            CALL operator_stack % pop( tok )
+
+          ENDDO
+
+          CALL operator_stack % push( parser % inFix % tokens(i) )
+
+
+        ELSEIF( parser % inFix % tokens(i) % tokenType == OpeningParentheses_Token )THEN
+
+          CALL operator_stack % push( parser % inFix % tokens(i) )
+
+
+        ELSEIF( parser % inFix % tokens(i) % tokenType == ClosingParentheses_Token )THEN
+
+          tok = operator_stack % TopToken( )
+
+          DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" )
+            
+            CALL parser % postFix % push( parser % inFix % tokens(i) )
+            CALL operator_stack % pop( tok )
+
+          ENDDO
+
+          ! Pop the opening parenthesis
+          CALL operator_stack % pop( tok )
+
+        ENDIF
+
+      ENDDO
+
+      ! Pop the remaining operators
+      DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) )
+        
+        CALL parser % postFix % push( parser % inFix % tokens(i) )
+        CALL operator_stack % pop( tok )
+   
+      ENDDO
+      
+  END SUBROUTINE ConvertToPostFix
+
+  INTEGER FUNCTION Priority( operatorString )
+    CHARACTER(1) :: operatorString
+
+      IF( operatorString == '^' )THEN
+
+        Priority = 3
+
+      ELSEIF( operatorString == '*' .OR. operatorString == '/' )THEN
+
+        Priority = 2
+
+      ELSEIF( operatorString == '+' .OR. operatorString == '-' )THEN
+   
+        Priority = 1
+ 
+      ELSE
+
+        Priority = 0
+      
+      ENDIF
+
+  END FUNCTION Priority
 
   SUBROUTINE Construct_TokenStack( stack, N )
    CLASS(TokenStack), INTENT(out) :: stack
    INTEGER, INTENT(in)            :: N
 
-     ALLOCATE( stack % tokens(N) )
+     ALLOCATE( stack % tokens(1:N) )
      stack % top_index = 0
 
   END SUBROUTINE Construct_TokenStack
@@ -505,9 +580,9 @@ CONTAINS
     INTEGER :: i
 
       IsFunction = .FALSE.
-      DO i = 1, 5
+      DO i = 1, 12
 
-        IF( eqChar == operators(i) )THEN
+        IF( eqChar == functions(i) % str(1:1) )THEN
           IsFunction = .TRUE.
         ENDIF
 
@@ -516,10 +591,10 @@ CONTAINS
   END FUNCTION IsFunction
 
   FUNCTION FindLastFunctionIndex( eqChar ) RESULT( j )
-    CHARACTER(Max_Equation_Length+1) :: eqChar
-    INTEGER                          :: i, j
+    CHARACTER(Max_Function_Length) :: eqChar
+    INTEGER                        :: i, j
 
-      DO i = 1, Max_Equation_Length
+      DO i = 1, Max_Function_Length
 
         IF( eqChar(i:i) == "(" )THEN
           j = i-2
