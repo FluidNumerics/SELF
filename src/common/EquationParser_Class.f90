@@ -88,8 +88,10 @@ IMPLICIT NONE
 
       PROCEDURE :: CleanEquation
       PROCEDURE :: Tokenize
+      PROCEDURE :: ConvertToPostfix
 
       PROCEDURE :: Print_InFixTokens
+      PROCEDURE :: Print_PostFixTokens
 
   END TYPE EquationParser
 
@@ -136,13 +138,14 @@ CONTAINS
 
         CALL parser % Tokenize( tokenized, errorMsg )
 
-           PRINT*, TRIM( errorMsg )
-        CALL parser % Print_InfixTokens( )
-STOP 
+!        CALL parser % Print_InfixTokens( )
+!STOP 
         IF( tokenized )THEN
 
-!          CALL parser % ConvertToPostFix( )
+          CALL parser % ConvertToPostFix( )
         
+        CALL parser % Print_PostfixTokens( )
+STOP
 !           IF( FinalSyntaxCheckOK( self ) )     THEN
 !              success = .true.
 !           ELSE
@@ -328,6 +331,18 @@ STOP
 
   END SUBROUTINE Print_InfixTokens
 
+  SUBROUTINE Print_PostfixTokens( parser )
+    CLASS( EquationParser ), INTENT(in) :: parser
+    ! Local
+    INTEGER :: i
+
+      DO i = 1, parser % postFix % top_index
+        PRINT*, TRIM( parser % postFix % tokens(i) % tokenString )
+      ENDDO
+
+
+  END SUBROUTINE Print_PostfixTokens
+
   SUBROUTINE ConvertToPostFix( parser )
     CLASS( EquationParser ), INTENT(inout) :: parser
     ! Local
@@ -339,6 +354,7 @@ STOP
     
       !success = .FALSE. 
 
+      CALL parser % postfix % Construct( Stack_Length )
       CALL operator_stack % Construct( Stack_Length )
   
       DO i = 1, parser % infix % top_index
@@ -348,11 +364,13 @@ STOP
             parser % inFix % tokens(i) % tokenType == Number_Token )THEN
 
           
+          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to postfix stack'
           CALL parser % postFix % push( parser % inFix % tokens(i) )
 
   
         ELSEIF( parser % inFix % tokens(i) % tokenType == Function_Token )THEN
 
+          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to operator stack'
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
         ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token )THEN
@@ -362,16 +380,20 @@ STOP
           DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" .AND. &
                     Priority( TRIM(tok % tokenString) ) >  Priority( TRIM(parser % inFix % tokens(i) % tokenString) ) )
      
-            CALL parser % postFix % push( operator_stack % TopToken( ) )
+            PRINT*, 'Push '//TRIM( tok % tokenString )//' to postfix stack'
+            CALL parser % postFix % push( tok )
             CALL operator_stack % pop( tok )
+            tok = operator_stack % TopToken( )
 
           ENDDO
 
+          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to operator stack'
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
 
         ELSEIF( parser % inFix % tokens(i) % tokenType == OpeningParentheses_Token )THEN
 
+          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to operator stack'
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
 
@@ -381,8 +403,11 @@ STOP
 
           DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" )
             
-            CALL parser % postFix % push( parser % inFix % tokens(i) )
+         !   CALL parser % postFix % push( parser % inFix % tokens(i) )
+            PRINT*, 'Push '//TRIM( tok % tokenString )//' to postfix stack'
+            CALL parser % postFix % push( tok )
             CALL operator_stack % pop( tok )
+            tok = operator_stack % TopToken( )
 
           ENDDO
 
@@ -396,7 +421,8 @@ STOP
       ! Pop the remaining operators
       DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) )
         
-        CALL parser % postFix % push( parser % inFix % tokens(i) )
+        tok = operator_stack % TopToken( )
+        CALL parser % postFix % push( tok )
         CALL operator_stack % pop( tok )
    
       ENDDO
@@ -406,7 +432,12 @@ STOP
   INTEGER FUNCTION Priority( operatorString )
     CHARACTER(1) :: operatorString
 
-      IF( operatorString == '^' )THEN
+
+      IF( IsFunction( operatorString ) )THEN
+
+        Priority = 4
+
+      ELSEIF( operatorString == '^' )THEN
 
         Priority = 3
 
@@ -448,7 +479,8 @@ STOP
     TYPE(Token), INTENT(in)         :: tok
 
       stack % top_index                  = stack % top_index + 1
-      stack % tokens( stack % top_index) = tok
+      stack % tokens(stack % top_index)  % tokenString = tok % tokenString
+      stack % tokens(stack % top_index)  % tokenType   = tok % tokenType
  
   END SUBROUTINE Push_TokenStack
 
@@ -459,7 +491,8 @@ STOP
       IF( stack % top_index <= 0 ) THEN
         PRINT *, "Attempt to pop from empty token stack"
       ELSE 
-        tok         = stack % tokens( stack % top_index )
+        tok % tokenString         = stack % tokens( stack % top_index ) % tokenString
+        tok % tokenType           = stack % tokens( stack % top_index ) % tokenType
         stack % top_index = stack % top_index - 1
       END IF
 
@@ -473,7 +506,8 @@ STOP
       IF( stack % top_index <= 0 ) THEN
         PRINT *, "Attempt to peek from empty token stack"
       ELSE 
-        tok = stack % tokens( stack % top_index )
+        tok % tokenString = stack % tokens( stack % top_index ) % tokenString
+        tok % tokenType   = stack % tokens( stack % top_index ) % tokenType
       END IF
   END SUBROUTINE Peek_TokenStack
 
@@ -491,11 +525,11 @@ STOP
   TYPE( Token ) FUNCTION TopToken( stack )
     CLASS( TokenStack ) :: stack
 
-      IF( stack % top_index <= 0 ) THEN
-        PRINT *, "  Empty Stack"
-      ELSE 
+      !IF( stack % top_index <= 0 ) THEN
+      !  PRINT *, "  Empty Stack"
+      !ELSE 
         TopToken = stack % tokens( stack % top_index )
-      ENDIF
+      !ENDIF
 
   END FUNCTION TopToken 
 
