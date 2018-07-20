@@ -429,6 +429,111 @@ CONTAINS
       
   END SUBROUTINE ConvertToPostFix
 
+  FUNCTION Evaluate( parser, x ) RESULT( f )
+    CLASS(EquationParser) :: parser
+    REAL(prec)            :: x(1:3)
+    REAL(prec)            :: f
+    ! Local
+    INTEGER           :: k
+    TYPE(Token)       :: t
+    TYPE(NumberStack) :: stack
+    REAL(prec)        :: v, a, b, c
+         
+      CALL stack % Construct( Stack_Length )
+         
+      DO k = 1, parser % postfix % top_index 
+
+        t = parser % postfix % tokens(k)
+
+        SELECT CASE ( t % tokenType )
+         
+          CASE( Number_Token )
+         !   IF( t % token == "pi" .OR. t%token == "PI" )     THEN
+         !      v = PI
+         !   ELSE
+               READ( t % tokenString, * ) v
+         !   END IF
+            CALL stack % Push( v )
+               
+          CASE ( Variable_Token )
+
+            IF( TRIM( t % tokenString ) == "x" )THEN
+
+               CALL stack % Push( x(1) )
+
+            ELSEIF( TRIM( t % tokenString ) == "y" )THEN
+
+               CALL stack % Push( x(2) )
+
+            ELSEIF( TRIM( t % tokenString ) == "z" )THEN
+
+               CALL stack % Push( x(3) )
+
+            ENDIF
+
+          CASE ( Operator_Token )
+
+            CALL stack % Pop( a )
+            CALL stack % Pop( b )
+
+            SELECT CASE ( TRIM(t % tokenString) )
+
+               CASE ( "+" )
+
+                  c = a + b
+
+               CASE ( "-" )
+
+                  c = b - a
+
+               CASE ( "*" )
+
+                  c = a*b
+
+               CASE ( "/" )
+
+                  c = b/a
+
+               CASE ( "^" )
+
+                  c = b**a
+               CASE DEFAULT
+
+            END SELECT
+
+            CALL stack % Push( c )
+            
+         CASE ( Function_Token )
+
+            CALL stack % Pop( a )
+
+            b = F_of_X( TRIM(t % tokenString), a )
+
+            CALL stack % Push( b )
+            
+         CASE ( Monadic_Token )
+
+           IF( TRIM(t % tokenString) == "-" )     THEN
+
+              CALL stack % Pop( a )
+              a = -a
+              CALL stack % Push( a )
+
+           END IF
+           
+         CASE DEFAULT
+
+       END SELECT
+
+     END DO
+
+     CALL stack % Pop( a )
+     f = a
+
+     CALL stack % Destruct( )
+         
+  END FUNCTION Evaluate
+
   SUBROUTINE Print_InfixTokens( parser )
     CLASS( EquationParser ), INTENT(in) :: parser
     ! Local
@@ -696,8 +801,8 @@ CONTAINS
   END FUNCTION FindLastFunctionIndex
 
   REAL(prec) FUNCTION F_of_X( func, x ) 
-    CHARACTER(Max_Function_Length) :: func
-    REAL(prec)                     :: x
+    CHARACTER(*) :: func
+    REAL(prec)   :: x
 
       IF( TRIM( func ) == "cos" .OR. TRIM( func ) == "COS" )THEN
 
@@ -782,93 +887,4 @@ CONTAINS
 
 END MODULE EquationParser_Class
 
-!      FUNCTION EvaluateEquation_At_( self, x ) RESULT(y)
-!         IMPLICIT NONE
-!!
-!!        ---------
-!!        Arguments
-!!        ---------
-!!
-!         TYPE(EquationParser) :: self
-!         REAL(KIND=EP)           :: x, y
-!!
-!!        ---------------
-!!        Local variables
-!!        ---------------
-!!
-!         INTEGER           :: k, N
-!         TYPE(Token)       :: t
-!         TYPE(NumberStack) :: stack
-!         REAL(KIND=EP)     :: v, a, b, c
-!         
-!         N = SIZE(self%postfix)
-!         CALL ConstructNumberStack( stack, N )
-!         
-!         DO k = 1, N 
-!            t = self%postfix(k)
-!            SELECT CASE ( t%tokenType )
-!            
-!               CASE( TYPE_NUMBER )
-!                  IF( t%token == "pi" .OR. t%token == "PI" )     THEN
-!                     v = PI
-!                  ELSE
-!                     READ( t%token, * ) v
-!                  END IF
-!                  CALL NumberStackPush( stack, v )
-!                  
-!               CASE ( TYPE_VARIABLE )
-!                  CALL NumberStackPush( stack, x )
-!
-!               CASE ( TYPE_OPERATOR )
-!                  CALL NumberStackPop( stack, a )
-!                  CALL NumberStackPop( stack, b )
-!                  SELECT CASE ( t%token )
-!                     CASE ( "+" )
-!                        c = a + b
-!                     CASE ( "-" )
-!                        c = b - a
-!                     CASE ( "*" )
-!                        c = a*b
-!                     CASE ( "/" )
-!                        c = b/a
-!                     CASE ( "^" )
-!                        IF( MOD(a,2.0_EP) == 0.0 )     THEN
-!                           c = ABS(b)**a
-!                        ELSE
-!                           c = b**a
-!                        END IF
-!                     CASE DEFAULT
-!                  END SELECT
-!                  CALL NumberStackPush( stack, c )
-!               
-!               CASE ( TYPE_FUNCTION )
-!                  CALL NumberStackPop( stack, a )
-!                  CALL FunOfx( t%token, a, b )
-!                  CALL NumberStackPush( stack, b )
-!                  
-!               CASE (TYPE_MONO_OPERATOR )
-!                 IF( t%token == "-" )     THEN
-!                    CALL NumberStackPop( stack, a )
-!                    a = -a
-!                    CALL NumberStackPush( stack, a )
-!                 END IF
-!                 
-!               CASE DEFAULT
-!            END SELECT
-!         END DO
-!!
-!!        ----
-!!        Done
-!!        ----
-!!
-!         CALL NumberStackPop( stack, a )
-!         y = a
-!!
-!!        --------
-!!        Clean up
-!!        --------
-!!
-!         CALL DestructNumberStack( stack )
-!         
-!      END FUNCTION EvaluateEquation_At_
 !
