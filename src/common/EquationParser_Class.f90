@@ -72,9 +72,29 @@ IMPLICIT NONE
   
   END TYPE TokenStack
 
-  PRIVATE :: Token, TokenStack
+
+
+  TYPE NumberStack
+    REAL(prec), ALLOCATABLE :: tokens(:)
+    INTEGER                 :: top_index
+
+    CONTAINS
+  
+      PROCEDURE :: Construct => Construct_NumberStack
+      PROCEDURE :: Destruct  => Destruct_NumberStack
+      
+      PROCEDURE :: Push      => Push_NumberStack
+      PROCEDURE :: Pop       => Pop_NumberStack
+      PROCEDURE :: Peek      => Peek_NumberStack
+
+      PROCEDURE :: IsEmpty   => IsEmpty_NumberStack
+  
+  END TYPE NumberStack
+
+  PRIVATE :: Token, TokenStack, NumberStack
   PRIVATE :: Construct_TokenStack, Destruct_TokenStack, Push_TokenStack, Pop_TokenStack, Peek_TokenStack, IsEmpty_TokenStack
-  PRIVATE :: IsNumber, IsVariable, IsFunction, IsOperator, IsSeparator
+  PRIVATE :: Construct_NumberStack, Destruct_NumberStack, Push_NumberStack, Pop_NumberStack, Peek_NumberStack, IsEmpty_NumberStack
+  PRIVATE :: IsNumber, IsVariable, IsFunction, IsOperator, IsSeparator, FindLastFunctionIndex, F_of_X, Priority
 
 
   TYPE EquationParser
@@ -138,14 +158,12 @@ CONTAINS
 
         CALL parser % Tokenize( tokenized, errorMsg )
 
-!        CALL parser % Print_InfixTokens( )
-!STOP 
         IF( tokenized )THEN
 
           CALL parser % ConvertToPostFix( )
         
-        CALL parser % Print_PostfixTokens( )
-STOP
+!        CALL parser % Print_PostfixTokens( )
+!STOP
 !           IF( FinalSyntaxCheckOK( self ) )     THEN
 !              success = .true.
 !           ELSE
@@ -161,6 +179,7 @@ STOP
 
       END IF
          
+  STOP
   END FUNCTION Construct_EquationParser
 
   SUBROUTINE CleanEquation( parser, equationCleaned, errorMsg )
@@ -202,8 +221,6 @@ STOP
   
       equationCleaned = .TRUE.
 
-      PRINT*, TRIM(parser % infixformula )
-
   END SUBROUTINE CleanEquation
 
   SUBROUTINE Tokenize( parser, tokenized, errorMsg )
@@ -214,7 +231,6 @@ STOP
     INTEGER                         :: i, j 
  
 
-      PRINT*, 'Tokenizing...'
       tokenized = .FALSE.
       errorMsg  = " "
 
@@ -230,9 +246,9 @@ STOP
           parser % inFix % tokens( parser % inFix % top_index ) % tokenType   = Variable_Token 
           i = i+1
 
-          ! Next item must be an operator or a closing parentheses
+          ! Next item must be an operator, closing parentheses, or end of equation
           IF( .NOT. IsOperator( parser % infixFormula(i:i) ) .AND. &
-              parser % inFixFormula(i:i) /= ")"  )THEN
+              ( parser % inFixFormula(i:i) /= ")" .OR. parser % inFixFormula(i:i) /= " " )  )THEN
 
             errorMsg = "Missing operator or closing parentheses after token : "//&
                        TRIM( parser % inFix % tokens( parser % inFix % top_index ) % tokenString )
@@ -333,29 +349,6 @@ STOP
 
   END SUBROUTINE Tokenize
 
-  SUBROUTINE Print_InfixTokens( parser )
-    CLASS( EquationParser ), INTENT(in) :: parser
-    ! Local
-    INTEGER :: i
-
-      DO i = 1, parser % inFix % top_index
-        PRINT*, TRIM( parser % inFix % tokens(i) % tokenString )
-      ENDDO
-
-
-  END SUBROUTINE Print_InfixTokens
-
-  SUBROUTINE Print_PostfixTokens( parser )
-    CLASS( EquationParser ), INTENT(in) :: parser
-    ! Local
-    INTEGER :: i
-
-      DO i = 1, parser % postFix % top_index
-        PRINT*, TRIM( parser % postFix % tokens(i) % tokenString )
-      ENDDO
-
-
-  END SUBROUTINE Print_PostfixTokens
 
   SUBROUTINE ConvertToPostFix( parser )
     CLASS( EquationParser ), INTENT(inout) :: parser
@@ -436,33 +429,31 @@ STOP
       
   END SUBROUTINE ConvertToPostFix
 
-  INTEGER FUNCTION Priority( operatorString )
-    CHARACTER(1) :: operatorString
+  SUBROUTINE Print_InfixTokens( parser )
+    CLASS( EquationParser ), INTENT(in) :: parser
+    ! Local
+    INTEGER :: i
+
+      DO i = 1, parser % inFix % top_index
+        PRINT*, TRIM( parser % inFix % tokens(i) % tokenString )
+      ENDDO
 
 
-      IF( IsFunction( operatorString ) )THEN
+  END SUBROUTINE Print_InfixTokens
 
-        Priority = 4
+  SUBROUTINE Print_PostfixTokens( parser )
+    CLASS( EquationParser ), INTENT(in) :: parser
+    ! Local
+    INTEGER :: i
 
-      ELSEIF( operatorString == '^' )THEN
+      DO i = 1, parser % postFix % top_index
+        PRINT*, TRIM( parser % postFix % tokens(i) % tokenString )
+      ENDDO
 
-        Priority = 3
 
-      ELSEIF( operatorString == '*' .OR. operatorString == '/' )THEN
+  END SUBROUTINE Print_PostfixTokens
 
-        Priority = 2
-
-      ELSEIF( operatorString == '+' .OR. operatorString == '-' )THEN
-   
-        Priority = 1
- 
-      ELSE
-
-        Priority = 0
-      
-      ENDIF
-
-  END FUNCTION Priority
+  ! TokenStack and NumberStack 
 
   SUBROUTINE Construct_TokenStack( stack, N )
    CLASS(TokenStack), INTENT(out) :: stack
@@ -476,7 +467,7 @@ STOP
   SUBROUTINE Destruct_TokenStack( stack )
     CLASS(TokenStack), INTENT(inout) :: stack
 
-      DEALLOCATE( stack % tokens )
+      IF( ALLOCATED( stack % tokens ) ) DEALLOCATE( stack % tokens )
       stack % top_index = 0
 
   END SUBROUTINE Destruct_TokenStack
@@ -532,11 +523,7 @@ STOP
   TYPE( Token ) FUNCTION TopToken( stack )
     CLASS( TokenStack ) :: stack
 
-      !IF( stack % top_index <= 0 ) THEN
-      !  PRINT *, "  Empty Stack"
-      !ELSE 
-        TopToken = stack % tokens( stack % top_index )
-      !ENDIF
+      TopToken = stack % tokens( stack % top_index )
 
   END FUNCTION TopToken 
 
@@ -548,6 +535,68 @@ STOP
       tok2 % tokenType   = tok1 % tokenType
 
   END FUNCTION Equals_Token
+
+  SUBROUTINE Construct_NumberStack( stack, N )
+   CLASS(NumberStack), INTENT(out) :: stack
+   INTEGER, INTENT(in)            :: N
+
+     ALLOCATE( stack % tokens(1:N) )
+     stack % top_index = 0
+
+  END SUBROUTINE Construct_NumberStack
+
+  SUBROUTINE Destruct_NumberStack( stack )
+    CLASS(NumberStack), INTENT(inout) :: stack
+
+      IF( ALLOCATED( stack % tokens) ) DEALLOCATE( stack % tokens )
+      stack % top_index = 0
+
+  END SUBROUTINE Destruct_NumberStack
+
+  SUBROUTINE Push_NumberStack( stack, tok ) 
+    CLASS(NumberStack), INTENT(inout) :: stack
+    REAL(prec), INTENT(in)         :: tok
+
+      stack % top_index                  = stack % top_index + 1
+      stack % tokens(stack % top_index) = tok 
+ 
+  END SUBROUTINE Push_NumberStack
+
+  SUBROUTINE Pop_NumberStack( stack, tok ) 
+    CLASS(NumberStack), INTENT(inout) :: stack
+    REAL(prec), INTENT(out)        :: tok
+    
+      IF( stack % top_index <= 0 ) THEN
+        PRINT *, "Attempt to pop from empty token stack"
+      ELSE 
+        tok               = stack % tokens( stack % top_index )
+        stack % top_index = stack % top_index - 1
+      END IF
+
+
+  END SUBROUTINE Pop_NumberStack
+
+  SUBROUTINE Peek_NumberStack( stack, tok ) 
+    CLASS(NumberStack), INTENT(in) :: stack
+    REAL(prec), INTENT(out)        :: tok
+    
+      IF( stack % top_index <= 0 ) THEN
+        PRINT *, "Attempt to peek from empty token stack"
+      ELSE 
+        tok = stack % tokens( stack % top_index )
+      END IF
+  END SUBROUTINE Peek_NumberStack
+
+  LOGICAL FUNCTION IsEmpty_NumberStack( stack )
+    CLASS( NumberStack ) :: stack
+
+      IsEmpty_NumberStack = .FALSE.
+
+      IF( stack % top_index <= 0 )THEN
+        IsEmpty_NumberStack = .TRUE.
+      ENDIF
+
+  END FUNCTION IsEmpty_NumberStack
 
   ! Support Functions !
 
@@ -646,15 +695,93 @@ STOP
          
   END FUNCTION FindLastFunctionIndex
 
+  REAL(prec) FUNCTION F_of_X( func, x ) 
+    CHARACTER(Max_Function_Length) :: func
+    REAL(prec)                     :: x
+
+      IF( TRIM( func ) == "cos" .OR. TRIM( func ) == "COS" )THEN
+
+        F_of_X = cos( x )
+
+      ELSEIF( TRIM( func ) == "sin" .OR. TRIM( func ) == "SIN" )THEN
+
+        F_of_X = sin( x )
+
+      ELSEIF( TRIM( func ) == "tan" .OR. TRIM( func ) == "TAN" )THEN
+
+        F_of_X = tan( x )
+
+      ELSEIF( TRIM( func ) == "tanh" .OR. TRIM( func ) == "TANH" )THEN
+
+        F_of_X = tanh( x )
+
+      ELSEIF( TRIM( func ) == "sqrt" .OR. TRIM( func ) == "SQRT" )THEN
+
+        F_of_X = sqrt( x )
+
+      ELSEIF( TRIM( func ) == "abs" .OR. TRIM( func ) == "ABS" )THEN
+
+        F_of_X = abs( x )
+
+      ELSEIF( TRIM( func ) == "exp" .OR. TRIM( func ) == "EXP" )THEN
+
+        F_of_X = exp( x )
+
+      ELSEIF( TRIM( func ) == "ln" .OR. TRIM( func ) == "LN" )THEN
+
+        F_of_X = log( x )
+
+      ELSEIF( TRIM( func ) == "log" .OR. TRIM( func ) == "LOG" )THEN
+
+        F_of_X = log10( x )
+
+      ELSEIF( TRIM( func ) == "acos" .OR. TRIM( func ) == "ACOS" )THEN
+
+        F_of_X = acos( x )
+
+      ELSEIF( TRIM( func ) == "asin" .OR. TRIM( func ) == "ASIN" )THEN
+
+        F_of_X = asin( x )
+
+      ELSEIF( TRIM( func ) == "atan" .OR. TRIM( func ) == "ATAN" )THEN
+
+        F_of_X = atan( x )
+
+      ENDIF
+
+
+  END FUNCTION F_of_X
+
+  INTEGER FUNCTION Priority( operatorString )
+    CHARACTER(1) :: operatorString
+
+
+      IF( IsFunction( operatorString ) )THEN
+
+        Priority = 4
+
+      ELSEIF( operatorString == '^' )THEN
+
+        Priority = 3
+
+      ELSEIF( operatorString == '*' .OR. operatorString == '/' )THEN
+
+        Priority = 2
+
+      ELSEIF( operatorString == '+' .OR. operatorString == '-' )THEN
+   
+        Priority = 1
+ 
+      ELSE
+
+        Priority = 0
+      
+      ENDIF
+
+  END FUNCTION Priority
+
 END MODULE EquationParser_Class
 
-!
-!
-         
-         
-!
-!!////////////////////////////////////////////////////////////////////////
-!!
 !      FUNCTION EvaluateEquation_At_( self, x ) RESULT(y)
 !         IMPLICIT NONE
 !!
@@ -744,63 +871,4 @@ END MODULE EquationParser_Class
 !         CALL DestructNumberStack( stack )
 !         
 !      END FUNCTION EvaluateEquation_At_
-!!
-!!///////////////////////////////////////////////////////////////////////
-!
-!
-!////////////////////////////////////////////////////////////////////////
-!
-      
-!!///////////////////////////////////////////////////////////////////////
-!!                                                                       
-!      SUBROUTINE FunOfx(fun,a,result) 
-!!                                                                       
-!      REAL(KIND=EP)    :: a,result 
-!      CHARACTER(LEN=*) :: fun 
-!      INTRINSIC        ::  abs,acos,asin,atan,cos,exp,log,log10,sin,sqrt,tan,tanh 
-!!---
-!!     ..                                                                
-!      if ( fun == "cos" .OR. fun == "COS") then 
-!          result = cos(a) 
-!                                                                        
-!      else if ( fun == "sin".OR. fun == "SIN") then 
-!          result = sin(a) 
-!                                                                        
-!      else if ( fun == "exp".OR. fun == "EXP") then 
-!          result = exp(a) 
-!                                                                        
-!      else if ( fun == "sqrt".OR. fun == "SQRT") then 
-!          result = sqrt(a) 
-!                                                                        
-!      else if ( fun == "ln".OR. fun == "LN") then 
-!          result = log(a) 
-!                                                                        
-!      else if ( fun == "log".OR. fun == "LOG") then 
-!          result = log10(a) 
-!                                                                        
-!      else if ( fun == "abs".OR. fun == "ABS") then 
-!          result = abs(a) 
-!                                                                        
-!      else if ( fun == "acos".OR. fun == "ACOS") then 
-!          result = acos(a) 
-!                                                                        
-!      else if ( fun == "asin".OR. fun == "ASIN") then 
-!          result = asin(a) 
-!                                                                        
-!      else if ( fun == "tan".OR. fun == "TAN") then 
-!          result = tan(a) 
-!                                                                        
-!      else if ( fun == "atan".OR. fun == "ATAN") then 
-!          result = atan(a) 
-!                                                                        
-!      else if ( fun == "tanh".OR. fun == "TANH") then 
-!          result = tanh(a) 
-!                                                                        
-!      else 
-!          write (6,fmt=*) "unknown function" 
-!          result = 0.0d0 
-!      end if 
-!      END SUBROUTINE funofx                                          
-!
-!////////////////////////////////////////////////////////////////////////
 !
