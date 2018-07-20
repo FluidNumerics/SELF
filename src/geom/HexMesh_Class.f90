@@ -1912,12 +1912,12 @@ CONTAINS
           IF( workingOnNodes )THEN
 
             nNodes = nNodes + 1       
-            READ( lineInTheFile, '(I6,3(",",2x,E14.6))' ), id, myHexMesh % nodes % x(1:3,nNodes)
+            READ( lineInTheFile, '(I6,3(",",2x,E14.6))' ) id, myHexMesh % nodes % x(1:3,nNodes)
 
           ELSEIF( workingOnElements )THEN
 
             nElements = nElements + 1
-            READ( lineInTheFile, '(9(2x,I6))' ), id, myHexMesh % elements % nodeIDs(1:8,nElements)
+            READ( lineInTheFile, '(9(2x,I6))' ) id, myHexMesh % elements % nodeIDs(1:8,nElements)
 
           ENDIF
 

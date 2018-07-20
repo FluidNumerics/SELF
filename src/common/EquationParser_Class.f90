@@ -110,6 +110,8 @@ IMPLICIT NONE
       PROCEDURE :: Tokenize
       PROCEDURE :: ConvertToPostfix
 
+      PROCEDURE :: Evaluate
+
       PROCEDURE :: Print_InFixTokens
       PROCEDURE :: Print_PostFixTokens
 
@@ -886,5 +888,3 @@ CONTAINS
   END FUNCTION Priority
 
 END MODULE EquationParser_Class
-
-!
