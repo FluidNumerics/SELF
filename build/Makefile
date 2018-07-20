@@ -168,6 +168,8 @@ CommonRoutines.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/Common
 Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}common/Timing.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/Timing.f90 -o $@
 
+EquationParser_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/EquationParser_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}common/EquationParser_Class.f90 -o $@
    
 # ---------------------------------------------------------------------- #
 #                           ~/src/spectral/                           #
@@ -261,15 +263,6 @@ MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Qu
                       TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o -o $@
 
 	
-# ---------------------------------------------------------------------- #
-#                          ~/src/FortranParser/src
-# ---------------------------------------------------------------------- #
-
-FortranParser_parameters.o : ${SRCDIR}FortranParser/src/FortranParser_parameters.f90
-	${FC} ${OPT} -c ${SRCDIR}FortranParser/src/FortranParser_parameters.f90 -o $@
-
-FortranParser.o : FortranParser_parameters.o ${SRCDIR}FortranParser/src/FortranParser.f90
-	${FC} ${OPT} -c ${SRCDIR}FortranParser/src/FortranParser.f90 -o $@
 
 # ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
@@ -291,7 +284,7 @@ Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 
-Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o FortranParser.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
+Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}fluid/Fluid_EquationParser_Class.f90 -o $@
 
 
@@ -337,8 +330,7 @@ FLOBJ = ModelPrecision.o \
         HexMesh_Class.o \
         BoundaryCommunicator_Class.o \
         BodyForces_Class.o \
-        FortranParser_parameters.o \
-        FortranParser.o \
+        EquationParser.o \
         Fluid_EquationParser_Class.o \
         Fluid_Class.o
 
