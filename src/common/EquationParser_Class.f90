@@ -32,7 +32,7 @@ IMPLICIT NONE
   INTEGER, PARAMETER, PRIVATE :: Function_Token           = 4
   INTEGER, PARAMETER, PRIVATE :: OpeningParentheses_Token = 5
   INTEGER, PARAMETER, PRIVATE :: ClosingParentheses_Token = 6
-  INTEGER, PARAMETER, PRIVATE :: Monodic_Token            = 7
+  INTEGER, PARAMETER, PRIVATE :: Monadic_Token            = 7
 
   INTEGER, PARAMETER, PRIVATE :: nSeparators = 7
 
@@ -314,6 +314,20 @@ STOP
         ENDIF
 
       ENDDO
+
+      
+      IF( parser % inFix % tokens(1) % tokenType == Operator_Token )THEN
+         IF( TRIM( parser % inFix % tokens(1) % tokenString ) == "+" .OR. TRIM( parser % inFix % tokens(1) % tokenString ) == "-" )     THEN
+            parser % inFix % tokens(1) % tokenType = Monadic_Token
+         END IF
+      END IF
+      
+      DO i = 2, parser % inFix % top_index
+         IF( parser % inFix % tokens(i) % tokenType == Operator_Token .AND. parser % inFix % tokens(i-1) % tokenType == OpeningParentheses_Token )     THEN
+            parser % inFix % tokens(i) % tokenType = Monadic_Token
+         END IF
+      END DO
+
       
       tokenized = .TRUE.
 
@@ -364,13 +378,11 @@ STOP
             parser % inFix % tokens(i) % tokenType == Number_Token )THEN
 
           
-          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to postfix stack'
           CALL parser % postFix % push( parser % inFix % tokens(i) )
 
   
         ELSEIF( parser % inFix % tokens(i) % tokenType == Function_Token )THEN
 
-          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to operator stack'
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
         ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token )THEN
@@ -380,20 +392,17 @@ STOP
           DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" .AND. &
                     Priority( TRIM(tok % tokenString) ) >  Priority( TRIM(parser % inFix % tokens(i) % tokenString) ) )
      
-            PRINT*, 'Push '//TRIM( tok % tokenString )//' to postfix stack'
             CALL parser % postFix % push( tok )
             CALL operator_stack % pop( tok )
             tok = operator_stack % TopToken( )
 
           ENDDO
 
-          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to operator stack'
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
 
         ELSEIF( parser % inFix % tokens(i) % tokenType == OpeningParentheses_Token )THEN
 
-          PRINT*, 'Push '//TRIM( parser % inFix % tokens(i) % tokenString )//' to operator stack'
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
 
@@ -403,8 +412,6 @@ STOP
 
           DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" )
             
-         !   CALL parser % postFix % push( parser % inFix % tokens(i) )
-            PRINT*, 'Push '//TRIM( tok % tokenString )//' to postfix stack'
             CALL parser % postFix % push( tok )
             CALL operator_stack % pop( tok )
             tok = operator_stack % TopToken( )
