@@ -284,7 +284,7 @@ Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
 
 
-Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
+Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser_Class.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}fluid/Fluid_EquationParser_Class.f90 -o $@
 
 
@@ -330,7 +330,7 @@ FLOBJ = ModelPrecision.o \
         HexMesh_Class.o \
         BoundaryCommunicator_Class.o \
         BodyForces_Class.o \
-        EquationParser.o \
+        EquationParser_Class.o \
         Fluid_EquationParser_Class.o \
         Fluid_Class.o
 

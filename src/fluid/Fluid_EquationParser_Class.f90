@@ -2,7 +2,7 @@ MODULE Fluid_EquationParser_Class
 
 USE ModelPrecision
 USE CommonRoutines
-USE FortranParser, only : EquationParser
+USE EquationParser_Class
 
 IMPLICIT NONE
 
@@ -29,12 +29,8 @@ CONTAINS
    CHARACTER(*), INTENT(IN)                   :: icFile
    ! Local
    INTEGER :: fUnit, ioErr
-   CHARACTER(200) :: functionLine, actualFunction
-   CHARACTER(10)  :: variables(3)
-   CHARACTER(10)  :: variables_2d(2)
+   CHARACTER(200) :: functionLine
 
-     variables    = ['x', 'y', 'z']
-     variables_2d = ['x', 'y']
 
      fluidEqs % calculate_density_from_T = .TRUE.    
      fluidEqs % topography_equation_provided = .FALSE.    
@@ -52,34 +48,28 @@ CONTAINS
 
        IF( functionLine(1:1) == 'u' )THEN
 
-         WRITE( actualFunction, '("u = ",A200)' ) functionLine
-         fluidEqs % u = EquationParser( actualFunction, variables )
+         fluidEqs % u = EquationParser( functionLine )
 
        ELSEIF( functionLine(1:1) == 'b' )THEN
 
-         WRITE( actualFunction, '("w = ",A200)' ) functionLine
-         fluidEqs % w = EquationParser( actualFunction, variables )
+         fluidEqs % w = EquationParser( functionLine )
 
        ELSEIF( functionLine(1:1) == 'w' )THEN
 
-         WRITE( actualFunction, '("w = ",A200)' ) functionLine
-         fluidEqs % w = EquationParser( actualFunction, variables )
+         fluidEqs % w = EquationParser( functionLine )
 
        ELSEIF( functionLine(1:1) == 'r' )THEN
 
-         WRITE( actualFunction, '("rho = ",A200)' ) functionLine
-         fluidEqs % w = EquationParser( actualFunction, variables )
+         fluidEqs % w = EquationParser( functionLine )
          fluidEqs % calculate_density_from_t = .FALSE.
 
        ELSEIF( functionLine(1:1) == 't' )THEN
 
-         WRITE( actualFunction, '("t = ",A200)' ) functionLine
-         fluidEqs % t = EquationParser( actualFunction, variables )
+         fluidEqs % t = EquationParser( functionLine )
 
        ELSEIF( functionLine(1:1) == 'h' )THEN
 
-         WRITE( actualFunction, '("h = ",A200)' ) functionLine
-         fluidEqs % topography = EquationParser( actualFunction, variables_2d )
+         fluidEqs % topography = EquationParser( functionLine )
          fluidEqs % topography_equation_provided = .TRUE.
        ENDIF      
 
