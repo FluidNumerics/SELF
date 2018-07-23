@@ -288,26 +288,6 @@ Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser_
 	${FC} ${OPT} -c ${SRCDIR}fluid/Fluid_EquationParser_Class.f90 -o $@
 
 
-ifdef MODDIR
-Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${MODDIR}/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
-else
-Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
-endif
-
-ifeq (${TIMING},yes)
-
-Fluid_Driver.o : ModelPrecision.o Timing.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
-
-else
-
-Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
-
-endif
-
 SELF_Fluids_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o Fluid_EquationParser_Class.o ${SRCDIR}fluid/SELF_Fluids_Driver.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SELF_Fluids_Driver.f90 ${LIB} ${INC} -o $@
 
