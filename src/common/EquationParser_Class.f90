@@ -386,7 +386,7 @@ CONTAINS
 
           CALL operator_stack % push( parser % inFix % tokens(i) )
 
-        ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token )THEN
+        ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token .OR. parser % inFix % tokens(i) % tokenType == Monadic_Token )THEN
 
           tok = operator_stack % TopToken( )
               
