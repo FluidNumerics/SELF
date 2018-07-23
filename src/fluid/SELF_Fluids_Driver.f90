@@ -100,7 +100,7 @@ CONTAINS
               v = myFluidConditions % v % evaluate( x ) 
               w = myFluidConditions % w % evaluate( x ) 
               T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
-PRINT*, T
+
               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
 
               myFluid % state % solution(i,j,k,4,iEl) = -myFluid % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
@@ -137,6 +137,8 @@ PRINT*, T
     !$OMP PARALLEL
     CALL myFluid % EquationOfState( )
     !$OMP END PARALLEL
+
+    CALL myFluid % UpdateExternalStaticState( )
 
   END SUBROUTINE InitialConditions
 

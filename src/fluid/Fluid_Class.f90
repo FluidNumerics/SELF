@@ -92,6 +92,7 @@ MODULE Fluid_Class
     PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
     PROCEDURE :: WritePickup  => WritePickup_Fluid
     PROCEDURE :: ReadPickup   => ReadPickup_Fluid
+    PROCEDURE :: UpdateExternalStaticState => UpdateExternalStaticState_Fluid
 
   END TYPE Fluid
 
@@ -3131,57 +3132,70 @@ CONTAINS
 
     ENDIF
 
-
-#ifdef HAVE_CUDA
-    CALL myDGSEM % static % UpdateDevice( )
-    CALL myDGSEM % state % UpdateDevice( )
-    CALL myDGSEM % sourceTerms % UpdateDevice( )
-    istat = cudaDeviceSynchronize( )
-
-    tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                  myDGSEM % params % polyDeg+1 , &
-                  1 )
-    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
-
-    CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
-                                                                         myDGSEM % static % boundarySolution_dev,  &
-                                                                         myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-
-   CALL myDGSEM % static % UpdateHost( )
-   istat = cudaDeviceSynchronize( )
-#else
-
-    ! Interpolate the static state to the element boundaries
-    CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-
-#endif
-
-  ! Update the static external states
-  DO bID = 1, myDGSEM % extComm % nBoundaries
-
-    iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
-    e1    = myDGSEM % mesh % faces % elementIDs(1,iFace)
-    s1    = myDGSEM % mesh % faces % elementSides(1,iFace)
-
-    DO j = 0, myDGSEM % params % polyDeg
-      DO i = 0, myDGSEM % params % polyDeg
-        DO iEq = 1, myDGSEM % static % nEquations
-          myDGSEM % static % externalState(i,j,iEq,bID) = myDGSEM % static % boundarySolution(i,j,iEq,s1,e1)
-        ENDDO
-      ENDDO
-    ENDDO
-
-  ENDDO
-
-#ifdef HAVE_CUDA
-  myDGSEM % static % externalState_dev = myDGSEM % static % externalState
-  istat = cudaDeviceSynchronize( )
-#endif
+    CALL myDGSEM % UpdateExternalStaticState( )
 
     PRINT*, 'S/R ReadPickup : Done.'
 
 
   END SUBROUTINE ReadPickup_Fluid
+
+  SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
+    IMPLICIT NONE
+    CLASS( Fluid ), INTENT (inout) :: myDGSEM 
+    ! Local
+    INTEGER :: bID, iFace, e1, s1, i, j, iEq
+#ifdef HAVE_CUDA
+    INTEGER    :: istat
+    TYPE(dim3) :: tBlock, grid
+#endif
+
+#ifdef HAVE_CUDA
+      CALL myDGSEM % static % UpdateDevice( )
+      CALL myDGSEM % state % UpdateDevice( )
+      CALL myDGSEM % sourceTerms % UpdateDevice( )
+      istat = cudaDeviceSynchronize( )
+  
+      tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1 , &
+                    1 )
+      grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
+  
+      CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
+                                                                           myDGSEM % static % boundarySolution_dev,  &
+                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+  
+     CALL myDGSEM % static % UpdateHost( )
+     istat = cudaDeviceSynchronize( )
+#else
+
+     ! Interpolate the static state to the element boundaries
+     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+#endif
+
+    ! Update the static external states
+    DO bID = 1, myDGSEM % extComm % nBoundaries
+  
+      iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
+      e1    = myDGSEM % mesh % faces % elementIDs(1,iFace)
+      s1    = myDGSEM % mesh % faces % elementSides(1,iFace)
+  
+      DO j = 0, myDGSEM % params % polyDeg
+        DO i = 0, myDGSEM % params % polyDeg
+          DO iEq = 1, myDGSEM % static % nEquations
+            myDGSEM % static % externalState(i,j,iEq,bID) = myDGSEM % static % boundarySolution(i,j,iEq,s1,e1)
+          ENDDO
+        ENDDO
+      ENDDO
+  
+    ENDDO
+
+#ifdef HAVE_CUDA
+   myDGSEM % static % externalState_dev = myDGSEM % static % externalState
+   istat = cudaDeviceSynchronize( )
+#endif
+  END SUBROUTINE UpdateExternalStaticState_Fluid
+
 !
 #ifdef HAVE_CUDA
 ! ============================================================================================================================ !
