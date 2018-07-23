@@ -162,14 +162,6 @@ CONTAINS
 
           CALL parser % ConvertToPostFix( )
         
-!        CALL parser % Print_PostfixTokens( )
-!STOP
-!           IF( FinalSyntaxCheckOK( self ) )     THEN
-!              success = .true.
-!           ELSE
-!              success = .false.
-!           END IF
-
         ELSE
 
            PRINT*, TRIM( errorMsg )
@@ -261,13 +253,24 @@ CONTAINS
           parser % inFix % top_index = parser % inFix % top_index + 1
           parser % inFix % tokens( parser % inFix % top_index ) % tokenString = ''
 
-          j = 0
-          DO WHILE( IsNumber( parser % inFixFormula(i+j:i+j) ) )
 
-            parser % inFix % tokens( parser % inFix % top_index ) % tokenString(j+1:j+1) = parser % inFixFormula(i+j:i+j) 
-            j = j+1
+          IF( parser % inFixFormula(i:i) == 'p' .OR. parser % inFixFormula(i:i) == 'P' )THEN
 
-          ENDDO
+            ! Conditional for using built in "pi" definition
+            parser % inFix % tokens( parser % inFix % top_index ) % tokenString(1:2) = parser % inFixFormula(i:i+1)
+            j = 2
+
+          ELSE
+
+            j = 0
+            DO WHILE( IsNumber( parser % inFixFormula(i+j:i+j) ) )
+
+              parser % inFix % tokens( parser % inFix % top_index ) % tokenString(j+1:j+1) = parser % inFixFormula(i+j:i+j) 
+              j = j+1
+
+            ENDDO
+
+          ENDIF
 
           parser % inFix % tokens( parser % inFix % top_index ) % tokenType = Number_Token
         
@@ -448,11 +451,13 @@ CONTAINS
         SELECT CASE ( t % tokenType )
          
           CASE( Number_Token )
-         !   IF( t % token == "pi" .OR. t%token == "PI" )     THEN
-         !      v = PI
-         !   ELSE
-               READ( t % tokenString, * ) v
-         !   END IF
+
+            IF( t % tokenString == "pi" .OR. t % tokenString == "PI" )     THEN
+               v = pi
+            ELSE
+              READ( t % tokenString, * ) v
+            END IF
+
             CALL stack % Push( v )
                
           CASE ( Variable_Token )
@@ -727,9 +732,15 @@ CONTAINS
     INTEGER :: i
 
       IsNumber = .FALSE.
+
+      IF( eqChar == '.' .OR. eqChar == 'p' .OR. eqChar == 'P' )THEN
+        IsNumber = .TRUE.
+        RETURN
+      ENDIF
+         
       DO i = 1, 10
 
-        IF( eqChar == numbers(i) .OR. eqChar == '.' )THEN
+        IF( eqChar == numbers(i) )THEN
           IsNumber = .TRUE.
         ENDIF
 
