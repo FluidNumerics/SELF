@@ -51,12 +51,16 @@ IMPLICIT NONE
   TYPE Token  
     CHARACTER(Token_Length) :: tokenString
     INTEGER                 :: tokenType
+
+    CONTAINS  
+      PROCEDURE :: Equals_Token
+
   END TYPE Token
 
 
   TYPE TokenStack
     TYPE(Token), ALLOCATABLE :: tokens(:)
-    INTEGER                  :: top_index
+    INTEGER                  :: top_index = 0
 
     CONTAINS
   
@@ -173,7 +177,6 @@ CONTAINS
 
       END IF
          
-  STOP
   END FUNCTION Construct_EquationParser
 
   SUBROUTINE CleanEquation( parser, equationCleaned, errorMsg )
@@ -445,99 +448,107 @@ CONTAINS
     REAL(prec)        :: v, a, b, c
          
       CALL stack % Construct( Stack_Length )
-         
-      DO k = 1, parser % postfix % top_index 
 
-        t = parser % postfix % tokens(k)
+      IF( .NOT.( ALLOCATED( parser % postfix % tokens ) ) )THEN
 
-        SELECT CASE ( t % tokenType )
-         
-          CASE( Number_Token )
+        f = 0.0_prec
 
-            IF( t % tokenString == "pi" .OR. t % tokenString == "PI" )     THEN
-               v = pi
-            ELSE
-              READ( t % tokenString, * ) v
-            END IF
+      ELSE
 
-            CALL stack % Push( v )
-               
-          CASE ( Variable_Token )
-
-            IF( TRIM( t % tokenString ) == "x" )THEN
-
-               CALL stack % Push( x(1) )
-
-            ELSEIF( TRIM( t % tokenString ) == "y" )THEN
-
-               CALL stack % Push( x(2) )
-
-            ELSEIF( TRIM( t % tokenString ) == "z" )THEN
-
-               CALL stack % Push( x(3) )
-
-            ENDIF
-
-          CASE ( Operator_Token )
-
-            CALL stack % Pop( a )
-            CALL stack % Pop( b )
-
-            SELECT CASE ( TRIM(t % tokenString) )
-
-               CASE ( "+" )
-
-                  c = a + b
-
-               CASE ( "-" )
-
-                  c = b - a
-
-               CASE ( "*" )
-
-                  c = a*b
-
-               CASE ( "/" )
-
-                  c = b/a
-
-               CASE ( "^" )
-
-                  c = b**a
-               CASE DEFAULT
-
-            END SELECT
-
-            CALL stack % Push( c )
-            
-         CASE ( Function_Token )
-
-            CALL stack % Pop( a )
-
-            b = F_of_X( TRIM(t % tokenString), a )
-
-            CALL stack % Push( b )
-            
-         CASE ( Monadic_Token )
-
-           IF( TRIM(t % tokenString) == "-" )     THEN
-
-              CALL stack % Pop( a )
-              a = -a
-              CALL stack % Push( a )
-
-           END IF
+        DO k = 1, parser % postfix % top_index 
+  
+          t = parser % postfix % tokens(k) % Equals_Token( )
+  
+          SELECT CASE ( t % tokenType )
            
-         CASE DEFAULT
+            CASE( Number_Token )
+  
+              IF( t % tokenString == "pi" .OR. t % tokenString == "PI" )     THEN
+                 v = pi
+              ELSE
+                READ( t % tokenString, * ) v
+              END IF
+  
+              CALL stack % Push( v )
+                 
+            CASE ( Variable_Token )
+  
+              IF( TRIM( t % tokenString ) == "x" )THEN
+  
+                 CALL stack % Push( x(1) )
+  
+              ELSEIF( TRIM( t % tokenString ) == "y" )THEN
+  
+                 CALL stack % Push( x(2) )
+  
+              ELSEIF( TRIM( t % tokenString ) == "z" )THEN
+  
+                 CALL stack % Push( x(3) )
+  
+              ENDIF
+  
+            CASE ( Operator_Token )
+  
+              CALL stack % Pop( a )
+              CALL stack % Pop( b )
+  
+              SELECT CASE ( TRIM(t % tokenString) )
+  
+                 CASE ( "+" )
+  
+                    c = a + b
+  
+                 CASE ( "-" )
+  
+                    c = b - a
+  
+                 CASE ( "*" )
+  
+                    c = a*b
+  
+                 CASE ( "/" )
+  
+                    c = b/a
+  
+                 CASE ( "^" )
+  
+                    c = b**a
+                 CASE DEFAULT
+  
+              END SELECT
+  
+              CALL stack % Push( c )
+              
+           CASE ( Function_Token )
+  
+              CALL stack % Pop( a )
+  
+              b = F_of_X( TRIM(t % tokenString), a )
+  
+              CALL stack % Push( b )
+              
+           CASE ( Monadic_Token )
+  
+             IF( TRIM(t % tokenString) == "-" )     THEN
+  
+                CALL stack % Pop( a )
+                a = -a
+                CALL stack % Push( a )
+  
+             END IF
+             
+           CASE DEFAULT
+  
+         END SELECT
+  
+       END DO
+  
+       CALL stack % Pop( a )
+       f = a
+  
+       CALL stack % Destruct( )
 
-       END SELECT
-
-     END DO
-
-     CALL stack % Pop( a )
-     f = a
-
-     CALL stack % Destruct( )
+     ENDIF
          
   END FUNCTION Evaluate
 
