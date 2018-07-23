@@ -46,11 +46,13 @@ CONTAINS
   SUBROUTINE Setup( )
     IMPLICIT NONE
 
-    CALL myFluid % Build( pickupFileExists, setupSuccess )
+    CALL myFluid % Build( setupSuccess )
 
     IF( .NOT. setupSuccess )THEN
       RETURN
     ENDIF
+
+    CALL myFluid % ReadPickup( pickupFileExists )
 
     IF( .NOT. pickupFileExists )THEN
 

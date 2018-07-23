@@ -131,12 +131,11 @@ CONTAINS
 !==================================================================================================!
 !
 !
-  SUBROUTINE Build_Fluid( myDGSEM, pickupExists, setupSuccess )
+  SUBROUTINE Build_Fluid( myDGSEM, setupSuccess )
 
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     LOGICAL, INTENT(inout)      :: setupSuccess
-    LOGICAL, INTENT(out)        :: pickupExists
     ! Local
 #ifdef HAVE_CUDA
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
@@ -255,8 +254,6 @@ CONTAINS
 
 #endif
 
-    ! Read the initial conditions, static state, and the boundary communicator
-    CALL myDGSEM % ReadPickup( pickupExists )
 
 #ifdef TIMING
     ! Setup timers
