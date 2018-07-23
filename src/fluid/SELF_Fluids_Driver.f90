@@ -60,6 +60,9 @@ CONTAINS
       CALL myFluidConditions % Build( 'self.equations' )
       CALL InitialConditions( )
 
+      CALL myFluid % WritePickup( )
+      CALL myFluid % WriteTecplot( )
+
     ENDIF
 
     CALL myFluid % WriteDiagnostics( )
@@ -97,7 +100,7 @@ CONTAINS
               v = myFluidConditions % v % evaluate( x ) 
               w = myFluidConditions % w % evaluate( x ) 
               T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
-
+PRINT*, T
               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
 
               myFluid % state % solution(i,j,k,4,iEl) = -myFluid % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
