@@ -35,9 +35,7 @@ PROGRAM SELF_Fluids_Driver
 
     IF( run_MeshGenOnly )THEN
 
-      PRINT*, '  Generating structured mesh...'
-      CALL StructuredMeshGenerator_3D( )
-      PRINT*, '  Done'
+      CALL MeshGen( )
     
     ELSE
 
@@ -168,6 +166,27 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
+
+  SUBROUTINE MeshGen( )
+
+
+      CALL myFluid % ExtComm % SetRanks( )
+
+      IF( myFluid % ExtComm % myRank == 0 )THEN
+        PRINT*, '  Generating structured mesh...'
+        CALL StructuredMeshGenerator_3D( )
+      ENDIF
+
+      CALL myFluid % ExtComm % Finalize( )
+
+      PRINT*, '  Done'
+
+  END SUBROUTINE MeshGen
+
+! ------------------------------------------------------------------------------ !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+! ------------------------------------------------------------------------------ !
+
   SUBROUTINE Initialize( )
 
     ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
