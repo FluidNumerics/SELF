@@ -68,7 +68,7 @@ MODULE HexMesh_Class
 
     ! Connectivity Routines
     PROCEDURE :: ConstructFaces               => ConstructFaces_HexMesh
-    PROCEDURE :: ConstructDOublyPeriodicFaces => ConstructDOublyPeriodicFaces_HexMesh
+    PROCEDURE :: ConstructDoublyPeriodicFaces => ConstructDoublyPeriodicFaces_HexMesh
     PROCEDURE :: ConstructElementNeighbors    => ConstructElementNeighbors_HexMesh
     PROCEDURE :: DetermineOrientation         => DetermineOrientation_HexMesh
     PROCEDURE :: ScaleTheMesh                 => ScaleTheMesh_HexMesh
@@ -553,7 +553,7 @@ CONTAINS
 
   END SUBROUTINE ConstructFaces_HexMesh
 !
-  SUBROUTINE ConstructDOublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem )
+  SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem )
 
 ! Assumes structured mesh
     IMPLICIT NONE
@@ -819,7 +819,7 @@ CONTAINS
 
 #endif
 
-  END SUBROUTINE ConstructDOublyPeriodicFaces_HexMesh
+  END SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh
 !
 !> \addtogroup HexMesh_Class
 !! @{
@@ -1062,7 +1062,7 @@ CONTAINS
     CLASS( HexMesh ), INTENT(inout)  :: myHexMesh
     TYPE( Lagrange ), INTENT(in)     :: interp
     INTEGER, INTENT(in)              :: nXelem, nYelem, nZelem
-    LOGICAL, INTENT(in)              :: DOublyPeriodic
+    LOGICAL, INTENT(in)              :: DoublyPeriodic
     ! LOGICAL
     TYPE( Surfaces ) :: boundSurfs
     REAL(prec) :: x, y, z, zb, zi, zu, zip1, dxElem, dyElem, dzElem
@@ -1087,9 +1087,6 @@ CONTAINS
     nSurf     = 6*nElements
     ! ************************************************************************* !
 
-    PRINT*, 'nNodes    : ', nNodes
-    PRINT*, 'nElements : ', nElements
-    PRINT*, 'gPolyDeg  : ', gPolyDeg
 
     ! Generate the Legendre-Gauss Lobatto points of order gPolyDeg
     ! These are the points USEd to define the parametric
@@ -1242,13 +1239,12 @@ CONTAINS
     CALL myHexMesh % elements % GenerateMesh( interp, boundSurfs )
     CALL myHexMesh % elements % GenerateMetrics( interp )
 
-    IF( DOublyPeriodic )THEN
-      CALL myHexMesh % ConstructDOublyPeriodicFaces( nXElem, nYElem, nZElem )
+    IF( DoublyPeriodic )THEN
+      CALL myHexMesh % ConstructDoublyPeriodicFaces( nXElem, nYElem, nZElem )
     ELSE
       CALL myHexMesh % ConstructFaces( )
     ENDIF
 
-    PRINT*, 'nFaces    : ', myHexMesh % faces % nFaces
 
     CALL myHexMesh % ConstructElementNeighbors( )
 
@@ -1337,8 +1333,8 @@ CONTAINS
          ENDDO
 !
          DO procID = 0, nProc-1
-            PRINT*, 'Process ID :',procID, ', nElems :', nElPerProc(procID)
-            PRINT*, 'Process ID :',procID, ', nNodes :', nNodePerProc(procID)
+            PRINT*, '  Process ID :',procID, ', nElems :', nElPerProc(procID)
+            PRINT*, '  Process ID :',procID, ', nNodes :', nNodePerProc(procID)
          ENDDO
 
       ELSE
@@ -1405,8 +1401,7 @@ CONTAINS
 #endif
 
 
-    PRINT*, 'Mesh File : '//TRIM( filename )//'.mesh'
-
+    PRINT(MsgFMT), 'Reading '//TRIM( filename )//'.mesh'
     ! Get a new file unit
     OPEN( UNIT    = NEWUNIT(fUnit), &
       FILE    = TRIM( filename )//'.mesh', &
@@ -1427,10 +1422,10 @@ CONTAINS
     READ( fUnit, rec=k )N
     k = k+1
 
-    PRINT*, 'nNodes    : ', nNodes
-    PRINT*, 'nElements : ', nElements
-    PRINT*, 'nFaces    : ', nFaces
-    PRINT*, 'N         : ', N
+    PRINT*, '  nNodes    : ', nNodes
+    PRINT*, '  nElements : ', nElements
+    PRINT*, '  nFaces    : ', nFaces
+
     ! ---- Build the quadrature mesh (empty) ---- !
     CALL myHexMesh % Build( nNodes, nElements, nFaces, N )
 
@@ -1640,7 +1635,6 @@ CONTAINS
     INTEGER :: fUnit, k, i, j, l, row, col
 
 
-    PRINT*, 'Mesh File : '//TRIM( filename )//'.mesh'
     nNodes = 1
     ! Get a new file unit
     OPEN( UNIT    = NEWUNIT(fUnit), &
@@ -1667,10 +1661,10 @@ CONTAINS
     WRITE( fUnit, rec=k )N
     k = k+1
 
-    PRINT*, 'nNodes    : ', nNodes
-    PRINT*, 'nElements : ', nElements
-    PRINT*, 'nFaces    : ', nFaces
-    PRINT*, 'N         : ', N
+    PRINT*, '  nNodes    : ', nNodes
+    PRINT*, '  nElements : ', nElements
+    PRINT*, '  nFaces    : ', nFaces
+    PRINT*, '  N         : ', N
 
     ! ---- Read in the element connectivity ---- !
     DO iEl = 1, nElements
@@ -1934,8 +1928,8 @@ CONTAINS
 
     CLOSE( fUnit )
 
-    PRINT*, 'nNodes = ', myHexMesh % nodes % nNodes
-    PRINT*, 'nElements = ', myHexMesh % elements % nElements
+    PRINT*, '  nNodes = ', myHexMesh % nodes % nNodes
+    PRINT*, '  nElements = ', myHexMesh % elements % nElements
 
     gPolyDeg = interp % N
     ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6*nElements), weights(0:gpolyDeg) )
@@ -1995,7 +1989,7 @@ CONTAINS
 
     CALL myHexMesh % ConstructFaces( )
 
-    PRINT*, 'nFaces    : ', myHexMesh % faces % nFaces
+    PRINT*, '  nFaces    : ', myHexMesh % faces % nFaces
 
     CALL myHexMesh % ConstructElementNeighbors( )
 
@@ -2048,7 +2042,7 @@ CONTAINS
     TYPE( Surfaces ) :: boundSurfs
 
 
-    PRINT*, 'Mesh File : '//TRIM( filename )
+    PRINT(MsgFMT), 'Mesh File : '//TRIM( filename )
 
     ! Get a new file unit
     OPEN( UNIT    = NEWUNIT(fUnit), &
@@ -2073,9 +2067,9 @@ CONTAINS
     ! Structured nFaces = 1 for initial build
     nFaces = 1
 
-    PRINT*, 'nNodes    : ', nNodes
-    PRINT*, 'nElements : ', nElements
-    PRINT*, 'N         : ', interp % N
+    PRINT*, '  nNodes    : ', nNodes
+    PRINT*, '  nElements : ', nElements
+    PRINT*, '  N         : ', interp % N
     ! ---- Build the quadrature mesh (empty) ---- !
     CALL myHexMesh % Build( nNodes, nElements, nFaces, interp % N )
 

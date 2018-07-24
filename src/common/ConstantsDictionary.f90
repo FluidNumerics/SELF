@@ -172,7 +172,7 @@
 
 ! Misc. INTEGER and CHARACTER flag definitions
   CHARACTER(1), PARAMETER :: nada = ' '
-  CHARACTER(6), PARAMETER :: MsgFmt = '(4x,A)'
+  CHARACTER(6), PARAMETER :: MsgFmt = '(2x,A)'
 
 #ifdef HAVE_CUDA
   REAL(prec), DEVICE, ALLOCATABLE, PUBLIC :: rk3_a_dev(:), rk3_g_dev(:), rk3_b_dev(:)

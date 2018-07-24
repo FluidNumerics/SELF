@@ -292,7 +292,7 @@ CONTAINS
     CALL MPI_BARRIER( myDGSEM % extComm % mpi_comm )
 #endif
 
-    PRINT*, '    S/R Trash_Fluid : Clearing memory.'
+    PRINT*, '  Clearing memory.'
 
     CALL myDGSEM % params % Trash( )
     CALL myDGSEM % mesh % Trash(  )
@@ -327,9 +327,6 @@ CONTAINS
     CHARACTER(4) :: rankChar
 
     WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
-    PRINT*,'    Module Fluid_Class.f90 : S/R BuildHexMesh :'
-
-    PRINT*,'      Reading mesh from '//TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar//'.smesh '
 
     ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
     CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar )
@@ -3001,8 +2998,7 @@ CONTAINS
     N = myDGSEM % params % polyDeg
 
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-    PRINT(MsgFMT), ' S/R WritePickup_Fluid : Writing output file :  State.'//&
-      rankChar//'.'//timeStampString//'.pickup'
+    PRINT(MsgFMT), 'Writing output file :  State.'//rankChar//'.'//timeStampString//'.pickup'
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
@@ -3130,9 +3126,6 @@ CONTAINS
     ENDIF
 
     CALL myDGSEM % UpdateExternalStaticState( )
-
-    PRINT*, 'S/R ReadPickup : Done.'
-
 
   END SUBROUTINE ReadPickup_Fluid
 

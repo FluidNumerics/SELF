@@ -380,7 +380,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 
     CALL myComm % Build( nBe )
 
-    PRINT*, '  Rank ',myComm % myRank,' Reading ExtComm.'//rankChar//'.bcm', myComm % nBoundaries
 
     DO i = 1, myComm % nBoundaries
 
@@ -423,7 +422,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
       CALL MPI_INIT( myComm % mpiErr )
       CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
       CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
-      PRINT*, '    S/R SetRanks : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
 
 #ifdef HAVE_CUDA
 
@@ -431,9 +429,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
       ! each rank is assigned to it's own GPU.
       iStat = cudaGetDeviceCount( nDevices )
       cudaDeviceNumber = MOD( myComm % myRank, nDevices )
-  
-      PRINT*, '    S/R SetRanks : Rank :', myComm % myRank, ': Getting Device # ', cudaDeviceNumber
-  
       iStat = cudaSetDevice( cudaDeviceNumber )
 
 #endif
@@ -480,7 +475,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     ENDDO
 
     myComm % nNeighbors = SUM( myComm % rankTable )
-    PRINT*, '  S/R ConstructCommTables : Found', myComm % nNeighbors, 'neighbors for Rank', myComm % myRank+1
 
     ALLOCATE( myComm % neighborRank(1:myComm % nNeighbors), &
               myComm % bufferSize(1:myComm % nNeighbors), &
