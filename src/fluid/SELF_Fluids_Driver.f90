@@ -10,6 +10,7 @@ PROGRAM SELF_Fluids_Driver
 
   USE ModelPrecision
   USE ModelParameters_Class
+  USE HexMesh_Class
   USE Fluid_EquationParser_Class
   USE Fluid_Class
 
@@ -22,6 +23,7 @@ PROGRAM SELF_Fluids_Driver
   LOGICAL                      :: setupSuccess
   LOGICAL                      :: initializeFromScratch
   LOGICAL                      :: pickupFileExists
+  LOGICAL                      :: run_MeshGenOnly, run_UpToInitOnly
 
 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
@@ -31,11 +33,24 @@ PROGRAM SELF_Fluids_Driver
 
   IF( setupSuccess )THEN
 
-    CALL Initialize( )
+    IF( run_MeshGenOnly )THEN
 
-    CALL MainLoop( )
+      PRINT*, '  Generating structured mesh...'
+      CALL StructuredMeshGenerator_3D( )
+      PRINT*, '  Done'
+    
+    ELSE
 
-    CALL Cleanup( )
+      CALL Initialize( )
+
+      IF( .NOT. run_UpToInitOnly )THEN
+        CALL MainLoop( )
+      ENDIF
+
+      CALL Cleanup( )
+
+    ENDIF
+
 
   ENDIF
 
@@ -47,15 +62,106 @@ CONTAINS
 
   SUBROUTINE Setup( )
     IMPLICIT NONE
+    ! Local
+    INTEGER :: nArg, argID
+    CHARACTER(500) :: argName
+    LOGICAL :: helpNeeded
 
-    CALL myFluid % Build( setupSuccess )
+    helpNeeded       = .FALSE.
+    run_MeshGenOnly  = .FALSE.
+    run_UpToInitOnly = .FALSE.
 
-    IF( .NOT. setupSuccess )THEN
+    nArg = command_argument_count( )
+
+    IF( nArg > 0 )THEN
+
+      CALL get_command_argument( 1, argName )
+
+      SELECT CASE( TRIM( argName ) )
+
+        CASE( "meshgen" )
+
+          run_MeshGenOnly  = .TRUE.
+          run_UpToInitOnly = .FALSE.
+          setupSuccess     = .TRUE.
+
+          IF( nArg > 1 ) THEN
+            PRINT*, '  Too many command line arguments for sfluid meshgen.'
+            helpNeeded   = .TRUE.
+            setupSuccess = .FALSE.
+          ENDIF
+
+        CASE( "init" )
+
+          run_MeshGenOnly  = .FALSE.
+          run_UpToInitOnly = .TRUE.
+          setupSuccess     = .TRUE.
+
+          IF( nArg > 1 ) THEN
+            PRINT*, '  Too many command line arguments for sfluid init.'
+            helpNeeded   = .TRUE.
+            setupSuccess = .FALSE.
+          ENDIF
+
+         CASE( "help" )
+            helpNeeded   = .TRUE.
+            setupSuccess = .FALSE.
+
+         CASE DEFAULT
+            run_MeshGenOnly  = .FALSE.
+            run_UpToInitOnly = .FALSE.
+            helpNeeded       = .FALSE.
+
+      END SELECT
+
+    ENDIF
+
+    IF( helpNeeded ) THEN
+
+      PRINT*, 'SELF-Fluids (sfluid) Command Line Tool'      
+      PRINT*, ' '
+      PRINT*, ' A program for solving Compressible Navier-Stokes using the'
+      PRINT*, ' Nodal Discontinuous Galerkin Spectral Element Method.'
+      PRINT*, ' '
+      PRINT*, '  sfluid [tool]'      
+      PRINT*, ' '
+      PRINT*, ' [tool] can be :'
+      PRINT*, ' '
+      PRINT*, '   help'
+      PRINT*, '     Display this help message'
+      PRINT*, ' '
+      PRINT*, '   meshgen'
+      PRINT*, '     Run only the mesh generator to generate a structured mesh.'
+      PRINT*, '     The structured mesh is built using nXElem, nYElem, and nZElem'
+      PRINT*, '     specified in runtime.params. Further, domain decomposition '
+      PRINT*, '     for the structured mesh is done by setting the number of'
+      PRINT*, '     of processes in each direction (nProcX, nProcY, nProcZ)'
+      PRINT*, '     Topography can be set using an equation like'
+      PRINT*, ' '
+      PRINT*, '           h = exp( -(x-500.0)^2/200.0 )'
+      PRINT*, ' '
+      PRINT*, '     in the self.equations file. This will result in a terrain-following'
+      PRINT*, '     structured mesh.'
+      PRINT*, ' '
+      PRINT*, '     Future releases of SELF-Fluids will offer more complete support'
+      PRINT*, '     for working with typical unstructured mesh formats. '
+      PRINT*, ' '
+      PRINT*, '   init'
+      PRINT*, '     Run up to the initial condition generation and do not forward'
+      PRINT*, '     step the model. The initial conditions are read in from the '
+      PRINT*, '     self.equations file. '
+      PRINT*, ' '
+      PRINT*, ' '
+      PRINT*, ' '
+
+      setupSuccess = .FALSE.
       RETURN
     ENDIF
 
+    IF( .NOT. run_MeshGenOnly )THEN
+      CALL myFluid % Build( setupSuccess )
+    ENDIF
 
-    PRINT(MsgFMT), 'Setup Complete'
 
   END SUBROUTINE Setup
 
