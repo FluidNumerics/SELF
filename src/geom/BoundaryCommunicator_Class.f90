@@ -123,7 +123,6 @@ CONTAINS
     CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
     INTEGER, INTENT(in)                        :: nBe
 
-    CALL myComm % SetRanks( )
 
     myComm % nBoundaries = nBe
 
@@ -365,7 +364,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     INTEGER       :: fUnit
     INTEGER       :: nBe
 
-    CALL myComm % SetRanks( )
 
     WRITE( rankChar, '(I4.4)' ) myComm % myRank
 

@@ -31,6 +31,8 @@ PROGRAM SELF_Fluids_Driver
 
   IF( setupSuccess )THEN
 
+    CALL Initialize( )
+
     CALL MainLoop( )
 
     CALL Cleanup( )
@@ -52,8 +54,22 @@ CONTAINS
       RETURN
     ENDIF
 
+
+    PRINT(MsgFMT), 'Setup Complete'
+
+  END SUBROUTINE Setup
+
+! ------------------------------------------------------------------------------ !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+! ------------------------------------------------------------------------------ !
+  SUBROUTINE Initialize( )
+
+    ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
+    ! returns FALSE.
     CALL myFluid % ReadPickup( pickupFileExists )
 
+    ! If the pickup file doesn't exist, then the initial conditions are generated
+    ! from the equation parser.
     IF( .NOT. pickupFileExists )THEN
 
       PRINT(MsgFMT), 'Pickup file not found.'
@@ -71,9 +87,7 @@ CONTAINS
     CALL myFluid % WriteDiagnostics( )
 #endif
 
-    PRINT(MsgFMT), 'Setup Complete'
-
-  END SUBROUTINE Setup
+  END SUBROUTINE Initialize
 
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !

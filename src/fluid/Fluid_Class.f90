@@ -154,7 +154,7 @@ CONTAINS
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
     ! the device for each rank is also set here.
-    CALL myDGSEM % extComm % ReadPickup( )
+    CALL myDGSEM % extComm % SetRanks( )
 
 #ifdef HAVE_CUDA
     CALL UpdateDeviceDictionary( )
@@ -173,7 +173,7 @@ CONTAINS
       myDGSEM % params % filterType )
 
     CALL myDGSEM % BuildHexMesh(  )
-
+    CALL myDGSEM % extComm % ReadPickup( )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
@@ -325,17 +325,38 @@ CONTAINS
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     CHARACTER(4) :: rankChar
+    LOGICAL      :: fileExists
 
-    WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
+      WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
 
-    ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
-    CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar )
 
-    ! Multiply the mesh positions to scale the size of the mesh
-    CALL myDGSEM % mesh % ScaleTheMesh( myDGSEM % dgStorage % interp, &
-                                        myDGSEM % params % xScale, &
-                                        myDGSEM % params % yScale, &
-                                        myDGSEM % params % zScale )
+      IF( myDGSEM % extComm % myRank == 0 )THEN
+
+        INQUIRE( FILE=TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar//'.mesh', EXIST=fileExists )
+
+        IF( .NOT. fileExists )THEN
+
+          PRINT*, '  Mesh files not found.'
+          PRINT*, '  Generating structured mesh...'
+          CALL StructuredMeshGenerator_3D( )
+          PRINT*, '  Done'
+
+        ENDIF
+
+      ENDIF
+        
+#ifdef HAVE_MPI
+      CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM )
+#endif
+
+      ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
+      CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar )
+
+      ! Multiply the mesh positions to scale the size of the mesh
+      CALL myDGSEM % mesh % ScaleTheMesh( myDGSEM % dgStorage % interp, &
+                                          myDGSEM % params % xScale, &
+                                          myDGSEM % params % yScale, &
+                                          myDGSEM % params % zScale )
 
 
   END SUBROUTINE BuildHexMesh_Fluid
