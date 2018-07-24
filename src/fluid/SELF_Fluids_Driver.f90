@@ -67,7 +67,9 @@ CONTAINS
 
     ENDIF
 
+#ifdef HAVE_DIAGNOSTICS
     CALL myFluid % WriteDiagnostics( )
+#endif
 
     PRINT(MsgFMT), 'Setup Complete'
 
@@ -176,8 +178,10 @@ CONTAINS
       CALL myFluid % WritePickup( )
       CALL myFluid % WriteTecplot( )
 
+#ifdef HAVE_DIAGNOSTICS
       CALL myFluid % Diagnostics( )
       CALL myFluid % WriteDiagnostics( )
+#endif
 
     ENDDO
 
