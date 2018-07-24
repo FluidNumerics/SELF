@@ -270,10 +270,9 @@ CONTAINS
               myFluid % state % solution(i,j,k,3,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
               myFluid % state % solution(i,j,k,5,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*T
 
-
-              myFluid % sourceTerms % drag(i,j,k,iEl) = myFluidConditions % drag % evaluate( x )
-
             ENDIF
+
+            myFluid % sourceTerms % drag(i,j,k,iEl) = myFluidConditions % drag % evaluate( x )
 
           ENDDO
         ENDDO
