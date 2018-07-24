@@ -179,8 +179,12 @@ CONTAINS
     IF( .NOT. pickupFileExists )THEN
 
       PRINT(MsgFMT), 'Pickup file not found.'
-      PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
 
+    ENDIF
+
+    IF( .NOT. pickupFileExists .OR. run_UpToInitOnly )THEN
+
+      PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
       CALL myFluidConditions % Build( 'self.equations' )
       CALL InitialConditions( )
 
