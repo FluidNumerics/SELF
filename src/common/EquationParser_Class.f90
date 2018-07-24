@@ -155,6 +155,7 @@ CONTAINS
       functions(11) % str = "asin"
       functions(12) % str = "atan"
 
+      parser % inFixFormula = " "
       parser % equation = equation
       errorMsg = " "
 
@@ -225,7 +226,7 @@ CONTAINS
     LOGICAL, INTENT(out)                   :: tokenized
     CHARACTER(Error_Message_Length)        :: errorMsg
     ! Local
-    INTEGER                         :: i, j 
+    INTEGER :: i, j 
  
 
       tokenized = .FALSE.
@@ -244,8 +245,9 @@ CONTAINS
           i = i+1
 
           ! Next item must be an operator, closing parentheses, or end of equation
+
           IF( .NOT. IsOperator( parser % infixFormula(i:i) ) .AND. &
-              ( parser % inFixFormula(i:i) /= ")" .OR. parser % inFixFormula(i:i) /= " " )  )THEN
+              parser % inFixFormula(i:i) /= ")" .AND. parser % inFixFormula(i:i) /= " "  )THEN
 
             errorMsg = "Missing operator or closing parentheses after token : "//&
                        TRIM( parser % inFix % tokens( parser % inFix % top_index ) % tokenString )
@@ -283,7 +285,7 @@ CONTAINS
 
           ! Next item must be an operator or a closing parentheses
           IF( .NOT. IsOperator( parser % infixFormula(i:i) ) .AND. &
-              parser % inFixFormula(i:i) /= ")"  )THEN
+              parser % inFixFormula(i:i) /= ")" .AND. parser % inFixFormula(i:i) /= " " )THEN
 
             errorMsg = "Missing operator or closing parentheses after token : "//&
                        TRIM( parser % inFix % tokens( parser % inFix % top_index ) % tokenString )
