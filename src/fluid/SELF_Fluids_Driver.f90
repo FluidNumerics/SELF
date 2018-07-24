@@ -127,6 +127,9 @@ CONTAINS
               myFluid % state % solution(i,j,k,3,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
               myFluid % state % solution(i,j,k,5,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*T
 
+
+              myFluid % sourceTerms % drag(i,j,k,iEl) = myFluidConditions % drag % evaluate( x )
+
             ENDIF
 
           ENDDO
@@ -136,6 +139,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     myFluid % state % solution_dev = myFluid % state % solution
+    CALL myFluid % sourceTerms % Update_Device( )
 #endif
 
     !$OMP PARALLEL

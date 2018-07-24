@@ -13,6 +13,7 @@ IMPLICIT NONE
     TYPE( EquationParser ) :: t
     TYPE( EquationParser ) :: rho
     TYPE( EquationParser ) :: topography
+    TYPE( EquationParser ) :: drag
     LOGICAL                :: calculate_density_from_T
     LOGICAL                :: topography_equation_provided
 
@@ -71,6 +72,11 @@ CONTAINS
 
          fluidEqs % topography = EquationParser( functionLine )
          fluidEqs % topography_equation_provided = .TRUE.
+
+       ELSEIF( functionLine(1:1) == 'c' )THEN
+
+         fluidEqs % drag = EquationParser( functionLine )
+
        ENDIF      
 
      ENDDO
