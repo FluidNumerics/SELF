@@ -70,6 +70,7 @@ MODULE BoundaryCommunicator_CLASS
 
     PROCEDURE :: Build => Build_BoundaryCommunicator
     PROCEDURE :: Trash => Trash_BoundaryCommunicator
+    PROCEDURE :: Finalize => Finalize_BoundaryCommunicator
     PROCEDURE :: SetRanks
 
 #ifdef HAVE_CUDA
@@ -197,25 +198,34 @@ myComm % setup = .TRUE.
 
 #ifdef HAVE_MPI
 
-    DEALLOCATE( myComm % neighborRank, &
-      myComm % bufferSize, &
-      myComm % bufferMap, &
-      myComm % rankTable )
+    IF( ALLOCATED( myComm % neighborRank ) )DEALLOCATE( myComm % neighborRank )
+    IF( ALLOCATED( myComm % bufferSize ) )DEALLOCATE( myComm % bufferSize )
+    IF( ALLOCATED( myComm % bufferMap ) )DEALLOCATE( myComm % bufferMap )
+    IF( ALLOCATED( myComm % rankTable ) )DEALLOCATE( myComm % rankTable )
 
 #ifdef HAVE_CUDA
 
-    DEALLOCATE( myComm % neighborRank_dev, &
-      myComm % bufferSize_dev, &
-      myComm % bufferMap_dev, &
-      myComm % rankTable_dev )
+    IF( ALLOCATED( myComm % neighborRank_dev ) )DEALLOCATE( myComm % neighborRank_dev )
+    IF( ALLOCATED( myComm % bufferSize_dev ) )DEALLOCATE( myComm % bufferSize_dev )
+    IF( ALLOCATED( myComm % bufferMap_dev ) )DEALLOCATE( myComm % bufferMap_dev )
+    IF( ALLOCATED( myComm % rankTable_dev ) )DEALLOCATE( myComm % rankTable_dev )
 
 #endif
 
-    CALL MPI_FINALIZE( myComm % mpiErr )
 
 #endif
 
   END SUBROUTINE Trash_BoundaryCommunicator
+
+  SUBROUTINE Finalize_BoundaryCommunicator( myComm )
+    IMPLICIT NONE
+    CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
+
+#ifdef HAVE_MPI
+      CALL MPI_FINALIZE( myComm % mpiErr )
+#endif
+
+  END SUBROUTINE Finalize_BoundaryCommunicator
 
 #ifdef HAVE_CUDA
 

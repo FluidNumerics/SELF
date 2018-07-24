@@ -288,10 +288,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
 
-#ifdef HAVE_MPI
-    CALL MPI_BARRIER( myDGSEM % extComm % mpi_comm )
-#endif
-
     PRINT*, '  Clearing memory.'
 
     CALL myDGSEM % params % Trash( )
@@ -306,15 +302,16 @@ CONTAINS
     CALL myDGSEM % stressTensor % Trash( )
     CALL myDGSEM % sgsCoeffs % Trash( )
 
-#ifdef HAVE_MPI
-    CALL myDGSEM % mpiStateHandler % Trash( )
-    CALL myDGSEM % mpiStressHandler % Trash( )
-    CALL myDGSEM % mpiSGSHandler % Trash( )
-#endif
-
 #ifdef TIMING
     CALL myDGSEM % timers % Write_MultiTimers( )
     CALL myDGSEM % timers % Trash( )
+#endif
+
+#ifdef HAVE_MPI
+    CALL myDGSEM % extComm % Finalize( )
+    CALL myDGSEM % mpiStateHandler % Trash( )
+    CALL myDGSEM % mpiStressHandler % Trash( )
+    CALL myDGSEM % mpiSGSHandler % Trash( )
 #endif
 
   END SUBROUTINE Trash_Fluid
