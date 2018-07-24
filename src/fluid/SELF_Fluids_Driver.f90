@@ -282,7 +282,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     myFluid % state % solution_dev = myFluid % state % solution
-    CALL myFluid % sourceTerms % Update_Device( )
+    CALL myFluid % sourceTerms % UpdateDevice( )
 #endif
 
     !$OMP PARALLEL
