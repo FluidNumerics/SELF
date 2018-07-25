@@ -711,9 +711,6 @@ USE OMP_LIB
    CHARACTER(defaultNameLength) :: tName
 
       OPEN( UNIT = NewUnit(fUnit), FILE = 'Timing.stats' ) 
-
-      WRITE(fUnit,*) '====================== Timing Results ======================'
-      WRITE(fUnit,*) ' '
       
       theTimers % current => theTimers % head
       k = 0
@@ -721,40 +718,20 @@ USE OMP_LIB
          k = k+1
 
          CALL theTimers % GetName( tName )
+         IF( AlmostEqual( theTimers % current % nObs, 0.0_prec) )THEN
 
-         WRITE(fUnit,*) tName
-         WRITE(fUnit,*) 'Number of Measurements : ', theTimers % current % nObs
-         WRITE(fUnit,*) 'Accumulated Time       : ', theTimers % current % accumulatedTime
-         WRITE(fUnit,*) 'Average Time           : ', theTimers % current % accumulatedTime/theTimers % current % nObs
-         WRITE(fUnit,*) '------------------------------------------------------------'
+           WRITE(fUnit,*) tName, theTimers % current % accumulatedTime
 
+         ELSE
+
+           WRITE(fUnit,*) tName, theTimers % current % accumulatedTime/theTimers % current % nObs
+        
+         ENDIF
          CALL theTimers % MoveToNext( )
 
       ENDDO
       CLOSE(fUnit)
 
-
-      theTimers % current => theTimers % head
-      
-      PRINT*, '====================== Timing Results ======================'
-      PRINT*, ' '
-      
-      DO WHILE( ASSOCIATED(theTimers % current) )
-
-         CALL theTimers % GetName( tName ) 
-
-         PRINT*, tName
-         PRINT*, 'Number of Measurements : ', theTimers % current % nObs
-         PRINT*, 'Accumulated Time       : ', theTimers % current % accumulatedTime
-         PRINT*, 'Average Time           : ', theTimers % current % accumulatedTime/theTimers % current % nObs
-         PRINT*, '------------------------------------------------------------'
-
-         CALL theTimers % MoveToNext( )
-
-      ENDDO
-
-      PRINT*, '------------------------------------------------------------'
-      PRINT*,' Timing Results saved to  "Timing.Stats" '
 
  END SUBROUTINE Write_MultiTimers
 

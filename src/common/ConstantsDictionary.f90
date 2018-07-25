@@ -114,6 +114,7 @@
    INTEGER, PARAMETER :: RADIATION      = -101
    INTEGER, PARAMETER :: PRESCRIBED     = -102
    INTEGER, PARAMETER :: DRAG_SLIP      = -103
+   INTEGER, PARAMETER :: INFLOW         = -104
   !
   !==============================================!
   ! ---------- Continuous Galerkin ------------- !
@@ -152,6 +153,7 @@
   !==============================================!
    INTEGER, PARAMETER :: ModalCutoff = 3000
    INTEGER, PARAMETER :: TanhRollOff = 3001 
+   INTEGER, PARAMETER :: RampFilter  = 3002 
   !
   !==============================================!
   ! ---------------- Geometry ------------------ !
@@ -170,7 +172,7 @@
 
 ! Misc. INTEGER and CHARACTER flag definitions
   CHARACTER(1), PARAMETER :: nada = ' '
-  CHARACTER(6), PARAMETER :: MsgFmt = '(4x,A)'
+  CHARACTER(6), PARAMETER :: MsgFmt = '(2x,A)'
 
 #ifdef HAVE_CUDA
   REAL(prec), DEVICE, ALLOCATABLE, PUBLIC :: rk3_a_dev(:), rk3_g_dev(:), rk3_b_dev(:)

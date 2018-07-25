@@ -70,6 +70,7 @@ MODULE BoundaryCommunicator_CLASS
 
     PROCEDURE :: Build => Build_BoundaryCommunicator
     PROCEDURE :: Trash => Trash_BoundaryCommunicator
+    PROCEDURE :: Finalize => Finalize_BoundaryCommunicator
     PROCEDURE :: SetRanks
 
 #ifdef HAVE_CUDA
@@ -123,7 +124,6 @@ CONTAINS
     CLASS(BoundaryCommunicator), INTENT(inout) :: myComm
     INTEGER, INTENT(in)                        :: nBe
 
-    CALL myComm % SetRanks( )
 
     myComm % nBoundaries = nBe
 
@@ -198,25 +198,34 @@ myComm % setup = .TRUE.
 
 #ifdef HAVE_MPI
 
-    DEALLOCATE( myComm % neighborRank, &
-      myComm % bufferSize, &
-      myComm % bufferMap, &
-      myComm % rankTable )
+    IF( ALLOCATED( myComm % neighborRank ) )DEALLOCATE( myComm % neighborRank )
+    IF( ALLOCATED( myComm % bufferSize ) )DEALLOCATE( myComm % bufferSize )
+    IF( ALLOCATED( myComm % bufferMap ) )DEALLOCATE( myComm % bufferMap )
+    IF( ALLOCATED( myComm % rankTable ) )DEALLOCATE( myComm % rankTable )
 
 #ifdef HAVE_CUDA
 
-    DEALLOCATE( myComm % neighborRank_dev, &
-      myComm % bufferSize_dev, &
-      myComm % bufferMap_dev, &
-      myComm % rankTable_dev )
+    IF( ALLOCATED( myComm % neighborRank_dev ) )DEALLOCATE( myComm % neighborRank_dev )
+    IF( ALLOCATED( myComm % bufferSize_dev ) )DEALLOCATE( myComm % bufferSize_dev )
+    IF( ALLOCATED( myComm % bufferMap_dev ) )DEALLOCATE( myComm % bufferMap_dev )
+    IF( ALLOCATED( myComm % rankTable_dev ) )DEALLOCATE( myComm % rankTable_dev )
 
 #endif
 
-    CALL MPI_FINALIZE( myComm % mpiErr )
 
 #endif
 
   END SUBROUTINE Trash_BoundaryCommunicator
+
+  SUBROUTINE Finalize_BoundaryCommunicator( myComm )
+    IMPLICIT NONE
+    CLASS( BoundaryCommunicator ), INTENT(inout) :: myComm
+
+#ifdef HAVE_MPI
+      CALL MPI_FINALIZE( myComm % mpiErr )
+#endif
+
+  END SUBROUTINE Finalize_BoundaryCommunicator
 
 #ifdef HAVE_CUDA
 
@@ -365,7 +374,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     INTEGER       :: fUnit
     INTEGER       :: nBe
 
-    CALL myComm % SetRanks( )
 
     WRITE( rankChar, '(I4.4)' ) myComm % myRank
 
@@ -380,7 +388,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
 
     CALL myComm % Build( nBe )
 
-    PRINT*, '  Rank ',myComm % myRank,' Reading ExtComm.'//rankChar//'.bcm', myComm % nBoundaries
 
     DO i = 1, myComm % nBoundaries
 
@@ -423,7 +430,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
       CALL MPI_INIT( myComm % mpiErr )
       CALL MPI_COMM_RANK( myComm % MPI_COMM, myComm % myRank, myComm % mpiErr )
       CALL MPI_COMM_SIZE( myComm % MPI_COMM, myComm % nProc, myComm % mpiErr )
-      PRINT*, '    S/R SetRanks : Greetings from Process ', myComm % myRank+1, ' of ', myComm % nProc
 
 #ifdef HAVE_CUDA
 
@@ -431,9 +437,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
       ! each rank is assigned to it's own GPU.
       iStat = cudaGetDeviceCount( nDevices )
       cudaDeviceNumber = MOD( myComm % myRank, nDevices )
-  
-      PRINT*, '    S/R SetRanks : Rank :', myComm % myRank, ': Getting Device # ', cudaDeviceNumber
-  
       iStat = cudaSetDevice( cudaDeviceNumber )
 
 #endif
@@ -480,7 +483,6 @@ END SUBROUTINE UpdateHost_BoundaryCommunicator
     ENDDO
 
     myComm % nNeighbors = SUM( myComm % rankTable )
-    PRINT*, '  S/R ConstructCommTables : Found', myComm % nNeighbors, 'neighbors for Rank', myComm % myRank+1
 
     ALLOCATE( myComm % neighborRank(1:myComm % nNeighbors), &
               myComm % bufferSize(1:myComm % nNeighbors), &

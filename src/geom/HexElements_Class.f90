@@ -42,6 +42,7 @@ MODULE HexElements_CLASS
     INTEGER, ALLOCATABLE    :: elementID(:)
     INTEGER, ALLOCATABLE    :: nodeIDs(:,:)
     INTEGER, ALLOCATABLE    :: neighbors(:,:)
+    REAL(prec), ALLOCATABLE :: boundaryLengthScale(:,:,:,:)
     REAL(prec), ALLOCATABLE :: nHat(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: xBound(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: x(:,:,:,:,:)
@@ -56,6 +57,7 @@ MODULE HexElements_CLASS
     INTEGER, DEVICE, ALLOCATABLE    :: elementID_dev(:)
     INTEGER, DEVICE, ALLOCATABLE    :: nodeIDs_dev(:,:)
     INTEGER, DEVICE, ALLOCATABLE    :: neighbors_dev(:,:)
+    REAL(prec), DEVICE, ALLOCATABLE :: boundaryLengthScale_dev(:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: nHat_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: xBound_dev(:,:,:,:,:)
     REAL(prec), DEVICE, ALLOCATABLE :: x_dev(:,:,:,:,:)
@@ -81,6 +83,8 @@ MODULE HexElements_CLASS
     PROCEDURE :: GenerateBoundaryMetrics => GenerateBoundaryMetrics_HexElements
     PROCEDURE :: ScaleGeometry => ScaleGeometry_HexElements
     PROCEDURE :: ResetInternalMesh => ResetInternalMesh_HexElements
+
+    PROCEDURE :: CalculateComputationalCoordinates
 
   END TYPE HexElements
 
@@ -134,6 +138,7 @@ CONTAINS
       myElements % J(0:N,0:N,0:N,1:nElements), &
       myElements % x(0:N,0:N,0:N,1:3,1:nElements), &
       myElements % xBound(0:N,0:N,1:3,1:6,1:nElements), &
+      myElements % boundaryLengthScale(0:N,0:N,1:6,1:nElements), &
       myElements % nHat(1:3,0:N,0:N,1:6,1:nElements) )
 
     myElements % dxds   = 0.0_prec
@@ -170,6 +175,7 @@ CONTAINS
       myElements % J_dev(0:N,0:N,0:N,1:nElements), &
       myElements % x_dev(0:N,0:N,0:N,1:3,1:nElements), &
       myElements % xBound_dev(0:N,0:N,1:3,1:6,1:nElements), &
+      myElements % boundaryLengthScale_dev(0:N,0:N,1:6,1:nElements), &
       myElements % nHat_dev(1:3,0:N,0:N,1:6,1:nElements) )
 
     myElements % N_dev =  N
@@ -188,6 +194,8 @@ CONTAINS
     myElements % Ja_dev     = 0.0_prec
     myElements % x_dev      = 0.0_prec
     myElements % xBound_dev = 0.0_prec
+    myElements % nHat_dev   = 0.0_prec
+    myElements % boundaryLengthScale_dev = 0.0_prec
 
 #endif
 
@@ -236,6 +244,7 @@ CONTAINS
       myElements % J, &
       myElements % x, &
       myElements % xBound, &
+      myElements % boundaryLengthScale, &
       myElements % nHat )
 
 #ifdef HAVE_CUDA
@@ -258,6 +267,7 @@ CONTAINS
       myElements % J_dev, &
       myElements % x_dev, &
       myElements % xBound_dev, &
+      myElements % boundaryLengthScale_dev, &
       myElements % nHat_dev )
 
 #endif
@@ -288,6 +298,7 @@ CONTAINS
     myElements % x_dev = myElements % x
     myElements % xBound_dev = myElements % xBound
     myElements % nHat_dev   = myElements % nHat
+    myElements % boundaryLengthScale_dev = myElements % boundaryLengthScale
 
 
   END SUBROUTINE UpdateDevice_HexElements
@@ -313,8 +324,8 @@ CONTAINS
     myElements % x = myElements % x_dev
     myElements % xBound = myElements % xBound_dev
     myElements % nHat   = myElements % nHat_dev
-
-
+    myElements % boundaryLengthScale = myElements % boundaryLengthScale_dev
+   
   END SUBROUTINE UpdateHost_HexElements
 #endif
 
@@ -530,62 +541,8 @@ CONTAINS
 
     ENDDO
 
-#ifdef SKEW_METRICS
+#ifdef CURL_INVARIANT
 
-    !Ja_1
-    DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
-            myElements % Ja(i,j,k,1,1,iEl) = myElements % dydp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) - &
-                                             myElements % dzdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl)
-
-            myElements % Ja(i,j,k,2,1,iEl) = myElements % dzdp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl) - &
-                                             myElements % dxdp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl)
-
-            myElements % Ja(i,j,k,3,1,iEl) = myElements % dxdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl) - &
-                                             myElements % dydp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl)
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    !Ja_2
-    DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
-            myElements % Ja(i,j,k,1,2,iEl) = myElements % dydq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl) - &
-                                             myElements % dzdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl)
-
-            myElements % Ja(i,j,k,2,2,iEl) = myElements % dzdq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl) - &
-                                             myElements % dxdq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl)
-
-            myElements % Ja(i,j,k,3,2,iEl) = myElements % dxdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl) - &
-                                             myElements % dydq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl)
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    !Ja_3
-    DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
-            myElements % Ja(i,j,k,1,3,iEl) = myElements % dyds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) - &
-                                             myElements % dzds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl)
-
-            myElements % Ja(i,j,k,2,3,iEl) = myElements % dzds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl) - &
-                                             myElements % dxds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl)
-
-            myElements % Ja(i,j,k,3,3,iEl) = myElements % dxds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl) - &
-                                             myElements % dyds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl)
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-#else
     ! Generate the contravariant basis vectors using the curl form ( Kopriva, 2006 )
     !Ja_1
     DO iEl = 1, myElements % nElements
@@ -671,6 +628,63 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+
+#else
+
+    !Ja_1
+    DO iEl = 1, myElements % nElements
+      DO k = 0, N
+        DO j = 0, N
+          DO i = 0, N
+            myElements % Ja(i,j,k,1,1,iEl) = myElements % dydp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) - &
+                                             myElements % dzdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,2,1,iEl) = myElements % dzdp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl) - &
+                                             myElements % dxdp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,3,1,iEl) = myElements % dxdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl) - &
+                                             myElements % dydp(i,j,k,iEl)*myElements % dxdq(i,j,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    !Ja_2
+    DO iEl = 1, myElements % nElements
+      DO k = 0, N
+        DO j = 0, N
+          DO i = 0, N
+            myElements % Ja(i,j,k,1,2,iEl) = myElements % dydq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl) - &
+                                             myElements % dzdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,2,2,iEl) = myElements % dzdq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl) - &
+                                             myElements % dxdq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,3,2,iEl) = myElements % dxdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl) - &
+                                             myElements % dydq(i,j,k,iEl)*myElements % dxds(i,j,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    !Ja_3
+    DO iEl = 1, myElements % nElements
+      DO k = 0, N
+        DO j = 0, N
+          DO i = 0, N
+            myElements % Ja(i,j,k,1,3,iEl) = myElements % dyds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) - &
+                                             myElements % dzds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,2,3,iEl) = myElements % dzds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl) - &
+                                             myElements % dxds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl)
+
+            myElements % Ja(i,j,k,3,3,iEl) = myElements % dxds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl) - &
+                                             myElements % dyds(i,j,k,iEl)*myElements % dxdp(i,j,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
 #endif
 
     CALL myElements % GenerateBoundaryMetrics( interp )
@@ -747,6 +761,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,3,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,bottom,iEl) = -signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,bottom,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           node = (/ s(i), p, s(j) /)
           Jac = interp % Interpolate_3D( myElements % J(0:N,0:N,0:N,iEl), node ) !Determinant( cv, 3 )
@@ -759,6 +774,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,2,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,south,iEl)= -signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,south,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           ! west boundary
           node = (/ p, s(i), s(j) /)
@@ -772,6 +788,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,1,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,west,iEl) = -signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,west,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           p = 1.0_prec  ! top, north, and east boundaries
 
@@ -787,6 +804,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,3,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,top,iEl) = signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,top,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           !north boundary
           node = (/ s(i), p, s(j) /)
@@ -800,6 +818,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,2,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,north,iEl) = signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,north,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
           ! east boundary
           node = (/ p, s(i), s(j) /)
@@ -813,6 +832,7 @@ CONTAINS
           Jain = myElements % Ja(0:N,0:N,0:N,3,1,iEl)
           nz = interp % Interpolate_3D( Jain, node )
           myElements % nHat(1:3,i,j,east,iEl) = signJ*(/ nx, ny, nz /)
+          myElements % boundaryLengthScale(i,j,east,iEl) = SQRT( nx**2 + ny**2 + nz**2 )/ABS( Jac )
 
         ENDDO
       ENDDO
@@ -867,9 +887,9 @@ CONTAINS
     myElements % x(:,:,:,1,:) = xScale*( myElements % x(:,:,:,1,:) )
     myElements % x(:,:,:,2,:) = yScale*( myElements % x(:,:,:,2,:) )
     myElements % x(:,:,:,3,:) = zScale*( myElements % x(:,:,:,3,:) )
-    myElements % xBound(:,:,:,1,:) = xScale*( myElements % xBound(:,:,:,1,:) )
-    myElements % xBound(:,:,:,2,:) = yScale*( myElements % xBound(:,:,:,2,:) )
-    myElements % xBound(:,:,:,3,:) = zScale*( myElements % xBound(:,:,:,3,:) )
+    myElements % xBound(:,:,1,:,:) = xScale*( myElements % xBound(:,:,1,:,:) )
+    myElements % xBound(:,:,2,:,:) = yScale*( myElements % xBound(:,:,2,:,:) )
+    myElements % xBound(:,:,3,:,:) = zScale*( myElements % xBound(:,:,3,:,:) )
 
     ! Update the boundary metrics -- normals and normal lengths
     CALL myElements % GenerateMetrics( interp )
@@ -881,6 +901,282 @@ CONTAINS
 #endif
 
   END SUBROUTINE ScaleGeometry_HexElements
+!
+  SUBROUTINE CalculateComputationalCoordinates( myElements, interp, x, s, elements, nCoordinates )
+    IMPLICIT NONE
+    CLASS( HexElements ), INTENT(in) :: myElements
+    TYPE( Lagrange ), INTENT(in)     :: interp
+    INTEGER, INTENT(in)              :: nCoordinates
+    REAL(prec), INTENT(in)           :: x(1:3,1:nCoordinates)
+    REAL(prec), INTENT(out)          :: s(1:3,1:nCoordinates)
+    INTEGER, INTENT(out)             :: elements(1:nCoordinates)
+    ! Local
+    INTEGER    :: i, iEl, kIt, row, col
+    REAL(prec) :: r(1:3), si(1:3), xi(1:3), delta(1:3), A(1:3,1:3), Ainv(1:3,1:3), dMag 
+    LOGICAL    :: converged
+
+      elements = 0
+      s = 0.0_prec
+
+      DO i = 1, nCoordinates
+
+        DO iEl = 1, myElements % nElements
+
+          si(1:3) = 0.0_prec
+
+          converged = .FALSE.
+
+          DO kIt = 1, newtonMax
+
+            xi(1) = interp % Interpolate_3D( myElements % x(1,:,:,:,iEl), si )
+            xi(2) = interp % Interpolate_3D( myElements % x(2,:,:,:,iEl), si )
+            xi(3) = interp % Interpolate_3D( myElements % x(3,:,:,:,iEl), si )
+              
+            A(1,1) = interp % Interpolate_3D( myElements % dxds(:,:,:,iEl), si )
+            A(1,2) = interp % Interpolate_3D( myElements % dxdp(:,:,:,iEl), si )
+            A(1,3) = interp % Interpolate_3D( myElements % dxdq(:,:,:,iEl), si )
+
+            A(2,1) = interp % Interpolate_3D( myElements % dyds(:,:,:,iEl), si )
+            A(2,2) = interp % Interpolate_3D( myElements % dydp(:,:,:,iEl), si )
+            A(2,3) = interp % Interpolate_3D( myElements % dydq(:,:,:,iEl), si )
+
+            A(3,1) = interp % Interpolate_3D( myElements % dzds(:,:,:,iEl), si )
+            A(3,2) = interp % Interpolate_3D( myElements % dzdp(:,:,:,iEl), si )
+            A(3,3) = interp % Interpolate_3D( myElements % dzdq(:,:,:,iEl), si )
+
+            Ainv = Invert_3x3( A )
+            
+            r(1:3) = x(1:3,i) - xi(1:3) 
+
+            dMag = 0.0_prec
+            DO row = 1, 3
+              delta(row) = 0.0_prec
+              DO col = 1, 3
+                delta(row) = delta(row) + Ainv(row,col)*r(col)
+              ENDDO
+              dMag = dMag + delta(row)**2
+            ENDDO
+
+            si(1:3) = si(1:3) + delta(1:3)
+
+            IF( SQRT(dMag) <= TOL*MAXVAL(si) ) THEN
+              converged = .TRUE.
+              EXIT
+            ENDIF
+
+          ENDDO
+
+          IF( converged .AND. MAXVAL( ABS(si) ) <= 1.0_prec  )THEN
+
+            s(1:3,i)    = si(1:3)
+            elements(i) = iEl
+            EXIT
+            
+          ENDIF
+      
+        ENDDO
+
+      ENDDO
+
+  END SUBROUTINE CalculateComputationalCoordinates
+!
+  FUNCTION TransfiniteMetricTerms( boundingSurfaces, iEl, a, b, c ) RESULT( dXdS )
+    IMPLICIT NONE
+    TYPE( Surfaces )  :: boundingSurfaces
+    INTEGER           :: iEl
+    REAL(prec)        :: a, b, c
+    REAL(prec)        :: dXdS(1:3,1:3)
+    ! Local
+    REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
+    REAL(prec)  :: sSurfSlope(1:3,1:2), nSurfSlope(1:3,1:2), eSurfSlope(1:3,1:2), wSurfSlope(1:3,1:2), bSurfSlope(1:3,1:2), tSurfSlope(1:3,1:2)
+    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
+    REAL(prec)  :: q1(1:3), q2(1:3), r1(1:3), r2(1:3)
+    REAL(prec)  :: PL(1:3), PR(1:3)
+    REAL(prec)  :: dP1dS(1:3,1:3)
+    REAL(prec)  :: dP2dS(1:3,1:3)
+    REAL(prec)  :: dP3dS(1:3,1:3)
+
+    ! Use the formula for transfinite interpolation with linear blending to 
+    ! Calculate the covariant metric tensor
+
+    ! Calculate the Linear Blending weights.
+    l1 = LinearBlend( a )
+    l2 = LinearBlend( b )
+    l3 = LinearBlend( c )
+
+    ! The bounding surfaces need to be evaluated at the provided computational coordinates
+    wSurf = boundingSurfaces % Evaluate( (/b, c/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/b, c/), east + (iEl-1)*6 )   ! east
+    sSurf = boundingSurfaces % Evaluate( (/a, c/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, c/), north + (iEl-1)*6 )  ! north
+    bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
+    tSurf = boundingSurfaces % Evaluate( (/a, b/), top + (iEl-1)*6 )    ! top
+
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, c/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, c/), east + (iEl-1)*6 )   ! east
+    sSurfSlope = boundingSurfaces % EvaluateSlope( (/a, c/), south + (iEl-1)*6 )  ! south
+    nSurfSlope = boundingSurfaces % EvaluateSlope( (/a, c/), north + (iEl-1)*6 )  ! north
+    bSurfSlope = boundingSurfaces % EvaluateSlope( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
+    tSurfSlope = boundingSurfaces % EvaluateSlope( (/a, b/), top + (iEl-1)*6 )    ! top
+
+
+    dP1dS(1:3,1) = 0.5_prec*( wSurf - eSurf ) 
+    dP2dS(1:3,2) = 0.5_prec*( nSurf - sSurf ) 
+    dP3dS(1:3,3) = 0.5_prec*( tSurf - bSurf ) 
+
+    dP1dS(1:3,2) = l1(1)*wSurfSlope(1:3,1) + l1(2)*eSurfSlope(1:3,1)
+    dP1dS(1:3,3) = l1(1)*wSurfSlope(1:3,2) + l1(2)*eSurfSlope(1:3,2)
+
+    dP2dS(1:3,1) = l1(1)*sSurfSlope(1:3,1) + l1(2)*nSurfSlope(1:3,1)
+    dP2dS(1:3,3) = l1(1)*sSurfSlope(1:3,2) + l1(2)*nSurfSlope(1:3,2)
+    
+    dP3dS(1:3,1) = l1(1)*bSurfSlope(1:3,1) + l1(2)*tSurfSlope(1:3,1)
+    dP3dS(1:3,2) = l1(1)*bSurfSlope(1:3,2) + l1(2)*tSurfSlope(1:3,2)
+
+
+    dXdS(1:3,1:3) = dP1dS(1:3,1:3) + dP2dS(1:3,1:3) + dP3dS(1:3,1:3)
+
+   
+    ! Modify dXdS(1:3,1) due to boolean sum
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/1.0_prec, c/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/1.0_prec, c/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) - 0.5_prec*( l2(1)*(r1-q1) + l2(2)*(r2-q2) ) 
+
+    q1 = boundingSurfaces % Evaluate( (/b,-1.0_prec/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/b,-1.0_prec/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/b,1.0_prec/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/b,1.0_prec/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) - 0.5_prec*( l3(1)*(r1-q1) + l3(2)*(r2-q2) ) 
+   
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec,-1.0_prec/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec,-1.0_prec/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/1.0_prec,-1.0_prec/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/1.0_prec,-1.0_prec/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) + 0.5_prec*l3(1)*( l2(1)*(r1-q1) + l2(2)*(r2-q2) ) 
+
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec,1.0_prec/), west + (iEl-1)*6 )   ! west
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec,1.0_prec/), east + (iEl-1)*6 )   ! east
+    q2 = boundingSurfaces % Evaluate( (/1.0_prec,1.0_prec/), west + (iEl-1)*6 )   ! west
+    r2 = boundingSurfaces % Evaluate( (/1.0_prec,1.0_prec/), east + (iEl-1)*6 )   ! east
+
+    dXdS(1:3,1) = dXdS(1:3,1) + 0.5_prec*l3(2)*( l2(1)*(r1-q1) + l2(2)*(r2-q2) ) 
+
+
+    ! Modify dXdS(1:3,2) due to boolean sum
+    q1 = boundingSurfaces % Evaluate( (/1.0_prec, c/), west + (iEl-1)*6 )  ! south
+    r1 = boundingSurfaces % Evaluate( (/1.0_prec, c/), east + (iEl-1)*6 )  ! north
+
+    PR = l1(1)*q1 + l1(2)*r1 
+
+    q1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), west + (iEl-1)*6 )  ! south
+    r1 = boundingSurfaces % Evaluate( (/-1.0_prec, c/), east + (iEl-1)*6 )  ! north
+
+    PL = l1(1)*q1 + l1(2)*r1 
+
+    dXdS(1:3,2) = dXdS(1:3,2) - 0.5_prec*( PR - PL )
+
+    ! >>> dP1dS2 contribution
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,2) = l1(1)*wSurfSlope(1:3,1) + l1(2)*eSurfSlope(1:3,1)
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(1)*dP1dS(1:3,2)
+
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,2) = l1(1)*wSurfSlope(1:3,1) + l1(2)*eSurfSlope(1:3,1)
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(2)*dP1dS(1:3,2)
+  
+    ! >>> dP2dS2 contribution
+    sSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), north + (iEl-1)*6 )  ! north
+    dP2dS(1:3,2) = 0.5_prec*( nSurf - sSurf ) 
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(1)*dP2dS(1:3,2)
+
+    sSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), north + (iEl-1)*6 )  ! north
+    dP2dS(1:3,2) = 0.5_prec*( nSurf - sSurf ) 
+
+    dXdS(1:3,2) = dXdS(1:3,2) - l3(2)*dP2dS(1:3,2)
+
+    ! >>> 
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l1(1)*wSurf + l1(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l1(1)*wSurf + l1(2)*eSurf
+
+    dXdS(1:3,2) = dXdS(1:3,2) - 0.5_prec*( l3(1)*PL + l3(2)*PR )
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l1(1)*wSurf + l1(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l1(1)*wSurf + l1(2)*eSurf
+
+    dXdS(1:3,2) = dXdS(1:3,2) + 0.5_prec*( l3(1)*PL + l3(2)*PR )
+
+
+    ! Modify dXdS(1:3,3) due to boolean sum
+
+    ! >>> dP1dS2 contribution
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,3) = l1(1)*wSurfSlope(1:3,2) + l1(2)*eSurfSlope(1:3,2)
+
+    dXdS(1:3,3) = dXdS(1:3,3) - l3(1)*dP1dS(1:3,3)
+
+    wSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurfSlope = boundingSurfaces % EvaluateSlope( (/b, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    dP1dS(1:3,3) = l1(1)*wSurfSlope(1:3,2) + l1(2)*eSurfSlope(1:3,2)
+
+    dXdS(1:3,3) = dXdS(1:3,3) - l3(2)*dP1dS(1:3,3)
+
+    !
+    sSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, 1.0_prec/), north + (iEl-1)*6 )  ! north
+    PR = l2(1)*sSurf + l2(2)*nSurf
+
+    sSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), south + (iEl-1)*6 )  ! south
+    nSurf = boundingSurfaces % Evaluate( (/a, -1.0_prec/), north + (iEl-1)*6 )  ! north
+    PL = l2(1)*sSurf + l2(2)*nSurf
+
+    dXdS(1:3,3) = dXdS(1:3,3) + 0.5_prec*( PR - PL )
+
+
+    ! >>> 
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l2(1)*wSurf + l2(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/-1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l2(1)*wSurf + l2(2)*eSurf
+
+    dXdS(1:3,3) = dXdS(1:3,3) - 0.5_prec*( l3(1)*PL + l3(2)*PR )
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, -1.0_prec/), east + (iEl-1)*6 )   ! east
+    PL = l2(1)*wSurf + l2(2)*eSurf
+
+    wSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), west + (iEl-1)*6 )   ! west
+    eSurf = boundingSurfaces % Evaluate( (/1.0_prec, 1.0_prec/), east + (iEl-1)*6 )   ! east
+    PR = l2(1)*wSurf + l2(2)*eSurf
+
+    dXdS(1:3,3) = dXdS(1:3,3) + 0.5_prec*( l3(1)*PL + l3(2)*PR )
+    
+  END FUNCTION TransfiniteMetricTerms
 !
   FUNCTION TransfiniteInterpolation( boundingSurfaces, iEl, a, b, c ) RESULT( P )
     ! TransfiniteInterpolation

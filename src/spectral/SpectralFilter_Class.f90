@@ -97,11 +97,12 @@ CONTAINS
 !   
 ! ========================================================================================================= !
 
-  SUBROUTINE Build_SpectralFilter( thisFilter, interpNodes, interpWeights, N, nCutoff, filterType )
+  SUBROUTINE Build_SpectralFilter( thisFilter, interpNodes, interpWeights, N, nCutoff, filter_a, filter_b, filterType )
 
     IMPLICIT NONE
     CLASS(SpectralFilter), INTENT(inout) :: thisFilter
     INTEGER, INTENT(in)                  :: N, nCutoff
+    REAL(prec), INTENT(in)               :: filter_a, filter_b 
     REAL(prec), INTENT(in)               :: interpNodes(0:N)
     REAL(prec), INTENT(in)               :: interpWeights(0:N)
     INTEGER, INTENT(in)                  :: filterType
@@ -136,13 +137,30 @@ CONTAINS
 
           IF( row <= nCutoff )THEN
             Pfilt(row,row) = 1.0_dp
+          ELSE
+            Pfilt(row,row) = 0.0_dp
           ENDIF
 
         ELSEIF( filterType == TanhRollOff )THEN
 
-          Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- REAL(nCutoff,dp)) ) )
+          IF( row < N-2 )THEN
+            Pfilt(row,row) = 1.0_prec
+          ELSE
+            Pfilt(row,row) = 0.5_dp*(1.0_dp - tanh( (r- filter_b)*filter_a ) )
+          ENDIF
+
+        ELSEIF( filterType == RampFilter )THEN
+
+          IF( row == N-1 )THEN
+            Pfilt(row,row) = filter_b 
+          ELSEIF( row == N )THEN
+            Pfilt(row,row) = filter_a
+          ELSE
+            Pfilt(row,row) = 1.0_prec
+          ENDIF
 
         ENDIF
+
 
         Lnorm = 0.0_dp
 
@@ -403,7 +421,8 @@ CONTAINS
     INTEGER :: ii, jj, kk
     REAL(prec) :: uij, ui
  
-
+     
+      !$OMP DO
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO k = 0, thisFilter % N
@@ -438,6 +457,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO
 
          
   END FUNCTION Filter3D_SpectralFilter

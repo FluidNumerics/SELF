@@ -819,4 +819,30 @@ CONTAINS
       ENDIF
 
  END FUNCTION TimeStamp
+ LOGICAL FUNCTION IsNaN( a )
+   IMPLICIT NONE
+   REAL(prec) ::  a
+
+     IF(a.ne.a)THEN
+       IsNaN = .TRUE.
+     ELSE
+       IsNaN = .FALSE.
+     ENDIF
+     RETURN
+
+ END FUNCTION IsNaN
+ LOGICAL FUNCTION IsInf( a )
+   IMPLICIT NONE
+   REAL(prec) :: a
+
+     IF( a > HUGE(prec) )THEN
+       IsInf = .TRUE.
+     ELSE
+       IsInf = .FALSE.
+     ENDIF
+     RETURN
+
+ END FUNCTION IsInf
+
+
 END MODULE CommonRoutines

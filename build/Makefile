@@ -23,7 +23,7 @@ ifeq (${FC},gfortran)
   ifeq (${DEBUG},yes)
     OPT+=-O0 -g -ffree-line-length-none -ffpe-trap=invalid -fbacktrace
   else
-    OPT+=-Ofast -ffree-line-length-none
+    OPT+=-O3 -ffree-line-length-none
   endif
 
   ifeq (${OPENMP},yes)
@@ -45,6 +45,8 @@ ifeq (${FC},gfortran)
 else ifeq (${FC},pgfortran)
 
   $(info 'Compiling with PGI Compilers')
+
+  KIEEE=-Kieee
   CPPFLAGS=-Mpreprocess 
 
   ifeq (${DEBUG},yes)
@@ -58,7 +60,6 @@ else ifeq (${FC},pgfortran)
   
     $(info '+CUDA-Fortran')
     OPT+=-Mcuda=${GPU_ARCH}
-#,${CUDA_VERSION}
     ifeq (${PTX_INFO},yes)
       OPT+=,ptxinfo
     endif
@@ -92,9 +93,14 @@ ifeq (${TIMING},yes)
   CPPFLAGS+=-DTIMING
 endif
 
-ifeq (${SKEW_METRICS},yes)
-  CPPFLAGS+=-DSKEW_METRICS
+ifeq (${CURL_INVARIANT},yes)
+  CPPFLAGS+=-DCURL_INVARIANT
 endif
+
+ifeq (${PASSIVE_TRACERS},yes)
+  CPPFLAGS+=-DPASSIVE_TRACERS
+endif
+
 ifeq (${INSITU_VIZ},yes)
   ifeq (${MPI},yes)
     $(info '>>> MPI with in-situ graphics is currently not supported.')
@@ -157,11 +163,13 @@ HashTable_Class.o : ConstantsDictionary.o LinkedList_Class.o ${SRCDIR}common/Has
 	${FC} ${OPT} -c ${SRCDIR}common/HashTable_Class.f90 -o $@
 
 CommonRoutines.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/CommonRoutines.f90
-	${FC} ${OPT} -c ${SRCDIR}common/CommonRoutines.f90 -o $@
+	${FC} ${OPT} ${KIEEE} -c ${SRCDIR}common/CommonRoutines.f90 -o $@
 
 Timing.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ${SRCDIR}common/Timing.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}common/Timing.f90 -o $@
 
+EquationParser_Class.o : ModelPrecision.o ConstantsDictionary.o ${SRCDIR}common/EquationParser_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}common/EquationParser_Class.f90 -o $@
    
 # ---------------------------------------------------------------------- #
 #                           ~/src/spectral/                           #
@@ -233,25 +241,18 @@ BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
-                  Quadrature.o Surfaces_Class.o HexElements_Class.o \
+                  Quadrature.o Surfaces_Class.o HexElements_Class.o TopographicShapes.o BoundaryCommunicator_Class.o NodalDG_Class.o \
                   Faces_Class.o Nodes_Class.o ModelParameters_Class.o ${SRCDIR}geom/HexMesh_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
 
-MeshGenerator_3D.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o NodalDG_Class.o HexMesh_Class.o \
-                     TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o ${SRCDIR}geom/MeshGenerator_3D.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/MeshGenerator_3D.f90
-
-MeshGen_3D : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
-              LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
-              TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o
-	${FC} ${OPT}  ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o Quadrature.o Lagrange_Class.o NodalDG_Class.o \
-                      LinkedList_Class.o KeyRing_Class.o Surfaces_Class.o HexElements_Class.o Faces_Class.o Nodes_Class.o HexMesh_Class.o \
-                      TopographicShapes.o ModelParameters_Class.o BoundaryCommunicator_Class.o MeshGenerator_3D.o -o $@
+Voxels_Class.o : ModelPrecision.o Lagrange_Class.o HexMesh_Class.o HexElements_Class.o ${SRCDIR}geom/Voxels_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}geom/Voxels_Class.f90 -o $@
 
 	
+
 # ---------------------------------------------------------------------- #
 #                             ~/src/fluid                                #
 # ---------------------------------------------------------------------- #
@@ -266,30 +267,28 @@ MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o Bou
                    ${SRCDIR}fluid/MPILayer_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
-Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
+
+
+ifeq (${MPI},yes)
+Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
+                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
+                BodyForces_Class.o MPILayer_Class.o ${SRCDIR}fluid/Fluid_Class.f90
+	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
+else
+
+Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
                 SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
                 BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
-
-ifdef MODDIR
-Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${MODDIR}/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${MODDIR}/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
-else
-Fluid_InitialConditions.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}/fluid/Fluid_InitialConditions.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_InitialConditions.f90 ${LIB} ${INC} -o $@
 endif
 
-ifeq (${TIMING},yes)
 
-Fluid_Driver.o : ModelPrecision.o Timing.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
+Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser_Class.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}fluid/Fluid_EquationParser_Class.f90 -o $@
 
-else
 
-Fluid_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o ${SRCDIR}fluid/Fluid_Driver.f90
-	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/Fluid_Driver.f90 ${LIB} ${INC} -o $@
-
-endif
+SELF_Fluids_Driver.o : ModelPrecision.o ModelParameters_Class.o Fluid_Class.o Fluid_EquationParser_Class.o ${SRCDIR}fluid/SELF_Fluids_Driver.f90
+	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/SELF_Fluids_Driver.f90 ${LIB} ${INC} -o $@
 
 FLOBJ = ModelPrecision.o \
         ConstantsDictionary.o \
@@ -307,21 +306,20 @@ FLOBJ = ModelPrecision.o \
         HexElements_Class.o \
         Faces_Class.o \
         Nodes_Class.o \
+	TopographicShapes.o \
         HexMesh_Class.o \
         BoundaryCommunicator_Class.o \
-        BodyForces_Class.o
+        BodyForces_Class.o \
+        EquationParser_Class.o \
+        Fluid_EquationParser_Class.o \
+        Fluid_Class.o
 
 ifeq (${MPI},yes)
 FLOBJ+=MPILayer_Class.o
 endif
 
-FLOBJ+=Fluid_Class.o
-
-initialize: ${FLOBJ} Fluid_InitialConditions.o
-	${FC} ${OPT} ${FLOBJ} Fluid_InitialConditions.o ${LIB} ${INC} -o $@
-
-integrate: ${FLOBJ} Fluid_Driver.o
-	${FC} ${OPT} ${FLOBJ} Fluid_Driver.o ${LIB} ${INC} -o $@
+sfluid: ${FLOBJ} SELF_Fluids_Driver.o
+	${FC} ${OPT} ${FLOBJ} SELF_Fluids_Driver.o ${LIB} ${INC} -o $@
 	
 
 .PHONY : clean

@@ -48,10 +48,12 @@ MODULE ModelParameters_CLASS
     REAL(prec)    :: zScale
     ! SubsgridScale
     INTEGER       :: SubGridModel
+    LOGICAL       :: SpectralFilter
     INTEGER       :: filterTYPE
     REAL(prec)    :: viscosity
     REAL(prec)    :: viscLengthScale
     INTEGER       :: nCutoff
+    REAL(prec)    :: filter_a, filter_b
     ! Physical
     REAL(prec)    :: fRotX  ! coriolis parameter (x-component)
     REAL(prec)    :: fRotY  ! "                " (y-component)
@@ -149,11 +151,13 @@ CONTAINS
     REAL(prec)    :: yScale
     REAL(prec)    :: zScale
     ! SubgridScale
+    LOGICAL       :: SpectralFilter
     CHARACTER(20) :: SubGridModel
     CHARACTER(20) :: filterTYPE
     REAL(prec)    :: viscosity
     REAL(prec)    :: viscLengthScale
     INTEGER       :: nCutoff
+    REAL(prec)    :: filter_a, filter_b
     ! Physical
     REAL(prec)    :: fRotX
     REAL(prec)    :: fRotY
@@ -176,7 +180,7 @@ CONTAINS
     NAMELIST / SpaceManagement / SpecMeshFile, SELFMeshFile, UCDMeshFile, MeshTYPE, topographicShape, QuadTYPE, polyDeg, &
       nXElem, nYElem, nZElem, nProc, nProcX, nProcY, nProcZ, &
       nPlot, xScale, yScale, zScale
-    NAMELIST / SubgridScale / SubGridModel, filterTYPE, viscosity, viscLengthScale, nCutoff
+    NAMELIST / SubgridScale / SubGridModel, SpectralFilter, filterTYPE, viscosity, viscLengthScale, nCutoff, filter_a, filter_b
     NAMELIST / PhysicalConstants / fRotX, fRotY, fRotZ, Cd, dragscale, g, Cv, R, T0, dTdz, rho0, P0, v0
 
     readSuccess = .FALSE.
@@ -208,11 +212,14 @@ CONTAINS
     yScale        = 1.0_prec
     zScale        = 1.0_prec
     ! SubgridScale
+    SpectralFilter  = .FALSE.
     SubGridModel    = 'Laplacian'
-    filterTYPE      = 'TanhRollOff'
+    filterTYPE      = 'TanhRolloff'
     viscosity       = 0.0_prec  ! (m^2/s)
     viscLengthScale = 1.0_prec  ! (m)
     nCutoff = 5
+    filter_a = 8.0_prec
+    filter_b = 1.0_prec
     ! PhysicalConstants
     fRotX          = 0.0_prec ! 1/s
     fRotY          = 0.0_prec ! 1/s
@@ -264,7 +271,7 @@ CONTAINS
 
       ELSE
 
-        PRINT(MsgFMT), 'S/R Build_Params : Unknown units specIFied.'
+        PRINT(MsgFMT), '  Unknown units specified for time in runtime.params.'
         RETURN
 
       ENDIF
@@ -272,8 +279,6 @@ CONTAINS
       params % nStepsPerDump = INT( params % outputFrequency/params % dt )
       params % nDumps        = INT( (params % endTime-params % startTime)/params % outputFrequency )
 
-      PRINT(MsgFMT), 'S/R Build_Params : Estimated Number of Time Steps :'
-      PRINT('(4x,I10)'), params % nStepsPerDump*params % nDumps
 
       params % jacobianStepSize = jacobianStepSize
       ! SpaceManagement
@@ -283,25 +288,20 @@ CONTAINS
       IF( TRIM( UpperCASE( MeshTYPE ) )=='DEFAULT' )THEN
         params % MeshTYPE = DefaultMesh
       ELSEIF( TRIM( UpperCASE( MeshTYPE ) )=='DOUBLYPERIODIC' )THEN
-        params % MeshTYPE = DOublyPeriodic
+        params % MeshTYPE = DoublyPeriodic
       ELSE
-        PRINT*, 'Module ModelParameters_CLASS.f90 : S/R Build '
-        PRINT*, '   Invalid MeshTYPE : '//UpperCASE(MeshTYPE)
-        PRINT*, '   Valid options are "Default" or "DOublyPeriodic"'
-        STOP 'STOPPING!'
+        PRINT*, '   Invalid mesh type : '//UpperCASE(MeshTYPE)
+        PRINT*, '   Valid options are "Default" or "DoublyPeriodic"'
       ENDIF
 
-      IF( TRIM( UpperCASE( topographicShape ) ) =='DEFAULT' )THEN
-        params % topographicShape = DefaultMesh
-      ELSEIF( TRIM( UpperCASE( topographicShape ) ) =='GAUSSIANHILL' )THEN
-        params % topographicShape = Gaussian
-      ENDIF
+      params % topographicShape = DefaultMesh
 
       params % QuadTYPE      = QuadTYPE
       params % polyDeg = polyDeg
       params % nXElem = nXElem
       params % nYElem = nYElem
       params % nZElem = nZElem
+
       IF( nProcX == 0 .AND. nProcY == 0 .AND. nProcZ == 0)THEN
         params % nProc  = nProc
         params % nProcX = nProcX
@@ -313,11 +313,13 @@ CONTAINS
         params % nProcY = nProcY
         params % nProcZ = nProcZ
       ENDIF
+
       params % nPlot = nPlot
       params % dxPlot = 2.0_prec/REAL(nPlot,prec)
       params % xScale = xScale
       params % yScale = yScale
       params % zScale = zScale
+
       ! SubgridScale
       IF( TRIM( UpperCASE( SubGridModel) )=='LAPLACIAN' )THEN
         params % SubGridModel = Laplacian ! convert to the INTEGER flag
@@ -326,20 +328,26 @@ CONTAINS
       ELSEIF( TRIM(UpperCASE( SubGridModel) )=='SPECTRALFILTERING' )THEN
         params % SubGridModel = SpectralFiltering
       ELSE
-        PRINT*, 'Module ModelParameters_CLASS.f90 : S/R Build '
-        PRINT*, '   Invalid SubGridModel : '//UpperCASE(SubGridModel)
+        PRINT*, '   Invalid subgrid-scale model : '//UpperCASE(SubGridModel)
         PRINT*, '   Valid options are "Laplacian", "SpectralEKE", or "SpectralFiltering"'
-        STOP 'STOPPING!'
+        RETURN
       ENDIF
+
       IF( TRIM( UpperCASE( FilterTYPE ) )=='TANHROLLOFF' )THEN
         params % filterTYPE = tanhRollOff
       ELSEIF( TRIM( UpperCASE( FilterTYPE ) )=='MODALCUTOFF' )THEN
         params % filterTYPE = modalCutoff
+      ELSEIF( TRIM( UpperCASE( FilterTYPE ) )=='RAMPFILTER' )THEN
+        params % filterTYPE = rampFilter
       ENDIF
+
       !params % subGridModel = subGridModel
+      params % SpectralFilter  = SpectralFilter
       params % viscosity       = viscosity
       params % viscLengthScale = viscLengthScale
       params % nCutoff         = nCutoff
+      params % filter_a        = filter_a
+      params % filter_b        = filter_b
       ! PhysicalConstants
       params % fRotX  = fRotX
       params % fRotY  = fRotY
@@ -356,6 +364,7 @@ CONTAINS
       params % v0   = v0
 
       readSuccess = .TRUE.
+
     ELSE
 
       OPEN( UNIT = NEWUNIT(nUnit), FILE = 'runtime.params', ACTION = 'WRITE' )
@@ -365,10 +374,10 @@ CONTAINS
       WRITE( UNIT = nUnit, NML = PhysicalConstants )
       CLOSE( UNIT = nUnit )
 
-      PRINT(MsgFMT), 'S/R Build_ModelParameters : runtime.params not found.'
-      PRINT(MsgFMT), 'S/R Build_ModelParameters : A sample runtime.params namelist file has been'
+      PRINT(MsgFMT), 'runtime.params not found.'
+      PRINT(MsgFMT), 'A sample runtime.params namelist file has been'
       PRINT(MsgFMT), 'generated for you in your current directory.'
-      readSuccess = .FALSE.
+      RETURN 
 
     ENDIF
 

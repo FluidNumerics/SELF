@@ -48,7 +48,8 @@ CONTAINS
 
     TYPE( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
-    INTEGER :: IFace, IFace2, e1, e2, s1, p2
+    INTEGER :: IFace, IFace2, e1, e2, s1, p2, i, j 
+    REAL(prec) :: x, y, r
 
 
     DO IFace = 1, myDGSEM % extComm % nBoundaries
@@ -61,7 +62,42 @@ CONTAINS
 
       IF( e2 < 0 .AND. p2 == myeu % extComm % myRank )THEN
 
-        myDGSEM % mesh % faces % elementIDs(2,iFace2) = NO_NORMAL_FLOW
+        myDGSEM % mesh % faces % elementIDs(2,iFace2) = RADIATION
+
+        IF( ABS(myDGSEM % mesh % elements % nHat(3, 0, 0, s1,e1) ) >&
+            SQRT( myDGSEM % mesh % elements % nHat(1, 0, 0, s1,e1)**2 + &
+                  myDGSEM % mesh % elements % nHat(2, 0, 0, s1,e1)**2 ) ) THEN ! Top or bottom surface
+
+            IF( myDGSEM % mesh % elements % nHat(3,0,0,s1,e1) > 0.0_prec ) THEN ! Top
+
+              myDGSEM % mesh % faces % elementIDs(2,iFace2) = NO_NORMAL_FLOW
+
+            ELSE
+
+              myDGSEM % mesh % faces % elementIDs(2,iFace2) = INFLOW
+
+              DO j = 0, myDGSEM % params % polyDeg
+                DO i = 0, myDGSEM % params % polyDeg
+
+                  x = myDGSEM % mesh % elements % xBound(i,j,1,s1,e1)
+                  y = myDGSEM % mesh % elements % xBound(i,j,2,s1,e1)
+
+                  r = ( (x-0.5_prec*myDGSEM % params % xScale)**2 + (y-0.5_prec*myDGSEM % params % yScale)**2 )
+                  myDGSEM % state % prescribedState(i,j,1,iFace) = exp( -r/(800.0_prec) )*myDGSEM % params % v0*&
+                                                                    ( myDGSEM % state % boundarySolution(i,j,4,s1,e1) + &
+                                                                      myDGSEM % static % boundarySolution(i,j,4,s1,e1) ) ! Set the normal momentum (positive inwards)
+                  myDGSEM % state % prescribedState(i,j,4,iFace) = myDGSEM % state % boundarySolution(i,j,4,s1,e1)
+                  myDGSEM % state % prescribedState(i,j,nEquations,iFace) = myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) ! Set the pressure
+#ifdef PASSIVE_TRACERS
+                  myDGSEM % state % prescribedState(i,j,6,iFace) = myDGSEM % static % boundarySolution(i,j,4,s1,e1)*1.0_prec
+#endif
+                 
+                ENDDO
+              ENDDO
+
+            ENDIF
+
+        ENDIF
 
       ENDIF
 
@@ -74,7 +110,7 @@ CONTAINS
 
     TYPE( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
-    INTEGER    :: i, j, k, iEl, IFace
+    INTEGER    :: i, j, k, iEl, IFace, istat
     REAL(prec) :: x, y, z, r, hScale, Lx, Ly, H, T, Tbar
 
 
@@ -88,6 +124,13 @@ CONTAINS
     CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
     !$OMP END PARALLEL
 
+    CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+#ifdef HAVE_CUDA
+    CALL myDGSEM % static % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
+
     ! ////////////////////////////////////////////////////////////////////////////////// !
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
@@ -98,14 +141,14 @@ CONTAINS
             y = myDGSEM % mesh % elements % x(i,j,k,2,iEl)
             z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
-            r = sqrt( ( x-0.5_prec*Lx )**2 + ( y-0.5_prec*Ly )**2 + ( z-0.25_prec*H )**2 )
+            IF( sqrt( (x-0.5_prec*Lx)**2 + (y-0.5_prec*Ly)**2 ) <= 10.0_prec )THEN
 
-            IF( r <= 250.0_prec )THEN
-              T = 0.25_prec*(1.0_prec + cos( pi*r/250.0_prec ) ) ! Potential temperature anomaly
+              T = 5.0_prec
               Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
-              myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
-            ENDIF
+              myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)*( exp( -((x-0.5_prec*Lx)**2 + (y-0.5_prec*Ly)**2 + z**2)/(800.0_prec) ) )
+!              myDGSEM % static % source(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)*( exp( -(x**2 + y**2 + (z+480.0_prec)**2)/(800.0_prec) ) )
 
+            ENDIF
 
           ENDDO
         ENDDO
@@ -113,16 +156,21 @@ CONTAINS
     ENDDO
 
 #ifdef HAVE_CUDA
-    myDGSEM % state % solution_dev = myDGSEM % state % solution
+    CALL myDGSEM % state % UpdateDevice( )
 #endif
-
     !$OMP PARALLEL
     CALL myDGSEM % EquationOfState( )
     !$OMP END PARALLEL
 
+    CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
+
+
 #ifdef HAVE_CUDA
-    myDGSEM % state % solution = myDGSEM % state % solution_dev
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % static % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
 #endif
+
 
   END SUBROUTINE InitialCondition
 !
