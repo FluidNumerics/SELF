@@ -225,6 +225,7 @@ CONTAINS
   SUBROUTINE InitialConditions( )
     ! Local
     INTEGER    :: i, j, k, iEl
+    INTEGER    :: iFace, bID, e1, s1, e2
     REAL(prec) :: x(1:3)
     REAL(prec) :: T, Tbar, u, v, w, rho, rhobar
 
@@ -288,7 +289,74 @@ CONTAINS
     CALL myFluid % EquationOfState( )
     !$OMP END PARALLEL
 
+#ifdef HAVE_CUDA
+    myFluid % state % boundarySolution  = myFluid % state % boundarySolution_dev
+#endif
+
     CALL myFluid % UpdateExternalStaticState( )
+
+    DO bID = 1, myFluid % extComm % nBoundaries
+
+       iFace = myFluid % extComm % boundaryIDs( bID )
+       e1    = myFluid % mesh % faces % elementIDs(1,iFace)
+       s1    = myFluid % mesh % faces % elementSides(1,iFace)
+       e2    = myFluid % mesh % faces % elementIDs(2,iFace)
+
+       IF( e2 == PRESCRIBED )THEN
+
+
+         IF( myFluidConditions % calculate_density_from_T )THEN
+
+           DO j = 0, myFluid % params % polyDeg
+             DO i = 0, myFluid % params % polyDeg
+
+               x(1:3) = myFluid % mesh % elements % xBound(i,j,1:3,s1,e1)
+
+               u = myFluidConditions % u % evaluate( x ) 
+               v = myFluidConditions % v % evaluate( x ) 
+               w = myFluidConditions % w % evaluate( x ) 
+               T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
+      
+               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
+      
+               myFluid % state % prescribedState(i,j,4,bID) = -myFluid % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
+               myFluid % state % prescribedState(i,j,1,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*u
+               myFluid % state % prescribedState(i,j,2,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*v
+               myFluid % state % prescribedState(i,j,3,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
+
+             ENDDO
+           ENDDO
+          
+         ELSE
+
+           DO j = 0, myFluid % params % polyDeg
+             DO i = 0, myFluid % params % polyDeg
+
+               x(1:3) = myFluid % mesh % elements % xBound(i,j,1:3,s1,e1)
+
+               u = myFluidConditions % u % evaluate( x ) 
+               v = myFluidConditions % v % evaluate( x ) 
+               w = myFluidConditions % w % evaluate( x ) 
+               T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
+               rho = myFluidConditions % rho % evaluate( x ) 
+  
+               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
+  
+               myFluid % state % prescribedState(i,j,4,bID) = rho
+               myFluid % state % prescribedState(i,j,1,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*u
+               myFluid % state % prescribedState(i,j,2,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*v
+               myFluid % state % prescribedState(i,j,3,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
+               myFluid % state % prescribedState(i,j,5,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*T
+
+             ENDDO
+           ENDDO
+
+         ENDIF
+
+       ENDIF
+
+    ENDDO
+
 
   END SUBROUTINE InitialConditions
 

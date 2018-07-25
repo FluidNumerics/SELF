@@ -267,10 +267,20 @@ MPILayer_Class.o : ModelPrecision.o NodalDGSolution_3D_Class.o Faces_Class.o Bou
                    ${SRCDIR}fluid/MPILayer_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}fluid/MPILayer_Class.f90
 
+
+
+ifeq (${MPI},yes)
 Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
                 SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
                 BodyForces_Class.o MPILayer_Class.o ${SRCDIR}fluid/Fluid_Class.f90
 	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
+else
+
+Fluid_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Timing.o ModelParameters_Class.o Lagrange_Class.o NodalDG_Class.o \
+                SpectralFilter_Class.o NodalDGSolution_3D_Class.o HexMesh_Class.o BoundaryCommunicator_Class.o \
+                BodyForces_Class.o ${SRCDIR}fluid/Fluid_Class.f90
+	${FC} ${OPT} -c ${CPPFLAGS} ${SRCDIR}fluid/Fluid_Class.f90 ${LIB} -o $@
+endif
 
 
 Fluid_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser_Class.o ${SRCDIR}fluid/Fluid_EquationParser_Class.f90
