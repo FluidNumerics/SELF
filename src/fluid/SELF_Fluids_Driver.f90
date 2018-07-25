@@ -317,12 +317,12 @@ CONTAINS
                w = myFluidConditions % w % evaluate( x ) 
                T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
       
-               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
+               Tbar = myFluid % static % boundarySolution(i,j,5,s1,e1)/myFluid % static % boundarySolution(i,j,4,s1,e1)
       
-               myFluid % state % prescribedState(i,j,4,bID) = -myFluid % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
-               myFluid % state % prescribedState(i,j,1,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*u
-               myFluid % state % prescribedState(i,j,2,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*v
-               myFluid % state % prescribedState(i,j,3,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
+               myFluid % state % prescribedState(i,j,4,bID) = -myFluid % static % boundarySolution(i,j,4,s1,e1)*T/(Tbar + T)
+               myFluid % state % prescribedState(i,j,1,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*u
+               myFluid % state % prescribedState(i,j,2,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*v
+               myFluid % state % prescribedState(i,j,3,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*w
 
              ENDDO
            ENDDO
@@ -340,13 +340,13 @@ CONTAINS
                T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
                rho = myFluidConditions % rho % evaluate( x ) 
   
-               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
+               Tbar = myFluid % static % boundarySolution(i,j,5,s1,e1)/myFluid % static % boundarySolution(i,j,4,e1,s1)
   
                myFluid % state % prescribedState(i,j,4,bID) = rho
-               myFluid % state % prescribedState(i,j,1,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*u
-               myFluid % state % prescribedState(i,j,2,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*v
-               myFluid % state % prescribedState(i,j,3,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
-               myFluid % state % prescribedState(i,j,5,bID) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*T
+               myFluid % state % prescribedState(i,j,1,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*u
+               myFluid % state % prescribedState(i,j,2,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*v
+               myFluid % state % prescribedState(i,j,3,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*w
+               myFluid % state % prescribedState(i,j,5,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*T
 
              ENDDO
            ENDDO
