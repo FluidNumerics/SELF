@@ -227,7 +227,7 @@ CONTAINS
     INTEGER    :: i, j, k, iEl
     INTEGER    :: iFace, bID, e1, s1, e2
     REAL(prec) :: x(1:3)
-    REAL(prec) :: T, Tbar, u, v, w, rho, rhobar
+    REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
 
 
     myFluid % state % solution = 0.0_prec
@@ -244,10 +244,12 @@ CONTAINS
 
             IF( myFluidConditions % calculate_density_from_T )THEN
                
-              u = myFluidConditions % u % evaluate( x ) 
-              v = myFluidConditions % v % evaluate( x ) 
-              w = myFluidConditions % w % evaluate( x ) 
-              T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
+              u  = myFluidConditions % u % evaluate( x ) 
+              v  = myFluidConditions % v % evaluate( x ) 
+              w  = myFluidConditions % w % evaluate( x ) 
+              T  = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
+              s  = myFluidConditions % tracer % evaluate( x )
+              s0 = myFluidConditions % staticTracer % evaluate( x )
 
               Tbar = myFluid % static % solution(i,j,k,5,iEl)/myFluid % static % solution(i,j,k,4,iEl)
 
@@ -255,6 +257,10 @@ CONTAINS
               myFluid % state % solution(i,j,k,1,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*u
               myFluid % state % solution(i,j,k,2,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*v
               myFluid % state % solution(i,j,k,3,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
+#ifdef PASSIVE_TRACERS
+              myFluid % state % solution(i,j,k,6,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*s
+              myFluid % static % solution(i,j,k,6,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*s0
+#endif
 
             ELSE
 
@@ -263,6 +269,7 @@ CONTAINS
               w   = myFluidConditions % w % evaluate( x ) 
               rho = myFluidConditions % rho % evaluate( x ) 
               T   = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
+              s = myFluidConditions % tracer % evaluate( x )
 
 
               myFluid % state % solution(i,j,k,4,iEl) = rho
@@ -270,6 +277,10 @@ CONTAINS
               myFluid % state % solution(i,j,k,2,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*v
               myFluid % state % solution(i,j,k,3,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*w
               myFluid % state % solution(i,j,k,5,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*T
+#ifdef PASSIVE_TRACERS
+              myFluid % state % solution(i,j,k,6,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*s
+              myFluid % static % solution(i,j,k,6,iEl) = ( myFluid % state % solution(i,j,k,4,iEl) + myFluid % static % solution(i,j,k,4,iEl) )*s0
+#endif
 
             ENDIF
 
@@ -316,6 +327,7 @@ CONTAINS
                v = myFluidConditions % v % evaluate( x ) 
                w = myFluidConditions % w % evaluate( x ) 
                T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
+               s = myFluidConditions % tracer % evaluate( x )
       
                Tbar = myFluid % static % boundarySolution(i,j,5,s1,e1)/myFluid % static % boundarySolution(i,j,4,s1,e1)
       
@@ -323,6 +335,9 @@ CONTAINS
                myFluid % state % prescribedState(i,j,1,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*u
                myFluid % state % prescribedState(i,j,2,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*v
                myFluid % state % prescribedState(i,j,3,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*w
+#ifdef PASSIVE_TRACERS
+               myFluid % state % prescribedState(i,j,6,bID) = ( myFluid % state % prescribedState(i,j,4,bID) + myFluid % static % boundarySolution(i,j,4,s1,e1) )*s
+#endif
 
              ENDDO
            ENDDO
@@ -339,6 +354,7 @@ CONTAINS
                w = myFluidConditions % w % evaluate( x ) 
                T = myFluidConditions % t % evaluate( x ) ! Potential temperature anomaly
                rho = myFluidConditions % rho % evaluate( x ) 
+               s = myFluidConditions % tracer % evaluate( x )
   
                Tbar = myFluid % static % boundarySolution(i,j,5,s1,e1)/myFluid % static % boundarySolution(i,j,4,e1,s1)
   
@@ -347,6 +363,9 @@ CONTAINS
                myFluid % state % prescribedState(i,j,2,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*v
                myFluid % state % prescribedState(i,j,3,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*w
                myFluid % state % prescribedState(i,j,5,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*T
+#ifdef PASSIVE_TRACERS
+               myFluid % state % prescribedState(i,j,6,bID) = ( rho + myFluid % static % boundarySolution(i,j,4,s1,e1) )*s
+#endif
 
              ENDDO
            ENDDO
