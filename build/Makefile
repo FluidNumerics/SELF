@@ -140,7 +140,6 @@ GEOM = Faces_Class.o \
        HexElements_Class.o \
        BoundaryCommunicator_Class.o \
        HexMesh_Class.o \
-       TopographicShapes.o \
        ModelParameters_Class.o
 
 # ---------------------------------------------------------------------- #
@@ -243,12 +242,9 @@ BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/BoundaryCommunicator_Class.f90 -o $@
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
-                  Quadrature.o Surfaces_Class.o HexElements_Class.o TopographicShapes.o BoundaryCommunicator_Class.o NodalDG_Class.o \
+                  Quadrature.o Surfaces_Class.o HexElements_Class.o  BoundaryCommunicator_Class.o NodalDG_Class.o \
                   Faces_Class.o Nodes_Class.o Geom_EquationParser_Class.o ModelParameters_Class.o ${SRCDIR}geom/HexMesh_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
-
-TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
-	${FC} ${OPT} -c ${SRCDIR}geom/TopographicShapes.f90 -o $@ 
 
 Voxels_Class.o : ModelPrecision.o Lagrange_Class.o HexMesh_Class.o HexElements_Class.o ${SRCDIR}geom/Voxels_Class.f90
 	${FC} ${OPT} -c ${SRCDIR}geom/Voxels_Class.f90 -o $@
@@ -308,7 +304,6 @@ FLOBJ = ModelPrecision.o \
         HexElements_Class.o \
         Faces_Class.o \
         Nodes_Class.o \
-	TopographicShapes.o \
         HexMesh_Class.o \
         BoundaryCommunicator_Class.o \
         BodyForces_Class.o \
