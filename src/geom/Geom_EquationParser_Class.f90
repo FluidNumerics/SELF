@@ -43,6 +43,8 @@ CONTAINS
 
      ENDDO
 
+     CLOSE( fUnit )
+
   END SUBROUTINE Build_Geom_EquationParser
 
 END MODULE Geom_EquationParser_Class
