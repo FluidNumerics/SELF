@@ -72,6 +72,7 @@ MODULE HexMesh_Class
 
     ! Connectivity Routines
     PROCEDURE :: ConstructFaces               => ConstructFaces_HexMesh
+    PROCEDURE :: ConstructStructuredFaces     => ConstructStructuredFaces_HexMesh
     PROCEDURE :: ConstructDoublyPeriodicFaces => ConstructDoublyPeriodicFaces_HexMesh
     PROCEDURE :: ConstructElementNeighbors    => ConstructElementNeighbors_HexMesh
     PROCEDURE :: DetermineOrientation         => DetermineOrientation_HexMesh
@@ -531,6 +532,274 @@ CONTAINS
 
   END SUBROUTINE ConstructFaces_HexMesh
 !
+  SUBROUTINE ConstructStructuredFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem )
+
+! Assumes structured mesh
+    IMPLICIT NONE
+    CLASS( HexMesh ), INTENT(inout) :: myHexMesh
+    INTEGER, INTENT(in) :: nXElem, nYElem, nZElem
+    ! LOCAL
+    INTEGER ::  e1, e2, s1, s2, nFaces, i, j, k, l, IFace, ii, jj
+
+    nFaces = (nZElem+1)*nXElem*nYElem + (nXElem+1)*nYElem*nZElem + (nYElem+1)*nXElem*nZElem
+
+    ! Re-allocate space for the mesh Faces
+    CALL myHexMesh % faces % Trash( )
+    CALL myHexMesh % faces % Build( nFaces, myHexMesh % elements % N )
+
+    IFace = 0
+
+    DO k = 1, nZElem
+      DO j = 1, nYElem
+        DO i = 1, nXElem
+
+          e1 = i + nXElem*( j-1 + nYElem*(k-1) ) ! Primary element ID
+          ! Element e1's southern boundary
+          s1 = SOUTH
+          IF( j==1 )THEN
+
+            IFace = IFace + 1
+            e2 = NO_NORMAL_FLOW ! Enforce boundary condition on south boundary of the domain
+            s2 = NORTH
+            myHexMesh % faces % faceID(IFace) = IFace
+            DO l = 1, 4
+              myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,SOUTH), e1 )
+            ENDDO
+            myHexMesh % faces % elementIDs(1,IFace)   = e1
+            myHexMesh % faces % elementIDs(2,IFace)   = e2
+            myHexMesh % faces % elementSides(1,IFace) = s1
+            myHexMesh % faces % elementSides(2,IFace) = s2
+            myHexMesh % faces % iStart(IFace)         = 0
+            myHexMesh % faces % iInc(IFace)           = 1
+            myHexMesh % faces % jStart(IFace)         = 0
+            myHexMesh % faces % jInc(IFace)           = 1
+            myHexMesh % faces % swapDimensions(IFace) = 0
+
+          ELSE
+
+            IFace = IFace + 1
+            e2 = i + nXElem*( j-2 + (nYElem)*(k-1) )
+            s2 = NORTH
+            myHexMesh % faces % faceID(IFace) = IFace
+            DO l = 1, 4
+              myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,SOUTH), e1 )
+            ENDDO
+            myHexMesh % faces % elementIDs(1,IFace)   = e1
+            myHexMesh % faces % elementIDs(2,IFace)   = e2
+            myHexMesh % faces % elementSides(1,IFace) = s1
+            myHexMesh % faces % elementSides(2,IFace) = s2
+            myHexMesh % faces % iStart(IFace)         = 0
+            myHexMesh % faces % iInc(IFace)           = 1
+            myHexMesh % faces % jStart(IFace)         = 0
+            myHexMesh % faces % jInc(IFace)           = 1
+            myHexMesh % faces % swapDimensions(IFace) = 0
+
+          ENDIF
+
+          ! Element e1's western boundary
+          s1 = WEST
+          IF( i==1 )THEN
+
+            IFace = IFace + 1
+            e2 = NO_NORMAL_FLOW ! Enforce boundary condition on west domain boundary
+            s2 = EAST
+            myHexMesh % faces % faceID(IFace) = IFace
+            DO l = 1, 4
+              myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,WEST), e1 )
+            ENDDO
+            myHexMesh % faces % elementIDs(1,IFace)   = e1
+            myHexMesh % faces % elementIDs(2,IFace)   = e2
+            myHexMesh % faces % elementSides(1,IFace) = s1
+            myHexMesh % faces % elementSides(2,IFace) = s2
+            myHexMesh % faces % iStart(IFace)         = 0
+            myHexMesh % faces % iInc(IFace)           = 1
+            myHexMesh % faces % jStart(IFace)         = 0
+            myHexMesh % faces % jInc(IFace)           = 1
+            myHexMesh % faces % swapDimensions(IFace) = 0
+
+          ELSE
+            IFace = IFace + 1
+            e2 = i-1 + nXElem*( j-1 + (nYElem)*(k-1) )
+            s2 = EAST
+            myHexMesh % faces % faceID(IFace) = IFace
+            DO l = 1, 4
+              myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,WEST), e1 )
+            ENDDO
+            myHexMesh % faces % elementIDs(1,IFace)   = e1
+            myHexMesh % faces % elementIDs(2,IFace)   = e2
+            myHexMesh % faces % elementSides(1,IFace) = s1
+            myHexMesh % faces % elementSides(2,IFace) = s2
+            myHexMesh % faces % iStart(IFace)         = 0
+            myHexMesh % faces % iInc(IFace)           = 1
+            myHexMesh % faces % jStart(IFace)         = 0
+            myHexMesh % faces % jInc(IFace)           = 1
+            myHexMesh % faces % swapDimensions(IFace) = 0
+
+          ENDIF
+
+          ! Element e1's bottom boundary
+          s1 = BOTTOM
+          IF( k==1 )THEN
+
+            IFace = IFace + 1
+            e2 = NO_NORMAL_FLOW ! Enforce boundary condition on bottom domain boundary
+            s2 = TOP
+            myHexMesh % faces % faceID(IFace) = IFace
+            DO l = 1, 4
+              myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,BOTTOM), e1 )
+            ENDDO
+            myHexMesh % faces % elementIDs(1,IFace)   = e1
+            myHexMesh % faces % elementIDs(2,IFace)   = e2
+            myHexMesh % faces % elementSides(1,IFace) = s1
+            myHexMesh % faces % elementSides(2,IFace) = s2
+            myHexMesh % faces % iStart(IFace)         = 0
+            myHexMesh % faces % iInc(IFace)           = 1
+            myHexMesh % faces % jStart(IFace)         = 0
+            myHexMesh % faces % jInc(IFace)           = 1
+            myHexMesh % faces % swapDimensions(IFace) = 0
+
+          ELSE
+
+            IFace = IFace + 1
+            e2 = i + nXElem*( j-1 + (nYElem)*(k-2) )
+            s2 = TOP
+            myHexMesh % faces % faceID(IFace) = IFace
+            DO l = 1, 4
+              myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,BOTTOM), e1 )
+            ENDDO
+            myHexMesh % faces % elementIDs(1,IFace)   = e1
+            myHexMesh % faces % elementIDs(2,IFace)   = e2
+            myHexMesh % faces % elementSides(1,IFace) = s1
+            myHexMesh % faces % elementSides(2,IFace) = s2
+            myHexMesh % faces % iStart(IFace)         = 0
+            myHexMesh % faces % iInc(IFace)           = 1
+            myHexMesh % faces % jStart(IFace)         = 0
+            myHexMesh % faces % jInc(IFace)           = 1
+            myHexMesh % faces % swapDimensions(IFace) = 0
+
+          ENDIF
+
+        ENDDO ! i
+
+        e1 = nXElem + nXElem*( j-1 + (nYElem)*(k-1) )
+        s1 = EAST
+        IFace = IFace + 1
+        e2 = NO_NORMAL_FLOW ! Enforce boundary condition on east domain boundary
+        s2 = WEST
+        myHexMesh % faces % faceID(IFace) = IFace
+        DO l = 1, 4
+          myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,EAST), e1 )
+        ENDDO
+        myHexMesh % faces % elementIDs(1,IFace)   = e1
+        myHexMesh % faces % elementIDs(2,IFace)   = e2
+        myHexMesh % faces % elementSides(1,IFace) = s1
+        myHexMesh % faces % elementSides(2,IFace) = s2
+        myHexMesh % faces % iStart(IFace)         = 0
+        myHexMesh % faces % iInc(IFace)           = 1
+        myHexMesh % faces % jStart(IFace)         = 0
+        myHexMesh % faces % jInc(IFace)           = 1
+        myHexMesh % faces % swapDimensions(IFace) = 0
+
+      ENDDO ! j
+
+      DO i = 1, nXElem
+
+        IFace = IFace + 1
+        e1 = i + nXElem*( nYElem-1 + (nYElem)*(k-1) )
+        s1 = NORTH
+        e2 = NO_NORMAL_FLOW ! Enforce boundary condition on domain north boundary
+        s2 = SOUTH
+        myHexMesh % faces % faceID(IFace) = IFace
+        DO l = 1, 4
+          myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,NORTH), e1 )
+        ENDDO
+        myHexMesh % faces % elementIDs(1,IFace)    = e1
+        myHexMesh % faces % elementIDs(2,IFace)    = e2
+        myHexMesh % faces % elementSides(1,IFace)  = s1
+        myHexMesh % faces % elementSides(2,IFace)  = s2
+        myHexMesh % faces % iStart(IFace)          = 0
+        myHexMesh % faces % iInc(IFace)            = 1
+        myHexMesh % faces % jStart(IFace)          = 0
+        myHexMesh % faces % jInc(IFace)            = 1
+        myHexMesh % faces % swapDimensions(IFace)  = 0
+
+      ENDDO
+
+    ENDDO ! k
+
+    DO j = 1, nYElem
+      DO i = 1, nXElem
+
+        e1 = i + nXElem*( j-1 + (nYElem)*(nZElem-1) ) ! Primary element ID
+        IFace = IFace + 1
+        e2 = NO_NORMAL_FLOW ! Enforce boundary condition on domain top
+        s1 = TOP
+        s2 = s1
+        myHexMesh % faces % faceID(IFace) = IFace
+        DO l = 1, 4
+          myHexMesh % faces % nodeIDs(l,IFace) = myHexMesh % elements % nodeIDs( myHexMesh % faceMap(l,TOP), e1 )
+        ENDDO
+        myHexMesh % faces % elementIDs(1,IFace)   = e1
+        myHexMesh % faces % elementIDs(2,IFace)   = e2
+        myHexMesh % faces % elementSides(1,IFace) = s1
+        myHexMesh % faces % elementSides(2,IFace) = s2
+        myHexMesh % faces % iStart(IFace)         = 0
+        myHexMesh % faces % iInc(IFace)           = 1
+        myHexMesh % faces % jStart(IFace)         = 0
+        myHexMesh % faces % jInc(IFace)           = 1
+        myHexMesh % faces % swapDimensions(IFace) = 0
+
+      ENDDO
+    ENDDO
+
+    DO k = 1, myHexMesh % faces % nFaces
+      DO j = 0, myHexMesh % elements % N
+        DO i = 0, myHexMesh % elements % N
+
+          IF( i == 0 )THEN
+            IF( j == 0 )THEN
+              ii = (1-myHexMesh % faces % swapDimensions(k))*&
+                (myHexMesh % faces % iStart(k)) + &
+                (myHexMesh % faces % swapDimensions(k))*&
+                (myHexMesh % faces % jStart(k))
+              jj = (1-myHexMesh % faces % swapDimensions(k))*&
+                (myHexMesh % faces % jStart(k)) + &
+                (myHexMesh % faces % swapDimensions(k))*&
+                (myHexMesh % faces % iStart(k))
+            ELSE
+              ii = myHexMesh % faces % swapDimensions(k)*&
+                (ii+myHexMesh % faces % jInc(k)) + &
+                (1-myHexMesh % faces % swapDimensions(k))*&
+                myHexMesh % faces % iStart(k)
+              jj = (1-myHexMesh % faces % swapDimensions(k))*&
+                (jj+myHexMesh % faces % jInc(k)) +&
+                myHexMesh % faces % swapDimensions(k)*&
+                myHexMesh % faces % jStart(k)
+            ENDIF
+          ELSE
+            ii = (1-myHexMesh % faces % swapDimensions(k))*&
+              (ii + myHexMesh % faces % iInc(k)) +&
+              myHexMesh % faces % swapDimensions(k)*ii
+            jj = myHexMesh % faces % swapDimensions(k)*&
+              (jj+myHexMesh % faces % iInc(k)) + &
+              (1-myHexMesh % faces % swapDimensions(k))*jj
+          ENDIF
+
+          myHexMesh % faces % iMap(i,j,k) = ii
+          myHexMesh % faces % jMap(i,j,k) = jj
+
+        ENDDO
+      ENDDO
+    ENDDO
+
+#ifdef HAVE_CUDA
+
+    CALL myHexMesh % faces % UpdateDevice( )
+
+#endif
+
+  END SUBROUTINE ConstructStructuredFaces_HexMesh
+!  
   SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem )
 
 ! Assumes structured mesh
@@ -1225,7 +1494,7 @@ CONTAINS
     IF( DoublyPeriodic )THEN
       CALL myHexMesh % ConstructDoublyPeriodicFaces( nXElem, nYElem, nZElem )
     ELSE
-      CALL myHexMesh % ConstructFaces( )
+      CALL myHexMesh % ConstructStructuredFaces( nXElem, nYElem, nZElem )
     ENDIF
 
 
