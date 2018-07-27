@@ -220,6 +220,8 @@ MappedGradient_Testing.o : ${COMM} ${SPEC} ${GEOM} ${SRCDIR}spectral/testing/Map
 #                            ~/src/geom/                                 #
 # ---------------------------------------------------------------------- #
 
+Geom_EquationParser_Class.o : ModelPrecision.o CommonRoutines.o EquationParser_Class.o ${SRCDIR}geom/Geom_EquationParser_Class.f90
+	${FC} ${OPT} -c ${SRCDIR}geom/Geom_EquationParser_Class.f90 -o $@
 
 Edges_Class.o : ModelPrecision.o ${SRCDIR}geom/Edges_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/Edges_Class.f90 -o $@
@@ -242,7 +244,7 @@ BoundaryCommunicator_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRout
 
 HexMesh_Class.o : ModelPrecision.o ConstantsDictionary.o  LinkedList_Class.o KeyRing_Class.o \
                   Quadrature.o Surfaces_Class.o HexElements_Class.o TopographicShapes.o BoundaryCommunicator_Class.o NodalDG_Class.o \
-                  Faces_Class.o Nodes_Class.o ModelParameters_Class.o ${SRCDIR}geom/HexMesh_Class.f90
+                  Faces_Class.o Nodes_Class.o Geom_EquationParser_Class.o ModelParameters_Class.o ${SRCDIR}geom/HexMesh_Class.f90
 	${FC} ${OPT} ${CPPFLAGS} -c ${SRCDIR}geom/HexMesh_Class.f90 -o $@
 
 TopographicShapes.o : ModelPrecision.o ${SRCDIR}geom/TopographicShapes.f90 ${SRCDIR}geom/TopographicShapes.f90
@@ -312,6 +314,7 @@ FLOBJ = ModelPrecision.o \
         BodyForces_Class.o \
         EquationParser_Class.o \
         Fluid_EquationParser_Class.o \
+	Geom_EquationParser_Class.o \
         Fluid_Class.o
 
 ifeq (${MPI},yes)

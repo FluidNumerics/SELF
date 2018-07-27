@@ -20,7 +20,7 @@ MODULE HexMesh_Class
   USE Nodes_Class
   USE ModelParameters_Class
   USE BoundaryCommunicator_Class
-  USE TopographicShapes
+  USE Geom_EquationParser_Class
 
 
   IMPLICIT NONE
@@ -88,21 +88,6 @@ MODULE HexMesh_Class
 
   INTEGER, PRIVATE, PARAMETER    :: BoundaryFlagStructured = NO_NORMAL_FLOW
 
-
-!
-  ABSTRACT INTERFACE
-
-    FUNCTION Topography( x, y )
-      USE ModelPrecision
-      IMPLICIT NONE
-      REAL(prec)             :: Topography
-      REAL(prec), INTENT(in) :: x, y
-    END FUNCTION Topography
-
-  END INTERFACE
-
-  PROCEDURE(Topography), POINTER :: TopographicShape => NULL()
-!
 
 
 CONTAINS
@@ -273,17 +258,6 @@ CONTAINS
 #endif
 
   END SUBROUTINE Trash_HexMesh
-!
-  FUNCTION DefaultTopography( x, y )
-    IMPLICIT NONE
-    REAL(prec)             :: DefaultTopography
-    REAL(prec), INTENT(in) :: x, y
-
-    DefaultTopography = 0.0_prec
-
-    RETURN
-
-  END FUNCTION DefaultTopography
 !
 #ifdef HAVE_CUDA
   SUBROUTINE UpdateDevice_HexMesh( myHexMesh )
@@ -1060,18 +1034,19 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
-  SUBROUTINE ConstructStructuredMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem, DoublyPeriodic  )
+  SUBROUTINE ConstructStructuredMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem, geomparser, DoublyPeriodic  )
 
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout)  :: myHexMesh
     TYPE( Lagrange ), INTENT(in)     :: interp
     INTEGER, INTENT(in)              :: nXelem, nYelem, nZelem
+    TYPE( Geom_EquationParser ), INTENT(in) :: geomparser
     LOGICAL, INTENT(in)              :: DoublyPeriodic
     ! LOGICAL
     TYPE( Surfaces ) :: boundSurfs
     REAL(prec) :: x, y, z, zb, zi, zu, zip1, dxElem, dyElem, dzElem
     REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
-    REAL(prec) :: c1(1:3), c2(1:3)
+    REAL(prec) :: c1(1:3), c2(1:3), xE(1:3)
     REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:), weights(:)
 
     INTEGER :: nNodes, nElements, nFaces, gPolyDeg, nSurf
@@ -1117,7 +1092,8 @@ CONTAINS
           iNode = iX + (iY-1)*(nXElem+1) + (iZ-1)*(nXElem+1)*(nYElem+1)
           x = dXElem*(REAL(iX-1,prec))
 
-          zb = TopographicShape( x, y )
+          xE(1:3) = (/ x, y, 0.0_prec /)
+          zb = geomparser % topography % Evaluate( xE )
 
           z = zb*(1.0_prec-zi) + 1.0_prec*zi
 
@@ -1198,7 +1174,8 @@ CONTAINS
                   DO j = 0, gPolyDeg
                     DO i = 0, gPolyDeg
   
-                      zb   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
+                      xE(1:3) = (/ xc(i,j,1,iSurf), xc(i,j,2,iSurf), 0.0_prec /)
+                      zb = geomparser % topography % Evaluate( xE )
                       xc(i,j,3,iSurf) = zb*(1.0_prec-zu) + 1.0_prec*zu
   
                     ENDDO
@@ -1210,7 +1187,8 @@ CONTAINS
                   DO j = 0, gPolyDeg
                     DO i = 0, gPolyDeg
   
-                      zb   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
+                      xE(1:3) = (/ xc(i,j,1,iSurf), xc(i,j,2,iSurf), 0.0_prec /)
+                      zb = geomparser % topography % Evaluate( xE )
                       xc(i,j,3,iSurf) = zb*(1.0_prec-zu) + 1.0_prec*zu
   
                     ENDDO
@@ -1224,7 +1202,8 @@ CONTAINS
                     DO i = 0, gPolyDeg
   
                       zu = 0.5_prec*( zi*( s(j) - 1.0_prec ) + zip1*( s(j) + 1.0_prec ) ) 
-                      zb   = TopographicShape( xc(i,j,1,iSurf), xc(i,j,2,iSurf) )
+                      xE(1:3) = (/ xc(i,j,1,iSurf), xc(i,j,2,iSurf), 0.0_prec /)
+                      zb = geomparser % topography % Evaluate( xE )
                       xc(i,j,3,iSurf) = zb*(1.0_prec-zu) + 1.0_prec*zu
   
                     ENDDO
@@ -2364,6 +2343,7 @@ CONTAINS
  TYPE( HexMesh )                           :: mesh
  TYPE( HexMesh )                           :: procMesh
  TYPE( ModelParameters )                   :: params
+ TYPE( Geom_EquationParser )               :: geomParser
  TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
  INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
  INTEGER                      :: procID
@@ -2381,6 +2361,7 @@ CONTAINS
 
       ! Read in the parameters
       CALL params % Build( setupSuccess )
+      CALL geomParser % Build( 'self.equations' )
 
       IF( setupSuccess )THEN
          ! Build an interpolant
@@ -2389,11 +2370,6 @@ CONTAINS
                              nTargetPoints = params % nPlot, &
                              quadrature = GAUSS_LOBATTO )
    
-         IF( params % topographicShape == Gaussian )THEN
-            TopographicShape => GaussianHill
-         ELSE
-            TopographicShape => DefaultTopography
-         ENDIF
          ! Build the Geometry
          IF( TRIM( params % UCDMeshFile ) == '' )THEN
 
@@ -2403,6 +2379,7 @@ CONTAINS
                 params % nXelem, &
                 params % nYelem, &
                 params % nZelem, &
+                geomParser, &
                 .TRUE. )
            ELSE
               PRINT*,' Loading default mesh.'
@@ -2410,6 +2387,7 @@ CONTAINS
                 params % nXelem, &
                 params % nYelem, &
                 params % nZelem, &
+                geomParser, &
                 .FALSE. )
            ENDIF
 
