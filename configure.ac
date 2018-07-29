@@ -19,10 +19,11 @@ AS_IF([test "x$FC" = "xgfortran"],[
 
 # Check for CUDA-Fortran acceleration request
 # Set --enable-cuda-fortran yes turns on the -DHAVE_CUDA CPP-flag if the PGI compilers are used.
-AC_ARG_ENABLE( cuda, AS_HELP_STRING([--enable-cuda-fortran, default:no]))
+AC_ARG_ENABLE( cuda, AS_HELP_STRING([--enable-cuda, default:no]))
 AM_CONDITIONAL(CUDA, test x"$cuda"=x"true")
-AS_IF([test "x$cuda" = "xyes"],[
+AS_IF([test "x$enable_cuda" = "xyes"],[
 
+#  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
   if test "x$FC" = "xpgfortran"; then
     # GPU_ARCH needs to be set as an environment variable or passed, e.g.
     # GPU_ARCH=cc60 ./configure --enable-cuda
