@@ -48,10 +48,8 @@ MODULE BoundaryCommunicator_CLASS
 #endif
 
 #ifdef HAVE_MPI
-    INTEGER :: nNeighbors
-    INTEGER :: maxBufferSize
-    INTEGER :: MPI_COMM, MPI_PREC, mpiErr
-
+    INTEGER              :: nNeighbors,  maxBufferSize
+    INTEGER              :: MPI_COMM, MPI_PREC, mpiErr
     INTEGER, ALLOCATABLE :: bufferMap(:)
     INTEGER, ALLOCATABLE :: neighborRank(:)
     INTEGER, ALLOCATABLE :: bufferSize(:)
