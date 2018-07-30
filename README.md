@@ -31,10 +31,19 @@ SELF-Fluids is built and installed using autotools.
 For a serial build, with single precision, no diagnostics, no timers, and without GPU 
 acceleration, installation is as simple as
 ```
-./configure --prefix=/path/to/install/directory
+./configure [OPTIONS] --prefix=/path/to/install/directory
 make
 make install
 ```
+Additional options for the configure step include
+```
+  --enable-mpi
+  --enable-openmp
+  --enable-cuda
+  --enable-double-precision
+  --enable-timing
+```
+
 
 ### MPI Support
 To enable building of the sfluid executable with MPI support, you can add the flag
@@ -44,8 +53,8 @@ To enable building of the sfluid executable with MPI support, you can add the fl
 make
 make install
 ```
-This causes the configure script to seek out the mpif90 compiler. Because of this,
-it is necessary to have an MPI library, like OpenMPI or MPICH, installed.
+To use MPI, it is necessary to have an MPI library, like OpenMPI or MPICH, installed
+and have binaries in your path.
 
 
 ### OpenMP Multi-Threaded Acceleration
