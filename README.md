@@ -100,22 +100,26 @@ At run-time, the sfluid executable uses the `runtime.params` file for determinin
 the run, mesh size (if structured), and other numerical and physical parameters. Additionally,
 the initial conditions and drag forces are set in `self.equations`. 
 
-The first time the `sfluid`is executed for an example, it will generate a mesh consistent with 
+The first time the `sfluid` is executed for an example, it will generate a mesh consistent with 
 the settings in `runtime.params` and initial conditions consistent with those specified in 
-`self.equations`. To get started quickly, run
+`self.equations`. If `runtime.params` is not present, a sample will be generated for you.
+If `self.equations` is not present, a sample equations file will be generated
+for you as well.
+
+To get started quickly, run
 ```
-./sfluid
+sfluid
 ```
 
 If you would just like to generate the mesh, or generate a new mesh from scratch, run
 ```
-./sfluid meshgen
+sfluid meshgen
 ```
 
 If you would like to proceed up to initial condition generation, and not forward step the model,
 you can run
 ```
-./sfluid init
+sfluid init
 ```
 
 Note that if you are running with MPI enabled, you will need to prepend `mpirun -np XX`, replacing
