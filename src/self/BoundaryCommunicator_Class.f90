@@ -146,6 +146,7 @@ CONTAINS
 
 
 #ifdef HAVE_MPI
+    CALL MPI_COMM_SIZE( MPI_COMM_WORLD, myComm % nProc, myComm % mpiErr )
 
     ALLOCATE( myComm % bufferMap(1:myComm % nBoundaries), &
               myComm % rankTable(0:myComm % nProc-1) )

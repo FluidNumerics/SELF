@@ -64,7 +64,7 @@ CONTAINS
 
     myMPI % N     = N
     myMPI % nVars = nVars
-#ifdef HAVE_MPE
+#ifdef HAVE_MPI
     ALLOCATE( myMPI % requestHandle(1:extComm % nNeighbors*2), &
       myMPI % requestStats(MPI_STATUS_SIZE,1:extComm % nNeighbors*2), &
       myMPI % recvBuffer(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &

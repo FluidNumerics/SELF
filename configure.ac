@@ -10,11 +10,11 @@ AC_CONFIG_MACRO_DIRS([m4])
 # Find Fortran compilers
 AC_PROG_FC([pgfortran gfortran])
 AS_IF([test "x$FC" = "xpgfortran"],[
-  FCFLAGS+=" -Mpreprocess"
+  FCFLAGS="-fast -Mpreprocess"
 ])
 
 AS_IF([test "x$FC" = "xgfortran"],[
-  FCFLAGS+=" -cpp -ffree-line-length-none"
+  FCFLAGS="-O3 -cpp -ffree-line-length-none"
 ])
 
 # Check for CUDA-Fortran acceleration request
@@ -35,26 +35,20 @@ AS_IF([test "x$enable_cuda" = "xyes"],[
 ])
 
 # Check for MPI
+AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
 AC_ARG_ENABLE([mpi], AS_HELP_STRING([--enable-mpi], [default:no]))
-AM_CONDITIONAL(MPI, test x"$mpi"=x"true")
+AM_CONDITIONAL(MPI, test "x$enable_mpi"="xyes")
 AS_IF([test "x$enable_mpi" = "xyes"],[
 
-  AX_MPI
-
-  if test "$MPIFC"="mpif90"; then
-    AC_MSG_NOTICE("Found $MPIFC")
-    FC="$MPIFC"
-    FCFLAGS+=" -DHAVE_MPI"
-  else
-    AC_MSG_ERROR('--enable-mpi set to yes but MPI-Fortran compiler not found.')
-  fi
+  FC=$MPIFC
+  FCFLAGS+=" -DHAVE_MPI"
 
 ])
 
 # Check for Double Precision floating point arithmetic request.
-AC_ARG_ENABLE( double_precision, AS_HELP_STRING([--enable-double-precision, default:no]))
-AM_CONDITIONAL(DOUBLE_PRECISION, test x"$double_precision"=x"true")
-AS_IF([test "x$double_precision" = "xyes"],[
+AC_ARG_ENABLE( double, AS_HELP_STRING([--enable-double, default:no]))
+AM_CONDITIONAL(DOUBLE_PRECISION, test x"$double"=x"true")
+AS_IF([test "x$enable_double" = "xyes"],[
   FCFLAGS+=" -DDOUBLE_PRECISION"
 ])
 
@@ -63,7 +57,7 @@ AS_IF([test "x$double_precision" = "xyes"],[
 AC_ARG_ENABLE( timing, AS_HELP_STRING([--enable-timing, default:no]))
 AM_CONDITIONAL(TIMING, test x"$timing"=x"true")
 
-AS_IF( [test "x$timing" = "xtrue"],[
+AS_IF( [test "x$enable_timing" = "xyes"],[
   FCFLAGS+=" -DTIMING"
 ])
 
