@@ -35,6 +35,13 @@ acceleration, installation is as simple as
 make
 make install
 ```
+This installs the `sfluid` binary in the directory specified by the `prefix` argument
+at the configure stage. To make this binary visible, add
+```
+export PATH=${PATH}:/path/to/install/directory/bin
+```
+to your `.bashrc` file.
+
 Additional options for the configure step include
 ```
   --enable-mpi
