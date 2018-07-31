@@ -588,15 +588,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
-TIMING_FALSE
-TIMING_TRUE
-DOUBLE_PRECISION_FALSE
-DOUBLE_PRECISION_TRUE
-MPI_FALSE
-MPI_TRUE
 MPIFC
-CUDA_FALSE
-CUDA_TRUE
 ac_ct_FC
 FCFLAGS
 FC
@@ -695,6 +687,7 @@ enable_cuda
 enable_mpi
 enable_double
 enable_timing
+enable_diagnostics
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1343,6 +1336,8 @@ Optional Features:
   --enable-double, default:no
 
   --enable-timing, default:no
+
+  --enable-diagnostics, default:no
 
 
 Some influential environment variables:
@@ -4006,25 +4001,10 @@ if test "${enable_cuda+set}" = set; then :
   enableval=$enable_cuda;
 fi
 
- if test x"$cuda"=x"true"; then
-  CUDA_TRUE=
-  CUDA_FALSE='#'
-else
-  CUDA_TRUE='#'
-  CUDA_FALSE=
-fi
-
 if test "x$enable_cuda" = "xyes"; then :
 
 
-#  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
-  if test "x$FC" = "xpgfortran"; then
-    # GPU_ARCH needs to be set as an environment variable or passed, e.g.
-    # GPU_ARCH=cc60 ./configure --enable-cuda
-    FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
-  else
-    as_fn_error $? "\"CUDA-Fortran can only be enabled with PGI compilers\"" "$LINENO" 5
-  fi
+  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
 
 
 fi
@@ -4078,14 +4058,6 @@ if test "${enable_mpi+set}" = set; then :
   enableval=$enable_mpi;
 fi
 
- if test "x$enable_mpi"="xyes"; then
-  MPI_TRUE=
-  MPI_FALSE='#'
-else
-  MPI_TRUE='#'
-  MPI_FALSE=
-fi
-
 if test "x$enable_mpi" = "xyes"; then :
 
 
@@ -4101,14 +4073,6 @@ if test "${enable_double+set}" = set; then :
   enableval=$enable_double;
 fi
 
- if test x"$double"=x"true"; then
-  DOUBLE_PRECISION_TRUE=
-  DOUBLE_PRECISION_FALSE='#'
-else
-  DOUBLE_PRECISION_TRUE='#'
-  DOUBLE_PRECISION_FALSE=
-fi
-
 if test "x$enable_double" = "xyes"; then :
 
   FCFLAGS+=" -DDOUBLE_PRECISION"
@@ -4122,18 +4086,23 @@ if test "${enable_timing+set}" = set; then :
   enableval=$enable_timing;
 fi
 
- if test x"$timing"=x"true"; then
-  TIMING_TRUE=
-  TIMING_FALSE='#'
-else
-  TIMING_TRUE='#'
-  TIMING_FALSE=
-fi
-
 
 if test "x$enable_timing" = "xyes"; then :
 
   FCFLAGS+=" -DTIMING"
+
+fi
+
+# Check for request to enable diagnostics in Fluids_Class.f90
+# Check whether --enable-diagnostics was given.
+if test "${enable_diagnostics+set}" = set; then :
+  enableval=$enable_diagnostics;
+fi
+
+
+if test "x$enable_diagnostics" = "xyes"; then :
+
+  FCFLAGS+=" -DDIAGNOSTICS"
 
 fi
 
@@ -4307,22 +4276,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${CUDA_TRUE}" && test -z "${CUDA_FALSE}"; then
-  as_fn_error $? "conditional \"CUDA\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${MPI_TRUE}" && test -z "${MPI_FALSE}"; then
-  as_fn_error $? "conditional \"MPI\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${DOUBLE_PRECISION_TRUE}" && test -z "${DOUBLE_PRECISION_FALSE}"; then
-  as_fn_error $? "conditional \"DOUBLE_PRECISION\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${TIMING_TRUE}" && test -z "${TIMING_FALSE}"; then
-  as_fn_error $? "conditional \"TIMING\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

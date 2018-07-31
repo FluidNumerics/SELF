@@ -18,24 +18,15 @@ AS_IF([test "x$FC" = "xgfortran"],[
 # Check for CUDA-Fortran acceleration request
 # Set --enable-cuda-fortran yes turns on the -DHAVE_CUDA CPP-flag if the PGI compilers are used.
 AC_ARG_ENABLE( cuda, AS_HELP_STRING([--enable-cuda, default:no]))
-AM_CONDITIONAL(CUDA, test x"$cuda"=x"true")
 AS_IF([test "x$enable_cuda" = "xyes"],[
 
-#  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
-  if test "x$FC" = "xpgfortran"; then
-    # GPU_ARCH needs to be set as an environment variable or passed, e.g.
-    # GPU_ARCH=cc60 ./configure --enable-cuda
-    FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
-  else
-    AC_MSG_ERROR("CUDA-Fortran can only be enabled with PGI compilers")
-  fi
+  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
 
 ])
 
 # Check for MPI
 AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
 AC_ARG_ENABLE([mpi], AS_HELP_STRING([--enable-mpi], [default:no]))
-AM_CONDITIONAL(MPI, test "x$enable_mpi"="xyes")
 AS_IF([test "x$enable_mpi" = "xyes"],[
 
   FC=$MPIFC
@@ -45,7 +36,6 @@ AS_IF([test "x$enable_mpi" = "xyes"],[
 
 # Check for Double Precision floating point arithmetic request.
 AC_ARG_ENABLE( double, AS_HELP_STRING([--enable-double, default:no]))
-AM_CONDITIONAL(DOUBLE_PRECISION, test x"$double"=x"true")
 AS_IF([test "x$enable_double" = "xyes"],[
   FCFLAGS+=" -DDOUBLE_PRECISION"
 ])
@@ -53,10 +43,16 @@ AS_IF([test "x$enable_double" = "xyes"],[
 
 # Check for request to enable timers in Fluids_Class.f90
 AC_ARG_ENABLE( timing, AS_HELP_STRING([--enable-timing, default:no]))
-AM_CONDITIONAL(TIMING, test x"$timing"=x"true")
 
 AS_IF( [test "x$enable_timing" = "xyes"],[
   FCFLAGS+=" -DTIMING"
+])
+
+# Check for request to enable diagnostics in Fluids_Class.f90
+AC_ARG_ENABLE( diagnostics, AS_HELP_STRING([--enable-diagnostics, default:no]))
+
+AS_IF( [test "x$enable_diagnostics" = "xyes"],[
+  FCFLAGS+=" -DDIAGNOSTICS"
 ])
 
 AC_CONFIG_FILES([
