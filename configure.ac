@@ -9,12 +9,10 @@ AC_CONFIG_MACRO_DIRS([m4])
 
 # Find Fortran compilers
 AC_PROG_FC([pgfortran gfortran])
-AS_IF([test "x$FC" = "xpgfortran"],[
-  FCFLAGS="-fast -Mpreprocess"
-])
+FCFLAGS="-O3"
 
 AS_IF([test "x$FC" = "xgfortran"],[
-  FCFLAGS="-O3 -cpp -ffree-line-length-none"
+  FCFLAGS+=" -ffree-line-length-none"
 ])
 
 # Check for CUDA-Fortran acceleration request
