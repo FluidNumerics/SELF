@@ -322,7 +322,7 @@ CONTAINS
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     CHARACTER(4) :: rankChar
-    LOGICAL      :: fileExists
+    LOGICAL      :: fileExists, meshgenSuccess
 
       WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
 
@@ -335,7 +335,7 @@ CONTAINS
 
           PRINT*, '  Mesh files not found.'
           PRINT*, '  Generating structured mesh...'
-          CALL StructuredMeshGenerator_3D( )
+          CALL StructuredMeshGenerator_3D( meshgenSuccess )
           PRINT*, '  Done'
 
         ENDIF

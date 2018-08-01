@@ -1541,8 +1541,17 @@ CONTAINS
 
       IF( nProc > 1 )THEN
          nxp = params % nXelem/params % nProcX
+         IF( nxp*params % nProcX < params % nXElem )THEN
+           nxp = nxp + 1
+         ENDIF
          nyp = params % nYelem/params % nProcY
+         IF( nyp*params % nProcY < params % nYElem )THEN
+           nyp = nyp + 1
+         ENDIF
          nzp = params % nZelem/params % nProcZ
+         IF( nzp*params % nProcZ < params % nZElem )THEN
+           nzp = nzp + 1
+         ENDIF
          DO iPz = 1, params % nProcZ
             DO iPy = 1, params % nProcY
                DO iPx = 1, params % nProcX
@@ -1556,7 +1565,9 @@ CONTAINS
                            iZ = iZp + (iPz-1)*nzp
                            
                            iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
-                           partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
+                           IF( iEl <= myMesh % elements % nElements )THEN
+                             partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
+                           ENDIF
                            
                         ENDDO
                      ENDDO
@@ -1582,11 +1593,6 @@ CONTAINS
          DO nID = 1, myMesh % nodes % nNodes
             nNodePerProc = nNodePerProc + nodeLogic(nID,:)
             globalToLocalNode(nID,:) = nNodePerProc
-         ENDDO
-!
-         DO procID = 0, nProc-1
-            PRINT*, '  Process ID :',procID, ', nElems :', nElPerProc(procID)
-            PRINT*, '  Process ID :',procID, ', nNodes :', nNodePerProc(procID)
          ENDDO
 
       ELSE
@@ -1673,10 +1679,6 @@ CONTAINS
     k = k+1
     READ( fUnit, rec=k )N
     k = k+1
-
-    PRINT*, '  nNodes    : ', nNodes
-    PRINT*, '  nElements : ', nElements
-    PRINT*, '  nFaces    : ', nFaces
 
     ! ---- Build the quadrature mesh (empty) ---- !
     CALL myHexMesh % Build( nNodes, nElements, nFaces, N )
@@ -1913,10 +1915,6 @@ CONTAINS
     WRITE( fUnit, rec=k )N
     k = k+1
 
-    PRINT*, '  nNodes    : ', nNodes
-    PRINT*, '  nElements : ', nElements
-    PRINT*, '  nFaces    : ', nFaces
-    PRINT*, '  N         : ', N
 
     ! ---- Read in the element connectivity ---- !
     DO iEl = 1, nElements
@@ -2180,8 +2178,6 @@ CONTAINS
 
     CLOSE( fUnit )
 
-    PRINT*, '  nNodes = ', myHexMesh % nodes % nNodes
-    PRINT*, '  nElements = ', myHexMesh % elements % nElements
 
     gPolyDeg = interp % N
     ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:6*nElements), weights(0:gpolyDeg) )
@@ -2241,7 +2237,6 @@ CONTAINS
 
     CALL myHexMesh % ConstructFaces( )
 
-    PRINT*, '  nFaces    : ', myHexMesh % faces % nFaces
 
     CALL myHexMesh % ConstructElementNeighbors( )
 
@@ -2319,9 +2314,6 @@ CONTAINS
     ! Structured nFaces = 1 for initial build
     nFaces = 1
 
-    PRINT*, '  nNodes    : ', nNodes
-    PRINT*, '  nElements : ', nElements
-    PRINT*, '  N         : ', interp % N
     ! ---- Build the quadrature mesh (empty) ---- !
     CALL myHexMesh % Build( nNodes, nElements, nFaces, interp % N )
 
@@ -2605,8 +2597,9 @@ CONTAINS
     
   END FUNCTION NumberOfBoundaryFaces
   
- SUBROUTINE StructuredMeshGenerator_3D( )
+ SUBROUTINE StructuredMeshGenerator_3D( setupSuccess )
  IMPLICIT NONE
+ LOGICAL, INTENT(out)                      :: setupSuccess
   ! Local
  TYPE( NodalDG )                           :: nodal
  TYPE( HexMesh )                           :: mesh
@@ -2615,8 +2608,8 @@ CONTAINS
  TYPE( Geom_EquationParser )               :: geomParser
  TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
  INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
- INTEGER                      :: procID
- INTEGER                      :: nElems, nProc, pID, i
+ INTEGER                      :: procID, mpiErr
+ INTEGER                      :: nElems, nProc, pID, i, j
  INTEGER                      :: iEl, jEl, iSide, iNode, nAdj, nID, elID, nMPI
  INTEGER                      :: e1, e2, p1, p2, iFace, iFaceLocal, jFace, localID
  INTEGER                      :: nBe, npFaces
@@ -2625,11 +2618,89 @@ CONTAINS
  INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
  INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:), nLocMPI(:)
  REAL(prec), ALLOCATABLE      :: materials(:)
- LOGICAL                      :: setupSuccess
  
 
       ! Read in the parameters
       CALL params % Build( setupSuccess )
+
+#ifdef HAVE_MPI
+      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, params % nProc, mpiErr )
+
+      IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
+
+        PRINT*, ' Number of processes exceeds number of elements.'
+        setupSuccess = .FALSE.
+
+      ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
+
+        params % nProcX = params % nXElem
+        params % nProcY = params % nYElem
+        params % nProcZ = params % nZElem
+
+      ELSE
+
+        params % nProcX = 1
+        params % nProcY = 1
+
+        params % nProcZ = params % nProc
+
+        DO WHILE( params % nProcZ > params % nZElem )
+
+          DO i = 2, params % nProcZ
+            IF( MOD( params % nProcZ, i ) == 0 )THEN
+              ! nProcZ is divisible by i
+              j = i
+              EXIT
+            ENDIF
+          ENDDO
+
+          params % nProcZ = params % nProcZ/j
+
+        ENDDO
+
+        params % nProcY = params % nProc/params % nProcZ
+        IF( params % nProcY > 1 )THEN
+          DO WHILE( params % nProcY > params % nYElem )
+
+            DO i = 2, params % nProcY
+              IF( MOD( params % nProcY, i ) == 0 )THEN
+                ! nProcY is divisible by i
+                j = i
+                EXIT
+              ENDIF
+            ENDDO
+
+            params % nProcY = params % nProcY/j
+
+          ENDDO
+
+        ENDIF
+
+        params % nProcX = params % nProc/(params % nProcZ*params % nProcY)
+        IF( params % nProcX > 1 )THEN
+          DO WHILE( params % nProcX > params % nXElem )
+
+            DO i = 2, params % nProcX
+              IF( MOD( params % nProcX, i ) == 0 )THEN
+                ! nProcX is divisible by i
+                j = i
+                EXIT
+              ENDIF
+            ENDDO
+
+            params % nProcX = params % nProcX/j
+
+          ENDDO
+
+        ENDIF
+
+      ENDIF
+
+      PRINT*, ' nProcX :', params % nProcX
+      PRINT*, ' nProcY :', params % nProcY
+      PRINT*, ' nProcZ :', params % nProcZ
+      
+#endif
       CALL geomParser % Build( 'self.equations' )
 
       IF( setupSuccess )THEN
@@ -2643,7 +2714,6 @@ CONTAINS
          IF( TRIM( params % UCDMeshFile ) == '' )THEN
 
            IF( params % MeshType == DoublyPeriodic )THEN
-              PRINT*,' Loading doubly periodic mesh.'
               CALL mesh % ConstructStructuredMesh( nodal % interp, &
                 params % nXelem, &
                 params % nYelem, &
@@ -2651,7 +2721,6 @@ CONTAINS
                 geomParser, &
                 .TRUE. )
            ELSE
-              PRINT*,' Loading default mesh.'
               CALL mesh % ConstructStructuredMesh( nodal % interp, &
                 params % nXelem, &
                 params % nYelem, &
@@ -2822,10 +2891,8 @@ CONTAINS
 
             ENDDO
 
-            PRINT*, '========================================================================='
-            PRINT*, 'Process ID :',procID, ', nMPI   :', nMPI
-            PRINT*, 'Process ID :',procID, ', nFaces :', npFaces
-            PRINT*, 'Process ID :',procID, ', nBFace :', nBe
+            PRINT*, 'Process ID    nMPI    nFaces  nBoundaryFaces' 
+            PRINT*,  procID, nMPI, npFaces, nBe
 
             CALL procMesh % faces % Trash( )
             CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
@@ -2986,7 +3053,8 @@ CONTAINS
 
                ELSE
                   PRINT*, '  SetupCommTables : Something catastrophic happened !'
-                  STOP
+                  setupSuccess = .FALSE.
+                  RETURN
                ENDIF
 
 

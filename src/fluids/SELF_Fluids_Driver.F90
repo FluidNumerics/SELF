@@ -21,6 +21,7 @@ PROGRAM SELF_Fluids_Driver
   TYPE( Fluid )                :: myFluid
   TYPE( Fluid_EquationParser ) :: myFluidConditions
   LOGICAL                      :: setupSuccess
+  LOGICAL                      :: meshgenSuccess
   LOGICAL                      :: initializeFromScratch
   LOGICAL                      :: pickupFileExists
   LOGICAL                      :: run_MeshGenOnly, run_UpToInitOnly
@@ -174,12 +175,12 @@ CONTAINS
 
       IF( myFluid % ExtComm % myRank == 0 )THEN
         PRINT*, '  Generating structured mesh...'
-        CALL StructuredMeshGenerator_3D( )
+        CALL StructuredMeshGenerator_3D( meshGenSuccess )
+        PRINT*, '  Done'
       ENDIF
 
       CALL myFluid % ExtComm % Finalize( )
 
-      PRINT*, '  Done'
 
   END SUBROUTINE MeshGen
 

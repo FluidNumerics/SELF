@@ -442,7 +442,6 @@ CONTAINS
 
   END SUBROUTINE Trash_ModelParameters
 
-
 #ifdef HAVE_CUDA
   SUBROUTINE UpdateDevice_ModelParameters( params )
     IMPLICIT NONE
