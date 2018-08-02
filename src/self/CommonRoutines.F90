@@ -843,6 +843,57 @@ CONTAINS
      RETURN
 
  END FUNCTION IsInf
+ 
+ FUNCTION FloorSQRT( x ) RESULT( sqrtX )
+   INTEGER :: x, sqrtX
+   ! Local
+   INTEGER :: i, res
 
+
+     IF( x == 0 .OR. x == 1)THEN
+
+       sqrtX = x
+
+     ELSE
+
+       res = 1
+       i   = 1
+       DO WHILE( res <= x )
+         i = i + 1
+         res = i*i
+       ENDDO
+
+       sqrtX = i-1         
+
+     ENDIF
+   
+
+ END FUNCTION FloorSQRT
+
+ FUNCTION FloorCURT( x ) RESULT( curtX )
+   INTEGER :: x, curtX
+   ! Local
+   INTEGER :: i, res
+
+
+     IF( x == 0 .OR. x == 1)THEN
+
+       curtX = x
+
+     ELSE
+
+       res = 1
+       i   = 1
+       DO WHILE( res <= x )
+         i = i + 1
+         res = i*i*i
+       ENDDO
+
+       curtX = i-1         
+
+     ENDIF
+   
+
+ END FUNCTION FloorCURT
 
 END MODULE CommonRoutines

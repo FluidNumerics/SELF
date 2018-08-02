@@ -1524,12 +1524,15 @@ CONTAINS
     INTEGER, INTENT(out)                :: globalToLocalNode(1:myMesh % nodes % nNodes,0:nProc-1)
    
     ! Local
-    INTEGER :: nxp, nyp, nzp
+!    INTEGER :: nxp, nyp, nzp
     INTEGER :: iPz, iPy, iPx
     INTEGER :: iZp, iYp, iXp
     INTEGER :: iZ, iY, iX
     INTEGER :: iNode, nID
     INTEGER :: iEl, procID
+    INTEGER :: nxp(1:params % nProcX)
+    INTEGER :: nyp(1:params % nProcY)
+    INTEGER :: nzp(1:params % nProcZ)
     
 
       partitions        = 0
@@ -1540,41 +1543,74 @@ CONTAINS
       globalToLocalNode = 0
 
       IF( nProc > 1 )THEN
-         nxp = params % nXelem/params % nProcX
-         IF( nxp*params % nProcX < params % nXElem )THEN
-           nxp = nxp + 1
-         ENDIF
-         nyp = params % nYelem/params % nProcY
-         IF( nyp*params % nProcY < params % nYElem )THEN
-           nyp = nyp + 1
-         ENDIF
-         nzp = params % nZelem/params % nProcZ
-         IF( nzp*params % nProcZ < params % nZElem )THEN
-           nzp = nzp + 1
-         ENDIF
-         DO iPz = 1, params % nProcZ
-            DO iPy = 1, params % nProcY
-               DO iPx = 1, params % nProcX
-               
-                  DO iZp = 1, nzp
-                     DO iYp = 1, nyp
-                        DO iXp = 1, nxp
-                        
-                           iX = iXp + (iPx-1)*nxp
-                           iY = iYp + (iPy-1)*nyp
-                           iZ = iZp + (iPz-1)*nzp
-                           
-                           iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
-                           IF( iEl <= myMesh % elements % nElements )THEN
-                             partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
-                           ENDIF
-                           
-                        ENDDO
-                     ENDDO
-                  ENDDO
+
                   
+         nxp = params % nXelem/params % nProcX
+         IF( SUM(nxp) < params % nXElem )THEN
+
+           DO iPx = 1, params % nProcX
+             nxp(iPx) = nxp(iPx) + 1
+             IF( SUM(nxp) == params % nXElem )THEN
+               EXIT
+             ENDIF
+           ENDDO
+
+         ENDIF
+
+         nyp = params % nYelem/params % nProcY
+         IF( SUM(nyp) < params % nYElem )THEN
+
+           DO iPy = 1, params % nProcY
+             nyp(iPy) = nyp(iPy) + 1
+             IF( SUM(nyp) == params % nYElem )THEN
+               EXIT
+             ENDIF
+           ENDDO
+
+         ENDIF
+
+         nzp = params % nZelem/params % nProcZ
+         IF( SUM(nzp) < params % nZElem )THEN
+
+           DO iPz = 1, params % nProcZ
+             nzp(iPz) = nzp(iPz) + 1
+             IF( SUM(nzp) == params % nZElem )THEN
+               EXIT
+             ENDIF
+           ENDDO
+
+         ENDIF
+
+         iZ = 0
+         DO iPz = 1, params % nProcZ
+           DO iZp = 1, nzp(iPz)
+
+             iZ = iZ+1
+             iY = 0
+
+             DO iPy = 1, params % nProcY
+               DO iYp = 1, nyp(iPy)
+
+                 iY = iY+1
+                 iX = 0
+
+                 DO iPx = 1, params % nProcX
+                   DO iXp = 1, nxp(iPx)
+
+                     iX = iX +1               
+                        
+                     iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
+                     IF( iEl <= myMesh % elements % nElements )THEN
+                       partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
+                     ENDIF
+
+                   ENDDO
+                 ENDDO
+
                ENDDO
-            ENDDO
+             ENDDO
+
+           ENDDO
          ENDDO
       
          DO iEl = 1, myMesh % elements % nElements
@@ -2639,58 +2675,83 @@ CONTAINS
 
       ELSE
 
-        params % nProcX = 1
-        params % nProcY = 1
+        IF( floorSQRT(params % nProc)**2 == params % nProc )THEN
 
-        params % nProcZ = params % nProc
+          params % nProcZ = 1
+          params % nProcY = floorSQRT(params % nProc)
+          params % nProcX = floorSQRT(params % nProc)
 
-        DO WHILE( params % nProcZ > params % nZElem )
+        ELSEIF(  floorCURT( params % nProc )**3 ==  params % nProc )THEN
 
-          DO i = 2, params % nProcZ
-            IF( MOD( params % nProcZ, i ) == 0 )THEN
-              ! nProcZ is divisible by i
+          params % nProcZ = floorCURT( params % nProc )
+          params % nProcY = floorCURT( params % nProc )
+          params % nProcX = floorCURT( params % nProc )
+
+        ELSE
+
+          params % nProcZ = 1 
+          params % nProcY = 1 
+          params % nProcX = params % nProc 
+
+        ENDIF
+
+          
+
+        DO WHILE( params % nProcX > params % nXElem )
+
+          DO i = 2, params % nProcX
+            IF( MOD( params % nProcX, i ) == 0 )THEN
+              ! nProcX is divisible by i
               j = i
               EXIT
             ENDIF
           ENDDO
 
-          params % nProcZ = params % nProcZ/j
+          params % nProcX = params % nProcX/j
 
         ENDDO
 
-        params % nProcY = params % nProc/params % nProcZ
-        IF( params % nProcY > 1 )THEN
-          DO WHILE( params % nProcY > params % nYElem )
+        IF( params % nProcX*params % nProcY*params % nProcZ < params % nProc )THEN
 
-            DO i = 2, params % nProcY
-              IF( MOD( params % nProcY, i ) == 0 )THEN
-                ! nProcY is divisible by i
-                j = i
-                EXIT
-              ENDIF
+          params % nProcY = params % nProc/params % nProcX
+          IF( params % nProcY > 1 )THEN
+            DO WHILE( params % nProcY > params % nYElem )
+  
+              DO i = 2, params % nProcY
+                IF( MOD( params % nProcY, i ) == 0 )THEN
+                  ! nProcY is divisible by i
+                  j = i
+                  EXIT
+                ENDIF
+              ENDDO
+  
+              params % nProcY = params % nProcY/j
+  
             ENDDO
-
-            params % nProcY = params % nProcY/j
-
-          ENDDO
+  
+          ENDIF
 
         ENDIF
 
-        params % nProcX = params % nProc/(params % nProcZ*params % nProcY)
-        IF( params % nProcX > 1 )THEN
-          DO WHILE( params % nProcX > params % nXElem )
+        IF( params % nProcX*params % nProcY*params % nProcZ < params % nProc )THEN
 
-            DO i = 2, params % nProcX
-              IF( MOD( params % nProcX, i ) == 0 )THEN
-                ! nProcX is divisible by i
-                j = i
-                EXIT
-              ENDIF
+          params % nProcZ = params % nProc/(params % nProcX*params % nProcY)
+          IF( params % nProcZ > 1 )THEN
+            DO WHILE( params % nProcZ > params % nZElem )
+  
+              DO i = 2, params % nProcZ
+                IF( MOD( params % nProcZ, i ) == 0 )THEN
+                  ! nProcZ is divisible by i
+                  j = i
+                  EXIT
+                ENDIF
+              ENDDO
+  
+              params % nProcZ = params % nProcZ/j
+  
             ENDDO
-
-            params % nProcX = params % nProcX/j
-
-          ENDDO
+  
+          ENDIF
 
         ENDIF
 
@@ -2766,24 +2827,18 @@ CONTAINS
          faceBoundaryIDs = 0
          faceProcTable   = -5000
 
- !        IF( TRIM( params % UCDMeshFile ) == '' )THEN
+         CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
+                                                          globalToLocal, nodeLogic, nNodePerProc, &
+                                                          globalToLocalNode, nProc )
 
-           CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
-                                                            globalToLocal, nodeLogic, nNodePerProc, &
-                                                            globalToLocalNode, nProc )
-
- !        ELSE
-
-
- !        ENDIF        
    
             
          ! Now we generate the local mesh for each process
 
          DO procID = 0, nProc-1
             CALL procMesh % Build( nNodePerProc(procID), &
-                                           nElPerProc(procID), &
-                                           1, params % polyDeg )
+                                   nElPerProc(procID), &
+                                   1, params % polyDeg )
 ! ----------------------------------------------------------------------------- !
 
             DO nID = 1, mesh % nodes % nNodes
@@ -2891,8 +2946,8 @@ CONTAINS
 
             ENDDO
 
-            PRINT*, 'Process ID    nMPI    nFaces  nBoundaryFaces' 
-            PRINT*,  procID, nMPI, npFaces, nBe
+            PRINT*, '      Process ID        nMPI       nFaces       nBFaces       nElements' 
+            PRINT*,  procID, nMPI, npFaces, nBe, nElPerProc(procID)
 
             CALL procMesh % faces % Trash( )
             CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
