@@ -26,73 +26,100 @@ shear. Eventually, this shear layer becomes unstable ( Kelvin-Helmholtz ) and tu
 ensues.
 
 
-First, to get started, change directories into the boundary layer example
+## Compiling and Installing
+SELF-Fluids is built and installed using autotools. 
+For a serial build, with single precision, no diagnostics, no timers, and without GPU 
+acceleration, installation is as simple as
 ```
-cd SELF-Fluids/examples/boundarylayer
+./configure [OPTIONS] --prefix=/path/to/install/directory
+make
+make install
 ```
-
-There are a variety of flavors of the sfluid executable that can be built dependent on 
-environment variables that control things like the fortran compiler used, gpu acceleration,
-in-situ timers, integrated diagnostics, passive tracers, etc. Currently yhe environment
-variables that control these features are set in a file called `SELF_environment_settings`.
-To build with various options, you'll usually, change this file, source it, and recompile.
-
-### Set up for serial CPU
-Open `SELF_environment_settings` in a text editor. Make sure that `MPI=no`, `OpenMP=no`, and
-`CUDA=no`. Also check to make sure `FC` is set to a fortran compiler in your path. 
-
-### Set up with MPI support
-Open `SELF_environment_settings` in a text editor. Make sure that `MPI=yes`, `OpenMP=no`, and
-`CUDA=no`. Also check to make sure `MPIFC` and is set to an MPI-Fortran compiler in your path. 
-
-### Set up with CUDA-Fortran support
-Open `SELF_environment_settings` in a text editor. Make sure that `MPI=no`, `OpenMP=no`, and
-`CUDA=yes`. Also check to make sure `FC=pgfortran`. 
-
-Note that to use CUDA-Fortran support, you must have the PGI Compilers installed.
-
-### Set up with OpenMP support
-Open `SELF_environment_settings` in a text editor. Make sure that `MPI=no`, `OpenMP=yes`, and
-`CUDA=no`. Also check to make sure `FC` is set to a fortran compiler in your path. 
-
-### Set up with MPI+CUDA support
-Open `SELF_environment_settings` in a text editor. Make sure that `MPI=yes`, `OpenMP=no`, and
-`CUDA=yes`. Also check to make sure `FC=pgfortran` and `MPIFC=mpif90`. 
-
-### Set up with MPI+OpenMP support
-Open `SELF_environment_settings` in a text editor. Make sure that `MPI=yes`, `OpenMP=yes`, and
-`CUDA=no`. Also check to make sure `FC` is set to a fortran compiler in your path. 
-
-Note that OpenMP cannot be used when CUDA is enabled.
-
-### Compiling
-Once your environment settings file is set up, do
+This installs the `sfluid` binary in the directory specified by the `prefix` argument
+at the configure stage. To make this binary visible, add
 ```
-source SELF_environment_settings
-make sfluid
+export PATH=${PATH}:/path/to/install/directory/bin
+```
+to your `.bashrc` file.
+
+Additional options for the configure step include
+```
+  --enable-mpi
+  --enable-openmp
+  --enable-cuda
+  --enable-double-precision
+  --enable-timing
 ```
 
-### Running
+
+### MPI Support
+To enable building of the sfluid executable with MPI support, you can add the flag
+`--enable-mpi` at the configure stage.
+```
+./configure --enable-mpi --prefix=/path/to/install/directory
+make
+make install
+```
+To use MPI, it is necessary to have an MPI library, like OpenMPI or MPICH, installed
+and have binaries in your path.
+
+
+### OpenMP Multi-Threaded Acceleration
+To enable building of the sfluid executable with multi-threading support via OpenMP,
+ you can add the flag `--enable-openmp` at the configure stage.
+```
+./configure --enable-openmp --prefix=/path/to/install/directory
+make
+make install
+```
+This adds the appropriate flag to `FCFLAGS` so that OpenMP directives within the
+SELF-Fluids source are interpreted. Note that OpenMP support can be used with MPI, 
+but cannot be enabled when GPU accelerations are enabled.
+
+At runtime, you will need to set the environment variable `OMP_NUM_THREADS` to
+the desired number of threads.
+
+
+### GPU Acceleration
+To enable building of the sfluid executable with GPU acceleration via CUDA-Fortran,
+ you can add the flag `--enable-cuda` at the configure stage. You must also specify
+a GPU architecture using the `GPU_ARCH` flag ( e.g `GPU_ARCH=cc60` specifies
+compilation for devices with compute capability 6.0 ).
+```
+./configure --enable-cuda --prefix=/path/to/install/directory GPU_ARCH=<compute-capability>
+make
+make install
+```
+Note that CUDA support can be used with MPI. To use the GPU acceleration, you must use
+the PGI compilers ( https://www.pgroup.com/products/community.htm )
+
+
+
+## Running
 At run-time, the sfluid executable uses the `runtime.params` file for determining the length of 
 the run, mesh size (if structured), and other numerical and physical parameters. Additionally,
 the initial conditions and drag forces are set in `self.equations`. 
 
-The first time the `sfluid`is executed for an example, it will generate a mesh consistent with 
+The first time the `sfluid` is executed for an example, it will generate a mesh consistent with 
 the settings in `runtime.params` and initial conditions consistent with those specified in 
-`self.equations`. To get started quickly, run
+`self.equations`. If `runtime.params` is not present, a sample will be generated for you.
+If `self.equations` is not present, a sample equations file will be generated
+for you as well.
+
+To get started quickly, run
 ```
-./sfluid
+sfluid
 ```
 
 If you would just like to generate the mesh, or generate a new mesh from scratch, run
 ```
-./sfluid meshgen
+sfluid meshgen
 ```
 
 If you would like to proceed up to initial condition generation, and not forward step the model,
 you can run
 ```
-./sfluid init
+sfluid init
 ```
 
 Note that if you are running with MPI enabled, you will need to prepend `mpirun -np XX`, replacing
