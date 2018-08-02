@@ -100,11 +100,7 @@ MODULE Fluid_Class
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
   INTEGER, PRIVATE            :: diagUnits(1:5)
 
-#ifdef PASSIVE_TRACERS
   INTEGER, PARAMETER :: nEquations   = 7
-#else
-  INTEGER, PARAMETER :: nEquations   = 6
-#endif
 
 #ifdef HAVE_CUDA
  INTEGER, CONSTANT    :: nEq_dev
@@ -1445,10 +1441,7 @@ CONTAINS
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-
-#ifdef PASSIVE_TRACERS
             myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) 
-#endif
 
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) ! P
 
@@ -1507,9 +1500,7 @@ CONTAINS
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % prescribedState(i,j,4,bID) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % prescribedState(i,j,5,bID) ! potential temperature
-#ifdef PASSIVE_TRACERS
             myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % prescribedState(i,j,6,bID)
-#endif
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % prescribedState(i,j,nEquations,bID) ! P
 
           ENDIF
@@ -2757,17 +2748,10 @@ CONTAINS
       FORM='formatted', &
       STATUS='replace')
 
-#ifdef PASSIVE_TRACERS
 
     WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure",'//&
       ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
 
-#else
-
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Pressure",'//&
-      ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
-
-#endif
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
@@ -2789,9 +2773,7 @@ CONTAINS
               sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
               sol(i,j,k,4,iEl), &
               (sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl))/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-#ifdef PASSIVE_TRACERS
               ( bsol(i,j,k,6,iEl) + sol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-#endif
               sol(i,j,k,nEquations,iEl), &
               bsol(i,j,k,4,iEl), &
               bsol(i,j,k,5,iEl)/( bsol(i,j,k,4,iEl) ),&
@@ -3404,9 +3386,7 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
           externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-#ifdef PASSIVE_TRACERS
           externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! tracer
-#endif
           externalState(i,j,nEq_dev,iFace) =  stateBsols(i,j,nEq_dev,s1,e1) ! P
     
         ELSEIF( e2 == INFLOW )THEN
@@ -3462,9 +3442,7 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  prescribedState(i,j,4,iFace) ! rho
           externalState(i,j,5,iFace) =  prescribedState(i,j,5,iFace) ! potential temperature
-#ifdef PASSIVE_TRACERS
           externalState(i,j,6,iFace) =  prescribedState(i,j,6,iFace) ! tracer
-#endif
           externalState(i,j,nEq_dev,iFace) =  prescribedState(i,j,nEq_dev,iFace) ! P
     
         ENDIF
@@ -3495,11 +3473,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-#ifdef PASSIVE_TRACERS
    REAL(prec) :: jump(1:6), aS(1:6)
-#else
-   REAL(prec) :: jump(1:5), aS(1:5)
-#endif
    REAL(prec) :: fac
 
 
@@ -3630,11 +3604,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-#ifdef PASSIVE_TRACERS
    REAL(prec) :: jump(1:6), aS(1:6)
-#else
-   REAL(prec) :: jump(1:5), aS(1:5)
-#endif
    REAL(prec) :: fac
 
 
