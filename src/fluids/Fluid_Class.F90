@@ -373,11 +373,7 @@ CONTAINS
     TYPE(dim3)         :: fgrid, grid, tBlock
 #else
     REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
-    REAL(prec) :: G3D(0:myDGSEM % params % polyDeg,&
-                      0:myDGSEM % params % polyDeg,&
-                      0:myDGSEM % params % polyDeg,&
-                      1:myDGSEM % state % nEquations,&
-                      1:myDGSEM % mesh % elements % nElements)
+    REAL(prec), ALLOCATABLE :: G3D(:,:,:,:,:)
     INTEGER    :: m, iEl, iT, i, j, k, iEq
 
 #endif
@@ -459,6 +455,11 @@ CONTAINS
 
 #else
 
+    ALLOCATE( G3D(0:myDGSEM % params % polyDeg,&
+                  0:myDGSEM % params % polyDeg,&
+                  0:myDGSEM % params % polyDeg,&
+                  1:myDGSEM % state % nEquations,&
+                  1:myDGSEM % mesh % elements % nElements) )
 
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
@@ -576,6 +577,9 @@ CONTAINS
       !$OMP BARRIER
 
     ENDIF
+
+    DEALLOCATE( G3D )
+
 #endif
 
 #ifdef TIMING
@@ -2700,11 +2704,6 @@ CONTAINS
 
     CLASS( Fluid ), INTENT(inout) :: myDGsem
     !LOCAL
-    REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: drag(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1, 1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: drag_init(0:myDGSEM % params % polydeg,0:myDGSEM % params % polydeg,0:myDGSEM % params % polydeg,1, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
     INTEGER :: istat
 #endif
@@ -2723,24 +2722,6 @@ CONTAINS
 
 #endif
 
-    drag_init(:,:,:,1,:) = myDGSEM % sourceTerms % drag
-    sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
-                                                myDGSEM % state % solution, &
-                                                myDGSEM % state % nEquations, &
-                                                myDGSEM % mesh % elements % nElements )
-
-    bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
-                                                 myDGSEM % static % nEquations, &
-                                                 myDGSEM % mesh % elements % nElements )
-
-    drag = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, drag_init, &
-                                                 1, &
-                                                 myDGSEM % mesh % elements % nElements )
-
-    x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
-                                              3, &
-                                              myDGSEM % mesh % elements % nElements )
-
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
     OPEN( UNIT=NEWUNIT(fUnit), &
@@ -2749,37 +2730,30 @@ CONTAINS
       STATUS='replace')
 
 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure",'//&
-      ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure"'
 
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
       WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements % elementID(iEl)
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % nPlot+1,&
-                                                 ', J=',myDGSEM % params % nPlot+1,&
-                                                 ', K=',myDGSEM % params % nPlot+1,',F=POINT'
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % polyDeg+1,&
+                                                 ', J=',myDGSEM % params % polyDeg+1,&
+                                                 ', K=',myDGSEM % params % polyDeg+1,',F=POINT'
 
-      DO k = 0, myDGSEM % params % nPlot
-        DO j = 0, myDGSEM % params % nPlot
-          DO i = 0, myDGSEM % params % nPlot
-            T =   (bsol(i,j,k,5,iEl) + sol(i,j,k,5,iEl))/(bsol(i,j,k,4,iEl)+sol(i,j,k,4,iEl) )
+      DO k = 0, myDGSEM % params % polyDeg
+        DO j = 0, myDGSEM % params % polyDeg
+          DO i = 0, myDGSEM % params % polyDeg
 
-            ! Sound speed estimate for the external and internal states
-            c = sqrt( myDGSEM % params % R*T*( ( sol(i,j,k,nEquations,iEl) + bsol(i,j,k,nEquations,iEl) )/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio   )
-            WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), x(i,j,k,2,iEl), x(i,j,k,3,iEl),&
-              sol(i,j,k,1,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,4,iEl), &
-              (sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl))/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              ( bsol(i,j,k,6,iEl) + sol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,nEquations,iEl), &
-              bsol(i,j,k,4,iEl), &
-              bsol(i,j,k,5,iEl)/( bsol(i,j,k,4,iEl) ),&
-              bsol(i,j,k,nEquations,iEl),&
-              drag(i,j,k,1,iEl), c
-
+            WRITE(fUnit,'(17(E15.7,1x))') myDGSEM % mesh % elements % x(i,j,k,1,iEl), &
+                                          myDGSEM % mesh % elements % x(i,j,k,2,iEl), &
+                                          myDGSEM % mesh % elements % x(i,j,k,3,iEl), &
+                                          myDGSEM % state % solution(i,j,k,1,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
+                                          myDGSEM % state % solution(i,j,k,2,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
+                                          myDGSEM % state % solution(i,j,k,3,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
+                                          myDGSEM % state % solution(i,j,k,4,iEl), &
+                                          ( myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
+                                          ( myDGSEM % state % solution(i,j,k,6,iEl) + myDGSEM % static % solution(i,j,k,6,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
+                                          myDGSEM % state % solution(i,j,k,nEquations,iEl)
 
           ENDDO
         ENDDO
