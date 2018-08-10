@@ -18,10 +18,12 @@ MODULE Fluid_Class
   USE NodalDGSolution_3D_Class
   USE HexMesh_Class
   USE BoundaryCommunicator_Class
-  USE BodyForces_Class
 #ifdef HAVE_MPI
   USE MPILayer_Class
 #endif
+
+  USE BodyForces_Class
+  USE Fluid_EquationParser_Class
 
 #ifdef HAVE_CUDA
   USE cudafor
@@ -36,6 +38,7 @@ MODULE Fluid_Class
     REAL(prec) :: simulationTime
     REAL(prec) :: volume, mass, KE, PE, heat
   
+    TYPE( Fluid_EquationParser ) :: fluidEquations
     TYPE( MultiTimers )          :: timers
     TYPE( ModelParameters )      :: params
     TYPE( HexMesh )              :: mesh
@@ -60,10 +63,21 @@ MODULE Fluid_Class
     PROCEDURE :: Build => Build_Fluid
     PROCEDURE :: Trash => Trash_Fluid
 
-    PROCEDURE :: BuildHexMesh => BuildHexMesh_Fluid
+    PROCEDURE :: SetInitialConditions => SetInitialConditions_Fluid
+    PROCEDURE :: SetPrescribedState   => SetPrescribedState_Fluid
+    PROCEDURE :: InitializeMesh       => InitializeMesh_Fluid
     PROCEDURE :: CalculateStaticState => CalculateStaticState_Fluid
 
-    ! Time integrators
+    PROCEDURE :: Diagnostics           => Diagnostics_Fluid
+    PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
+    PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
+    PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
+
+    PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
+    PROCEDURE :: WritePickup  => WritePickup_Fluid
+    PROCEDURE :: ReadPickup   => ReadPickup_Fluid
+
+    ! (Soon to be) PRIVATE Routines
     PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
 !    PROCEDURE :: CrankNicholsonRHS     => CrankNicholsonRHS_Fluid
 
@@ -84,14 +98,6 @@ MODULE Fluid_Class
     PROCEDURE :: InternalFace_StressFlux           => InternalFace_StressFlux_Fluid
     PROCEDURE :: BoundaryFace_StressFlux           => BoundaryFace_StressFlux_Fluid
 
-    PROCEDURE :: Diagnostics           => Diagnostics_Fluid
-    PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
-    PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
-    PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
-
-    PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
-    PROCEDURE :: WritePickup  => WritePickup_Fluid
-    PROCEDURE :: ReadPickup   => ReadPickup_Fluid
     PROCEDURE :: UpdateExternalStaticState => UpdateExternalStaticState_Fluid
 
   END TYPE Fluid
@@ -147,6 +153,8 @@ CONTAINS
       RETURN
     ENDIF
 
+    CALL myDGSEM % fluidEquations % Build( 'self.equations' )
+
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
     ! the device for each rank is also set here.
@@ -168,7 +176,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % BuildHexMesh(  )
+    CALL myDGSEM % InitializeMesh(  )
     CALL myDGSEM % extComm % ReadPickup( )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
@@ -312,7 +320,170 @@ CONTAINS
 
   END SUBROUTINE Trash_Fluid
 !
-  SUBROUTINE BuildHexMesh_Fluid( myDGSEM )
+  SUBROUTINE SetInitialConditions_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    ! Local
+    INTEGER    :: i, j, k, iEl
+    INTEGER    :: iFace, bID, e1, s1, e2
+    REAL(prec) :: x(1:3)
+    REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
+
+
+
+    myDGSEM % state % solution = 0.0_prec
+    !$OMP PARALLEL
+    CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
+    !$OMP END PARALLEL
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      DO k = 0, myDGSEM % params % polyDeg
+        DO j = 0, myDGSEM % params % polyDeg
+          DO i = 0, myDGSEM % params % polyDeg
+
+            x(1:3) = myDGSEM % mesh % elements % x(i,j,k,1:3,iEl)
+
+            IF( myDGSEM % fluidEquations % calculate_density_from_T )THEN
+               
+              u  = myDGSEM % fluidEquations % u % evaluate( x ) 
+              v  = myDGSEM % fluidEquations % v % evaluate( x ) 
+              w  = myDGSEM % fluidEquations % w % evaluate( x ) 
+              T  = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+              s  = myDGSEM % fluidEquations % tracer % evaluate( x )
+              s0 = myDGSEM % fluidEquations % staticTracer % evaluate( x )
+
+              Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
+
+              myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
+              myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
+              myDGSEM % state % solution(i,j,k,2,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*v
+              myDGSEM % state % solution(i,j,k,3,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*w
+              myDGSEM % state % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s
+              myDGSEM % static % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s0
+
+            ELSE
+
+              u   = myDGSEM % fluidEquations % u % evaluate( x ) 
+              v   = myDGSEM % fluidEquations % v % evaluate( x ) 
+              w   = myDGSEM % fluidEquations % w % evaluate( x ) 
+              rho = myDGSEM % fluidEquations % rho % evaluate( x ) 
+              T   = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+              s   = myDGSEM % fluidEquations % tracer % evaluate( x )
+              s0  = myDGSEM % fluidEquations % staticTracer % evaluate( x )
+
+
+              myDGSEM % state % solution(i,j,k,4,iEl) = rho
+              myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
+              myDGSEM % state % solution(i,j,k,2,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*v
+              myDGSEM % state % solution(i,j,k,3,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*w
+              myDGSEM % state % solution(i,j,k,5,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*T
+              myDGSEM % state % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s
+              myDGSEM % static % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s0
+
+            ENDIF
+
+            myDGSEM % sourceTerms % drag(i,j,k,iEl) = myDGSEM % fluidEquations % drag % evaluate( x )
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+#ifdef HAVE_CUDA
+    myDGSEM % state % solution_dev = myDGSEM % state % solution
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
+#endif
+
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( )
+    !$OMP END PARALLEL
+
+#ifdef HAVE_CUDA
+    myDGSEM % state % boundarySolution  = myDGSEM % state % boundarySolution_dev
+#endif
+
+    CALL myDGSEM % UpdateExternalStaticState( )
+
+    CALL myDGSEM % SetPrescribedState( )
+
+  END SUBROUTINE SetInitialConditions_Fluid
+
+  SUBROUTINE SetPrescribedState_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+    ! Local
+    INTEGER    :: i, j, k, iEl
+    INTEGER    :: iFace, bID, e1, s1, e2
+    REAL(prec) :: x(1:3)
+    REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
+
+    DO bID = 1, myDGSEM % extComm % nBoundaries
+
+       iFace = myDGSEM % extComm % boundaryIDs( bID )
+       e1    = myDGSEM % mesh % faces % elementIDs(1,iFace)
+       s1    = myDGSEM % mesh % faces % elementSides(1,iFace)
+       e2    = myDGSEM % mesh % faces % elementIDs(2,iFace)
+
+       IF( e2 == PRESCRIBED )THEN
+
+
+         IF( myDGSEM % fluidEquations % calculate_density_from_T )THEN
+
+           DO j = 0, myDGSEM % params % polyDeg
+             DO i = 0, myDGSEM % params % polyDeg
+
+               x(1:3) = myDGSEM % mesh % elements % xBound(i,j,1:3,s1,e1)
+
+               u = myDGSEM % fluidEquations % u % evaluate( x ) 
+               v = myDGSEM % fluidEquations % v % evaluate( x ) 
+               w = myDGSEM % fluidEquations % w % evaluate( x ) 
+               T = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+               s = myDGSEM % fluidEquations % tracer % evaluate( x )
+      
+               Tbar = myDGSEM % static % boundarySolution(i,j,5,s1,e1)/myDGSEM % static % boundarySolution(i,j,4,s1,e1)
+      
+               myDGSEM % state % prescribedState(i,j,4,bID) = -myDGSEM % static % boundarySolution(i,j,4,s1,e1)*T/(Tbar + T)
+               myDGSEM % state % prescribedState(i,j,1,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*u
+               myDGSEM % state % prescribedState(i,j,2,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*v
+               myDGSEM % state % prescribedState(i,j,3,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*w
+               myDGSEM % state % prescribedState(i,j,6,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*s
+
+             ENDDO
+           ENDDO
+          
+         ELSE
+
+           DO j = 0, myDGSEM % params % polyDeg
+             DO i = 0, myDGSEM % params % polyDeg
+
+               x(1:3) = myDGSEM % mesh % elements % xBound(i,j,1:3,s1,e1)
+
+               u   = myDGSEM % fluidEquations % u % evaluate( x ) 
+               v   = myDGSEM % fluidEquations % v % evaluate( x ) 
+               w   = myDGSEM % fluidEquations % w % evaluate( x ) 
+               T   = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+               rho = myDGSEM % fluidEquations % rho % evaluate( x ) 
+               s   = myDGSEM % fluidEquations % tracer % evaluate( x )
+  
+               Tbar = myDGSEM % static % boundarySolution(i,j,5,s1,e1)/myDGSEM % static % boundarySolution(i,j,4,e1,s1)
+  
+               myDGSEM % state % prescribedState(i,j,4,bID) = rho
+               myDGSEM % state % prescribedState(i,j,1,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*u
+               myDGSEM % state % prescribedState(i,j,2,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*v
+               myDGSEM % state % prescribedState(i,j,3,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*w
+               myDGSEM % state % prescribedState(i,j,5,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*T
+               myDGSEM % state % prescribedState(i,j,6,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*s
+
+             ENDDO
+           ENDDO
+
+         ENDIF
+
+       ENDIF
+
+    ENDDO
+
+  END SUBROUTINE SetPrescribedState_Fluid
+
+  SUBROUTINE InitializeMesh_Fluid( myDGSEM )
 
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
@@ -352,7 +523,7 @@ CONTAINS
                                           myDGSEM % params % zScale )
 
 
-  END SUBROUTINE BuildHexMesh_Fluid
+  END SUBROUTINE InitializeMesh_Fluid
 !
   SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT )
 
@@ -456,6 +627,9 @@ CONTAINS
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
 
     ENDIF
+
+    ! Update the host copy of the solution
+    myDGSEM % state % solution = myDGSEM % state % solution_dev
 
 #else
 
@@ -3032,18 +3206,6 @@ CONTAINS
 
     CLOSE(UNIT=fUnit)
 
-    OPEN( UNIT   = NEWUNIT(fUnit), &
-      FILE   = 'State.'//rankChar//'.'//timeStampString//'.exs', &
-      FORM   ='UNFORMATTED',&
-      ACCESS ='DIRECT',&
-      STATUS ='REPLACE',&
-      ACTION ='WRITE', &
-      CONVERT='BIG_ENDIAN',&
-      RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
-    WRITE( fUnit, rec = 1 ) myDGSEM % state % externalState
-    WRITE( fUnit, rec = 2 ) myDGSEM % state % prescribedState
-    CLOSE(fUnit)
-
 
   END SUBROUTINE WritePickup_Fluid
 !
@@ -3109,26 +3271,10 @@ CONTAINS
 
     INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
 
-    IF( itExists )THEN
-
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-        FILE   = 'State.'//rankChar//'.'//timeStampString//'.exs', &
-        FORM   ='UNFORMATTED',&
-        ACCESS ='DIRECT',&
-        STATUS ='OLD',&
-        ACTION ='READ', &
-        CONVERT='BIG_ENDIAN',&
-        RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
-      READ( fUnit, rec = 1 ) myDGSEM % state % externalState
-      READ( fUnit, rec = 2 ) myDGSEM % state % prescribedState
-      CLOSE(fUnit)
-
-    ENDIF
-
     CALL myDGSEM % UpdateExternalStaticState( )
 
   END SUBROUTINE ReadPickup_Fluid
-
+  
   SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid ), INTENT (inout) :: myDGSEM 

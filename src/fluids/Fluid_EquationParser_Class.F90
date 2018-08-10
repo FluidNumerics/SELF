@@ -91,6 +91,8 @@ CONTAINS
 
      ENDDO
 
+     CLOSE( fUnit )
+
   END SUBROUTINE Build_Fluid_EquationParser
 
 END MODULE Fluid_EquationParser_Class
