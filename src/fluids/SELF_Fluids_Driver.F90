@@ -191,6 +191,7 @@ CONTAINS
     ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
     ! returns FALSE.
     CALL myFluid % ReadPickup( pickupFileExists )
+    CALL myFluid % SetPrescribedState( )
 
     ! If the pickup file doesn't exist, then the initial conditions are generated
     ! from the equation parser.

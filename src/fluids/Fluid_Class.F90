@@ -3243,8 +3243,6 @@ CONTAINS
 
     ENDIF
 
-    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
-
     CALL myDGSEM % UpdateExternalStaticState( )
 
   END SUBROUTINE ReadPickup_Fluid
