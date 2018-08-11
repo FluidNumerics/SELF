@@ -29,6 +29,7 @@ MODULE Fluid_Class
   USE cudafor
 #endif
 
+  USE HDF5
 
   IMPLICIT NONE
 
@@ -3133,6 +3134,152 @@ CONTAINS
 
   END SUBROUTINE Diagnostics_Fluid
 !
+  SUBROUTINE Write_to_HDF5( myDGSEM )
+    IMPLICIT NONE
+    CLASS( Fluid ), INTENT(in) :: myDGSEM
+    ! Local
+    CHARACTER(100)   :: filename, groupname
+    CHARACTER(13)    :: timeStampString
+    CHARACTER(10)    :: zoneID
+    INTEGER          :: iEl, N, rank, error
+    INTEGER(HSIZE_T) :: dimensions(1:3)
+    INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id
+
+    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+
+    filename = "State."//timeStampString//".h5"
+
+    N = myDGSEM % params % polyDeg
+    dimensions = (/ N+1, N+1, N+1 /)
+
+    PRINT(MsgFMT), 'Writing output file : '//TRIM(filename)
+
+    ! Initialize FORTRAN interface.
+    !
+    CALL h5open_f(error)  
+  
+    ! Create a new file using default properties.
+    !
+    CALL h5fcreate_f(TRIM(filename), H5F_ACC_TRUNC_F, file_id, error)
+  
+    ! Create dataspace to be used for each element ( (N+1)x(N+1)x(N+1) grid )
+    !
+    CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+
+      WRITE(zoneID,'(I10.10)') myDGSEM % mesh % elements % elementID(iEl)
+      groupname = "/model_output/element_"//zoneID
+
+      !
+      ! Create a dataset in the model_output/element_<id> group
+      !
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/x_momentum", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/y_momentum", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/z_momentum", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/density", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/potential_temperature", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/tracer", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/pressure", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      ! Write the static fields to file
+      groupname = "/static_states/element_"//zoneID
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/x_momentum", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/y_momentum", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/z_momentum", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/density", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/potential_temperature", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/tracer", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/pressure", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+
+      groupname = "/model_conditions/element_"//zoneID
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/drag", &
+                         H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), dimensions, error)
+      CALL h5dclose_f(dataset_id, error)
+    
+    ENDDO
+
+    ! Close the dataspace for the second dataset.
+    !
+    CALL h5sclose_f(dataspace_id, error)
+
+    ! Close the file.
+    !
+    CALL h5fclose_f(file_id, error)
+
+
+  END SUBROUTINE Write_to_HDF5
+
   SUBROUTINE WritePickup_Fluid( myDGSEM )
 
     IMPLICIT NONE

@@ -24,15 +24,27 @@ AS_IF([test "x$enable_cuda" = "xyes"],[
 
 ])
 
+# Check for HDF5
+AX_LIB_HDF5()
+AS_IF([test "x$with_hdf5" = "xyes"],[
+  AC_MSG_NOTICE([found hdf5 $H5FC])
+  FC="$H5FC"
+],[
+  AC_MSG_ERROR([Unable to find HDF5, we need HDF5.])
+])
+
 # Check for MPI
 AC_CHECK_PROGS(MPIFC, mpif90 mpxlf95_r mpxlf90_r mpxlf95 mpxlf90 mpf90 cmpif90c, $FC)
 AC_ARG_ENABLE([mpi], AS_HELP_STRING([--enable-mpi], [default:no]))
 AS_IF([test "x$enable_mpi" = "xyes"],[
 
-  FC=$MPIFC
   FCFLAGS+=" -DHAVE_MPI"
+  AS_IF([test "x$HDF5_TYPE" = "xserial",],[
+    AC_MSG_ERROR([HDF5 found is serial. We need parallel HDF5.])
+  ])
 
 ])
+
 
 # Check for Double Precision floating point arithmetic request.
 AC_ARG_ENABLE( double, AS_HELP_STRING([--enable-double, default:no]))
@@ -54,6 +66,7 @@ AC_ARG_ENABLE( diagnostics, AS_HELP_STRING([--enable-diagnostics, default:no]))
 AS_IF( [test "x$enable_diagnostics" = "xyes"],[
   FCFLAGS+=" -DDIAGNOSTICS"
 ])
+
 
 AC_CONFIG_FILES([
 Makefile
