@@ -205,7 +205,8 @@ CONTAINS
       PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
       CALL myFluid % SetInitialConditions( )
 
-      CALL myFluid % WritePickup( )
+!      CALL myFluid % WritePickup( )
+      CALL myFluid % Write_to_HDF5( )
       CALL myFluid % WriteTecplot( )
 
     ENDIF

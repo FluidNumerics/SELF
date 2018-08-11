@@ -74,6 +74,7 @@ MODULE Fluid_Class
     PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
     PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
 
+    PROCEDURE :: Write_to_HDF5
     PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
     PROCEDURE :: WritePickup  => WritePickup_Fluid
     PROCEDURE :: ReadPickup   => ReadPickup_Fluid
@@ -159,6 +160,7 @@ CONTAINS
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
     ! the device for each rank is also set here.
+    myDGSEM % extComm % setup = .FALSE.
     CALL myDGSEM % extComm % SetRanks( )
 
 #ifdef HAVE_CUDA
@@ -3144,12 +3146,15 @@ CONTAINS
     INTEGER          :: iEl, N, rank, error
     INTEGER(HSIZE_T) :: dimensions(1:3)
     INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id
+    INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
+    INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id
 
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
     filename = "State."//timeStampString//".h5"
 
     N = myDGSEM % params % polyDeg
+    rank = 3
     dimensions = (/ N+1, N+1, N+1 /)
 
     PRINT(MsgFMT), 'Writing output file : '//TRIM(filename)
@@ -3166,11 +3171,21 @@ CONTAINS
     !
     CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
 
+    groupname = "/model_output"
+    CALL h5gcreate_f( file_id, TRIM(groupname), model_group_id, error )
+
+    groupname = "/static_states"
+    CALL h5gcreate_f( file_id, TRIM(groupname), static_group_id, error )
+
+    groupname = "/model_conditions"
+    CALL h5gcreate_f( file_id, TRIM(groupname), conditions_group_id, error )
+
     DO iEl = 1, myDGSEM % mesh % elements % nElements
 
       WRITE(zoneID,'(I10.10)') myDGSEM % mesh % elements % elementID(iEl)
       groupname = "/model_output/element_"//zoneID
-
+      CALL h5gcreate_f( file_id, TRIM(groupname), element_group_id, error )
+      
       !
       ! Create a dataset in the model_output/element_<id> group
       !
@@ -3218,6 +3233,8 @@ CONTAINS
 
       ! Write the static fields to file
       groupname = "/static_states/element_"//zoneID
+      CALL h5gcreate_f( file_id, TRIM(groupname), static_element_group_id, error )
+
       CALL h5dcreate_f( file_id, TRIM(groupname)//"/x_momentum", &
                          H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
       CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
@@ -3261,21 +3278,31 @@ CONTAINS
       CALL h5dclose_f(dataset_id, error)
 
       groupname = "/model_conditions/element_"//zoneID
+      CALL h5gcreate_f( file_id, TRIM(groupname), conditions_element_group_id, error )
+
       CALL h5dcreate_f( file_id, TRIM(groupname)//"/drag", &
                          H5T_NATIVE_REAL, dataspace_id, dataset_id, error)
       CALL h5dwrite_f( dataset_id, H5T_NATIVE_REAL, &
                        myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), dimensions, error)
       CALL h5dclose_f(dataset_id, error)
     
+      CALL h5gclose_f( element_group_id, error )
+      CALL h5gclose_f( static_element_group_id, error )
+      CALL h5gclose_f( conditions_element_group_id, error )
+
     ENDDO
 
+
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
     ! Close the dataspace for the second dataset.
     !
-    CALL h5sclose_f(dataspace_id, error)
+    CALL h5sclose_f( dataspace_id, error )
 
     ! Close the file.
     !
-    CALL h5fclose_f(file_id, error)
+    CALL h5fclose_f( file_id, error )
 
 
   END SUBROUTINE Write_to_HDF5
