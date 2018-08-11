@@ -481,6 +481,10 @@ CONTAINS
 
     ENDDO
 
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
+#endif
+
   END SUBROUTINE SetPrescribedState_Fluid
 
   SUBROUTINE InitializeMesh_Fluid( myDGSEM )
@@ -2893,7 +2897,6 @@ CONTAINS
     CALL myDGSEM % state % UpdateHost( )
     CALL myDGSEM % static % UpdateHost( )
     istat = cudaDeviceSynchronize( )
-
 #endif
 
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
@@ -3243,7 +3246,15 @@ CONTAINS
 
     ENDIF
 
+#ifdef HAVE_CUDA
+    CALL myDGSEM % static % UpdateDevice( )
+    CALL myDGSEM % state % UpdateDevice( )
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
+#endif
+
     CALL myDGSEM % UpdateExternalStaticState( )
+    CALL myDGSEM % SetPrescribedState( )
 
   END SUBROUTINE ReadPickup_Fluid
   
@@ -3258,10 +3269,6 @@ CONTAINS
 #endif
 
 #ifdef HAVE_CUDA
-      CALL myDGSEM % static % UpdateDevice( )
-      CALL myDGSEM % state % UpdateDevice( )
-      CALL myDGSEM % sourceTerms % UpdateDevice( )
-      istat = cudaDeviceSynchronize( )
   
       tBlock = dim3(myDGSEM % params % polyDeg+1, &
                     myDGSEM % params % polyDeg+1 , &
