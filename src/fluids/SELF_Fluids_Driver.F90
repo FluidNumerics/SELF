@@ -190,7 +190,8 @@ CONTAINS
 
     ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
     ! returns FALSE.
-    CALL myFluid % ReadPickup( pickupFileExists )
+!    CALL myFluid % ReadPickup( pickupFileExists )
+    CALL myFluid % Read_from_HDF5( pickupFileExists ) 
 
     ! If the pickup file doesn't exist, then the initial conditions are generated
     ! from the equation parser.
@@ -242,7 +243,7 @@ CONTAINS
 
       CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
 
-      CALL myFluid % WritePickup( )
+      CALL myFluid % Write_to_HDF5( )
       CALL myFluid % WriteTecplot( )
 
 #ifdef HAVE_DIAGNOSTICS
