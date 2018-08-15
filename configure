@@ -4296,11 +4296,41 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 FCFLAGS="-O3"
 
-if test "x$FC" = "xgfortran"; then :
+ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
-  FCFLAGS+=" -ffree-line-length-none"
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether Fortran compiler accepts -ffree-line-length-none" >&5
+$as_echo_n "checking whether Fortran compiler accepts -ffree-line-length-none... " >&6; }
+if ${ax_cv_check_fcflags___ffree_line_length_none+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$FCFLAGS
+  FCFLAGS="$FCFLAGS  -ffree-line-length-none"
+  cat > conftest.$ac_ext <<_ACEOF
+      program main
+
+      end
+_ACEOF
+if ac_fn_fc_try_compile "$LINENO"; then :
+  ax_cv_check_fcflags___ffree_line_length_none=yes
+else
+  ax_cv_check_fcflags___ffree_line_length_none=no
 fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  FCFLAGS=$ax_check_save_flags
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_fcflags___ffree_line_length_none" >&5
+$as_echo "$ax_cv_check_fcflags___ffree_line_length_none" >&6; }
+if test "x$ax_cv_check_fcflags___ffree_line_length_none" = xyes; then :
+  FCFLAGS+=" -ffree-line-length-none"
+else
+  :
+fi
+
 
 # Check for CUDA-Fortran acceleration request
 # Set --enable-cuda-fortran yes turns on the -DHAVE_CUDA CPP-flag if the PGI compilers are used.
@@ -5061,11 +5091,10 @@ ac_cv_lib_hdf5_hl=ac_cv_lib_hdf5_hl_main
         CPPFLAGS=$ax_lib_hdf5_save_CPPFLAGS
         LIBS=$ax_lib_hdf5_save_LIBS
         LDFLAGS=$ax_lib_hdf5_save_LDFLAGS
-        ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
+        ac_ext=${ac_fc_srcext-f}
+ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
+ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for matching HDF5 Fortran wrapper" >&5

@@ -11,9 +11,8 @@ AC_CONFIG_MACRO_DIRS([m4])
 AC_PROG_FC([pgfortran gfortran])
 FCFLAGS="-O3"
 
-AS_IF([test "x$FC" = "xgfortran"],[
-  FCFLAGS+=" -ffree-line-length-none"
-])
+AC_LANG_PUSH([Fortran])
+AX_CHECK_COMPILE_FLAG([-ffree-line-length-none], [FCFLAGS+=" -ffree-line-length-none"])
 
 # Check for CUDA-Fortran acceleration request
 # Set --enable-cuda-fortran yes turns on the -DHAVE_CUDA CPP-flag if the PGI compilers are used.
