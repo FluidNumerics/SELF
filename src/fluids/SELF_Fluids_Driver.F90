@@ -243,6 +243,7 @@ CONTAINS
 
       CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
 
+     ! CALL myFluid % IO( )
       CALL myFluid % Write_to_HDF5( )
       CALL myFluid % WriteTecplot( )
 

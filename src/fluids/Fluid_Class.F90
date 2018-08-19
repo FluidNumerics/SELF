@@ -409,6 +409,11 @@ CONTAINS
 
     CALL myDGSEM % SetPrescribedState( )
 
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
+    CALL myDGSEM % static % UpdateDevice( )
+#endif
+
   END SUBROUTINE SetInitialConditions_Fluid
 
   SUBROUTINE SetPrescribedState_Fluid( myDGSEM )
@@ -3139,24 +3144,27 @@ CONTAINS
 !
   SUBROUTINE Write_to_HDF5( myDGSEM )
     IMPLICIT NONE
-    CLASS( Fluid ), INTENT(in) :: myDGSEM
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     CHARACTER(100)   :: filename, groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
-    INTEGER          :: iEl, N, rank, error
-    INTEGER(HSIZE_T) :: dimensions(1:3)
-    INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id
+    INTEGER          :: iEl, N, rank, m_rank, error
+    INTEGER(HSIZE_T) :: dimensions(1:4), m_dimensions(1:3)
+    INTEGER(HID_T)   :: file_id, dataspace_id, m_dataspace_id, dataset_id
     INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
-    INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id
+    INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id, plist_id
 
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
     filename = "State."//timeStampString//".h5"
 
     N = myDGSEM % params % polyDeg
-    rank = 3
-    dimensions = (/ N+1, N+1, N+1 /)
+    rank = 4
+    dimensions = (/ N+1, N+1, N+1, nEquations /)
+
+    m_rank = 3
+    m_dimensions = (/ N+1, N+1, N+1 /)
 
     PRINT(MsgFMT), 'Writing output file : '//TRIM(filename)
 
@@ -3165,21 +3173,108 @@ CONTAINS
     CALL h5open_f(error)  
     IF( error /= 0 ) STOP
   
-    ! Create a new file using default properties.
+#ifdef HAVE_MPI
+    ! Setup file access property list with parallel I/O access.
     !
-    CALL h5fcreate_f(TRIM(filename), H5F_ACC_TRUNC_F, file_id, error)
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
+    CALL h5pset_fapl_mpio_f(plist_id, myDGSEM % MPI_COMM, MPI_INFO_NULL, error)
+
+    ! Create the file collectively
+    !
+    CALL h5fcreate_f(TRIM(filename), H5F_ACC_TRUNC_F, file_id, error, access_prp = plist_id)
     IF( error /= 0 ) STOP
-  
+
     ! Create dataspace to be used for each element ( (N+1)x(N+1)x(N+1) grid )
     !
     CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5screate_simple_f(m_rank, m_dimensions, m_dataspace_id, error)
     IF( error /= 0 ) STOP
 
     groupname = "/model_output"
     CALL h5gcreate_f( file_id, TRIM(groupname), model_group_id, error )
     IF( error /= 0 ) STOP
 
-    groupname = "/static_states"
+    groupname = "/static"
+    CALL h5gcreate_f( file_id, TRIM(groupname), static_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/model_conditions"
+    CALL h5gcreate_f( file_id, TRIM(groupname), conditions_group_id, error )
+    IF( error /= 0 ) STOP
+
+    !
+    ! Create property list for collective dataset write
+    !
+    CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error) 
+    CALL h5pset_dxpl_mpio_f(plist_id, H5FD_MPIO_INDEPENDENT_F, error)
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+
+      WRITE(zoneID,'(I10.10)') myDGSEM % mesh % elements % elementID(iEl)
+      groupname = "/model_output/element_"//zoneID
+      CALL h5gcreate_f( file_id, TRIM(groupname), element_group_id, error )
+      
+      !
+      ! Create a dataset in the model_output/element_<id> group
+      !
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/fluid_state", &
+                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1:nEquations,iEl), dimensions, error, xfer_prp = plist_id )
+      CALL h5dclose_f(dataset_id, error)
+
+      ! Write the static fields to file
+      groupname = "/static/element_"//zoneID
+      CALL h5gcreate_f( file_id, TRIM(groupname), static_element_group_id, error )
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/fluid_state", &
+                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1:nEquations,iEl), dimensions, error, xfer_prp = plist_id)
+      CALL h5dclose_f(dataset_id, error)
+
+      groupname = "/model_conditions/element_"//zoneID
+      CALL h5gcreate_f( file_id, TRIM(groupname), conditions_element_group_id, error )
+
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/drag", &
+                         H5T_IEEE_F32LE, m_dataspace_id, dataset_id, error)
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), m_dimensions, error, xfer_prp = plist_id)
+      CALL h5dclose_f(dataset_id, error)
+    
+      CALL h5gclose_f( element_group_id, error )
+      CALL h5gclose_f( static_element_group_id, error )
+      CALL h5gclose_f( conditions_element_group_id, error )
+
+      IF( error /= 0 ) STOP
+
+    ENDDO
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
+    CALL h5sclose_f( dataspace_id, error )
+    CALL h5pclose_f( plist_id, error )
+
+#else
+    ! Create a new file using default properties.
+    !
+    CALL h5fcreate_f(TRIM(filename), H5F_ACC_TRUNC_F, file_id, error)
+    IF( error /= 0 ) STOP
+    ! Create dataspace to be used for each element ( (N+1)x(N+1)x(N+1) grid )
+    !
+    CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5screate_simple_f(m_rank, m_dimensions, m_dataspace_id, error)
+    IF( error /= 0 ) STOP
+
+    groupname = "/model_output"
+    CALL h5gcreate_f( file_id, TRIM(groupname), model_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/static"
     CALL h5gcreate_f( file_id, TRIM(groupname), static_group_id, error )
     IF( error /= 0 ) STOP
 
@@ -3196,101 +3291,29 @@ CONTAINS
       !
       ! Create a dataset in the model_output/element_<id> group
       !
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/x_momentum", &
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/fluid_state", &
                          H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/y_momentum", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/z_momentum", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/density", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/potential_temperature", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/tracer", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/pressure", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl), dimensions, error)
+                       myDGSEM % state % solution(0:N,0:N,0:N,1:nEquations ,iEl), dimensions, error)
       CALL h5dclose_f(dataset_id, error)
 
       ! Write the static fields to file
-      groupname = "/static_states/element_"//zoneID
+      groupname = "/static/element_"//zoneID
       CALL h5gcreate_f( file_id, TRIM(groupname), static_element_group_id, error )
 
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/x_momentum", &
+      CALL h5dcreate_f( file_id, TRIM(groupname)//"/fluid_state", &
                          H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/y_momentum", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/z_momentum", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/density", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/potential_temperature", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/tracer", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dcreate_f( file_id, TRIM(groupname)//"/pressure", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
-      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl), dimensions, error)
+                       myDGSEM % static % solution(0:N,0:N,0:N,1:nEquations,iEl), dimensions, error)
       CALL h5dclose_f(dataset_id, error)
 
       groupname = "/model_conditions/element_"//zoneID
       CALL h5gcreate_f( file_id, TRIM(groupname), conditions_element_group_id, error )
 
       CALL h5dcreate_f( file_id, TRIM(groupname)//"/drag", &
-                         H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+                         H5T_IEEE_F32LE, m_dataspace_id, dataset_id, error)
       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), dimensions, error)
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), m_dimensions, error)
       CALL h5dclose_f(dataset_id, error)
     
       CALL h5gclose_f( element_group_id, error )
@@ -3300,18 +3323,16 @@ CONTAINS
       IF( error /= 0 ) STOP
 
     ENDDO
-
-
     CALL h5gclose_f( model_group_id, error )
     CALL h5gclose_f( static_group_id, error )
     CALL h5gclose_f( conditions_group_id, error )
-    ! Close the dataspace for the second dataset.
-    !
     CALL h5sclose_f( dataspace_id, error )
 
-    ! Close the file.
-    !
+#endif
+
     CALL h5fclose_f( file_id, error )
+
+    CALL h5close_f( error )
 
 
   END SUBROUTINE Write_to_HDF5
@@ -3324,8 +3345,8 @@ CONTAINS
     CHARACTER(100)   :: filename, groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
-    INTEGER          :: iEl, N, rank, error
-    INTEGER(HSIZE_T) :: dimensions(1:3)
+    INTEGER          :: iEl, N, rank, m_rank, error
+    INTEGER(HSIZE_T) :: dimensions(1:4), m_dimensions(1:3)
     INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id
     INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
     INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id
@@ -3344,8 +3365,10 @@ CONTAINS
     ENDIF
 
     N = myDGSEM % params % polyDeg
-    rank = 3
-    dimensions = (/ N+1, N+1, N+1 /)
+    rank = 4
+    dimensions = (/ N+1, N+1, N+1, nEquations /)
+    m_rank = 3
+    m_dimensions = (/ N+1, N+1, N+1 /)
 
     PRINT(MsgFMT), 'Reading output file : '//TRIM(filename)
 
@@ -3358,7 +3381,7 @@ CONTAINS
     CALL h5gopen_f( file_id, TRIM(groupname), model_group_id, error )
     IF( error /= 0 ) STOP
 
-    groupname = "/static_states"
+    groupname = "/static"
     CALL h5gopen_f( file_id, TRIM(groupname), static_group_id, error )
     IF( error /= 0 ) STOP
 
@@ -3373,93 +3396,20 @@ CONTAINS
       CALL h5gopen_f( file_id, TRIM(groupname), element_group_id, error )
       IF( error /= 0 ) STOP
       
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/x_momentum", &
+      CALL h5dopen_f( file_id, TRIM(groupname)//"/fluid_state", &
                       dataset_id, error)
       CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/y_momentum", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/z_momentum", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/density", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/potential_temperature", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/tracer", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/pressure", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl), dimensions, error)
+                       myDGSEM % state % solution(0:N,0:N,0:N,1:nEquations,iEl), dimensions, error)
       CALL h5dclose_f(dataset_id, error)
 
       ! Write the static fields to file
-      groupname = "/static_states/element_"//zoneID
+      groupname = "/static/element_"//zoneID
       CALL h5gopen_f( file_id, TRIM(groupname), static_element_group_id, error )
 
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/x_momentum", &
+      CALL h5dopen_f( file_id, TRIM(groupname)//"/fluid_state", &
                       dataset_id, error)
       CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/y_momentum", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/z_momentum", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/density", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/potential_temperature", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/tracer", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
-
-      CALL h5dopen_f( file_id, TRIM(groupname)//"/pressure", &
-                      dataset_id, error)
-      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl), dimensions, error)
-      CALL h5dclose_f(dataset_id, error)
+                       myDGSEM % static % solution(0:N,0:N,0:N,1:nEquations,iEl), dimensions, error)
 
       groupname = "/model_conditions/element_"//zoneID
       CALL h5gopen_f( file_id, TRIM(groupname), conditions_element_group_id, error )
@@ -3467,7 +3417,7 @@ CONTAINS
       CALL h5dopen_f( file_id, TRIM(groupname)//"/drag", &
                       dataset_id, error)
       CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
-                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), dimensions, error)
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl), m_dimensions, error)
       CALL h5dclose_f(dataset_id, error)
     
       CALL h5gclose_f( element_group_id, error )
