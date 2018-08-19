@@ -190,7 +190,6 @@ CONTAINS
 
     ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
     ! returns FALSE.
-!    CALL myFluid % ReadPickup( pickupFileExists )
     CALL myFluid % Read_from_HDF5( pickupFileExists ) 
 
     ! If the pickup file doesn't exist, then the initial conditions are generated
@@ -206,15 +205,9 @@ CONTAINS
       PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
       CALL myFluid % SetInitialConditions( )
 
-!      CALL myFluid % WritePickup( )
-      CALL myFluid % Write_to_HDF5( )
-      CALL myFluid % WriteTecplot( )
+      CALL myFluid % IO( )
 
     ENDIF
-
-#ifdef HAVE_DIAGNOSTICS
-    CALL myFluid % WriteDiagnostics( )
-#endif
 
   END SUBROUTINE Initialize
 
@@ -243,14 +236,7 @@ CONTAINS
 
       CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
 
-     ! CALL myFluid % IO( )
-      CALL myFluid % Write_to_HDF5( )
-      CALL myFluid % WriteTecplot( )
-
-#ifdef HAVE_DIAGNOSTICS
-      CALL myFluid % Diagnostics( )
-      CALL myFluid % WriteDiagnostics( )
-#endif
+      CALL myFluid % IO( )
 
     ENDDO
 

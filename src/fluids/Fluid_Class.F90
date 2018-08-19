@@ -74,6 +74,7 @@ MODULE Fluid_Class
     PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
     PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
 
+    PROCEDURE :: IO => IO_Fluid
     PROCEDURE :: Write_to_HDF5
     PROCEDURE :: Read_from_HDF5
     PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
@@ -2885,11 +2886,34 @@ CONTAINS
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
-  SUBROUTINE WriteTecplot_Fluid( myDGSEM )
+  SUBROUTINE IO_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+    ! Local
+    CHARACTER(50) :: filename
+    CHARACTER(13) :: timeStampString
+ 
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+
+      filename = "State."//timeStampString//".h5"
+      CALL myDGSEM % Write_to_HDF5( filename )
+
+      filename = "State."//timeStampString//".tec"
+      CALL myDGSEM % WriteTecplot( filename )
+
+#ifdef HAVE_DIAGNOSTICS
+      CALL myFluid % Diagnostics( )
+      CALL myFluid % WriteDiagnostics( )
+#endif
+
+      
+  END SUBROUTINE IO_Fluid
+!
+  SUBROUTINE WriteTecplot_Fluid( myDGSEM, filename )
 
     IMPLICIT NONE
 
     CLASS( Fluid ), INTENT(inout) :: myDGsem
+    CHARACTER(*), INTENT(in)      :: filename
     !LOCAL
 #ifdef HAVE_CUDA
     INTEGER :: istat
@@ -2898,9 +2922,7 @@ CONTAINS
     CHARACTER(5)  :: zoneID
     CHARACTER(4)  :: rankChar
     REAL(prec)    :: hCapRatio, c, T
-    CHARACTER(13) :: timeStampString
 
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
@@ -2911,7 +2933,7 @@ CONTAINS
     WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= 'State.'//rankChar//'.'//timeStampString//'.tec', &
+      FILE= TRIM(filename), &
       FORM='formatted', &
       STATUS='replace')
 
@@ -3142,22 +3164,27 @@ CONTAINS
 
   END SUBROUTINE Diagnostics_Fluid
 !
-  SUBROUTINE Write_to_HDF5( myDGSEM )
+  SUBROUTINE Write_to_HDF5( myDGSEM, filename )
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    CHARACTER(*), INTENT(in)      :: filename
     ! Local
-    CHARACTER(100)   :: filename, groupname
+    CHARACTER(100)   :: groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
-    INTEGER          :: iEl, N, rank, m_rank, error
+    INTEGER          :: iEl, N, rank, m_rank, error, istat
     INTEGER(HSIZE_T) :: dimensions(1:4), m_dimensions(1:3)
     INTEGER(HID_T)   :: file_id, dataspace_id, m_dataspace_id, dataset_id
     INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
     INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id, plist_id
 
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % static % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
 
-    filename = "State."//timeStampString//".h5"
+    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
     N = myDGSEM % params % polyDeg
     rank = 4
@@ -3337,12 +3364,13 @@ CONTAINS
 
   END SUBROUTINE Write_to_HDF5
 
-  SUBROUTINE Read_from_HDF5( myDGSEM, itExists )
+  SUBROUTINE Read_from_HDF5( myDGSEM, itExists, filename )
     IMPLICIT NONE
-    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-    LOGICAL, INTENT(out)          :: itExists
+    CLASS( Fluid ), INTENT(inout)      :: myDGSEM
+    CHARACTER(*), OPTIONAL, INTENT(in) :: filename
+    LOGICAL, INTENT(out)               :: itExists
     ! Local
-    CHARACTER(100)   :: filename, groupname
+    CHARACTER(100)   :: fname, groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
     INTEGER          :: iEl, N, rank, m_rank, error
@@ -3354,10 +3382,13 @@ CONTAINS
                                   0:myDGSEM % params % polyDeg, &
                                   0:myDGSEM % params % polyDeg )
 
+    IF( PRESENT( filename ) )THEN
+      fname = TRIM(filename)
+    ELSE
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+      fname = "State."//timeStampString//".h5"
+    ENDIF
 
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
-    filename = "State."//timeStampString//".h5"
     INQUIRE( FILE=TRIM(filename), EXIST = itExists )
 
     IF( .NOT. itExists ) THEN
@@ -3370,11 +3401,11 @@ CONTAINS
     m_rank = 3
     m_dimensions = (/ N+1, N+1, N+1 /)
 
-    PRINT(MsgFMT), 'Reading output file : '//TRIM(filename)
+    PRINT(MsgFMT), 'Reading output file : '//TRIM(fname)
 
     CALL h5open_f(error)  
   
-    CALL h5fopen_f(TRIM(filename), H5F_ACC_RDWR_F, file_id, error)
+    CALL h5fopen_f(TRIM(fname), H5F_ACC_RDWR_F, file_id, error)
     IF( error /= 0 ) STOP
 
     groupname = "/model_output"
