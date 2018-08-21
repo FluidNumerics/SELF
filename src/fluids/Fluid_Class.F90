@@ -76,8 +76,6 @@ MODULE Fluid_Class
     PROCEDURE :: Write_to_HDF5
     PROCEDURE :: Read_from_HDF5
     PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
-!    PROCEDURE :: WritePickup  => WritePickup_Fluid
-!    PROCEDURE :: ReadPickup   => ReadPickup_Fluid
 
     ! (Soon to be) PRIVATE Routines
     PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
@@ -2897,13 +2895,15 @@ CONTAINS
       filename = "State."//timeStampString//".h5"
       CALL myDGSEM % Write_to_HDF5( filename )
 
+#ifdef TECPLOT
       filename = "State."//rankChar//"."//timeStampString//".tec"
       CALL myDGSEM % WriteTecplot( filename )
+#endif
 
-!#ifdef HAVE_DIAGNOSTICS
+#ifdef DIAGNOSTICS
       CALL myDGSEM % Diagnostics( )
       CALL myDGSEM % WriteDiagnostics( )
-!#endif
+#endif
 
       
   END SUBROUTINE IO_Fluid

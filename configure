@@ -742,6 +742,7 @@ enable_mpi
 enable_double
 enable_timing
 enable_diagnostics
+enable_tecplot
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1393,6 +1394,8 @@ Optional Features:
   --enable-timing, default:no
 
   --enable-diagnostics, default:no
+
+  --enable-tecplot, default:no
 
 
 Optional Packages:
@@ -5264,6 +5267,19 @@ fi
 if test "x$enable_diagnostics" = "xyes"; then :
 
   FCFLAGS+=" -DDIAGNOSTICS"
+
+fi
+
+# Check for request to enable tecplot output in Fluids_Class.f90
+# Check whether --enable-tecplot was given.
+if test "${enable_tecplot+set}" = set; then :
+  enableval=$enable_tecplot;
+fi
+
+
+if test "x$enable_tecplot" = "xyes"; then :
+
+  FCFLAGS+=" -DTECPLOT"
 
 fi
 

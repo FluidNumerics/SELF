@@ -66,6 +66,13 @@ AS_IF( [test "x$enable_diagnostics" = "xyes"],[
   FCFLAGS+=" -DDIAGNOSTICS"
 ])
 
+# Check for request to enable tecplot output in Fluids_Class.f90
+AC_ARG_ENABLE( tecplot, AS_HELP_STRING([--enable-tecplot, default:no]))
+
+AS_IF( [test "x$enable_tecplot" = "xyes"],[
+  FCFLAGS+=" -DTECPLOT"
+])
+
 
 AC_CONFIG_FILES([
 Makefile
