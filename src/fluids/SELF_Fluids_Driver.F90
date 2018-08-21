@@ -192,6 +192,7 @@ CONTAINS
     ! returns FALSE.
     CALL myFluid % Read_from_HDF5( pickupFileExists ) 
 
+
     ! If the pickup file doesn't exist, then the initial conditions are generated
     ! from the equation parser.
     IF( .NOT. pickupFileExists )THEN
@@ -204,7 +205,6 @@ CONTAINS
 
       PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
       CALL myFluid % SetInitialConditions( )
-
       CALL myFluid % IO( )
 
     ENDIF

@@ -70,16 +70,14 @@ MODULE Fluid_Class
     PROCEDURE :: CalculateStaticState => CalculateStaticState_Fluid
 
     PROCEDURE :: Diagnostics           => Diagnostics_Fluid
-    PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
     PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
-    PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
 
     PROCEDURE :: IO => IO_Fluid
     PROCEDURE :: Write_to_HDF5
     PROCEDURE :: Read_from_HDF5
     PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
-    PROCEDURE :: WritePickup  => WritePickup_Fluid
-    PROCEDURE :: ReadPickup   => ReadPickup_Fluid
+!    PROCEDURE :: WritePickup  => WritePickup_Fluid
+!    PROCEDURE :: ReadPickup   => ReadPickup_Fluid
 
     ! (Soon to be) PRIVATE Routines
     PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
@@ -108,7 +106,7 @@ MODULE Fluid_Class
 
 
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
-  INTEGER, PRIVATE            :: diagUnits(1:5)
+  INTEGER, PRIVATE            :: diagUnits
 
   INTEGER, PARAMETER :: nEquations   = 7
 
@@ -2891,19 +2889,21 @@ CONTAINS
     ! Local
     CHARACTER(50) :: filename
     CHARACTER(13) :: timeStampString
+    CHARACTER(4)  :: rankChar
  
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+      WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
       filename = "State."//timeStampString//".h5"
       CALL myDGSEM % Write_to_HDF5( filename )
 
-      filename = "State."//timeStampString//".tec"
+      filename = "State."//rankChar//"."//timeStampString//".tec"
       CALL myDGSEM % WriteTecplot( filename )
 
-#ifdef HAVE_DIAGNOSTICS
-      CALL myFluid % Diagnostics( )
-      CALL myFluid % WriteDiagnostics( )
-#endif
+!#ifdef HAVE_DIAGNOSTICS
+      CALL myDGSEM % Diagnostics( )
+      CALL myDGSEM % WriteDiagnostics( )
+!#endif
 
       
   END SUBROUTINE IO_Fluid
@@ -2930,7 +2930,6 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 #endif
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(filename), &
@@ -2973,93 +2972,37 @@ CONTAINS
 
   END SUBROUTINE WriteTecplot_Fluid
 !
-  SUBROUTINE OpenDiagnosticsFiles_Fluid( myDGSEM )
-    IMPLICIT NONE
-    CLASS( Fluid  ), INTENT(inout) :: myDGSEM
-    ! Local
-    CHARACTER(13) :: timeStampString
-
-
-    myDGSEM % volume = 0.0_prec
-    myDGSEM % mass   = 0.0_prec
-    myDGSEM % KE     = 0.0_prec
-    myDGSEM % PE     = 0.0_prec
-    myDGSEM % heat   = 0.0_prec
-
-    IF( myDGSEM % extComm % myRank == 0 )THEN
-      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
-
-      OPEN( UNIT=NewUnit(diagUnits(1)), &
-        FILE='Mass.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(1),*) '#TotalMass'
-
-      OPEN( UNIT=NewUnit(diagUnits(2)), &
-        FILE='KineticEnergy.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(2),*) '#TotalKineticEnergy'
-
-      OPEN( UNIT=NewUnit(diagUnits(3)), &
-        FILE='PotentialEnergy.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(3),*) '#TotalPotentialEnergy'
-
-      OPEN( UNIT=NewUnit(diagUnits(4)), &
-        FILE='Heat.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(4),*) '#TotalHeat'
-
-      OPEN( UNIT=NewUnit(diagUnits(5)), &
-        FILE='Volume.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(5),*) '#TotalVolume'
-    ENDIF
-
-  END SUBROUTINE OpenDiagnosticsFiles_Fluid
-!
   SUBROUTINE WriteDiagnostics_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    ! Local
+    LOGICAL :: fileExists
 
-    CALL myDGSEM % OpenDiagnosticsFiles( )
 
     IF( myDGSEM % extComm % myRank == 0 )THEN
-      WRITE(diagUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
-      WRITE(diagUnits(2),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % KE
-      WRITE(diagUnits(3),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % PE
-      WRITE(diagUnits(4),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % heat
-      WRITE(diagUnits(5),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % volume
+
+      INQUIRE( file='Diagnostics.curve', EXIST=fileExists )
+
+      OPEN( UNIT=NewUnit(diagUnits), &
+        FILE='Diagnostics.curve', &
+        FORM='FORMATTED', &
+        ACCESS='APPEND' )
+
+      IF( .NOT. fileExists )THEN
+        WRITE(diagUnits,*) 'Time, Total Mass, Total Kinetic Energy, Total Potential Energy, Total heat content, Total volume'
+      ENDIF
+
     ENDIF
 
-    CALL myDGSEM % CloseDiagnosticsFiles( )
-
-  END SUBROUTINE WriteDiagnostics_Fluid
-!
-  SUBROUTINE CloseDiagnosticsFiles_Fluid( myDGSEM )
-    IMPLICIT NONE
-    CLASS( Fluid  ), INTENT(inout) :: myDGSEM
-
+    IF( myDGSEM % extComm % myRank == 0 )THEN
+      WRITE(diagUnits,'(5(E15.5,",",2x),E15.5)') myDGSEM % simulationTime, myDGSEM % mass, myDGSEM % KE, myDGSEM % PE, myDGSEM % heat, myDGSEM % volume
+    ENDIF
 
     IF( myDGSEM % extComm % myRank == 0 ) THEN
-      CLOSE( UNIT=diagUnits(1) )
-      CLOSE( UNIT=diagUnits(2) )
-      CLOSE( UNIT=diagUnits(3) )
-      CLOSE( UNIT=diagUnits(4) )
-      CLOSE( UNIT=diagUnits(5) )
+      CLOSE( UNIT=diagUnits )
     ENDIF
 
-  END SUBROUTINE CloseDiagnosticsFiles_Fluid
+  END SUBROUTINE WriteDiagnostics_Fluid
 !
   SUBROUTINE Diagnostics_Fluid( myDGSEM )
     IMPLICIT NONE
@@ -3135,13 +3078,14 @@ CONTAINS
     myDGSEM % KE     = KE
     myDGSEM % PE     = PE
     myDGSEM % heat   = heat
+    !PRINT*, volume, mass, KE, PE, heat
 
 #ifdef HAVE_MPI
-    CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
 #endif
 
     IF( IsNaN( myDGSEM % KE ) .OR. IsInf( myDGSEM % KE/ myDGSEM % volume) )THEN
@@ -3686,10 +3630,6 @@ CONTAINS
 
     CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
 
-!    CALL h5pcreate_f(H5P_DATASET_ACCESS_F, daccess_plist_id, error)
-!    CALL h5pset_chunk_f(daccess_plist_id, rank, dimensions, error)
-!    IF( error /= 0 ) PRINT*, __LINE__
-
     CALL h5pcreate_f(H5P_DATASET_XFER_F, transfer_plist_id, error)
     CALL h5pset_dxpl_mpio_f(transfer_plist_id, H5FD_MPIO_COLLECTIVE_F, error)
 
@@ -4080,132 +4020,150 @@ CONTAINS
     CALL h5close_f( error )
 #endif
 
-  END SUBROUTINE Read_from_HDF5
-
-  SUBROUTINE WritePickup_Fluid( myDGSEM )
-
-    IMPLICIT NONE
-    CLASS( Fluid ), INTENT(in) :: myDGSEM
-    ! LOCAL
-    CHARACTER(4)  :: rankChar
-    INTEGER       :: iEl
-    INTEGER       :: thisRec, fUnit
-    INTEGER       :: iEq, N
-    CHARACTER(13) :: timeStampString
-
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
-    N = myDGSEM % params % polyDeg
-
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-    PRINT(MsgFMT), 'Writing output file :  State.'//rankChar//'.'//timeStampString//'.pickup'
-
-    OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
-      FORM='UNFORMATTED',&
-      ACCESS='DIRECT',&
-      STATUS='REPLACE',&
-      ACTION='WRITE',&
-      CONVERT='BIG_ENDIAN',&
-      RECL=prec*(N+1)*(N+1)*(N+1) )
-
-    thisRec = 1
-    DO iEl = 1, myDGSEM % mesh % elements % nElements
-
-      DO iEq = 1, myDGSEM % state % nEquations
-        WRITE( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
-        thisRec = thisRec+1
-      ENDDO
-      DO iEq = 1, myDGSEM % state % nEquations
-        WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
-        thisRec = thisRec+1
-      ENDDO
-      DO iEq = 1, myDGSEM % state % nEquations
-        WRITE( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
-        thisRec = thisRec+1
-      ENDDO
-
-      WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
-      thisRec = thisRec+1
-
-    ENDDO
-
-    CLOSE(UNIT=fUnit)
-
-
-  END SUBROUTINE WritePickup_Fluid
-!
-  SUBROUTINE ReadPickup_Fluid( myDGSEM, itExists )
-
-    IMPLICIT NONE
-    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-    LOGICAL, INTENT(out)          :: itExists
-    ! LOCAL
-    CHARACTER(4)  :: rankChar
-    INTEGER       :: iEl, istat
-    INTEGER       :: thisRec, fUnit, i, j 
-    INTEGER       :: iEq, N, iFace, e1, s1, bID
-    CHARACTER(13) :: timeStampString
 #ifdef HAVE_CUDA
-    TYPE(dim3) :: tBlock, grid
-#endif
-   
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
-    N = myDGSEM % params % polyDeg
-
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
-
-    IF( itExists )THEN
-
-      PRINT*, '  Opening State.'//rankChar//'.'//timeStampString//'.pickup'
-
-      OPEN( UNIT=NEWUNIT(fUnit), &
-        FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
-        FORM='unformatted',&
-        ACCESS='direct',&
-        STATUS='old',&
-        ACTION='READ',&
-        CONVERT='big_endian',&
-        RECL=prec*(N+1)*(N+1)*(N+1) )
-
-      thisRec = 1
-      DO iEl = 1, myDGSEM % mesh % elements % nElements
-
-        DO iEq = 1, myDGSEM  % state % nEquations
-          READ( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
-          thisRec = thisRec+1
-        ENDDO
-        DO iEq = 1, myDGSEM % state % nEquations
-          READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
-          thisRec = thisRec+1
-        ENDDO
-        DO iEq = 1, myDGSEM % state % nEquations
-          READ( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
-          thisRec = thisRec+1
-        ENDDO
-
-        READ( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
-        thisRec = thisRec+1
-
-      ENDDO
-
-      CLOSE(UNIT=fUnit)
-
-    ENDIF
-
-#ifdef HAVE_CUDA
-    CALL myDGSEM % static % UpdateDevice( )
-    CALL myDGSEM % state % UpdateDevice( )
+    myDGSEM % state % solution_dev = myDGSEM % state % solution
     CALL myDGSEM % sourceTerms % UpdateDevice( )
-    istat = cudaDeviceSynchronize( )
 #endif
+
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( )
+    !$OMP END PARALLEL
 
     CALL myDGSEM % UpdateExternalStaticState( )
+
     CALL myDGSEM % SetPrescribedState( )
 
-  END SUBROUTINE ReadPickup_Fluid
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
+    CALL myDGSEM % static % UpdateDevice( )
+#endif
+
+  END SUBROUTINE Read_from_HDF5
+
+!  SUBROUTINE WritePickup_Fluid( myDGSEM )
+!
+!    IMPLICIT NONE
+!    CLASS( Fluid ), INTENT(in) :: myDGSEM
+!    ! LOCAL
+!    CHARACTER(4)  :: rankChar
+!    INTEGER       :: iEl
+!    INTEGER       :: thisRec, fUnit
+!    INTEGER       :: iEq, N
+!    CHARACTER(13) :: timeStampString
+!
+!    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+!
+!    N = myDGSEM % params % polyDeg
+!
+!    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
+!    PRINT(MsgFMT), 'Writing output file :  State.'//rankChar//'.'//timeStampString//'.pickup'
+!
+!    OPEN( UNIT=NEWUNIT(fUnit), &
+!      FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
+!      FORM='UNFORMATTED',&
+!      ACCESS='DIRECT',&
+!      STATUS='REPLACE',&
+!      ACTION='WRITE',&
+!      CONVERT='BIG_ENDIAN',&
+!      RECL=prec*(N+1)*(N+1)*(N+1) )
+!
+!    thisRec = 1
+!    DO iEl = 1, myDGSEM % mesh % elements % nElements
+!
+!      DO iEq = 1, myDGSEM % state % nEquations
+!        WRITE( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
+!        thisRec = thisRec+1
+!      ENDDO
+!      DO iEq = 1, myDGSEM % state % nEquations
+!        WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
+!        thisRec = thisRec+1
+!      ENDDO
+!      DO iEq = 1, myDGSEM % state % nEquations
+!        WRITE( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
+!        thisRec = thisRec+1
+!      ENDDO
+!
+!      WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
+!      thisRec = thisRec+1
+!
+!    ENDDO
+!
+!    CLOSE(UNIT=fUnit)
+!
+!
+!  END SUBROUTINE WritePickup_Fluid
+!!
+!  SUBROUTINE ReadPickup_Fluid( myDGSEM, itExists )
+!
+!    IMPLICIT NONE
+!    CLASS( Fluid ), INTENT(inout) :: myDGSEM
+!    LOGICAL, INTENT(out)          :: itExists
+!    ! LOCAL
+!    CHARACTER(4)  :: rankChar
+!    INTEGER       :: iEl, istat
+!    INTEGER       :: thisRec, fUnit, i, j 
+!    INTEGER       :: iEq, N, iFace, e1, s1, bID
+!    CHARACTER(13) :: timeStampString
+!#ifdef HAVE_CUDA
+!    TYPE(dim3) :: tBlock, grid
+!#endif
+!   
+!    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+!
+!    N = myDGSEM % params % polyDeg
+!
+!    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
+!    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
+!
+!    IF( itExists )THEN
+!
+!      PRINT*, '  Opening State.'//rankChar//'.'//timeStampString//'.pickup'
+!
+!      OPEN( UNIT=NEWUNIT(fUnit), &
+!        FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
+!        FORM='unformatted',&
+!        ACCESS='direct',&
+!        STATUS='old',&
+!        ACTION='READ',&
+!        CONVERT='big_endian',&
+!        RECL=prec*(N+1)*(N+1)*(N+1) )
+!
+!      thisRec = 1
+!      DO iEl = 1, myDGSEM % mesh % elements % nElements
+!
+!        DO iEq = 1, myDGSEM  % state % nEquations
+!          READ( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
+!          thisRec = thisRec+1
+!        ENDDO
+!        DO iEq = 1, myDGSEM % state % nEquations
+!          READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
+!          thisRec = thisRec+1
+!        ENDDO
+!        DO iEq = 1, myDGSEM % state % nEquations
+!          READ( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
+!          thisRec = thisRec+1
+!        ENDDO
+!
+!        READ( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
+!        thisRec = thisRec+1
+!
+!      ENDDO
+!
+!      CLOSE(UNIT=fUnit)
+!
+!    ENDIF
+!
+!#ifdef HAVE_CUDA
+!    CALL myDGSEM % static % UpdateDevice( )
+!    CALL myDGSEM % state % UpdateDevice( )
+!    CALL myDGSEM % sourceTerms % UpdateDevice( )
+!    istat = cudaDeviceSynchronize( )
+!#endif
+!
+!    CALL myDGSEM % UpdateExternalStaticState( )
+!    CALL myDGSEM % SetPrescribedState( )
+!
+!  END SUBROUTINE ReadPickup_Fluid
   
   SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
     IMPLICIT NONE
