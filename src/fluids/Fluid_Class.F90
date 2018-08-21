@@ -3637,14 +3637,13 @@ CONTAINS
     CHARACTER(100)   :: fname, groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
-    INTEGER          :: iEl, N, rank, m_rank, error, nEl
-    INTEGER(HSIZE_T) :: dimensions(1:4)
-    INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id
+    INTEGER          :: iEl, N, rank, m_rank, error, nEl, elID
+    INTEGER(HSIZE_T) :: dimensions(1:4), global_dimensions(1:4)
+    INTEGER(HSIZE_T) :: starts(1:4), counts(1:4), strides(1:4)
+    INTEGER(HID_T)   :: file_id, dataspace_id, global_dataspace_id, dataset_id
     INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
     INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id
-    REAL(prec)       :: tmp_array(0:myDGSEM % params % polyDeg, &
-                                  0:myDGSEM % params % polyDeg, &
-                                  0:myDGSEM % params % polyDeg )
+    INTEGER(HID_T)   :: daccess_plist_id, access_plist_id, transfer_plist_id
 
     IF( PRESENT( filename ) )THEN
       fname = TRIM(filename)
@@ -3653,12 +3652,304 @@ CONTAINS
       fname = "State."//timeStampString//".h5"
     ENDIF
 
-    INQUIRE( FILE=TRIM(filename), EXIST = itExists )
-
+    INQUIRE( FILE=TRIM(fname), EXIST = itExists )
+    PRINT*, '  Reading '//TRIM(fname)
+     
     IF( .NOT. itExists ) THEN
       RETURN
     ENDIF
 
+
+#ifdef HAVE_MPI
+    N = myDGSEM % params % polyDeg
+    CALL MPI_ALLREDUCE( myDGSEM % mesh % elements % nElements, nEl, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, error )
+    rank = 4
+    ! Local Dimensions
+    dimensions = (/ N+1, N+1, N+1, 1 /)
+    global_dimensions = (/ N+1, N+1, N+1, nEl /)
+
+    CALL h5open_f(error)  
+  
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, access_plist_id, error)
+    CALL h5pset_fapl_mpio_f(access_plist_id, myDGSEM % extComm % MPI_COMM, MPI_INFO_NULL, error)
+
+    CALL h5fopen_f(TRIM(fname), H5F_ACC_RDWR_F, file_id, error, access_plist_id)
+
+    groupname = "/model_output"
+    CALL h5gopen_f( file_id, TRIM(groupname), model_group_id, error )
+
+    groupname = "/static"
+    CALL h5gopen_f( file_id, TRIM(groupname), static_group_id, error )
+
+    groupname = "/model_conditions"
+    CALL h5gopen_f( file_id, TRIM(groupname), conditions_group_id, error )
+
+    CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+
+!    CALL h5pcreate_f(H5P_DATASET_ACCESS_F, daccess_plist_id, error)
+!    CALL h5pset_chunk_f(daccess_plist_id, rank, dimensions, error)
+!    IF( error /= 0 ) PRINT*, __LINE__
+
+    CALL h5pcreate_f(H5P_DATASET_XFER_F, transfer_plist_id, error)
+    CALL h5pset_dxpl_mpio_f(transfer_plist_id, H5FD_MPIO_COLLECTIVE_F, error)
+
+    CALL h5dopen_f(file_id, "/model_output/x_momentum", dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+
+    ENDDO
+
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/y_momentum",dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/z_momentum",dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_temperature", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_tracer", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/pressure", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dopen_f( file_id, "/static/x_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/y_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/z_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_temperature", dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_tracer",dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/pressure", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id,"/model_conditions/drag",dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
+    CALL h5pclose_f( access_plist_id, error )
+    CALL h5pclose_f( transfer_plist_id, error )
+    CALL h5sclose_f( dataspace_id, error )
+    CALL h5sclose_f( global_dataspace_id, error )
+    CALL h5fclose_f( file_id, error )
+    CALL h5close_f( error )
+
+
+#else
     N = myDGSEM % params % polyDeg
     nEl = myDGSEM % mesh % elements % nElements
     rank = 4
@@ -3787,7 +4078,7 @@ CONTAINS
     CALL h5sclose_f( dataspace_id, error )
     CALL h5fclose_f( file_id, error )
     CALL h5close_f( error )
-
+#endif
 
   END SUBROUTINE Read_from_HDF5
 
