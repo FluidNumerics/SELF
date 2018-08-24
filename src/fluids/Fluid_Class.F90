@@ -391,6 +391,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     myDGSEM % state % solution_dev = myDGSEM % state % solution
+    myDGSEM % static % solution_dev = myDGSEM % static % solution
     CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
 
@@ -409,6 +410,7 @@ CONTAINS
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 #endif
 
   END SUBROUTINE SetInitialConditions_Fluid
@@ -500,6 +502,7 @@ CONTAINS
     ! Local
     CHARACTER(4) :: rankChar
     LOGICAL      :: fileExists, meshgenSuccess
+    INTEGER      :: mpierr
 
       WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
 
@@ -520,7 +523,7 @@ CONTAINS
       ENDIF
         
 #ifdef HAVE_MPI
-      CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM )
+      CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, mpierr )
 #endif
 
       ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
@@ -3136,6 +3139,7 @@ CONTAINS
 #ifdef HAVE_MPI
 
     N = myDGSEM % params % polyDeg
+    CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
     CALL MPI_ALLREDUCE( myDGSEM % mesh % elements % nElements, nEl, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, error )
     rank = 4
     ! Local Dimensions
@@ -3425,6 +3429,7 @@ CONTAINS
     ENDDO
     CALL h5dclose_f(dataset_id, error)
     IF( error /= 0 ) STOP
+    CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
 
     CALL h5gclose_f( model_group_id, error )
     CALL h5gclose_f( static_group_id, error )
@@ -3581,7 +3586,7 @@ CONTAINS
     CHARACTER(100)   :: fname, groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
-    INTEGER          :: iEl, N, rank, m_rank, error, nEl, elID
+    INTEGER          :: iEl, N, rank, m_rank, error, nEl, elID, istat
     INTEGER(HSIZE_T) :: dimensions(1:4), global_dimensions(1:4)
     INTEGER(HSIZE_T) :: starts(1:4), counts(1:4), strides(1:4)
     INTEGER(HID_T)   :: file_id, dataspace_id, global_dataspace_id, dataset_id
@@ -3878,6 +3883,7 @@ CONTAINS
     CALL h5dclose_f(dataset_id, error)
     IF( error /= 0 ) STOP
 
+    CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
     CALL h5gclose_f( model_group_id, error )
     CALL h5gclose_f( static_group_id, error )
     CALL h5gclose_f( conditions_group_id, error )
@@ -4032,6 +4038,7 @@ CONTAINS
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 #endif
 
   END SUBROUTINE Read_from_HDF5
