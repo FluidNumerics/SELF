@@ -4006,22 +4006,19 @@ CONTAINS
                      myDGSEM % sourceTerms % drag, dimensions, error)
     CALL h5dclose_f(dataset_id, error)
     
-    CALL h5gclose_f( element_group_id, error )
-    CALL h5gclose_f( static_element_group_id, error )
-    CALL h5gclose_f( conditions_element_group_id, error )
     IF( error /= 0 ) STOP
 
 
     CALL h5gclose_f( model_group_id, error )
     CALL h5gclose_f( static_group_id, error )
     CALL h5gclose_f( conditions_group_id, error )
-    CALL h5sclose_f( dataspace_id, error )
     CALL h5fclose_f( file_id, error )
     CALL h5close_f( error )
 #endif
 
 #ifdef HAVE_CUDA
     myDGSEM % state % solution_dev = myDGSEM % state % solution
+    myDGSEM % static % solution_dev = myDGSEM % static % solution
     CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
 
@@ -4030,7 +4027,6 @@ CONTAINS
     !$OMP END PARALLEL
 
     CALL myDGSEM % UpdateExternalStaticState( )
-
     CALL myDGSEM % SetPrescribedState( )
 
 #ifdef HAVE_CUDA
