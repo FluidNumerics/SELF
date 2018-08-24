@@ -2793,7 +2793,9 @@ CONTAINS
          ELSE   
 
            CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
+#ifdef TECPLOT
            CALL mesh % WriteTecplot( 'mesh' )
+#endif
 
          ENDIF
 
@@ -3075,7 +3077,9 @@ CONTAINS
 ! ----------------------------------------------------------------------------- !
 
             WRITE( pIDChar, '(I4.4)' ) procID
+#ifdef TECPLOT
             CALL procMesh % WriteTecplot( 'mesh.'//pIDChar )
+#endif
             CALL procMesh % WriteSELFMeshFile( TRIM(params % SELFMeshFile)//'.'//pIDChar )
             
             CALL procMesh % Trash( )
@@ -3137,7 +3141,9 @@ CONTAINS
 
       ! For visualizing the decomposition
       materials = REAL( partitions, prec )
+#ifdef TECPLOT
       CALL mesh % WriteMaterialTecplot( materials )
+#endif
       
 
       ! Clean up memory !

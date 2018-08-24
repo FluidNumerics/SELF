@@ -501,44 +501,81 @@ CONTAINS
     CLASS( HexElements ), INTENT(inout) :: myElements
     TYPE( Lagrange ), INTENT(in)        :: interp
     ! Local
-    INTEGER    :: i, j, k, iEl, N
-    REAL(prec) :: cv(1:3,1:3)
-    REAL(prec) :: xGradient(1:3,0:interp % N,0:interp % N,0:interp % N,1:3,1:myElements % nElements)
+    INTEGER    :: i, j, k, iEl, ii
+#ifdef CURL_INVARIANT
     REAL(prec) :: v(0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
     REAL(prec) :: Dv(1:3,0:interp % N, 0:interp % N, 0:interp % N,1:3,1:myElements % nElements)
-
-    N = interp % N
-
-    ! Forced call to the CPU Kernel for calculating gradient
-    xGradient = CalculateGradient_3D_Lagrange( interp, &
-                                               myElements % x,&
-                                               3, myElements % nElements )
+#endif
 
     DO iEl = 1, myElements % nElements
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
 
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+            myElements % dxds(i,j,k,iEl) = 0.0_prec 
+            myElements % dxdp(i,j,k,iEl) = 0.0_prec 
+            myElements % dxdq(i,j,k,iEl) = 0.0_prec 
+            myElements % dyds(i,j,k,iEl) = 0.0_prec 
+            myElements % dydp(i,j,k,iEl) = 0.0_prec 
+            myElements % dydq(i,j,k,iEl) = 0.0_prec 
+            myElements % dzds(i,j,k,iEl) = 0.0_prec 
+            myElements % dzdp(i,j,k,iEl) = 0.0_prec 
+            myElements % dzdq(i,j,k,iEl) = 0.0_prec 
 
-            myElements % dxds(i,j,k,iEl) = xGradient(1,i,j,k,1,iEl) 
-            myElements % dxdp(i,j,k,iEl) = xGradient(2,i,j,k,1,iEl) 
-            myElements % dxdq(i,j,k,iEl) = xGradient(3,i,j,k,1,iEl) 
-            myElements % dyds(i,j,k,iEl) = xGradient(1,i,j,k,2,iEl) 
-            myElements % dydp(i,j,k,iEl) = xGradient(2,i,j,k,2,iEl) 
-            myElements % dydq(i,j,k,iEl) = xGradient(3,i,j,k,2,iEl) 
-            myElements % dzds(i,j,k,iEl) = xGradient(1,i,j,k,3,iEl) 
-            myElements % dzdp(i,j,k,iEl) = xGradient(2,i,j,k,3,iEl) 
-            myElements % dzdq(i,j,k,iEl) = xGradient(3,i,j,k,3,iEl) 
+            DO ii = 0, interp % N
 
-            cv(1,1:3) = xGradient(1:3,i,j,k,1,iEl)
-            cv(2,1:3) = xGradient(1:3,i,j,k,2,iEl)
-            cv(3,1:3) = xGradient(1:3,i,j,k,3,iEl)
-            myElements % J(i,j,k,iEl) = Determinant( cv, 3 )
+              myElements % dxds(i,j,k,iEl) = myElements % dxds(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,i)*&
+                                             myElements % x(ii,j,k,1,iEl)
+
+              myElements % dxdp(i,j,k,iEl) = myElements % dxdp(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,j)*&
+                                             myElements % x(i,ii,k,1,iEl)
+
+              myElements % dxdq(i,j,k,iEl) = myElements % dxdq(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,k)*&
+                                             myElements % x(i,j,ii,1,iEl)
+
+              myElements % dyds(i,j,k,iEl) = myElements % dyds(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,i)*&
+                                             myElements % x(ii,j,k,2,iEl)
+
+              myElements % dydp(i,j,k,iEl) = myElements % dydp(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,j)*&
+                                             myElements % x(i,ii,k,2,iEl)
+
+              myElements % dydq(i,j,k,iEl) = myElements % dydq(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,k)*&
+                                             myElements % x(i,j,ii,2,iEl)
+
+              myElements % dzds(i,j,k,iEl) = myElements % dzds(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,i)*&
+                                             myElements % x(ii,j,k,3,iEl)
+
+              myElements % dzdp(i,j,k,iEl) = myElements % dzdp(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,j)*&
+                                             myElements % x(i,ii,k,3,iEl)
+
+              myElements % dzdq(i,j,k,iEl) = myElements % dzdq(i,j,k,iEl) +&
+                                             interp % derivativeMatrixTranspose(ii,k)*&
+                                             myElements % x(i,j,ii,3,iEl)
+
+            ENDDO
+
+            myElements % J(i,j,k,iEl) = myElements % dxds(i,j,k,iEl)*&
+                                        ( myElements % dydp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) -&
+                                          myElements % dydq(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) ) -&
+                                       myElements % dyds(i,j,k,iEl)*&
+                                        ( myElements % dxdp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) -&
+                                          myElements % dxdq(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) ) +&
+                                       myElements % dzds(i,j,k,iEl)*&
+                                        ( myElements % dxdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl) -&
+                                          myElements % dxdq(i,j,k,iEl)*myElements % dydp(i,j,k,iEl) )
+                                         
 
           ENDDO
         ENDDO
       ENDDO
-
     ENDDO
 
 #ifdef CURL_INVARIANT
@@ -546,9 +583,9 @@ CONTAINS
     ! Generate the contravariant basis vectors using the curl form ( Kopriva, 2006 )
     !Ja_1
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             v(i,j,k,1,iEl)  = -myElements % x(i,j,k,3,iEl)*myElements % dyds(i,j,k,iEl)
             v(i,j,k,2,iEl)  = -myElements % x(i,j,k,3,iEl)*myElements % dydp(i,j,k,iEl)
             v(i,j,k,3,iEl)  = -myElements % x(i,j,k,3,iEl)*myElements % dydq(i,j,k,iEl)
@@ -564,9 +601,9 @@ CONTAINS
     ! The contravariant metric tensor stores each contravariant basis vector in each column
     ! of the tensor
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             myElements % Ja(i,j,k,1,1,iEl) = ( Dv(2,i,j,k,3,iEl) - Dv(3,i,j,k,2,iEl) )
             myElements % Ja(i,j,k,1,2,iEl) = -( Dv(1,i,j,k,3,iEl) - Dv(3,i,i,k,1,iEl) )
             myElements % Ja(i,j,k,1,3,iEl) = ( Dv(1,i,j,k,2,iEl) - Dv(2,i,j,k,1,iEl) )
@@ -577,9 +614,9 @@ CONTAINS
 
     !Ja_2
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             v(i,j,k,1,iEl)  = -myElements % x(i,j,k,1,iEl)*myElements % dzds(i,j,k,iEl)
             v(i,j,k,2,iEl)  = -myElements % x(i,j,k,1,iEl)*myElements % dzdp(i,j,k,iEl)
             v(i,j,k,3,iEl)  = -myElements % x(i,j,k,1,iEl)*myElements % dzdq(i,j,k,iEl)
@@ -591,9 +628,9 @@ CONTAINS
     Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
 
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             myElements % Ja(i,j,k,2,1,iEl) = ( Dv(2,i,j,k,3,iEl) - Dv(3,i,j,k,2,iEl) )
             myElements % Ja(i,j,k,2,2,iEl) = -( Dv(1,i,j,k,3,iEl) - Dv(3,i,i,k,1,iEl) )
             myElements % Ja(i,j,k,2,3,iEl) = ( Dv(1,i,j,k,2,iEl) - Dv(2,i,j,k,1,iEl) )
@@ -604,9 +641,9 @@ CONTAINS
 
     !Ja_3
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             v(i,j,k,1,iEl)  = -myElements % x(i,j,k,2,iEl)*myElements % dxds(i,j,k,iEl)
             v(i,j,k,2,iEl)  = -myElements % x(i,j,k,2,iEl)*myElements % dxdp(i,j,k,iEl)
             v(i,j,k,3,iEl)  = -myElements % x(i,j,k,2,iEl)*myElements % dxdq(i,j,k,iEl)
@@ -618,9 +655,9 @@ CONTAINS
     Dv = CalculateGradient_3D_Lagrange( interp, v, 3, myElements % nElements )
 
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             myElements % Ja(i,j,k,3,1,iEl) = ( Dv(2,i,j,k,3,iEl) - Dv(3,i,j,k,2,iEl) )
             myElements % Ja(i,j,k,3,2,iEl) = -( Dv(1,i,j,k,3,iEl) - Dv(3,i,i,k,1,iEl) )
             myElements % Ja(i,j,k,3,3,iEl) = ( Dv(1,i,j,k,2,iEl) - Dv(2,i,j,k,1,iEl) )
@@ -633,9 +670,9 @@ CONTAINS
 
     !Ja_1
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             myElements % Ja(i,j,k,1,1,iEl) = myElements % dydp(i,j,k,iEl)*myElements % dzdq(i,j,k,iEl) - &
                                              myElements % dzdp(i,j,k,iEl)*myElements % dydq(i,j,k,iEl)
 
@@ -651,9 +688,9 @@ CONTAINS
 
     !Ja_2
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             myElements % Ja(i,j,k,1,2,iEl) = myElements % dydq(i,j,k,iEl)*myElements % dzds(i,j,k,iEl) - &
                                              myElements % dzdq(i,j,k,iEl)*myElements % dyds(i,j,k,iEl)
 
@@ -669,9 +706,9 @@ CONTAINS
 
     !Ja_3
     DO iEl = 1, myElements % nElements
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
+      DO k = 0, interp % N
+        DO j = 0, interp % N
+          DO i = 0, interp % N
             myElements % Ja(i,j,k,1,3,iEl) = myElements % dyds(i,j,k,iEl)*myElements % dzdp(i,j,k,iEl) - &
                                              myElements % dzds(i,j,k,iEl)*myElements % dydp(i,j,k,iEl)
 

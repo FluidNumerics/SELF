@@ -18,15 +18,18 @@ MODULE Fluid_Class
   USE NodalDGSolution_3D_Class
   USE HexMesh_Class
   USE BoundaryCommunicator_Class
-  USE BodyForces_Class
 #ifdef HAVE_MPI
   USE MPILayer_Class
 #endif
+
+  USE BodyForces_Class
+  USE Fluid_EquationParser_Class
 
 #ifdef HAVE_CUDA
   USE cudafor
 #endif
 
+  USE HDF5
 
   IMPLICIT NONE
 
@@ -36,6 +39,7 @@ MODULE Fluid_Class
     REAL(prec) :: simulationTime
     REAL(prec) :: volume, mass, KE, PE, heat
   
+    TYPE( Fluid_EquationParser ) :: fluidEquations
     TYPE( MultiTimers )          :: timers
     TYPE( ModelParameters )      :: params
     TYPE( HexMesh )              :: mesh
@@ -60,10 +64,20 @@ MODULE Fluid_Class
     PROCEDURE :: Build => Build_Fluid
     PROCEDURE :: Trash => Trash_Fluid
 
-    PROCEDURE :: BuildHexMesh => BuildHexMesh_Fluid
+    PROCEDURE :: SetInitialConditions => SetInitialConditions_Fluid
+    PROCEDURE :: SetPrescribedState   => SetPrescribedState_Fluid
+    PROCEDURE :: InitializeMesh       => InitializeMesh_Fluid
     PROCEDURE :: CalculateStaticState => CalculateStaticState_Fluid
 
-    ! Time integrators
+    PROCEDURE :: Diagnostics           => Diagnostics_Fluid
+    PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
+
+    PROCEDURE :: IO => IO_Fluid
+    PROCEDURE :: Write_to_HDF5
+    PROCEDURE :: Read_from_HDF5
+    PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
+
+    ! (Soon to be) PRIVATE Routines
     PROCEDURE :: ForwardStepRK3        => ForwardStepRK3_Fluid
 !    PROCEDURE :: CrankNicholsonRHS     => CrankNicholsonRHS_Fluid
 
@@ -84,27 +98,15 @@ MODULE Fluid_Class
     PROCEDURE :: InternalFace_StressFlux           => InternalFace_StressFlux_Fluid
     PROCEDURE :: BoundaryFace_StressFlux           => BoundaryFace_StressFlux_Fluid
 
-    PROCEDURE :: Diagnostics           => Diagnostics_Fluid
-    PROCEDURE :: OpenDiagnosticsFiles  => OpenDiagnosticsFiles_Fluid
-    PROCEDURE :: WriteDiagnostics      => WriteDiagnostics_Fluid
-    PROCEDURE :: CloseDiagnosticsFiles => CloseDiagnosticsFiles_Fluid
-
-    PROCEDURE :: WriteTecplot => WriteTecplot_Fluid
-    PROCEDURE :: WritePickup  => WritePickup_Fluid
-    PROCEDURE :: ReadPickup   => ReadPickup_Fluid
     PROCEDURE :: UpdateExternalStaticState => UpdateExternalStaticState_Fluid
 
   END TYPE Fluid
 
 
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
-  INTEGER, PRIVATE            :: diagUnits(1:5)
+  INTEGER, PRIVATE            :: diagUnits
 
-#ifdef PASSIVE_TRACERS
   INTEGER, PARAMETER :: nEquations   = 7
-#else
-  INTEGER, PARAMETER :: nEquations   = 6
-#endif
 
 #ifdef HAVE_CUDA
  INTEGER, CONSTANT    :: nEq_dev
@@ -151,9 +153,12 @@ CONTAINS
       RETURN
     ENDIF
 
+    CALL myDGSEM % fluidEquations % Build( 'self.equations' )
+
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
     ! the device for each rank is also set here.
+    myDGSEM % extComm % setup = .FALSE.
     CALL myDGSEM % extComm % SetRanks( )
 
 #ifdef HAVE_CUDA
@@ -172,7 +177,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % BuildHexMesh(  )
+    CALL myDGSEM % InitializeMesh(  )
     CALL myDGSEM % extComm % ReadPickup( )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
@@ -316,13 +321,188 @@ CONTAINS
 
   END SUBROUTINE Trash_Fluid
 !
-  SUBROUTINE BuildHexMesh_Fluid( myDGSEM )
+  SUBROUTINE SetInitialConditions_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    ! Local
+    INTEGER    :: i, j, k, iEl
+    INTEGER    :: iFace, bID, e1, s1, e2
+    REAL(prec) :: x(1:3)
+    REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
+
+
+
+    myDGSEM % state % solution = 0.0_prec
+    !$OMP PARALLEL
+    CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
+    !$OMP END PARALLEL
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      DO k = 0, myDGSEM % params % polyDeg
+        DO j = 0, myDGSEM % params % polyDeg
+          DO i = 0, myDGSEM % params % polyDeg
+
+            x(1:3) = myDGSEM % mesh % elements % x(i,j,k,1:3,iEl)
+
+            IF( myDGSEM % fluidEquations % calculate_density_from_T )THEN
+               
+              u  = myDGSEM % fluidEquations % u % evaluate( x ) 
+              v  = myDGSEM % fluidEquations % v % evaluate( x ) 
+              w  = myDGSEM % fluidEquations % w % evaluate( x ) 
+              T  = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+              s  = myDGSEM % fluidEquations % tracer % evaluate( x )
+              s0 = myDGSEM % fluidEquations % staticTracer % evaluate( x )
+
+              Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
+
+              myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
+              myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
+              myDGSEM % state % solution(i,j,k,2,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*v
+              myDGSEM % state % solution(i,j,k,3,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*w
+              myDGSEM % state % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s
+              myDGSEM % static % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s0
+
+            ELSE
+
+              u   = myDGSEM % fluidEquations % u % evaluate( x ) 
+              v   = myDGSEM % fluidEquations % v % evaluate( x ) 
+              w   = myDGSEM % fluidEquations % w % evaluate( x ) 
+              rho = myDGSEM % fluidEquations % rho % evaluate( x ) 
+              T   = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+              s   = myDGSEM % fluidEquations % tracer % evaluate( x )
+              s0  = myDGSEM % fluidEquations % staticTracer % evaluate( x )
+
+
+              myDGSEM % state % solution(i,j,k,4,iEl) = rho
+              myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
+              myDGSEM % state % solution(i,j,k,2,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*v
+              myDGSEM % state % solution(i,j,k,3,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*w
+              myDGSEM % state % solution(i,j,k,5,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*T
+              myDGSEM % state % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s
+              myDGSEM % static % solution(i,j,k,6,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*s0
+
+            ENDIF
+
+            myDGSEM % sourceTerms % drag(i,j,k,iEl) = myDGSEM % fluidEquations % drag % evaluate( x )
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+#ifdef HAVE_CUDA
+    myDGSEM % state % solution_dev = myDGSEM % state % solution
+    myDGSEM % static % solution_dev = myDGSEM % static % solution
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
+#endif
+
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( )
+    !$OMP END PARALLEL
+
+#ifdef HAVE_CUDA
+    myDGSEM % state % boundarySolution  = myDGSEM % state % boundarySolution_dev
+#endif
+
+    CALL myDGSEM % UpdateExternalStaticState( )
+
+    CALL myDGSEM % SetPrescribedState( )
+
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
+    CALL myDGSEM % static % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
+#endif
+
+  END SUBROUTINE SetInitialConditions_Fluid
+
+  SUBROUTINE SetPrescribedState_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+    ! Local
+    INTEGER    :: i, j, k, iEl
+    INTEGER    :: iFace, bID, e1, s1, e2
+    REAL(prec) :: x(1:3)
+    REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
+
+    DO bID = 1, myDGSEM % extComm % nBoundaries
+
+       iFace = myDGSEM % extComm % boundaryIDs( bID )
+       e1    = myDGSEM % mesh % faces % elementIDs(1,iFace)
+       s1    = myDGSEM % mesh % faces % elementSides(1,iFace)
+       e2    = myDGSEM % mesh % faces % elementIDs(2,iFace)
+
+       IF( e2 == PRESCRIBED )THEN
+
+
+         IF( myDGSEM % fluidEquations % calculate_density_from_T )THEN
+
+           DO j = 0, myDGSEM % params % polyDeg
+             DO i = 0, myDGSEM % params % polyDeg
+
+               x(1:3) = myDGSEM % mesh % elements % xBound(i,j,1:3,s1,e1)
+
+               u = myDGSEM % fluidEquations % u % evaluate( x ) 
+               v = myDGSEM % fluidEquations % v % evaluate( x ) 
+               w = myDGSEM % fluidEquations % w % evaluate( x ) 
+               T = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+               s = myDGSEM % fluidEquations % tracer % evaluate( x )
+      
+               Tbar = myDGSEM % static % boundarySolution(i,j,5,s1,e1)/myDGSEM % static % boundarySolution(i,j,4,s1,e1)
+      
+               myDGSEM % state % prescribedState(i,j,4,bID) = -myDGSEM % static % boundarySolution(i,j,4,s1,e1)*T/(Tbar + T)
+               myDGSEM % state % prescribedState(i,j,1,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*u
+               myDGSEM % state % prescribedState(i,j,2,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*v
+               myDGSEM % state % prescribedState(i,j,3,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*w
+               myDGSEM % state % prescribedState(i,j,6,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*s
+
+             ENDDO
+           ENDDO
+          
+         ELSE
+
+           DO j = 0, myDGSEM % params % polyDeg
+             DO i = 0, myDGSEM % params % polyDeg
+
+               x(1:3) = myDGSEM % mesh % elements % xBound(i,j,1:3,s1,e1)
+
+               u   = myDGSEM % fluidEquations % u % evaluate( x ) 
+               v   = myDGSEM % fluidEquations % v % evaluate( x ) 
+               w   = myDGSEM % fluidEquations % w % evaluate( x ) 
+               T   = myDGSEM % fluidEquations % t % evaluate( x ) ! Potential temperature anomaly
+               rho = myDGSEM % fluidEquations % rho % evaluate( x ) 
+               s   = myDGSEM % fluidEquations % tracer % evaluate( x )
+  
+               Tbar = myDGSEM % static % boundarySolution(i,j,5,s1,e1)/myDGSEM % static % boundarySolution(i,j,4,e1,s1)
+  
+               myDGSEM % state % prescribedState(i,j,4,bID) = rho
+               myDGSEM % state % prescribedState(i,j,1,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*u
+               myDGSEM % state % prescribedState(i,j,2,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*v
+               myDGSEM % state % prescribedState(i,j,3,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*w
+               myDGSEM % state % prescribedState(i,j,5,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*T
+               myDGSEM % state % prescribedState(i,j,6,bID) = ( rho + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*s
+
+             ENDDO
+           ENDDO
+
+         ENDIF
+
+       ENDIF
+
+    ENDDO
+
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
+#endif
+
+  END SUBROUTINE SetPrescribedState_Fluid
+
+  SUBROUTINE InitializeMesh_Fluid( myDGSEM )
 
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     CHARACTER(4) :: rankChar
     LOGICAL      :: fileExists, meshgenSuccess
+    INTEGER      :: mpierr
 
       WRITE( rankChar, '(I4.4)' )myDGSEM % extComm % myRank
 
@@ -343,7 +523,7 @@ CONTAINS
       ENDIF
         
 #ifdef HAVE_MPI
-      CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM )
+      CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, mpierr )
 #endif
 
       ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
@@ -356,7 +536,7 @@ CONTAINS
                                           myDGSEM % params % zScale )
 
 
-  END SUBROUTINE BuildHexMesh_Fluid
+  END SUBROUTINE InitializeMesh_Fluid
 !
   SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT )
 
@@ -377,11 +557,7 @@ CONTAINS
     TYPE(dim3)         :: fgrid, grid, tBlock
 #else
     REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
-    REAL(prec) :: G3D(0:myDGSEM % params % polyDeg,&
-                      0:myDGSEM % params % polyDeg,&
-                      0:myDGSEM % params % polyDeg,&
-                      1:myDGSEM % state % nEquations,&
-                      1:myDGSEM % mesh % elements % nElements)
+    REAL(prec), ALLOCATABLE :: G3D(:,:,:,:,:)
     INTEGER    :: m, iEl, iT, i, j, k, iEq
 
 #endif
@@ -461,8 +637,16 @@ CONTAINS
 
     ENDIF
 
+    ! Update the host copy of the solution
+    myDGSEM % state % solution = myDGSEM % state % solution_dev
+
 #else
 
+    ALLOCATE( G3D(0:myDGSEM % params % polyDeg,&
+                  0:myDGSEM % params % polyDeg,&
+                  0:myDGSEM % params % polyDeg,&
+                  1:myDGSEM % state % nEquations,&
+                  1:myDGSEM % mesh % elements % nElements) )
 
     t0 = myDGSEM % simulationTime
     dt = myDGSEM % params % dt
@@ -580,6 +764,9 @@ CONTAINS
       !$OMP BARRIER
 
     ENDIF
+
+    DEALLOCATE( G3D )
+
 #endif
 
 #ifdef TIMING
@@ -1445,10 +1632,7 @@ CONTAINS
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % boundarySolution(i,j,4,s1,e1) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % boundarySolution(i,j,5,s1,e1) ! potential temperature
-
-#ifdef PASSIVE_TRACERS
             myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % boundarySolution(i,j,6,s1,e1) 
-#endif
 
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) ! P
 
@@ -1507,9 +1691,7 @@ CONTAINS
             myDGSEM % state % externalState(i,j,3,bID) = -nz*un + us*sz + ut*tz ! w
             myDGSEM % state % externalState(i,j,4,bID) =  myDGSEM % state % prescribedState(i,j,4,bID) ! rho
             myDGSEM % state % externalState(i,j,5,bID) =  myDGSEM % state % prescribedState(i,j,5,bID) ! potential temperature
-#ifdef PASSIVE_TRACERS
             myDGSEM % state % externalState(i,j,6,bID) =  myDGSEM % state % prescribedState(i,j,6,bID)
-#endif
             myDGSEM % state % externalState(i,j,nEquations,bID) =  myDGSEM % state % prescribedState(i,j,nEquations,bID) ! P
 
           ENDIF
@@ -2703,17 +2885,39 @@ CONTAINS
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
-  SUBROUTINE WriteTecplot_Fluid( myDGSEM )
+  SUBROUTINE IO_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+    ! Local
+    CHARACTER(50) :: filename
+    CHARACTER(13) :: timeStampString
+    CHARACTER(4)  :: rankChar
+ 
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+      WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
+
+      filename = "State."//timeStampString//".h5"
+      CALL myDGSEM % Write_to_HDF5( filename )
+
+#ifdef TECPLOT
+      filename = "State."//rankChar//"."//timeStampString//".tec"
+      CALL myDGSEM % WriteTecplot( filename )
+#endif
+
+#ifdef DIAGNOSTICS
+      CALL myDGSEM % Diagnostics( )
+      CALL myDGSEM % WriteDiagnostics( )
+#endif
+
+      
+  END SUBROUTINE IO_Fluid
+!
+  SUBROUTINE WriteTecplot_Fluid( myDGSEM, filename )
 
     IMPLICIT NONE
 
     CLASS( Fluid ), INTENT(inout) :: myDGsem
+    CHARACTER(*), INTENT(in)      :: filename
     !LOCAL
-    REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: drag(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1, 1:myDGSEM % mesh % elements % nElements)
-    REAL(prec)  :: drag_init(0:myDGSEM % params % polydeg,0:myDGSEM % params % polydeg,0:myDGSEM % params % polydeg,1, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
     INTEGER :: istat
 #endif
@@ -2721,83 +2925,45 @@ CONTAINS
     CHARACTER(5)  :: zoneID
     CHARACTER(4)  :: rankChar
     REAL(prec)    :: hCapRatio, c, T
-    CHARACTER(13) :: timeStampString
 
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
     CALL myDGSEM % static % UpdateHost( )
     istat = cudaDeviceSynchronize( )
-
 #endif
 
-    drag_init(:,:,:,1,:) = myDGSEM % sourceTerms % drag
-    sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
-                                                myDGSEM % state % solution, &
-                                                myDGSEM % state % nEquations, &
-                                                myDGSEM % mesh % elements % nElements )
-
-    bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
-                                                 myDGSEM % static % nEquations, &
-                                                 myDGSEM % mesh % elements % nElements )
-
-    drag = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, drag_init, &
-                                                 1, &
-                                                 myDGSEM % mesh % elements % nElements )
-
-    x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
-                                              3, &
-                                              myDGSEM % mesh % elements % nElements )
-
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= 'State.'//rankChar//'.'//timeStampString//'.tec', &
+      FILE= TRIM(filename), &
       FORM='formatted', &
       STATUS='replace')
 
-#ifdef PASSIVE_TRACERS
 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure",'//&
-      ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure"'
 
-#else
-
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Pressure",'//&
-      ' "rho_b", "Pot. Temp._b", "Pressure_b", "Drag", "c" '
-
-#endif
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
       WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements % elementID(iEl)
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % nPlot+1,&
-                                                 ', J=',myDGSEM % params % nPlot+1,&
-                                                 ', K=',myDGSEM % params % nPlot+1,',F=POINT'
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % polyDeg+1,&
+                                                 ', J=',myDGSEM % params % polyDeg+1,&
+                                                 ', K=',myDGSEM % params % polyDeg+1,',F=POINT'
 
-      DO k = 0, myDGSEM % params % nPlot
-        DO j = 0, myDGSEM % params % nPlot
-          DO i = 0, myDGSEM % params % nPlot
-            T =   (bsol(i,j,k,5,iEl) + sol(i,j,k,5,iEl))/(bsol(i,j,k,4,iEl)+sol(i,j,k,4,iEl) )
+      DO k = 0, myDGSEM % params % polyDeg
+        DO j = 0, myDGSEM % params % polyDeg
+          DO i = 0, myDGSEM % params % polyDeg
 
-            ! Sound speed estimate for the external and internal states
-            c = sqrt( myDGSEM % params % R*T*( ( sol(i,j,k,nEquations,iEl) + bsol(i,j,k,nEquations,iEl) )/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio   )
-            WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), x(i,j,k,2,iEl), x(i,j,k,3,iEl),&
-              sol(i,j,k,1,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-              sol(i,j,k,4,iEl), &
-              (sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl))/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-#ifdef PASSIVE_TRACERS
-              ( bsol(i,j,k,6,iEl) + sol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
-#endif
-              sol(i,j,k,nEquations,iEl), &
-              bsol(i,j,k,4,iEl), &
-              bsol(i,j,k,5,iEl)/( bsol(i,j,k,4,iEl) ),&
-              bsol(i,j,k,nEquations,iEl),&
-              drag(i,j,k,1,iEl), c
-
+            WRITE(fUnit,'(17(E15.7,1x))') myDGSEM % mesh % elements % x(i,j,k,1,iEl), &
+                                          myDGSEM % mesh % elements % x(i,j,k,2,iEl), &
+                                          myDGSEM % mesh % elements % x(i,j,k,3,iEl), &
+                                          myDGSEM % state % solution(i,j,k,1,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
+                                          myDGSEM % state % solution(i,j,k,2,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
+                                          myDGSEM % state % solution(i,j,k,3,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
+                                          myDGSEM % state % solution(i,j,k,4,iEl), &
+                                          ( myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
+                                          ( myDGSEM % state % solution(i,j,k,6,iEl) + myDGSEM % static % solution(i,j,k,6,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
+                                          myDGSEM % state % solution(i,j,k,nEquations,iEl)
 
           ENDDO
         ENDDO
@@ -2809,93 +2975,37 @@ CONTAINS
 
   END SUBROUTINE WriteTecplot_Fluid
 !
-  SUBROUTINE OpenDiagnosticsFiles_Fluid( myDGSEM )
-    IMPLICIT NONE
-    CLASS( Fluid  ), INTENT(inout) :: myDGSEM
-    ! Local
-    CHARACTER(13) :: timeStampString
-
-
-    myDGSEM % volume = 0.0_prec
-    myDGSEM % mass   = 0.0_prec
-    myDGSEM % KE     = 0.0_prec
-    myDGSEM % PE     = 0.0_prec
-    myDGSEM % heat   = 0.0_prec
-
-    IF( myDGSEM % extComm % myRank == 0 )THEN
-      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
-
-      OPEN( UNIT=NewUnit(diagUnits(1)), &
-        FILE='Mass.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(1),*) '#TotalMass'
-
-      OPEN( UNIT=NewUnit(diagUnits(2)), &
-        FILE='KineticEnergy.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(2),*) '#TotalKineticEnergy'
-
-      OPEN( UNIT=NewUnit(diagUnits(3)), &
-        FILE='PotentialEnergy.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(3),*) '#TotalPotentialEnergy'
-
-      OPEN( UNIT=NewUnit(diagUnits(4)), &
-        FILE='Heat.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(4),*) '#TotalHeat'
-
-      OPEN( UNIT=NewUnit(diagUnits(5)), &
-        FILE='Volume.'//timeStampString//'.curve', &
-        FORM='FORMATTED', &
-        STATUS='REPLACE', &
-        ACCESS='APPEND' )
-      WRITE(diagUnits(5),*) '#TotalVolume'
-    ENDIF
-
-  END SUBROUTINE OpenDiagnosticsFiles_Fluid
-!
   SUBROUTINE WriteDiagnostics_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    ! Local
+    LOGICAL :: fileExists
 
-    CALL myDGSEM % OpenDiagnosticsFiles( )
 
     IF( myDGSEM % extComm % myRank == 0 )THEN
-      WRITE(diagUnits(1),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % mass
-      WRITE(diagUnits(2),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % KE
-      WRITE(diagUnits(3),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % PE
-      WRITE(diagUnits(4),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % heat
-      WRITE(diagUnits(5),'(E15.5,2x,E15.5)') myDGSEM % simulationTime, myDGSEM % volume
+
+      INQUIRE( file='Diagnostics.curve', EXIST=fileExists )
+
+      OPEN( UNIT=NewUnit(diagUnits), &
+        FILE='Diagnostics.curve', &
+        FORM='FORMATTED', &
+        ACCESS='APPEND' )
+
+      IF( .NOT. fileExists )THEN
+        WRITE(diagUnits,*) 'Time, Total Mass, Total Kinetic Energy, Total Potential Energy, Total heat content, Total volume'
+      ENDIF
+
     ENDIF
 
-    CALL myDGSEM % CloseDiagnosticsFiles( )
-
-  END SUBROUTINE WriteDiagnostics_Fluid
-!
-  SUBROUTINE CloseDiagnosticsFiles_Fluid( myDGSEM )
-    IMPLICIT NONE
-    CLASS( Fluid  ), INTENT(inout) :: myDGSEM
-
+    IF( myDGSEM % extComm % myRank == 0 )THEN
+      WRITE(diagUnits,'(5(E15.5,",",2x),E15.5)') myDGSEM % simulationTime, myDGSEM % mass, myDGSEM % KE, myDGSEM % PE, myDGSEM % heat, myDGSEM % volume
+    ENDIF
 
     IF( myDGSEM % extComm % myRank == 0 ) THEN
-      CLOSE( UNIT=diagUnits(1) )
-      CLOSE( UNIT=diagUnits(2) )
-      CLOSE( UNIT=diagUnits(3) )
-      CLOSE( UNIT=diagUnits(4) )
-      CLOSE( UNIT=diagUnits(5) )
+      CLOSE( UNIT=diagUnits )
     ENDIF
 
-  END SUBROUTINE CloseDiagnosticsFiles_Fluid
+  END SUBROUTINE WriteDiagnostics_Fluid
 !
   SUBROUTINE Diagnostics_Fluid( myDGSEM )
     IMPLICIT NONE
@@ -2971,13 +3081,14 @@ CONTAINS
     myDGSEM % KE     = KE
     myDGSEM % PE     = PE
     myDGSEM % heat   = heat
+    !PRINT*, volume, mass, KE, PE, heat
 
 #ifdef HAVE_MPI
-    CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
-    CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, MPI_COMM_WORLD, mpiErr )
+    CALL MPI_ALLREDUCE( volume, myDGSEM % volume, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( mass, myDGSEM % mass, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( KE, myDGSEM % KE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( PE, myDGSEM % PE, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
+    CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, myDGSEM % extComm % MPI_PREC, MPI_SUM, myDGSEM % extComm % MPI_COMM, mpiErr )
 #endif
 
     IF( IsNaN( myDGSEM % KE ) .OR. IsInf( myDGSEM % KE/ myDGSEM % volume) )THEN
@@ -3000,153 +3111,1063 @@ CONTAINS
 
   END SUBROUTINE Diagnostics_Fluid
 !
-  SUBROUTINE WritePickup_Fluid( myDGSEM )
-
+  SUBROUTINE Write_to_HDF5( myDGSEM, filename )
     IMPLICIT NONE
-    CLASS( Fluid ), INTENT(in) :: myDGSEM
-    ! LOCAL
-    CHARACTER(4)  :: rankChar
-    INTEGER       :: iEl
-    INTEGER       :: thisRec, fUnit
-    INTEGER       :: iEq, N
-    CHARACTER(13) :: timeStampString
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    CHARACTER(*), INTENT(in)      :: filename
+    ! Local
+    CHARACTER(100)   :: groupname
+    CHARACTER(13)    :: timeStampString
+    CHARACTER(10)    :: zoneID
+    INTEGER          :: iEl, N, rank, m_rank, error, istat, nEl, elID
+    INTEGER(HSIZE_T) :: dimensions(1:4), global_dimensions(1:4)
+    INTEGER(HSIZE_T) :: starts(1:4), counts(1:4), strides(1:4)
+    INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id, global_dataspace_id
+    INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
+    INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id, plist_id
+    INTEGER(HID_T)   :: create_plist_id, access_plist_id, transfer_plist_id
+
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
+    CALL myDGSEM % static % UpdateHost( )
+    istat = cudaDeviceSynchronize( )
+#endif
 
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+    PRINT(MsgFMT), 'Writing output file : '//TRIM(filename)
+
+#ifdef HAVE_MPI
 
     N = myDGSEM % params % polyDeg
+    CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
+    CALL MPI_ALLREDUCE( myDGSEM % mesh % elements % nElements, nEl, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, error )
+    rank = 4
+    ! Local Dimensions
+    dimensions = (/ N+1, N+1, N+1, 1 /)
+    global_dimensions = (/ N+1, N+1, N+1, nEl /)
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-    PRINT(MsgFMT), 'Writing output file :  State.'//rankChar//'.'//timeStampString//'.pickup'
 
-    OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
-      FORM='UNFORMATTED',&
-      ACCESS='DIRECT',&
-      STATUS='REPLACE',&
-      ACTION='WRITE',&
-      CONVERT='BIG_ENDIAN',&
-      RECL=prec*(N+1)*(N+1)*(N+1) )
+    CALL h5open_f(error)  
+    IF( error /= 0 ) STOP
+  
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, access_plist_id, error)
+    CALL h5pset_fapl_mpio_f(access_plist_id, myDGSEM % extComm % MPI_COMM, MPI_INFO_NULL, error)
 
-    thisRec = 1
+    ! Create a new file using default properties.
+    !
+    CALL h5fcreate_f(TRIM(filename), H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, access_plist_id)
+    IF( error /= 0 ) STOP
+
+    ! Create groups 
+    groupname = "/model_output"
+    CALL h5gcreate_f( file_id, TRIM(groupname), model_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/static"
+    CALL h5gcreate_f( file_id, TRIM(groupname), static_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/model_conditions"
+    CALL h5gcreate_f( file_id, TRIM(groupname), conditions_group_id, error )
+    IF( error /= 0 ) STOP
+    ! --------------
+
+    ! Create a dataspace for the global dataset
+    CALL h5screate_simple_f(rank, global_dimensions, global_dataspace_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+    IF( error /= 0 ) STOP
+
+    ! Set the data creation mode to CHUNK
+    CALL h5pcreate_f(H5P_DATASET_CREATE_F, create_plist_id, error)
+    CALL h5pset_chunk_f(create_plist_id, rank, dimensions, error)
+
+    CALL h5pcreate_f(H5P_DATASET_XFER_F, transfer_plist_id, error)
+    CALL h5pset_dxpl_mpio_f(transfer_plist_id, H5FD_MPIO_COLLECTIVE_F, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/x_momentum", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+
     DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
 
-      DO iEq = 1, myDGSEM % state % nEquations
-        WRITE( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
-        thisRec = thisRec+1
-      ENDDO
-      DO iEq = 1, myDGSEM % state % nEquations
-        WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
-        thisRec = thisRec+1
-      ENDDO
-      DO iEq = 1, myDGSEM % state % nEquations
-        WRITE( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
-        thisRec = thisRec+1
-      ENDDO
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
 
-      WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
-      thisRec = thisRec+1
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/y_momentum", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/z_momentum", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_temperature", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_tracer", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/pressure", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dcreate_f( file_id, "/static/x_momentum", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/y_momentum", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/z_momentum", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_temperature", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_tracer", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/pressure", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id,"/model_conditions/drag", &
+                       H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+    IF( error /= 0 ) STOP
+    CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
+
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
+    CALL h5pclose_f( access_plist_id, error )
+    CALL h5pclose_f( transfer_plist_id, error )
+    CALL h5pclose_f( create_plist_id, error )
+    CALL h5sclose_f( dataspace_id, error )
+    CALL h5sclose_f( global_dataspace_id, error )
+    CALL h5fclose_f( file_id, error )
+    CALL h5close_f( error )
+
+#else
+
+    N = myDGSEM % params % polyDeg
+    nEl = myDGSEM % mesh % elements % nElements
+    rank = 4
+    dimensions = (/ N+1, N+1, N+1, nEl /)
+
+    CALL h5open_f(error)  
+    IF( error /= 0 ) STOP
+  
+    ! Create a new file using default properties.
+    !
+    CALL h5fcreate_f(TRIM(filename), H5F_ACC_TRUNC_F, file_id, error)
+    IF( error /= 0 ) STOP
+    ! Create dataspace to be used for each element ( (N+1)x(N+1)x(N+1) grid )
+    !
+    CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+    IF( error /= 0 ) STOP
+
+    groupname = "/model_output"
+    CALL h5gcreate_f( file_id, TRIM(groupname), model_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/static"
+    CALL h5gcreate_f( file_id, TRIM(groupname), static_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/model_conditions"
+    CALL h5gcreate_f( file_id, TRIM(groupname), conditions_group_id, error )
+    IF( error /= 0 ) STOP
+
+    CALL h5dcreate_f( file_id, "/model_output/x_momentum", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/y_momentum", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/z_momentum", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_temperature", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_tracer", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/pressure", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dcreate_f( file_id, "/static/x_momentum", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/y_momentum", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/z_momentum", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_temperature", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_tracer", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/pressure", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id,"/model_conditions/drag", &
+                       H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % sourceTerms % drag, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
+    CALL h5sclose_f( dataspace_id, error )
+    CALL h5fclose_f( file_id, error )
+    CALL h5close_f( error )
+#endif
+
+
+
+  END SUBROUTINE Write_to_HDF5
+
+  SUBROUTINE Read_from_HDF5( myDGSEM, itExists, filename )
+    IMPLICIT NONE
+    CLASS( Fluid ), INTENT(inout)      :: myDGSEM
+    CHARACTER(*), OPTIONAL, INTENT(in) :: filename
+    LOGICAL, INTENT(out)               :: itExists
+    ! Local
+    CHARACTER(100)   :: fname, groupname
+    CHARACTER(13)    :: timeStampString
+    CHARACTER(10)    :: zoneID
+    INTEGER          :: iEl, N, rank, m_rank, error, nEl, elID, istat
+    INTEGER(HSIZE_T) :: dimensions(1:4), global_dimensions(1:4)
+    INTEGER(HSIZE_T) :: starts(1:4), counts(1:4), strides(1:4)
+    INTEGER(HID_T)   :: file_id, dataspace_id, global_dataspace_id, dataset_id
+    INTEGER(HID_T)   :: model_group_id, static_group_id, static_element_group_id, element_group_id
+    INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id
+    INTEGER(HID_T)   :: daccess_plist_id, access_plist_id, transfer_plist_id
+
+    IF( PRESENT( filename ) )THEN
+      fname = TRIM(filename)
+    ELSE
+      timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+      fname = "State."//timeStampString//".h5"
+    ENDIF
+
+    INQUIRE( FILE=TRIM(fname), EXIST = itExists )
+    PRINT*, '  Reading '//TRIM(fname)
+     
+    IF( .NOT. itExists ) THEN
+      RETURN
+    ENDIF
+
+
+#ifdef HAVE_MPI
+    N = myDGSEM % params % polyDeg
+    CALL MPI_ALLREDUCE( myDGSEM % mesh % elements % nElements, nEl, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, error )
+    rank = 4
+    ! Local Dimensions
+    dimensions = (/ N+1, N+1, N+1, 1 /)
+    global_dimensions = (/ N+1, N+1, N+1, nEl /)
+
+    CALL h5open_f(error)  
+  
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, access_plist_id, error)
+    CALL h5pset_fapl_mpio_f(access_plist_id, myDGSEM % extComm % MPI_COMM, MPI_INFO_NULL, error)
+
+    CALL h5fopen_f(TRIM(fname), H5F_ACC_RDWR_F, file_id, error, access_plist_id)
+
+    groupname = "/model_output"
+    CALL h5gopen_f( file_id, TRIM(groupname), model_group_id, error )
+
+    groupname = "/static"
+    CALL h5gopen_f( file_id, TRIM(groupname), static_group_id, error )
+
+    groupname = "/model_conditions"
+    CALL h5gopen_f( file_id, TRIM(groupname), conditions_group_id, error )
+
+    CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
+
+    CALL h5pcreate_f(H5P_DATASET_XFER_F, transfer_plist_id, error)
+    CALL h5pset_dxpl_mpio_f(transfer_plist_id, H5FD_MPIO_COLLECTIVE_F, error)
+
+    CALL h5dopen_f(file_id, "/model_output/x_momentum", dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
 
     ENDDO
 
-    CLOSE(UNIT=fUnit)
+    CALL h5dclose_f(dataset_id, error)
 
-    OPEN( UNIT   = NEWUNIT(fUnit), &
-      FILE   = 'State.'//rankChar//'.'//timeStampString//'.exs', &
-      FORM   ='UNFORMATTED',&
-      ACCESS ='DIRECT',&
-      STATUS ='REPLACE',&
-      ACTION ='WRITE', &
-      CONVERT='BIG_ENDIAN',&
-      RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
-    WRITE( fUnit, rec = 1 ) myDGSEM % state % externalState
-    WRITE( fUnit, rec = 2 ) myDGSEM % state % prescribedState
-    CLOSE(fUnit)
+    CALL h5dopen_f( file_id, "/model_output/y_momentum",dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/z_momentum",dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_temperature", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_tracer", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/pressure", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dopen_f( file_id, "/static/x_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/y_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/z_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_temperature", dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_tracer",dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/pressure", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id,"/model_conditions/drag",dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
+    CALL h5pclose_f( access_plist_id, error )
+    CALL h5pclose_f( transfer_plist_id, error )
+    CALL h5sclose_f( dataspace_id, error )
+    CALL h5sclose_f( global_dataspace_id, error )
+    CALL h5fclose_f( file_id, error )
+    CALL h5close_f( error )
 
 
-  END SUBROUTINE WritePickup_Fluid
-!
-  SUBROUTINE ReadPickup_Fluid( myDGSEM, itExists )
-
-    IMPLICIT NONE
-    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-    LOGICAL, INTENT(out)          :: itExists
-    ! LOCAL
-    CHARACTER(4)  :: rankChar
-    INTEGER       :: iEl, istat
-    INTEGER       :: thisRec, fUnit, i, j 
-    INTEGER       :: iEq, N, iFace, e1, s1, bID
-    CHARACTER(13) :: timeStampString
-#ifdef HAVE_CUDA
-    TYPE(dim3) :: tBlock, grid
-#endif
-   
-    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-
+#else
     N = myDGSEM % params % polyDeg
+    nEl = myDGSEM % mesh % elements % nElements
+    rank = 4
+    dimensions = (/ N+1, N+1, N+1, nEl /)
 
-    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
+    PRINT(MsgFMT), 'Reading output file : '//TRIM(fname)
 
-    IF( itExists )THEN
+    CALL h5open_f(error)  
+  
+    CALL h5fopen_f(TRIM(fname), H5F_ACC_RDWR_F, file_id, error)
+    IF( error /= 0 ) STOP
 
-      PRINT*, '  Opening State.'//rankChar//'.'//timeStampString//'.pickup'
+    groupname = "/model_output"
+    CALL h5gopen_f( file_id, TRIM(groupname), model_group_id, error )
+    IF( error /= 0 ) STOP
 
-      OPEN( UNIT=NEWUNIT(fUnit), &
-        FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
-        FORM='unformatted',&
-        ACCESS='direct',&
-        STATUS='old',&
-        ACTION='READ',&
-        CONVERT='big_endian',&
-        RECL=prec*(N+1)*(N+1)*(N+1) )
+    groupname = "/static"
+    CALL h5gopen_f( file_id, TRIM(groupname), static_group_id, error )
+    IF( error /= 0 ) STOP
 
-      thisRec = 1
-      DO iEl = 1, myDGSEM % mesh % elements % nElements
+    groupname = "/model_conditions"
+    CALL h5gopen_f( file_id, TRIM(groupname), conditions_group_id, error )
+    IF( error /= 0 ) STOP
 
-        DO iEq = 1, myDGSEM  % state % nEquations
-          READ( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
-          thisRec = thisRec+1
-        ENDDO
-        DO iEq = 1, myDGSEM % state % nEquations
-          READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
-          thisRec = thisRec+1
-        ENDDO
-        DO iEq = 1, myDGSEM % state % nEquations
-          READ( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
-          thisRec = thisRec+1
-        ENDDO
+    CALL h5dopen_f( file_id, "/model_output/x_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-        READ( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
-        thisRec = thisRec+1
+    CALL h5dopen_f( file_id, "/model_output/y_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-      ENDDO
+    CALL h5dopen_f( file_id, "/model_output/z_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-      CLOSE(UNIT=fUnit)
+    CALL h5dopen_f( file_id, "/model_output/density", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-    ENDIF
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_temperature", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.exs', EXIST = itExists )
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_tracer", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-    IF( itExists )THEN
+    CALL h5dopen_f( file_id, "/model_output/pressure", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-      OPEN( UNIT   = NEWUNIT(fUnit), &
-        FILE   = 'State.'//rankChar//'.'//timeStampString//'.exs', &
-        FORM   ='UNFORMATTED',&
-        ACCESS ='DIRECT',&
-        STATUS ='OLD',&
-        ACTION ='READ', &
-        CONVERT='BIG_ENDIAN',&
-        RECL   = prec*(myDGSEM % params % polyDeg+1)*(myDGSEM % params % polyDeg+1)*(myDGSEM % state % nEquations)*(myDGSEM % extComm % nBoundaries) )
-      READ( fUnit, rec = 1 ) myDGSEM % state % externalState
-      READ( fUnit, rec = 2 ) myDGSEM % state % prescribedState
-      CLOSE(fUnit)
+    ! Read the static fields 
+    CALL h5dopen_f( file_id, "/static/x_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
 
-    ENDIF
+    CALL h5dopen_f( file_id, "/static/y_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/z_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_temperature", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_tracer", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/pressure", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+
+    CALL h5dopen_f( file_id, "/model_conditions/drag", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
+                     myDGSEM % sourceTerms % drag, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+    
+    IF( error /= 0 ) STOP
+
+
+    CALL h5gclose_f( model_group_id, error )
+    CALL h5gclose_f( static_group_id, error )
+    CALL h5gclose_f( conditions_group_id, error )
+    CALL h5fclose_f( file_id, error )
+    CALL h5close_f( error )
+#endif
+
+#ifdef HAVE_CUDA
+    myDGSEM % state % solution_dev = myDGSEM % state % solution
+    myDGSEM % static % solution_dev = myDGSEM % static % solution
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
+#endif
+
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( )
+    !$OMP END PARALLEL
 
     CALL myDGSEM % UpdateExternalStaticState( )
+    CALL myDGSEM % SetPrescribedState( )
 
-  END SUBROUTINE ReadPickup_Fluid
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
+    CALL myDGSEM % static % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
+#endif
 
+  END SUBROUTINE Read_from_HDF5
+
+!  SUBROUTINE WritePickup_Fluid( myDGSEM )
+!
+!    IMPLICIT NONE
+!    CLASS( Fluid ), INTENT(in) :: myDGSEM
+!    ! LOCAL
+!    CHARACTER(4)  :: rankChar
+!    INTEGER       :: iEl
+!    INTEGER       :: thisRec, fUnit
+!    INTEGER       :: iEq, N
+!    CHARACTER(13) :: timeStampString
+!
+!    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+!
+!    N = myDGSEM % params % polyDeg
+!
+!    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
+!    PRINT(MsgFMT), 'Writing output file :  State.'//rankChar//'.'//timeStampString//'.pickup'
+!
+!    OPEN( UNIT=NEWUNIT(fUnit), &
+!      FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
+!      FORM='UNFORMATTED',&
+!      ACCESS='DIRECT',&
+!      STATUS='REPLACE',&
+!      ACTION='WRITE',&
+!      CONVERT='BIG_ENDIAN',&
+!      RECL=prec*(N+1)*(N+1)*(N+1) )
+!
+!    thisRec = 1
+!    DO iEl = 1, myDGSEM % mesh % elements % nElements
+!
+!      DO iEq = 1, myDGSEM % state % nEquations
+!        WRITE( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
+!        thisRec = thisRec+1
+!      ENDDO
+!      DO iEq = 1, myDGSEM % state % nEquations
+!        WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
+!        thisRec = thisRec+1
+!      ENDDO
+!      DO iEq = 1, myDGSEM % state % nEquations
+!        WRITE( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
+!        thisRec = thisRec+1
+!      ENDDO
+!
+!      WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
+!      thisRec = thisRec+1
+!
+!    ENDDO
+!
+!    CLOSE(UNIT=fUnit)
+!
+!
+!  END SUBROUTINE WritePickup_Fluid
+!!
+!  SUBROUTINE ReadPickup_Fluid( myDGSEM, itExists )
+!
+!    IMPLICIT NONE
+!    CLASS( Fluid ), INTENT(inout) :: myDGSEM
+!    LOGICAL, INTENT(out)          :: itExists
+!    ! LOCAL
+!    CHARACTER(4)  :: rankChar
+!    INTEGER       :: iEl, istat
+!    INTEGER       :: thisRec, fUnit, i, j 
+!    INTEGER       :: iEq, N, iFace, e1, s1, bID
+!    CHARACTER(13) :: timeStampString
+!#ifdef HAVE_CUDA
+!    TYPE(dim3) :: tBlock, grid
+!#endif
+!   
+!    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
+!
+!    N = myDGSEM % params % polyDeg
+!
+!    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
+!    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
+!
+!    IF( itExists )THEN
+!
+!      PRINT*, '  Opening State.'//rankChar//'.'//timeStampString//'.pickup'
+!
+!      OPEN( UNIT=NEWUNIT(fUnit), &
+!        FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
+!        FORM='unformatted',&
+!        ACCESS='direct',&
+!        STATUS='old',&
+!        ACTION='READ',&
+!        CONVERT='big_endian',&
+!        RECL=prec*(N+1)*(N+1)*(N+1) )
+!
+!      thisRec = 1
+!      DO iEl = 1, myDGSEM % mesh % elements % nElements
+!
+!        DO iEq = 1, myDGSEM  % state % nEquations
+!          READ( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
+!          thisRec = thisRec+1
+!        ENDDO
+!        DO iEq = 1, myDGSEM % state % nEquations
+!          READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
+!          thisRec = thisRec+1
+!        ENDDO
+!        DO iEq = 1, myDGSEM % state % nEquations
+!          READ( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
+!          thisRec = thisRec+1
+!        ENDDO
+!
+!        READ( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
+!        thisRec = thisRec+1
+!
+!      ENDDO
+!
+!      CLOSE(UNIT=fUnit)
+!
+!    ENDIF
+!
+!#ifdef HAVE_CUDA
+!    CALL myDGSEM % static % UpdateDevice( )
+!    CALL myDGSEM % state % UpdateDevice( )
+!    CALL myDGSEM % sourceTerms % UpdateDevice( )
+!    istat = cudaDeviceSynchronize( )
+!#endif
+!
+!    CALL myDGSEM % UpdateExternalStaticState( )
+!    CALL myDGSEM % SetPrescribedState( )
+!
+!  END SUBROUTINE ReadPickup_Fluid
+  
   SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
     IMPLICIT NONE
     CLASS( Fluid ), INTENT (inout) :: myDGSEM 
@@ -3158,10 +4179,6 @@ CONTAINS
 #endif
 
 #ifdef HAVE_CUDA
-      CALL myDGSEM % static % UpdateDevice( )
-      CALL myDGSEM % state % UpdateDevice( )
-      CALL myDGSEM % sourceTerms % UpdateDevice( )
-      istat = cudaDeviceSynchronize( )
   
       tBlock = dim3(myDGSEM % params % polyDeg+1, &
                     myDGSEM % params % polyDeg+1 , &
@@ -3404,9 +4421,7 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  stateBsols(i,j,4,s1,e1) ! rho
           externalState(i,j,5,iFace) =  stateBsols(i,j,5,s1,e1) ! potential temperature
-#ifdef PASSIVE_TRACERS
           externalState(i,j,6,iFace) =  stateBsols(i,j,6,s1,e1) ! tracer
-#endif
           externalState(i,j,nEq_dev,iFace) =  stateBsols(i,j,nEq_dev,s1,e1) ! P
     
         ELSEIF( e2 == INFLOW )THEN
@@ -3462,9 +4477,7 @@ CONTAINS
           externalState(i,j,3,iFace) = -nz*un + us*sz + ut*tz ! w
           externalState(i,j,4,iFace) =  prescribedState(i,j,4,iFace) ! rho
           externalState(i,j,5,iFace) =  prescribedState(i,j,5,iFace) ! potential temperature
-#ifdef PASSIVE_TRACERS
           externalState(i,j,6,iFace) =  prescribedState(i,j,6,iFace) ! tracer
-#endif
           externalState(i,j,nEq_dev,iFace) =  prescribedState(i,j,nEq_dev,iFace) ! P
     
         ENDIF
@@ -3495,11 +4508,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-#ifdef PASSIVE_TRACERS
    REAL(prec) :: jump(1:6), aS(1:6)
-#else
-   REAL(prec) :: jump(1:5), aS(1:5)
-#endif
    REAL(prec) :: fac
 
 
@@ -3630,11 +4639,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: ii, jj, bID
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-#ifdef PASSIVE_TRACERS
    REAL(prec) :: jump(1:6), aS(1:6)
-#else
-   REAL(prec) :: jump(1:5), aS(1:5)
-#endif
    REAL(prec) :: fac
 
 

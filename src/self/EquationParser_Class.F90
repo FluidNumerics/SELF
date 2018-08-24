@@ -366,8 +366,7 @@ CONTAINS
     CHARACTER(Error_Message_Length) :: errorMsg
     TYPE( TokenStack )              :: operator_stack
     TYPE( Token )                   :: tok
-    CHARACTER(Max_Equation_Length)  :: postFix
-    INTEGER                         :: i, j
+    INTEGER                         :: i
     
       !success = .FALSE. 
 
@@ -376,7 +375,6 @@ CONTAINS
   
       DO i = 1, parser % infix % top_index
      
-         
         IF( parser % inFix % tokens(i) % tokenType == Variable_Token .OR. &
             parser % inFix % tokens(i) % tokenType == Number_Token )THEN
 
@@ -390,19 +388,23 @@ CONTAINS
 
         ELSEIF( parser % inFix % tokens(i) % tokenType == Operator_Token .OR. parser % inFix % tokens(i) % tokenType == Monadic_Token )THEN
 
-          tok = operator_stack % TopToken( )
-              
-          DO WHILE( .NOT.( operator_stack % IsEmpty( ) ) .AND. TRIM(tok % tokenString) /= "(" .AND. &
-                    Priority( TRIM(tok % tokenString) ) >  Priority( TRIM(parser % inFix % tokens(i) % tokenString) ) )
-     
-            CALL parser % postFix % push( tok )
-            CALL operator_stack % pop( tok )
-            tok = operator_stack % TopToken( )
 
-          ENDDO
+          IF( .NOT. operator_stack % IsEmpty( ) )THEN
+
+            tok = operator_stack % TopToken( )
+              
+            DO WHILE( TRIM(tok % tokenString) /= "(" .AND. &
+                      Priority( TRIM(tok % tokenString) ) >  Priority( TRIM(parser % inFix % tokens(i) % tokenString) ) )
+       
+              CALL parser % postFix % push( tok )
+              CALL operator_stack % pop( tok )
+              tok = operator_stack % TopToken( )
+
+            ENDDO
+
+          ENDIF
 
           CALL operator_stack % push( parser % inFix % tokens(i) )
-
 
         ELSEIF( parser % inFix % tokens(i) % tokenType == OpeningParentheses_Token )THEN
 
@@ -648,7 +650,12 @@ CONTAINS
   TYPE( Token ) FUNCTION TopToken( stack )
     CLASS( TokenStack ) :: stack
 
-      TopToken = stack % tokens( stack % top_index )
+      IF( stack % top_index > 0 )THEN
+        TopToken % tokenString = stack % tokens( stack % top_index ) % tokenString
+        TopToken % tokenType   = stack % tokens( stack % top_index ) % tokenType
+      ELSE
+        TopToken % tokenString = ''
+      ENDIF
 
   END FUNCTION TopToken 
 

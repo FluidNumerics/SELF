@@ -1,7 +1,9 @@
 bin_PROGRAMS=sfluid
 
-AM_FCFLAGS=-I ../self/
-sfluid_LDADD=../self/libSELF.a
+AM_FCFLAGS = -I ../self/ $(HDF5_FFLAGS)
+AM_LDFLAGS = $(HDF5_LDFLAGS)
+AM_CPPFLAGS = $(HDF5_CPPLAGS)
+sfluid_LDADD =../self/libSELF.a
 
-sfluid_SOURCES= MPILayer_Class.F90 Fluid_EquationParser_Class.F90 BodyForces_Class.F90 Fluid_Class.F90 SELF_Fluids_Driver.F90
+sfluid_SOURCES= Fluid_EquationParser_Class.F90 BodyForces_Class.F90 Fluid_Class.F90 SELF_Fluids_Driver.F90
 

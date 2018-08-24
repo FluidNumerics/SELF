@@ -93,8 +93,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS( MPILayer ), INTENT(inout) :: myMPI
 
-    PRINT*, '    S/R Trash_MPILayer : Clearing memory.'
-
     DEALLOCATE( myMPI % requestHandle, &
                 myMPI % requestStats, &
                 myMPI % recvBuffer, &
