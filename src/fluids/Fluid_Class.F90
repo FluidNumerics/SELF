@@ -324,7 +324,7 @@ CONTAINS
   SUBROUTINE SetInitialConditions_Fluid( myDGSEM )
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
-    INTEGER    :: i, j, k, iEl
+    INTEGER    :: i, j, k, iEl, istat
     INTEGER    :: iFace, bID, e1, s1, e2
     REAL(prec) :: x(1:3)
     REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
