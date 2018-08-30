@@ -78,6 +78,7 @@ AC_CONFIG_FILES([
 Makefile
 src/self/Makefile
 src/fluids/Makefile
+src/cubed-sphere/Makefile
 ])
 
 AC_OUTPUT
