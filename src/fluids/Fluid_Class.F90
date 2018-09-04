@@ -2918,6 +2918,9 @@ CONTAINS
     CLASS( Fluid ), INTENT(inout) :: myDGsem
     CHARACTER(*), INTENT(in)      :: filename
     !LOCAL
+    REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
     INTEGER :: istat
 #endif
@@ -2933,6 +2936,19 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 #endif
 
+    sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
+                                                myDGSEM % state % solution, &
+                                                myDGSEM % state % nEquations, &
+                                                myDGSEM % mesh % elements % nElements )
+
+    bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
+                                                 myDGSEM % static % nEquations, &
+                                                 myDGSEM % mesh % elements % nElements )
+
+    x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
+                                              3, &
+                                              myDGSEM % mesh % elements % nElements )
+
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(filename), &
@@ -2946,24 +2962,24 @@ CONTAINS
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
       WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements % elementID(iEl)
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % polyDeg+1,&
-                                                 ', J=',myDGSEM % params % polyDeg+1,&
-                                                 ', K=',myDGSEM % params % polyDeg+1,',F=POINT'
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % nPlot+1,&
+                                                 ', J=',myDGSEM % params % nPlot+1,&
+                                                 ', K=',myDGSEM % params % nPlot+1,',F=POINT'
 
-      DO k = 0, myDGSEM % params % polyDeg
-        DO j = 0, myDGSEM % params % polyDeg
-          DO i = 0, myDGSEM % params % polyDeg
+      DO k = 0, myDGSEM % params % nPlot
+        DO j = 0, myDGSEM % params % nPlot
+          DO i = 0, myDGSEM % params % nPlot
 
-            WRITE(fUnit,'(17(E15.7,1x))') myDGSEM % mesh % elements % x(i,j,k,1,iEl), &
-                                          myDGSEM % mesh % elements % x(i,j,k,2,iEl), &
-                                          myDGSEM % mesh % elements % x(i,j,k,3,iEl), &
-                                          myDGSEM % state % solution(i,j,k,1,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
-                                          myDGSEM % state % solution(i,j,k,2,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
-                                          myDGSEM % state % solution(i,j,k,3,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
-                                          myDGSEM % state % solution(i,j,k,4,iEl), &
-                                          ( myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
-                                          ( myDGSEM % state % solution(i,j,k,6,iEl) + myDGSEM % static % solution(i,j,k,6,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
-                                          myDGSEM % state % solution(i,j,k,nEquations,iEl)
+            WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), &
+                                          x(i,j,k,2,iEl), &
+                                          x(i,j,k,3,iEl), &
+                                          sol(i,j,k,1,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+                                          sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+                                          sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+                                          sol(i,j,k,4,iEl), &
+                                          ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
+                                          ( sol(i,j,k,6,iEl) + bsol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
+                                          sol(i,j,k,nEquations,iEl)
 
           ENDDO
         ENDDO
