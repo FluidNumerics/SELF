@@ -16,6 +16,7 @@ MODULE HexMesh_Class
   USE NodalDG_Class
   USE Surfaces_Class
   USE HexElements_Class
+  USE Edges_Class
   USE Faces_Class
   USE Nodes_Class
   USE ModelParameters_Class
@@ -38,10 +39,12 @@ MODULE HexMesh_Class
   TYPE HexMesh
     TYPE( HexElements ) :: elements
     TYPE( Nodes  )      :: nodes
+    TYPE( Edges )       :: edges 
     TYPE( Faces )       :: faces
     INTEGER             :: cornerMap(1:3,1:8)
     INTEGER             :: sideMap(1:6)
     INTEGER             :: faceMap(1:4,1:6)
+    INTEGER             :: edgeMap(1:2,1:12)
     INTEGER             :: edgeFaceMap(1:2,1:4)
 
 #ifdef HAVE_CUDA
@@ -49,6 +52,7 @@ MODULE HexMesh_Class
     INTEGER, DEVICE, ALLOCATABLE :: sideMap_dev(:)
     INTEGER, DEVICE, ALLOCATABLE :: faceMap_dev(:,:)
     INTEGER, DEVICE, ALLOCATABLE :: edgeFaceMap_dev(:,:)
+    INTEGER, DEVICE, ALLOCATABLE :: edgeMap_dev(:,:)
 #endif
 
   CONTAINS
@@ -158,9 +162,9 @@ CONTAINS
     ! The computational coordinates for the corner nodes is given assuming a Gauss-Lobatto
     ! computational mesh is USEd. Note that for a Gauss mesh, the corner nodes are not included.
 
-    myHexmesh % cornerMap(1, 1:8) = (/ 0, N, N,  0,  0, N, N,  0 /)
-    myHexmesh % cornerMap(2, 1:8) = (/ 0,  0, N, N,  0,  0, N, N /)
-    myHexmesh % cornerMap(3, 1:8) = (/ 0,  0,  0,  0, N, N, N, N /)
+    myHexmesh % cornerMap(1, 1:8) = (/ 0, N, N, 0, 0, N, N, 0 /)
+    myHexmesh % cornerMap(2, 1:8) = (/ 0, 0, N, N, 0, 0, N, N /)
+    myHexmesh % cornerMap(3, 1:8) = (/ 0, 0, 0, 0, N, N, N, N /)
 
     ! Mesh construction usually begins with the specIFication of elements and the corner nodes, in
     ! addition to the element geometry. From the element-to-node connectivity, we need to construct
@@ -194,6 +198,21 @@ CONTAINS
     myHexmesh % edgeFaceMap(1, 1:4) = (/ 1, 2, 4, 1 /)
     myHexmesh % edgeFaceMap(2, 1:4) = (/ 2, 3, 3, 4 /)
 
+    ! the edge map is used to order the 12 edges that make up the hex cell by using the local
+    ! corner node ID's
+    myHexMesh % edgeMap(1, 1:2)  = (/ 1, 2 /)
+    myHexMesh % edgeMap(2, 1:2)  = (/ 2, 3 /)
+    myHexMesh % edgeMap(3, 1:2)  = (/ 3, 4 /)
+    myHexMesh % edgeMap(4, 1:2)  = (/ 4, 1 /)
+    myHexMesh % edgeMap(5, 1:2)  = (/ 5, 6 /)
+    myHexMesh % edgeMap(6, 1:2)  = (/ 6, 7 /)
+    myHexMesh % edgeMap(7, 1:2)  = (/ 7, 8 /)
+    myHexMesh % edgeMap(8, 1:2)  = (/ 8, 5 /)
+    myHexMesh % edgeMap(9, 1:2)  = (/ 5, 1 /)
+    myHexMesh % edgeMap(10, 1:2) = (/ 2, 6 /)
+    myHexMesh % edgeMap(11, 1:2) = (/ 3, 7 /)
+    myHexMesh % edgeMap(12, 1:2) = (/ 8, 4 /)
+
     ! The number of nodes, the number of elements, and the number of faces are stored in this DATA
     ! structure for convenience. In another implementation (planned for the next version), the
     ! number of elements, nodes, and faces is dynamic; that implementation
@@ -207,14 +226,16 @@ CONTAINS
 #ifdef HAVE_CUDA
 
     ALLOCATE( myHexMesh % cornerMap_dev(1:3,1:8), &
-      myHexMesh % sideMap_dev(1:6), &
-      myHexMesh % faceMap_dev(1:4,1:6), &
-      myHexMesh % edgeFaceMap_dev(1:2,1:4) )
+              myHexMesh % sideMap_dev(1:6), &
+              myHexMesh % faceMap_dev(1:4,1:6), &
+              myHexMesh % edgeFaceMap_dev(1:2,1:4), &
+              myHexMesh % edgeMap(1:2,1:12) )
 
     myHexMesh % cornerMap_dev   = myHexMesh % cornerMap
     myHexMesh % sideMap_dev     = myHexMesh % sideMap
     myHexMesh % faceMap_dev     = myHexMesh % faceMap
     myHexMesh % edgeFaceMap_dev = myHexMesh % edgeFaceMap
+    myHexMesh % edgeMap_dev     = myHexMesh % edgeMap
 
 #endif
 
@@ -253,9 +274,10 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     DEALLOCATE( myHexMesh % cornerMap_dev, &
-      myHexMesh % sideMap_dev, &
-      myHexMesh % faceMap_dev, &
-      myHexMesh % edgeFaceMap_dev )
+                myHexMesh % sideMap_dev, &
+                myHexMesh % faceMap_dev, &
+                myHexMesh % edgeFaceMap_dev, &
+                myHexMesh % edgeMap )
 #endif
 
   END SUBROUTINE Trash_HexMesh

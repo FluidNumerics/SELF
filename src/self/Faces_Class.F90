@@ -1,11 +1,11 @@
-! Facess_CLASS.f90
+! Facess_Class.f90
 !
 ! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE Faces_CLASS
+MODULE Faces_Class
 
 ! src/COMMON/
   USE ModelPrecision
@@ -17,13 +17,12 @@ MODULE Faces_CLASS
     INTEGER              :: nFaces, N
     INTEGER, ALLOCATABLE :: faceID(:)            ! The face ID
     INTEGER, ALLOCATABLE :: boundaryID(:)        ! IF the face is part of the mesh boundary, the face gets assigned a boundary face ID
-    INTEGER, ALLOCATABLE :: nodeIDs(:,:)      ! Node IDs which start and terminate this face
-    INTEGER, ALLOCATABLE :: elementIDs(:,:)   ! Neighboring elements IDs across the face
-    INTEGER, ALLOCATABLE :: elementSides(:,:) ! Local side IDs for the neighboring elements
-    INTEGER, ALLOCATABLE :: iStart(:), iInc(:)      ! Loop start and increment for the secondary element side (1st computational direction)
-    INTEGER, ALLOCATABLE :: jStart(:), jInc(:)      ! Loop start and increment for the secondary element side (2nd computational direction)
-    INTEGER, ALLOCATABLE :: swapDimensions(:)    ! A flag USEd to swap the computational directions
-!                                         between the primary and secondary elements
+    INTEGER, ALLOCATABLE :: nodeIDs(:,:)         ! Node IDs which start and terminate this face
+    INTEGER, ALLOCATABLE :: elementIDs(:,:)      ! Neighboring elements IDs across the face
+    INTEGER, ALLOCATABLE :: elementSides(:,:)    ! Local side IDs for the neighboring elements
+    INTEGER, ALLOCATABLE :: iStart(:), iInc(:)   ! Loop start and increment for the secondary element side (1st computational direction)
+    INTEGER, ALLOCATABLE :: jStart(:), jInc(:)   ! Loop start and increment for the secondary element side (2nd computational direction)
+    INTEGER, ALLOCATABLE :: swapDimensions(:)    ! A flag USEd to swap the computational directions between the primary and secondary elements
     INTEGER, ALLOCATABLE :: iMap(:,:,:)
     INTEGER, ALLOCATABLE :: jMap(:,:,:)
 
@@ -56,7 +55,7 @@ CONTAINS
 
   SUBROUTINE Build_Faces( myFaces, nFaces, N )
     IMPLICIT NONE
-    CLASS( Faces ), INTENT(out) :: myFaces
+    Class( Faces ), INTENT(out) :: myFaces
     INTEGER, INTENT(in)         :: nFaces, N
 
 
@@ -118,7 +117,7 @@ CONTAINS
 !
   SUBROUTINE Trash_Faces( myFaces )
     IMPLICIT NONE
-    CLASS( Faces ), INTENT(inout) :: myFaces
+    Class( Faces ), INTENT(inout) :: myFaces
 
 
 
@@ -154,7 +153,7 @@ CONTAINS
 
   SUBROUTINE UpdateHost_Faces( myFaces )
     IMPLICIT NONE
-    CLASS( Faces ), INTENT(inout) :: myFaces
+    Class( Faces ), INTENT(inout) :: myFaces
 
     myFaces % faceID       = myFaces % faceID_dev
     myFaces % boundaryID   = myFaces % boundaryID_dev
@@ -168,7 +167,7 @@ CONTAINS
 
   SUBROUTINE UpdateDevice_Faces( myFaces )
     IMPLICIT NONE
-    CLASS( Faces ), INTENT(inout) :: myFaces
+    Class( Faces ), INTENT(inout) :: myFaces
 
     myFaces % faceID_dev       = myFaces % faceID
     myFaces % boundaryID_dev   = myFaces % boundaryID
@@ -182,4 +181,4 @@ CONTAINS
 
 #endif
 
-END MODULE Faces_CLASS
+END MODULE Faces_Class
