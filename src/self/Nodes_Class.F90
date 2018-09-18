@@ -25,6 +25,8 @@ MODULE Nodes_CLASS
     INTEGER, ALLOCATABLE    :: nodeID(:)
     INTEGER, ALLOCATABLE    :: nodeTYPE(:)
     REAL(prec), ALLOCATABLE :: x(:,:)
+    
+    INTEGER, ALLOCATABLE    :: nElements(:)
     INTEGER, ALLOCATABLE    :: elementIDs(:,:)
     INTEGER, ALLOCATABLE    :: elementNodes(:,:)
 
@@ -33,6 +35,8 @@ MODULE Nodes_CLASS
     INTEGER, DEVICE, ALLOCATABLE    :: nodeID_dev(:)
     INTEGER, DEVICE, ALLOCATABLE    :: nodeTYPE_dev(:)
     REAL(prec), DEVICE, ALLOCATABLE :: x_dev(:,:)
+ 
+    INTEGER, DEVICE, ALLOCATABLE    :: nElements_dev(:)
     INTEGER, DEVICE, ALLOCATABLE    :: elementIDs_dev(:,:)
     INTEGER, DEVICE, ALLOCATABLE    :: elementNodes_dev(:,:)
 #endif
@@ -65,13 +69,15 @@ CONTAINS
     ALLOCATE( myNodes % nodeID(1:nNodes), &
       myNodes % nodeTYPE(1:nNodes), &
       myNodes % x(1:3,1:nNodes), &
+      myNodes % nElements(1:nNodes), &
       myNodes % elementIDs(1:maxNodeValence,1:nNodes), &
       myNodes % elementNodes(1:maxNodeValence,1:nNodes) )
 
-    myNodes % nodeID   = 0
-    myNodes % nodeTYPE = 0
-    myNodes % x        = 0.0_prec
-    myNodes % elementIDs = 0
+    myNodes % nodeID       = 0
+    myNodes % nodeTYPE     = 0
+    myNodes % x            = 0.0_prec
+    myNodes % nElements    = 0
+    myNodes % elementIDs   = 0
     myNodes % elementNodes = 0
 
 #ifdef HAVE_CUDA
@@ -80,15 +86,17 @@ CONTAINS
     ALLOCATE( myNodes % nodeID_dev(1:nNodes), &
               myNodes % nodeType_dev(1:nNodes), &
               myNodes % x_dev(1:3,1:nNodes), &
+              myNodes % nElements_dev(1:nNodes), &
               myNodes % elementIDs_dev(1:maxNodeValence,1:nNodes), &
               myNodes % elementNodes_dev(1:maxNodeValence,1:nNodes) )
 
     myNodes % nNodes_dev = nNodes
 
-    myNodes % nodeID_dev   = 0
-    myNodes % nodeTYPE_dev = 0
-    myNodes % x_dev        = 0.0_prec
-    myNodes % elementIDs_dev = 0
+    myNodes % nodeID_dev       = 0
+    myNodes % nodeTYPE_dev     = 0
+    myNodes % x_dev            = 0.0_prec
+    myNodes % nElements_dev    = 0
+    myNodes % elementIDs_dev   = 0
     myNodes % elementNodes_dev = 0
 
 #endif
@@ -105,6 +113,7 @@ CONTAINS
     DEALLOCATE( myNodes % nodeID, &
       myNodes % nodeTYPE, &
       myNodes % x, &
+      myNodes % nElements, &
       myNodes % elementIDs, &
       myNodes % elementNodes )
 
@@ -114,6 +123,7 @@ CONTAINS
     DEALLOCATE( myNodes % nodeID_dev, &
       myNodes % nodeTYPE_dev, &
       myNodes % x_dev, &
+      myNodes % nElements_dev, &
       myNodes % elementIDs_dev, &
       myNodes % elementNodes_dev )
 
@@ -131,6 +141,7 @@ CONTAINS
     myNodes % nodeID_dev   = myNodes % nodeID
     myNodes % nodeTYPE_dev = myNodes % nodeTYPE
     myNodes % x_dev        = myNodes % x
+    myNodes % nElements_dev = myNodes % nElements
     myNodes % elementIDs_dev = myNodes % elementIDs
     myNodes % elementNodes_dev = myNodes % elementNodes
 
@@ -147,6 +158,7 @@ CONTAINS
     myNodes % nodeID   = myNodes % nodeID_dev
     myNodes % nodeTYPE = myNodes % nodeTYPE_dev
     myNodes % x        = myNodes % x_dev
+    myNodes % nElements = myNodes % nElements_dev
     myNodes % elementIDs = myNodes % elementIDs_dev
     myNodes % elementNodes = myNodes % elementNodes_dev
 

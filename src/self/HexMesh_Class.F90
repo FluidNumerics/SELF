@@ -309,6 +309,33 @@ CONTAINS
 !--------------------------------- TYPE SpecIFic Routines -----------------------------------------!
 !==================================================================================================!
 !
+  SUBROUTINE ConstructNodeToElementConnectivity( myHexMesh )
+    CLASS( HexMesh ), INTENT(inout) :: myHexMesh
+    ! Local
+    INTEGER :: iEl, j, localNodeID, globalNodeID
+    INTEGER :: nodeLogic(1:myHexMesh % nodes % nNodes)
+
+   
+      nodeLogic = 0
+      DO iEl = 1, myHexMesh % elements % nElements 
+        DO localNodeID = 1, 8
+
+          globalNodeID = myHexMesh % elements % nodeIDs(localNodeID,iEl)
+
+          myHexMesh % nodes % nElements(globalNodeID) = myHexMesh % nodes % nElements(globalNodeID) + 1
+          j = myHexMesh % nodes % nElements(globalNodeID)
+
+          IF( j <= maxNodeValence )THEN
+            myHexMesh % nodes % elementIDs(j,globalNodeID)   = iEl
+            myHexMesh % nodes % elementNodes(j,globalNodeID) = localNodeID
+          ENDIF
+
+        ENDDO
+      ENDDO
+    
+  END SUBROUTINE ConstructNodeToElementConnectivity
+
+
 !
 !> \addtogroup HexMesh_Class
 !! @{
@@ -2655,9 +2682,10 @@ CONTAINS
     
   END FUNCTION NumberOfBoundaryFaces
   
- SUBROUTINE StructuredMeshGenerator_3D( setupSuccess )
+ SUBROUTINE StructuredMeshGenerator_3D( paramFile, setupSuccess )
  IMPLICIT NONE
  LOGICAL, INTENT(out)                      :: setupSuccess
+ CHARACTER(*), INTENT(in)                  :: paramFile
   ! Local
  TYPE( NodalDG )                           :: nodal
  TYPE( HexMesh )                           :: mesh
@@ -2679,7 +2707,7 @@ CONTAINS
  
 
       ! Read in the parameters
-      CALL params % Build( setupSuccess )
+      CALL params % Build( TRIM(paramFile), setupSuccess )
 
 #ifdef HAVE_MPI
       CALL MPI_COMM_SIZE( MPI_COMM_WORLD, params % nProc, mpiErr )

@@ -23,6 +23,7 @@ PROGRAM SELF_Fluids_Driver
   LOGICAL                      :: initializeFromScratch
   LOGICAL                      :: pickupFileExists
   LOGICAL                      :: run_MeshGenOnly, run_UpToInitOnly
+  CHARACTER(500)               :: equationFile, paramFile
 
 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
@@ -62,11 +63,16 @@ CONTAINS
     ! Local
     INTEGER :: nArg, argID
     CHARACTER(500) :: argName
-    LOGICAL :: helpNeeded
+    LOGICAL :: helpNeeded, equationFileProvided, paramFileProvided
 
-    helpNeeded       = .FALSE.
-    run_MeshGenOnly  = .FALSE.
-    run_UpToInitOnly = .FALSE.
+    helpNeeded           = .FALSE.
+    run_MeshGenOnly      = .FALSE.
+    run_UpToInitOnly     = .FALSE.
+    equationFileProvided = .FALSE.
+    paramFileProvided    = .FALSE.
+
+    paramFile = './runtime.params'
+    equationFile = './self.equations'
 
     nArg = command_argument_count( )
 
@@ -100,14 +106,28 @@ CONTAINS
             setupSuccess = .FALSE.
           ENDIF
 
+         CASE( "--param-file" )
+            paramFileProvided = .TRUE.
+
          CASE( "help" )
             helpNeeded   = .TRUE.
             setupSuccess = .FALSE.
 
          CASE DEFAULT
-            run_MeshGenOnly  = .FALSE.
-            run_UpToInitOnly = .FALSE.
-            helpNeeded       = .FALSE.
+
+           IF( paramFileProvided )THEN
+
+             paramFile = TRIM( argName )
+             paramFileProvided = .FALSE.
+
+           ENDIF
+
+           IF( equationFileProvided )THEN
+
+             equationFile = TRIM( argName )
+             equationFileProvided = .FALSE.
+
+           ENDIF
 
       END SELECT
 
@@ -120,7 +140,7 @@ CONTAINS
       PRINT*, ' A program for solving Compressible Navier-Stokes using the'
       PRINT*, ' Nodal Discontinuous Galerkin Spectral Element Method.'
       PRINT*, ' '
-      PRINT*, '  sfluid [tool]'      
+      PRINT*, '  sfluid [tool] [options]'      
       PRINT*, ' '
       PRINT*, ' [tool] can be :'
       PRINT*, ' '
@@ -148,6 +168,18 @@ CONTAINS
       PRINT*, '     step the model. The initial conditions are read in from the '
       PRINT*, '     self.equations file. '
       PRINT*, ' '
+      PRINT*, '  [options] can be :'
+      PRINT*, ' '
+      PRINT*, '    --param-file /path/to/param/file'
+      PRINT*, '       Specifies the full path to a file with namelist settings for'
+      PRINT*, '       the sfluid application. If not provided, runtime.params in  '
+      PRINT*, '       your current directory is assumed.                          '
+      PRINT*, ' '
+      PRINT*, '   --equation-file /path/to/equation/file'
+      PRINT*, '       Specifies the full path to an equation file for setting the '
+      PRINT*, '       initial conditions, topography shape (for structured mesh), '
+      PRINT*, '       and the drag field. If not provided, self.equations in your '
+      PRINT*, '       current directory is assumed.                               '
       PRINT*, ' '
       PRINT*, ' '
 
@@ -156,7 +188,7 @@ CONTAINS
     ENDIF
 
     IF( .NOT. run_MeshGenOnly )THEN
-      CALL myFluid % Build( setupSuccess )
+      CALL myFluid % Build( equationFile, paramFile, setupSuccess )
     ENDIF
 
 
@@ -173,7 +205,7 @@ CONTAINS
 
       IF( myFluid % ExtComm % myRank == 0 )THEN
         PRINT*, '  Generating structured mesh...'
-        CALL StructuredMeshGenerator_3D( meshGenSuccess )
+        CALL StructuredMeshGenerator_3D( paramFile, meshGenSuccess )
         PRINT*, '  Done'
       ENDIF
 
@@ -191,7 +223,6 @@ CONTAINS
     ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
     ! returns FALSE.
     CALL myFluid % Read_from_HDF5( pickupFileExists ) 
-
 
     ! If the pickup file doesn't exist, then the initial conditions are generated
     ! from the equation parser.
@@ -229,6 +260,7 @@ CONTAINS
   SUBROUTINE MainLoop( )
     IMPLICIT NONE
     INTEGER    :: iT
+
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !

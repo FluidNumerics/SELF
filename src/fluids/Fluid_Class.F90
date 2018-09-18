@@ -133,10 +133,12 @@ CONTAINS
 !==================================================================================================!
 !
 !
-  SUBROUTINE Build_Fluid( myDGSEM, setupSuccess )
+  SUBROUTINE Build_Fluid( myDGSEM, equationFile, paramFile, setupSuccess )
 
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
+    CHARACTER(*), INTENT(in)    :: equationFile
+    CHARACTER(*), INTENT(in)    :: paramFile
     LOGICAL, INTENT(inout)      :: setupSuccess
     ! Local
 #ifdef HAVE_CUDA
@@ -145,7 +147,7 @@ CONTAINS
 #endif
 
 
-    CALL myDGSEM % params % Build( setupSuccess )
+    CALL myDGSEM % params % Build( TRIM( paramFile), setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
     IF( .NOT. SetupSuccess ) THEN
@@ -153,7 +155,7 @@ CONTAINS
       RETURN
     ENDIF
 
-    CALL myDGSEM % fluidEquations % Build( 'self.equations' )
+    CALL myDGSEM % fluidEquations % Build( TRIM( equationFile ) )
 
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
@@ -177,7 +179,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % InitializeMesh(  )
+    CALL myDGSEM % InitializeMesh( paramFile )
     CALL myDGSEM % extComm % ReadPickup( )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
@@ -495,10 +497,11 @@ CONTAINS
 
   END SUBROUTINE SetPrescribedState_Fluid
 
-  SUBROUTINE InitializeMesh_Fluid( myDGSEM )
+  SUBROUTINE InitializeMesh_Fluid( myDGSEM, paramFile )
 
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    CHARACTER(*), INTENT(in)      :: paramFile
     ! Local
     CHARACTER(4) :: rankChar
     LOGICAL      :: fileExists, meshgenSuccess
@@ -515,7 +518,7 @@ CONTAINS
 
           PRINT*, '  Mesh files not found.'
           PRINT*, '  Generating structured mesh...'
-          CALL StructuredMeshGenerator_3D( meshgenSuccess )
+          CALL StructuredMeshGenerator_3D( TRIM(paramFile), meshgenSuccess )
           PRINT*, '  Done'
 
         ENDIF
@@ -563,11 +566,8 @@ CONTAINS
 #endif
 
 
-    !$OMP PARALLEL
 #ifdef TIMING
-    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 1 )
-    !$OMP END MASTER
 #endif
 
 
@@ -652,6 +652,7 @@ CONTAINS
     dt = myDGSEM % params % dt
 
 
+    !$OMP PARALLEL
     DO iT = 1, nT
 
 
@@ -764,17 +765,15 @@ CONTAINS
       !$OMP BARRIER
 
     ENDIF
+    !$OMP END PARALLEL
 
     DEALLOCATE( G3D )
 
 #endif
 
 #ifdef TIMING
-    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 1 )
-    !$OMP END MASTER
 #endif
-    !$OMP END PARALLEL
 
   END SUBROUTINE ForwardStepRK3_Fluid
 !
