@@ -76,9 +76,9 @@ CONTAINS
 
     nArg = command_argument_count( )
 
-    IF( nArg > 0 )THEN
+    DO argID = 1, nArg
 
-      CALL get_command_argument( 1, argName )
+      CALL get_command_argument( argID, argName )
 
       SELECT CASE( TRIM( argName ) )
 
@@ -88,50 +88,43 @@ CONTAINS
           run_UpToInitOnly = .FALSE.
           setupSuccess     = .TRUE.
 
-          IF( nArg > 1 ) THEN
-            PRINT*, '  Too many command line arguments for sfluid meshgen.'
-            helpNeeded   = .TRUE.
-            setupSuccess = .FALSE.
-          ENDIF
-
         CASE( "init" )
 
           run_MeshGenOnly  = .FALSE.
           run_UpToInitOnly = .TRUE.
           setupSuccess     = .TRUE.
 
-          IF( nArg > 1 ) THEN
-            PRINT*, '  Too many command line arguments for sfluid init.'
-            helpNeeded   = .TRUE.
-            setupSuccess = .FALSE.
+        CASE( "help" )
+          helpNeeded   = .TRUE.
+          setupSuccess = .FALSE.
+
+        CASE( "--param-file" )
+          paramFileProvided = .TRUE.
+
+        CASE( "--equation-file" )
+          equationFileProvided = .TRUE.
+
+        CASE DEFAULT
+
+          IF( paramFileProvided )THEN
+
+            paramFile = TRIM( argName )
+            paramFileProvided = .FALSE.
+
           ENDIF
 
-         CASE( "--param-file" )
-            paramFileProvided = .TRUE.
+          IF( equationFileProvided )THEN
 
-         CASE( "help" )
-            helpNeeded   = .TRUE.
-            setupSuccess = .FALSE.
+            equationFile = TRIM( argName )
+            equationFileProvided = .FALSE.
 
-         CASE DEFAULT
-
-           IF( paramFileProvided )THEN
-
-             paramFile = TRIM( argName )
-             paramFileProvided = .FALSE.
-
-           ENDIF
-
-           IF( equationFileProvided )THEN
-
-             equationFile = TRIM( argName )
-             equationFileProvided = .FALSE.
-
-           ENDIF
+          ENDIF
 
       END SELECT
 
-    ENDIF
+    ENDDO
+
+    PRINT*, TRIM(equationFile)
 
     IF( helpNeeded ) THEN
 

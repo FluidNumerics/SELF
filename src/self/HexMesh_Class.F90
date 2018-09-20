@@ -200,18 +200,18 @@ CONTAINS
 
     ! the edge map is used to order the 12 edges that make up the hex cell by using the local
     ! corner node ID's
-    myHexMesh % edgeMap(1, 1:2)  = (/ 1, 2 /)
-    myHexMesh % edgeMap(2, 1:2)  = (/ 2, 3 /)
-    myHexMesh % edgeMap(3, 1:2)  = (/ 3, 4 /)
-    myHexMesh % edgeMap(4, 1:2)  = (/ 4, 1 /)
-    myHexMesh % edgeMap(5, 1:2)  = (/ 5, 6 /)
-    myHexMesh % edgeMap(6, 1:2)  = (/ 6, 7 /)
-    myHexMesh % edgeMap(7, 1:2)  = (/ 7, 8 /)
-    myHexMesh % edgeMap(8, 1:2)  = (/ 8, 5 /)
-    myHexMesh % edgeMap(9, 1:2)  = (/ 5, 1 /)
-    myHexMesh % edgeMap(10, 1:2) = (/ 2, 6 /)
-    myHexMesh % edgeMap(11, 1:2) = (/ 3, 7 /)
-    myHexMesh % edgeMap(12, 1:2) = (/ 8, 4 /)
+    myHexMesh % edgeMap(1:2, 1)  = (/ 1, 2 /)
+    myHexMesh % edgeMap(1:2, 2)  = (/ 2, 3 /)
+    myHexMesh % edgeMap(1:2, 3)  = (/ 3, 4 /)
+    myHexMesh % edgeMap(1:2, 4)  = (/ 4, 1 /)
+    myHexMesh % edgeMap(1:2, 5)  = (/ 5, 6 /)
+    myHexMesh % edgeMap(1:2, 6)  = (/ 6, 7 /)
+    myHexMesh % edgeMap(1:2, 7)  = (/ 7, 8 /)
+    myHexMesh % edgeMap(1:2, 8)  = (/ 8, 5 /)
+    myHexMesh % edgeMap(1:2, 9)  = (/ 5, 1 /)
+    myHexMesh % edgeMap(1:2, 10) = (/ 2, 6 /)
+    myHexMesh % edgeMap(1:2, 11) = (/ 3, 7 /)
+    myHexMesh % edgeMap(1:2, 12) = (/ 8, 4 /)
 
     ! The number of nodes, the number of elements, and the number of faces are stored in this DATA
     ! structure for convenience. In another implementation (planned for the next version), the
@@ -229,7 +229,7 @@ CONTAINS
               myHexMesh % sideMap_dev(1:6), &
               myHexMesh % faceMap_dev(1:4,1:6), &
               myHexMesh % edgeFaceMap_dev(1:2,1:4), &
-              myHexMesh % edgeMap(1:2,1:12) )
+              myHexMesh % edgeMap_dev(1:2,1:12) )
 
     myHexMesh % cornerMap_dev   = myHexMesh % cornerMap
     myHexMesh % sideMap_dev     = myHexMesh % sideMap
@@ -277,7 +277,7 @@ CONTAINS
                 myHexMesh % sideMap_dev, &
                 myHexMesh % faceMap_dev, &
                 myHexMesh % edgeFaceMap_dev, &
-                myHexMesh % edgeMap )
+                myHexMesh % edgeMap_dev )
 #endif
 
   END SUBROUTINE Trash_HexMesh
