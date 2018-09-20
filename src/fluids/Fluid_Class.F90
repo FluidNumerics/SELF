@@ -133,10 +133,12 @@ CONTAINS
 !==================================================================================================!
 !
 !
-  SUBROUTINE Build_Fluid( myDGSEM, setupSuccess )
+  SUBROUTINE Build_Fluid( myDGSEM, equationFile, paramFile, setupSuccess )
 
     IMPLICIT NONE
     CLASS(Fluid), INTENT(inout) :: myDGSEM
+    CHARACTER(*), INTENT(in)    :: equationFile
+    CHARACTER(*), INTENT(in)    :: paramFile
     LOGICAL, INTENT(inout)      :: setupSuccess
     ! Local
 #ifdef HAVE_CUDA
@@ -145,7 +147,7 @@ CONTAINS
 #endif
 
 
-    CALL myDGSEM % params % Build( setupSuccess )
+    CALL myDGSEM % params % Build( TRIM( paramFile), setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
     IF( .NOT. SetupSuccess ) THEN
@@ -153,7 +155,7 @@ CONTAINS
       RETURN
     ENDIF
 
-    CALL myDGSEM % fluidEquations % Build( 'self.equations' )
+    CALL myDGSEM % fluidEquations % Build( TRIM( equationFile ) )
 
     ! This call to the extComm % ReadPickup reads in the external communicator
     ! data. If MPI is enabled, MPI is initialized. If CUDA and MPI are enabled
@@ -177,7 +179,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % InitializeMesh(  )
+    CALL myDGSEM % InitializeMesh( paramFile, equationFile )
     CALL myDGSEM % extComm % ReadPickup( )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
@@ -324,7 +326,7 @@ CONTAINS
   SUBROUTINE SetInitialConditions_Fluid( myDGSEM )
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
-    INTEGER    :: i, j, k, iEl
+    INTEGER    :: i, j, k, iEl, istat
     INTEGER    :: iFace, bID, e1, s1, e2
     REAL(prec) :: x(1:3)
     REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
@@ -495,10 +497,12 @@ CONTAINS
 
   END SUBROUTINE SetPrescribedState_Fluid
 
-  SUBROUTINE InitializeMesh_Fluid( myDGSEM )
+  SUBROUTINE InitializeMesh_Fluid( myDGSEM, paramFile, equationFile )
 
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
+    CHARACTER(*), INTENT(in)      :: paramFile
+    CHARACTER(*), INTENT(in)      :: equationFile
     ! Local
     CHARACTER(4) :: rankChar
     LOGICAL      :: fileExists, meshgenSuccess
@@ -515,7 +519,7 @@ CONTAINS
 
           PRINT*, '  Mesh files not found.'
           PRINT*, '  Generating structured mesh...'
-          CALL StructuredMeshGenerator_3D( meshgenSuccess )
+          CALL StructuredMeshGenerator_3D( TRIM(paramFile), TRIM(equationFile), meshgenSuccess )
           PRINT*, '  Done'
 
         ENDIF
@@ -563,11 +567,8 @@ CONTAINS
 #endif
 
 
-    !$OMP PARALLEL
 #ifdef TIMING
-    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 1 )
-    !$OMP END MASTER
 #endif
 
 
@@ -652,6 +653,7 @@ CONTAINS
     dt = myDGSEM % params % dt
 
 
+    !$OMP PARALLEL
     DO iT = 1, nT
 
 
@@ -764,17 +766,15 @@ CONTAINS
       !$OMP BARRIER
 
     ENDIF
+    !$OMP END PARALLEL
 
     DEALLOCATE( G3D )
 
 #endif
 
 #ifdef TIMING
-    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 1 )
-    !$OMP END MASTER
 #endif
-    !$OMP END PARALLEL
 
   END SUBROUTINE ForwardStepRK3_Fluid
 !
@@ -2918,6 +2918,9 @@ CONTAINS
     CLASS( Fluid ), INTENT(inout) :: myDGsem
     CHARACTER(*), INTENT(in)      :: filename
     !LOCAL
+    REAL(prec)  :: x(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:3,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: sol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations,1:myDGSEM % mesh % elements % nElements)
+    REAL(prec)  :: bsol(0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,0:myDGSEM % params % nPlot,1:myDGSEM % state % nEquations, 1:myDGSEM % mesh % elements % nElements)
 #ifdef HAVE_CUDA
     INTEGER :: istat
 #endif
@@ -2933,6 +2936,19 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 #endif
 
+    sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
+                                                myDGSEM % state % solution, &
+                                                myDGSEM % state % nEquations, &
+                                                myDGSEM % mesh % elements % nElements )
+
+    bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
+                                                 myDGSEM % static % nEquations, &
+                                                 myDGSEM % mesh % elements % nElements )
+
+    x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
+                                              3, &
+                                              myDGSEM % mesh % elements % nElements )
+
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(filename), &
@@ -2946,24 +2962,24 @@ CONTAINS
     DO iEl = 1, myDGsem % mesh % elements % nElements
 
       WRITE(zoneID,'(I5.5)') myDGSEM % mesh % elements % elementID(iEl)
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % polyDeg+1,&
-                                                 ', J=',myDGSEM % params % polyDeg+1,&
-                                                 ', K=',myDGSEM % params % polyDeg+1,',F=POINT'
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myDGSEM % params % nPlot+1,&
+                                                 ', J=',myDGSEM % params % nPlot+1,&
+                                                 ', K=',myDGSEM % params % nPlot+1,',F=POINT'
 
-      DO k = 0, myDGSEM % params % polyDeg
-        DO j = 0, myDGSEM % params % polyDeg
-          DO i = 0, myDGSEM % params % polyDeg
+      DO k = 0, myDGSEM % params % nPlot
+        DO j = 0, myDGSEM % params % nPlot
+          DO i = 0, myDGSEM % params % nPlot
 
-            WRITE(fUnit,'(17(E15.7,1x))') myDGSEM % mesh % elements % x(i,j,k,1,iEl), &
-                                          myDGSEM % mesh % elements % x(i,j,k,2,iEl), &
-                                          myDGSEM % mesh % elements % x(i,j,k,3,iEl), &
-                                          myDGSEM % state % solution(i,j,k,1,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
-                                          myDGSEM % state % solution(i,j,k,2,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
-                                          myDGSEM % state % solution(i,j,k,3,iEl)/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ), &
-                                          myDGSEM % state % solution(i,j,k,4,iEl), &
-                                          ( myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
-                                          ( myDGSEM % state % solution(i,j,k,6,iEl) + myDGSEM % static % solution(i,j,k,6,iEl) )/( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) ),  &
-                                          myDGSEM % state % solution(i,j,k,nEquations,iEl)
+            WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), &
+                                          x(i,j,k,2,iEl), &
+                                          x(i,j,k,3,iEl), &
+                                          sol(i,j,k,1,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+                                          sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+                                          sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
+                                          sol(i,j,k,4,iEl), &
+                                          ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
+                                          ( sol(i,j,k,6,iEl) + bsol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
+                                          sol(i,j,k,nEquations,iEl)
 
           ENDDO
         ENDDO

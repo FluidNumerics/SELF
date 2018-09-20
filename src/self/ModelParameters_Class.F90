@@ -117,10 +117,11 @@ MODULE ModelParameters_CLASS
 CONTAINS
 
 
-  SUBROUTINE Build_ModelParameters( params, readSuccess )
+  SUBROUTINE Build_ModelParameters( params, paramFile, readSuccess )
 
     CLASS( ModelParameters ), INTENT(out) :: params
-    LOGICAL, INTENT(out)              :: readSuccess
+    CHARACTER(*), INTENT(in)              :: paramFile
+    LOGICAL, INTENT(out)                  :: readSuccess
     ! LOCAL
     INTEGER :: nUnit
     ! TimeManagement
@@ -236,10 +237,10 @@ CONTAINS
     v0   = 10.0_prec
 
 
-    INQUIRE( FILE = 'runtime.params', EXIST = fileExists )
+    INQUIRE( FILE = TRIM(paramFile), EXIST = fileExists )
 
     IF( fileExists )THEN
-      OPEN( UNIT = NEWUNIT(nUnit), FILE = 'runtime.params')
+      OPEN( UNIT = NEWUNIT(nUnit), FILE = TRIM(paramFile))
       READ( UNIT = nUnit, NML = TimeManagement )
       READ( UNIT = nUnit, NML = SpaceManagement )
       READ( UNIT = nUnit, NML = SubgridScale )
@@ -271,7 +272,7 @@ CONTAINS
 
       ELSE
 
-        PRINT(MsgFMT), '  Unknown units specified for time in runtime.params.'
+        PRINT(MsgFMT), '  Unknown units specified for time in '//TRIM(paramFile)
         RETURN
 
       ENDIF
@@ -367,16 +368,16 @@ CONTAINS
 
     ELSE
 
-      OPEN( UNIT = NEWUNIT(nUnit), FILE = 'runtime.params', ACTION = 'WRITE' )
+      OPEN( UNIT = NEWUNIT(nUnit), FILE = TRIM(paramFile), ACTION = 'WRITE' )
       WRITE( UNIT = nUnit, NML = TimeManagement )
       WRITE( UNIT = nUnit, NML = SpaceManagement )
       WRITE( UNIT = nUnit, NML = SubgridScale )
       WRITE( UNIT = nUnit, NML = PhysicalConstants )
       CLOSE( UNIT = nUnit )
 
-      PRINT(MsgFMT), 'runtime.params not found.'
-      PRINT(MsgFMT), 'A sample runtime.params namelist file has been'
-      PRINT(MsgFMT), 'generated for you in your current directory.'
+      PRINT(MsgFMT), TRIM(paramFile)//'not found.'
+      PRINT(MsgFMT), 'A sample namelist file has been generated   '
+      PRINT(MsgFMT), 'for you in your current directory.'
       RETURN 
 
     ENDIF
