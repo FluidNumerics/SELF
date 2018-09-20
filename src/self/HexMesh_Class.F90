@@ -2682,10 +2682,11 @@ CONTAINS
     
   END FUNCTION NumberOfBoundaryFaces
   
- SUBROUTINE StructuredMeshGenerator_3D( paramFile, setupSuccess )
+ SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess )
  IMPLICIT NONE
  LOGICAL, INTENT(out)                      :: setupSuccess
  CHARACTER(*), INTENT(in)                  :: paramFile
+ CHARACTER(*), INTENT(in)                  :: equationFile
   ! Local
  TYPE( NodalDG )                           :: nodal
  TYPE( HexMesh )                           :: mesh
@@ -2812,7 +2813,7 @@ CONTAINS
       PRINT*, ' nProcZ :', params % nProcZ
       
 #endif
-      CALL geomParser % Build( 'self.equations' )
+      CALL geomParser % Build( equationFile )
 
       IF( setupSuccess )THEN
          ! Build an interpolant

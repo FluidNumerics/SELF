@@ -198,7 +198,7 @@ CONTAINS
 
       IF( myFluid % ExtComm % myRank == 0 )THEN
         PRINT*, '  Generating structured mesh...'
-        CALL StructuredMeshGenerator_3D( paramFile, meshGenSuccess )
+        CALL StructuredMeshGenerator_3D( paramFile, equationFile, meshGenSuccess )
         PRINT*, '  Done'
       ENDIF
 

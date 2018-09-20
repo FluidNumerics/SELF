@@ -179,7 +179,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % InitializeMesh( paramFile )
+    CALL myDGSEM % InitializeMesh( paramFile, equationFile )
     CALL myDGSEM % extComm % ReadPickup( )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
@@ -497,11 +497,12 @@ CONTAINS
 
   END SUBROUTINE SetPrescribedState_Fluid
 
-  SUBROUTINE InitializeMesh_Fluid( myDGSEM, paramFile )
+  SUBROUTINE InitializeMesh_Fluid( myDGSEM, paramFile, equationFile )
 
     IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     CHARACTER(*), INTENT(in)      :: paramFile
+    CHARACTER(*), INTENT(in)      :: equationFile
     ! Local
     CHARACTER(4) :: rankChar
     LOGICAL      :: fileExists, meshgenSuccess
@@ -518,7 +519,7 @@ CONTAINS
 
           PRINT*, '  Mesh files not found.'
           PRINT*, '  Generating structured mesh...'
-          CALL StructuredMeshGenerator_3D( TRIM(paramFile), meshgenSuccess )
+          CALL StructuredMeshGenerator_3D( TRIM(paramFile), TRIM(equationFile), meshgenSuccess )
           PRINT*, '  Done'
 
         ENDIF
