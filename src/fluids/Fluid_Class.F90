@@ -91,6 +91,9 @@ MODULE Fluid_Class
     PROCEDURE :: CalculateSGSCoefficients => CalculateSGSCoefficients_Fluid
     PROCEDURE :: UpdateExternalSGS        => UpdateExternalSGS_Fluid
 
+    PROCEDURE :: StressFluxDivergence              => StressFluxDivergence_Fluid
+    PROCEDURE :: CalculateStateAtBoundaries        => CalculateStateAtBoundaries_Fluid
+    PROCEDURE :: CalculateSGSAtBoundaries          => CalculateSGSAtBoundaries_Fluid
     PROCEDURE :: CalculateSolutionGradient         => CalculateSolutionGradient_Fluid
     PROCEDURE :: CalculateNormalStressAtBoundaries => CalculateNormalStressAtBoundaries_Fluid
     PROCEDURE :: CalculateStressFlux               => CalculateStressFlux_Fluid
@@ -687,7 +690,7 @@ CONTAINS
                 DO i = 0, myDGSEM % params % polyDeg
 
                   G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) - ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) -&
-                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
+                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) ) + &
                     myDGSEM % state % source(i,j,k,iEq,iEl)
 
 
@@ -745,7 +748,7 @@ CONTAINS
                 DO i = 0, myDGSEM % params % polyDeg
 
                   G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) - ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) -&
-                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
+                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) ) + &
                     myDGSEM % state % source(i,j,k,iEq,iEl)
 
                   myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
@@ -870,21 +873,7 @@ CONTAINS
     !$OMP END MASTER
 #endif
 
-#ifdef HAVE_CUDA
-
-    tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                  myDGSEM % params % polyDeg+1 , &
-                  1 )
-    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
-
-    CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
-                                                                  myDGSEM % state % boundarySolution_dev,  &
-                                                                  myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-#else
-
-    CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-
-#endif
+    CALL myDGSEM % CalculateStateAtBoundaries( )
 
 #ifdef TIMING
     !$OMP MASTER
@@ -1093,20 +1082,7 @@ CONTAINS
         !$OMP END MASTER
 #endif
 
-#ifdef HAVE_CUDA
-
-        tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                      1 )
-        grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1) 
-         
-        CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
-                                                                       myDGSEM % sgsCoeffs % boundarySolution_dev,  &
-                                                                       myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-
-#else
-        CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-#endif
+        CALL myDGSEM % CalculateSGSAtBoundaries( )
 
 #ifdef TIMING
         !$OMP MASTER
@@ -1345,24 +1321,7 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef HAVE_CUDA
-      tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                    myDGSEM % params % polyDeg+1, &
-                    myDGSEM % params % polyDeg+1 )
-
-      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % state % nElements, 1)  
-
-      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
-                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
-                                                          myDGSEM % stressTensor % fluxDivergence_dev, &
-                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
-                                                          myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                          myDGSEM % mesh % elements % J_dev )
-
-#else
-      CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
-#endif
+      CALL myDGSEM % StressFluxDivergence( )
 
 #ifdef TIMING
       !$OMP MASTER
@@ -1405,6 +1364,171 @@ CONTAINS
 
   END SUBROUTINE GlobalTimeDerivative_Fluid
 !
+  SUBROUTINE CalculateSGSAtBoundaries_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+#ifdef HAVE_CUDA
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+
+        tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                      1 )
+        grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1) 
+         
+        CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
+                                                                       myDGSEM % sgsCoeffs % boundarySolution_dev,  &
+                                                                       myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+
+#else
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+    REAL(prec) :: fb(1:6)
+
+
+      !$OMP DO
+      DO iEl = 1, myDGSEM % sgsCoeffs % nElements
+        DO iVar = 1, myDGSEM % sgsCoeffs % nEquations
+          DO j = 0, myDGSEM % sgsCoeffs % N
+            DO i = 0, myDGSEM % sgsCoeffs % N
+            
+              fb(1:6) = 0.0_prec
+              
+              DO k = 0, myDGSEM % sgsCoeffs % N
+               
+                fb(1) = fb(1) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % sgsCoeffs % solution(i,k,j,iVar,iEl) ! South
+                fb(2) = fb(2) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % sgsCoeffs % solution(k,i,j,iVar,iEl) ! East
+                fb(3) = fb(3) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % sgsCoeffs % solution(i,k,j,iVar,iEl) ! North
+                fb(4) = fb(4) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % sgsCoeffs % solution(k,i,j,iVar,iEl) ! West
+                fb(5) = fb(5) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % sgsCoeffs % solution(i,j,k,iVar,iEl) ! Bottom
+                fb(6) = fb(6) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % sgsCoeffs % solution(i,j,k,iVar,iEl) ! Top
+               
+              ENDDO
+
+              myDGSEM % sgsCoeffs % boundarySolution(i,j,iVar,1:6,iEl) = fb(1:6)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      !$OMP ENDDO
+
+#endif
+  END SUBROUTINE CalculateSGSAtBoundaries_Fluid
+
+  
+  SUBROUTINE StressFluxDivergence_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+#ifdef HAVE_CUDA
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+
+      tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1 )
+
+      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % state % nElements, 1)  
+
+      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
+                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % stressTensor % fluxDivergence_dev, &
+                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+                                                          myDGSEM % dgStorage % quadratureWeights_dev, &
+                                                          myDGSEM % mesh % elements % J_dev )
+
+#else
+    ! Local
+    INTEGER    :: ii, i, j, k, iVar, iEl
+    REAL(prec) :: df
+
+      !$OMP DO
+      DO iEl = 1, myDGSEM % stressTensor % nElements
+        DO iVar = 1, myDGSEM % stressTensor % nEquations
+          DO k = 0, myDGSEM % stressTensor % N
+            DO j = 0, myDGSEM % stresstensor % N
+              DO i = 0, myDGSEM % stressTensor % N   
+ 
+                df = 0.0_prec
+                DO ii = 0, myDGSEM % dgStorage % N
+                  df = df + myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,i)*myDGSEM % stressTensor % flux(1,ii,j,k,iVar,iEl) + &
+                            myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,j)*myDGSEM % stressTensor % flux(2,i,ii,k,iVar,iEl) + &
+                            myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,k)*myDGSEM % stressTensor % flux(3,i,j,ii,iVar,iEl)
+                ENDDO
+                 
+                myDGSEM % stressTensor % fluxDivergence(i,j,k,iVar,iEl) =  ( df+ ( myDGSEM % stressTensor % boundaryFlux(i,k,iVar,1,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,0) + &
+                                                myDGSEM % stressTensor % boundaryFlux(i,k,iVar,3,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,1) )/&
+                                              myDGSEM % dgStorage % quadratureWeights(j) + &
+                                              ( myDGSEM % stressTensor % boundaryFlux(j,k,iVar,4,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,0) + &
+                                                myDGSEM % stressTensor % boundaryFlux(j,k,iVar,2,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,1) )/&
+                                              myDGSEM % dgStorage % quadratureWeights(i) + &
+                                              ( myDGSEM % stressTensor % boundaryFlux(i,j,iVar,5,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0) + &
+                                                myDGSEM % stressTensor % boundaryFlux(i,j,iVar,6,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1) )/&
+                                              myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % elements % J(i,j,k,iEl) 
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      !$OMP ENDDO
+
+#endif
+
+
+  END SUBROUTINE StressFluxDivergence_Fluid
+
+  SUBROUTINE CalculateStateAtBoundaries_Fluid( myDGSEM ) 
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+#ifdef HAVE_CUDA
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 , &
+                  1 )
+    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
+
+    CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
+                                                                  myDGSEM % state % boundarySolution_dev,  &
+                                                                  myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+#else
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+    REAL(prec) :: fb(1:6)
+
+
+      !$OMP DO
+      DO iEl = 1, myDGSEM % state % nElements
+        DO iVar = 1, myDGSEM % state % nEquations
+          DO j = 0, myDGSEM % state % N
+            DO i = 0, myDGSEM % state % N
+            
+              fb(1:6) = 0.0_prec
+              
+              DO k = 0, myDGSEM % state % N
+               
+                fb(1) = fb(1) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % state % solution(i,k,j,iVar,iEl) ! South
+                fb(2) = fb(2) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % state % solution(k,i,j,iVar,iEl) ! East
+                fb(3) = fb(3) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % state % solution(i,k,j,iVar,iEl) ! North
+                fb(4) = fb(4) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % state % solution(k,i,j,iVar,iEl) ! West
+                fb(5) = fb(5) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % state % solution(i,j,k,iVar,iEl) ! Bottom
+                fb(6) = fb(6) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % state % solution(i,j,k,iVar,iEl) ! Top
+               
+              ENDDO
+
+              myDGSEM % state % boundarySolution(i,j,iVar,1:6,iEl) = fb(1:6)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      !$OMP ENDDO
+
+
+#endif
+
+  END SUBROUTINE CalculateStateAtBoundaries_Fluid
+
   SUBROUTINE CalculateSGSCoefficients_Fluid( myDGSEM )
 
     IMPLICIT NONE
@@ -2042,8 +2166,8 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 #else
-    INTEGER    :: iEl, i, j, k, m, iEq, row, col
-    REAL(prec) :: F
+    INTEGER    :: iEl, i, j, k, m, iEq, row, col, ii
+    REAL(prec) :: df, F
 #endif
 
 
@@ -2078,7 +2202,7 @@ CONTAINS
 #else
 
 
-    !$OMP DO
+    !$OMP DO PRIVATE( F )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
@@ -2151,9 +2275,38 @@ CONTAINS
     ENDDO
     !$OMP ENDDO
 
-     CALL myDGSEM % state % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )  
+    !$OMP DO PRIVATE( df )
+    DO iEl = 1, myDGSEM % state % nElements
+      DO iEq = 1, myDGSEM % state % nEquations
+        DO k = 0, myDGSEM % state % N
+          DO j = 0, myDGSEM % state % N
+            DO i = 0, myDGSEM % state % N   
+ 
+              df = 0.0_prec
+              DO ii = 0, myDGSEM % dgStorage % N
+                df = df + myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,i)*myDGSEM % state % flux(1,ii,j,k,iEq,iEl) + &
+                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,j)*myDGSEM % state % flux(2,i,ii,k,iEq,iEl) + &
+                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,k)*myDGSEM % state % flux(3,i,j,ii,iEq,iEl)
+              ENDDO
+               
+              myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) =  ( df+ ( myDGSEM % state % boundaryFlux(i,k,iEq,1,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,0) + &
+                                              myDGSEM % state % boundaryFlux(i,k,iEq,3,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,1) )/&
+                                            myDGSEM % dgStorage % quadratureWeights(j) + &
+                                            ( myDGSEM % state % boundaryFlux(j,k,iEq,4,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,0) + &
+                                              myDGSEM % state % boundaryFlux(j,k,iEq,2,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,1) )/&
+                                            myDGSEM % dgStorage % quadratureWeights(i) + &
+                                            ( myDGSEM % state % boundaryFlux(i,j,iEq,5,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0) + &
+                                              myDGSEM % state % boundaryFlux(i,j,iEq,6,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1) )/&
+                                            myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % elements % J(i,j,k,iEl) 
 
-    !$OMP DO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+    !$OMP ENDDO
+
+    !$OMP DO PRIVATE( F )
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations-1
 
