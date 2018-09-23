@@ -148,6 +148,7 @@ CONTAINS
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 #endif
+    INTEGER :: n_threads, nface_per_thread, thread_id, remainder
 
 
     CALL myDGSEM % params % Build( TRIM( paramFile), setupSuccess )
@@ -291,6 +292,7 @@ CONTAINS
     CALL myDGSEM % timers % AddTimer( 'Mapped_Time_Derivative', 21 )
 #endif
 
+
   END SUBROUTINE Build_Fluid
 !
   SUBROUTINE Trash_Fluid( myDGSEM )
@@ -398,7 +400,9 @@ CONTAINS
     CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
 
+    !$OMP PARALLEL
     CALL myDGSEM % EquationOfState( )
+    !$OMP END PARALLEL
 
 #ifdef HAVE_CUDA
     myDGSEM % state % boundarySolution  = myDGSEM % state % boundarySolution_dev
@@ -652,9 +656,11 @@ CONTAINS
     dt = myDGSEM % params % dt
 
 
+    !$OMP PARALLEL
     DO iT = 1, nT
 
 
+      !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
@@ -666,6 +672,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO
 
       DO m = 1,3 ! Loop over RK3 steps
 
@@ -675,6 +682,7 @@ CONTAINS
         CALL myDGSEM % EquationOfState( )
         CALL myDGSEM % GlobalTimeDerivative( t )
 
+        !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
@@ -694,10 +702,14 @@ CONTAINS
             ENDDO
           ENDDO
         ENDDO 
+        !$OMP ENDDO
 
       ENDDO
 
+ 
+      !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
+      !$OMP END MASTER
 
     ENDDO
 
@@ -706,7 +718,7 @@ CONTAINS
     IF( .NOT. AlmostEqual( myDGSEM % simulationTime, t0+myDGSEM % params % outputFrequency ) )THEN
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
-
+      !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
           DO k = 0, myDGSEM % params % polyDeg
@@ -718,6 +730,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO
 
       DO m = 1,3
 
@@ -726,6 +739,7 @@ CONTAINS
         CALL myDGSEM % EquationOfState( )
         CALL myDGSEM % GlobalTimeDerivative( t )
 
+        !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
             DO k = 0, myDGSEM % params % polyDeg
@@ -744,12 +758,16 @@ CONTAINS
             ENDDO
           ENDDO
         ENDDO
+        !$OMP ENDDO
 
       ENDDO
 
+      !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime +  dt
+      !$OMP END MASTER
 
     ENDIF
+    !$OMP END PARALLEL
 
     DEALLOCATE( G3D )
 
@@ -796,7 +814,9 @@ CONTAINS
    REAL(prec)   :: b(0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 0:myDGSEM % params % polyDeg, 1:nEquations, 1:myDGSEM % mesh % elements % nElements)
 
 
+      !$OMP PARALLEL
       CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
+      !$OMP END PARALLEL
       b = -( snk - 0.5_prec*myDGSEM % params % dt*myDGSEM % state % tendency )
 
 
@@ -813,7 +833,9 @@ CONTAINS
 
       myDGSEM % state % solution = s + myDGSEM % params % jacobianStepSize*ds
 
+      !$OMP PARALLEL
       CALL myDGSEM % GlobalTimeDerivative( myDGSEM % simulationTime )
+      !$OMP END PARALLEL
 
       ! J*ds = (I - (dt/2)* dF/ds )*ds
       Jds = ds - 0.5_prec*myDGSEM % params % dt*( myDGSEM % state % tendency - Fs )/myDGSEM % params % jacobianStepSize
@@ -844,13 +866,17 @@ CONTAINS
 !  occur.
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 2 )
+    !$OMP END MASTER
 #endif
 
     CALL myDGSEM % CalculateStateAtBoundaries( )
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 2 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -865,17 +891,23 @@ CONTAINS
 ! communication costs.
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 3 )
+    !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+    !$OMP MASTER
     CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % state, &
                                                    myDGSEM % mesh % faces, &
                                                    myDGSEM % extComm )
+    !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 3 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -887,13 +919,17 @@ CONTAINS
 ! routine is dependent on the result of CalculateBoundarySolution
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 4 )
+    !$OMP END MASTER
 #endif
 
     CALL myDGSEM % UpdateExternalState( tn )
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 4 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -906,38 +942,52 @@ CONTAINS
 ! MPI_StateExchange must have been completed.
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 5 )
+    !$OMP END MASTER
 #endif
 
     CALL myDGSEM % InternalFace_StateFlux( )
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 5 )
+    !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 6 )
+    !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+    !$OMP MASTER
     CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( myDGSEM % state, &
                                                             myDGSEM % mesh % faces, &
                                                             myDGSEM % extComm )
+    !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 6 )
+    !$OMP END MASTER
 #endif
 
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 7 )
+    !$OMP END MASTER
 #endif
 
     CALL myDGSEM % BoundaryFace_StateFlux( )
 
 #ifdef TIMING
+    !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 7 )
+    !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -967,7 +1017,9 @@ CONTAINS
 ! SUBROUTINE.
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 8 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_CUDA
@@ -983,7 +1035,9 @@ CONTAINS
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 8 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1001,12 +1055,17 @@ CONTAINS
 ! This routine depends on the results from CalculateSmoothedState.
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 9 )
+      !$OMP END MASTER
 #endif
+
         CALL myDGSEM % CalculateSGSCoefficients( )
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 9 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1017,13 +1076,17 @@ CONTAINS
 ! depends on the result of CalculateSGSCoefficients.
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 10 )
+      !$OMP END MASTER
 #endif
 
         CALL myDGSEM % CalculateSGSAtBoundaries( )
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 10 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1038,17 +1101,23 @@ CONTAINS
 !
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StartTimer( 11 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
         CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
                                                      myDGSEM % mesh % faces, &
                                                      myDGSEM % extComm )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
         CALL myDGSEM % timers % StopTimer( 11 )
+      !$OMP END MASTER
 #endif
 
       ENDIF
@@ -1061,29 +1130,39 @@ CONTAINS
 ! This routine depends on the result of FaceFlux ( state % boundaryGradientFlux )
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 12 )
+      !$OMP END MASTER
 #endif
 
       CALL myDGSEM % CalculateSolutionGradient( )
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 12 )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 13 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
         CALL myDGSEM % mpiSGSHandler % Finalize_MPI_Exchange( myDGSEM % sgsCoeffs, &
                                                               myDGSEM % mesh % faces, &
                                                               myDGSEM % extComm )
       ENDIF
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 13 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1095,13 +1174,17 @@ CONTAINS
 ! routine depends on the result of CalculateStressTensor.
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 14 )
+      !$OMP END MASTER
 #endif
 
       CALL myDGSEM % CalculateNormalStressAtBoundaries( )
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 14 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1113,17 +1196,23 @@ CONTAINS
 ! at the same time as UpdateExternalStress.
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 15 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
       CALL myDGSEM % mpiStressHandler % MPI_Exchange( myDGSEM % stressTensor, &
                                                       myDGSEM % mesh % faces, &
                                                       myDGSEM % extComm )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 15 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1134,13 +1223,17 @@ CONTAINS
 !  stress flux is calculated
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 16 )
+      !$OMP END MASTER
 #endif
 
       CALL myDGSEM % CalculateStressFlux( )
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 16 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1153,13 +1246,17 @@ CONTAINS
 ! be run simultaneously with the MPI_StressExchange
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 17 )
+      !$OMP END MASTER
 #endif
      
       CALL myDGSEM % UpdateExternalStress( tn )
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 17 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1173,27 +1270,36 @@ CONTAINS
 ! and the MPI_StressExchange.
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 18 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
+      !$OMP MASTER
       CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( myDGSEM % stressTensor,&
                                                                myDGSEM % mesh % faces, &
                                                                myDGSEM % extComm )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 18 )
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 19 )
+      !$OMP END MASTER
 #endif
-
       CALL myDGSEM % BoundaryFace_StressFlux( )
   
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 19 )
+      !$OMP END MASTER
 #endif      
 
 ! ----------------------------------------------------------------------------- !
@@ -1208,14 +1314,17 @@ CONTAINS
 !
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 20 )
+      !$OMP END MASTER
 #endif
-      !$OMP PARALLEL
+
       CALL myDGSEM % StressFluxDivergence( )
-      !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 20 )
+      !$OMP END MASTER
 #endif
 
 
@@ -1233,15 +1342,17 @@ CONTAINS
 ! result of FaceFlux, but can be DOne at the same time as StressDivergence
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 21 )
+      !$OMP END MASTER
 #endif
 
-    !$OMP PARALLEL
     CALL myDGSEM % MappedTimeDerivative( )
-    !$OMP END PARALLEL
 
 #ifdef TIMING
+      !$OMP MASTER
       CALL myDGSEM % timers % StopTimer( 21 )
+      !$OMP END MASTER
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1272,6 +1383,7 @@ CONTAINS
     REAL(prec) :: fb(1:6)
 
 
+      !$OMP DO
       DO iEl = 1, myDGSEM % sgsCoeffs % nElements
         DO iVar = 1, myDGSEM % sgsCoeffs % nEquations
           DO j = 0, myDGSEM % sgsCoeffs % N
@@ -1296,6 +1408,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      !$OMP ENDDO
 
 #endif
   END SUBROUTINE CalculateSGSAtBoundaries_Fluid
@@ -1382,6 +1495,7 @@ CONTAINS
     REAL(prec) :: fb(1:6)
 
 
+      !$OMP DO
       DO iEl = 1, myDGSEM % state % nElements
         DO iVar = 1, myDGSEM % state % nEquations
           DO j = 0, myDGSEM % state % N
@@ -1406,7 +1520,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
-
+      !$OMP ENDDO
 
 #endif
 
@@ -1442,6 +1556,7 @@ CONTAINS
     ! This component is defined (here) as the dIFference
     ! between the full solution and the smoothed solution.
 
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
@@ -1466,6 +1581,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -1554,7 +1670,7 @@ CONTAINS
                                                            myDGSEM % mesh % elements % nHat_dev )
 #else
     ! Local
-    INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
+    INTEGER    :: bID, i, j, k, iEq
     INTEGER    :: iFace2, p2
     INTEGER    :: e1, e2, s1, s2
     REAL(prec) :: norm, un, ut, us, speed
@@ -1563,6 +1679,8 @@ CONTAINS
     REAL(prec) :: tx, ty, tz
 
 
+!!!    !$OMP PARALLEL PRIVATE( i, j, k, iEq, iFace2, p2,
+    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace2 = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -1703,6 +1821,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -1740,15 +1859,17 @@ CONTAINS
 
 #else
     ! Local
-    INTEGER :: iEl, iFace
+    INTEGER    :: iFace
     INTEGER    :: i, j, k, m, iEq
     INTEGER    :: ii, jj, bID
-    INTEGER    :: e1, s1, e2, s2
+    INTEGER    :: e1, s1, e2, s2, thread_id
     REAL(prec) :: nHat(1:3), norm
     REAL(prec) :: uOut, uIn, cIn, cOut, T
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, rC
 
+    !!!!$OMP PARALLEL PRIVATE( iFace, i, j, k, m, iEq, ii, jj, bID, e1, s1, e2, s2, nHat, norm, uOut, uIn, cIn, cOut, T, jump, aS, fac, rC ) 
+    !!!$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1866,7 +1987,8 @@ CONTAINS
       ENDIF
 
     ENDDO
-
+    !!!$OMP ENDDO
+    !!!!$OMP END PARALLEL
 
 #endif
 
@@ -1909,6 +2031,7 @@ CONTAINS
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, hCapRatio, rC
 
+    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -2019,6 +2142,7 @@ CONTAINS
       ENDIF
 
     ENDDO
+    !$OMP ENDDO
 
 
 #endif
@@ -2291,6 +2415,7 @@ CONTAINS
                                                                 myDGSEM % dgStorage % quadratureWeights_dev )
 #else
 
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2366,6 +2491,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -2399,6 +2525,7 @@ CONTAINS
 #else
 
 
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
 
@@ -2433,6 +2560,7 @@ CONTAINS
 
       ENDDO
     ENDDO
+    !$OMP ENDDO
   
 
 #endif
@@ -2488,6 +2616,7 @@ CONTAINS
     !
     !
 
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % sgsCoeffs % nEquations
         DO k = 0, myDGSEM % params % polyDeg
@@ -2519,6 +2648,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -2552,6 +2682,7 @@ CONTAINS
     INTEGER    :: bID, p2
     INTEGER    :: e1, e2, s1, s2
 
+    !$OMP DO
     DO bID = 1, myDGSEM % extComm % nBoundaries
 
       iFace = myDGSEM % extComm % boundaryIDs( bID ) ! Obtain the process-local face id for this boundary-face id
@@ -2571,6 +2702,7 @@ CONTAINS
       ENDIF
 
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -2705,6 +2837,7 @@ CONTAINS
     INTEGER    :: ii, jj, bID
     INTEGER    :: e1, s1, e2, s2
 
+    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -2765,6 +2898,7 @@ CONTAINS
       ENDIF
 
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -2793,6 +2927,7 @@ CONTAINS
     INTEGER :: iEl, i, j, k
     REAL(prec) :: hCapRatio, rC, rhoT
 
+    !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
         DO j = 0, myDGSEM % params % polyDeg
@@ -2809,6 +2944,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 #endif
 
   END SUBROUTINE EquationOfState_Fluid
