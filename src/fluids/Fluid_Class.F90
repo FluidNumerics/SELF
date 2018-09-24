@@ -393,30 +393,19 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
-
-#ifdef HAVE_CUDA
-    myDGSEM % state % solution_dev = myDGSEM % state % solution
-    myDGSEM % static % solution_dev = myDGSEM % static % solution
-    CALL myDGSEM % sourceTerms % UpdateDevice( )
-#endif
-
-    !$OMP PARALLEL
-    CALL myDGSEM % EquationOfState( )
-    !$OMP END PARALLEL
-
-#ifdef HAVE_CUDA
-    myDGSEM % state % boundarySolution  = myDGSEM % state % boundarySolution_dev
-#endif
-
-    CALL myDGSEM % UpdateExternalStaticState( )
-
-    CALL myDGSEM % SetPrescribedState( )
+    CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
-    istat = cudaDeviceSynchronize( )
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
+
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( ) ! GPU Kernel (if CUDA)
+    !$OMP END PARALLEL
+
+    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
 
   END SUBROUTINE SetInitialConditions_Fluid
 
