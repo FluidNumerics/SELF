@@ -257,7 +257,7 @@ IMPLICIT NONE
 #ifdef HAVE_CUDA
     INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
     ! Local
     TYPE(dim3) :: grid, tBlock
   
@@ -272,7 +272,7 @@ IMPLICIT NONE
 #else
     INTEGER, INTENT(in)     :: nVariables, nElements
     REAL(prec), INTENT(in)  :: f(0:myNodal % N,0:myNodal % N,0:myNodal % N,1:nVariables,1:nElements)
-    REAL(prec), INTENT(out) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
+    REAL(prec), INTENT(inout) :: fAtBoundaries(0:myNodal % N,0:myNodal % N,1:nVariables,1:6,1:nElements)
      
       fAtBoundaries = CalculateFunctionsAtBoundaries_3D_NodalDG( myNodal, f, nVariables, nElements )
 
@@ -336,7 +336,7 @@ IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: divF(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: divF(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     ! Local
     TYPE(dim3) :: grid, tBlock
     INTEGER    :: threadCount
@@ -356,7 +356,7 @@ IMPLICIT NONE
     INTEGER, INTENT(in)     :: nVariables, nElements
     REAL(prec), INTENT(in)  :: f(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec), INTENT(in)  :: fnAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
-    REAL(prec), INTENT(out) :: divf(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(inout) :: divf(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
 
 
       divF = DG_Divergence_3D_NodalDG( myNodal, f, fnAtBoundaries, nVariables, nElements )
@@ -419,7 +419,7 @@ IMPLICIT NONE
     INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(in)  :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
-    REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec), DEVICE, INTENT(inout) :: gradF(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
     ! Local
     TYPE(dim3) :: grid, tBlock
   
@@ -436,10 +436,10 @@ IMPLICIT NONE
 
 
 #else
-    INTEGER         :: nVariables, nElements
-    REAL(prec)      :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
-    REAL(prec)      :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
-    REAL(prec)      :: gradf(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    REAL(prec), INTENT(in)      :: f(0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(in)      :: fAtBoundaries(0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:6, 1:nElements)
+    REAL(prec), INTENT(inout)      :: gradf(1:3,0:myNodal % N, 0:myNodal % N, 0:myNodal % N, 1:nVariables, 1:nElements)
 
       gradF = DG_Gradient_3D_NodalDG( myNodal, f, fAtBoundaries, nVariables, nElements )
     
@@ -503,7 +503,7 @@ IMPLICIT NONE
     INTEGER    :: ii, i, j, k, iVar, iEl
     REAL(prec) :: df
 
-      !$OMP DO
+      !$OMP DO PRIVATE(df)
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO k = 0, myNodal % N

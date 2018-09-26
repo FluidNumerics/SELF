@@ -745,7 +745,7 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
 
 #ifdef HAVE_CUDA
-    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
+    INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
     REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     REAL(prec), DEVICE, INTENT(out) :: gradF(1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
     TYPE(dim3) :: grid, tBlock

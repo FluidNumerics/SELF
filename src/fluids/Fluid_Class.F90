@@ -238,7 +238,7 @@ CONTAINS
       R_dev         = myDGSEM % params % R
       Cv_dev        = myDGSEM % params % Cv
       P0_dev        = myDGSEM % params % P0
-      hCapRatio_dev = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
+      hCapRatio_dev = myDGSEM % params % hCapRatio
       rC_dev        = myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
       g_dev         = myDGSEM % params % g
       dt_dev        = myDGSEM % params % dt
@@ -338,7 +338,6 @@ CONTAINS
 
 
 
-    myDGSEM % state % solution = 0.0_prec
     CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -393,12 +392,14 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+
     CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
     CALL myDGSEM % sourceTerms % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
 #endif
 
     !$OMP PARALLEL
@@ -483,9 +484,9 @@ CONTAINS
 
     ENDDO
 
-#ifdef HAVE_CUDA
-    CALL myDGSEM % state % UpdateDevice( )
-#endif
+!#ifdef HAVE_CUDA
+!    CALL myDGSEM % state % UpdateDevice( )
+!#endif
 
   END SUBROUTINE SetPrescribedState_Fluid
 
@@ -566,6 +567,12 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % EquationOfState( )
+    CALL myDGSEM % GlobalTimeDerivative( t )
+    RETURN
+#endif
+
     tBlock = dim3( myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1  )
@@ -635,6 +642,13 @@ CONTAINS
 
 #else
 
+#ifdef UNIT_TEST
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( )
+    CALL myDGSEM % GlobalTimeDerivative( t )
+    !$OMP END PARALLEL
+    RETURN
+#endif
     ALLOCATE( G3D(0:myDGSEM % params % polyDeg,&
                   0:myDGSEM % params % polyDeg,&
                   0:myDGSEM % params % polyDeg,&
@@ -695,7 +709,7 @@ CONTAINS
 
       ENDDO
 
- 
+
       !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
       !$OMP END MASTER
@@ -854,6 +868,10 @@ CONTAINS
 !  boundary conditions, Riemann Fluxes, and MPI DATA exchanges that need to
 !  occur.
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.00.h5')
+#endif
+
 #ifdef TIMING
     !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 2 )
@@ -868,6 +886,9 @@ CONTAINS
     !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.01.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -921,6 +942,10 @@ CONTAINS
     !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.02.h5')
+#endif
+
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -942,6 +967,10 @@ CONTAINS
     !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 5 )
     !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.03.h5')
 #endif
 
 #ifdef TIMING
@@ -977,6 +1006,10 @@ CONTAINS
     !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 7 )
     !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.04.h5')
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1029,6 +1062,10 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.05.h5')
+#endif
+
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1057,6 +1094,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % sgsCoeffs % Write_Pipeline_File( 'Pipeline.06.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1078,6 +1118,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % sgsCoeffs % Write_Pipeline_File( 'Pipeline.07.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1132,6 +1175,10 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.08.h5')
+#endif
+
 #ifdef TIMING
       !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 13 )
@@ -1176,6 +1223,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.09.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1225,6 +1275,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.10.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1248,6 +1301,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.11.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1291,6 +1347,9 @@ CONTAINS
       !$OMP END MASTER
 #endif      
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.12.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1316,6 +1375,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.13.h5')
+#endif
 
     ENDIF
 
@@ -1344,6 +1406,9 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.14.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -2925,9 +2990,12 @@ CONTAINS
             ! Pressure = rho*e*R/Cv (Ideal Gas Law, P = rho*R*T, thermo ~> T = theta*(P/P0)^r)
             ! THEN P = (rho*theta*R/P0^rC)^(Cp/Cv)
             ! And P' = P - P_static
-            rhoT = (myDGSEM % static % solution(i,j,k,5,iEl) + myDGSEM % state % solution(i,j,k,5,iEl) )
+            rhoT =(myDGSEM % static % solution(i,j,k,5,iEl) + myDGSEM % state % solution(i,j,k,5,iEl) ) 
             myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
                                                       myDGSEM % static % solution(i,j,k,nEquations,iEl)
+
+            !myDGSEM % state % solution(i,j,k,nEquations,iEl) = (myDGSEM % static % solution(i,j,k,5,iEl) + myDGSEM % state % solution(i,j,k,5,iEl))*&
+           !                                                    myDGSEM % params % R - myDGSEM % static % solution(i,j,k,nEquations,iEl)
 
           ENDDO
         ENDDO
@@ -2995,6 +3063,11 @@ CONTAINS
             ! Potential Temperature (weighted with density)
             myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T
 
+!            ! EquationOfState
+!            myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*&
+!                                                              ( myDGSEM % static % solution(i,j,k,5,iEl)*&
+!                                                                myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio
+
           ENDDO
         ENDDO
       ENDDO
@@ -3002,17 +3075,19 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     myDGSEM % static % solution_dev = myDGSEM % static % solution
+    myDGSEM % state % solution_dev  = 0.0_prec
 #endif
 
-    ! This routine Calculates the pressure
     CALL myDGSEM % EquationOfState( )
 
 #ifdef HAVE_CUDA
-    myDGSEM % state % solution = myDGSEM % state % solution_dev
+    istat = cudaDeviceSynchronize( )
+    myDGSEM % state % solution = myDGSEM % state % solution_dev 
 #endif
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       myDGSEM % static % solution(:,:,:,nEquations,iEl) = myDGSEM % state % solution(:,:,:,nEquations,iEl)
+      myDGSEM % state % solution(:,:,:,nEquations,iEl)  = 0.0_prec
     ENDDO
 
 #ifdef HAVE_CUDA
@@ -3020,9 +3095,6 @@ CONTAINS
     myDGSEM % state % solution_dev  = 0.0_prec
     istat = cudaDeviceSynchronize( )
 #endif
-
-    myDGSEM % state % solution = 0.0_prec
-
   END SUBROUTINE CalculateStaticState_Fluid
 !
   SUBROUTINE IO_Fluid( myDGSEM )
@@ -4178,22 +4250,14 @@ CONTAINS
     CALL h5close_f( error )
 #endif
 
-#ifdef HAVE_CUDA
-    myDGSEM % state % solution_dev = myDGSEM % state % solution
-    myDGSEM % static % solution_dev = myDGSEM % static % solution
-    CALL myDGSEM % sourceTerms % UpdateDevice( )
-#endif
-
-    CALL myDGSEM % EquationOfState( )
-
-    CALL myDGSEM % UpdateExternalStaticState( )
     CALL myDGSEM % SetPrescribedState( )
-
+    CALL myDGSEM % UpdateExternalStaticState( )
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
-    istat = cudaDeviceSynchronize( )
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
+
 
   END SUBROUTINE Read_from_HDF5
 
@@ -4328,29 +4392,14 @@ CONTAINS
     ! Local
     INTEGER :: bID, iFace, e1, s1, i, j, iEq
 #ifdef HAVE_CUDA
-    INTEGER    :: istat
-    TYPE(dim3) :: tBlock, grid
+    INTEGER :: iStat
 #endif
 
-#ifdef HAVE_CUDA
-  
-      tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                    myDGSEM % params % polyDeg+1 , &
-                    1 )
-      grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
-  
-      CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
-                                                                           myDGSEM % static % boundarySolution_dev,  &
-                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-  
-     CALL myDGSEM % static % UpdateHost( )
-     istat = cudaDeviceSynchronize( )
-#else
+     myDGSEM % static % boundarySolution = CalculateFunctionsAtBoundaries_3D_NodalDG( myDGSEM % dgStorage, &
+                                                                                      myDGSEM % static % solution, &
+                                                                                      myDGSEM % static % nEquations, &
+                                                                                      myDGSEM % static % nElements )
 
-     ! Interpolate the static state to the element boundaries
-     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-
-#endif
 
     ! Update the static external states
     DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -4371,6 +4420,7 @@ CONTAINS
 
 #ifdef HAVE_CUDA
    myDGSEM % static % externalState_dev = myDGSEM % static % externalState
+    myDGSEM % static % boundarySolution_dev = myDGSEM % static % boundarySolution
    istat = cudaDeviceSynchronize( )
 #endif
   END SUBROUTINE UpdateExternalStaticState_Fluid
@@ -5188,7 +5238,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
     REAL(prec), DEVICE, INTENT(in)    :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
      ! Local
     INTEGER :: i, j, k, iEl
-    REAL(prec) :: rhoT
+!    REAL(prec) :: rhoT
     
     iEl = blockIdx % x
     i   = threadIdx % x - 1
@@ -5198,8 +5248,8 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
      ! Pressure = rho*e*R/Cv (Ideal Gas Law, P = rho*R*T, thermo ~> T = theta*(P/P0)^r)
      ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
      ! And P' = P - P_static
-    rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
-    solution(i,j,k,nEq_dev,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
+    !solution(i,j,k,nEq_dev,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
+     solution(i,j,k,nEq_dev,iEl) = P0_dev*( (static(i,j,k,5,iEl) + solution(i,j,k,5,iEl))*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
   
   END SUBROUTINE EquationOfState_CUDAKernel
 !
