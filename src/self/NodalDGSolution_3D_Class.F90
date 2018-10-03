@@ -777,8 +777,8 @@ CONTAINS
 
   SUBROUTINE Write_Pipeline_File( nodalSolution, filename )
     IMPLICIT NONE
-    CLASS( NodalDGSolution_3D ), INTENT(in) :: nodalSolution
-    CHARACTER(*), INTENT(in)                :: filename
+    CLASS( NodalDGSolution_3D ), INTENT(inout) :: nodalSolution
+    CHARACTER(*), INTENT(in)                   :: filename
     ! Local
     CHARACTER(100)   :: groupname
     CHARACTER(13)    :: timeStampString
