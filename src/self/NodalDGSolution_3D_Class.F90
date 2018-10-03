@@ -783,16 +783,14 @@ CONTAINS
     CHARACTER(100)   :: groupname
     CHARACTER(13)    :: timeStampString
     CHARACTER(10)    :: zoneID
-    INTEGER          :: iEl, N, rank, m_rank, error, istat, nEl, elID
+    INTEGER          :: iEl, N, rank, erank, error, istat, nEl, elID
 
     INTEGER(HSIZE_T) :: dimensions(1:5)
-    INTEGER(HSIZE_T) :: starts(1:5), counts(1:5), strides(1:5)
-
     INTEGER(HSIZE_T) :: bDimensions(1:5)
-    INTEGER(HSIZE_T) :: bstarts(1:5), bcounts(1:5), bstrides(1:5)
+    INTEGER(HSIZE_T) :: eDimensions(1:4)
 
-    INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id, bdataspace_id
-    INTEGER(HID_T)   :: internal_group_id, boundary_group_id, element_group_id
+    INTEGER(HID_T)   :: file_id, dataspace_id, dataset_id, bdataspace_id, edataspace_id
+    INTEGER(HID_T)   :: external_group_id, internal_group_id, boundary_group_id
     INTEGER(HID_T)   :: plist_id
     INTEGER(HID_T)   :: create_plist_id, access_plist_id, transfer_plist_id
 
@@ -805,10 +803,14 @@ CONTAINS
 
     N = nodalSolution % N
     rank = 5
+    erank = 4
     ! Internal element storage dimensions
     dimensions = (/ N+1, N+1, N+1, nodalSolution % nEquations, nodalSolution % nElements /)
     ! Element Face storage
     bDimensions = (/ N+1, N+1, nodalSolution % nEquations, 6, nodalSolution % nElements /)
+    ! Boundary face storage
+    eDimensions = (/ N+1, N+1, nodalSolution % nEquations, nodalSolution % nBoundaryFaces /)
+
 
     CALL h5open_f(error)  
     IF( error /= 0 ) STOP
@@ -821,6 +823,7 @@ CONTAINS
     !
     CALL h5screate_simple_f(rank, dimensions, dataspace_id, error)
     CALL h5screate_simple_f(rank, bdimensions, bdataspace_id, error)
+    CALL h5screate_simple_f(erank, edimensions, edataspace_id, error)
 
     ! Create groups 
     groupname = "/internal"
@@ -829,6 +832,10 @@ CONTAINS
 
     groupname = "/boundary"
     CALL h5gcreate_f( file_id, TRIM(groupname), boundary_group_id, error )
+    IF( error /= 0 ) STOP
+
+    groupname = "/external"
+    CALL h5gcreate_f( file_id, TRIM(groupname), external_group_id, error )
     IF( error /= 0 ) STOP
 
     ! Set the data creation mode to CHUNK
@@ -901,6 +908,7 @@ CONTAINS
                      nodalSolution % boundarySolution, bdimensions, error)
     CALL h5dclose_f(dataset_id, error)
 
+
     CALL h5dcreate_f( file_id, "/boundary/boundary_gradient_flux_1", &
                        H5T_IEEE_F32LE, bdataspace_id, dataset_id, error)
     CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
@@ -925,10 +933,25 @@ CONTAINS
                      nodalSolution % boundaryFlux, bdimensions, error)
     CALL h5dclose_f(dataset_id, error)
 
+    CALL h5dcreate_f( file_id, "/external/prescribedState", &
+                       H5T_IEEE_F32LE, edataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     nodalSolution % prescribedState, edimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/external/externalState", &
+                       H5T_IEEE_F32LE, edataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
+                     nodalSolution % prescribedState, edimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+
     CALL h5gclose_f( internal_group_id, error )
     CALL h5gclose_f( boundary_group_id, error )
+    CALL h5gclose_f( external_group_id, error )
     CALL h5sclose_f( dataspace_id, error )
     CALL h5sclose_f( bdataspace_id, error )
+    CALL h5sclose_f( edataspace_id, error )
     CALL h5fclose_f( file_id, error )
     CALL h5close_f( error )
 
