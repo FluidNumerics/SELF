@@ -838,6 +838,114 @@ CONTAINS
     CALL h5gcreate_f( file_id, TRIM(groupname), external_group_id, error )
     IF( error /= 0 ) STOP
 
+#ifdef DOUBLE_PRECISION
+    ! Set the data creation mode to CHUNK
+    CALL h5dcreate_f( file_id, "/internal/solution", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % solution, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5dcreate_f( file_id, "/internal/flux_1", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % flux(1,:,:,:,:,:), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+    IF( error /= 0 ) STOP
+
+    CALL h5dcreate_f( file_id, "/internal/flux_2", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % flux(2,:,:,:,:,:), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/flux_3", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % flux(3,:,:,:,:,:), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/solution_gradient_1", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % solutionGradient(1,:,:,:,:,:), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/solution_gradient_2", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % solutionGradient(2,:,:,:,:,:), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/solution_gradient_3", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % solutionGradient(3,:,:,:,:,:), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/flux_divergence", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % fluxDivergence, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/source", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % source, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/internal/tendency", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % tendency, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Element Face data
+    CALL h5dcreate_f( file_id, "/boundary/boundarySolution", &
+                       H5T_IEEE_F64LE, bdataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % boundarySolution, bdimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+
+    CALL h5dcreate_f( file_id, "/boundary/boundary_gradient_flux_1", &
+                       H5T_IEEE_F64LE, bdataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % boundaryGradientFlux(1,:,:,:,:,:), bdimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/boundary/boundary_gradient_flux_2", &
+                       H5T_IEEE_F64LE, bdataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % boundaryGradientFlux(2,:,:,:,:,:), bdimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/boundary/boundary_gradient_flux_3", &
+                       H5T_IEEE_F64LE, bdataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % boundaryGradientFlux(3,:,:,:,:,:), bdimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/boundary/boundary_flux", &
+                       H5T_IEEE_F64LE, bdataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % boundaryFlux, bdimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/external/prescribedState", &
+                       H5T_IEEE_F64LE, edataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % prescribedState, edimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/external/externalState", &
+                       H5T_IEEE_F64LE, edataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     nodalSolution % prescribedState, edimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+#else
     ! Set the data creation mode to CHUNK
     CALL h5dcreate_f( file_id, "/internal/solution", &
                        H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
@@ -944,6 +1052,7 @@ CONTAINS
     CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
                      nodalSolution % prescribedState, edimensions, error)
     CALL h5dclose_f(dataset_id, error)
+#endif
 
 
     CALL h5gclose_f( internal_group_id, error )
