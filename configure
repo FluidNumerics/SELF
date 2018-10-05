@@ -740,6 +740,7 @@ enable_cuda
 enable_openmp
 with_hdf5
 enable_mpi
+enable_pottemp
 enable_double
 enable_timing
 enable_diagnostics
@@ -1392,6 +1393,8 @@ Optional Features:
 
   --enable-openmp         default:no
   --enable-mpi            default:no
+  --enable-pottemp, default:no
+
   --enable-double, default:no
 
   --enable-timing, default:no
@@ -5338,6 +5341,18 @@ fi
 
 fi
 
+
+# Check for potential temperature formulation request.
+# Check whether --enable-pottemp was given.
+if test "${enable_pottemp+set}" = set; then :
+  enableval=$enable_pottemp;
+fi
+
+if test "x$enable_pottemp" = "xyes"; then :
+
+  FCFLAGS+=" -DPOTENTIAL_TEMPERATURE"
+
+fi
 
 # Check for Double Precision floating point arithmetic request.
 # Check whether --enable-double was given.

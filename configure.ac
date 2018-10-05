@@ -58,6 +58,12 @@ AS_IF([test "x$enable_mpi" = "xyes"],[
 ])
 
 
+# Check for potential temperature formulation request.
+AC_ARG_ENABLE( pottemp, AS_HELP_STRING([--enable-pottemp, default:no]))
+AS_IF([test "x$enable_pottemp" = "xyes"],[
+  FCFLAGS+=" -DPOTENTIAL_TEMPERATURE"
+])
+
 # Check for Double Precision floating point arithmetic request.
 AC_ARG_ENABLE( double, AS_HELP_STRING([--enable-double, default:no]))
 AS_IF([test "x$enable_double" = "xyes"],[

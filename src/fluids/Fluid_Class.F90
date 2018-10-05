@@ -1993,15 +1993,28 @@ CONTAINS
                   (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) + myDGSEM % state % boundarySolution(ii,jj,4,s2,e2))
 
             ! Sound speed estimate for the external and internal states
+#ifdef POTENTIAL_TEMPERATURE
+            cOut = sqrt( myDGSEM % params % R *T* &
+              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
+              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
+              myDGSEM % params % P0 )**myDGSEM % params % rC   )
+#else
             cOut = sqrt( myDGSEM % params % R*T )
+#endif
 
             T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + &
               myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
               (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + &
               myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
+#ifdef POTENTIAL_TEMPERATURE
+            cIn = sqrt( myDGSEM % params % R *T* &
+              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
+              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
+              myDGSEM % params % P0 )**myDGSEM % params % rC   )
+#else
             cIn = sqrt( myDGSEM % params % R*T )
-
+#endif
             ! External normal velocity component
             uOut = ( myDGSEM % state % boundarySolution(ii,jj,1,s2,e2)*nHat(1) + &
                      myDGSEM % state % boundarySolution(ii,jj,2,s2,e2)*nHat(2) + &
@@ -2149,21 +2162,26 @@ CONTAINS
             T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % externalState(ii,jj,5,bID))/&
               (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % externalState(ii,jj,4,bID))
 
+#ifdef POTENTIAL_TEMPERATURE
+            cOut = sqrt( myDGSEM % params % R *T* &
+              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
+              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
+              myDGSEM % params % P0 )**myDGSEM % params % rC   )
+#else
             cOut = sqrt( myDGSEM % params % R*T )
-            !cOut = sqrt( myDGSEM % params % R*T* &
-            !  ( (myDGSEM % state % externalState(ii,jj,nEquations,bID)+&
-            !  myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
-            !  myDGSEM % params % P0 )**myDGSEM % params % rC   )
+#endif
 
             T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
                 (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1))
 
+#ifdef POTENTIAL_TEMPERATURE
+            cIn = sqrt( myDGSEM % params % R *T* &
+              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
+              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
+              myDGSEM % params % P0 )**myDGSEM % params % rC   )
+#else
             cIn = sqrt( myDGSEM % params % R*T )
-            !cIn  = sqrt( myDGSEM % params % R*T* &
-            !  ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
-            !  myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
-            !  myDGSEM % params % P0 )**myDGSEM % params % rC  )
-
+#endif
             ! External normal velocity component
             uOut = ( myDGSEM % state % externalState(ii,jj,1,bID)*nHat(1) + &
                      myDGSEM % state % externalState(ii,jj,2,bID)*nHat(2) + &
@@ -3018,8 +3036,13 @@ CONTAINS
 
             ! Pressure = rho*R*T
             ! And P' = P - P_static
-            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
+#ifdef POTENTIAL_TEMPERATURE
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
+                                                      myDGSEM % static % solution(i,j,k,nEquations,iEl)
 
+#else
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
+#endif
 
           ENDDO
         ENDDO
@@ -3087,7 +3110,12 @@ CONTAINS
             ! Temperature (weighted with density)
             myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T
 
+#ifdef POTENTIAL_TEMPERATURE
+            myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
+                                                                myDGSEM % static % solution(i,j,k,nEquations,iEl)
+#else
             myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % static % solution(i,j,k,5,iEl)*myDGSEM % params % R
+#endif
 
           ENDDO
         ENDDO
@@ -3145,7 +3173,7 @@ CONTAINS
     INTEGER       :: i, j, k, iEl, iEq, fUnit
     CHARACTER(5)  :: zoneID
     CHARACTER(4)  :: rankChar
-    REAL(prec)    :: hCapRatio, c, T
+    REAL(prec)    :: hCapRatio, c, T, insitu, pottemp
 
 
 #ifdef HAVE_CUDA
@@ -3174,7 +3202,7 @@ CONTAINS
       STATUS='replace')
 
 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "Pot. Temp.", "Tracer", "Pressure"'
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho","In-situ Temp.", "Pot. Temp.", "Tracer", "Pressure"'
 
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
@@ -3188,6 +3216,16 @@ CONTAINS
         DO j = 0, myDGSEM % params % nPlot
           DO i = 0, myDGSEM % params % nPlot
 
+#ifdef POTENTIAL_TEMPERATURE
+            pottemp = ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) )
+            insitu  = pottemp*( (bsol(i,j,k,7,iEl) + sol(i,j,k,7,iEl))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
+#else
+            insitu  = ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) )
+            pottemp = insitu*( (bsol(i,j,k,7,iEl) + sol(i,j,k,7,iEl))/myDGSEM % params % P0 )**(-myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
+#endif
+
+
+
             WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), &
                                           x(i,j,k,2,iEl), &
                                           x(i,j,k,3,iEl), &
@@ -3195,7 +3233,7 @@ CONTAINS
                                           sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
                                           sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
                                           sol(i,j,k,4,iEl), &
-                                          ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
+                                          insitu, pottemp, &
                                           ( sol(i,j,k,6,iEl) + bsol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
                                           sol(i,j,k,nEquations,iEl)
 
@@ -4718,7 +4756,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
    INTEGER    :: e1, s1, e2, s2
    REAL(prec) :: uOut, uIn, cIn, cOut, norm
    REAL(prec) :: aS(1:6)
-   REAL(prec) :: fac, jump
+   REAL(prec) :: fac, jump, T
    
 
       iFace = blockIdx % x
@@ -4740,11 +4778,26 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                      nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
         
         ! Sound speed estimate for the external and internal states
-        cOut = sqrt( R_dev*(boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
-                           (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2)) )
-                   
-        cIn = sqrt( R_dev*(boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
-                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1)) )        
+        T =   (boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
+                 (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
+                 
+        ! Sound speed estimate for the external and internal states
+#ifdef POTENTIAL_TEMPERATURE
+        cOut = sqrt( R_dev*T* &
+                    ( (boundarySolution(ii,jj,nEq_dev,s2,e2)+boundarySolution_static(ii,jj,nEq_dev,s2,e2))/ P0_dev )**rC_dev   )
+#else
+        cOut = sqrt( R_dev*T )
+#endif
+
+        T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
+                (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )        
+
+#ifdef POTENTIAL_TEMPERATURE
+        cIn = sqrt( R_dev*T* &
+                    ( (boundarySolution(ii,jj,nEq_dev,s2,e2)+boundarySolution_static(ii,jj,nEq_dev,s2,e2))/ P0_dev )**rC_dev   )
+#else
+        cIn = sqrt( R_dev*T )
+#endif
                      
         ! External normal velocity component
         uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
@@ -4862,17 +4915,23 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                  
                   T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
                           (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
-                 ! Sound speed estimate for the external and internal states
+
+#ifdef POTENTIAL_TEMPERATURE
+                  cOut = sqrt( R_dev*T* &
+                              ( (externalState(ii,jj,nEq_dev,bID)+boundarySolution_static(i,j,nEq_dev,s1,e1))/ P0_dev )**rC_dev   )
+#else
                   cOut = sqrt( R_dev*T )
-                  !cOut = sqrt( R_dev*T* &
-                  !            ( (externalState(ii,jj,nEq_dev,bID)+boundarySolution_static(i,j,nEq_dev,s1,e1))/ P0_dev )**rC_dev   )
+#endif
                   
                   T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
                           (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
                                    
+#ifdef POTENTIAL_TEMPERATURE
+                  cIn  = sqrt( R_dev*T* &
+                              ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
+#else
                   cIn = sqrt( R_dev*T )
-                  !cIn  = sqrt( R_dev*T* &
-                  !            ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
+#endif
                                
                   ! External normal velocity component
                   uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
@@ -5235,7 +5294,11 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
     k   = threadIdx % z - 1
     
      ! Pressure = rho*R*T
+#ifdef POTENTIAL_TEMPERATURE
+     solution(i,j,k,nEq_dev,iEl) = P0_dev*( (static(i,j,k,5,iEl) + solution(i,j,k,5,iEl))*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
+#else
      solution(i,j,k,nEq_dev,iEl) = solution(i,j,k,5,iEl)*R_dev
+#endif
 
   END SUBROUTINE EquationOfState_CUDAKernel
 !
