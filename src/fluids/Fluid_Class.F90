@@ -91,6 +91,9 @@ MODULE Fluid_Class
     PROCEDURE :: CalculateSGSCoefficients => CalculateSGSCoefficients_Fluid
     PROCEDURE :: UpdateExternalSGS        => UpdateExternalSGS_Fluid
 
+    PROCEDURE :: StressFluxDivergence              => StressFluxDivergence_Fluid
+    PROCEDURE :: CalculateStateAtBoundaries        => CalculateStateAtBoundaries_Fluid
+    PROCEDURE :: CalculateSGSAtBoundaries          => CalculateSGSAtBoundaries_Fluid
     PROCEDURE :: CalculateSolutionGradient         => CalculateSolutionGradient_Fluid
     PROCEDURE :: CalculateNormalStressAtBoundaries => CalculateNormalStressAtBoundaries_Fluid
     PROCEDURE :: CalculateStressFlux               => CalculateStressFlux_Fluid
@@ -98,7 +101,7 @@ MODULE Fluid_Class
     PROCEDURE :: InternalFace_StressFlux           => InternalFace_StressFlux_Fluid
     PROCEDURE :: BoundaryFace_StressFlux           => BoundaryFace_StressFlux_Fluid
 
-    PROCEDURE :: UpdateExternalStaticState => UpdateExternalStaticState_Fluid
+    PROCEDURE ::  UpdateExternalStaticState => UpdateExternalStaticState_Fluid
 
   END TYPE Fluid
 
@@ -145,6 +148,7 @@ CONTAINS
     INTEGER(KIND=cuda_count_KIND) :: freebytes, totalbytes
     INTEGER                       :: iStat, cudaDeviceNumber, nDevices
 #endif
+    INTEGER :: n_threads, nface_per_thread, thread_id, remainder
 
 
     CALL myDGSEM % params % Build( TRIM( paramFile), setupSuccess )
@@ -234,7 +238,7 @@ CONTAINS
       R_dev         = myDGSEM % params % R
       Cv_dev        = myDGSEM % params % Cv
       P0_dev        = myDGSEM % params % P0
-      hCapRatio_dev = ( myDGSEM % params % R + myDGSEM % params % Cv ) / myDGSEM % params % Cv
+      hCapRatio_dev = myDGSEM % params % hCapRatio
       rC_dev        = myDGSEM % params % R / ( myDGSEM % params % R + myDGSEM % params % Cv )
       g_dev         = myDGSEM % params % g
       dt_dev        = myDGSEM % params % dt
@@ -266,27 +270,29 @@ CONTAINS
     ! Setup timers
     CALL myDGSEM % timers % Build( )
     CALL myDGSEM % timers % AddTimer( 'Forward_Step_RK3', 1 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_State_At_Boundaries', 2 )
-    CALL myDGSEM % timers % AddTimer( 'MPI_State_Exchange', 3 )
-    CALL myDGSEM % timers % AddTimer( 'Update_External_State', 4 )
-    CALL myDGSEM % timers % AddTimer( 'Internal_Face_State_Flux', 5 )
-    CALL myDGSEM % timers % AddTimer( 'Finalize_MPI_State_Exchange', 6 )
-    CALL myDGSEM % timers % AddTimer( 'Boundary_Face_State_Flux', 7 )
-    CALL myDGSEM % timers % AddTimer( 'Filter3D_for_SmoothedState', 8 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_SGS_Coefficients', 9 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_SGS_At_Boundaries', 10 )
-    CALL myDGSEM % timers % AddTimer( 'MPI_SGS_Exchange', 11 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Solution_Gradient', 12 )
-    CALL myDGSEM % timers % AddTimer( 'Finalize_SGS_Exchange', 13 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Normal_Stress_At_Boundaries', 14 )
-    CALL myDGSEM % timers % AddTimer( 'MPI_Stress_Exchange', 15 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux', 16 )
-    CALL myDGSEM % timers % AddTimer( 'Update_External_Stress', 17 )
-    CALL myDGSEM % timers % AddTimer( 'Finalize_Stress_Exchange', 18 )
-    CALL myDGSEM % timers % AddTimer( 'Boundary_Face_Stress_Flux', 19 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux_Divergence', 20 )
-    CALL myDGSEM % timers % AddTimer( 'Mapped_Time_Derivative', 21 )
+    CALL myDGSEM % timers % AddTimer( 'EquationOfState', 2 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_State_At_Boundaries', 3 )
+    CALL myDGSEM % timers % AddTimer( 'MPI_State_Exchange', 4 )
+    CALL myDGSEM % timers % AddTimer( 'Update_External_State', 5 )
+    CALL myDGSEM % timers % AddTimer( 'Internal_Face_State_Flux', 6 )
+    CALL myDGSEM % timers % AddTimer( 'Finalize_MPI_State_Exchange', 7 )
+    CALL myDGSEM % timers % AddTimer( 'Boundary_Face_State_Flux', 8 )
+    CALL myDGSEM % timers % AddTimer( 'Filter3D_for_SmoothedState', 9 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_SGS_Coefficients', 10 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_SGS_At_Boundaries', 11 )
+    CALL myDGSEM % timers % AddTimer( 'MPI_SGS_Exchange', 12 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_Solution_Gradient', 13 )
+    CALL myDGSEM % timers % AddTimer( 'Finalize_SGS_Exchange', 14 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_Normal_Stress_At_Boundaries', 15 )
+    CALL myDGSEM % timers % AddTimer( 'MPI_Stress_Exchange', 16 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux', 17 )
+    CALL myDGSEM % timers % AddTimer( 'Update_External_Stress', 18 )
+    CALL myDGSEM % timers % AddTimer( 'Finalize_Stress_Exchange', 19 )
+    CALL myDGSEM % timers % AddTimer( 'Boundary_Face_Stress_Flux', 20 )
+    CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux_Divergence', 21 )
+    CALL myDGSEM % timers % AddTimer( 'Mapped_Time_Derivative', 22 )
 #endif
+
 
   END SUBROUTINE Build_Fluid
 !
@@ -333,10 +339,7 @@ CONTAINS
 
 
 
-    myDGSEM % state % solution = 0.0_prec
-    !$OMP PARALLEL
     CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
-    !$OMP END PARALLEL
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
@@ -391,27 +394,23 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef HAVE_CUDA
-    myDGSEM % state % solution_dev = myDGSEM % state % solution
-    myDGSEM % static % solution_dev = myDGSEM % static % solution
-    CALL myDGSEM % sourceTerms % UpdateDevice( )
-#endif
-
-    !$OMP PARALLEL
-    CALL myDGSEM % EquationOfState( )
-    !$OMP END PARALLEL
-
-#ifdef HAVE_CUDA
-    myDGSEM % state % boundarySolution  = myDGSEM % state % boundarySolution_dev
-#endif
-
-    CALL myDGSEM % UpdateExternalStaticState( )
-
-    CALL myDGSEM % SetPrescribedState( )
+    CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
+    istat = cudaDeviceSynchronize( )
+#endif
+
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( ) ! GPU Kernel (if CUDA)
+    !$OMP END PARALLEL
+
+    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
+
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
 
@@ -491,9 +490,9 @@ CONTAINS
 
     ENDDO
 
-#ifdef HAVE_CUDA
-    CALL myDGSEM % state % UpdateDevice( )
-#endif
+!#ifdef HAVE_CUDA
+!    CALL myDGSEM % state % UpdateDevice( )
+!#endif
 
   END SUBROUTINE SetPrescribedState_Fluid
 
@@ -574,6 +573,12 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % EquationOfState( )
+    CALL myDGSEM % GlobalTimeDerivative( t )
+    RETURN
+#endif
+
     tBlock = dim3( myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1  )
@@ -592,7 +597,13 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
+#ifdef TIMING
+    CALL myDGSEM % timers % StartTimer( 2 )
+#endif
         CALL myDGSEM % EquationOfState( )
+#ifdef TIMING
+    CALL myDGSEM % timers % StopTimer( 2 )
+#endif
         CALL myDGSEM % GlobalTimeDerivative( t )
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
                                                     myDGSEM % state % solution_dev, &
@@ -620,7 +631,13 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
+#ifdef TIMING
+    CALL myDGSEM % timers % StartTimer( 2 )
+#endif
         CALL myDGSEM % EquationOfState( )
+#ifdef TIMING
+    CALL myDGSEM % timers % StopTimer( 2 )
+#endif
 
 
         CALL myDGSEM % GlobalTimeDerivative( t )
@@ -643,6 +660,13 @@ CONTAINS
 
 #else
 
+#ifdef UNIT_TEST
+    !$OMP PARALLEL
+    CALL myDGSEM % EquationOfState( )
+    CALL myDGSEM % GlobalTimeDerivative( t )
+    !$OMP END PARALLEL
+    RETURN
+#endif
     ALLOCATE( G3D(0:myDGSEM % params % polyDeg,&
                   0:myDGSEM % params % polyDeg,&
                   0:myDGSEM % params % polyDeg,&
@@ -669,14 +693,24 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
-      !$OMP ENDDO 
+      !$OMP ENDDO
 
       DO m = 1,3 ! Loop over RK3 steps
 
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
+#ifdef TIMING
+    !$OMP MASTER
+    CALL myDGSEM % timers % StartTimer( 2 )
+    !$OMP END MASTER
+#endif
         CALL myDGSEM % EquationOfState( )
+#ifdef TIMING
+    !$OMP MASTER
+    CALL myDGSEM % timers % StopTimer( 2 )
+    !$OMP END MASTER
+#endif
         CALL myDGSEM % GlobalTimeDerivative( t )
 
         !$OMP DO
@@ -687,7 +721,7 @@ CONTAINS
                 DO i = 0, myDGSEM % params % polyDeg
 
                   G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) - ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) -&
-                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
+                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) ) + &
                     myDGSEM % state % source(i,j,k,iEq,iEl)
 
 
@@ -703,10 +737,10 @@ CONTAINS
 
       ENDDO
 
+
       !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
       !$OMP END MASTER
-      !$OMP BARRIER
 
     ENDDO
 
@@ -715,7 +749,6 @@ CONTAINS
     IF( .NOT. AlmostEqual( myDGSEM % simulationTime, t0+myDGSEM % params % outputFrequency ) )THEN
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
-
       !$OMP DO
       DO iEl = 1, myDGSEM % mesh % elements % nElements
         DO iEq = 1, myDGSEM % state % nEquations-1
@@ -734,7 +767,17 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
+#ifdef TIMING
+    !$OMP MASTER
+    CALL myDGSEM % timers % StartTimer( 2 )
+    !$OMP END MASTER
+#endif
         CALL myDGSEM % EquationOfState( )
+#ifdef TIMING
+    !$OMP MASTER
+    CALL myDGSEM % timers % StopTimer( 2 )
+    !$OMP END MASTER
+#endif
         CALL myDGSEM % GlobalTimeDerivative( t )
 
         !$OMP DO
@@ -745,7 +788,7 @@ CONTAINS
                 DO i = 0, myDGSEM % params % polyDeg
 
                   G3D(i,j,k,iEq,iEl) = rk3_a(m)*G3D(i,j,k,iEq,iEl) - ( myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) -&
-                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) )/myDGSEM % mesh % elements % J(i,j,k,iEl) + &
+                    myDGSEM % stressTensor % fluxDivergence(i,j,k,iEq,iEl) ) + &
                     myDGSEM % state % source(i,j,k,iEq,iEl)
 
                   myDGSEM % state % solution(i,j,k,iEq,iEl) = myDGSEM % state % solution(i,j,k,iEq,iEl) + &
@@ -763,7 +806,6 @@ CONTAINS
       !$OMP MASTER
       myDGSEM % simulationTime = myDGSEM % simulationTime +  dt
       !$OMP END MASTER
-      !$OMP BARRIER
 
     ENDIF
     !$OMP END PARALLEL
@@ -864,34 +906,27 @@ CONTAINS
 !  boundary conditions, Riemann Fluxes, and MPI DATA exchanges that need to
 !  occur.
 
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 2 )
-    !$OMP END MASTER
-#endif
-
-#ifdef HAVE_CUDA
-
-    tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                  myDGSEM % params % polyDeg+1 , &
-                  1 )
-    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
-
-    CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
-                                                                  myDGSEM % state % boundarySolution_dev,  &
-                                                                  myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-#else
-
-    CALL myDGSEM % state % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.00.h5')
 #endif
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 2 )
+    CALL myDGSEM % timers % StartTimer( 3 )
     !$OMP END MASTER
 #endif
 
+    CALL myDGSEM % CalculateStateAtBoundaries( )
+
+#ifdef TIMING
+    !$OMP MASTER
+    CALL myDGSEM % timers % StopTimer( 3 )
+    !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.01.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -905,7 +940,7 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 3 )
+    CALL myDGSEM % timers % StartTimer( 4 )
     !$OMP END MASTER
 #endif
 
@@ -919,7 +954,7 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 3 )
+    CALL myDGSEM % timers % StopTimer( 4 )
     !$OMP END MASTER
 #endif
 
@@ -933,7 +968,7 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 4 )
+    CALL myDGSEM % timers % StartTimer( 5 )
     !$OMP END MASTER
 #endif
 
@@ -941,8 +976,12 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 4 )
+    CALL myDGSEM % timers % StopTimer( 5 )
     !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.02.h5')
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -956,7 +995,7 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 5 )
+    CALL myDGSEM % timers % StartTimer( 6 )
     !$OMP END MASTER
 #endif
 
@@ -964,13 +1003,17 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 5 )
+    CALL myDGSEM % timers % StopTimer( 6 )
     !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.03.h5')
 #endif
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 6 )
+    CALL myDGSEM % timers % StartTimer( 7 )
     !$OMP END MASTER
 #endif
 
@@ -984,14 +1027,14 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 6 )
+    CALL myDGSEM % timers % StopTimer( 7 )
     !$OMP END MASTER
 #endif
 
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 7 )
+    CALL myDGSEM % timers % StartTimer( 8 )
     !$OMP END MASTER
 #endif
 
@@ -999,8 +1042,12 @@ CONTAINS
 
 #ifdef TIMING
     !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 7 )
+    CALL myDGSEM % timers % StopTimer( 8 )
     !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.04.h5')
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1030,9 +1077,9 @@ CONTAINS
 ! SUBROUTINE.
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 8 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StartTimer( 9 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_CUDA
@@ -1048,9 +1095,13 @@ CONTAINS
 #endif
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 8 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StopTimer( 9 )
+      !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.05.h5')
 #endif
 
 ! ----------------------------------------------------------------------------- !
@@ -1068,18 +1119,22 @@ CONTAINS
 ! This routine depends on the results from CalculateSmoothedState.
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 9 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StartTimer( 10 )
+      !$OMP END MASTER
 #endif
+
         CALL myDGSEM % CalculateSGSCoefficients( )
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 9 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StopTimer( 10 )
+      !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % sgsCoeffs % Write_Pipeline_File( 'Pipeline.06.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1088,32 +1143,22 @@ CONTAINS
 ! depends on the result of CalculateSGSCoefficients.
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 10 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StartTimer( 11 )
+      !$OMP END MASTER
 #endif
 
-#ifdef HAVE_CUDA
-
-        tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
-                      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
-                      1 )
-        grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1) 
-         
-        CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
-                                                                       myDGSEM % sgsCoeffs % boundarySolution_dev,  &
-                                                                       myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-
-#else
-        CALL myDGSEM % sgsCoeffs % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-#endif
+        CALL myDGSEM % CalculateSGSAtBoundaries( )
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 10 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StopTimer( 11 )
+      !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % sgsCoeffs % Write_Pipeline_File( 'Pipeline.07.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1126,23 +1171,23 @@ CONTAINS
 !
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 11 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StartTimer( 12 )
+      !$OMP END MASTER
 #endif
 
 #ifdef HAVE_MPI
-        !$OMP MASTER
+      !$OMP MASTER
         CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
                                                      myDGSEM % mesh % faces, &
                                                      myDGSEM % extComm )
-        !$OMP END MASTER
+      !$OMP END MASTER
 #endif
 
 #ifdef TIMING
-        !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 11 )
-        !$OMP END MASTER
+      !$OMP MASTER
+        CALL myDGSEM % timers % StopTimer( 12 )
+      !$OMP END MASTER
 #endif
 
       ENDIF
@@ -1156,7 +1201,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 12 )
+      CALL myDGSEM % timers % StartTimer( 13 )
       !$OMP END MASTER
 #endif
 
@@ -1164,13 +1209,17 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 12 )
+      CALL myDGSEM % timers % StopTimer( 13 )
       !$OMP END MASTER
+#endif
+
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.08.h5')
 #endif
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 13 )
+      CALL myDGSEM % timers % StartTimer( 14 )
       !$OMP END MASTER
 #endif
 
@@ -1186,7 +1235,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 13 )
+      CALL myDGSEM % timers % StopTimer( 14 )
       !$OMP END MASTER
 #endif
 
@@ -1200,7 +1249,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 14 )
+      CALL myDGSEM % timers % StartTimer( 15 )
       !$OMP END MASTER
 #endif
 
@@ -1208,10 +1257,13 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 14 )
+      CALL myDGSEM % timers % StopTimer( 15 )
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.09.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1222,7 +1274,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 15 )
+      CALL myDGSEM % timers % StartTimer( 16 )
       !$OMP END MASTER
 #endif
 
@@ -1236,7 +1288,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 15 )
+      CALL myDGSEM % timers % StopTimer( 16 )
       !$OMP END MASTER
 #endif
 
@@ -1249,7 +1301,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 16 )
+      CALL myDGSEM % timers % StartTimer( 17 )
       !$OMP END MASTER
 #endif
 
@@ -1257,10 +1309,13 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 16 )
+      CALL myDGSEM % timers % StopTimer( 17 )
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.10.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1272,7 +1327,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 17 )
+      CALL myDGSEM % timers % StartTimer( 18 )
       !$OMP END MASTER
 #endif
      
@@ -1280,10 +1335,13 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 17 )
+      CALL myDGSEM % timers % StopTimer( 18 )
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.11.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1296,7 +1354,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 18 )
+      CALL myDGSEM % timers % StartTimer( 19 )
       !$OMP END MASTER
 #endif
 
@@ -1310,24 +1368,26 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 18 )
+      CALL myDGSEM % timers % StopTimer( 19 )
       !$OMP END MASTER
 #endif
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 19 )
+      CALL myDGSEM % timers % StartTimer( 20 )
       !$OMP END MASTER
 #endif
-
       CALL myDGSEM % BoundaryFace_StressFlux( )
   
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 19 )
+      CALL myDGSEM % timers % StopTimer( 20 )
       !$OMP END MASTER
 #endif      
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.12.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1341,35 +1401,21 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 20 )
+      CALL myDGSEM % timers % StartTimer( 21 )
       !$OMP END MASTER
 #endif
 
-#ifdef HAVE_CUDA
-      tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                    myDGSEM % params % polyDeg+1, &
-                    myDGSEM % params % polyDeg+1 )
-
-      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % state % nElements, 1)  
-
-      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
-                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
-                                                          myDGSEM % stressTensor % fluxDivergence_dev, &
-                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
-                                                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
-                                                          myDGSEM % dgStorage % quadratureWeights_dev, &
-                                                          myDGSEM % mesh % elements % J_dev )
-
-#else
-      CALL myDGSEM % stressTensor % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )
-#endif
+      CALL myDGSEM % StressFluxDivergence( )
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 20 )
+      CALL myDGSEM % timers % StopTimer( 21 )
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.13.h5')
+#endif
 
     ENDIF
 
@@ -1386,7 +1432,7 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 21 )
+      CALL myDGSEM % timers % StartTimer( 22 )
       !$OMP END MASTER
 #endif
 
@@ -1394,10 +1440,13 @@ CONTAINS
 
 #ifdef TIMING
       !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 21 )
+      CALL myDGSEM % timers % StopTimer( 22 )
       !$OMP END MASTER
 #endif
 
+#ifdef UNIT_TEST
+    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.14.h5')
+#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1405,6 +1454,170 @@ CONTAINS
 
   END SUBROUTINE GlobalTimeDerivative_Fluid
 !
+  SUBROUTINE CalculateSGSAtBoundaries_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+#ifdef HAVE_CUDA
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+
+        tBlock = dim3(4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ), &
+                      4*(ceiling( REAL(myDGSEM % params % polyDeg+1)/4 ) ) , &
+                      1 )
+        grid = dim3(myDGSEM % sgsCoeffs % nEquations, myDGSEM % sgsCoeffs % nElements, 1) 
+         
+        CALL CalculateSGSAtBoundaries_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % sgsCoeffs % solution_dev, &
+                                                                       myDGSEM % sgsCoeffs % boundarySolution_dev,  &
+                                                                       myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+
+#else
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+    REAL(prec) :: fb(1:6)
+
+
+      !$OMP DO
+      DO iEl = 1, myDGSEM % sgsCoeffs % nElements
+        DO iVar = 1, myDGSEM % sgsCoeffs % nEquations
+          DO j = 0, myDGSEM % sgsCoeffs % N
+            DO i = 0, myDGSEM % sgsCoeffs % N
+            
+              fb(1:6) = 0.0_prec
+              
+              DO k = 0, myDGSEM % sgsCoeffs % N
+               
+                fb(1) = fb(1) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % sgsCoeffs % solution(i,k,j,iVar,iEl) ! South
+                fb(2) = fb(2) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % sgsCoeffs % solution(k,i,j,iVar,iEl) ! East
+                fb(3) = fb(3) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % sgsCoeffs % solution(i,k,j,iVar,iEl) ! North
+                fb(4) = fb(4) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % sgsCoeffs % solution(k,i,j,iVar,iEl) ! West
+                fb(5) = fb(5) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % sgsCoeffs % solution(i,j,k,iVar,iEl) ! Bottom
+                fb(6) = fb(6) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % sgsCoeffs % solution(i,j,k,iVar,iEl) ! Top
+               
+              ENDDO
+
+              myDGSEM % sgsCoeffs % boundarySolution(i,j,iVar,1:6,iEl) = fb(1:6)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      !$OMP ENDDO
+
+#endif
+  END SUBROUTINE CalculateSGSAtBoundaries_Fluid
+
+  
+  SUBROUTINE StressFluxDivergence_Fluid( myDGSEM )
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+#ifdef HAVE_CUDA
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+
+      tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1, &
+                    myDGSEM % params % polyDeg+1 )
+
+      grid = dim3(myDGSEM % stressTensor % nEquations, myDGSEM % state % nElements, 1)  
+
+      CALL Stress_Mapped_DG_Divergence_3D_CUDAKernel<<<grid, tBlock>>>( myDGSEM % stressTensor % flux_dev, &
+                                                          myDGSEM % stressTensor % boundaryFlux_dev, &
+                                                          myDGSEM % stressTensor % fluxDivergence_dev, &
+                                                          myDGSEM % dgStorage % boundaryInterpolationMatrix_dev, &
+                                                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose_dev, &
+                                                          myDGSEM % dgStorage % quadratureWeights_dev, &
+                                                          myDGSEM % mesh % elements % J_dev )
+
+#else
+    ! Local
+    INTEGER    :: ii, i, j, k, iVar, iEl
+    REAL(prec) :: df
+
+      !$OMP DO
+      DO iEl = 1, myDGSEM % stressTensor % nElements
+        DO iVar = 1, myDGSEM % stressTensor % nEquations
+          DO k = 0, myDGSEM % stressTensor % N
+            DO j = 0, myDGSEM % stresstensor % N
+              DO i = 0, myDGSEM % stressTensor % N   
+ 
+                df = 0.0_prec
+                DO ii = 0, myDGSEM % dgStorage % N
+                  df = df + myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,i)*myDGSEM % stressTensor % flux(1,ii,j,k,iVar,iEl) + &
+                            myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,j)*myDGSEM % stressTensor % flux(2,i,ii,k,iVar,iEl) + &
+                            myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,k)*myDGSEM % stressTensor % flux(3,i,j,ii,iVar,iEl)
+                ENDDO
+                 
+                myDGSEM % stressTensor % fluxDivergence(i,j,k,iVar,iEl) =  ( df+ ( myDGSEM % stressTensor % boundaryFlux(i,k,iVar,1,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,0) + &
+                                                myDGSEM % stressTensor % boundaryFlux(i,k,iVar,3,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,1) )/&
+                                              myDGSEM % dgStorage % quadratureWeights(j) + &
+                                              ( myDGSEM % stressTensor % boundaryFlux(j,k,iVar,4,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,0) + &
+                                                myDGSEM % stressTensor % boundaryFlux(j,k,iVar,2,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,1) )/&
+                                              myDGSEM % dgStorage % quadratureWeights(i) + &
+                                              ( myDGSEM % stressTensor % boundaryFlux(i,j,iVar,5,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0) + &
+                                                myDGSEM % stressTensor % boundaryFlux(i,j,iVar,6,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1) )/&
+                                              myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % elements % J(i,j,k,iEl) 
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      !$OMP ENDDO
+
+#endif
+
+
+  END SUBROUTINE StressFluxDivergence_Fluid
+
+  SUBROUTINE CalculateStateAtBoundaries_Fluid( myDGSEM ) 
+    CLASS( Fluid ), INTENT(inout) :: myDGSEM 
+#ifdef HAVE_CUDA
+    ! Local
+    TYPE(dim3) :: grid, tBlock
+
+    tBlock = dim3(myDGSEM % params % polyDeg+1, &
+                  myDGSEM % params % polyDeg+1 , &
+                  1 )
+    grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
+
+    CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % solution_dev, &
+                                                                  myDGSEM % state % boundarySolution_dev,  &
+                                                                  myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
+#else
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+    REAL(prec) :: fb(1:6)
+
+
+      !$OMP DO
+      DO iEl = 1, myDGSEM % state % nElements
+        DO iVar = 1, myDGSEM % state % nEquations
+          DO j = 0, myDGSEM % state % N
+            DO i = 0, myDGSEM % state % N
+            
+              fb(1:6) = 0.0_prec
+              
+              DO k = 0, myDGSEM % state % N
+               
+                fb(1) = fb(1) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % state % solution(i,k,j,iVar,iEl) ! South
+                fb(2) = fb(2) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % state % solution(k,i,j,iVar,iEl) ! East
+                fb(3) = fb(3) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % state % solution(i,k,j,iVar,iEl) ! North
+                fb(4) = fb(4) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % state % solution(k,i,j,iVar,iEl) ! West
+                fb(5) = fb(5) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0)*myDGSEM % state % solution(i,j,k,iVar,iEl) ! Bottom
+                fb(6) = fb(6) + myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1)*myDGSEM % state % solution(i,j,k,iVar,iEl) ! Top
+               
+              ENDDO
+
+              myDGSEM % state % boundarySolution(i,j,iVar,1:6,iEl) = fb(1:6)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+      !$OMP ENDDO
+
+#endif
+
+  END SUBROUTINE CalculateStateAtBoundaries_Fluid
+
   SUBROUTINE CalculateSGSCoefficients_Fluid( myDGSEM )
 
     IMPLICIT NONE
@@ -1549,7 +1762,7 @@ CONTAINS
                                                            myDGSEM % mesh % elements % nHat_dev )
 #else
     ! Local
-    INTEGER    :: iEl, bID, bFaceID, i, j, k, iEq
+    INTEGER    :: bID, i, j, k, iEq
     INTEGER    :: iFace2, p2
     INTEGER    :: e1, e2, s1, s2
     REAL(prec) :: norm, un, ut, us, speed
@@ -1737,16 +1950,16 @@ CONTAINS
 
 #else
     ! Local
-    INTEGER :: iEl, iFace
+    INTEGER    :: iFace
     INTEGER    :: i, j, k, m, iEq
     INTEGER    :: ii, jj, bID
-    INTEGER    :: e1, s1, e2, s2
+    INTEGER    :: e1, s1, e2, s2, thread_id
     REAL(prec) :: nHat(1:3), norm
     REAL(prec) :: uOut, uIn, cIn, cOut, T
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, rC
 
-    !$OMP DO
+
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1777,23 +1990,17 @@ CONTAINS
             ENDDO
 
             T =   (myDGSEM % static % boundarySolution(ii,jj,5,s2,e2) + myDGSEM % state % boundarySolution(ii,jj,5,s2,e2))/&
-              (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) + myDGSEM % state % boundarySolution(ii,jj,4,s2,e2))
+                  (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) + myDGSEM % state % boundarySolution(ii,jj,4,s2,e2))
 
             ! Sound speed estimate for the external and internal states
-            cOut = sqrt( myDGSEM % params % R *T* &
-              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
-              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC   )
+            cOut = sqrt( myDGSEM % params % R*T )
 
             T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + &
               myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
               (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + &
               myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
 
-            cIn  = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
-              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1))/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC  )
+            cIn = sqrt( myDGSEM % params % R*T )
 
             ! External normal velocity component
             uOut = ( myDGSEM % state % boundarySolution(ii,jj,1,s2,e2)*nHat(1) + &
@@ -1822,7 +2029,7 @@ CONTAINS
             DO k = 1, 3
               ! Momentum flux due to pressure
               aS(k) = aS(k) + (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1) + &
-                myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2))*nHat(k)
+                               myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2))*nHat(k)
             ENDDO
 
 
@@ -1864,8 +2071,6 @@ CONTAINS
       ENDIF
 
     ENDDO
-    !$OMP ENDDO
-
 
 #endif
 
@@ -1908,7 +2113,7 @@ CONTAINS
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
     REAL(prec) :: fac, hCapRatio, rC
 
-    !$OMP DO 
+    !$OMP DO
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
 
@@ -1944,18 +2149,20 @@ CONTAINS
             T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % externalState(ii,jj,5,bID))/&
               (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % externalState(ii,jj,4,bID))
 
-            cOut = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % state % externalState(ii,jj,nEquations,bID)+&
-              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC   )
+            cOut = sqrt( myDGSEM % params % R*T )
+            !cOut = sqrt( myDGSEM % params % R*T* &
+            !  ( (myDGSEM % state % externalState(ii,jj,nEquations,bID)+&
+            !  myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
+            !  myDGSEM % params % P0 )**myDGSEM % params % rC   )
 
             T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
                 (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1))
 
-            cIn  = sqrt( myDGSEM % params % R*T* &
-              ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
-              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC  )
+            cIn = sqrt( myDGSEM % params % R*T )
+            !cIn  = sqrt( myDGSEM % params % R*T* &
+            !  ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
+            !  myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1) )/&
+            !  myDGSEM % params % P0 )**myDGSEM % params % rC  )
 
             ! External normal velocity component
             uOut = ( myDGSEM % state % externalState(ii,jj,1,bID)*nHat(1) + &
@@ -2042,8 +2249,8 @@ CONTAINS
     ! Local
     TYPE(dim3) :: grid, tBlock
 #else
-    INTEGER    :: iEl, i, j, k, m, iEq, row, col
-    REAL(prec) :: F
+    INTEGER    :: iEl, i, j, k, m, iEq, row, col, ii
+    REAL(prec) :: df, F
 #endif
 
 
@@ -2151,7 +2358,36 @@ CONTAINS
     ENDDO
     !$OMP ENDDO
 
-     CALL myDGSEM % state % Calculate_Weak_Flux_Divergence( myDGSEM % dgStorage )  
+    !$OMP DO
+    DO iEl = 1, myDGSEM % state % nElements
+      DO iEq = 1, myDGSEM % state % nEquations
+        DO k = 0, myDGSEM % state % N
+          DO j = 0, myDGSEM % state % N
+            DO i = 0, myDGSEM % state % N   
+ 
+              df = 0.0_prec
+              DO ii = 0, myDGSEM % dgStorage % N
+                df = df + myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,i)*myDGSEM % state % flux(1,ii,j,k,iEq,iEl) + &
+                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,j)*myDGSEM % state % flux(2,i,ii,k,iEq,iEl) + &
+                          myDGSEM % dgStorage % dgDerivativeMatrixTranspose(ii,k)*myDGSEM % state % flux(3,i,j,ii,iEq,iEl)
+              ENDDO
+               
+              myDGSEM % state % fluxDivergence(i,j,k,iEq,iEl) =  ( df+ ( myDGSEM % state % boundaryFlux(i,k,iEq,1,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,0) + &
+                                              myDGSEM % state % boundaryFlux(i,k,iEq,3,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(j,1) )/&
+                                            myDGSEM % dgStorage % quadratureWeights(j) + &
+                                            ( myDGSEM % state % boundaryFlux(j,k,iEq,4,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,0) + &
+                                              myDGSEM % state % boundaryFlux(j,k,iEq,2,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(i,1) )/&
+                                            myDGSEM % dgStorage % quadratureWeights(i) + &
+                                            ( myDGSEM % state % boundaryFlux(i,j,iEq,5,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,0) + &
+                                              myDGSEM % state % boundaryFlux(i,j,iEq,6,iEl)*myDGSEM % dgStorage % boundaryInterpolationMatrix(k,1) )/&
+                                            myDGSEM % dgStorage % quadratureWeights(k) )/myDGSEM % mesh % elements % J(i,j,k,iEl) 
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+    !$OMP ENDDO
 
     !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -2496,6 +2732,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDDO
+    !$OMP ENDDO
 
 #endif
 
@@ -2772,7 +3009,6 @@ CONTAINS
 #else
     ! Local
     INTEGER :: iEl, i, j, k
-    REAL(prec) :: hCapRatio, rC, rhoT
 
     !$OMP DO
     DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -2780,12 +3016,10 @@ CONTAINS
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
 
-            ! Pressure = rho*e*R/Cv (Ideal Gas Law, P = rho*R*T, thermo ~> T = theta*(P/P0)^r)
-            ! THEN P = (rho*theta*R/P0^rC)^(Cp/Cv)
+            ! Pressure = rho*R*T
             ! And P' = P - P_static
-            rhoT = (myDGSEM % static % solution(i,j,k,5,iEl) + myDGSEM % state % solution(i,j,k,5,iEl) )
-            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
-                                                      myDGSEM % static % solution(i,j,k,nEquations,iEl)
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
+
 
           ENDDO
         ENDDO
@@ -2838,20 +3072,22 @@ CONTAINS
             z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
             ! The static profile is determined from hydrostatic balance, the equation of state,
-            ! and a prescribed potential temperature profile.
-            ! ** The potential temperature is assumed to vary linearly with z **
+            ! and a prescribed temperature profile.
 
             T = T0 + dTdz*z ! Potential temperature
             IF( AlmostEqual( dTdz, 0.0_prec ) )THEN
-              P = P0*( 1.0_prec - g*z/(T0*Cp) )**(Cp/R)
+              P = P0*exp( -g*z/(R*T0) )
             ELSE
               P = P0*( 1.0_prec - g*rC/R*log( (T/T0)**(1.0_prec/dTdz) ) )**(Cp/R)
+              P = P0*( (T0 + dTdz*z)/T0 )**( -g/(dTdz*R) )
             ENDIF
             ! Density
-            myDGSEM % static % solution(i,j,k,4,iEl) = (P/( T*R*(P/P0)**rC) )
+            myDGSEM % static % solution(i,j,k,4,iEl) = ( P/(R*T) )
 
-            ! Potential Temperature (weighted with density)
+            ! Temperature (weighted with density)
             myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T
+
+            myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % static % solution(i,j,k,5,iEl)*myDGSEM % params % R
 
           ENDDO
         ENDDO
@@ -2860,28 +3096,10 @@ CONTAINS
 
 #ifdef HAVE_CUDA
     myDGSEM % static % solution_dev = myDGSEM % static % solution
-#endif
-
-    ! This routine Calculates the pressure
-    !$OMP PARALLEL
-    CALL myDGSEM % EquationOfState( )
-    !$OMP END PARALLEL
-
-#ifdef HAVE_CUDA
-    myDGSEM % state % solution = myDGSEM % state % solution_dev
-#endif
-
-    DO iEl = 1, myDGSEM % mesh % elements % nElements
-      myDGSEM % static % solution(:,:,:,nEquations,iEl) = myDGSEM % state % solution(:,:,:,nEquations,iEl)
-    ENDDO
-
-#ifdef HAVE_CUDA
-    myDGSEM % static % solution_dev = myDGSEM % static % solution
-    myDGSEM % state % solution_dev  = 0.0_prec
     istat = cudaDeviceSynchronize( )
 #endif
 
-    myDGSEM % state % solution = 0.0_prec
+    CALL myDGSEM % UpdateExternalStaticState( )
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
@@ -3202,6 +3420,253 @@ CONTAINS
     CALL h5pcreate_f(H5P_DATASET_XFER_F, transfer_plist_id, error)
     CALL h5pset_dxpl_mpio_f(transfer_plist_id, H5FD_MPIO_COLLECTIVE_F, error)
 
+#ifdef DOUBLE_PRECISION
+
+    CALL h5dcreate_f( file_id, "/model_output/x_momentum", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/y_momentum", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/z_momentum", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_temperature", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_tracer", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/pressure", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dcreate_f( file_id, "/static/x_momentum", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/y_momentum", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/z_momentum", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_temperature", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_tracer", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/pressure", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id,"/model_conditions/drag", &
+                       H5T_IEEE_F64LE, global_dataspace_id, dataset_id, error, create_plist_id)
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+#else
+
     CALL h5dcreate_f( file_id, "/model_output/x_momentum", &
                        H5T_IEEE_F32LE, global_dataspace_id, dataset_id, error, create_plist_id)
 
@@ -3444,6 +3909,8 @@ CONTAINS
                        xfer_prp = transfer_plist_id )
     ENDDO
     CALL h5dclose_f(dataset_id, error)
+#endif
+
     IF( error /= 0 ) STOP
     CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
 
@@ -3489,6 +3956,101 @@ CONTAINS
     CALL h5gcreate_f( file_id, TRIM(groupname), conditions_group_id, error )
     IF( error /= 0 ) STOP
 
+#ifdef DOUBLE_PRECISION
+
+    CALL h5dcreate_f( file_id, "/model_output/x_momentum", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/y_momentum", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/z_momentum", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_temperature", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/density_weighted_tracer", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/model_output/pressure", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dcreate_f( file_id, "/static/x_momentum", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/y_momentum", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/z_momentum", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_temperature", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/density_weighted_tracer", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id, "/static/pressure", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dcreate_f( file_id,"/model_conditions/drag", &
+                       H5T_IEEE_F64LE, dataspace_id, dataset_id, error)
+    CALL h5dwrite_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % sourceTerms % drag, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+ 
+
+#else
     CALL h5dcreate_f( file_id, "/model_output/x_momentum", &
                        H5T_IEEE_F32LE, dataspace_id, dataset_id, error)
     CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
@@ -3579,6 +4141,7 @@ CONTAINS
     CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, &
                      myDGSEM % sourceTerms % drag, dimensions, error)
     CALL h5dclose_f(dataset_id, error)
+#endif
     IF( error /= 0 ) STOP
 
     CALL h5gclose_f( model_group_id, error )
@@ -3656,6 +4219,252 @@ CONTAINS
 
     CALL h5dopen_f(file_id, "/model_output/x_momentum", dataset_id, error)
     CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+
+#ifdef DOUBLE_PRECISION
+
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+
+    ENDDO
+
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/y_momentum",dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/z_momentum",dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_temperature", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_tracer", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/pressure", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % state % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Write the static fields to file
+    CALL h5dopen_f( file_id, "/static/x_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,1,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/y_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,2,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/z_momentum", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,3,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,4,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_temperature", dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,5,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_tracer",dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,6,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/pressure", dataset_id, error )
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % static % solution(0:N,0:N,0:N,7,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id,"/model_conditions/drag",dataset_id, error)
+    CALL h5dget_space_f( dataset_id, global_dataspace_id, error )
+    DO iEl = 1, myDGSEM % mesh % elements % nElements
+      elID = myDGSEM % mesh % elements % elementID(iEl)
+      starts = (/ 0, 0, 0, elID-1 /)
+      counts = (/ 1, 1, 1, 1 /)
+      strides = (/ 1, 1, 1, 1 /)
+
+      CALL h5sselect_hyperslab_f( global_dataspace_id, H5S_SELECT_SET_F, starts, counts, error, strides, dimensions )
+      CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                       myDGSEM % sourceTerms % drag(0:N,0:N,0:N,iEl:iEl), &
+                       dimensions, error, dataspace_id, global_dataspace_id,&
+                       xfer_prp = transfer_plist_id )
+    ENDDO
+    CALL h5dclose_f(dataset_id, error)
+ 
+
+#else
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       elID = myDGSEM % mesh % elements % elementID(iEl)
@@ -3897,6 +4706,7 @@ CONTAINS
                        xfer_prp = transfer_plist_id )
     ENDDO
     CALL h5dclose_f(dataset_id, error)
+#endif
     IF( error /= 0 ) STOP
 
     CALL MPI_BARRIER( myDGSEM % extComm % MPI_COMM, error )
@@ -3935,6 +4745,103 @@ CONTAINS
     groupname = "/model_conditions"
     CALL h5gopen_f( file_id, TRIM(groupname), conditions_group_id, error )
     IF( error /= 0 ) STOP
+
+#ifdef DOUBLE_PRECISION
+
+    CALL h5dopen_f( file_id, "/model_output/x_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/y_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/z_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_temperature", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/density_weighted_tracer", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/model_output/pressure", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % state % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    ! Read the static fields 
+    CALL h5dopen_f( file_id, "/static/x_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,1,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/y_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,2,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/z_momentum", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,3,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,4,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_temperature", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,5,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/density_weighted_tracer", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,6,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+    CALL h5dopen_f( file_id, "/static/pressure", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % static % solution(0:N,0:N,0:N,7,1:nEl), dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+
+
+    CALL h5dopen_f( file_id, "/model_conditions/drag", &
+                    dataset_id, error)
+    CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
+                     myDGSEM % sourceTerms % drag, dimensions, error)
+    CALL h5dclose_f(dataset_id, error)
+    
+
+#else
 
     CALL h5dopen_f( file_id, "/model_output/x_momentum", &
                     dataset_id, error)
@@ -4027,6 +4934,7 @@ CONTAINS
     CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
                      myDGSEM % sourceTerms % drag, dimensions, error)
     CALL h5dclose_f(dataset_id, error)
+#endif
     
     IF( error /= 0 ) STOP
 
@@ -4038,151 +4946,17 @@ CONTAINS
     CALL h5close_f( error )
 #endif
 
-#ifdef HAVE_CUDA
-    myDGSEM % state % solution_dev = myDGSEM % state % solution
-    myDGSEM % static % solution_dev = myDGSEM % static % solution
-    CALL myDGSEM % sourceTerms % UpdateDevice( )
-#endif
-
-    !$OMP PARALLEL
-    CALL myDGSEM % EquationOfState( )
-    !$OMP END PARALLEL
-
-    CALL myDGSEM % UpdateExternalStaticState( )
     CALL myDGSEM % SetPrescribedState( )
-
+    CALL myDGSEM % UpdateExternalStaticState( )
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
-    istat = cudaDeviceSynchronize( )
+    CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
+
 
   END SUBROUTINE Read_from_HDF5
 
-!  SUBROUTINE WritePickup_Fluid( myDGSEM )
-!
-!    IMPLICIT NONE
-!    CLASS( Fluid ), INTENT(in) :: myDGSEM
-!    ! LOCAL
-!    CHARACTER(4)  :: rankChar
-!    INTEGER       :: iEl
-!    INTEGER       :: thisRec, fUnit
-!    INTEGER       :: iEq, N
-!    CHARACTER(13) :: timeStampString
-!
-!    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-!
-!    N = myDGSEM % params % polyDeg
-!
-!    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-!    PRINT(MsgFMT), 'Writing output file :  State.'//rankChar//'.'//timeStampString//'.pickup'
-!
-!    OPEN( UNIT=NEWUNIT(fUnit), &
-!      FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
-!      FORM='UNFORMATTED',&
-!      ACCESS='DIRECT',&
-!      STATUS='REPLACE',&
-!      ACTION='WRITE',&
-!      CONVERT='BIG_ENDIAN',&
-!      RECL=prec*(N+1)*(N+1)*(N+1) )
-!
-!    thisRec = 1
-!    DO iEl = 1, myDGSEM % mesh % elements % nElements
-!
-!      DO iEq = 1, myDGSEM % state % nEquations
-!        WRITE( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
-!        thisRec = thisRec+1
-!      ENDDO
-!      DO iEq = 1, myDGSEM % state % nEquations
-!        WRITE( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
-!        thisRec = thisRec+1
-!      ENDDO
-!      DO iEq = 1, myDGSEM % state % nEquations
-!        WRITE( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
-!        thisRec = thisRec+1
-!      ENDDO
-!
-!      WRITE( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
-!      thisRec = thisRec+1
-!
-!    ENDDO
-!
-!    CLOSE(UNIT=fUnit)
-!
-!
-!  END SUBROUTINE WritePickup_Fluid
-!!
-!  SUBROUTINE ReadPickup_Fluid( myDGSEM, itExists )
-!
-!    IMPLICIT NONE
-!    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-!    LOGICAL, INTENT(out)          :: itExists
-!    ! LOCAL
-!    CHARACTER(4)  :: rankChar
-!    INTEGER       :: iEl, istat
-!    INTEGER       :: thisRec, fUnit, i, j 
-!    INTEGER       :: iEq, N, iFace, e1, s1, bID
-!    CHARACTER(13) :: timeStampString
-!#ifdef HAVE_CUDA
-!    TYPE(dim3) :: tBlock, grid
-!#endif
-!   
-!    timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-!
-!    N = myDGSEM % params % polyDeg
-!
-!    WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
-!    INQUIRE( FILE='State.'//rankChar//'.'//timeStampString//'.pickup', EXIST = itExists )
-!
-!    IF( itExists )THEN
-!
-!      PRINT*, '  Opening State.'//rankChar//'.'//timeStampString//'.pickup'
-!
-!      OPEN( UNIT=NEWUNIT(fUnit), &
-!        FILE='State.'//rankChar//'.'//timeStampString//'.pickup', &
-!        FORM='unformatted',&
-!        ACCESS='direct',&
-!        STATUS='old',&
-!        ACTION='READ',&
-!        CONVERT='big_endian',&
-!        RECL=prec*(N+1)*(N+1)*(N+1) )
-!
-!      thisRec = 1
-!      DO iEl = 1, myDGSEM % mesh % elements % nElements
-!
-!        DO iEq = 1, myDGSEM  % state % nEquations
-!          READ( fUnit, REC=thisRec )myDGSEM % state % solution(:,:,:,iEq,iEl)
-!          thisRec = thisRec+1
-!        ENDDO
-!        DO iEq = 1, myDGSEM % state % nEquations
-!          READ( fUnit, REC=thisRec )myDGSEM % static % solution(:,:,:,iEq,iEl)
-!          thisRec = thisRec+1
-!        ENDDO
-!        DO iEq = 1, myDGSEM % state % nEquations
-!          READ( fUnit, REC=thisRec )myDGSEM % static % source(:,:,:,iEq,iEl)
-!          thisRec = thisRec+1
-!        ENDDO
-!
-!        READ( fUnit, REC=thisRec )myDGSEM % sourceTerms % drag(:,:,:,iEl)
-!        thisRec = thisRec+1
-!
-!      ENDDO
-!
-!      CLOSE(UNIT=fUnit)
-!
-!    ENDIF
-!
-!#ifdef HAVE_CUDA
-!    CALL myDGSEM % static % UpdateDevice( )
-!    CALL myDGSEM % state % UpdateDevice( )
-!    CALL myDGSEM % sourceTerms % UpdateDevice( )
-!    istat = cudaDeviceSynchronize( )
-!#endif
-!
-!    CALL myDGSEM % UpdateExternalStaticState( )
-!    CALL myDGSEM % SetPrescribedState( )
-!
-!  END SUBROUTINE ReadPickup_Fluid
   
   SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
     IMPLICIT NONE
@@ -4190,29 +4964,14 @@ CONTAINS
     ! Local
     INTEGER :: bID, iFace, e1, s1, i, j, iEq
 #ifdef HAVE_CUDA
-    INTEGER    :: istat
-    TYPE(dim3) :: tBlock, grid
+    INTEGER :: iStat
 #endif
 
-#ifdef HAVE_CUDA
-  
-      tBlock = dim3(myDGSEM % params % polyDeg+1, &
-                    myDGSEM % params % polyDeg+1 , &
-                    1 )
-      grid = dim3(myDGSEM % state % nEquations, myDGSEM % state % nElements, 1)  
-  
-      CALL CalculateStateAtBoundaries_CUDAKernel<<<grid, tBlock>>>( myDGSEM % static % solution_dev, &
-                                                                           myDGSEM % static % boundarySolution_dev,  &
-                                                                           myDGSEM % dgStorage % boundaryInterpolationMatrix_dev )
-  
-     CALL myDGSEM % static % UpdateHost( )
-     istat = cudaDeviceSynchronize( )
-#else
+     myDGSEM % static % boundarySolution = CalculateFunctionsAtBoundaries_3D_NodalDG( myDGSEM % dgStorage, &
+                                                                                      myDGSEM % static % solution, &
+                                                                                      myDGSEM % static % nEquations, &
+                                                                                      myDGSEM % static % nElements )
 
-     ! Interpolate the static state to the element boundaries
-     CALL myDGSEM % static % Calculate_Solution_At_Boundaries( myDGSEM % dgStorage )
-
-#endif
 
     ! Update the static external states
     DO bID = 1, myDGSEM % extComm % nBoundaries
@@ -4232,7 +4991,8 @@ CONTAINS
     ENDDO
 
 #ifdef HAVE_CUDA
-   myDGSEM % static % externalState_dev = myDGSEM % static % externalState
+    myDGSEM % static % externalState_dev = myDGSEM % static % externalState
+    myDGSEM % static % boundarySolution_dev = myDGSEM % static % boundarySolution
    istat = cudaDeviceSynchronize( )
 #endif
   END SUBROUTINE UpdateExternalStaticState_Fluid
@@ -4505,7 +5265,6 @@ CONTAINS
 ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryIDs, iMap, jMap, &
                                                                  nHat, boundarySolution, boundarySolution_static, &
                                                                  boundaryFlux, stressFlux )
-
    IMPLICIT NONE
    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
@@ -4521,114 +5280,97 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
 
    INTEGER    :: iEl, iFace
    INTEGER    :: i, j, k, iEq
-   INTEGER    :: ii, jj, bID
+   INTEGER    :: ii, jj
    INTEGER    :: e1, s1, e2, s2
-   REAL(prec) :: uOut, uIn, cIn, cOut, norm, T
-   REAL(prec) :: jump(1:6), aS(1:6)
-   REAL(prec) :: fac
-
+   REAL(prec) :: uOut, uIn, cIn, cOut, norm
+   REAL(prec) :: aS(1:6)
+   REAL(prec) :: fac, jump
+   
 
       iFace = blockIdx % x
       j     = threadIdx % y - 1
-      i     = threadIdx % x -1
-     
-         e1 = elementIDs(1,iFace)
-         s1 = elementSides(1,iFace)
-         e2 = elementIDs(2,iFace)
-         s2 = ABS(elementSides(2,iFace))
-         bID  = ABS(boundaryIDs(iFace))
+      i     = threadIdx % x - 1
 
-               ii = iMap(i,j,iFace)
-               jj = jMap(i,j,iFace)
-               
-               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
-                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
-                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+      e1 = elementIDs(1,iFace)
+      e2 = elementIDs(2,iFace)
+      s1 = elementSides(1,iFace)
+      s2 = ABS(elementSides(2,iFace))
 
-               
-               IF( e2 > 0 )THEN
-               
-                  DO iEq = 1, nEq_dev-1
-                     jump(iEq)  = boundarySolution(ii,jj,iEq,s2,e2) - &
-                                  boundarySolution(i,j,iEq,s1,e1) !outState - inState
-                  ENDDO
+      IF( e2 > 0 )THEN
 
-                  
-                  T =   (boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
-                          (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
-                          
-                  ! Sound speed estimate for the external and internal states
-                  cOut = sqrt( R_dev*T* &
-                              ( (boundarySolution(ii,jj,nEq_dev,s2,e2)+boundarySolution_static(ii,jj,nEq_dev,s2,e2))/ P0_dev )**rC_dev   )
-                        
-                  T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
-                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )        
-                             
-                  cIn  = sqrt( R_dev*T* &
-                              ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
-                               
-                  ! External normal velocity component
-                  uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
-                           boundarySolution(ii,jj,2,s2,e2)*nHat(2,i,j,s1,e1)/norm + &
-                           boundarySolution(ii,jj,3,s2,e2)*nHat(3,i,j,s1,e1)/norm )/& 
-                         ( boundarySolution(ii,jj,4,s2,e2) + boundarySolution_static(ii,jj,4,s2,e2) )
-                           
-                  ! Internal normal velocity component
-                  uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
-                           boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
-                           boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
-                         ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) ) 
-                           
-                  ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
-                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+        ii = iMap(i,j,iFace)
+        jj = jMap(i,j,iFace)
 
-                  ! Advective flux
-                  DO iEq = 1, nEq_dev-1
-                        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
-                                 uOut*( boundarySolution(ii,jj,iEq,s2,e2) + boundarySolution_static(ii,jj,iEq,s2,e2) )
-                  ENDDO
-                  
-                  DO k = 1, 3
-                  ! Momentum flux due to pressure
-                  aS(k) = aS(k) + (boundarySolution(i,j,nEq_dev,s1,e1) + &
-                                   boundarySolution(ii,jj,nEq_dev,s2,e2))*nHat(k,i,j,s1,e1)/norm
-                  ENDDO    
-      
-                         
-                  DO iEq = 1, nEq_dev-1
-
-                     boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
-                     boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
-
-                     IF( iEq == 4 )THEN
-                        DO k = 1, 3
-                           ! Calculate the LDG flux for the stress tensor.
-                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
-                                                                    boundarySolution(ii,jj,iEq,s2,e2))*& 
-                                                                    nHat(k,i,j,s1,e1)
-                                                                                        
-                           stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
-                        ENDDO
-
-                     ELSE
-                        DO k = 1, 3
-                           ! Calculate the LDG flux for the stress tensor.
-                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
-                                                                  (boundarySolution(i,j,4,s1,e1)+&
-                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
-                                                                  boundarySolution(ii,jj,iEq,s2,e2)/&
-                                                                  (boundarySolution(ii,jj,4,s2,e2)+&
-                                                                   boundarySolution_static(ii,jj,4,s2,e2)) )*& 
-                                                                  nHat(k,i,j,s1,e1)
-                                                                                        
-                           stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
-
-                        ENDDO
-                     ENDIF
+        norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+                     nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+                     nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+        
+        ! Sound speed estimate for the external and internal states
+        cOut = sqrt( R_dev*(boundarySolution_static(ii,jj,5,s2,e2) + boundarySolution(ii,jj,5,s2,e2))/&
+                           (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2)) )
+                   
+        cIn = sqrt( R_dev*(boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
+                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1)) )        
                      
-                  ENDDO
-             
-               ENDIF 
+        ! External normal velocity component
+        uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
+                 boundarySolution(ii,jj,2,s2,e2)*nHat(2,i,j,s1,e1)/norm + &
+                 boundarySolution(ii,jj,3,s2,e2)*nHat(3,i,j,s1,e1)/norm )/& 
+               ( boundarySolution(ii,jj,4,s2,e2) + boundarySolution_static(ii,jj,4,s2,e2) )
+                 
+        ! Internal normal velocity component
+        uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
+                 boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
+                 boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
+               ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) ) 
+
+        ! Lax-Friedrich's estimate of the magnitude of the flux jacobian matrix
+        fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+
+        ! Advective flux
+        DO iEq = 1, nEq_dev-1
+              aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
+                        uOut*( boundarySolution(ii,jj,iEq,s2,e2) + boundarySolution_static(ii,jj,iEq,s2,e2) )
+        ENDDO
+        
+        DO k = 1, 3
+          ! Momentum flux due to pressure
+          aS(k) = aS(k) + (boundarySolution(i,j,7,s1,e1) + boundarySolution(ii,jj,7,s2,e2))*nHat(k,i,j,s1,e1)/norm
+        ENDDO    
+
+        DO iEq = 1, nEq_dev-1
+
+           jump = boundarySolution(ii,jj,iEq,s2,e2)-boundarySolution(i,j,iEq,s1,e1)
+           boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump )*norm
+           boundaryFlux(ii,jj,iEq,s2,e2) = -boundaryFlux(i,j,iEq,s1,e1)
+
+           IF( iEq == 4 )THEN
+              DO k = 1, 3
+                 ! Calculate the LDG flux for the stress tensor.
+                 stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
+                                                          boundarySolution(ii,jj,iEq,s2,e2))*nHat(k,i,j,s1,e1)
+                                                                              
+                 stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
+              ENDDO
+
+           ELSE
+              DO k = 1, 3
+                 ! Calculate the LDG flux for the stress tensor.
+                 stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
+                                                        (boundarySolution(i,j,4,s1,e1)+&
+                                                         boundarySolution_static(i,j,4,s1,e1)) +&
+                                                        boundarySolution(ii,jj,iEq,s2,e2)/&
+                                                        (boundarySolution(ii,jj,4,s2,e2)+&
+                                                         boundarySolution_static(ii,jj,4,s2,e2)) )*nHat(k,i,j,s1,e1)
+                                                                              
+                 stressFlux(k,ii,jj,iEq,s2,e2) = -stressFlux(k,i,j,iEq,s1,e1)
+
+              ENDDO
+           ENDIF
+           
+        ENDDO
+                         
+      ENDIF 
 
 
  END SUBROUTINE InternalFace_StateFlux_CUDAKernel
@@ -4687,14 +5429,16 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                   T =   (boundarySolution_static(i,j,5,s1,e1) + externalState(ii,jj,5,bID))/&
                           (externalState(ii,jj,4,bID)+boundarySolution_static(i,j,4,s1,e1) )
                  ! Sound speed estimate for the external and internal states
-                  cOut = sqrt( R_dev*T* &
-                              ( (externalState(ii,jj,nEq_dev,bID)+boundarySolution_static(i,j,nEq_dev,s1,e1))/ P0_dev )**rC_dev   )
+                  cOut = sqrt( R_dev*T )
+                  !cOut = sqrt( R_dev*T* &
+                  !            ( (externalState(ii,jj,nEq_dev,bID)+boundarySolution_static(i,j,nEq_dev,s1,e1))/ P0_dev )**rC_dev   )
                   
                   T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
                           (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
                                    
-                  cIn  = sqrt( R_dev*T* &
-                              ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
+                  cIn = sqrt( R_dev*T )
+                  !cIn  = sqrt( R_dev*T* &
+                  !            ( (boundarySolution(i,j,nEq_dev,s1,e1)+boundarySolution_static(i,j,nEq_dev,s1,e1))/P0_dev )**rC_dev  )
                                
                   ! External normal velocity component
                   uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
@@ -5050,19 +5794,15 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
     REAL(prec), DEVICE, INTENT(in)    :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
      ! Local
     INTEGER :: i, j, k, iEl
-    REAL(prec) :: rhoT
     
     iEl = blockIdx % x
     i   = threadIdx % x - 1
     j   = threadIdx % y - 1
     k   = threadIdx % z - 1
     
-     ! Pressure = rho*e*R/Cv (Ideal Gas Law, P = rho*R*T, thermo ~> T = theta*(P/P0)^r)
-     ! THEN P = P0*(rho*theta*R/P0)^(Cp/Cv)
-     ! And P' = P - P_static
-    rhoT = static(i,j,k,5,iEl) + solution(i,j,k,5,iEl)
-    solution(i,j,k,nEq_dev,iEl) = P0_dev*( rhoT*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
-  
+     ! Pressure = rho*R*T
+     solution(i,j,k,nEq_dev,iEl) = solution(i,j,k,5,iEl)*R_dev
+
   END SUBROUTINE EquationOfState_CUDAKernel
 !
   ATTRIBUTES(Global) SUBROUTINE State_Mapped_DG_Divergence_3D_CUDAKernel( f, fnAtBoundaries, divF, boundaryMatrix, dgDerivativeMatrixTranspose, quadratureWeights, Jac )

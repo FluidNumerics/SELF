@@ -21,6 +21,11 @@ USE CommonRoutines
 #ifdef HAVE_OPENMP
 USE OMP_LIB
 #endif
+
+#ifdef HAVE_CUDA
+  USE cudafor
+#endif
+
  IMPLICIT NONE
 
     INTEGER, PARAMETER :: timerNameLength = 30
@@ -632,6 +637,12 @@ USE OMP_LIB
 
    IMPLICIT NONE
    CLASS( RoutineTimer ), INTENT(inout) :: theTimer
+#ifdef HAVE_CUDA
+   INTEGER :: iStat
+
+      iStat = cudaDeviceSynchronize( )
+
+#endif
    
 #ifdef HAVE_OPENMP
       theTimer % stopTime = OMP_GET_WTIME( )

@@ -279,17 +279,25 @@ CONTAINS
     IMPLICIT NONE
     CLASS( Surfaces ), INTENT(inout) :: mySurfaces
 
+
+      mySurfaces % dxds = CalculateGradient_2D_Lagrange( mySurfaces % interp, &
+                                                         mySurfaces % x, &
+                                                         3, mySurfaces % nSurfaces )
 #ifdef HAVE_CUDA
-
-    CALL mySurfaces % interp % CalculateGradient_2D( mySurfaces % x_dev, mySurfaces % dxds_dev, &
-      nDim_dev, mySurfaces % nSurfaces_dev )
-
-#else
-
-    CALL mySurfaces % interp % CalculateGradient_2D( mySurfaces % x, mySurfaces % dxds, &
-      3, mySurfaces % nSurfaces )
-
+      mySurfaces % dxds_dev = mySurfaces % dxds
 #endif
+
+!#ifdef HAVE_CUDA
+!
+!    CALL mySurfaces % interp % CalculateGradient_2D( mySurfaces % x_dev, mySurfaces % dxds_dev, &
+!      nDim_dev, mySurfaces % nSurfaces_dev )
+!
+!#else
+!
+!    CALL mySurfaces % interp % CalculateGradient_2D( mySurfaces % x, mySurfaces % dxds, &
+!      3, mySurfaces % nSurfaces )
+!
+!#endif
 
   END SUBROUTINE CalculateSlope_Surfaces
 
