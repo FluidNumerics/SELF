@@ -965,6 +965,7 @@ CONTAINS
                                                    myDGSEM % mesh % faces, &
                                                    myDGSEM % extComm )
     !$OMP END MASTER
+    !$OMP BARRIER
 #endif
 
 #ifdef TIMING
@@ -1038,6 +1039,7 @@ CONTAINS
                                                             myDGSEM % mesh % faces, &
                                                             myDGSEM % extComm )
     !$OMP END MASTER
+    !$OMP BARRIER
 #endif
 
 #ifdef TIMING
@@ -1197,6 +1199,7 @@ CONTAINS
                                                      myDGSEM % mesh % faces, &
                                                      myDGSEM % extComm )
       !$OMP END MASTER
+      !$OMP BARRIER
 #endif
 
 #ifdef TIMING
@@ -1246,6 +1249,7 @@ CONTAINS
                                                               myDGSEM % extComm )
       ENDIF
       !$OMP END MASTER
+      !$OMP BARRIER
 #endif
 
 #ifdef TIMING
@@ -1299,6 +1303,7 @@ CONTAINS
                                                       myDGSEM % mesh % faces, &
                                                       myDGSEM % extComm )
       !$OMP END MASTER
+      !$OMP BARRIER
 #endif
 
 #ifdef TIMING
@@ -1379,6 +1384,7 @@ CONTAINS
                                                                myDGSEM % mesh % faces, &
                                                                myDGSEM % extComm )
       !$OMP END MASTER
+      !$OMP BARRIER
 #endif
 
 #ifdef TIMING
