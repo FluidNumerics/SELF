@@ -358,6 +358,12 @@ CONTAINS
               s0 = myDGSEM % fluidEquations % staticTracer % evaluate( x )
 
               Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
+#ifndef POTENTIAL_TEMPERATURE
+              ! In the in-situ temperature formulation, the potential temperature is calculated from the
+              ! equations file, and we convert to the in-situ temperature here
+              ! Since (rho*T)' = 0 in this setting, the pressure anomaly is also zero.
+              T  = T*( (myDGSEM % static % solution(i,j,k,7,iEl))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
+#endif
 
               myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
               myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
@@ -368,6 +374,7 @@ CONTAINS
 
             ELSE
 
+              ! In this case, it is assumed that the temperature passed in is consistent with the CPP flag for the selection of the temperature variable
               u   = myDGSEM % fluidEquations % u % evaluate( x ) 
               v   = myDGSEM % fluidEquations % v % evaluate( x ) 
               w   = myDGSEM % fluidEquations % w % evaluate( x ) 
@@ -394,7 +401,9 @@ CONTAINS
       ENDDO
     ENDDO
 
+    PRINT*, 'setting prescribed state'
     CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
+    PRINT*, 'done setting prescribed state'
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
@@ -448,6 +457,12 @@ CONTAINS
                s = myDGSEM % fluidEquations % tracer % evaluate( x )
       
                Tbar = myDGSEM % static % boundarySolution(i,j,5,s1,e1)/myDGSEM % static % boundarySolution(i,j,4,s1,e1)
+#ifndef POTENTIAL_TEMPERATURE
+              ! In the in-situ temperature formulation, the potential temperature is calculated from the
+              ! equations file, and we convert to the in-situ temperature here
+              ! Since (rho*T)' = 0 in this setting, the pressure anomaly is also zero.
+              T  = T*( (myDGSEM % static % boundarySolution(i,j,7,s1,e1))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
+#endif
       
                myDGSEM % state % prescribedState(i,j,4,bID) = -myDGSEM % static % boundarySolution(i,j,4,s1,e1)*T/(Tbar + T)
                myDGSEM % state % prescribedState(i,j,1,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*u
@@ -3058,7 +3073,7 @@ CONTAINS
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     INTEGER    :: i, j, k, iEl,iEq
-    REAL(prec) :: z, H, P0, Cp, T, T0, dTdz, P, rC, g, R
+    REAL(prec) :: z, H, P0, Cp, T, T0, dTdz, P, rC, g, R, hCapRatio, fs
 #ifdef HAVE_CUDA
     INTEGER :: istat
 #endif
@@ -3066,13 +3081,15 @@ CONTAINS
     R    = myDGSEM % params % R
     Cp   = (R + myDGSEM % params % Cv)
     rC   = R/Cp
+    hcapratio = myDGSEM % params % Cv/Cp
     g    = myDGSEM % params % g
-    H    = myDGSEM % params % zScale
     T0   = myDGSEM % params % T0
-    P0   = myDGSEM % params % P0
-    dTdz = myDGSEM % params % dTdz
 
     ! /////////////////////  Build the Static/Background State ///////////////////////// !
+    !
+    ! The static state is constructed using the assumptions of an isentropic, neutrally
+    ! stable (constant potential temperature) atmosphere.
+    ! 
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO iEq = 1, myDGSEM % state % nEquations
@@ -3094,27 +3111,23 @@ CONTAINS
 
             z = myDGSEM % mesh % elements % x(i,j,k,3,iEl)
 
-            ! The static profile is determined from hydrostatic balance, the equation of state,
-            ! and a prescribed temperature profile.
 
-            T = T0 + dTdz*z ! Potential temperature
-            IF( AlmostEqual( dTdz, 0.0_prec ) )THEN
-              P = P0*exp( -g*z/(R*T0) )
-            ELSE
-              P = P0*( 1.0_prec - g*rC/R*log( (T/T0)**(1.0_prec/dTdz) ) )**(Cp/R)
-              P = P0*( (T0 + dTdz*z)/T0 )**( -g/(dTdz*R) )
-            ENDIF
+            fs = (1.0_prec - (1.0_prec - hCapRatio)*g*z/( R*T0 ) )**( 1.0_prec/(1.0_prec - hCapRatio) ) 
+              
             ! Density
-            myDGSEM % static % solution(i,j,k,4,iEl) = ( P/(R*T) )
-
-            ! Temperature (weighted with density)
-            myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T
+            myDGSEM % static % solution(i,j,k,4,iEl) = myDGSEM % params % rho0*( fs )**hCapRatio
 
 #ifdef POTENTIAL_TEMPERATURE
-            myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
-                                                                myDGSEM % static % solution(i,j,k,nEquations,iEl)
+
+            myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T0
+            myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( myDGSEM % static % solution(i,j,k,5,iEl)*&
+                                                                                        myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
+
 #else
+
+            myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T0*( fs )**( R/Cp )
             myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % static % solution(i,j,k,5,iEl)*myDGSEM % params % R
+
 #endif
 
           ENDDO
