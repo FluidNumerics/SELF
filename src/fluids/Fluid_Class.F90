@@ -495,9 +495,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    PRINT*, 'setting prescribed state'
     CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
-    PRINT*, 'done setting prescribed state'
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
