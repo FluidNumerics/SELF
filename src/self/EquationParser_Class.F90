@@ -18,11 +18,11 @@ USE ConstantsDictionary
 IMPLICIT NONE
 
   INTEGER, PARAMETER :: Error_Message_Length = 256
-  INTEGER, PARAMETER :: Max_Equation_Length  = 512 
+  INTEGER, PARAMETER :: Max_Equation_Length  = 1024 
   INTEGER, PARAMETER :: Max_Function_Length  = 5
   INTEGER, PARAMETER :: Max_Variable_Length  = 12 
   INTEGER, PARAMETER :: Token_Length         = 48
-  INTEGER, PARAMETER :: Stack_Length         = 64
+  INTEGER, PARAMETER :: Stack_Length         = 128
 
   ! Token types 
   INTEGER, PARAMETER, PRIVATE :: None_Token               = 0
@@ -43,7 +43,7 @@ IMPLICIT NONE
   CHARACTER(1), DIMENSION(7), PRIVATE  :: separators = (/ "+", "-", "*", "/", "(", ")", "^" /) 
   CHARACTER(1), DIMENSION(5), PRIVATE  :: operators  = (/ "+", "-", "*", "/", "^" /) 
   CHARACTER(1), DIMENSION(10), PRIVATE :: numbers    = (/ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" /) 
-  TYPE(String), DIMENSION(12), PRIVATE :: functions 
+  TYPE(String), DIMENSION(13), PRIVATE :: functions 
   CHARACTER(1), DIMENSION(4), PRIVATE  :: variables  = (/ "x", "y", "z", "t" /)
 
   ! Private Types !
@@ -154,6 +154,7 @@ CONTAINS
       functions(10) % str = "acos"
       functions(11) % str = "asin"
       functions(12) % str = "atan"
+      functions(13) % str = "sech"
 
       parser % inFixFormula = " "
       parser % equation = equation
@@ -808,7 +809,7 @@ CONTAINS
     INTEGER :: i
 
       IsFunction = .FALSE.
-      DO i = 1, 12
+      DO i = 1, 13
 
         IF( eqChar == functions(i) % str(1:1) )THEN
           IsFunction = .TRUE.
@@ -853,6 +854,10 @@ CONTAINS
 
         F_of_X = tanh( x )
 
+      ELSEIF( TRIM( func ) == "sech" .OR. TRIM( func ) == "SECH" )THEN
+
+        F_of_X = 2.0_prec/( exp(x) + exp(-x) )
+
       ELSEIF( TRIM( func ) == "sqrt" .OR. TRIM( func ) == "SQRT" )THEN
 
         F_of_X = sqrt( x )
@@ -884,6 +889,10 @@ CONTAINS
       ELSEIF( TRIM( func ) == "atan" .OR. TRIM( func ) == "ATAN" )THEN
 
         F_of_X = atan( x )
+
+      ELSE
+ 
+        F_of_X = 0.0_prec
 
       ENDIF
 

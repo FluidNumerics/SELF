@@ -33,6 +33,7 @@ CONTAINS
    ! Local
    INTEGER :: fUnit, ioErr
    CHARACTER(200) :: functionLine
+   LOGICAL :: initialRead, bracketOpen
 
 
      fluidEqs % calculate_density_from_T = .TRUE.    
@@ -49,45 +50,69 @@ CONTAINS
 
        READ( fUnit, '(A200)', ioStat=ioErr ) functionLine
 
-       IF( functionLine(1:1) == 'u' )THEN
+       IF( functionLine(1:8) == 'initial' )THEN
 
-         fluidEqs % u = EquationParser( functionLine )
+         initialRead = .TRUE.
+         CYCLE
 
-       ELSEIF( functionLine(1:1) == 'b' )THEN
+       ENDIF
 
-         fluidEqs % w = EquationParser( functionLine )
+       IF( functionLine(1:8) == '{' )THEN
 
-       ELSEIF( functionLine(1:1) == 'w' )THEN
+         bracketOpen = .TRUE.
+         CYCLE
 
-         fluidEqs % w = EquationParser( functionLine )
+       ELSEIF( functionLine(1:1) == '}' )THEN
+         
+         bracketOpen = .FALSE.
+         IF( initialRead )THEN 
+           initialRead=.FALSE.
+         ENDIF
+         CYCLE
 
-       ELSEIF( functionLine(1:1) == 'r' )THEN
-
-         fluidEqs % w = EquationParser( functionLine )
-         fluidEqs % calculate_density_from_t = .FALSE.
-
-       ELSEIF( functionLine(1:1) == 't' )THEN
-
-         fluidEqs % t = EquationParser( functionLine )
-
-       ELSEIF( functionLine(1:1) == 'h' )THEN
-
-         fluidEqs % topography = EquationParser( functionLine )
-         fluidEqs % topography_equation_provided = .TRUE.
-
-       ELSEIF( functionLine(1:1) == 'c' )THEN
-
-         fluidEqs % drag = EquationParser( functionLine )
-
-       ELSEIF( functionLine(1:1) == 's' )THEN
-
-         fluidEqs % tracer = EquationParser( functionLine )
-
-       ELSEIF( functionLine(1:1) == 'S' )THEN
-
-         fluidEqs % staticTracer = EquationParser( functionLine )
-
-       ENDIF      
+       ENDIF
+       
+       IF( initialRead .AND. bracketOpen )THEN
+         IF( functionLine(1:1) == 'u' )THEN
+  
+           fluidEqs % u = EquationParser( functionLine )
+  
+         ELSEIF( functionLine(1:1) == 'v' )THEN
+  
+           fluidEqs % v = EquationParser( functionLine )
+  
+         ELSEIF( functionLine(1:1) == 'w' )THEN
+  
+           fluidEqs % w = EquationParser( functionLine )
+  
+         ELSEIF( functionLine(1:1) == 'r' )THEN
+  
+           fluidEqs % rho = EquationParser( functionLine )
+           fluidEqs % calculate_density_from_t = .FALSE.
+  
+         ELSEIF( functionLine(1:1) == 't' )THEN
+  
+           fluidEqs % t = EquationParser( functionLine )
+  
+         ELSEIF( functionLine(1:1) == 'h' )THEN
+  
+           fluidEqs % topography = EquationParser( functionLine )
+           fluidEqs % topography_equation_provided = .TRUE.
+  
+         ELSEIF( functionLine(1:1) == 'c' )THEN
+  
+           fluidEqs % drag = EquationParser( functionLine )
+  
+         ELSEIF( functionLine(1:1) == 's' )THEN
+  
+           fluidEqs % tracer = EquationParser( functionLine )
+  
+         ELSEIF( functionLine(1:1) == 'S' )THEN
+  
+           fluidEqs % staticTracer = EquationParser( functionLine )
+  
+         ENDIF      
+       ENDIF
 
      ENDDO
 

@@ -3155,11 +3155,14 @@ CONTAINS
             ! Pressure = rho*R*T
             ! And P' = P - P_static
 #ifdef POTENTIAL_TEMPERATURE
-            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( rhoT*myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( (myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl))*&
+                                                                                       myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
                                                       myDGSEM % static % solution(i,j,k,nEquations,iEl)
 
 #else
-            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
+            !myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = (myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl))*myDGSEM % params % R - &
+                                                                 myDGSEM % static % solution(i,j,k,7,iEl)
 #endif
 
           ENDDO
@@ -3298,18 +3301,25 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 #endif
 
-    sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
-                                                myDGSEM % state % solution, &
-                                                myDGSEM % state % nEquations, &
+
+    IF( myDGSEM % params % nPlot == myDGSEM % params % polyDeg )THEN
+      sol = myDGSEM % state % solution
+      bsol = myDGSEM % static % solution
+      x    = myDGSEM % mesh % elements % x
+    ELSE
+      sol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, &
+                                                  myDGSEM % state % solution, &
+                                                  myDGSEM % state % nEquations, &
+                                                  myDGSEM % mesh % elements % nElements )
+
+      bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
+                                                   myDGSEM % static % nEquations, &
+                                                   myDGSEM % mesh % elements % nElements )
+
+      x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
+                                                3, &
                                                 myDGSEM % mesh % elements % nElements )
-
-    bsol = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % static % solution, &
-                                                 myDGSEM % static % nEquations, &
-                                                 myDGSEM % mesh % elements % nElements )
-
-    x = ApplyInterpolationMatrix_3D_Lagrange( myDGSEM % dgStorage % interp, myDGSEM % mesh % elements % x, &
-                                              3, &
-                                              myDGSEM % mesh % elements % nElements )
+    ENDIF
 
 
     OPEN( UNIT=NEWUNIT(fUnit), &
@@ -5989,10 +5999,12 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
     k   = threadIdx % z - 1
     
      ! Pressure = rho*R*T
+     
 #ifdef POTENTIAL_TEMPERATURE
      solution(i,j,k,nEq_dev,iEl) = P0_dev*( (static(i,j,k,5,iEl) + solution(i,j,k,5,iEl))*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
 #else
      solution(i,j,k,nEq_dev,iEl) = solution(i,j,k,5,iEl)*R_dev
+     !solution(i,j,k,nEq_dev,iEl) = (solution(i,j,k,5,iEl)+static(i,j,k,5,iEl))*R_dev - static(i,j,k,7,iEl)
 #endif
 
   END SUBROUTINE EquationOfState_CUDAKernel
