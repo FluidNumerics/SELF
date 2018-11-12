@@ -581,14 +581,22 @@ CONTAINS
 
   END SUBROUTINE ConstructFaces_HexMesh
 !
-  SUBROUTINE ConstructStructuredFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem )
+  SUBROUTINE ConstructStructuredFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem, boundaryconditionflags )
 
 ! Assumes structured mesh
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     INTEGER, INTENT(in) :: nXElem, nYElem, nZElem
+    INTEGER, INTENT(in), OPTIONAL :: boundaryconditionflags(1:6)
     ! LOCAL
     INTEGER ::  e1, e2, s1, s2, nFaces, i, j, k, l, IFace, ii, jj
+    INTEGER :: bcflags(1:6)
+
+    IF( PRESENT(boundaryconditionflags) )THEN
+      bcflags = boundaryconditionflags
+    ELSE
+      bcflags = NO_NORMAL_FLOW
+    ENDIF
 
     nFaces = (nZElem+1)*nXElem*nYElem + (nXElem+1)*nYElem*nZElem + (nYElem+1)*nXElem*nZElem
 
@@ -608,7 +616,7 @@ CONTAINS
           IF( j==1 )THEN
 
             IFace = IFace + 1
-            e2 = NO_NORMAL_FLOW ! Enforce boundary condition on south boundary of the domain
+            e2 = bcFlags(1) ! Enforce boundary condition on south boundary of the domain
             s2 = NORTH
             myHexMesh % faces % faceID(IFace) = IFace
             DO l = 1, 4
@@ -650,7 +658,7 @@ CONTAINS
           IF( i==1 )THEN
 
             IFace = IFace + 1
-            e2 = NO_NORMAL_FLOW ! Enforce boundary condition on west domain boundary
+            e2 = bcFlags(4) ! Enforce boundary condition on west domain boundary
             s2 = EAST
             myHexMesh % faces % faceID(IFace) = IFace
             DO l = 1, 4
@@ -691,7 +699,7 @@ CONTAINS
           IF( k==1 )THEN
 
             IFace = IFace + 1
-            e2 = NO_NORMAL_FLOW ! Enforce boundary condition on bottom domain boundary
+            e2 = bcFlags(5) ! Enforce boundary condition on bottom domain boundary
             s2 = TOP
             myHexMesh % faces % faceID(IFace) = IFace
             DO l = 1, 4
@@ -733,7 +741,7 @@ CONTAINS
         e1 = nXElem + nXElem*( j-1 + (nYElem)*(k-1) )
         s1 = EAST
         IFace = IFace + 1
-        e2 = NO_NORMAL_FLOW ! Enforce boundary condition on east domain boundary
+        e2 = bcFlags(2) ! Enforce boundary condition on east domain boundary
         s2 = WEST
         myHexMesh % faces % faceID(IFace) = IFace
         DO l = 1, 4
@@ -756,7 +764,7 @@ CONTAINS
         IFace = IFace + 1
         e1 = i + nXElem*( nYElem-1 + (nYElem)*(k-1) )
         s1 = NORTH
-        e2 = NO_NORMAL_FLOW ! Enforce boundary condition on domain north boundary
+        e2 = bcFlags(3) ! Enforce boundary condition on domain north boundary
         s2 = SOUTH
         myHexMesh % faces % faceID(IFace) = IFace
         DO l = 1, 4
@@ -781,7 +789,7 @@ CONTAINS
 
         e1 = i + nXElem*( j-1 + (nYElem)*(nZElem-1) ) ! Primary element ID
         IFace = IFace + 1
-        e2 = NO_NORMAL_FLOW ! Enforce boundary condition on domain top
+        e2 = bcFlags(6) ! Enforce boundary condition on domain top
         s1 = TOP
         s2 = s1
         myHexMesh % faces % faceID(IFace) = IFace
@@ -849,14 +857,23 @@ CONTAINS
 
   END SUBROUTINE ConstructStructuredFaces_HexMesh
 !  
-  SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem )
+  SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem, boundaryconditionflags )
 
 ! Assumes structured mesh
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     INTEGER, INTENT(in) :: nXElem, nYElem, nZElem
+    INTEGER, INTENT(in), OPTIONAL :: boundaryconditionflags(1:6)
     ! LOCAL
     INTEGER ::  e1, e2, s1, s2, nFaces, i, j, k, l, IFace, ii, jj
+    INTEGER :: bcflags(1:6)
+
+    IF( PRESENT(boundaryconditionflags) )THEN
+      bcflags = boundaryconditionflags
+    ELSE
+      bcflags = NO_NORMAL_FLOW
+      bcflags(6) = PRESCRIBED
+    ENDIF
 
     nFaces = (nZElem+1)*nXElem*nYElem + (nXElem+1)*nYElem*nZElem + (nYElem+1)*nXElem*nZElem
 
@@ -959,7 +976,7 @@ CONTAINS
           IF( k==1 )THEN
 
             IFace = IFace + 1
-            e2 = NO_NORMAL_FLOW
+            e2 = bcFlags(5)
             s2 = TOP
             myHexMesh % faces % faceID(IFace) = IFace
             DO l = 1, 4
@@ -1049,7 +1066,7 @@ CONTAINS
 
         e1 = i + nXElem*( j-1 + (nYElem)*(nZElem-1) ) ! Primary element ID
         IFace = IFace + 1
-        e2 = PRESCRIBED
+        e2 = bcFlags(6)
         s1 = TOP
         s2 = s1
         myHexMesh % faces % faceID(IFace) = IFace
@@ -1318,7 +1335,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE ScaleTheMesh_HexMesh
-!
+
 !> \addtogroup HexMesh_Class
 !! @{
 ! ================================================================================================ !
@@ -1541,9 +1558,9 @@ CONTAINS
     CALL myHexMesh % elements % GenerateMetrics( interp )
 
     IF( DoublyPeriodic )THEN
-      CALL myHexMesh % ConstructDoublyPeriodicFaces( nXElem, nYElem, nZElem )
+      CALL myHexMesh % ConstructDoublyPeriodicFaces( nXElem, nYElem, nZElem, geomparser % boundaryconditionflags )
     ELSE
-      CALL myHexMesh % ConstructStructuredFaces( nXElem, nYElem, nZElem )
+      CALL myHexMesh % ConstructStructuredFaces( nXElem, nYElem, nZElem, geomparser % boundaryconditionflags )
     ENDIF
 
 

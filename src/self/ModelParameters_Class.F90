@@ -361,7 +361,7 @@ CONTAINS
       params % T0 = T0
       params % dTdz = dTdz
       params % rho0 = rho0
-      params % P0   = P0
+      params % P0   = rho0*R*T0
       params % v0   = v0
 
       readSuccess = .TRUE.
