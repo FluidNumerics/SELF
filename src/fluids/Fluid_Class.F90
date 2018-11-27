@@ -654,7 +654,7 @@ CONTAINS
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     INTEGER, INTENT(in)         :: nT
     ! LOCAL
-    REAL(dp)                  :: t0
+    REAL(prec)                  :: t0
 #ifdef HAVE_CUDA
     REAL(prec)           :: t, dt
     REAL(prec), DEVICE   :: t_dev
@@ -2596,7 +2596,7 @@ CONTAINS
             DO j = 0, myDGSEM % params % polyDeg
               DO i = 0, myDGSEM % params % polyDeg
 
-                myDGSEM % state % source(i,j,k,5,iEl) = -( myDGSEM % static % solution(i,j,k,nEq,iEl) + myDGSEM % state % solution(i,j,k,nEq_dev,iEl) )*&
+                myDGSEM % state % source(i,j,k,5,iEl) = -( myDGSEM % static % solution(i,j,k,nEquations,iEl) + myDGSEM % state % solution(i,j,k,nEquations,iEl) )*&
                                                          ( myDGSEM % state % solutionGradient(1,i,j,k,1,iEl) + &
                                                            myDGSEM % state % solutionGradient(2,i,j,k,2,iEl) + &
                                                            myDGSEM % state % solutionGradient(3,i,j,k,3,iEl) )/myDGSEM % params % Cv
