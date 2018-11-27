@@ -790,17 +790,19 @@ CONTAINS
    CHARACTER(4) :: dayStamp
    CHARACTER(2) :: hourStamp, minuteStamp, secondStamp
    CHARACTER(3) :: milliSecondStamp
+   REAL(dp)     :: time_dp
 
 
+      time_dp = REAL( time, dp )
       ! Units in "seconds"
       IF( units(1:1) == 's' ) THEN 
    
          ! Obtain the day
-         day    = INT( time/86400.0_prec )
-         hour   = INT( (time-86400.0_prec*day)/3600.0_prec )
-         minute = INT( (time-3600.0_prec*hour-86400.0_prec*day)/60.0_prec )
-         second = INT( (time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day) )
-         milliSecond = INT( ((time-60.0_prec*minute-3600.0_prec*hour-86400.0_prec*day)-REAL(second,prec))*1000.0_prec )
+         day    = INT( time_dp/86400.0_dp )
+         hour   = INT( (time_dp-86400.0_dp*day)/3600.0_dp )
+         minute = INT( (time_dp-3600.0_dp*hour-86400.0_dp*day)/60.0_dp )
+         second = INT( (time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day) )
+         milliSecond = INT( ((time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day)-REAL(second,dp))*1000.0_dp )
 
          WRITE( dayStamp,'(I4.4)' ) day 
          WRITE( hourStamp,'(I2.2)' ) hour

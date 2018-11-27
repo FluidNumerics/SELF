@@ -654,10 +654,10 @@ CONTAINS
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     INTEGER, INTENT(in)         :: nT
     ! LOCAL
-    REAL(prec)                  :: t0
+    REAL(dp)                  :: t0
 #ifdef HAVE_CUDA
-    REAL(prec)         :: t, dt
-    REAL(prec), DEVICE :: t_dev
+    REAL(prec)           :: t, dt
+    REAL(prec), DEVICE   :: t_dev
     REAL(prec), DEVICE :: G3D(0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
                              0:myDGSEM % params % polyDeg,&
@@ -731,12 +731,11 @@ CONTAINS
 
       dt = t0+myDGSEM % params % outputFrequency - myDGSEM % simulationTime
       G3D  = 0.0_prec
-      dt_dev = dt
 
       DO m = 1,3
 
 
-        t = myDGSEM % simulationTime + rk3_b(m)*dt
+        t = myDGSEM % simulationTime  + rk3_b(m)*dt
 
 #ifdef TIMING
     CALL myDGSEM % timers % StartTimer( 2 )
@@ -1554,7 +1553,7 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-    !CALL myDGSEM % MappedTimeDerivative( )
+      CALL myDGSEM % MappedTimeDerivative( )
 
 #ifdef TIMING
       !$OMP MASTER
@@ -2284,7 +2283,7 @@ CONTAINS
 #ifdef POTENTIAL_TEMPERATURE
             cOut = sqrt( myDGSEM % params % R *T* &
               ( (myDGSEM % state % externalState(ii,jj,nEquations,bID)+&
-              myDGSEM % static % externalState(ii,jj,nEquations,bID)/&
+              myDGSEM % static % externalState(ii,jj,nEquations,bID))/&
               myDGSEM % params % P0 )**myDGSEM % params % rC   )
 #else
             cOut = sqrt( myDGSEM % params % R*T )
@@ -2413,6 +2412,7 @@ CONTAINS
                                                                myDGSEM % mesh % elements % J_dev ) 
 
     CALL CalculateSourceTerms_CUDAKernel<<<grid,tBlock>>>( myDGSEM % state % solution_dev, &
+                                                           myDGSEM % state % solutionGradient_dev, &
                                                            myDGSEM % static % solution_dev, &
                                                            myDGSEM % static % source_dev, &
                                                            myDGSEM % state % source_dev, &
@@ -2586,6 +2586,25 @@ CONTAINS
               ENDDO
             ENDDO
           ENDDO
+
+#ifndef POTENTIAL_TEMPERATURE
+        ! When the in-situ temperature formulation is used, we must add in the adiabatic heating term
+        ! due to fluid convergences. This term is -( P_{total}/C_v )*div( u )
+        ELSEIF( iEq == 5 )THEN
+
+          DO k = 0, myDGSEM % params % polyDeg
+            DO j = 0, myDGSEM % params % polyDeg
+              DO i = 0, myDGSEM % params % polyDeg
+
+                myDGSEM % state % source(i,j,k,5,iEl) = -( myDGSEM % static % solution(i,j,k,nEq,iEl) + myDGSEM % state % solution(i,j,k,nEq_dev,iEl) )*&
+                                                         ( myDGSEM % state % solutionGradient(1,i,j,k,1,iEl) + &
+                                                           myDGSEM % state % solutionGradient(2,i,j,k,2,iEl) + &
+                                                           myDGSEM % state % solutionGradient(3,i,j,k,3,iEl) )/myDGSEM % params % Cv
+
+              ENDDO
+            ENDDO
+          ENDDO
+#endif
    
         ENDIF
 
@@ -3227,7 +3246,7 @@ CONTAINS
 
             myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T0
             myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( myDGSEM % static % solution(i,j,k,5,iEl)*&
-                                                                                        myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
+                                                                                        myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio
 
 #else
 
@@ -5757,10 +5776,11 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
   
   END SUBROUTINE CalculateFlux_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, static, staticSource, source, drag )
+  ATTRIBUTES(Global) SUBROUTINE CalculateSourceTerms_CUDAKernel( solution, solutionGradient, static, staticSource, source, drag )
   
     IMPLICIT NONE
     REAL(prec), DEVICE, INTENT(in)    :: solution(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
+    REAL(prec), DEVICE, INTENT(in)    :: solutionGradient(1:3,0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)    :: static(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)    :: drag(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)    :: staticSource(0:polyDeg_dev,0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:nEl_dev)
@@ -5801,6 +5821,19 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                             solution(i,j,k,2,iEl)*fRotX_dev +&
                             solution(i,j,k,1,iEl)*fRotY_dev -&
                             solution(i,j,k,4,iEl)*g_dev
+
+#ifndef POTENTIAL_TEMPERATURE
+    ! When the in-situ temperature formulation is used, we must add in the adiabatic heating term
+    ! due to fluid convergences. This term is -( P_{total}/C_v )*div( u )
+    ELSEIF( iEq == 5 )THEN 
+
+      source(i,j,k,5,iEl) = -( static(i,j,k,nEq_dev,iEl) + solution(i,j,k,nEq_dev,iEl) )*&
+                             ( solutionGradient(1,i,j,k,1,iEl) + &
+                               solutionGradient(2,i,j,k,2,iEl) + &
+                               solutionGradient(3,i,j,k,3,iEl) )/Cv_dev
+
+#endif
+    
 
     ENDIF
   
