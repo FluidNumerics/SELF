@@ -44,7 +44,6 @@ CONTAINS
        IF( functionLine(1:8) == 'boundary' )THEN
 
          boundaryRead = .TRUE.
-         PRINT*, 'Going to read boundaries'
          CYCLE
 
        ENDIF
@@ -52,7 +51,6 @@ CONTAINS
        IF( functionLine(1:8) == '{' )THEN
 
          bracketOpen = .TRUE.
-         PRINT*, 'Bracket Open'
          CYCLE
 
        ELSEIF( functionLine(1:1) == '}' )THEN
@@ -61,7 +59,6 @@ CONTAINS
          IF( boundaryRead )THEN 
            boundaryRead=.FALSE.
          ENDIF
-         PRINT*, 'Bracket Close'
          CYCLE
 
        ENDIF

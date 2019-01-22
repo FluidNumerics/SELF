@@ -33,13 +33,13 @@ MODULE Fluid_Class
 
   IMPLICIT NONE
 
-  TYPE ThreadHandler
-    INTEGER :: nThreads
-    INTEGER, ALLOCATABLE :: elem_low(:), elem_high(:)
-    INTEGER, ALLOCATABLE :: face_low(:), face_high(:)
-    INTEGER, ALLOCATABLE :: bid_low(:), bid_high(:)
+!  TYPE ThreadHandler
+!    INTEGER :: nThreads
+!    INTEGER, ALLOCATABLE :: elem_low(:), elem_high(:)
+!    INTEGER, ALLOCATABLE :: face_low(:), face_high(:)
+!    INTEGER, ALLOCATABLE :: bid_low(:), bid_high(:)
     
-  END TYPE ThreadHandler
+!  END TYPE ThreadHandler
 
   TYPE Fluid
 
@@ -59,7 +59,7 @@ MODULE Fluid_Class
     TYPE( NodalDGSolution_3D )   :: smoothState
     TYPE( NodalDGSolution_3D )   :: stressTensor
     TYPE( NodalDGSolution_3D )   :: sgsCoeffs
-    TYPE( ThreadHandler )        :: tHandle
+!    TYPE( ThreadHandler )        :: tHandle
 
 #ifdef HAVE_MPI
     TYPE( MPILayer )             :: mpiStateHandler
