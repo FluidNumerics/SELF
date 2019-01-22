@@ -1580,7 +1580,7 @@ CONTAINS
   SUBROUTINE PartitionStructuredElementsAndNodes( myMesh, params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(in)        :: myMesh
-    TYPE( ModelParameters ), INTENT(in) :: params
+    TYPE( ModelParameters ), INTENT(inout) :: params
     INTEGER, INTENT(in)                 :: nProc
     INTEGER, INTENT(out)                :: partitions(1:myMesh % elements % nElements)
     INTEGER, INTENT(out)                :: nElPerProc(0:nProc-1)
@@ -1590,17 +1590,17 @@ CONTAINS
     INTEGER, INTENT(out)                :: globalToLocalNode(1:myMesh % nodes % nNodes,0:nProc-1)
    
     ! Local
-!    INTEGER :: nxp, nyp, nzp
     INTEGER :: iPz, iPy, iPx
     INTEGER :: iZp, iYp, iXp
     INTEGER :: iZ, iY, iX
-    INTEGER :: iNode, nID
-    INTEGER :: iEl, procID
-    INTEGER :: nxp(1:params % nProcX)
-    INTEGER :: nyp(1:params % nProcY)
-    INTEGER :: nzp(1:params % nProcZ)
+    INTEGER :: i, iNode, nID
+    INTEGER :: iEl, elementID, procID, p1, p2, e2, iter
+    INTEGER :: neighbor_partitions(1:6)
+    INTEGER :: cost, upper_check, lower_check, graph_iter_max
+    REAL(prec) :: u, c
     
 
+      graph_iter_max = myMesh % elements % nElements*10
       partitions        = 0
       nElPerProc        = 0
       globalToLocal     = 0
@@ -1610,74 +1610,106 @@ CONTAINS
 
       IF( nProc > 1 )THEN
 
-                  
-         nxp = params % nXelem/params % nProcX
-         IF( SUM(nxp) < params % nXElem )THEN
+         IF( params % nProcX == 0 )THEN
+         ! Do the graph partitioning
+         ! Greedy K-Way
+         !   -> Graph Edges exist between elements that share a face
+         !   -> Graph weights are all one
+         !
+         ! Cost function to minimize is the sum of the graph edges that cross a
+         ! partitions
+         ! Additional constraint is to balance the number of elements per
+         ! partition
+         !   Load Balance constraint is
+         !    " the number of vertices in each set Vi is bounded by
+         !      |V|/(ck)<=|Vi|<=c|V|/k, for c >= 1.0 "
+         !                              
+         !   Here, c = 1.5, |V| is the number of graph vertices ( mesh elements ),
+         !   and k is the number of graph partitions ( mpi ranks )
+        
+         c = 1.5_prec
+         lower_check = myMesh % elements % nElements/( c*nProc )
+         upper_check = c*myMesh % elements % nElements/nProc
 
-           DO iPx = 1, params % nProcX
-             nxp(iPx) = nxp(iPx) + 1
-             IF( SUM(nxp) == params % nXElem )THEN
-               EXIT
-             ENDIF
-           ENDDO
+         ! Set the initial partition
+         nElPerProc = myMesh % elements % nElements/nProc
 
-         ENDIF
+         DO procID = 1, nProc
+           DO elementID = 1, nElPerProc(1)
 
-         nyp = params % nYelem/params % nProcY
-         IF( SUM(nyp) < params % nYElem )THEN
-
-           DO iPy = 1, params % nProcY
-             nyp(iPy) = nyp(iPy) + 1
-             IF( SUM(nyp) == params % nYElem )THEN
-               EXIT
-             ENDIF
-           ENDDO
-
-         ENDIF
-
-         nzp = params % nZelem/params % nProcZ
-         IF( SUM(nzp) < params % nZElem )THEN
-
-           DO iPz = 1, params % nProcZ
-             nzp(iPz) = nzp(iPz) + 1
-             IF( SUM(nzp) == params % nZElem )THEN
-               EXIT
-             ENDIF
-           ENDDO
-
-         ENDIF
-
-         iZ = 0
-         DO iPz = 1, params % nProcZ
-           DO iZp = 1, nzp(iPz)
-
-             iZ = iZ+1
-             iY = 0
-
-             DO iPy = 1, params % nProcY
-               DO iYp = 1, nyp(iPy)
-
-                 iY = iY+1
-                 iX = 0
-
-                 DO iPx = 1, params % nProcX
-                   DO iXp = 1, nxp(iPx)
-
-                     iX = iX +1               
-                        
-                     iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
-                     IF( iEl <= myMesh % elements % nElements )THEN
-                       partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
-                     ENDIF
-
-                   ENDDO
-                 ENDDO
-
-               ENDDO
-             ENDDO
+             iEl = elementID + (procID-1)*(nElPerProc(1))
+             partitions(iEl) = procID
 
            ENDDO
          ENDDO
+         ! "Pave" in the rest of the elements with the last process
+         iEl = nElPerProc(1)*nProc
+         partitions(iEl:myMesh % elements % nElements) = nProc
+
+         ! Calculate number of nodes in each partition
+         nElPerProc = 0
+         DO iEl = 1, myMesh % elements % nElements
+           procID = partitions(iEl)
+           nElPerProc(procID) = nElPerProc(procID) + 1
+         ENDDO
+
+         DO iter = 1, graph_iter_max
+
+           ! Pick a vertex at random
+           CALL RANDOM_NUMBER( u )
+           elementID = 1 + FLOOR((myMesh % elements % nElements)*u)
+
+           ! Determine which neighbors are in another partition
+           cost = 0
+           neighbor_partitions(1:6) = 0
+           DO i = 1, 6
+             e2 = myMesh % elements % neighbors(i,elementID)
+             IF( partitions(elementID) /= partitions(e2) )THEN
+               cost = cost+1
+               neighbor_partitions(i) = partitions(e2)
+             ENDIF
+           ENDDO
+
+           ! If any of the neighbors is in another partition
+           IF( cost > 0 )THEN
+
+           !   > Find the neighboring partition to move to such that the load
+           !   balance constraint is not violated.
+             p1 = partitions(elementID)
+             DO i = 1, 6
+               IF( neighbor_partitions(i) /= 0 )THEN
+
+                 e2 = myMesh % elements % neighbors(i,elementID)
+                 p2 = partitions(e2)
+                 
+                 ! If I subtract elementID from p1 and move it to p2,
+                 ! is my constraint violated ?
+                 IF( nElPerProc(p1)-1 > lower_check .AND. nElPerProc(p2)+1 < upper_check )THEN
+                   ! If not, move the element and exit
+                   partitions(elementID) = p2
+                   EXIT
+                 ENDIF
+
+               ENDIF
+             ENDDO
+
+ 
+           ENDIF
+           
+
+         ENDDO
+
+
+         ELSE             
+
+           ! The only other scenario that has occured is for nProcX=nXElem,
+           ! nProcY = nYElem, nProcZ = nZElem
+           DO iEl = 1, myMesh % elements % nElements
+             partitions(iEl) = iEl
+             nElPerProc(iEl) = 1
+           ENDDO
+
+         ENDIF
       
          DO iEl = 1, myMesh % elements % nElements
       
@@ -2743,92 +2775,15 @@ CONTAINS
 
       ELSE
 
-        IF( floorSQRT(params % nProc)**2 == params % nProc )THEN
-
-          params % nProcZ = 1
-          params % nProcY = floorSQRT(params % nProc)
-          params % nProcX = floorSQRT(params % nProc)
-
-        ELSEIF(  floorCURT( params % nProc )**3 ==  params % nProc )THEN
-
-          params % nProcZ = floorCURT( params % nProc )
-          params % nProcY = floorCURT( params % nProc )
-          params % nProcX = floorCURT( params % nProc )
-
-        ELSE
-
-          params % nProcZ = 1 
-          params % nProcY = 1 
-          params % nProcX = params % nProc 
-
-        ENDIF
-
-          
-
-        DO WHILE( params % nProcX > params % nXElem )
-
-          DO i = 2, params % nProcX
-            IF( MOD( params % nProcX, i ) == 0 )THEN
-              ! nProcX is divisible by i
-              j = i
-              EXIT
-            ENDIF
-          ENDDO
-
-          params % nProcX = params % nProcX/j
-
-        ENDDO
-
-        IF( params % nProcX*params % nProcY*params % nProcZ < params % nProc )THEN
-
-          params % nProcY = params % nProc/params % nProcX
-          IF( params % nProcY > 1 )THEN
-            DO WHILE( params % nProcY > params % nYElem )
-  
-              DO i = 2, params % nProcY
-                IF( MOD( params % nProcY, i ) == 0 )THEN
-                  ! nProcY is divisible by i
-                  j = i
-                  EXIT
-                ENDIF
-              ENDDO
-  
-              params % nProcY = params % nProcY/j
-  
-            ENDDO
-  
-          ENDIF
-
-        ENDIF
-
-        IF( params % nProcX*params % nProcY*params % nProcZ < params % nProc )THEN
-
-          params % nProcZ = params % nProc/(params % nProcX*params % nProcY)
-          IF( params % nProcZ > 1 )THEN
-            DO WHILE( params % nProcZ > params % nZElem )
-  
-              DO i = 2, params % nProcZ
-                IF( MOD( params % nProcZ, i ) == 0 )THEN
-                  ! nProcZ is divisible by i
-                  j = i
-                  EXIT
-                ENDIF
-              ENDDO
-  
-              params % nProcZ = params % nProcZ/j
-  
-            ENDDO
-  
-          ENDIF
-
-        ENDIF
+        ! Set the number of processes in each direction to  zero.
+        ! This triggers the graph partitioning algorithm in the Partition
+        ! routine
+        params % nProcX = 0      
+        params % nProcY = 0      
+        params % nProcZ = 0      
 
       ENDIF
 
-      PRINT*, ' nProcX :', params % nProcX
-      PRINT*, ' nProcY :', params % nProcY
-      PRINT*, ' nProcZ :', params % nProcZ
-      
 #endif
       CALL geomParser % Build( equationFile )
 
