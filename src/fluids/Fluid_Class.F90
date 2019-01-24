@@ -3588,8 +3588,6 @@ CONTAINS
                      variable, dimensions, error)
 #endif
 
-    CALL h5dclose_f(dataset_id, error)
-
 #endif
 
     CALL h5dclose_f( dataset_id, error)
