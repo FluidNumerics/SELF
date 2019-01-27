@@ -3750,9 +3750,9 @@ CONTAINS
     ! Clean up property list and dataspace handles
 #ifdef HAVE_MPI
     CALL h5pclose_f( plist_id, error )
+    CALL h5sclose_f( filespace, error )
 #endif
     CALL h5sclose_f( memspace, error )
-    CALL h5sclose_f( filespace, error )
 
     ! Close the file
     CALL h5fclose_f( file_id, error )
