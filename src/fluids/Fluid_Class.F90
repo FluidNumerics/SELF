@@ -680,12 +680,6 @@ CONTAINS
 
 #ifdef HAVE_CUDA
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % EquationOfState( )
-    CALL myDGSEM % GlobalTimeDerivative( t )
-    RETURN
-#endif
-
     tBlock = dim3( myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1, &
                    myDGSEM % params % polyDeg+1  )
@@ -766,13 +760,6 @@ CONTAINS
 
 #else
 
-#ifdef UNIT_TEST
-    !$OMP PARALLEL
-    CALL myDGSEM % EquationOfState( )
-    CALL myDGSEM % GlobalTimeDerivative( t )
-    !$OMP END PARALLEL
-    RETURN
-#endif
     ALLOCATE( G3D(0:myDGSEM % params % polyDeg,&
                   0:myDGSEM % params % polyDeg,&
                   0:myDGSEM % params % polyDeg,&
@@ -818,6 +805,7 @@ CONTAINS
     !$OMP END MASTER
 #endif
         CALL myDGSEM % GlobalTimeDerivative( t )
+       !$OMP BARRIER
 
         !$OMP DO
         DO iEl = 1, myDGSEM % mesh % elements % nElements
@@ -848,6 +836,7 @@ CONTAINS
       !$OMP END MASTER
 
     ENDDO
+    !$OMP BARRIER
 
     ! Determine IF we need to take another step with reduced time step to get the solution
     ! at exactly t0+outputFrequency
@@ -1014,10 +1003,6 @@ CONTAINS
 !  boundary conditions, Riemann Fluxes, and MPI DATA exchanges that need to
 !  occur.
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.00.h5')
-#endif
-
 #ifdef TIMING
     !$OMP MASTER
     CALL myDGSEM % timers % StartTimer( 3 )
@@ -1032,9 +1017,6 @@ CONTAINS
     !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.01.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1089,9 +1071,6 @@ CONTAINS
     !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.02.h5')
-#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1117,10 +1096,6 @@ CONTAINS
     !$OMP MASTER
     CALL myDGSEM % timers % StopTimer( 6 )
     !$OMP END MASTER
-#endif
-
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.03.h5')
 #endif
 
 #ifdef TIMING
@@ -1159,9 +1134,6 @@ CONTAINS
     !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.04.h5')
-#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1213,9 +1185,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.05.h5')
-#endif
 
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
@@ -1245,9 +1214,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % sgsCoeffs % Write_Pipeline_File( 'Pipeline.06.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1269,9 +1235,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % sgsCoeffs % Write_Pipeline_File( 'Pipeline.07.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1327,10 +1290,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.08.h5')
-#endif
-
 #ifdef TIMING
       !$OMP MASTER
       CALL myDGSEM % timers % StartTimer( 14 )
@@ -1376,9 +1335,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.09.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1429,9 +1385,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.10.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1455,9 +1408,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.11.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1502,9 +1452,6 @@ CONTAINS
       !$OMP END MASTER
 #endif      
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.12.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -1530,9 +1477,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % stressTensor % Write_Pipeline_File( 'Pipeline.13.h5')
-#endif
 
     ENDIF
 
@@ -1561,9 +1505,6 @@ CONTAINS
       !$OMP END MASTER
 #endif
 
-#ifdef UNIT_TEST
-    CALL myDGSEM % state % Write_Pipeline_File( 'Pipeline.14.h5')
-#endif
 ! ----------------------------------------------------------------------------- !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
 ! ----------------------------------------------------------------------------- !
@@ -3275,7 +3216,7 @@ CONTAINS
     CHARACTER(50) :: filename
     CHARACTER(13) :: timeStampString
     CHARACTER(4)  :: rankChar
- 
+
       timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
       WRITE(rankChar,'(I4.4)') myDGSEM % extComm % myRank
 
@@ -3758,6 +3699,7 @@ CONTAINS
     CALL h5fclose_f( file_id, error )
     ! Close access to HDF5
     CALL h5close_f( error )
+    PRINT(MsgFMT), 'Finished writing output file : '//TRIM(filename)
 
   END SUBROUTINE Write_to_HDF5
 
