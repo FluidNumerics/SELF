@@ -2722,6 +2722,7 @@ CONTAINS
  INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
  INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:), nLocMPI(:)
  REAL(prec), ALLOCATABLE      :: materials(:)
+ INTEGER :: procDim(1:3), meshDim(1:3), dimIndex(1:3), temp
  
 
       ! Read in the parameters
@@ -2743,57 +2744,61 @@ CONTAINS
 
       ELSE
 
-        IF( floorSQRT(params % nProc)**2 == params % nProc )THEN
 
-          params % nProcZ = 1
-          params % nProcY = floorSQRT(params % nProc)
-          params % nProcX = floorSQRT(params % nProc)
+        meshDim(1:3)  = (/ params % nXElem, params % nYElem, params % nZElem /) 
+        dimIndex(1:3) = (/ 1, 2, 3 /) 
 
-        ELSEIF(  floorCURT( params % nProc )**3 ==  params % nProc )THEN
+        ! Sort from largest mesh dimension to smallest with insertion sort
+        DO i = 2,  3
+          j = i
+          DO WHILE( j > 1 )
+            IF( meshDim(j-1) < meshDim(j) )THEN
 
-          params % nProcZ = floorCURT( params % nProc )
-          params % nProcY = floorCURT( params % nProc )
-          params % nProcX = floorCURT( params % nProc )
+              temp         = meshDim(j)
+              meshDim(j)   = meshDim(j-1)
+              meshDim(j-1) = temp 
 
-        ELSE
+              temp          = dimIndex(j)
+              dimIndex(j)   = dimIndex(j-1)
+              dimIndex(j-1) = temp 
+              j = j-1
 
-          params % nProcZ = 1 
-          params % nProcY = 1 
-          params % nProcX = params % nProc 
+            ELSE
+              EXIT
+            ENDIF
+          ENDDO
+        ENDDO
+        
+        procDim(1:3)  = (/ params % nProc, 1, 1 /)
 
-        ENDIF
+        DO WHILE( procDim(1) > meshDim(1) )
 
-          
-
-        DO WHILE( params % nProcX > params % nXElem )
-
-          DO i = 2, params % nProcX
-            IF( MOD( params % nProcX, i ) == 0 )THEN
-              ! nProcX is divisible by i
+          DO i = 2, procDim(1)
+            IF( MOD( procDim(1), i ) == 0 )THEN
               j = i
               EXIT
             ENDIF
           ENDDO
 
-          params % nProcX = params % nProcX/j
+          procDim(1) = procDim(1)/j
 
         ENDDO
 
-        IF( params % nProcX*params % nProcY*params % nProcZ < params % nProc )THEN
+        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
 
-          params % nProcY = params % nProc/params % nProcX
-          IF( params % nProcY > 1 )THEN
-            DO WHILE( params % nProcY > params % nYElem )
+          procDim(2) = params % nProc/procDim(1)
+
+          IF( procDim(2) > 1 )THEN
+            DO WHILE( procDim(2) > meshDim(2) )
   
-              DO i = 2, params % nProcY
-                IF( MOD( params % nProcY, i ) == 0 )THEN
-                  ! nProcY is divisible by i
+              DO i = 2, procDim(2)
+                IF( MOD( procDim(2), i ) == 0 )THEN
                   j = i
                   EXIT
                 ENDIF
               ENDDO
   
-              params % nProcY = params % nProcY/j
+              procDim(2) = procDim(2)/j
   
             ENDDO
   
@@ -2801,27 +2806,39 @@ CONTAINS
 
         ENDIF
 
-        IF( params % nProcX*params % nProcY*params % nProcZ < params % nProc )THEN
+        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
 
-          params % nProcZ = params % nProc/(params % nProcX*params % nProcY)
-          IF( params % nProcZ > 1 )THEN
-            DO WHILE( params % nProcZ > params % nZElem )
+          procDim(3) = params % nProc/(procDim(1)*procDim(2))
+          IF( procDim(3) > 1 )THEN
+            DO WHILE( procDim(3) > meshDim(3) )
   
-              DO i = 2, params % nProcZ
-                IF( MOD( params % nProcZ, i ) == 0 )THEN
-                  ! nProcZ is divisible by i
+              DO i = 2, procDim(3)
+                IF( MOD( procDim(3), i ) == 0 )THEN
                   j = i
                   EXIT
                 ENDIF
               ENDDO
   
-              params % nProcZ = params % nProcZ/j
+              procDim(3) = procDim(3)/j
   
             ENDDO
   
           ENDIF
 
         ENDIF
+
+        DO i = 1, 3
+
+          IF( dimIndex(i) == 1 )THEN
+            params % nProcX = procDim(i)
+          ELSEIF( dimIndex(i) == 2 )THEN
+            params % nProcY = procDim(i)
+          ELSE
+            params % nProcZ = procDim(i)
+          ENDIF
+
+        ENDDO
+
 
       ENDIF
 
