@@ -1,0 +1,34 @@
+BootStrap: docker
+From: gcc:8.3.0
+
+
+%help
+  This image contains GCC 8.3.0, and a serial build of HDF5 1.10.5
+  that can be used for compiling SELF-Fluids.
+
+  GCC 8.3.0 is inherited from [Dockerhub](https://hub.docker.com/_/gcc/).
+  OpenMPI and HDF5 are built in this container
+
+  The generated images should be used in subsequent build steps for building SELF-Fluids. 
+
+
+%post
+
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+
+   # HDF5 1.10.5
+   cd /tmp
+   wget https://github.com/live-clones/hdf5/archive/hdf5-1_10_5.tar.gz
+   tar -xvzf hdf5-1_10_5.tar.gz
+   cd /tmp/hdf5-hdf5-1_10_5
+   CC=gcc FC=gfortran CXX=g++ ./configure --enable-fortran
+   make
+   make install
+   cd /
+   rm -rf /tmp/hdf5-1_10_5.tar.gz /tmp/hdf5-hdf5-1_10_5
+
+   exit 0
+
+%environment
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+
