@@ -1,0 +1,19 @@
+Bootstrap: localimage
+From: /workspace/gcc-8.3.0.sif 
+
+%help
+
+%files
+
+
+%post
+
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+   ./configure --enable-timing --enable-diagnostics --enable-tecplot
+   make
+   make install
+
+
+%environment
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+
