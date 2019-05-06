@@ -3,6 +3,7 @@ FROM gcr.io/cloud-builders/go:debian
 ARG singularity_version=3.1.1
 
 # See https://github.com/singularityhub/singularity-docker/blob/3.0.2/Dockerfile
+ENV SINGULARITY_VERSION ${singularity_version}
 
 RUN GOPATH=/go && \
     apt-get update && \

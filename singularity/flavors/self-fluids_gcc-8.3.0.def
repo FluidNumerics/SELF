@@ -3,17 +3,30 @@ From: /workspace/gcc-8.3.0.sif
 
 %help
 
+
+%setup
+
+
 %files
 
+   /workspace
 
 %post
 
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-   /workspace/configure --enable-timing --enable-diagnostics --enable-tecplot
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/hdf5/lib
+   export PATH=${PATH}:/opt/hdf5/bin
+
+   ls -l ${SINGULARITY_ROOTFS}/usr/bin/
+   cd ${SINGULARITY_ROOTFS}/workspace
+   autoreconf --install
+   ${SINGULARITY_ROOTFS}/workspace/configure --enable-timing --enable-diagnostics --enable-tecplot
    make
    make install
 
 
 %environment
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/hdf5/lib
+   export PATH=${PATH}:/opt/hdf5/bin
 
