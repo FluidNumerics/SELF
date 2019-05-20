@@ -1,0 +1,16 @@
+# 
+# To use this build,
+# gcloud builds submit --config=cloudbuild.yaml . --timeout=2h 
+#
+
+steps:
+        #- name: gcr.io/cloud-builders/gsutil
+        #  args: ['cp', 'gs://${PROJECT_ID}-dependencies/pgilinux-2018-1810-x86-64.tar.gz','/workspace']
+
+- name: 'gcr.io/$PROJECT_ID/singularity'
+  args: ['build','pgi-18.10.sif','base.def']
+  timeout: 7200s
+artifacts:
+  objects:
+    location: 'gs://${PROJECT_ID}-singularity'
+    paths: ['pgi-18.10.sif']

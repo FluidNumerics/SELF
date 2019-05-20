@@ -1,0 +1,46 @@
+Bootstrap: docker
+From : nvcr.io/hpc/pgi-compilers:ce
+
+
+%help
+  This image contains PGI 18.10 and a serial build of HDF5 1.10.5
+  that can be used for compiling SELF-Fluids, especially for GPU offloading
+  through CUDA-Fortran. This builder is based off Centos7.
+
+  The generated images should be used in subsequent build steps for building SELF-Fluids. 
+
+%files
+  /workspace
+
+
+%post
+
+   cd ${SINGULARITY_ROOTFS}/workspace/
+   /opt/pgi/linux86-64/2018/bin/pgcc --version
+   # HDF5 1.10.5
+   cd /tmp
+   wget https://github.com/live-clones/hdf5/archive/hdf5-1_10_5.tar.gz
+   tar -xvzf hdf5-1_10_5.tar.gz
+   cd /tmp/hdf5-hdf5-1_10_5
+
+   CPP=cpp CFLAGS="-fPIC -m64 -tp=px" CXXFLAGS="-fPIC -m64 -tp=px" FCFLAGS="-fPIC -m64 -tp=px" \
+   CC=/opt/pgi/linux86-64/2018/bin/pgcc CXX=/opt/pgi/linux86-64/2018/bin/pgc++ FC=/opt/pgi/linux86-64/2018/bin/pgfortran \
+   ./configure --enable-threadsafe --enable-cxx --enable-fortran --enable-unsupported
+
+   make
+   make install
+   cd /
+   rm -rf /tmp/hdf5-1_10_5.tar.gz /tmp/hdf5-hdf5-1_10_5
+
+   exit 0
+
+%environment
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+
+   export PGI_VERSION 18.10
+   export PGI_INSTALL_DIR /usr/local/pgi
+   export PGI_HOME    ${PGI_INSTALL_DIR}/linux86-64/${PGI_VERSION}
+   export PGI_BIN_DIR ${PGI_HOME}/bin
+   export PGI_LIB_DIR ${PGI_HOME}/lib
+   export PGI_MAN_DIR ${PGI_HOME}/man
+
