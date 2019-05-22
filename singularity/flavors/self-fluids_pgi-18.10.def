@@ -1,5 +1,5 @@
 Bootstrap: localimage
-From: /workspace/gcc-8.3.0.sif 
+From: /workspace/pgi-18.10.sif 
 
 %help
 
@@ -13,13 +13,14 @@ From: /workspace/gcc-8.3.0.sif
 
 %post
 
+
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/hdf5/lib
    export PATH=${PATH}:/opt/hdf5/bin
 
    cd ${SINGULARITY_ROOTFS}/workspace
 #   autoreconf --install
-   ${SINGULARITY_ROOTFS}/workspace/configure --enable-timing --enable-diagnostics --enable-tecplot
+   ${SINGULARITY_ROOTFS}/workspace/configure --enable-timing --enable-diagnostics --enable-tecplot --enable-cuda
    make
    make install
 

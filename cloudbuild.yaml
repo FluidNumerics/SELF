@@ -1,16 +1,18 @@
 # 
 # To use this build,
-# gcloud builds submit --config=cloudbuild.yaml .
+# gcloud builds submit . --substitutions=_BUILD_BASE=pgi-18.10
 #
 
 steps:
 - name: 'gcr.io/cloud-builders/gsutil'
-  args: ['cp', 'gs://${PROJECT_ID}-singularity/gcc-8.3.0.sif', '/workspace']
+  args: ['cp', 'gs://${PROJECT_ID}-singularity/${_BUILD_BASE}.sif', '/workspace']
    
 - name: 'gcr.io/$PROJECT_ID/singularity'
-  args: ['build','self-fluids_gcc-8.3.0.sif','./singularity/flavors/self-fluids_gcc-8.3.0.def']
+  args: ['build','self-fluids_${_BUILD_BASE}.sif','./singularity/flavors/self-fluids_${_BUILD_BASE}.def']
 
+substitutions:
+  _BUILD_BASE: pgi-18.10
 artifacts:
   objects:
     location: 'gs://${PROJECT_ID}-singularity'
-    paths: ['self-fluids_gcc-8.3.0.sif']
+    paths: ['self-fluids_${_BUILD_BASE}.sif']

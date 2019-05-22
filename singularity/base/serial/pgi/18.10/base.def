@@ -15,10 +15,10 @@ From : nvcr.io/hpc/pgi-compilers:ce
 
 %post
 
+
    cd ${SINGULARITY_ROOTFS}/workspace/
    /opt/pgi/linux86-64/2018/bin/pgcc --version
    # HDF5 1.10.5
-   cd /tmp
    wget https://github.com/live-clones/hdf5/archive/hdf5-1_10_5.tar.gz
    tar -xvzf hdf5-1_10_5.tar.gz
    cd /tmp/hdf5-hdf5-1_10_5
@@ -30,7 +30,7 @@ From : nvcr.io/hpc/pgi-compilers:ce
    make
    make install
    cd /
-   rm -rf /tmp/hdf5-1_10_5.tar.gz /tmp/hdf5-hdf5-1_10_5
+   rm -rf /tmp/*
 
    exit 0
 
