@@ -29,6 +29,7 @@ PROGRAM SELF_Fluids_Driver
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 
 
+  PRINT*,'[SELF_Fluids_Driver](Initialize) : Start'
   CALL Setup( )
 
   IF( setupSuccess )THEN
@@ -50,6 +51,7 @@ PROGRAM SELF_Fluids_Driver
     ENDIF
 
 
+    PRINT*,'[SELF_Fluids_Driver](Initialize) : End'
   ENDIF
 
 CONTAINS
@@ -124,8 +126,6 @@ CONTAINS
 
     ENDDO
 
-    PRINT*, TRIM(equationFile)
-
     IF( helpNeeded ) THEN
 
       PRINT*, 'SELF-Fluids (sfluid) Command Line Tool'      
@@ -194,15 +194,15 @@ CONTAINS
   SUBROUTINE MeshGen( )
 
 
-      CALL myFluid % ExtComm % SetRanks( )
+      CALL Initialize_MPILayer()
 
-      IF( myFluid % ExtComm % myRank == 0 )THEN
+      IF( myRank == 0 )THEN
         PRINT*, '  Generating structured mesh...'
         CALL StructuredMeshGenerator_3D( paramFile, equationFile, meshGenSuccess )
         PRINT*, '  Done'
       ENDIF
 
-      CALL myFluid % ExtComm % Finalize( )
+      CALL Finalize_MPILayer( )
 
 
   END SUBROUTINE MeshGen
@@ -221,13 +221,13 @@ CONTAINS
     ! from the equation parser.
     IF( .NOT. pickupFileExists )THEN
 
-      PRINT(MsgFMT), 'Pickup file not found.'
+      PRINT*,'[SELF_Fluids_Driver](Initialize) : Pickup file not found'
 
     ENDIF
 
     IF( .NOT. pickupFileExists .OR. run_UpToInitOnly )THEN
 
-      PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
+      PRINT*,'[SELF_Fluids_Driver](Initialize) : Attempting initial condition generation from self.equations'
       CALL myFluid % SetInitialConditions( )
       CALL myFluid % IO( )
 

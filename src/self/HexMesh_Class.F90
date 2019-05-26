@@ -20,7 +20,7 @@ MODULE HexMesh_Class
   USE Faces_Class
   USE Nodes_Class
   USE ModelParameters_Class
-  USE BoundaryCommunicator_Class
+  USE Boundaries_Class
   USE Geom_EquationParser_Class
 
 
@@ -36,11 +36,13 @@ MODULE HexMesh_Class
 !  edge-to-element IDs, element-to-node IDs, and edge-to-node IDs.
 !
 
+
   TYPE HexMesh
     TYPE( HexElements ) :: elements
     TYPE( Nodes  )      :: nodes
     TYPE( Edges )       :: edges 
     TYPE( Faces )       :: faces
+    TYPE( Boundaries )  :: boundaryMap 
     INTEGER             :: cornerMap(1:3,1:8)
     INTEGER             :: sideMap(1:6)
     INTEGER             :: faceMap(1:4,1:6)
@@ -1404,7 +1406,7 @@ CONTAINS
 
     ! Generate the Legendre-Gauss Lobatto points of order gPolyDeg
     ! These are the points USEd to define the parametric
-    ! curves for the element boundaries
+    ! curves for the element boundaryMap
 
     ALLOCATE( s(0:gPolyDeg), xc(0:gPolyDeg,0:gPolyDeg,1:3,1:nSurf), weights(0:gpolyDeg) )
     CALL LegendreQuadrature( gPolyDeg, s, weights, GAUSS_LOBATTO )
@@ -1753,7 +1755,7 @@ CONTAINS
     CLASS( HexMesh ), INTENT(out)   :: myHexMesh
     CHARACTER(*), INTENT(in)        :: filename
     ! LOCAL
-    INTEGER :: nNodes, nElements, nFaces, N
+    INTEGER :: nNodes, nElements, nFaces, N, nBoundaries
     INTEGER :: IFace, iNode, iEl
     INTEGER :: fUnit, k, i, j, l, row, col, ii, jj
 #ifdef HAVE_CUDA
@@ -1761,7 +1763,8 @@ CONTAINS
 #endif
 
 
-    PRINT(MsgFMT), 'Reading '//TRIM( filename )//'.mesh'
+    PRINT*, '[HexMesh_Class](ReadSELFMeshFile) : Start'
+    PRINT*, '[HexMesh_Class](ReadSELFMeshFile) : Reading '//TRIM( filename )//'.mesh'
     ! Get a new file unit
     OPEN( UNIT    = NEWUNIT(fUnit), &
       FILE    = TRIM( filename )//'.mesh', &
@@ -1781,9 +1784,12 @@ CONTAINS
     k = k+1
     READ( fUnit, rec=k )N
     k = k+1
+    READ( fUnit, rec=k )nBoundaries
+    k = k+1
 
     ! ---- Build the quadrature mesh (empty) ---- !
     CALL myHexMesh % Build( nNodes, nElements, nFaces, N )
+    CALL myHexMesh % boundaryMap % Build( nBoundaries )
 
     ! ---- Read in the element connectivity ---- !
     DO iEl = 1, nElements
@@ -1821,6 +1827,17 @@ CONTAINS
       READ( fUnit, rec=k ) myHexMesh % faces % jInc(IFace)
       k = k+1
       READ( fUnit, rec=k ) myHexMesh % faces % swapDimensions(IFace)
+      k = k+1
+    ENDDO
+
+    DO iface = 1, myHexMesh % boundaryMap % nBoundaries
+      READ( fUnit, rec=k ) myHexMesh % boundaryMap % extProcIDs(iface)
+      k = k+1
+      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryIDs(iface)
+      k = k+1
+      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryGlobalIDs(iface)
+      k = k+1
+      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
       k = k+1
     ENDDO
 
@@ -1955,31 +1972,10 @@ CONTAINS
     CALL myHexMesh % UpdateDevice( )
     istat = cudaDeviceSynchronize( )
 #endif
+    PRINT*, '[HexMesh_Class](ReadSELFMeshFile) : End'
 
   END SUBROUTINE ReadSELFMeshFile_HexMesh
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R WriteSELFMeshFile
-!
-!> \fn WriteSELFMeshFile_HexMesh
-!! Writes a SELFMesh file using the HexMesh DATA structure.
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh)    :: this <BR>
-!! <B>CHARACTER</B>        :: filename <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % WriteSELFMeshFile( filename ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the SELFMesh file
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
   SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
 
     IMPLICIT NONE
@@ -2015,6 +2011,8 @@ CONTAINS
     WRITE( fUnit, rec=k )nFaces
     k = k+1
     WRITE( fUnit, rec=k )N
+    k = k+1
+    WRITE( fUnit, rec=k )myHexMesh % boundaryMap % nBoundaries
     k = k+1
 
 
@@ -2054,6 +2052,17 @@ CONTAINS
       WRITE( fUnit, rec=k ) myHexMesh % faces % jInc(IFace)
       k = k+1
       WRITE( fUnit, rec=k ) myHexMesh % faces % swapDimensions(IFace)
+      k = k+1
+    ENDDO
+
+    DO iface = 1, myHexMesh % boundaryMap % nBoundaries
+      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % extProcIDs(iface)
+      k = k+1
+      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryIDs(iface)
+      k = k+1
+      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryGlobalIDs(iface)
+      k = k+1
+      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
       k = k+1
     ENDDO
 
@@ -2710,7 +2719,6 @@ CONTAINS
  TYPE( HexMesh )                           :: procMesh
  TYPE( ModelParameters )                   :: params
  TYPE( Geom_EquationParser )               :: geomParser
- TYPE( BoundaryCommunicator ), ALLOCATABLE :: bcom(:)
  INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
  INTEGER                      :: procID, mpiErr
  INTEGER                      :: nElems, nProc, pID, i, j
@@ -2904,7 +2912,6 @@ CONTAINS
          nNodePerProc  = 0
          
          ALLOCATE( partitions(1:nElems) )
-         ALLOCATE( bcom(0:nProc-1) ) 
          ALLOCATE( faceProcCount(1:mesh % faces % nFaces), &
                    faceProcOwners(1:mesh % faces % nFaces,1:2), &
                    faceBoundaryIDs(1:mesh % faces % nFaces,1:2), &
@@ -3033,12 +3040,15 @@ CONTAINS
 
             ENDDO
 
-            PRINT*, '      Process ID        nMPI       nFaces       nBFaces       nElements' 
-            PRINT*,  procID, nMPI, npFaces, nBe, nElPerProc(procID)
+            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Process ID               ', procID
+            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of MPI Comms      ', nMPI
+            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of faces          ', npFaces
+            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of boundary faces ', nBe
+            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of elements       ', nElPerProc(procID)
 
             CALL procMesh % faces % Trash( )
             CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
-            CALL bCom(procID) % Build( nBe )
+            CALL procMesh % boundaryMap % Build( nBe )
 
             iFaceLocal = 0
             nBe        = 0
@@ -3093,13 +3103,13 @@ CONTAINS
                      nBe = nBe + 1
                      procMesh % faces % boundaryID(iFaceLocal) = -nBe
 
-                     ! Physical boundary ID's will be set to negative for physical boundaries
-                     ! so that boundaries requiring communication can be separated from physical
-                     ! boundaries. This will allow more operations to be run concurrently with
+                     ! Physical boundary ID's will be set to negative for physical boundaryMap
+                     ! so that boundaryMap requiring communication can be separated from physical
+                     ! boundaryMap. This will allow more operations to be run concurrently with
                      ! communication.
-                     bCom(procID) % boundaryIDs(nBe) = iFaceLocal
-                     bCom(procID) % boundaryGlobalIDs(nBe) = iFace
-                     bCom(procID) % extProcIDs(nBe)  = procID
+                     procMesh % boundaryMap % boundaryIDs(nBe)       = iFaceLocal
+                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
+                     procMesh % boundaryMap % extProcIDs(nBe)        = procID
 
                   ELSEIF( p2 /= p1 .AND. procID == p1 )THEN ! MPI Boundary
                 
@@ -3119,12 +3129,12 @@ CONTAINS
                      nBe = nBe + 1
                      procMesh % faces % boundaryID(iFaceLocal) = nBe
 
-                     ! Boundary ID's associated with MPI boundaries are reported as positive integers
-                     ! so that they can be distinguished from physical boundaries that do not require
+                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
+                     ! so that they can be distinguished from physical boundaryMap that do not require
                      ! communication with neighboring processes. 
-                     bCom(procID) % boundaryIDs(nBe) = iFaceLocal
-                     bCom(procID) % boundaryGlobalIDs(nBe) = iFace
-                     bCom(procID) % extProcIDs(nBe)  = p2
+                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
+                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
+                     procMesh % boundaryMap % extProcIDs(nBe)  = p2
 
 
                   ELSEIF( p2 /= p1 .AND. procID == p2 )THEN ! MPI Boundary
@@ -3146,12 +3156,12 @@ CONTAINS
                      nBe = nBe + 1
                      procMesh % faces % boundaryID(iFaceLocal) = nBe
 
-                     ! Boundary ID's associated with MPI boundaries are reported as positive integers
-                     ! so that they can be distinguished from physical boundaries that do not require
+                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
+                     ! so that they can be distinguished from physical boundaryMap that do not require
                      ! communication with neighboring processes. 
-                     bCom(procID) % boundaryIDs(nBe) = iFaceLocal
-                     bCom(procID) % boundaryGlobalIDs(nBe) = iFace
-                     bCom(procID) % extProcIDs(nBe)  = p1
+                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
+                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
+                     procMesh % boundaryMap % extProcIDs(nBe)  = p1
 
 
                   ENDIF
@@ -3171,58 +3181,6 @@ CONTAINS
 
          ENDDO
    
-
-
-      
-      DO procID = 0, nProc-1
-
-         nlocMPI = 0
-         DO bID = 1, bCom(procID) % nBoundaries
-
-            extProc = bCom(procID) % extProcIDs(bID)
-            IF( extProc /= procID )THEN
-
-               ! nMPI is an array that keeps track of the order in which MPI messages will be sent
-               ! to procID's neighbors
-               nlocMPI(extProc) = nlocMPI(extProc) + 1
-               globalFaceID  = bCom(procID) % boundaryGlobalIDs(bID)
-
-               IF( faceProcOwners(globalFaceID, 1) == procID )THEN
-
-                  extBID = faceBoundaryIDs(globalFaceID,2)
-
-               ELSEIF( faceProcOwners(globalFaceID,2) == procID )THEN
-
-                  extBID = faceBoundaryIDs(globalFaceID,1)
-
-               ELSE
-                  PRINT*, '  SetupCommTables : Something catastrophic happened !'
-                  setupSuccess = .FALSE.
-                  RETURN
-               ENDIF
-
-
-               bCom(extProc) % unPackMap(extBID) = nlocMPI(extProc)
-                  
-
-            ENDIF
-
-         ENDDO
-
-      ENDDO   
-
-      DO procID = 0, nProc-1
-         WRITE( pIDChar, '(I4.4)' ) procID
-         CALL bCom(procID) % WritePickup( 'ExtComm.'//pIDChar )
-      ENDDO
-         
-! ----------------------------------------------------------------------------- !
-
-      DO procID = 0, nProc-1
-         CALL bCom(procID) % Trash( )
-      ENDDO
-      DEALLOCATE( bCom )
-      
 
       ! For visualizing the decomposition
       materials = REAL( partitions, prec )

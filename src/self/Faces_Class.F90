@@ -15,7 +15,7 @@ MODULE Faces_Class
 
   TYPE Faces
     INTEGER              :: nFaces, N
-    INTEGER, ALLOCATABLE :: faceID(:)            ! The face ID
+    INTEGER, ALLOCATABLE :: faceID(:)            ! The global face ID
     INTEGER, ALLOCATABLE :: boundaryID(:)        ! IF the face is part of the mesh boundary, the face gets assigned a boundary face ID
     INTEGER, ALLOCATABLE :: nodeIDs(:,:)         ! Node IDs which start and terminate this face
     INTEGER, ALLOCATABLE :: elementIDs(:,:)      ! Neighboring elements IDs across the face
