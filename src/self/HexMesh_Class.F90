@@ -26,6 +26,8 @@ MODULE HexMesh_Class
 
   IMPLICIT NONE
 
+#include "self_macros.h"
+
 ! HexMesh
 !  The HexMesh DATA structure defines attributes needed to describe a conformal unstructured
 !  spectral element mesh.
@@ -36,18 +38,22 @@ MODULE HexMesh_Class
 !  edge-to-element IDs, element-to-node IDs, and edge-to-node IDs.
 !
 
+  !TYPE DomainDecomposition
+  !  INTEGER, ALLOCATABLE ::  
+  !END TYPE DomainDecomposition
 
   TYPE HexMesh
-    TYPE( HexElements ) :: elements
-    TYPE( Nodes  )      :: nodes
-    TYPE( Edges )       :: edges 
-    TYPE( Faces )       :: faces
-    TYPE( Boundaries )  :: boundaryMap 
-    INTEGER             :: cornerMap(1:3,1:8)
-    INTEGER             :: sideMap(1:6)
-    INTEGER             :: faceMap(1:4,1:6)
-    INTEGER             :: edgeMap(1:2,1:12)
-    INTEGER             :: edgeFaceMap(1:2,1:4)
+    TYPE( HexElements )         :: elements
+    TYPE( Nodes  )              :: nodes
+    TYPE( Edges )               :: edges 
+    TYPE( Faces )               :: faces
+    TYPE( Boundaries )          :: boundaryMap 
+   ! TYPE( DomainDecomposition ) :: decomp 
+    INTEGER                     :: cornerMap(1:3,1:8)
+    INTEGER                     :: sideMap(1:6)
+    INTEGER                     :: faceMap(1:4,1:6)
+    INTEGER                     :: edgeMap(1:2,1:12)
+    INTEGER                     :: edgeFaceMap(1:2,1:4)
 
 #ifdef HAVE_CUDA
     INTEGER, DEVICE, ALLOCATABLE :: cornerMap_dev(:,:)
@@ -274,6 +280,8 @@ CONTAINS
     CALL myHexmesh % nodes % Trash( )
     CALL myHexMesh % faces % Trash( )
 
+    CALL myHexMesh % boundaryMap % Trash( )
+
 #ifdef HAVE_CUDA
     DEALLOCATE( myHexMesh % cornerMap_dev, &
                 myHexMesh % sideMap_dev, &
@@ -292,6 +300,7 @@ CONTAINS
     CALL myHexMesh % faces % UpdateDevice( )
     CALL myHexMesh % elements % UpdateDevice( )
     CALL myHexMesh % nodes % UpdateDevice( )
+    CALL myHexMesh % boundaryMap % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_HexMesh
 
@@ -1751,7 +1760,9 @@ CONTAINS
 !>@}
   SUBROUTINE ReadSELFMeshFile_HexMesh( myHexMesh, filename )
 
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "ReadSELFMeshFile"
+
     CLASS( HexMesh ), INTENT(out)   :: myHexMesh
     CHARACTER(*), INTENT(in)        :: filename
     ! LOCAL
@@ -1763,8 +1774,8 @@ CONTAINS
 #endif
 
 
-    PRINT*, '[HexMesh_Class](ReadSELFMeshFile) : Start'
-    PRINT*, '[HexMesh_Class](ReadSELFMeshFile) : Reading '//TRIM( filename )//'.mesh'
+    INFO('Start')
+    INFO('Reading '//TRIM( filename )//'.mesh')
     ! Get a new file unit
     OPEN( UNIT    = NEWUNIT(fUnit), &
       FILE    = TRIM( filename )//'.mesh', &
@@ -1840,6 +1851,7 @@ CONTAINS
       READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
       k = k+1
     ENDDO
+
 
     CLOSE( fUnit )
     ! Get a new file unit
@@ -1972,7 +1984,7 @@ CONTAINS
     CALL myHexMesh % UpdateDevice( )
     istat = cudaDeviceSynchronize( )
 #endif
-    PRINT*, '[HexMesh_Class](ReadSELFMeshFile) : End'
+    INFO('End')
 
   END SUBROUTINE ReadSELFMeshFile_HexMesh
 !
@@ -2384,7 +2396,9 @@ CONTAINS
 !>@}
   SUBROUTINE ReadUCDMeshFile_HexMesh( myHexMesh, interp, filename )
 
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "ReadUCDMeshFile"
+
     CLASS( HexMesh ), INTENT(out)   :: myHexMesh
     TYPE( Lagrange ), INTENT(in)    :: interp
     CHARACTER(*), INTENT(in)        :: filename
@@ -2400,7 +2414,8 @@ CONTAINS
     TYPE( Surfaces ) :: boundSurfs
 
 
-    PRINT(MsgFMT), 'Mesh File : '//TRIM( filename )
+    INFO('Start')
+    INFO('Mesh File : '//TRIM( filename ))
 
     ! Get a new file unit
     OPEN( UNIT    = NEWUNIT(fUnit), &
@@ -2516,6 +2531,7 @@ CONTAINS
     CALL myHexMesh % UpdateDevice( )
 #endif
 
+    INFO('End')
 
   END SUBROUTINE ReadUCDMeshFile_HexMesh
 !
@@ -2709,7 +2725,10 @@ CONTAINS
   END FUNCTION NumberOfBoundaryFaces
   
  SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess )
- IMPLICIT NONE
+
+#undef __FUNC__
+#define __FUNC__ "StructuredMeshGenerator_3D"
+
  LOGICAL, INTENT(out)                      :: setupSuccess
  CHARACTER(*), INTENT(in)                  :: paramFile
  CHARACTER(*), INTENT(in)                  :: equationFile
@@ -2731,8 +2750,10 @@ CONTAINS
  INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:), nLocMPI(:)
  REAL(prec), ALLOCATABLE      :: materials(:)
  INTEGER :: procDim(1:3), meshDim(1:3), dimIndex(1:3), temp
+ CHARACTER(50) :: msg
  
 
+      INFO('Start')
       ! Read in the parameters
       CALL params % Build( TRIM(paramFile), setupSuccess )
 
@@ -2741,7 +2762,7 @@ CONTAINS
 
       IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
 
-        PRINT*, ' Number of processes exceeds number of elements.'
+        INFO('Number of processes exceeds number of elements.')
         setupSuccess = .FALSE.
 
       ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
@@ -2850,9 +2871,12 @@ CONTAINS
 
       ENDIF
 
-      PRINT*, ' nProcX :', params % nProcX
-      PRINT*, ' nProcY :', params % nProcY
-      PRINT*, ' nProcZ :', params % nProcZ
+      WRITE(msg,'(A,I5)')'nProcX :', params % nProcX
+      INFO( TRIM(msg) )
+      WRITE(msg,'(A,I5)')'nProcY :', params % nProcY
+      INFO( TRIM(msg) )
+      WRITE(msg,'(A,I5)')'nProcZ :', params % nProcZ
+      INFO( TRIM(msg) )
       
 #endif
       CALL geomParser % Build( equationFile )
@@ -3040,11 +3064,16 @@ CONTAINS
 
             ENDDO
 
-            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Process ID               ', procID
-            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of MPI Comms      ', nMPI
-            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of faces          ', npFaces
-            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of boundary faces ', nBe
-            PRINT*, '[HexMesh_Class](StructuredMeshGenerator_3D) : Number of elements       ', nElPerProc(procID)
+            WRITE(msg,'(A,I5)') 'Process ID : ',procID
+            INFO( TRIM(msg) )
+            WRITE(msg,'(A,I5)') 'Number of MPI Communications : ',nMPI
+            INFO( TRIM(msg) )
+            WRITE(msg,'(A,I5)') 'Number of faces : ',npFaces
+            INFO( TRIM(msg) )
+            WRITE(msg,'(A,I5)') 'Number of boundary faces : ',nBe
+            INFO( TRIM(msg) )
+            WRITE(msg,'(A,I5)') 'Number of elements : ',nElPerProc(procID)
+            INFO( TRIM(msg) )
 
             CALL procMesh % faces % Trash( )
             CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
@@ -3200,6 +3229,8 @@ CONTAINS
       CALL nodal % Trash( )
 
       ENDIF
+
+      INFO('End')
 
  END SUBROUTINE StructuredMeshGenerator_3D
 

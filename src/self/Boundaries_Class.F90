@@ -30,11 +30,21 @@ MODULE Boundaries_CLASS
     INTEGER, ALLOCATABLE :: boundaryGlobalIDs(:)
     INTEGER, ALLOCATABLE :: boundaryCondition(:)
 
+#ifdef HAVE_CUDA
+    INTEGER, DEVICE, ALLOCATABLE :: extProcIDs_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: boundaryIDs_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: boundaryGlobalIDs_dev(:)
+    INTEGER, DEVICE, ALLOCATABLE :: boundaryCondition_dev(:)
+#endif
+
   CONTAINS
 
     PROCEDURE :: Build => Build_Boundaries
     PROCEDURE :: Trash => Trash_Boundaries
 
+#ifdef HAVE_CUDA    
+    PROCEDURE :: UpdateDevice => UpdateDevice_Boundaries
+#endif
 
   END TYPE Boundaries
 
@@ -65,6 +75,12 @@ CONTAINS
     myBoundaries % boundaryGlobalIDs = -1
     myBoundaries % boundaryCondition = 0
    
+#ifdef HAVE_CUDA
+    ALLOCATE( myBoundaries % extProcIDs_dev(1:nBe) )
+    ALLOCATE( myBoundaries % boundaryIDs_dev(1:nBe) )
+    ALLOCATE( myBoundaries % boundaryGlobalIDs_dev(1:nBe) )
+    ALLOCATE( myBoundaries % boundaryCondition_dev(1:nBe) )
+#endif
 
 
   END SUBROUTINE Build_Boundaries
@@ -74,12 +90,31 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Boundaries), INTENT(inout) :: myBoundaries
 
-    DEALLOCATE( myBoundaries % extProcIDs, &
-                myBoundaries % boundaryIDs, &
-                myBoundaries % boundaryGlobalIDs, &
-                myBoundaries % boundaryCondition  )
+    IF( ALLOCATED( myBoundaries % extProcIDs ) ) DEALLOCATE( myBoundaries % extProcIDs )
+    IF( ALLOCATED( myBoundaries % boundaryIDs ) ) DEALLOCATE( myBoundaries % boundaryIDs )
+    IF( ALLOCATED( myBoundaries % boundaryGlobalIDs ) ) DEALLOCATE( myBoundaries % boundaryGlobalIDs )
+    IF( ALLOCATED( myBoundaries % boundaryCondition ) ) DEALLOCATE( myBoundaries % boundaryCondition )
+
+#ifdef HAVE_CUDA
+    IF( ALLOCATED( myBoundaries % extProcIDs_dev ) ) DEALLOCATE( myBoundaries % extProcIDs_dev )
+    IF( ALLOCATED( myBoundaries % boundaryIDs_dev ) ) DEALLOCATE( myBoundaries % boundaryIDs_dev )
+    IF( ALLOCATED( myBoundaries % boundaryGlobalIDs_dev ) ) DEALLOCATE( myBoundaries % boundaryGlobalIDs_dev )
+    IF( ALLOCATED( myBoundaries % boundaryCondition_dev ) ) DEALLOCATE( myBoundaries % boundaryCondition_dev )
+#endif
 
   END SUBROUTINE Trash_Boundaries
+
+#ifdef HAVE_CUDA
+  SUBROUTINE UpdateDevice_Boundaries( myBoundaries )
+    CLASS( Boundaries ), INTENT(inout) :: myBoundaries
+
+    myBoundaries % extProcIDs_dev  = myBoundaries % extProcIDs
+    myBoundaries % boundaryIDs_dev = myBoundaries % boundaryIDs
+    myBoundaries % boundaryGlobalIDs_dev = myBoundaries % boundaryGlobalIDs
+    myBoundaries % boundaryCondition_dev = myBoundaries % boundaryCondition
+
+  END SUBROUTINE UpdateDevice_Boundaries
+#endif
 
 
 END MODULE Boundaries_CLASS

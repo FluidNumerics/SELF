@@ -30,6 +30,8 @@ MODULE Fluid_Class
 
   IMPLICIT NONE
 
+#include "self_macros.h"
+
   TYPE Fluid
 
     REAL(prec) :: simulationTime
@@ -131,7 +133,9 @@ CONTAINS
 !
   SUBROUTINE Build_Fluid( myDGSEM, equationFile, paramFile, setupSuccess )
 
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "Build_Fluid"
+
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     CHARACTER(*), INTENT(in)    :: equationFile
     CHARACTER(*), INTENT(in)    :: paramFile
@@ -148,7 +152,8 @@ CONTAINS
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
     IF( .NOT. SetupSuccess ) THEN
-      PRINT(MsgFMT), 'S/R Build_Fluid : Halting before building,'
+      INFO( 'Model parameter setup not successful' )
+      INFO( 'Halting before building' )
       RETURN
     ENDIF
 
@@ -284,15 +289,17 @@ CONTAINS
     CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux_Divergence', 21 )
     CALL myDGSEM % timers % AddTimer( 'Mapped_Time_Derivative', 22 )
 #endif
+    INFO('End')
 
   END SUBROUTINE Build_Fluid
 !
   SUBROUTINE Trash_Fluid( myDGSEM )
 
-    IMPLICIT NONE
-    CLASS(Fluid), INTENT(inout) :: myDGSEM
+#undef __FUNC__
+#define __FUNC__ "Trash_Fluid"
 
-    PRINT*, '[Fluid_Class](Trash) : Clearing memory.'
+    CLASS(Fluid), INTENT(inout) :: myDGSEM
+    INFO('Start')
 
     CALL myDGSEM % params % Trash( )
     CALL myDGSEM % mesh % Trash(  )
@@ -315,10 +322,15 @@ CONTAINS
     CALL myDGSEM % mpiStressHandler % Trash( )
     CALL myDGSEM % mpiSGSHandler % Trash( )
 #endif
+    INFO('End')
 
   END SUBROUTINE Trash_Fluid
 !
   SUBROUTINE SetInitialConditions_Fluid( myDGSEM )
+
+#undef __FUNC__
+#define __FUNC__ "SetInitialConditions"
+
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     INTEGER    :: i, j, k, iEl, istat
@@ -326,10 +338,9 @@ CONTAINS
     REAL(prec) :: x(1:3)
     REAL(prec) :: T, Tbar, u, v, w, rho, rhobar, s, s0
 
-    PRINT*, '[Fluid_Class](SetInitialConditions) : Start'
+    INFO('Start')
 
     CALL myDGSEM % CalculateStaticState( ) !! CPU Kernel
-
 
     DO iEl = 1, myDGSEM % mesh % elements % nElements
       DO k = 0, myDGSEM % params % polyDeg
@@ -348,6 +359,8 @@ CONTAINS
               s0 = myDGSEM % fluidEquations % staticTracer % evaluate( x )
 
               Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
+
+              myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
 #ifndef POTENTIAL_TEMPERATURE
               ! In the in-situ temperature formulation, the potential temperature is calculated from the
               ! equations file, and we convert to the in-situ temperature here
@@ -355,7 +368,6 @@ CONTAINS
               T  = T*( (myDGSEM % static % solution(i,j,k,7,iEl))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
 #endif
 
-              myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
               myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
               myDGSEM % state % solution(i,j,k,2,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*v
               myDGSEM % state % solution(i,j,k,3,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*w
@@ -404,17 +416,21 @@ CONTAINS
     CALL myDGSEM % EquationOfState( ) ! GPU Kernel (if CUDA)
     !$OMP END PARALLEL
 
-    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
+!    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
     istat = cudaDeviceSynchronize( )
 #endif
-    PRINT*, '[Fluid_Class](SetInitialConditions) : End'
+    INFO('End')
 
   END SUBROUTINE SetInitialConditions_Fluid
 
   SUBROUTINE SetPrescribedState_Fluid( myDGSEM )
+
+#undef __FUNC__
+#define __FUNC__ "SetPrescribedState"
+
     CLASS( Fluid ), INTENT(inout) :: myDGSEM 
     ! Local
     INTEGER    :: i, j, k, iEl
@@ -502,7 +518,9 @@ CONTAINS
 
   SUBROUTINE InitializeMesh_Fluid( myDGSEM, paramFile, equationFile )
 
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "InitializeMesh"
+
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     CHARACTER(*), INTENT(in)      :: paramFile
     CHARACTER(*), INTENT(in)      :: equationFile
@@ -511,7 +529,8 @@ CONTAINS
     LOGICAL      :: fileExists, meshgenSuccess
     INTEGER      :: mpierr
 
-      PRINT*, '[Fluid_Class](InitializeMesh) : Start.'
+      INFO('Start')
+      
       WRITE( rankChar, '(I4.4)' )myRank
 
 
@@ -521,10 +540,10 @@ CONTAINS
 
         IF( .NOT. fileExists )THEN
 
-          PRINT*, '[Fluid_Class](InitializeMesh) :  Mesh files not found.'
-          PRINT*, '[Fluid_Class](InitializeMesh) :  Generating structured mesh...'
+          INFO('Mesh files not found.')
+          INFO('Generating structured mesh...')
           CALL StructuredMeshGenerator_3D( TRIM(paramFile), TRIM(equationFile), meshgenSuccess )
-          PRINT*, '[Fluid_Class](InitializeMesh) :  Structured mesh generation complete'
+          INFO('Structured mesh generation complete')
 
         ENDIF
 
@@ -544,7 +563,7 @@ CONTAINS
                                           myDGSEM % params % zScale )
 
 
-      PRINT*, '[Fluid_Class](InitializeMesh) : End'
+      INFO('End')
 
   END SUBROUTINE InitializeMesh_Fluid
 !
@@ -3032,7 +3051,10 @@ CONTAINS
   END SUBROUTINE EquationOfState_Fluid
 !
   SUBROUTINE CalculateStaticState_Fluid( myDGSEM )
-    IMPLICIT NONE
+
+#undef __FUNC__
+#define __FUNC__ "CalculateStaticState"
+
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     INTEGER    :: i, j, k, iEl,iEq
@@ -3041,7 +3063,7 @@ CONTAINS
     INTEGER :: istat
 #endif
 
-    PRINT*, '[Fluid_Class](CalculateStaticState) : Start'
+    INFO('Start')
     R    = myDGSEM % params % R
     Cp   = (R + myDGSEM % params % Cv)
     rC   = R/Cp
@@ -3105,7 +3127,7 @@ CONTAINS
 #endif
 
     CALL myDGSEM % UpdateExternalStaticState( )
-    PRINT*, '[Fluid_Class](CalculateStaticState) : End'
+    INFO('End')
 
   END SUBROUTINE CalculateStaticState_Fluid
 !
@@ -3265,7 +3287,10 @@ CONTAINS
   END SUBROUTINE WriteDiagnostics_Fluid
 !
   SUBROUTINE Diagnostics_Fluid( myDGSEM )
-    IMPLICIT NONE
+
+#undef __FUNC__
+#define __FUNC__ "Diagnostics"
+
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     INTEGER    :: iEl, i, j, k
@@ -3273,8 +3298,9 @@ CONTAINS
 #ifdef HAVE_MPI
     INTEGER    :: mpiErr
 #endif
+    CHARACTER(40) :: diagString
 
-    PRINT*, '[Fluid_Class](Diagnostics) : Start'
+    INFO('Start')
 
     volume = 0.0_prec
     mass   = 0.0_prec
@@ -3348,24 +3374,35 @@ CONTAINS
     CALL MPI_ALLREDUCE( heat, myDGSEM % heat, 1, mpiPrec, MPI_SUM, mpiComm, mpiErr )
 #endif
 
+    IF( myRank == 0 )THEN
+  
+      WRITE(diagString, '(E15.5,", ",E15.5)') myDGSEM % simulationTime, myDGSEM % volume
+      INFO('Time (s), Volume (m^3) : '//diagString )
+
+      WRITE(diagString, '(E15.5,", ",E15.5)') myDGSEM % simulationTime, myDGSEM % mass
+      INFO('Time (s), Mass (kg) : '//diagString )
+
+      WRITE(diagString, '(E15.5,", ",E15.5)') myDGSEM % simulationTime, myDGSEM % KE
+      INFO('Time (s), Kinetic Energy (N) : '//diagString )
+
+      WRITE(diagString, '(E15.5,", ",E15.5)') myDGSEM % simulationTime, myDGSEM % PE
+      INFO('Time (s), Potential Energy (N) : '//diagString )
+
+      WRITE(diagString, '(E15.5,", ",E15.5)') myDGSEM % simulationTime, myDGSEM % heat
+      INFO('Time (s), Heat (Km^3) : '//diagString )
+
+    ENDIF
     IF( IsNaN( myDGSEM % KE ) .OR. IsInf( myDGSEM % KE/ myDGSEM % volume) )THEN
 
-      PRINT*, '  Model bust at simulation time : ', myDGSEM % simulationTime
-      PRINT*, '  Total Kinetic Energy :', myDGSEM % KE
-      PRINT*, '  Consider reducing the time step or increasing dissipation.'
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,1,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,1,:) )
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,2,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,2,:) )
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,3,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,3,:) )
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,4,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,4,:) )
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,5,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,5,:) )
-      PRINT*,   MINVAL( myDGSEM % static % solution(:,:,:,6,:) ), MAXVAL( myDGSEM % static % solution(:,:,:,6,:) )
+      INFO('Model bust!')
+      INFO('Consider reducing the time step or increasing dissipation.')
 
       CALL myDGSEM % WriteDiagnostics( )
       CALL myDGSEM % Trash( )
 
       STOP
     ENDIF
-    PRINT*, '[Fluid_Class](Diagnostics) : End'
+    INFO('End')
 
   END SUBROUTINE Diagnostics_Fluid
 !
@@ -3436,7 +3473,10 @@ CONTAINS
   END SUBROUTINE Add_Variable_to_HDF5
 !
   SUBROUTINE Write_to_HDF5( myDGSEM, filename )
-    IMPLICIT NONE
+
+#undef __FUNC__
+#define __FUNC__ "Write_to_HDF5"
+
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     CHARACTER(*), INTENT(in)      :: filename
     ! Local
@@ -3450,7 +3490,7 @@ CONTAINS
     INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id, plist_id
     INTEGER(HID_T)   :: create_plist_id, access_plist_id, transfer_plist_id
 
-    PRINT*, '[Fluid_Class](Write_to_HDF5) : Start'
+    INFO('Start')
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
     CALL myDGSEM % static % UpdateHost( )
@@ -3458,7 +3498,7 @@ CONTAINS
 #endif
 
     timeStampString = TimeStamp( myDGSEM % simulationTime, 's' )
-    PRINT*, '[Fluid_Class](Write_to_HDF5) : Writing output file : '//TRIM(filename)
+    INFO('Writing output file : '//TRIM(filename) )
 
 
     N = myDGSEM % params % polyDeg
@@ -3600,13 +3640,16 @@ CONTAINS
     CALL h5fclose_f( file_id, error )
     ! Close access to HDF5
     CALL h5close_f( error )
-    PRINT*, '[Fluid_Class](Write_to_HDF5) : Finished writing output file : '//TRIM(filename)
-    PRINT*, '[Fluid_Class](Write_to_HDF5) : End'
+    INFO('Finished writing output file : '//TRIM(filename))
+    INFO('End')
 
   END SUBROUTINE Write_to_HDF5
 
   SUBROUTINE Read_from_HDF5( myDGSEM, itExists, filename )
-    IMPLICIT NONE
+
+#undef __FUNC__
+#define __FUNC__ "Read_from_HDF5"
+
     CLASS( Fluid ), INTENT(inout)      :: myDGSEM
     CHARACTER(*), OPTIONAL, INTENT(in) :: filename
     LOGICAL, INTENT(out)               :: itExists
@@ -3622,7 +3665,7 @@ CONTAINS
     INTEGER(HID_T)   :: conditions_group_id, conditions_element_group_id
     INTEGER(HID_T)   :: daccess_plist_id, access_plist_id, transfer_plist_id
 
-    PRINT*, '[Fluid_Class](Read_from_HDF5) : Start'
+    INFO('Start')
     IF( PRESENT( filename ) )THEN
       fname = TRIM(filename)
     ELSE
@@ -3636,7 +3679,7 @@ CONTAINS
       RETURN
     ENDIF
 
-    PRINT*, '[Fluid_Class](Read_from_HDF5) : Reading '//TRIM(fname)
+    INFO('Reading '//TRIM(fname))
 
 #ifdef HAVE_MPI
     N = myDGSEM % params % polyDeg
@@ -4403,13 +4446,16 @@ CONTAINS
     CALL myDGSEM % sourceTerms % UpdateDevice( )
 #endif
 
-    PRINT*, '[Fluid_Class](Read_from_HDF5) : End'
+    INFO('End')
 
   END SUBROUTINE Read_from_HDF5
 
   
   SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
-    IMPLICIT NONE
+
+#undef __FUNC__
+#define __FUNC__ "UpdateExternalStaticState"
+
     CLASS( Fluid ), INTENT (inout) :: myDGSEM 
     ! Local
     INTEGER :: bID, iFace, e1, s1, i, j, iEq
@@ -4417,7 +4463,7 @@ CONTAINS
     INTEGER :: iStat
 #endif
 
-     PRINT*, '[Fluid_Class](UpdateExternalStaticState): Start'
+     INFO('Start')
      myDGSEM % static % boundarySolution = CalculateFunctionsAtBoundaries_3D_NodalDG( myDGSEM % dgStorage, &
                                                                                       myDGSEM % static % solution, &
                                                                                       myDGSEM % static % nEquations, &
@@ -4457,7 +4503,7 @@ CONTAINS
 
 #endif
 
-     PRINT*, '[Fluid_Class](UpdateExternalStaticState) : End'
+     INFO('End')
 
   END SUBROUTINE UpdateExternalStaticState_Fluid
 

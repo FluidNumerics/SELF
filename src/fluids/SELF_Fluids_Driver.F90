@@ -15,7 +15,12 @@ PROGRAM SELF_Fluids_Driver
 
   IMPLICIT NONE
 
+#include "self_macros.h"
+
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+
+#undef __FUNC__
+#define __FUNC__ "Main"
 
   TYPE( Fluid )                :: myFluid
   LOGICAL                      :: setupSuccess
@@ -29,7 +34,7 @@ PROGRAM SELF_Fluids_Driver
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 
 
-  PRINT*,'[SELF_Fluids_Driver](Initialize) : Start'
+  INFO('Start')
   CALL Setup( )
 
   IF( setupSuccess )THEN
@@ -50,9 +55,9 @@ PROGRAM SELF_Fluids_Driver
 
     ENDIF
 
-
-    PRINT*,'[SELF_Fluids_Driver](Initialize) : End'
   ENDIF
+
+  INFO('End')
 
 CONTAINS
 
@@ -61,7 +66,7 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE Setup( )
-    IMPLICIT NONE
+    
     ! Local
     INTEGER :: nArg, argID
     CHARACTER(500) :: argName
@@ -240,7 +245,7 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE Cleanup( )
-    IMPLICIT NONE
+    
 
     CALL myFluid % Trash( )
 
@@ -251,7 +256,7 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE MainLoop( )
-    IMPLICIT NONE
+    
     INTEGER    :: iT
 
 ! ------------------------------------------------------------------------------ !
