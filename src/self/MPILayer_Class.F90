@@ -12,12 +12,13 @@ MODULE MPILayer_Class
   USE NodalDGSolution_3D_Class
   USE Faces_Class
 
+  IMPLICIT NONE
+
 #ifdef HAVE_MPI
   INCLUDE 'mpif.h'
 #endif
 
-  IMPLICIT NONE
-
+#include "self_macros.h"
 
   TYPE MPILayer
 
@@ -30,9 +31,6 @@ MODULE MPILayer_Class
       PROCEDURE :: Build => Build_MPILayer
       PROCEDURE :: Trash => Trash_MPILayer
 
-!      PROCEDURE :: Initialize_MPILayer
-!      PROCEDURE :: Finalize_MPILayer
- 
       PROCEDURE :: MPI_Exchange
       PROCEDURE :: Finalize_MPI_Exchange
 
@@ -42,15 +40,16 @@ MODULE MPILayer_Class
 CONTAINS
 
   SUBROUTINE Build_MPILayer( myMPI, N, nVars, nMessages )
-
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "Build_MPILayer"
     CLASS( MPILayer ), INTENT(out) :: myMPI
     INTEGER, INTENT(in)            :: N, nVars, nMessages
 
+    INFO('Start')
 #ifdef HAVE_MPI
 
-    ALLOCATE( myMPI % requestHandle(1:nVars), &
-              myMPI % requestStats(MPI_STATUS_SIZE,1:nVars) )
+    ALLOCATE( myMPI % requestHandle(1:2*nMessages), &
+              myMPI % requestStats(MPI_STATUS_SIZE,1:2*nMessages) )
 
     myMPI % requestHandle = 0
     myMPI % requestStats  = 0
@@ -60,12 +59,13 @@ CONTAINS
     myMPI % nVars     = nVars
     myMPI % nMessages = nMessages
 
+    INFO('End')
 
   END SUBROUTINE Build_MPILayer
 !
   SUBROUTINE Trash_MPILayer( myMPI )
-
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "Trash_MPILayer"
     CLASS( MPILayer ), INTENT(inout) :: myMPI
 
 #ifdef HAVE_MPI
@@ -76,14 +76,17 @@ CONTAINS
   END SUBROUTINE Trash_MPILayer
 
   SUBROUTINE Initialize_MPILayer( )
+#undef __FUNC__
+#define __FUNC__ "Initialize_MPILayer"
+    INTEGER       :: ierror
+    CHARACTER(30) :: msg
 
-    INTEGER    :: ierror
-
+    INFO('Start')
     myRank = 0
     nProc  = 1
 #ifdef HAVE_MPI
     mpiComm = MPI_COMM_WORLD
-    CALL MPI_INIT( mpiErr )
+    CALL MPI_INIT( ierror )
     CALL MPI_COMM_RANK( mpiComm, myRank, ierror )
     CALL MPI_COMM_SIZE( mpiComm, nProc,  ierror )
 
@@ -93,6 +96,10 @@ CONTAINS
       mpiPrec=MPI_DOUBLE
     ENDIF
 #endif
+    WRITE(msg,'(I5)')myRank
+    msg="Greetings from rank "//TRIM(msg)//"."
+    INFO(TRIM(msg))
+    INFO('End')
 
   END SUBROUTINE Initialize_MPILayer
 
@@ -106,7 +113,8 @@ CONTAINS
   END SUBROUTINE Finalize_MPILayer
 
   SUBROUTINE MPI_Exchange( myMPI, state, meshfaces, boundaryToFaceID, boundaryToProcID )
-
+#undef __FUNC__
+#define __FUNC__ "MPI_Exchange"
     CLASS( MPILayer ), INTENT(inout)          :: myMPI
     TYPE( NodalDGSolution_3D ), INTENT(inout) :: state
     TYPE( Faces ), INTENT(in)                 :: meshFaces
@@ -116,15 +124,15 @@ CONTAINS
     ! Local
     INTEGER    :: iError
     INTEGER    :: local_face_id, bID
-    INTEGER    :: tag
-    INTEGER    :: local_element_id, e2, side_id, external_process_id
-
+    INTEGER    :: global_face_id
+    INTEGER    :: local_element_id, e2, side_id, external_proc_id
+    
     DO bID = 1, myMPI % nMessages
 
-      local_face_id    = boundaryToFaceID( bID )
+      local_face_id    = boundaryToFaceID(bID)
       external_proc_id = boundaryToProcID(bID)
 
-      IF( external_process_id /= myMPI % myRank )THEN
+      IF( external_proc_id /= myRank )THEN
 
         local_element_id = meshFaces % elementIDs(1,local_face_id)
         side_id          = meshFaces % elementSides(1,local_face_id)
@@ -132,16 +140,16 @@ CONTAINS
 
         CALL MPI_IRECV( state % externalState(:,:,:,bID), &
                         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
-                        myMPI % MPI_PREC,   &
-                        p2, global_face_id,  &
-                        myMPI % mpiComm,   &
+                        mpiPrec,   &
+                        external_proc_id, global_face_id,  &
+                        mpiComm,   &
                         myMPI % requestHandle(bid*2-1), iError )
   
         CALL MPI_ISEND( state % boundarySolution(:,:,:,side_id,local_element_id), &
-                        (myMPI % N+1)*(myMPI % N+1), &
-                        myMPI % MPI_PREC, &
-                        p2, global_face_id, &
-                        myMPI % mpiComm, &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, &
+                        external_proc_id, global_face_id, &
+                        mpiComm, &
                         myMPI % requestHandle(bid*2), iError)
   
       ENDIF
@@ -152,7 +160,8 @@ CONTAINS
   END SUBROUTINE MPI_Exchange
 !
   SUBROUTINE Finalize_MPI_Exchange( myMPI )
-
+#undef __FUNC__
+#define __FUNC__ "Finalize_MPI_Exchange"
     CLASS( MPILayer ), INTENT(inout)          :: myMPI
 #ifdef HAVE_MPI
     ! Local

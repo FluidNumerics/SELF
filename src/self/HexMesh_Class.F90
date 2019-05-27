@@ -2724,7 +2724,7 @@ CONTAINS
     
   END FUNCTION NumberOfBoundaryFaces
   
- SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess )
+ SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess, nMPI_Ranks )
 
 #undef __FUNC__
 #define __FUNC__ "StructuredMeshGenerator_3D"
@@ -2732,6 +2732,7 @@ CONTAINS
  LOGICAL, INTENT(out)                      :: setupSuccess
  CHARACTER(*), INTENT(in)                  :: paramFile
  CHARACTER(*), INTENT(in)                  :: equationFile
+ INTEGER, INTENT(in)                       :: nMPI_Ranks
   ! Local
  TYPE( NodalDG )                           :: nodal
  TYPE( HexMesh )                           :: mesh
@@ -2758,7 +2759,7 @@ CONTAINS
       CALL params % Build( TRIM(paramFile), setupSuccess )
 
 #ifdef HAVE_MPI
-      CALL MPI_COMM_SIZE( MPI_COMM_WORLD, params % nProc, mpiErr )
+      params % nProc = nMPI_Ranks
 
       IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
 

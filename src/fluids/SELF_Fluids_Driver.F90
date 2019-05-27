@@ -35,6 +35,8 @@ PROGRAM SELF_Fluids_Driver
 
 
   INFO('Start')
+  CALL Initialize_MPILayer()
+
   CALL Setup( )
 
   IF( setupSuccess )THEN
@@ -44,6 +46,8 @@ PROGRAM SELF_Fluids_Driver
       CALL MeshGen( )
     
     ELSE
+
+      CALL myFluid % Build( equationFile, paramFile, setupSuccess )
 
       CALL Initialize( )
 
@@ -56,6 +60,8 @@ PROGRAM SELF_Fluids_Driver
     ENDIF
 
   ENDIF
+
+  CALL Finalize_MPILayer( )
 
   INFO('End')
 
@@ -83,6 +89,7 @@ CONTAINS
 
     nArg = command_argument_count( )
 
+    setupSuccess = .TRUE.
     DO argID = 1, nArg
 
       CALL get_command_argument( argID, argName )
@@ -185,9 +192,6 @@ CONTAINS
       RETURN
     ENDIF
 
-    IF( .NOT. run_MeshGenOnly )THEN
-      CALL myFluid % Build( equationFile, paramFile, setupSuccess )
-    ENDIF
 
 
   END SUBROUTINE Setup
@@ -199,16 +203,12 @@ CONTAINS
   SUBROUTINE MeshGen( )
 
 
-      CALL Initialize_MPILayer()
 
       IF( myRank == 0 )THEN
         PRINT*, '  Generating structured mesh...'
-        CALL StructuredMeshGenerator_3D( paramFile, equationFile, meshGenSuccess )
+        CALL StructuredMeshGenerator_3D( paramFile, equationFile, meshGenSuccess, nProc )
         PRINT*, '  Done'
       ENDIF
-
-      CALL Finalize_MPILayer( )
-
 
   END SUBROUTINE MeshGen
 

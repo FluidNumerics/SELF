@@ -159,8 +159,6 @@ CONTAINS
 
     CALL myDGSEM % fluidEquations % Build( TRIM( equationFile ) )
 
-    CALL Initialize_MPILayer() 
-
 #ifdef HAVE_CUDA
     CALL UpdateDeviceDictionary( )
 #endif
@@ -263,32 +261,6 @@ CONTAINS
 #endif
 
 
-#ifdef TIMING
-    ! Setup timers
-    CALL myDGSEM % timers % Build( )
-    CALL myDGSEM % timers % AddTimer( 'Forward_Step_RK3', 1 )
-    CALL myDGSEM % timers % AddTimer( 'EquationOfState', 2 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_State_At_Boundaries', 3 )
-    CALL myDGSEM % timers % AddTimer( 'MPI_State_Exchange', 4 )
-    CALL myDGSEM % timers % AddTimer( 'Update_External_State', 5 )
-    CALL myDGSEM % timers % AddTimer( 'Internal_Face_State_Flux', 6 )
-    CALL myDGSEM % timers % AddTimer( 'Finalize_MPI_State_Exchange', 7 )
-    CALL myDGSEM % timers % AddTimer( 'Boundary_Face_State_Flux', 8 )
-    CALL myDGSEM % timers % AddTimer( 'Filter3D_for_SmoothedState', 9 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_SGS_Coefficients', 10 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_SGS_At_Boundaries', 11 )
-    CALL myDGSEM % timers % AddTimer( 'MPI_SGS_Exchange', 12 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Solution_Gradient', 13 )
-    CALL myDGSEM % timers % AddTimer( 'Finalize_SGS_Exchange', 14 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Normal_Stress_At_Boundaries', 15 )
-    CALL myDGSEM % timers % AddTimer( 'MPI_Stress_Exchange', 16 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux', 17 )
-    CALL myDGSEM % timers % AddTimer( 'Update_External_Stress', 18 )
-    CALL myDGSEM % timers % AddTimer( 'Finalize_Stress_Exchange', 19 )
-    CALL myDGSEM % timers % AddTimer( 'Boundary_Face_Stress_Flux', 20 )
-    CALL myDGSEM % timers % AddTimer( 'Calculate_Stress_Flux_Divergence', 21 )
-    CALL myDGSEM % timers % AddTimer( 'Mapped_Time_Derivative', 22 )
-#endif
     INFO('End')
 
   END SUBROUTINE Build_Fluid
@@ -311,11 +283,6 @@ CONTAINS
     CALL myDGSEM % smoothState % Trash( )
     CALL myDGSEM % stressTensor % Trash( )
     CALL myDGSEM % sgsCoeffs % Trash( )
-
-#ifdef TIMING
-    CALL myDGSEM % timers % Write_MultiTimers( )
-    CALL myDGSEM % timers % Trash( )
-#endif
 
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Trash( )
@@ -416,7 +383,7 @@ CONTAINS
     CALL myDGSEM % EquationOfState( ) ! GPU Kernel (if CUDA)
     !$OMP END PARALLEL
 
-!    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
+    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
@@ -542,7 +509,7 @@ CONTAINS
 
           INFO('Mesh files not found.')
           INFO('Generating structured mesh...')
-          CALL StructuredMeshGenerator_3D( TRIM(paramFile), TRIM(equationFile), meshgenSuccess )
+          CALL StructuredMeshGenerator_3D( TRIM(paramFile), TRIM(equationFile), meshgenSuccess, nProc )
           INFO('Structured mesh generation complete')
 
         ENDIF
@@ -569,7 +536,9 @@ CONTAINS
 !
   SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT )
 
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "ForwardStepRK3"
+
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     INTEGER, INTENT(in)         :: nT
     ! LOCAL
@@ -591,10 +560,7 @@ CONTAINS
 
 #endif
 
-
-#ifdef TIMING
-    CALL myDGSEM % timers % StartTimer( 1 )
-#endif
+    INFO('Start')
 
 
 #ifdef HAVE_CUDA
@@ -617,13 +583,7 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
-#ifdef TIMING
-    CALL myDGSEM % timers % StartTimer( 2 )
-#endif
         CALL myDGSEM % EquationOfState( )
-#ifdef TIMING
-    CALL myDGSEM % timers % StopTimer( 2 )
-#endif
         CALL myDGSEM % GlobalTimeDerivative( t )
         CALL UpdateG3D_CUDAKernel<<<grid,tBlock>>>( G3D, rk3_a_dev(m), rk3_g_dev(m), &
                                                     myDGSEM % state % solution_dev, &
@@ -650,13 +610,7 @@ CONTAINS
 
         t = myDGSEM % simulationTime  + rk3_b(m)*dt
 
-#ifdef TIMING
-    CALL myDGSEM % timers % StartTimer( 2 )
-#endif
         CALL myDGSEM % EquationOfState( )
-#ifdef TIMING
-    CALL myDGSEM % timers % StopTimer( 2 )
-#endif
 
 
         CALL myDGSEM % GlobalTimeDerivative( t )
@@ -712,17 +666,7 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 2 )
-    !$OMP END MASTER
-#endif
         CALL myDGSEM % EquationOfState( )
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 2 )
-    !$OMP END MASTER
-#endif
         CALL myDGSEM % GlobalTimeDerivative( t )
        !$OMP BARRIER
 
@@ -780,17 +724,7 @@ CONTAINS
 
         t = myDGSEM % simulationTime + rk3_b(m)*dt
 
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 2 )
-    !$OMP END MASTER
-#endif
         CALL myDGSEM % EquationOfState( )
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 2 )
-    !$OMP END MASTER
-#endif
         CALL myDGSEM % GlobalTimeDerivative( t )
 
         !$OMP DO
@@ -830,9 +764,7 @@ CONTAINS
 
 #endif
 
-#ifdef TIMING
-    CALL myDGSEM % timers % StopTimer( 1 )
-#endif
+    INFO('End')
 
   END SUBROUTINE ForwardStepRK3_Fluid
 !
@@ -905,40 +837,11 @@ CONTAINS
 !
   SUBROUTINE GlobalTimeDerivative_Fluid( myDGSEM, tn )
 
-    IMPLICIT NONE
-    CLASS(Fluid), INTENT(inout) :: myDGSEM
-    REAL(prec), INTENT(in)      :: tn
-#ifdef HAVE_CUDA
-    TYPE(dim3) :: tBlock, grid
-    INTEGER    :: istat
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
+#undef __FUNC__
+#define __FUNC__ "GlobalTimeDerivative"
 !  Here, the solution within each element is interpolated to the faces of each
 !  element in order to prepare for computing the external state for enforcing
 !  boundary conditions, Riemann Fluxes, and MPI DATA exchanges that need to
-!  occur.
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 3 )
-    !$OMP END MASTER
-#endif
-
-    CALL myDGSEM % CalculateStateAtBoundaries( )
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 3 )
-    !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
 !
 ! When MPI is USEd, the boundary solutions that are stored on faces shared with
 ! a neighboring rank are passed to that neighboring rank. Additionally, the
@@ -946,13 +849,95 @@ CONTAINS
 ! routine is dependent on the result of CalculateBoundarySolutio, but can be
 ! DOne at the same time as UpdateExternalState; DOing so should hide some
 ! communication costs.
+!  occur.
+!
+! The boundary solutions are USEd to calculate the external states that, when
+! accompanied with a Riemann Solver, enforce boundary conditions. Calling this
+! routine is dependent on the result of CalculateBoundarySolution
+!
+! The inviscid fluxes (advection + pressure) through the faces of each element
+! are estimated here using a (linear) Lax-Friedrich's upwind solver. In order to
+! call this routine, CalculateBoundarySolution, UpdateExternalState, and
+! MPI_StateExchange must have been completed.
+!
+! IF the SpectralEKE or Laplacian subgridscale models are USEd, a Laplacian-like
+! operator is USEd to dIFfUSE momentum and heat. When the Laplacian model is
+! USEd a fixed viscosity is specIFied in runtime.params and a Rayleigh number of
+! 1 is assumed (viscosity = dIFfusivity). When the SpectralEKE model is USEd,
+! the viscosity coefficient is diagnosed using a Smagorinksy closure, where the
+! unresolved kinetic energy is diagnosed from a highpass spectral filter.
+!
+! In the Spectral-EKE model, the under-resolved state is diagnosed from a high
+! pass spectral filter (the dIFference between the state and smoothed state).
+! Here, we first calculate the smoothed state and store it in the smoothedState
+! attribute. This SUBROUTINE call has no dependence to any other within this
+! SUBROUTINE.
+!
+! The high passed solution is USEd to diagnose an isotropic viscosity
+! coefficient, similar to a Smagorinksy closure and similar to the closure in
+!
+!  J. Sauer (2013), "Towards Improved Capability and Confidence in Coupled
+!  Atmospheric and Wildland Fire Modeling"
+!
+! The main dIFference in this work, is in the diagnosis of the SGS Kinetic
+! Energy from the high pass filtered solution.
+! This routine depends on the results from CalculateSmoothedState.
+!
+! The viscosity coefficient that is calculated is now interpolated to the faces
+! of each element so that the viscous flux can later be computed. This routine
+! depends on the result of CalculateSGSCoefficients.
+!
+! The viscosity coefficients are exchanged with neighboring ranks that share
+! COMMON faces. MPI_SGSExchange can be run simulataneously with
+! CalculateStressTensor, CalculateBoundaryStress, UpdateExternalStress, and the
+! MPI_StressExchange. The viscosity coefficients that are exchanged are not
+! needed until StressFlux
+!
+! Now, the internal solution and the boundaryGradientFlux can be pieced
+! together to calculate gradients in the velocity and potential temperature.
+! This routine depends on the result of FaceFlux ( state % boundaryGradientFlux )
+!
+! The solution gradient values are interpolated to the faces of each element and
+! projected onto the face normal direction. This
+! routine depends on the result of CalculateStressTensor.
+!
+! Stress tensor values are exchanged with neighboring ranks along shared faces.
+! This routine depends on the result of CalculateBoundaryStress, but can be run
+! at the same time as UpdateExternalStress.
+!
+!  Using the solution gradient and the eddy-viscosities/diffusivities, the
+!  stress flux is calculated
+!
+! Now that the stress tensor is available on element faces, boundary conditions
+! can be applied by setting the external stress tensor state. This routine
+! depends on the result of CalculateBoundaryStress. Note that this routine can
+! be run simultaneously with the MPI_StressExchange
+!
+! Using the boundary and the external state for the stress tensor, the viscous
+! fluxes are estimated using a Bassi-Rebay flux that averages neighboring values
+! of the stress tensor plus the jump in the solution weighted by a spatial
+! wave-number. This routine depends on the result of the UpdateExternalStress
+! and the MPI_StressExchange.
+!
+! With the boundary stress flux and the internal stress tensor values, the
+! divergence of the stress tensor can be calculated, giving the viscous tendency
+! for the momentum and the potential temperature. This routine depends on the
+! result of StressFlux (and the dependencies of StressFlux), but can be DOne
+! simultaneously with the MappedTimeDerivative.
+!
+! Once the inviscid fluxes through the faces are calculated, and the internal
+! state is known, the tendency due to the inviscid flux terms and
+! nonconservative source terms is calculated here. This routine depends on the
+! result of FaceFlux, but can be DOne at the same time as StressDivergence
 
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 4 )
-    !$OMP END MASTER
+    CLASS(Fluid), INTENT(inout) :: myDGSEM
+    REAL(prec), INTENT(in)      :: tn
+#ifdef HAVE_CUDA
+    TYPE(dim3) :: tBlock, grid
+    INTEGER    :: istat
 #endif
 
+    CALL myDGSEM % CalculateStateAtBoundaries( )
 #ifdef HAVE_MPI
     !$OMP MASTER
     CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % state, &
@@ -962,67 +947,11 @@ CONTAINS
     !$OMP END MASTER
     !$OMP BARRIER
 #endif
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 4 )
-    !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! The boundary solutions are USEd to calculate the external states that, when
-! accompanied with a Riemann Solver, enforce boundary conditions. Calling this
-! routine is dependent on the result of CalculateBoundarySolution
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 5 )
-    !$OMP END MASTER
-#endif
-
     CALL myDGSEM % UpdateExternalState( tn )
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 5 )
-    !$OMP END MASTER
-#endif
-
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! The inviscid fluxes (advection + pressure) through the faces of each element
-! are estimated here using a (linear) Lax-Friedrich's upwind solver. In order to
-! call this routine, CalculateBoundarySolution, UpdateExternalState, and
-! MPI_StateExchange must have been completed.
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 6 )
-    !$OMP END MASTER
-#endif
-
     !$OMP MASTER
     CALL myDGSEM % InternalFace_StateFlux( )
     !$OMP END MASTER
     !$OMP BARRIER
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 6 )
-    !$OMP END MASTER
-#endif
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 7 )
-    !$OMP END MASTER
-#endif
 
 #ifdef HAVE_MPI
     !$OMP MASTER
@@ -1031,59 +960,12 @@ CONTAINS
     !$OMP BARRIER
 #endif
 
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 7 )
-    !$OMP END MASTER
-#endif
-
-
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StartTimer( 8 )
-    !$OMP END MASTER
-#endif
-
     CALL myDGSEM % BoundaryFace_StateFlux( )
 
-#ifdef TIMING
-    !$OMP MASTER
-    CALL myDGSEM % timers % StopTimer( 8 )
-    !$OMP END MASTER
-#endif
-
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! IF the SpectralEKE or Laplacian subgridscale models are USEd, a Laplacian-like
-! operator is USEd to dIFfUSE momentum and heat. When the Laplacian model is
-! USEd a fixed viscosity is specIFied in runtime.params and a Rayleigh number of
-! 1 is assumed (viscosity = dIFfusivity). When the SpectralEKE model is USEd,
-! the viscosity coefficient is diagnosed using a Smagorinksy closure, where the
-! unresolved kinetic energy is diagnosed from a highpass spectral filter.
-!
     IF( myDGSEM % params % SubGridModel == SpectralEKE .OR. &
         myDGSEM % params % SubGridModel == Laplacian ) THEN
 
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
-!
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! In the Spectral-EKE model, the under-resolved state is diagnosed from a high
-! pass spectral filter (the dIFference between the state and smoothed state).
-! Here, we first calculate the smoothed state and store it in the smoothedState
-! attribute. This SUBROUTINE call has no dependence to any other within this
-! SUBROUTINE.
-
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 9 )
-      !$OMP END MASTER
-#endif
 
 #ifdef HAVE_CUDA
         CALL myDGSEM % filter % Filter3D( myDGSEM % state % solution_dev, &
@@ -1097,79 +979,8 @@ CONTAINS
                                           myDGSEM % mesh % elements % nElements )
 #endif
 
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 9 )
-      !$OMP END MASTER
-#endif
-
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! The high passed solution is USEd to diagnose an isotropic viscosity
-! coefficient, similar to a Smagorinksy closure and similar to the closure in
-!
-!  J. Sauer (2013), "Towards Improved Capability and Confidence in Coupled
-!  Atmospheric and Wildland Fire Modeling"
-!
-! The main dIFference in this work, is in the diagnosis of the SGS Kinetic
-! Energy from the high pass filtered solution.
-! This routine depends on the results from CalculateSmoothedState.
-
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 10 )
-      !$OMP END MASTER
-#endif
-
         CALL myDGSEM % CalculateSGSCoefficients( )
-
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 10 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-! The viscosity coefficient that is calculated is now interpolated to the faces
-! of each element so that the viscous flux can later be computed. This routine
-! depends on the result of CalculateSGSCoefficients.
-
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 11 )
-      !$OMP END MASTER
-#endif
-
         CALL myDGSEM % CalculateSGSAtBoundaries( )
-
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 11 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! The viscosity coefficients are exchanged with neighboring ranks that share
-! COMMON faces. MPI_SGSExchange can be run simulataneously with
-! CalculateStressTensor, CalculateBoundaryStress, UpdateExternalStress, and the
-! MPI_StressExchange. The viscosity coefficients that are exchanged are not
-! needed until StressFlux
-!
-
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StartTimer( 12 )
-      !$OMP END MASTER
-#endif
-
 #ifdef HAVE_MPI
       !$OMP MASTER
         CALL myDGSEM % mpiSGSHandler % MPI_Exchange( myDGSEM % sgsCoeffs, &
@@ -1180,41 +991,9 @@ CONTAINS
       !$OMP BARRIER
 #endif
 
-#ifdef TIMING
-      !$OMP MASTER
-        CALL myDGSEM % timers % StopTimer( 12 )
-      !$OMP END MASTER
-#endif
-
       ENDIF
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! Now, the internal solution and the boundaryGradientFlux can be pieced
-! together to calculate gradients in the velocity and potential temperature.
-! This routine depends on the result of FaceFlux ( state % boundaryGradientFlux )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 13 )
-      !$OMP END MASTER
-#endif
 
       CALL myDGSEM % CalculateSolutionGradient( )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 13 )
-      !$OMP END MASTER
-#endif
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 14 )
-      !$OMP END MASTER
-#endif
-
 #ifdef HAVE_MPI
       !$OMP MASTER
       IF( myDGSEM % params % SubGridModel == SpectralEKE )THEN !
@@ -1223,48 +1002,7 @@ CONTAINS
       !$OMP END MASTER
       !$OMP BARRIER
 #endif
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 14 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! The solution gradient values are interpolated to the faces of each element and
-! projected onto the face normal direction. This
-! routine depends on the result of CalculateStressTensor.
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 15 )
-      !$OMP END MASTER
-#endif
-
       CALL myDGSEM % CalculateNormalStressAtBoundaries( )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 15 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! Stress tensor values are exchanged with neighboring ranks along shared faces.
-! This routine depends on the result of CalculateBoundaryStress, but can be run
-! at the same time as UpdateExternalStress.
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 16 )
-      !$OMP END MASTER
-#endif
 
 #ifdef HAVE_MPI
       !$OMP MASTER
@@ -1275,156 +1013,21 @@ CONTAINS
       !$OMP END MASTER
       !$OMP BARRIER
 #endif
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 16 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-!  Using the solution gradient and the eddy-viscosities/diffusivities, the
-!  stress flux is calculated
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 17 )
-      !$OMP END MASTER
-#endif
-
       CALL myDGSEM % CalculateStressFlux( )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 17 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! Now that the stress tensor is available on element faces, boundary conditions
-! can be applied by setting the external stress tensor state. This routine
-! depends on the result of CalculateBoundaryStress. Note that this routine can
-! be run simultaneously with the MPI_StressExchange
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 18 )
-      !$OMP END MASTER
-#endif
-     
       CALL myDGSEM % UpdateExternalStress( tn )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 18 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! Using the boundary and the external state for the stress tensor, the viscous
-! fluxes are estimated using a Bassi-Rebay flux that averages neighboring values
-! of the stress tensor plus the jump in the solution weighted by a spatial
-! wave-number. This routine depends on the result of the UpdateExternalStress
-! and the MPI_StressExchange.
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 19 )
-      !$OMP END MASTER
-#endif
-
 #ifdef HAVE_MPI
       !$OMP MASTER
       CALL myDGSEM % mpiStressHandler % Finalize_MPI_Exchange( )
       !$OMP END MASTER
       !$OMP BARRIER
 #endif
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 19 )
-      !$OMP END MASTER
-#endif
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 20 )
-      !$OMP END MASTER
-#endif
       CALL myDGSEM % BoundaryFace_StressFlux( )
-  
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 20 )
-      !$OMP END MASTER
-#endif      
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><>><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! With the boundary stress flux and the internal stress tensor values, the
-! divergence of the stress tensor can be calculated, giving the viscous tendency
-! for the momentum and the potential temperature. This routine depends on the
-! result of StressFlux (and the dependencies of StressFlux), but can be DOne
-! simultaneously with the MappedTimeDerivative.
-!
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 21 )
-      !$OMP END MASTER
-#endif
-
       CALL myDGSEM % StressFluxDivergence( )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 21 )
-      !$OMP END MASTER
-#endif
-
 
     ENDIF
 
 
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-!
-! Once the inviscid fluxes through the faces are calculated, and the internal
-! state is known, the tendency due to the inviscid flux terms and
-! nonconservative source terms is calculated here. This routine depends on the
-! result of FaceFlux, but can be DOne at the same time as StressDivergence
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StartTimer( 22 )
-      !$OMP END MASTER
-#endif
-
       CALL myDGSEM % MappedTimeDerivative( )
-
-#ifdef TIMING
-      !$OMP MASTER
-      CALL myDGSEM % timers % StopTimer( 22 )
-      !$OMP END MASTER
-#endif
-
-! ----------------------------------------------------------------------------- !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>< !
-! ----------------------------------------------------------------------------- !
-
 
   END SUBROUTINE GlobalTimeDerivative_Fluid
 !
@@ -1811,8 +1414,6 @@ CONTAINS
             ut = myDGSEM % state % boundarySolution(i,j,1,s1,e1)*tx  + &
               myDGSEM % state % boundarySolution(i,j,2,s1,e1)*ty  + &
               myDGSEM % state % boundarySolution(i,j,3,s1,e1)*tz
-
-
 
             myDGSEM % state % externalState(i,j,1,bID) = -nx*un + us*sx + ut*tx ! u
             myDGSEM % state % externalState(i,j,2,bID) = -ny*un + us*sy + ut*ty ! v
@@ -4487,20 +4088,20 @@ CONTAINS
   
     ENDDO
 
-#ifdef HAVE_CUDA
-    myDGSEM % static % externalState_dev = myDGSEM % static % externalState
-    myDGSEM % static % boundarySolution_dev = myDGSEM % static % boundarySolution
-    istat = cudaDeviceSynchronize( )
-#endif
 
 #ifdef HAVE_MPI
-    ! When CUDA is enabled, the externalState_dev is filled in.
     CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % static, &
                                                    myDGSEM % mesh % faces, &
                                                    myDGSEM % mesh % boundaryMap % boundaryIDs, &
                                                    myDGSEM % mesh % boundaryMap % extProcIDs )
     CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( )
 
+#endif
+
+#ifdef HAVE_CUDA
+    myDGSEM % static % externalState_dev = myDGSEM % static % externalState
+    myDGSEM % static % boundarySolution_dev = myDGSEM % static % boundarySolution
+    istat = cudaDeviceSynchronize( )
 #endif
 
      INFO('End')
