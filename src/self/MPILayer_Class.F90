@@ -123,17 +123,19 @@ CONTAINS
 #ifdef HAVE_MPI
     ! Local
     INTEGER    :: iError
-    INTEGER    :: local_face_id, bID
+    INTEGER    :: local_face_id, bID, message_id
     INTEGER    :: global_face_id
     INTEGER    :: local_element_id, e2, side_id, external_proc_id
     
-    DO bID = 1, myMPI % nMessages
+    message_id = 0
+    DO bID = 1, state % nBoundaryFaces
 
       local_face_id    = boundaryToFaceID(bID)
       external_proc_id = boundaryToProcID(bID)
 
       IF( external_proc_id /= myRank )THEN
-
+ 
+        message_id = message_id + 1
         local_element_id = meshFaces % elementIDs(1,local_face_id)
         side_id          = meshFaces % elementSides(1,local_face_id)
         global_face_id   = meshFaces % faceID(local_face_id) 
@@ -143,14 +145,14 @@ CONTAINS
                         mpiPrec,   &
                         external_proc_id, global_face_id,  &
                         mpiComm,   &
-                        myMPI % requestHandle(bid*2-1), iError )
+                        myMPI % requestHandle(message_id*2-1), iError )
   
         CALL MPI_ISEND( state % boundarySolution(:,:,:,side_id,local_element_id), &
                         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
                         mpiPrec, &
                         external_proc_id, global_face_id, &
                         mpiComm, &
-                        myMPI % requestHandle(bid*2), iError)
+                        myMPI % requestHandle(message_id*2), iError)
   
       ENDIF
     ENDDO

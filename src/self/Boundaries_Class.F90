@@ -24,11 +24,12 @@ MODULE Boundaries_CLASS
 !
 
   TYPE Boundaries
-    INTEGER              :: nBoundaries
+    INTEGER              :: nBoundaries, nMPI
     INTEGER, ALLOCATABLE :: extProcIDs(:)
     INTEGER, ALLOCATABLE :: boundaryIDs(:)
     INTEGER, ALLOCATABLE :: boundaryGlobalIDs(:)
     INTEGER, ALLOCATABLE :: boundaryCondition(:)
+    INTEGER, ALLOCATABLE :: boundary_to_mpi(:)
 
 #ifdef HAVE_CUDA
     INTEGER, DEVICE, ALLOCATABLE :: extProcIDs_dev(:)
@@ -56,19 +57,21 @@ CONTAINS
 !==================================================================================================!
 !
 !
-  SUBROUTINE Build_Boundaries( myBoundaries, nBe )
+  SUBROUTINE Build_Boundaries( myBoundaries, nbf, nmpi )
 
     IMPLICIT NONE
     CLASS(Boundaries), INTENT(inout) :: myBoundaries
-    INTEGER, INTENT(in)                        :: nBe
+    INTEGER, INTENT(in)              :: nbf, nmpi
 
 
-    myBoundaries % nBoundaries = nBe
+    myBoundaries % nBoundaries = nbf
+    myBoundaries % nmpi        = nmpi
 
-    ALLOCATE( myBoundaries % extProcIDs(1:nBe) )
-    ALLOCATE( myBoundaries % boundaryIDs(1:nBe) )
-    ALLOCATE( myBoundaries % boundaryGlobalIDs(1:nBe) )
-    ALLOCATE( myBoundaries % boundaryCondition(1:nBe) )
+    ALLOCATE( myBoundaries % extProcIDs(1:nbf) )
+    ALLOCATE( myBoundaries % boundaryIDs(1:nbf) )
+    ALLOCATE( myBoundaries % boundaryGlobalIDs(1:nbf) )
+    ALLOCATE( myBoundaries % boundaryCondition(1:nbf) )
+    IF( nmpi > 0 ) ALLOCATE(myBoundaries % boundary_to_mpi(1:nmpi))
 
     myBoundaries % extProcIDs        = 0
     myBoundaries % boundaryIDs       = -1
@@ -76,10 +79,10 @@ CONTAINS
     myBoundaries % boundaryCondition = 0
    
 #ifdef HAVE_CUDA
-    ALLOCATE( myBoundaries % extProcIDs_dev(1:nBe) )
-    ALLOCATE( myBoundaries % boundaryIDs_dev(1:nBe) )
-    ALLOCATE( myBoundaries % boundaryGlobalIDs_dev(1:nBe) )
-    ALLOCATE( myBoundaries % boundaryCondition_dev(1:nBe) )
+    ALLOCATE( myBoundaries % extProcIDs_dev(1:nbf) )
+    ALLOCATE( myBoundaries % boundaryIDs_dev(1:nbf) )
+    ALLOCATE( myBoundaries % boundaryGlobalIDs_dev(1:nbf) )
+    ALLOCATE( myBoundaries % boundaryCondition_dev(1:nbf) )
 #endif
 
 
@@ -94,6 +97,7 @@ CONTAINS
     IF( ALLOCATED( myBoundaries % boundaryIDs ) ) DEALLOCATE( myBoundaries % boundaryIDs )
     IF( ALLOCATED( myBoundaries % boundaryGlobalIDs ) ) DEALLOCATE( myBoundaries % boundaryGlobalIDs )
     IF( ALLOCATED( myBoundaries % boundaryCondition ) ) DEALLOCATE( myBoundaries % boundaryCondition )
+    IF( ALLOCATED( myBoundaries % boundary_to_mpi ) ) DEALLOCATE( myBoundaries % boundary_to_mpi )
 
 #ifdef HAVE_CUDA
     IF( ALLOCATED( myBoundaries % extProcIDs_dev ) ) DEALLOCATE( myBoundaries % extProcIDs_dev )
@@ -115,6 +119,5 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Boundaries
 #endif
-
 
 END MODULE Boundaries_CLASS

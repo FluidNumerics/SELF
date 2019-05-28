@@ -61,7 +61,6 @@ MODULE Fluid_Class
 
     PROCEDURE :: SetInitialConditions => SetInitialConditions_Fluid
     PROCEDURE :: SetPrescribedState   => SetPrescribedState_Fluid
-    PROCEDURE :: InitializeMesh       => InitializeMesh_Fluid
     PROCEDURE :: CalculateStaticState => CalculateStaticState_Fluid
 
     PROCEDURE :: Diagnostics           => Diagnostics_Fluid
@@ -132,10 +131,8 @@ CONTAINS
 !
 !
   SUBROUTINE Build_Fluid( myDGSEM, equationFile, paramFile, setupSuccess )
-
 #undef __FUNC__
 #define __FUNC__ "Build_Fluid"
-
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     CHARACTER(*), INTENT(in)    :: equationFile
     CHARACTER(*), INTENT(in)    :: paramFile
@@ -175,7 +172,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % InitializeMesh( paramFile, equationFile )
+    CALL myDGSEM % mesh % Load_SELFMesh( TRIM(myDGSEM % params % SELFMeshFile), myRank, nProc )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
@@ -219,15 +216,15 @@ CONTAINS
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % Build( myDGSEM % params % polyDeg, &
                                             myDGSEM % state % nEquations, &
-                                            myDGSEM % mesh % boundaryMap % nBoundaries )
+                                            myDGSEM % mesh % boundaryMap % nmpi )
 
     CALL myDGSEM % mpiStressHandler % Build( myDGSEM % params % polyDeg, &
                                              myDGSEM % stressTensor % nEquations, &
-                                             myDGSEM % mesh % boundaryMap % nBoundaries )
+                                             myDGSEM % mesh % boundaryMap % nmpi )
 
     CALL myDGSEM % mpiSGSHandler % Build( myDGSEM % params % polyDeg, &
                                           myDGSEM % sgsCoeffs % nEquations, &
-                                          myDGSEM % mesh % boundaryMap % nBoundaries )
+                                          myDGSEM % mesh % boundaryMap % nmpi )
 #endif
 
 #ifdef HAVE_CUDA
@@ -477,62 +474,11 @@ CONTAINS
 
     ENDDO
 
-!#ifdef HAVE_CUDA
-!    CALL myDGSEM % state % UpdateDevice( )
-!#endif
-
-  END SUBROUTINE SetPrescribedState_Fluid
-
-  SUBROUTINE InitializeMesh_Fluid( myDGSEM, paramFile, equationFile )
-
-#undef __FUNC__
-#define __FUNC__ "InitializeMesh"
-
-    CLASS( Fluid ), INTENT(inout) :: myDGSEM
-    CHARACTER(*), INTENT(in)      :: paramFile
-    CHARACTER(*), INTENT(in)      :: equationFile
-    ! Local
-    CHARACTER(4) :: rankChar
-    LOGICAL      :: fileExists, meshgenSuccess
-    INTEGER      :: mpierr
-
-      INFO('Start')
-      
-      WRITE( rankChar, '(I4.4)' )myRank
-
-
-      IF( myRank == 0 )THEN
-
-        INQUIRE( FILE=TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar//'.mesh', EXIST=fileExists )
-
-        IF( .NOT. fileExists )THEN
-
-          INFO('Mesh files not found.')
-          INFO('Generating structured mesh...')
-          CALL StructuredMeshGenerator_3D( TRIM(paramFile), TRIM(equationFile), meshgenSuccess, nProc )
-          INFO('Structured mesh generation complete')
-
-        ENDIF
-
-      ENDIF
-        
-#ifdef HAVE_MPI
-      CALL MPI_BARRIER( mpiComm, mpierr )
+#ifdef HAVE_CUDA
+    CALL myDGSEM % state % UpdateDevice( )
 #endif
 
-      ! This loads in the mesh from the "pc-mesh file" and sets up the device arrays for the mesh
-      CALL myDGSEM % mesh % ReadSELFMeshFile( TRIM(myDGSEM % params % SELFMeshFile)//'.'//rankChar )
-
-      ! Multiply the mesh positions to scale the size of the mesh
-      CALL myDGSEM % mesh % ScaleTheMesh( myDGSEM % dgStorage % interp, &
-                                          myDGSEM % params % xScale, &
-                                          myDGSEM % params % yScale, &
-                                          myDGSEM % params % zScale )
-
-
-      INFO('End')
-
-  END SUBROUTINE InitializeMesh_Fluid
+  END SUBROUTINE SetPrescribedState_Fluid
 !
   SUBROUTINE ForwardStepRK3_Fluid( myDGSEM, nT )
 
@@ -3104,13 +3050,11 @@ CONTAINS
 #ifdef DOUBLE_PRECISION
       CALL h5dread_f( dataset_id, H5T_IEEE_F64LE, &
                        variable(0:N,0:N,0:N,iEl:iEl), &
-                       dimensions, error, memspace, filespace,&
-                       xfer_prp = transfer_plist_id )
+                       dimensions, error, memspace, filespace)
 #else
       CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, &
                        variable(0:N,0:N,0:N,iEl:iEl), &
-                       dimensions, error, memspace, filespace,&
-                       xfer_prp = transfer_plist_id )
+                       dimensions, error, memspace, filespace)
 #endif
 
     ENDDO
@@ -3134,6 +3078,7 @@ CONTAINS
   SUBROUTINE Write_to_HDF5( myDGSEM, filename )
 #undef __FUNC__
 #define __FUNC__ "Write_to_HDF5"
+    IMPLICIT NONE
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     CHARACTER(*), INTENT(in)      :: filename
     ! Local

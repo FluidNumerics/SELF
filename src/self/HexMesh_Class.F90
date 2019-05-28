@@ -23,6 +23,7 @@ MODULE HexMesh_Class
   USE Boundaries_Class
   USE Geom_EquationParser_Class
 
+  USE HDF5
 
   IMPLICIT NONE
 
@@ -38,9 +39,19 @@ MODULE HexMesh_Class
 !  edge-to-element IDs, element-to-node IDs, and edge-to-node IDs.
 !
 
-  !TYPE DomainDecomposition
-  !  INTEGER, ALLOCATABLE ::  
-  !END TYPE DomainDecomposition
+  TYPE MeshObjectList
+    INTEGER              :: nNodes, nFaces, nElements
+    INTEGER, ALLOCATABLE :: nodeids(:)
+    INTEGER, ALLOCATABLE :: faceids(:)
+    INTEGER, ALLOCATABLE :: elementids(:)
+  END TYPE MeshObjectList
+
+  TYPE DomainDecomposition
+    INTEGER                           :: nBlocks, nGlobalElements
+    TYPE(MeshObjectList), ALLOCATABLE :: mesh_obj(:) 
+    INTEGER, ALLOCATABLE              :: element_to_blockID(:) 
+    INTEGER, ALLOCATABLE              :: global_to_localID(:) 
+  END TYPE DomainDecomposition
 
   TYPE HexMesh
     TYPE( HexElements )         :: elements
@@ -48,7 +59,7 @@ MODULE HexMesh_Class
     TYPE( Edges )               :: edges 
     TYPE( Faces )               :: faces
     TYPE( Boundaries )          :: boundaryMap 
-   ! TYPE( DomainDecomposition ) :: decomp 
+    TYPE( DomainDecomposition ) :: decomp 
     INTEGER                     :: cornerMap(1:3,1:8)
     INTEGER                     :: sideMap(1:6)
     INTEGER                     :: faceMap(1:4,1:6)
@@ -73,35 +84,35 @@ MODULE HexMesh_Class
     PROCEDURE :: UpdateHost   => UpdateHost_HexMesh
 #endif
 
-    ! Built in "strucured" mesh construction
-    PROCEDURE :: ConstructStructuredMesh => ConstructStructuredMesh_HexMesh
+    PROCEDURE :: Load_SELFMesh
 
     ! Mesh Format readers/writers
-    PROCEDURE :: ReadSELFMeshFile    => ReadSELFMeshFile_HexMesh
-    PROCEDURE :: WriteSELFMeshFile   => WriteSELFMeshFile_HexMesh
-    PROCEDURE :: ReadUCDMeshFile     => ReadUCDMeshFile_HexMesh
-    PROCEDURE :: ReadTrellisUCDMeshFile => ReadTrellisUCDMeshFile_HexMesh
-
-    ! Connectivity Routines
-    PROCEDURE :: ConstructFaces               => ConstructFaces_HexMesh
-    PROCEDURE :: ConstructStructuredFaces     => ConstructStructuredFaces_HexMesh
-    PROCEDURE :: ConstructDoublyPeriodicFaces => ConstructDoublyPeriodicFaces_HexMesh
-    PROCEDURE :: ConstructElementNeighbors    => ConstructElementNeighbors_HexMesh
-    PROCEDURE :: DetermineOrientation         => DetermineOrientation_HexMesh
-    PROCEDURE :: ScaleTheMesh                 => ScaleTheMesh_HexMesh
-    PROCEDURE :: PartitionStructuredElementsAndNodes
+    PROCEDURE          :: Write_TecplotMesh
+    PROCEDURE, PRIVATE :: Read_SELFMesh
+    PROCEDURE, PRIVATE :: Write_SELFMesh
+    PROCEDURE, PRIVATE :: Read_UCDMesh
+    PROCEDURE, PRIVATE :: Read_TrellisUCDMesh
+  
+    ! Support Routines
+    PROCEDURE, PRIVATE :: ConstructStructuredMesh
+    PROCEDURE, PRIVATE :: Write_MeshElements
+    PROCEDURE, PRIVATE :: ConstructFaces               
+    PROCEDURE, PRIVATE :: ConstructStructuredFaces     
+    PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
+    PROCEDURE, PRIVATE :: ConstructElementNeighbors    
+    PROCEDURE, PRIVATE :: DetermineOrientation         
+    PROCEDURE, PRIVATE :: ScaleTheMesh                 
 
     ! Visualization I/O Routines
-    PROCEDURE :: WriteTecplot         => WriteTecplot_Hexmesh
-    PROCEDURE :: WriteMaterialTecplot => WriteMaterialTecplot_Hexmesh
-
-    PROCEDURE :: NumberOfBoundaryFaces
 
   END TYPE HexMesh
 
   INTEGER, PRIVATE, PARAMETER    :: BoundaryFlagStructured = NO_NORMAL_FLOW
-
-
+  PRIVATE :: MeshDecompose
+  PRIVATE :: SetupProcessBoundaryMap
+  PRIVATE :: CreateMeshObjLists
+  PRIVATE :: StructuredMeshToBlocks
+  PRIVATE :: StructuredDecompose
 
 CONTAINS
 !
@@ -111,33 +122,6 @@ CONTAINS
 !==================================================================================================!
 !
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R Build
-!
-!> \fn Build_HexMesh
-!! Builds the attributes and "convenience" arrays of the HexMesh DATA-structure.
-!!
-!!
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh) :: this <BR>
-!! <B>INTEGER</B>        :: nNodes, nElements, nFaces, N <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Build( nNodes, nElements, nFaces, N ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> out <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> nNodes <td> INTEGER <td> The number of nodes in the mesh
-!!   <tr> <td> in <th> nElements <td> INTEGER <td> The number of elements in the mesh
-!!   <tr> <td> in <th> nFaces <td> INTEGER <td> The number of faces in the mesh
-!!   <tr> <td> in <th> N <td> INTEGER <td> Polynomial degree for the geometry within each element
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
   SUBROUTINE Build_HexMesh( myHexMesh, nNodes, nElements, nFaces, N )
 
     IMPLICIT NONE
@@ -250,31 +234,12 @@ CONTAINS
 
   END SUBROUTINE Build_HexMesh
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R Trash
-!
-!> \fn Trash_HexMesh
-!! Frees memory associated with each of the attributes of the HexMesh DATA structure
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % Trash( ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in/out <th> myHexMesh <td> HexMesh <td> On output, the memory associated with
-!!                         attributes of the HexMesh structure have been freed
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
   SUBROUTINE Trash_HexMesh( myHexMesh )
 
     IMPLICIT NONE
     CLASS(HexMesh), INTENT(inout) :: myHexMesh
+    ! Local
+    INTEGER :: i 
 
     CALL myHexMesh % elements % Trash( )
     CALL myHexmesh % nodes % Trash( )
@@ -289,6 +254,17 @@ CONTAINS
                 myHexMesh % edgeFaceMap_dev, &
                 myHexMesh % edgeMap_dev )
 #endif
+
+    IF( ALLOCATED(myHexMesh % decomp % mesh_obj) )THEN
+      DO i = 0, myHexMesh % decomp % nBlocks-1
+        IF( ALLOCATED(myHexMesh % decomp % mesh_obj(i) % nodeids) )DEALLOCATE(myHexMesh % decomp % mesh_obj(i) % nodeids)
+        IF( ALLOCATED(myHexMesh % decomp % mesh_obj(i) % faceids) )DEALLOCATE(myHexMesh % decomp % mesh_obj(i) % faceids)
+        IF( ALLOCATED(myHexMesh % decomp % mesh_obj(i) % elementids) )DEALLOCATE(myHexMesh % decomp % mesh_obj(i) % elementids)
+      ENDDO
+      DEALLOCATE(myHexMesh % decomp % mesh_obj)
+    ENDIF
+    IF( ALLOCATED(myHexMesh % decomp % element_to_blockID) )DEALLOCATE(myHexMesh % decomp % element_to_blockID)
+    IF( ALLOCATED(myHexMesh % decomp % global_to_localID) )DEALLOCATE(myHexMesh % decomp % global_to_localID)
 
   END SUBROUTINE Trash_HexMesh
 !
@@ -321,6 +297,7 @@ CONTAINS
 !==================================================================================================!
 !
   SUBROUTINE ConstructNodeToElementConnectivity( myHexMesh )
+    IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     ! Local
     INTEGER :: iEl, j, localNodeID, globalNodeID
@@ -345,45 +322,10 @@ CONTAINS
       ENDDO
     
   END SUBROUTINE ConstructNodeToElementConnectivity
-
-
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R ConstructFaces
-!
-!> \fn ConstructFaces_HexMesh
-!! USEs the element-to-node connectivity to construct all of the unique faces in a mesh
-!!
-!! Similar to the edge construction in a QuadMesh, we loop over the elements and construct a face
-!! using the element-to-node connectivity and a convenience array that relates the local nodes
-!! to each face. A face is identIFied by its four corner nodes. The four corner node IDs for each
-!! elements face are gathered and compared against a list of already identIFied faces. IF the
-!! face is not in the list, THEN a new face is added to the list and the element that added
-!! the face to the list is designated the "primary" element. IF the face is on the list,
-!! the orientation of the secondary element relative to the primary element is determined.
-!!
-!! This routine depends on <BR>
-!!     Module HexMesh_Class : \ref DetermineOrientation_HexMesh
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(DATATYPE) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % ConstructFaces( ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in/out <th> myHexMesh <td> HexMesh <td>
-!!                         On <B>input</B>, the element and node information has been filled in, <BR>
-!!                         On <B>output</B>, the unique faces have been identIFied and the face
-!!                         information has been filled in.
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE ConstructFaces_HexMesh( myHexMesh )
-
+  SUBROUTINE ConstructFaces( myHexMesh )
+#undef __FUNC__
+#define __FUNC__ "ConstructFaces"
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     ! LOCAL
@@ -393,6 +335,8 @@ CONTAINS
     INTEGER :: keyRingID, globFaceID
     INTEGER :: N
     LOGICAL :: keyExists
+
+    INFO('Start')
 
     nNodes = myHexMesh % nodes % nNodes
     nEls   = myHexMesh % elements % nElements
@@ -589,12 +533,13 @@ CONTAINS
     CALL myHexMesh % faces % UpdateDevice( )
 
 #endif
+    INFO('End')
 
-  END SUBROUTINE ConstructFaces_HexMesh
+  END SUBROUTINE ConstructFaces
 !
-  SUBROUTINE ConstructStructuredFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem, boundaryconditionflags )
-
-! Assumes structured mesh
+  SUBROUTINE ConstructStructuredFaces( myHexMesh, nXElem, nYElem, nZElem, boundaryconditionflags )
+#undef __FUNC__
+#define __FUNC__ "ConstructStructuredFaces"
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     INTEGER, INTENT(in) :: nXElem, nYElem, nZElem
@@ -602,6 +547,8 @@ CONTAINS
     ! LOCAL
     INTEGER ::  e1, e2, s1, s2, nFaces, i, j, k, l, IFace, ii, jj
     INTEGER :: bcflags(1:6)
+
+    INFO('Start')
 
     IF( PRESENT(boundaryconditionflags) )THEN
       bcflags = boundaryconditionflags
@@ -865,12 +812,13 @@ CONTAINS
     CALL myHexMesh % faces % UpdateDevice( )
 
 #endif
+    INFO('End')
 
-  END SUBROUTINE ConstructStructuredFaces_HexMesh
+  END SUBROUTINE ConstructStructuredFaces
 !  
-  SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh( myHexMesh, nXElem, nYElem, nZElem, boundaryconditionflags )
-
-! Assumes structured mesh
+  SUBROUTINE ConstructDoublyPeriodicFaces( myHexMesh, nXElem, nYElem, nZElem, boundaryconditionflags )
+#undef __FUNC__
+#define __FUNC__ "ConstructDoublyPeriodicFaces"
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
     INTEGER, INTENT(in) :: nXElem, nYElem, nZElem
@@ -878,6 +826,8 @@ CONTAINS
     ! LOCAL
     INTEGER ::  e1, e2, s1, s2, nFaces, i, j, k, l, IFace, ii, jj
     INTEGER :: bcflags(1:6)
+
+    INFO('Start')
 
     IF( PRESENT(boundaryconditionflags) )THEN
       bcflags = boundaryconditionflags
@@ -1142,50 +1092,11 @@ CONTAINS
     CALL myHexMesh % faces % UpdateDevice( )
 
 #endif
+    INFO('End')
 
-  END SUBROUTINE ConstructDoublyPeriodicFaces_HexMesh
+  END SUBROUTINE ConstructDoublyPeriodicFaces
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R DetermineOrientation
-!
-!> \fn DetermineOrientation_HexMesh
-!! Given a face-ID and an array of global node ID's, this routine determines the relative orientation
-!! of the face to a face represented by the incoming global node ID's.
-!!
-!!  This support routine takes as input the mesh, a face ID number, and a list of node IDs.
-!!  This routine assumes that the primary element information for the given face ID has been
-!!  filled upon issuing a call to this routine. IF the primary element shares this face with
-!!  another element, this routine is called and the secondary element node ID's are passed in.
-!!  The order of the secondary node ID's relative to the order of the primary node ID's determines
-!!  the orientation of the secondary element relative to the primary element. We need to know
-!!  IF the roles of the computational coordinates are flipped, and (simultaneously) IF the
-!!  incrementing of the computational coordinates are reversed (or not).
-!!  This routine determines the orientation by determining how many times the ordered secondary
-!!  node ID's need to be shIFted in order to match the ordered primary node ID's.
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh) :: this <BR>
-!! <B>INTEGER</B>       :: faceID <BR>
-!! <B>INTEGER</B>       :: secondaryNodes(1:4) <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % DetermineOrientation( faceID, secondaryNodes ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in/out <th> myHexMesh <td> HexMesh <td>
-!!                         On <B>input</B>, HexMesh with myHexMesh % faces(faceID) primary element
-!!                         information filled in, <BR>
-!!                         On <B>output</B>, secondary element information is filled in for this face
-!!   <tr> <td> in <th> faceID <td> INTEGER <td> ID for the face in question
-!!   <tr> <td> in <th> secondaryNodes(1:4) <td> INTEGER <td> Global node ID's associated with the
-!!                                                           secondary element.
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE DetermineOrientation_HexMesh( myHexMesh, faceID, secondaryNodes )
+  SUBROUTINE DetermineOrientation( myHexMesh, faceID, secondaryNodes )
 
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
@@ -1251,31 +1162,9 @@ CONTAINS
     ENDIF
 
 
-  END SUBROUTINE DetermineOrientation_HexMesh
+  END SUBROUTINE DetermineOrientation
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R ConstructElementNeighbors
-!
-!> \fn sConstructElementNeighbors_HexMesh
-!! USEs the edge-to-element connectivity to construct the element neighbors attribute.
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(myHexMesh) :: this <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % ConstructElementNeighbors( ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in/out <th> myHexMesh <td> HexMesh <td>
-!!                         On <B>input</B>, the edge-to-element information has been constructed, <BR>
-!!                         On <B>output</B>, the element neighbors information has been filled in.
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE ConstructElementNeighbors_HexMesh( myHexMesh )
+  SUBROUTINE ConstructElementNeighbors( myHexMesh )
 
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
@@ -1292,39 +1181,9 @@ CONTAINS
     ENDDO
 
 
-  END SUBROUTINE ConstructElementNeighbors_HexMesh
+  END SUBROUTINE ConstructElementNeighbors
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R ScaleTheMesh_HexMesh
-!
-!> \fn ScaleTheMesh
-!! Scales the element geometry and corner node positions by the provided x-scale, y-scale, and z-scale.
-!!
-!! This routine depend on <BR>
-!!   Module \ref MappedGeometry_2D_Class, S/R ScaleGeometry_MappedGeometry_2D <BR>
-!!   Module \ref Node_Class, S/R ScalePosition_Node
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh)    :: this <BR>
-!! <B>TYPE</B>(Lagrange) :: interp <BR>
-!! <B>REAL</B>(prec)        :: xScale, yScale, zScale <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % ScaleGeometry( interp, xScale, yScale, zScale ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in/out <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> interp <td> Lagrange <td>
-!!   <tr> <td> in <th> xScale <td> REAL(prec) <td>
-!!   <tr> <td> in <th> yScale <td> REAL(prec) <td>
-!!   <tr> <td> in <th> zScale <td> REAL(prec) <td>
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE ScaleTheMesh_HexMesh( myHexMesh, interp, xScale, yScale, zScale  )
+  SUBROUTINE ScaleTheMesh( myHexMesh, interp, xScale, yScale, zScale  )
 
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout) :: myHexMesh
@@ -1345,61 +1204,30 @@ CONTAINS
 
 #endif
 
-  END SUBROUTINE ScaleTheMesh_HexMesh
+  END SUBROUTINE ScaleTheMesh
 
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R ConstructStructuredMesh
-!
-!> \fn ConstructStructuredMesh_HexMesh
-!! Constructs a "structured" spectral element mesh with nXelem-by-nYelem elements.
-!!
-!! This routine builds a mesh with nXelem elements in the x-direction,  nYelem elements in the
-!! y-direction, and nZelem elements in the z-direction. The mesh nodes are between [0,1]x[0,1]x[0,1].
-!!  After construction, the USEr can call "ScaleTheMesh" to change the physical extents of the DOmain.
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh)    :: this <BR>
-!! <B>TYPE</B>(Lagrange) :: interp <BR>
-!! <B>INTEGER</B>           :: nXElem, nYElem, nZElem <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % RoutineName( interp, nXElem, nYElem, nZElem ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in/out <th> myHexMesh <td> HexMesh <td> On output, CONTAINS the "structured" mesh
-!!                                                       in the unstructured spectral element
-!!                                                       mesh format.
-!!   <tr> <td> in <th> interp <td> Lagrange <td> 2-D interpolant that stores the computational
-!!                                                  quadrature mesh for each element.
-!!   <tr> <td> in <th> nXElem <td> INTEGER <td> The number of desired elements in the x-direction
-!!   <tr> <td> in <th> nYElem <td> INTEGER <td> The number of desired elements in the y-direction
-!!   <tr> <td> in <th> nZElem <td> INTEGER <td> The number of desired elements in the z-direction
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE ConstructStructuredMesh_HexMesh( myHexMesh, interp, nXelem, nYelem, nZelem, geomparser, DoublyPeriodic  )
-
+  SUBROUTINE ConstructStructuredMesh( myHexMesh, interp, nXelem, nYelem, nZelem, geomparser  )
+#undef __FUNC__
+#define __FUNC__ "ConstructStructuredMesh"
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(inout)  :: myHexMesh
     TYPE( Lagrange ), INTENT(in)     :: interp
     INTEGER, INTENT(in)              :: nXelem, nYelem, nZelem
     TYPE( Geom_EquationParser ), INTENT(in) :: geomparser
-    LOGICAL, INTENT(in)              :: DoublyPeriodic
     ! LOGICAL
     TYPE( Surfaces ) :: boundSurfs
     REAL(prec) :: x, y, z, zb, zi, zu, zip1, dxElem, dyElem, dzElem
     REAL(prec) :: x1(1:3), x2(1:3), x3(1:3), x4(1:3)
     REAL(prec) :: c1(1:3), c2(1:3), xE(1:3)
     REAL(prec), ALLOCATABLE :: xc(:,:,:,:), s(:), weights(:)
-
+    LOGICAL :: DoublyPeriodic
     INTEGER :: nNodes, nElements, nFaces, gPolyDeg, nSurf
     INTEGER :: nodes(1:8)
     INTEGER :: n1, n2, n3, n4
     INTEGER :: iNode, iEl, iSide, iX, iY, iZ, i, j, iSurf
 
+    INFO('Start')
+    IF( geomparser % boundaryconditionflags(1) == PERIODIC ) DoublyPeriodic = .TRUE.
     dxElem = 1.0_prec/nXElem
     dyElem = 1.0_prec/nYElem
     dzElem = 1.0_prec/nZElem
@@ -1585,587 +1413,423 @@ CONTAINS
 #ifdef HAVE_CUDA
     CALL myHexMesh % UpdateDevice( )
 #endif
+    INFO('End')
 
-  END SUBROUTINE ConstructStructuredMesh_HexMesh
-
-  SUBROUTINE PartitionStructuredElementsAndNodes( myMesh, params, partitions, nElPerProc, globalToLocal, nodeLogic, nNodePerProc, globalToLocalNode, nProc )
-    IMPLICIT NONE
-    CLASS( HexMesh ), INTENT(in)        :: myMesh
-    TYPE( ModelParameters ), INTENT(in) :: params
-    INTEGER, INTENT(in)                 :: nProc
-    INTEGER, INTENT(out)                :: partitions(1:myMesh % elements % nElements)
-    INTEGER, INTENT(out)                :: nElPerProc(0:nProc-1)
-    INTEGER, INTENT(out)                :: globalToLocal(1:myMesh % elements % nElements,1:2)
-    INTEGER, INTENT(out)                :: nodeLogic(1:myMesh % nodes % nNodes,0:nProc-1)
-    INTEGER, INTENT(out)                :: nNodePerProc(0:nProc-1)
-    INTEGER, INTENT(out)                :: globalToLocalNode(1:myMesh % nodes % nNodes,0:nProc-1)
-   
-    ! Local
-!    INTEGER :: nxp, nyp, nzp
-    INTEGER :: iPz, iPy, iPx
-    INTEGER :: iZp, iYp, iXp
-    INTEGER :: iZ, iY, iX
-    INTEGER :: iNode, nID
-    INTEGER :: iEl, procID
-    INTEGER :: nxp(1:params % nProcX)
-    INTEGER :: nyp(1:params % nProcY)
-    INTEGER :: nzp(1:params % nProcZ)
-    
-
-      partitions        = 0
-      nElPerProc        = 0
-      globalToLocal     = 0
-      nodeLogic         = 0
-      nNodePerProc      = 0
-      globalToLocalNode = 0
-
-      IF( nProc > 1 )THEN
-
-                  
-         nxp = params % nXelem/params % nProcX
-         IF( SUM(nxp) < params % nXElem )THEN
-
-           DO iPx = 1, params % nProcX
-             nxp(iPx) = nxp(iPx) + 1
-             IF( SUM(nxp) == params % nXElem )THEN
-               EXIT
-             ENDIF
-           ENDDO
-
-         ENDIF
-
-         nyp = params % nYelem/params % nProcY
-         IF( SUM(nyp) < params % nYElem )THEN
-
-           DO iPy = 1, params % nProcY
-             nyp(iPy) = nyp(iPy) + 1
-             IF( SUM(nyp) == params % nYElem )THEN
-               EXIT
-             ENDIF
-           ENDDO
-
-         ENDIF
-
-         nzp = params % nZelem/params % nProcZ
-         IF( SUM(nzp) < params % nZElem )THEN
-
-           DO iPz = 1, params % nProcZ
-             nzp(iPz) = nzp(iPz) + 1
-             IF( SUM(nzp) == params % nZElem )THEN
-               EXIT
-             ENDIF
-           ENDDO
-
-         ENDIF
-
-         iZ = 0
-         DO iPz = 1, params % nProcZ
-           DO iZp = 1, nzp(iPz)
-
-             iZ = iZ+1
-             iY = 0
-
-             DO iPy = 1, params % nProcY
-               DO iYp = 1, nyp(iPy)
-
-                 iY = iY+1
-                 iX = 0
-
-                 DO iPx = 1, params % nProcX
-                   DO iXp = 1, nxp(iPx)
-
-                     iX = iX +1               
-                        
-                     iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
-                     IF( iEl <= myMesh % elements % nElements )THEN
-                       partitions(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
-                     ENDIF
-
-                   ENDDO
-                 ENDDO
-
-               ENDDO
-             ENDDO
-
-           ENDDO
-         ENDDO
-      
-         DO iEl = 1, myMesh % elements % nElements
-      
-            procID               = partitions(iEl)
-            nElPerProc(procID)   = nElPerProc(procID) + 1 ! Increment the local element ID for this process
-            globalToLocal(iEl,1) = nElPerProc(procID)     ! Store the local element ID on this process
-            globalToLocal(iEl,2) = procID                 ! Store the process ID
-         
-            DO iNode = 1, 8
-               nID = myMesh % elements % nodeIDs(iNode,iEl) 
-               nodeLogic(nID,procID) = 1
-            ENDDO
-         
-         ENDDO
-         DO nID = 1, myMesh % nodes % nNodes
-            nNodePerProc = nNodePerProc + nodeLogic(nID,:)
-            globalToLocalNode(nID,:) = nNodePerProc
-         ENDDO
-
-      ELSE
-
-         DO iEl = 1, myMesh % elements % nElements
-            nElPerProc(0) = myMesh % elements % nElements
-            globalToLocal(iEl,1) = iEl ! Local ID is global ID
-            globalToLocal(iEl,2) = 0   ! process ID
-            
-            DO iNode = 1, 8
-               nID = myMesh % elements % nodeIDs(iNode,iEl) 
-               nodeLogic(nID,0) = 1
-            ENDDO
-         ENDDO
-         
-         DO nID = 1, myMesh % nodes % nNodes
-            nNodePerProc = nNodePerProc + nodeLogic(nID,:)
-            globalToLocalNode(nID,:) = nNodePerProc
-         ENDDO
-
-      ENDIF
-
-  END SUBROUTINE PartitionStructuredElementsAndNodes
+  END SUBROUTINE ConstructStructuredMesh
 !
 !==================================================================================================!
 !--------------------------------- Mesh File I/O Routines -----------------------------------------!
 !==================================================================================================!
 !
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R ReadSELFMeshFile
+!  SUBROUTINE ReadSELFMeshFile_HexMesh( myHexMesh, filename )
 !
-!> \fn ReadSELFMeshFile_HexMesh
-!! Reads a SELFMesh file and constructs the HexMesh DATA structure.
-!!
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh)    :: this <BR>
-!! <B>CHARACTER</B>        :: filename <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % ReadSELFMeshFile( filename ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> out <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the SELFMesh file
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE ReadSELFMeshFile_HexMesh( myHexMesh, filename )
-
-#undef __FUNC__
-#define __FUNC__ "ReadSELFMeshFile"
-
-    CLASS( HexMesh ), INTENT(out)   :: myHexMesh
-    CHARACTER(*), INTENT(in)        :: filename
-    ! LOCAL
-    INTEGER :: nNodes, nElements, nFaces, N, nBoundaries
-    INTEGER :: IFace, iNode, iEl
-    INTEGER :: fUnit, k, i, j, l, row, col, ii, jj
-#ifdef HAVE_CUDA
-    INTEGER :: istat
-#endif
-
-
-    INFO('Start')
-    INFO('Reading '//TRIM( filename )//'.mesh')
-    ! Get a new file unit
-    OPEN( UNIT    = NEWUNIT(fUnit), &
-      FILE    = TRIM( filename )//'.mesh', &
-      FORM    = 'UNFORMATTED',&
-      STATUS  = 'OLD', &
-      ACCESS  = 'DIRECT', &
-      CONVERT = 'BIG_ENDIAN', &
-      RECL    = SIZEOF(nNodes) ) ! How to DO variable record length
-
-    ! ---- Gather the number of nodes, number of elements, and number of edges ---- !
-    k = 1
-    READ( fUnit, rec=k )nNodes
-    k = k+1
-    READ( fUnit, rec=k )nElements
-    k = k+1
-    READ( fUnit, rec=k )nFaces
-    k = k+1
-    READ( fUnit, rec=k )N
-    k = k+1
-    READ( fUnit, rec=k )nBoundaries
-    k = k+1
-
-    ! ---- Build the quadrature mesh (empty) ---- !
-    CALL myHexMesh % Build( nNodes, nElements, nFaces, N )
-    CALL myHexMesh % boundaryMap % Build( nBoundaries )
-
-    ! ---- Read in the element connectivity ---- !
-    DO iEl = 1, nElements
-      READ( fUnit, rec=k ) myHexMesh % elements % elementID(iEl)
-      k = k+1
-      DO i = 1, 8
-        READ( fUnit, rec=k ) myHexMesh % elements % nodeIDs(i,iEl)
-        k = k+1
-      ENDDO
-    ENDDO
-
-    ! ---- Read in the face information ---- !
-
-    DO IFace = 1, nFaces
-      READ( fUnit, rec=k ) myHexMesh % faces % faceID(IFace)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % faces % boundaryID(IFace)
-      k = k+1
-      DO i = 1, 4
-        READ( fUnit, rec=k ) myHexMesh % faces % nodeIDs(i,IFace)
-        k = k+1
-      ENDDO
-      DO i = 1, 2
-        READ( fUnit, rec=k ) myHexMesh % faces % elementIDs(i,IFace)
-        k = k+1
-        READ( fUnit, rec=k ) myHexMesh % faces % elementSides(i,IFace)
-        k = k+1
-      ENDDO
-      READ( fUnit, rec=k ) myHexMesh % faces % iStart(IFace)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % faces % iInc(IFace)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % faces % jStart(IFace)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % faces % jInc(IFace)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % faces % swapDimensions(IFace)
-      k = k+1
-    ENDDO
-
-    DO iface = 1, myHexMesh % boundaryMap % nBoundaries
-      READ( fUnit, rec=k ) myHexMesh % boundaryMap % extProcIDs(iface)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryIDs(iface)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryGlobalIDs(iface)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
-      k = k+1
-    ENDDO
-
-
-    CLOSE( fUnit )
-    ! Get a new file unit
-    OPEN( UNIT    = NEWUNIT(fUnit), &
-      FILE    = TRIM( filename )//'.geom', &
-      FORM    = 'UNFORMATTED',&
-      STATUS  = 'OLD', &
-      ACCESS  = 'DIRECT', &
-      CONVERT = 'BIG_ENDIAN', &
-      RECL    = prec ) ! How to DO variable record length
-
-    ! ---- Read in the corner nodes ---- !
-    k = 1
-    DO iNode = 1, nNodes  ! Loop over the nodes in the file
-      READ( fUnit, rec=k ) myHexMesh % nodes % x(1,iNode)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % nodes % x(2,iNode)
-      k = k+1
-      READ( fUnit, rec=k ) myHexMesh % nodes % x(3,iNode)
-      k = k+1
-    ENDDO
-
-    ! ---- Read in the element information ---- !
-    DO iEl = 1, nElements
-      DO l = 0, N
-        DO j = 0, N
-          DO i = 0, N
-            READ( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,1,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,2,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,3,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dxds(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dxdp(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dxdq(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dyds(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dydp(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dydq(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dzds(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dzdp(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % dzdq(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % J(i,j,l,iEl)
-            k = k+1
-            DO col = 1, 3
-              DO row = 1, 3
-                READ( fUnit, rec=k ) myHexMesh % elements % Ja(i,j,l,row,col,iEl)
-                k = k+1
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-      DO l = 1, 6
-        DO j = 0, N
-          DO i = 0, N
-            READ( fUnit, rec=k ) myHexMesh % elements % boundaryLengthScale(i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,1,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,2,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,3,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % nHat(1,i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % nHat(2,i,j,l,iEl)
-            k = k+1
-            READ( fUnit, rec=k ) myHexMesh % elements % nHat(3,i,j,l,iEl)
-            k = k+1
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    CLOSE( fUnit )
-
-    CALL myHexMesh % ConstructElementNeighbors( )
-
-    DO k = 1, myHexMesh % faces % nFaces
-      DO j = 0, N
-        DO i = 0, N
-
-          IF( i == 0 )THEN
-            IF( j == 0 )THEN
-              ii = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k))
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k))
-            ELSE
-              ii = myHexMesh % faces % swapDimensions(k)*&
-                (ii+myHexMesh % faces % jInc(k)) + &
-                (1-myHexMesh % faces % swapDimensions(k))*&
-                myHexMesh % faces % iStart(k)
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (jj+myHexMesh % faces % jInc(k)) +&
-                myHexMesh % faces % swapDimensions(k)*&
-                myHexMesh % faces % jStart(k)
-            ENDIF
-          ELSE
-            ii = (1-myHexMesh % faces % swapDimensions(k))*&
-              (ii + myHexMesh % faces % iInc(k)) +&
-              myHexMesh % faces % swapDimensions(k)*ii
-            jj = myHexMesh % faces % swapDimensions(k)*&
-              (jj+myHexMesh % faces % iInc(k)) + &
-              (1-myHexMesh % faces % swapDimensions(k))*jj
-          ENDIF
-
-          myHexMesh % faces % iMap(i,j,k) = ii
-          myHexMesh % faces % jMap(i,j,k) = jj
-
-        ENDDO
-      ENDDO
-    ENDDO
-
-#ifdef HAVE_CUDA
-    CALL myHexMesh % UpdateDevice( )
-    istat = cudaDeviceSynchronize( )
-#endif
-    INFO('End')
-
-  END SUBROUTINE ReadSELFMeshFile_HexMesh
+!#undef __FUNC__
+!#define __FUNC__ "ReadSELFMeshFile"
 !
-  SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
+!    CLASS( HexMesh ), INTENT(out)   :: myHexMesh
+!    CHARACTER(*), INTENT(in)        :: filename
+!    ! LOCAL
+!    INTEGER :: nNodes, nElements, nFaces, N, nBoundaries
+!    INTEGER :: IFace, iNode, iEl
+!    INTEGER :: fUnit, k, i, j, l, row, col, ii, jj
+!#ifdef HAVE_CUDA
+!    INTEGER :: istat
+!#endif
+!
+!
+!    INFO('Start')
+!    INFO('Reading '//TRIM( filename )//'.mesh')
+!    ! Get a new file unit
+!    OPEN( UNIT    = NEWUNIT(fUnit), &
+!      FILE    = TRIM( filename )//'.mesh', &
+!      FORM    = 'UNFORMATTED',&
+!      STATUS  = 'OLD', &
+!      ACCESS  = 'DIRECT', &
+!      CONVERT = 'BIG_ENDIAN', &
+!      RECL    = SIZEOF(nNodes) ) ! How to DO variable record length
+!
+!    ! ---- Gather the number of nodes, number of elements, and number of edges ---- !
+!    k = 1
+!    READ( fUnit, rec=k )nNodes
+!    k = k+1
+!    READ( fUnit, rec=k )nElements
+!    k = k+1
+!    READ( fUnit, rec=k )nFaces
+!    k = k+1
+!    READ( fUnit, rec=k )N
+!    k = k+1
+!    READ( fUnit, rec=k )nBoundaries
+!    k = k+1
+!
+!    ! ---- Build the quadrature mesh (empty) ---- !
+!    CALL myHexMesh % Build( nNodes, nElements, nFaces, N )
+!    CALL myHexMesh % boundaryMap % Build( nBoundaries, 0 )
+!
+!    ! ---- Read in the element connectivity ---- !
+!    DO iEl = 1, nElements
+!      READ( fUnit, rec=k ) myHexMesh % elements % elementID(iEl)
+!      k = k+1
+!      DO i = 1, 8
+!        READ( fUnit, rec=k ) myHexMesh % elements % nodeIDs(i,iEl)
+!        k = k+1
+!      ENDDO
+!    ENDDO
+!
+!    ! ---- Read in the face information ---- !
+!
+!    DO IFace = 1, nFaces
+!      READ( fUnit, rec=k ) myHexMesh % faces % faceID(IFace)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % faces % boundaryID(IFace)
+!      k = k+1
+!      DO i = 1, 4
+!        READ( fUnit, rec=k ) myHexMesh % faces % nodeIDs(i,IFace)
+!        k = k+1
+!      ENDDO
+!      DO i = 1, 2
+!        READ( fUnit, rec=k ) myHexMesh % faces % elementIDs(i,IFace)
+!        k = k+1
+!        READ( fUnit, rec=k ) myHexMesh % faces % elementSides(i,IFace)
+!        k = k+1
+!      ENDDO
+!      READ( fUnit, rec=k ) myHexMesh % faces % iStart(IFace)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % faces % iInc(IFace)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % faces % jStart(IFace)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % faces % jInc(IFace)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % faces % swapDimensions(IFace)
+!      k = k+1
+!    ENDDO
+!
+!    DO iface = 1, myHexMesh % boundaryMap % nBoundaries
+!      READ( fUnit, rec=k ) myHexMesh % boundaryMap % extProcIDs(iface)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryIDs(iface)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryGlobalIDs(iface)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
+!      k = k+1
+!    ENDDO
+!
+!
+!    CLOSE( fUnit )
+!    ! Get a new file unit
+!    OPEN( UNIT    = NEWUNIT(fUnit), &
+!      FILE    = TRIM( filename )//'.geom', &
+!      FORM    = 'UNFORMATTED',&
+!      STATUS  = 'OLD', &
+!      ACCESS  = 'DIRECT', &
+!      CONVERT = 'BIG_ENDIAN', &
+!      RECL    = prec ) ! How to DO variable record length
+!
+!    ! ---- Read in the corner nodes ---- !
+!    k = 1
+!    DO iNode = 1, nNodes  ! Loop over the nodes in the file
+!      READ( fUnit, rec=k ) myHexMesh % nodes % x(1,iNode)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % nodes % x(2,iNode)
+!      k = k+1
+!      READ( fUnit, rec=k ) myHexMesh % nodes % x(3,iNode)
+!      k = k+1
+!    ENDDO
+!
+!    ! ---- Read in the element information ---- !
+!    DO iEl = 1, nElements
+!      DO l = 0, N
+!        DO j = 0, N
+!          DO i = 0, N
+!            READ( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,1,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,2,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,3,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dxds(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dxdp(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dxdq(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dyds(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dydp(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dydq(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dzds(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dzdp(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % dzdq(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % J(i,j,l,iEl)
+!            k = k+1
+!            DO col = 1, 3
+!              DO row = 1, 3
+!                READ( fUnit, rec=k ) myHexMesh % elements % Ja(i,j,l,row,col,iEl)
+!                k = k+1
+!              ENDDO
+!            ENDDO
+!          ENDDO
+!        ENDDO
+!      ENDDO
+!      DO l = 1, 6
+!        DO j = 0, N
+!          DO i = 0, N
+!            READ( fUnit, rec=k ) myHexMesh % elements % boundaryLengthScale(i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,1,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,2,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,3,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % nHat(1,i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % nHat(2,i,j,l,iEl)
+!            k = k+1
+!            READ( fUnit, rec=k ) myHexMesh % elements % nHat(3,i,j,l,iEl)
+!            k = k+1
+!          ENDDO
+!        ENDDO
+!      ENDDO
+!    ENDDO
+!
+!    CLOSE( fUnit )
+!
+!    CALL myHexMesh % ConstructElementNeighbors( )
+!
+!    DO k = 1, myHexMesh % faces % nFaces
+!      DO j = 0, N
+!        DO i = 0, N
+!
+!          IF( i == 0 )THEN
+!            IF( j == 0 )THEN
+!              ii = (1-myHexMesh % faces % swapDimensions(k))*&
+!                (myHexMesh % faces % iStart(k)) + &
+!                (myHexMesh % faces % swapDimensions(k))*&
+!                (myHexMesh % faces % jStart(k))
+!              jj = (1-myHexMesh % faces % swapDimensions(k))*&
+!                (myHexMesh % faces % jStart(k)) + &
+!                (myHexMesh % faces % swapDimensions(k))*&
+!                (myHexMesh % faces % iStart(k))
+!            ELSE
+!              ii = myHexMesh % faces % swapDimensions(k)*&
+!                (ii+myHexMesh % faces % jInc(k)) + &
+!                (1-myHexMesh % faces % swapDimensions(k))*&
+!                myHexMesh % faces % iStart(k)
+!              jj = (1-myHexMesh % faces % swapDimensions(k))*&
+!                (jj+myHexMesh % faces % jInc(k)) +&
+!                myHexMesh % faces % swapDimensions(k)*&
+!                myHexMesh % faces % jStart(k)
+!            ENDIF
+!          ELSE
+!            ii = (1-myHexMesh % faces % swapDimensions(k))*&
+!              (ii + myHexMesh % faces % iInc(k)) +&
+!              myHexMesh % faces % swapDimensions(k)*ii
+!            jj = myHexMesh % faces % swapDimensions(k)*&
+!              (jj+myHexMesh % faces % iInc(k)) + &
+!              (1-myHexMesh % faces % swapDimensions(k))*jj
+!          ENDIF
+!
+!          myHexMesh % faces % iMap(i,j,k) = ii
+!          myHexMesh % faces % jMap(i,j,k) = jj
+!
+!        ENDDO
+!      ENDDO
+!    ENDDO
+!
+!#ifdef HAVE_CUDA
+!    CALL myHexMesh % UpdateDevice( )
+!    istat = cudaDeviceSynchronize( )
+!#endif
+!    INFO('End')
+!
+!  END SUBROUTINE ReadSELFMeshFile_HexMesh
+!!
+!  SUBROUTINE WriteSELFMeshFile_HexMesh( myHexMesh, filename )
+!
+!    IMPLICIT NONE
+!    CLASS( HexMesh ), INTENT(in)   :: myHexMesh
+!    CHARACTER(*), INTENT(in)       :: filename
+!    ! LOCAL
+!    INTEGER :: nNodes, nElements, nFaces, N
+!    INTEGER :: IFace, iNode, iEl
+!    INTEGER :: fUnit, k, i, j, l, row, col
+!
+!
+!    nNodes = 1
+!    ! Get a new file unit
+!    OPEN( UNIT    = NEWUNIT(fUnit), &
+!      FILE    = TRIM( filename )//'.mesh', &
+!      FORM    = 'UNFORMATTED',&
+!      STATUS  = 'REPLACE', &
+!      ACCESS  = 'DIRECT', &
+!      CONVERT = 'BIG_ENDIAN', &
+!      RECL    = SIZEOF(nNodes) ) ! How to DO variable record length
+!
+!
+!    ! ---- Gather the number of nodes, number of elements, and number of edges ---- !
+!    nNodes = myHexMesh % nodes % nNodes
+!    nElements = myHexMesh % elements % nElements
+!    nFaces = myHexMesh % faces % nFaces
+!    N      = myHexMesh % elements % N
+!    k = 1
+!    WRITE( fUnit, rec=k )nNodes
+!    k = k+1
+!    WRITE( fUnit, rec=k )nElements
+!    k = k+1
+!    WRITE( fUnit, rec=k )nFaces
+!    k = k+1
+!    WRITE( fUnit, rec=k )N
+!    k = k+1
+!    WRITE( fUnit, rec=k )myHexMesh % boundaryMap % nBoundaries
+!    k = k+1
+!
+!
+!    ! ---- Read in the element connectivity ---- !
+!    DO iEl = 1, nElements
+!      WRITE( fUnit, rec=k ) myHexMesh % elements % elementID(iEl)
+!      k = k+1
+!      DO i = 1, 8
+!        WRITE( fUnit, rec=k ) myHexMesh % elements % nodeIDs(i,iEl)
+!        k = k+1
+!      ENDDO
+!    ENDDO
+!
+!    ! ---- Read in the face information ---- !
+!
+!    DO IFace = 1, nFaces
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % faceID(IFace)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % boundaryID(IFace)
+!      k = k+1
+!      DO i = 1, 4
+!        WRITE( fUnit, rec=k ) myHexMesh % faces % nodeIDs(i,IFace)
+!        k = k+1
+!      ENDDO
+!      DO i = 1, 2
+!        WRITE( fUnit, rec=k ) myHexMesh % faces % elementIDs(i,IFace)
+!        k = k+1
+!        WRITE( fUnit, rec=k ) myHexMesh % faces % elementSides(i,IFace)
+!        k = k+1
+!      ENDDO
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % iStart(IFace)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % iInc(IFace)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % jStart(IFace)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % jInc(IFace)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % faces % swapDimensions(IFace)
+!      k = k+1
+!    ENDDO
+!
+!    DO iface = 1, myHexMesh % boundaryMap % nBoundaries
+!      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % extProcIDs(iface)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryIDs(iface)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryGlobalIDs(iface)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
+!      k = k+1
+!    ENDDO
+!
+!    CLOSE( fUnit )
+!    ! Get a new file unit
+!    OPEN( UNIT    = NEWUNIT(fUnit), &
+!      FILE    = TRIM( filename )//'.geom', &
+!      FORM    = 'UNFORMATTED',&
+!      STATUS  = 'REPLACE', &
+!      ACCESS  = 'DIRECT', &
+!      CONVERT = 'BIG_ENDIAN', &
+!      RECL    = prec ) ! How to DO variable record length
+!
+!    ! ---- Read in the corner nodes ---- !
+!    k = 1
+!    DO iNode = 1, nNodes  ! Loop over the nodes in the file
+!      WRITE( fUnit, rec=k ) myHexMesh % nodes % x(1,iNode)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % nodes % x(2,iNode)
+!      k = k+1
+!      WRITE( fUnit, rec=k ) myHexMesh % nodes % x(3,iNode)
+!      k = k+1
+!    ENDDO
+!
+!    ! ---- Read in the element information ---- !
+!    DO iEl = 1, nElements
+!      DO l = 0, N
+!        DO j = 0, N
+!          DO i = 0, N
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,1,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,2,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,3,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dxds(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dxdp(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dxdq(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dyds(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dydp(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dydq(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dzds(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dzdp(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % dzdq(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % J(i,j,l,iEl)
+!            k = k+1
+!            DO col = 1, 3
+!              DO row = 1, 3
+!                WRITE( fUnit, rec=k ) myHexMesh % elements % Ja(i,j,l,row,col,iEl)
+!                k = k+1
+!              ENDDO
+!            ENDDO
+!          ENDDO
+!        ENDDO
+!      ENDDO
+!      DO l = 1, 6
+!        DO j = 0, N
+!          DO i = 0, N
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % boundaryLengthScale(i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,1,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,2,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,3,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % nHat(1,i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % nHat(2,i,j,l,iEl)
+!            k = k+1
+!            WRITE( fUnit, rec=k ) myHexMesh % elements % nHat(3,i,j,l,iEl)
+!            k = k+1
+!          ENDDO
+!        ENDDO
+!      ENDDO
+!    ENDDO
+!
+!    CLOSE( fUnit )
+!
+!  END SUBROUTINE WriteSELFMeshFile_HexMesh
 
-    IMPLICIT NONE
-    CLASS( HexMesh ), INTENT(in)   :: myHexMesh
-    CHARACTER(*), INTENT(in)       :: filename
-    ! LOCAL
-    INTEGER :: nNodes, nElements, nFaces, N
-    INTEGER :: IFace, iNode, iEl
-    INTEGER :: fUnit, k, i, j, l, row, col
-
-
-    nNodes = 1
-    ! Get a new file unit
-    OPEN( UNIT    = NEWUNIT(fUnit), &
-      FILE    = TRIM( filename )//'.mesh', &
-      FORM    = 'UNFORMATTED',&
-      STATUS  = 'REPLACE', &
-      ACCESS  = 'DIRECT', &
-      CONVERT = 'BIG_ENDIAN', &
-      RECL    = SIZEOF(nNodes) ) ! How to DO variable record length
-
-
-    ! ---- Gather the number of nodes, number of elements, and number of edges ---- !
-    nNodes = myHexMesh % nodes % nNodes
-    nElements = myHexMesh % elements % nElements
-    nFaces = myHexMesh % faces % nFaces
-    N      = myHexMesh % elements % N
-    k = 1
-    WRITE( fUnit, rec=k )nNodes
-    k = k+1
-    WRITE( fUnit, rec=k )nElements
-    k = k+1
-    WRITE( fUnit, rec=k )nFaces
-    k = k+1
-    WRITE( fUnit, rec=k )N
-    k = k+1
-    WRITE( fUnit, rec=k )myHexMesh % boundaryMap % nBoundaries
-    k = k+1
-
-
-    ! ---- Read in the element connectivity ---- !
-    DO iEl = 1, nElements
-      WRITE( fUnit, rec=k ) myHexMesh % elements % elementID(iEl)
-      k = k+1
-      DO i = 1, 8
-        WRITE( fUnit, rec=k ) myHexMesh % elements % nodeIDs(i,iEl)
-        k = k+1
-      ENDDO
-    ENDDO
-
-    ! ---- Read in the face information ---- !
-
-    DO IFace = 1, nFaces
-      WRITE( fUnit, rec=k ) myHexMesh % faces % faceID(IFace)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % faces % boundaryID(IFace)
-      k = k+1
-      DO i = 1, 4
-        WRITE( fUnit, rec=k ) myHexMesh % faces % nodeIDs(i,IFace)
-        k = k+1
-      ENDDO
-      DO i = 1, 2
-        WRITE( fUnit, rec=k ) myHexMesh % faces % elementIDs(i,IFace)
-        k = k+1
-        WRITE( fUnit, rec=k ) myHexMesh % faces % elementSides(i,IFace)
-        k = k+1
-      ENDDO
-      WRITE( fUnit, rec=k ) myHexMesh % faces % iStart(IFace)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % faces % iInc(IFace)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % faces % jStart(IFace)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % faces % jInc(IFace)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % faces % swapDimensions(IFace)
-      k = k+1
-    ENDDO
-
-    DO iface = 1, myHexMesh % boundaryMap % nBoundaries
-      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % extProcIDs(iface)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryIDs(iface)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryGlobalIDs(iface)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % boundaryMap % boundaryCondition(iface)
-      k = k+1
-    ENDDO
-
-    CLOSE( fUnit )
-    ! Get a new file unit
-    OPEN( UNIT    = NEWUNIT(fUnit), &
-      FILE    = TRIM( filename )//'.geom', &
-      FORM    = 'UNFORMATTED',&
-      STATUS  = 'REPLACE', &
-      ACCESS  = 'DIRECT', &
-      CONVERT = 'BIG_ENDIAN', &
-      RECL    = prec ) ! How to DO variable record length
-
-    ! ---- Read in the corner nodes ---- !
-    k = 1
-    DO iNode = 1, nNodes  ! Loop over the nodes in the file
-      WRITE( fUnit, rec=k ) myHexMesh % nodes % x(1,iNode)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % nodes % x(2,iNode)
-      k = k+1
-      WRITE( fUnit, rec=k ) myHexMesh % nodes % x(3,iNode)
-      k = k+1
-    ENDDO
-
-    ! ---- Read in the element information ---- !
-    DO iEl = 1, nElements
-      DO l = 0, N
-        DO j = 0, N
-          DO i = 0, N
-            WRITE( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,1,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,2,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % x(i,j,l,3,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dxds(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dxdp(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dxdq(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dyds(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dydp(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dydq(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dzds(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dzdp(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % dzdq(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % J(i,j,l,iEl)
-            k = k+1
-            DO col = 1, 3
-              DO row = 1, 3
-                WRITE( fUnit, rec=k ) myHexMesh % elements % Ja(i,j,l,row,col,iEl)
-                k = k+1
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-      DO l = 1, 6
-        DO j = 0, N
-          DO i = 0, N
-            WRITE( fUnit, rec=k ) myHexMesh % elements % boundaryLengthScale(i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,1,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,2,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % xBound(i,j,3,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % nHat(1,i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % nHat(2,i,j,l,iEl)
-            k = k+1
-            WRITE( fUnit, rec=k ) myHexMesh % elements % nHat(3,i,j,l,iEl)
-            k = k+1
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    CLOSE( fUnit )
-
-  END SUBROUTINE WriteSELFMeshFile_HexMesh
-
-  SUBROUTINE ReadTrellisUCDMeshFile_HexMesh( myHexMesh, interp, filename )
+  SUBROUTINE Read_TrellisUCDMesh( myHexMesh, interp, filename )
 
     IMPLICIT NONE
     CLASS( HexMesh ), INTENT(out)   :: myHexMesh
@@ -2366,39 +2030,12 @@ CONTAINS
     DEALLOCATE( s, xc, weights )
     CALL boundSurfs % Trash( )
 
-  END SUBROUTINE ReadTrellisUCDMeshFile_HexMesh
-
+  END SUBROUTINE Read_TrellisUCDMesh
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R ReadUCDMeshFile
-!
-!> \fn ReadUCDMeshFile_HexMesh
-!! Reads in a ucd unstructured mesh file. It is assumed that the nodes and elements are numbered
-!! between 1 to nNodes and 1 to nElements, respectively. To ensure this in Trellis or CuBit, TYPE
-!! "compress all" before exporting ucd file.
-!!
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh)    :: this <BR>
-!! <B>CHARACTER</B>        :: filename <BR>
-!!         .... <BR>
-!!     <B>CALL</B> this % ReadUCDMeshFile( filename ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> out <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the SELFMesh file
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE ReadUCDMeshFile_HexMesh( myHexMesh, interp, filename )
-
+  SUBROUTINE Read_UCDMesh( myHexMesh, interp, filename )
 #undef __FUNC__
-#define __FUNC__ "ReadUCDMeshFile"
-
+#define __FUNC__ "Read_UCDMesh"
+    IMPLICIT NONE
     CLASS( HexMesh ), INTENT(out)   :: myHexMesh
     TYPE( Lagrange ), INTENT(in)    :: interp
     CHARACTER(*), INTENT(in)        :: filename
@@ -2533,34 +2170,9 @@ CONTAINS
 
     INFO('End')
 
-  END SUBROUTINE ReadUCDMeshFile_HexMesh
+  END SUBROUTINE Read_UCDMesh
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R WriteTecplot
-!
-!> \fn WriteTecplot_HexMesh
-!! Writes a tecplot file of the mesh geometry.
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh) :: this <BR>
-!! <B>CHARACTER</B>      :: filename <BR>
-!!         .... <BR>
-!!     ! To write a file with a specIFied name <BR>
-!!     <B>CALL</B> this % WriteTecplot( filename ) <BR>
-!!     ! Or, the file "mesh.tec" will be USEd with the following calling sequence <BR>
-!!     <B>CALL</B> this % WriteTecplot( ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the tecplot file
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE WriteTecplot_Hexmesh( myHexMesh, filename )
+  SUBROUTINE Write_TecplotMesh( myHexMesh, filename )
 
     IMPLICIT NONE
     CLASS(HexMesh), INTENT(inout)     :: myHexMesh
@@ -2620,151 +2232,578 @@ CONTAINS
 
     RETURN
 
-  END SUBROUTINE WriteTecplot_Hexmesh
+ END SUBROUTINE Write_TecplotMesh
 !
-!> \addtogroup HexMesh_Class
-!! @{
-! ================================================================================================ !
-! S/R WriteMaterialTecplot
-!
-!> \fn WriteMaterialTecplot_HexMesh
-!! Writes a tecplot file of the mesh geometry and a given "material" field.
-!!
-!! When performing DOmain decomposition (e.g. with the DecomposeHexMesh.f90 program), the
-!! decomposition can be visualized by assigning each element a number that corresponds to the
-!! process ID it has been assigned to. This routine takes in an array of "material ID's" that
-!! identIFy each element.
-!!
-!! <H2> Usage : </H2>
-!! <B>TYPE</B>(HexMesh) :: this <BR>
-!! <B>REAL</B>(prec)     :: pID(1:this % nElements) <BR>
-!! <B>CHARACTER</B>      :: filename <BR>
-!!         .... <BR>
-!!     ! To write a file with a specIFied name <BR>
-!!     <B>CALL</B> this % WriteMaterialTecplot( pID, filename ) <BR>
-!!     ! Or, the file "mesh.tec" will be USEd with the following calling sequence <BR>
-!!     <B>CALL</B> this % WriteMaterialTecplot( pID ) <BR>
-!!
-!!  <H2> Parameters : </H2>
-!!  <table>
-!!   <tr> <td> in <th> myHexMesh <td> HexMesh <td>
-!!   <tr> <td> in <th> materialIDs(1:myHexMesh % nElements) <td> REAL(prec) <td>
-!!                     Array of values that are assigned to each element.
-!!   <tr> <td> in <th> filename <td> CHARACTER <td> Base-name of the MaterialTecplot file
-!!  </table>
-!!
-! ================================================================================================ !
-!>@}
-  SUBROUTINE WriteMaterialTecplot_Hexmesh( myHexMesh, materialIDs, filename )
-
-    IMPLICIT NONE
-    CLASS(HexMesh), INTENT(inout)      :: myHexMesh
-    REAL(prec), INTENT(in)             :: materialIDs(1:myHexMesh % elements % nElements)
-    CHARACTER(*), INTENT(in), OPTIONAL :: filename
-    ! Local
-    INTEGER :: i, j, k, N, iEl,fUnit
-    CHARACTER(7) :: zoneID
-
-    N = myHexMesh % elements % N
-
-    IF( PRESENT(filename) )THEN
-      OPEN( UNIT=NEWUNIT(fUnit), &
-        FILE= TRIM(filename)//'.tec', &
-        FORM='formatted')
-    ELSE
-      OPEN( UNIT=NEWUNIT(fUnit), &
-        FILE= 'mesh.tec', &
-        FORM='formatted')
-    ENDIF
-
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "materialIDs" '
-
-    DO iEl = 1, myHexMesh % elements % nElements
-
-      WRITE(zoneID,'(I7.7)') myHexMesh % elements % elementID(iEl)
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',N+1,', J=',N+1,', K=',N+1,',F=POINT'
-
-      DO k = 0, N
-        DO j = 0, N
-          DO i = 0, N
-            WRITE(fUnit,*) myHexMesh % elements % x(i,j,k,1,iEl), &
-              myHexMesh % elements % x(i,j,k,2,iEl), &
-              myHexMesh % elements % x(i,j,k,3,iEl), &
-              materialIDs(iEl)
-          ENDDO
-        ENDDO
-      ENDDO
-
-    ENDDO
-
-    CLOSE(UNIT=fUnit)
-    RETURN
-
-  END SUBROUTINE WriteMaterialTecplot_Hexmesh
-!
-  FUNCTION NumberOfBoundaryFaces( mesh ) RESULT( nBFaces )
+ SUBROUTINE Read_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "Read_SELFMesh"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: mesh 
+   CHARACTER(*), INTENT(in)        :: meshfile
+   INTEGER, INTENT(in)             :: my_RankID
+   INTEGER, INTENT(in)             :: nMPI_Ranks
   
-    IMPLICIT NONE
-    CLASS( HexMesh ) :: mesh
-    INTEGER          :: nBFaces
-    ! Local
-    INTEGER :: iFace
+   INFO('Start')
 
-    nBFaces = 0
+   IF( nMPI_Ranks > 1 )THEN
 
-    DO iFace = 1, mesh % faces % nFaces
+     ! Need to load the decomposition mesh object lists
 
-      IF( mesh % faces % elementIDs(2,iFace) < 0 )THEN
 
-        nBFaces = nBFaces + 1 
+   ENDIF
 
+   INFO('End')
+
+
+ END SUBROUTINE Read_SELFMesh
+
+ SUBROUTINE Write_SELFMesh( global_mesh, meshfile, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "Write_SELFMesh"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: global_mesh 
+   CHARACTER(*), INTENT(in)        :: meshfile
+   INTEGER, INTENT(in)             :: nMPI_Ranks
+   ! Local 
+   INTEGER(HSIZE_T) :: starts(1), counts(1), strides(1)
+   INTEGER(HSIZE_T) :: dimensions(1)
+   INTEGER(HID_T)   :: file_id, memspace, filespace, group_id
+   INTEGER          :: error
+
+     INFO('Start')
+
+       CALL h5open_f(error)  
+  
+       CALL h5fcreate_f(TRIM(meshfile), H5F_ACC_TRUNC_F, file_id, error)
+
+       CALL h5gcreate_f( file_id, "/mesh", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       CALL h5gcreate_f( file_id, "/mesh/global", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       CALL h5gcreate_f( file_id, "/mesh/global/elements", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       CALL global_mesh % Write_MeshElements( file_id )
+ 
+!       CALL h5gcreate_f( file_id, "/mesh/global/faces", group_id, error )
+!       CALL h5gclose_f( group_id, error )
+!
+!       CALL h5gcreate_f( file_id, "/mesh/global/nodes", group_id, error )
+!       CALL h5gclose_f( group_id, error )
+!
+!       CALL h5gcreate_f( file_id, "/mesh/global/geometry", group_id, error )
+!       CALL h5gclose_f( group_id, error )
+
+!       CALL h5gcreate_f( file_id, "/mesh/decomp", group_id, error )
+!       CALL h5gclose_f( group_id, error )
+
+       CALL h5fclose_f( file_id, error )
+       CALL h5close_f( error )
+
+     INFO('End')
+
+
+ END SUBROUTINE Write_SELFMesh
+
+ SUBROUTINE Write_MeshElements( global_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Write_MeshElements"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: global_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:2)
+   INTEGER(HID_T)   :: memspace, dataset_id
+   CHARACTER(60)    :: variable_name
+   INTEGER          :: rank, error
+
+       rank            = 2
+       dimensions(1:2) = (/8, global_mesh % elements % nElements /)  
+       variable_name = '/mesh/global/elements/node-ids'
+
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % elements % nodeIDs, dimensions, error)
+
+       CALL h5dclose_f( dataset_id, error )
+       CALL h5sclose_f( memspace, error )
+
+ END SUBROUTINE Write_MeshElements
+  
+ SUBROUTINE Load_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "Load_SELFMesh"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: mesh 
+   CHARACTER(*), INTENT(in)        :: meshfile
+   INTEGER, INTENT(in)             :: my_RankID
+   INTEGER, INTENT(in)             :: nMPI_Ranks
+
+   ! Read From HDF5
+   !  - If serial, load in the global mesh. Then create the boundary map
+   !  - If parallel, load in the local process mesh information, the element_to_blockID array and the decomp objects into decomp % mesh_obj(0). 
+   !       Then adjust the face information and create the boundary map 
+
+      CALL mesh % Read_SELFMesh( meshfile, my_RankID, nMPI_Ranks )
+      CALL SetupProcessBoundaryMap( mesh, my_RankID )
+
+
+
+ END SUBROUTINE Load_SELFMesh
+
+ SUBROUTINE Generate_SELFMesh(paramFile, equationFile, nMPI_Ranks)
+#undef __FUNC__
+#define __FUNC__ "Generate_SELFMesh"
+   ! Generates a global SELFMeshFile with a boundary map and
+   ! decomposition for a structured mesh or a UCD mesh file.
+   IMPLICIT NONE
+   CHARACTER(*), INTENT(in) :: paramFile
+   CHARACTER(*), INTENT(in) :: equationFile
+   INTEGER, INTENT(in)      :: nMPI_Ranks
+   ! Local
+   LOGICAL                     :: setupSuccess
+   TYPE( NodalDG )             :: nodal
+   TYPE( HexMesh )             :: mesh
+   TYPE( ModelParameters )     :: params
+   TYPE( Geom_EquationParser ) :: geomParser
+   INTEGER :: nbf, i
+
+   INFO('Start')
+      
+      CALL params % Build( TRIM(paramFile), setupSuccess )
+      CALL geomParser % Build( equationFile )
+
+      ! Build an interpolant
+      CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
+                          N = params % polyDeg, &
+                          nTargetPoints = params % nPlot, &
+                          quadrature = GAUSS )
+   
+      ! Build the Geometry
+      IF( TRIM( params % UCDMeshFile ) == '' )THEN
+           CALL mesh % ConstructStructuredMesh( nodal % interp, params % nXelem, params % nYelem, params % nZelem, &
+                                                geomParser )
+      ELSE   
+        CALL mesh % Read_TrellisUCDMesh( nodal % interp, TRIM( params % UCDMeshFile ) )           
       ENDIF
 
-    ENDDO   
-    
-  END FUNCTION NumberOfBoundaryFaces
-  
- SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess, nMPI_Ranks )
+      CALL mesh % ScaleTheMesh( nodal % interp, params % xScale, params % yScale, params % zScale  )
 
+      CALL mesh % boundaryMap % Build(mesh % faces % nBoundaryFaces(),0)
+
+      ! Set the boundary map for the global mesh
+      nbf = 0
+      DO i = 1, mesh % faces % nFaces
+        IF( mesh % faces % elementIDs(2,i) < 0 )THEN
+          nbf = nbf+1
+          mesh % boundaryMap % boundaryIDs(nbf)       = i
+          mesh % boundaryMap % boundaryGlobalIDs(nbf) = i
+          mesh % boundaryMap % extProcIDs(nbf)        = 0
+          mesh % boundaryMap % boundarycondition(nbf) = mesh % faces % elementIDs(2,i)
+        ENDIF
+      ENDDO
+
+      IF( nMPI_Ranks > 1 )THEN
+        CALL MeshDecompose(mesh, params, nMPI_Ranks )
+      ENDIF 
+
+      CALL mesh % Write_TecplotMesh(TRIM(params % SELFMeshFile))
+      CALL mesh % Write_SELFMesh(TRIM(params % SELFMeshFile), nMPI_Ranks)
+      CALL mesh % Trash( )
+
+    INFO('End')
+
+ END SUBROUTINE Generate_SELFMesh
+!
+ SUBROUTINE MeshDecompose( mesh, params, nMPI_Ranks )
 #undef __FUNC__
-#define __FUNC__ "StructuredMeshGenerator_3D"
+#define __FUNC__ "MeshDecompose"
+   IMPLICIT NONE
+   TYPE( HexMesh ), INTENT(inout)        :: mesh
+   TYPE( ModelParameters ),INTENT(inout) :: params  
+   INTEGER, INTENT(in)                   :: nMPI_Ranks
+   ! Local 
+   LOGICAL                 :: setupSuccess
 
- LOGICAL, INTENT(out)                      :: setupSuccess
- CHARACTER(*), INTENT(in)                  :: paramFile
- CHARACTER(*), INTENT(in)                  :: equationFile
- INTEGER, INTENT(in)                       :: nMPI_Ranks
-  ! Local
- TYPE( NodalDG )                           :: nodal
- TYPE( HexMesh )                           :: mesh
- TYPE( HexMesh )                           :: procMesh
- TYPE( ModelParameters )                   :: params
- TYPE( Geom_EquationParser )               :: geomParser
- INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
- INTEGER                      :: procID, mpiErr
- INTEGER                      :: nElems, nProc, pID, i, j
- INTEGER                      :: iEl, jEl, iSide, iNode, nAdj, nID, elID, nMPI
- INTEGER                      :: e1, e2, p1, p2, iFace, iFaceLocal, jFace, localID
- INTEGER                      :: nBe, npFaces
- INTEGER                      :: globalFaceID, localFaceID, bID, extProc, extBID
- CHARACTER(4)                 :: pIDChar
- INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
- INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:), nLocMPI(:)
- REAL(prec), ALLOCATABLE      :: materials(:)
- INTEGER :: procDim(1:3), meshDim(1:3), dimIndex(1:3), temp
- CHARACTER(50) :: msg
+   INFO('Start')
  
-
-      INFO('Start')
-      ! Read in the parameters
-      CALL params % Build( TRIM(paramFile), setupSuccess )
+     IF( TRIM( params % UCDMeshFile ) /= '' )THEN
+       INFO('Cannot decompose unstructured UCD mesh yet.') 
+       INFO('Stopping.') 
+       STOP
+     ENDIF
 
 #ifdef HAVE_MPI
+     CALL StructuredDecompose( params, nMPI_Ranks )
+#endif
+ 
+     ! TO DO : constructor for decomp
+     ALLOCATE( mesh % decomp % element_to_blockID(1:mesh % elements % nElements) )
+     ALLOCATE( mesh % decomp % global_to_localID(1:mesh % elements % nElements) )
+     mesh % decomp % element_to_blockID = 0
+     mesh % decomp % global_to_localID = 0
+     mesh % decomp % nGlobalElements = 0
+     mesh % decomp % nBlocks = nMPI_Ranks
+     CALL StructuredMeshToBlocks( mesh, params )
+     CALL CreateMeshObjLists( mesh, nMPI_Ranks )
+
+
+   INFO('End')
+
+ END SUBROUTINE MeshDecompose
+
+ SUBROUTINE SetupProcessBoundaryMap( mesh, my_RankID )
+#undef __FUNC__
+#define __FUNC__ "SetupProcessBoundaryMap"
+ ! This routine takes in a mesh block assigned to a given MPI rank, along with
+ ! the filled in decomp object. When the decomp object is created on an MPI rank
+ ! only the 0th array element is allocated
+ ! This routine also assumes that the decomp element_to_blockID and global_to_localID arrays
+ ! have been filled in
+ !
+ ! On input, the mesh has the node, element, and face information filled in. However, the
+ ! face element IDs refer to global element IDs and must be converted to local element IDs
+ !
+   IMPLICIT NONE
+   TYPE( HexMesh ), INTENT(inout) :: mesh
+   INTEGER,  INTENT(in)           :: my_RankID
+   ! Local
+   INTEGER :: iFace, e1, e2, p1, p2, e1Local, e2Local, s1, s2
+   INTEGER :: nbf, nmpi
+   CHARACTER(30) :: msg
+   
+   INFO('Start')
+
+     ! Count the number of boundary faces first
+     nbf  = 0
+     nmpi = 0
+     DO iFace = 1, mesh % faces % nFaces
+
+       e1 = mesh % faces % elementIDs(1,iFace)
+       e2 = mesh % faces % elementIDs(2,iFace)
+       p1 = mesh % decomp % element_to_blockID(e1)
+
+       IF( e2 > 0 )THEN ! Global internal face
+         p2 = mesh % decomp % element_to_blockID(e2)
+
+         IF( p1 == my_RankID .AND. p2 == my_RankID )THEN ! Local internal face
+          ! mesh % faces % elementIDs(1,iFace) = mesh % decomp % global_to_localID(e1)
+          ! mesh % faces % elementIDs(2,iFace) = mesh % decomp % global_to_localID(e2)
+         ELSE ! MPI Boundary
+            nbf = nbf + 1
+            nmpi = nmpi + 1
+         ENDIF
+
+       ELSE ! Physical Boundary
+
+         nbf = nbf + 1
+
+       ENDIF
+
+     ENDDO
+
+     WRITE(msg,'(A,I5)') 'Number of boundary faces : ',nbf
+     INFO( TRIM(msg) )
+     WRITE(msg,'(A,I5)') 'Number of MPI exchanges : ',nmpi
+     INFO( TRIM(msg) )
+
+     CALL mesh % boundaryMap % build( nbf, nmpi )
+
+     nbf  = 0
+     nmpi = 0
+     DO iFace = 1, mesh % faces % nFaces
+
+       e1 = mesh % faces % elementIDs(1,iFace)
+       e2 = mesh % faces % elementIDs(2,iFace)
+       p1 = mesh % decomp % element_to_blockID(e1)
+
+       IF( e2 > 0 )THEN ! Global internal face
+         p2 = mesh % decomp % element_to_blockID(e2)
+
+         IF( p1 == my_RankID .AND. p2 == my_RankID )THEN ! Local internal face
+           mesh % faces % elementIDs(1,iFace) = mesh % decomp % global_to_localID(e1)
+           mesh % faces % elementIDs(2,iFace) = mesh % decomp % global_to_localID(e2)
+         ELSE ! MPI Boundary
+            nbf = nbf + 1
+            nmpi = nmpi + 1
+
+            e1local = mesh % decomp % global_to_localID(e1)
+            e2local = mesh % decomp % global_to_localID(e2)
+            s1 = mesh % faces % elementSides(1,iFace)
+            s2 = mesh % faces % elementSides(2,iFace)
+
+            IF( p1 == my_RankID )THEN
+
+              mesh % faces % elementIDs(1,iFace)   = e1local
+              mesh % faces % elementIDs(2,iFace)   = -e2 ! Store the negative of the global element ID as the secondary element
+              mesh % faces % elementSides(1,iFace) = s1  
+              mesh % faces % elementSides(2,iFace) = s2  
+
+              mesh % boundaryMap % extProcIDs(nbf)        = p2
+              mesh % boundaryMap % boundaryIDs(nbf)       = iFace
+              mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
+              mesh % boundaryMap % boundaryCondition(nbf) = MPI_BOUNDARY 
+              mesh % boundaryMap % boundary_to_mpi(nmpi)  = nbf
+
+            ELSE ! this process owns the secondary element - need to swap the ids and sides
+
+              mesh % faces % elementIDs(1,iFace)   = e2local
+              mesh % faces % elementIDs(2,iFace)   = -e1 ! Store the negative of the global element ID as the secondary element
+              mesh % faces % elementSides(1,iFace) = s2  
+              mesh % faces % elementSides(2,iFace) = s1  
+
+              mesh % boundaryMap % extProcIDs(nbf)        = p1
+              mesh % boundaryMap % boundaryIDs(nbf)       = iFace
+              mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
+              mesh % boundaryMap % boundaryCondition(nbf) = MPI_BOUNDARY 
+              mesh % boundaryMap % boundary_to_mpi(nmpi)  = nbf
+
+            ENDIF
+         ENDIF
+
+       ELSE ! Physical Boundary
+
+         nbf = nbf + 1
+         mesh % faces % elementIDs(1,iFace)   = e1local
+         mesh % faces % elementSides(1,iFace) = s1  
+
+         mesh % boundaryMap % extProcIDs(nbf)        = p1
+         mesh % boundaryMap % boundaryIDs(nbf)       = iFace
+         mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
+         mesh % boundaryMap % boundaryCondition(nbf) = e2 ! Retain the boundary condition from the face information 
+
+       ENDIF
+
+     ENDDO
+
+   INFO('End')
+
+ END SUBROUTINE SetupProcessBoundaryMap
+
+ SUBROUTINE CreateMeshObjLists( global_mesh, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "CreateMeshObjLists"
+   IMPLICIT NONE
+   TYPE( HexMesh ), INTENT(inout) :: global_mesh
+   INTEGER, INTENT(in)            :: nMPI_Ranks
+   ! Local
+   INTEGER :: iEl, iNode, iFace, e1, e2
+   INTEGER :: procID, nodeID, faceID
+   INTEGER :: nNodes, nFaces
+   INTEGER :: nEl(0:nMPI_Ranks-1)
+   INTEGER :: nodeLogic(1:global_mesh % nodes % nNodes,0:nMPI_Ranks-1)
+   INTEGER :: faceLogic(1:global_mesh % faces % nFaces,0:nMPI_Ranks-1)
+   CHARACTER(30) :: msg
+
+   INFO('Start')
+
+     nEl   = 0
+     nodeLogic = 0
+     faceLogic = 0
+     ! Set the logic mask for the nodes and count the number of elements
+     DO iEl = 1, global_mesh % elements % nElements
+       procID = global_mesh % decomp % element_to_blockID(iEl)
+       nEl(procID) = nEl(procID) + 1
+       DO iNode = 1, 8
+         nodeID = global_mesh % elements % nodeIDs(iNode,iEl) 
+         nodeLogic(nodeID,procID) = 1
+       ENDDO
+     ENDDO
+    
+     ! Set the logic mask for the faces
+     DO procID = 0, nMPI_Ranks -1
+       DO iFace = 1, global_mesh % faces % nFaces
+         e1 = global_mesh % faces % elementIDs(1,iFace)
+         e2 = global_mesh % faces % elementIDs(2,iFace)
+         IF( global_mesh % decomp % element_to_blockID(e1) == procID .OR. &
+             global_mesh % decomp % element_to_blockID(e2) == procID )THEN
+
+           faceLogic(iFace,procID) = 1
+ 
+         ENDIF
+       ENDDO
+     ENDDO
+
+     ! Allocate space for the decomposition mesh object lists
+     ! TO DO : Constructor for decomp
+     ALLOCATE( global_mesh % decomp % mesh_obj(0:nMPI_Ranks-1) )
+     global_mesh % decomp % nBlocks = nMPI_Ranks
+     global_mesh % decomp % nGlobalElements = global_mesh % elements % nElements 
+     DO procID = 0, nMPI_Ranks-1
+       ALLOCATE( global_mesh % decomp % mesh_obj(procID) % elementids(1:nEl(procID)) ) 
+       nNodes = SUM( nodeLogic(:,procID) )
+       ALLOCATE( global_mesh % decomp % mesh_obj(procID) % nodeids(1:nNodes) ) 
+       nFaces = SUM( faceLogic(:,procID) )
+       ALLOCATE( global_mesh % decomp % mesh_obj(procID) % faceids(1:nFaces) ) 
+       global_mesh % decomp % mesh_obj(procID) % nElements = nEl(procID)
+       global_mesh % decomp % mesh_obj(procID) % nNodes    = nNodes
+       global_mesh % decomp % mesh_obj(procID) % nFaces    = nFaces
+
+       WRITE(msg,'(A,I5)') 'Process ID : ',procID
+       INFO( TRIM(msg) )
+       WRITE(msg,'(A,I5)') 'Number of elements : ',nEl(procID)
+       INFO( TRIM(msg) )
+       WRITE(msg,'(A,I5)') 'Number of nodes : ',nNodes
+       INFO( TRIM(msg) )
+       WRITE(msg,'(A,I5)') 'Number of faces : ',nFaces
+       INFO( TRIM(msg) )
+
+     ENDDO
+
+
+     ! Set the element lists
+     nEl   = 0
+     DO iEl = 1, global_mesh % elements % nElements
+       procID = global_mesh % decomp % element_to_blockID(iEl)
+       nEl(procID) = nEl(procID) + 1
+       global_mesh % decomp % mesh_obj(procID) % elementids(nEl(procID)) = iEl
+     ENDDO
+
+     ! Set the node lists
+     DO procID = 0, nMPI_Ranks -1
+       nNodes = 0
+       DO iNode = 1, global_mesh % nodes % nNodes
+         IF( nodeLogic(iNode,procID) == 1 )THEN
+           nNodes = nNodes + 1
+           global_mesh % decomp % mesh_obj(procID) % nodeids(nNodes) = iNode
+         ENDIF
+       ENDDO
+     ENDDO
+
+     ! Set the face lists
+     DO procID = 0, nMPI_Ranks -1
+       nFaces = 0
+       DO iFace = 1, global_mesh % faces % nFaces
+         IF( faceLogic(iFace,procID) == 1 )THEN
+           nFaces = nFaces + 1
+           global_mesh % decomp % mesh_obj(procID) % faceids(nFaces) = iFace
+         ENDIF
+       ENDDO
+     ENDDO
+
+   INFO('End')
+
+ END SUBROUTINE CreateMeshObjLists
+
+ SUBROUTINE StructuredMeshToBlocks( global_mesh, params )
+#undef __FUNC__
+#define __FUNC__ "StructuredMeshToBlocks"
+   IMPLICIT NONE
+   TYPE( HexMesh ), INTENT(inout)        :: global_mesh
+   TYPE( ModelParameters ),INTENT(inout) :: params  
+   ! Local
+   INTEGER :: iPz, iPy, iPx
+   INTEGER :: iZp, iYp, iXp
+   INTEGER :: iZ, iY, iX
+   INTEGER :: iNode, nID
+   INTEGER :: iEl, procID
+   INTEGER :: nxp(1:params % nProcX)
+   INTEGER :: nyp(1:params % nProcY)
+   INTEGER :: nzp(1:params % nProcZ)
+   INTEGER :: nEl(0:params % nProc-1)
+    
+   INFO('Start')
+
+
+      IF( params % nProc > 1 )THEN
+        nxp = params % nXelem/params % nProcX
+        IF( SUM(nxp) < params % nXElem )THEN
+          DO iPx = 1, params % nProcX
+            nxp(iPx) = nxp(iPx) + 1
+            IF( SUM(nxp) == params % nXElem )THEN
+              EXIT
+            ENDIF
+          ENDDO
+        ENDIF
+
+        nyp = params % nYelem/params % nProcY
+        IF( SUM(nyp) < params % nYElem )THEN
+          DO iPy = 1, params % nProcY
+            nyp(iPy) = nyp(iPy) + 1
+            IF( SUM(nyp) == params % nYElem )THEN
+              EXIT
+            ENDIF
+          ENDDO
+        ENDIF
+
+        nzp = params % nZelem/params % nProcZ
+        IF( SUM(nzp) < params % nZElem )THEN
+          DO iPz = 1, params % nProcZ
+            nzp(iPz) = nzp(iPz) + 1
+            IF( SUM(nzp) == params % nZElem )THEN
+              EXIT
+            ENDIF
+          ENDDO
+        ENDIF
+
+        iZ = 0
+        DO iPz = 1, params % nProcZ
+          DO iZp = 1, nzp(iPz)
+
+            iZ = iZ+1
+            iY = 0
+
+            DO iPy = 1, params % nProcY
+              DO iYp = 1, nyp(iPy)
+
+                iY = iY+1
+                iX = 0
+
+                DO iPx = 1, params % nProcX
+                  DO iXp = 1, nxp(iPx)
+
+                    iX = iX +1               
+                       
+                    iEl = iX + params % nXelem*( iY-1 + params % nYelem*( iZ-1 ) )
+                    IF( iEl <= global_mesh % elements % nElements )THEN
+                      global_mesh % decomp % element_to_blockID(iEl) = iPx-1 + params % nProcX*( iPy-1 + params % nProcY*(iPz-1) )
+                    ENDIF
+
+                  ENDDO
+                ENDDO
+
+              ENDDO
+            ENDDO
+
+          ENDDO
+        ENDDO
+
+        nEl = 0
+        DO iEl = 1, global_mesh % elements % nElements
+          procID = global_mesh % decomp % element_to_blockID(iEl)
+          nEl(procID) = nEl(procID) + 1
+          global_mesh % decomp % global_to_localID(iEl) = nEl(procID)
+        ENDDO
+
+
+      ENDIF
+   INFO('End')
+
+ END SUBROUTINE StructuredMeshToBlocks
+
+ SUBROUTINE StructuredDecompose( params, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "StructuredDecompose"
+   IMPLICIT NONE
+   TYPE( ModelParameters ), INTENT(inout) :: params
+   INTEGER, INTENT(in)                    :: nMPI_Ranks
+   ! Local
+   INTEGER :: procDim(1:3), meshDim(1:3), dimIndex(1:3), temp
+   INTEGER :: i, j 
+   CHARACTER(50) :: msg
+
+   INFO('Start')
       params % nProc = nMPI_Ranks
 
       IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
 
         INFO('Number of processes exceeds number of elements.')
-        setupSuccess = .FALSE.
+        INFO('Cannot decompose.')
+        INFO('Stopping.')
+        STOP
 
       ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
 
@@ -2773,7 +2812,6 @@ CONTAINS
         params % nProcZ = params % nZElem
 
       ELSE
-
 
         meshDim(1:3)  = (/ params % nXElem, params % nYElem, params % nZElem /) 
         dimIndex(1:3) = (/ 1, 2, 3 /) 
@@ -2869,7 +2907,6 @@ CONTAINS
 
         ENDDO
 
-
       ENDIF
 
       WRITE(msg,'(A,I5)')'nProcX :', params % nProcX
@@ -2878,362 +2915,506 @@ CONTAINS
       INFO( TRIM(msg) )
       WRITE(msg,'(A,I5)')'nProcZ :', params % nProcZ
       INFO( TRIM(msg) )
+
+   INFO('End')
       
-#endif
-      CALL geomParser % Build( equationFile )
+ END SUBROUTINE StructuredDecompose     
 
-      IF( setupSuccess )THEN
-         ! Build an interpolant
-         CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
-                             N = params % polyDeg, &
-                             nTargetPoints = params % nPlot, &
-                             quadrature = GAUSS_LOBATTO )
-   
-         ! Build the Geometry
-         IF( TRIM( params % UCDMeshFile ) == '' )THEN
-
-           IF( params % MeshType == DoublyPeriodic )THEN
-              CALL mesh % ConstructStructuredMesh( nodal % interp, &
-                params % nXelem, &
-                params % nYelem, &
-                params % nZelem, &
-                geomParser, &
-                .TRUE. )
-           ELSE
-              CALL mesh % ConstructStructuredMesh( nodal % interp, &
-                params % nXelem, &
-                params % nYelem, &
-                params % nZelem, &
-                geomParser, &
-                .FALSE. )
-           ENDIF
-
-         ELSE   
-
-           CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
-#ifdef TECPLOT
-           CALL mesh % WriteTecplot( 'mesh' )
-#endif
-
-         ENDIF
-
-         nElems = mesh % elements % nElements
-         nProc  = params % nProcX*params % nProcY*params % nProcZ
-         IF( nProc == 0 )THEN
-            nProc = 1
-         ENDIF
-         ALLOCATE( materials(1:nElems), &
-                   globalToLocal(1:nElems,1:2), &
-                   nElPerProc(0:nProc-1), &
-                   nodeLogic(1:mesh % nodes % nNodes, 0:nProc-1), &
-                   nNodePerProc(0:nProc-1), &
-                   globalToLocalNode(1:mesh % nodes % nNodes, 0:nProc-1), &
-                   nLocMPI(0:nProc-1) )
-                   
-         materials     = 0.0_prec
-         globalToLocal = 0
-         nElPerProc    = 0
-         nodeLogic     = 0
-         nNodePerProc  = 0
-         
-         ALLOCATE( partitions(1:nElems) )
-         ALLOCATE( faceProcCount(1:mesh % faces % nFaces), &
-                   faceProcOwners(1:mesh % faces % nFaces,1:2), &
-                   faceBoundaryIDs(1:mesh % faces % nFaces,1:2), &
-                   faceProcTable(1:mesh % faces % nFaces, 0:nProc-1) )
-         faceProcCount   = 0
-         faceProcOwners  = -1
-         faceBoundaryIDs = 0
-         faceProcTable   = -5000
-
-         CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
-                                                          globalToLocal, nodeLogic, nNodePerProc, &
-                                                          globalToLocalNode, nProc )
-
-   
-            
-         ! Now we generate the local mesh for each process
-
-         DO procID = 0, nProc-1
-            CALL procMesh % Build( nNodePerProc(procID), &
-                                   nElPerProc(procID), &
-                                   1, params % polyDeg )
-! ----------------------------------------------------------------------------- !
-
-            DO nID = 1, mesh % nodes % nNodes
-            
-               ! We only assign node information if it is "owned" by this process
-               IF( nodeLogic(nID,procID) == 1 )THEN 
-
-                  localID = globalToLocalNode( nID, procID )
-                  procMesh % nodes % nodeID(localID)   = nID
-                  procMesh % nodes % nodeType(localID) = mesh % nodes % nodeTYPE(nID)
-                  procMesh % nodes % x(1:3,localID)    = mesh % nodes % x(1:3,nID)
-
-               ENDIF
-               
-            ENDDO
-   
-! ----------------------------------------------------------------------------- !
-
-            ! Set the element-node connectivity
-            DO iEl = 1, mesh % elements % nElements
-               ! We only assign element information if it is "owned" by this process
-               IF( globalToLocal(iEl,2) == procID )THEN
-                  elID = globalToLocal(iEl,1) ! Obtain the local element ID from the global-to-local array
-                  
-                  DO iNode = 1, 8
-       
-                    ! First we grab the global node ID for this element's corner node
-                    nID = mesh % elements % nodeIDs(iNode,iEl)
-                    ! THEN we convert this to a local node ID for this process
-                    localID = globalToLocalNode( nID, procID )
-                    ! And now we assign the local Node ID to the local element's corner node ID's
-                    procMesh % elements % nodeIDs(iNode,elID)  = localID
-       
-                  ENDDO
-                  procMesh % elements % elementID(elID) = iEl
-                     
-                  ! Set the geometry
-                  procMesh % elements % nHat(:,:,:,:,elID)   = mesh % elements % nHat(:,:,:,:,iEl)
-                  procMesh % elements % xBound(:,:,:,:,elID) = mesh % elements % xBound(:,:,:,:,iEl)
-                  procMesh % elements % x(:,:,:,:,elID)      = mesh % elements % x(:,:,:,:,iEl)
-                  procMesh % elements % J(:,:,:,elID)        = mesh % elements % J(:,:,:,iEl)
-                  procMesh % elements % dxds(:,:,:,elID)     = mesh % elements % dxds(:,:,:,iEl)
-                  procMesh % elements % dxdp(:,:,:,elID)     = mesh % elements % dxdp(:,:,:,iEl)
-                  procMesh % elements % dxdq(:,:,:,elID)     = mesh % elements % dxdq(:,:,:,iEl)
-                  procMesh % elements % dyds(:,:,:,elID)     = mesh % elements % dyds(:,:,:,iEl)
-                  procMesh % elements % dydp(:,:,:,elID)     = mesh % elements % dydp(:,:,:,iEl)
-                  procMesh % elements % dydq(:,:,:,elID)     = mesh % elements % dydq(:,:,:,iEl)
-                  procMesh % elements % dzds(:,:,:,elID)     = mesh % elements % dzds(:,:,:,iEl)
-                  procMesh % elements % dzdp(:,:,:,elID)     = mesh % elements % dzdp(:,:,:,iEl)
-                  procMesh % elements % dzdq(:,:,:,elID)     = mesh % elements % dzdq(:,:,:,iEl)
-                  procMesh % elements % Ja(:,:,:,:,:,elID)   = mesh % elements % Ja(:,:,:,:,:,iEl)
-       
-               ENDIF
-               
-            ENDDO
-   
-! ----------------------------------------------------------------------------- !
-
-            npFaces = 0 
-            nBe     = 0
-            iFaceLocal = 0
-            nMPI       = 0
-            DO iFace = 1, mesh % faces % nFaces
-
-               e1 = mesh % faces % elementIDs(1,iFace)
-               e2 = mesh % faces % elementIDs(2,iFace)
-
-               p1 = globalToLocal(e1,2)
-               IF( e2 > 0 )THEN
-                  p2 = globalToLocal(e2,2)
-               ELSE
-                  p2  = p1
-               ENDIF
-               IF( p1 == procID .OR. p2 == procID )THEN
-
-                  faceProcTable(iFace,p1) = 1
-                  faceProcTable(iFace,p2) = 1
-                  iFaceLocal = iFaceLocal+1
-
-                  faceProcCount(iFace) = faceProcCount(iFace) + 1
-                  faceProcOwners(iFace,faceProcCount(iFace)) = procID 
-
-                  npFaces = npFaces + 1
-
-                  IF( e2 < 0 .AND. p2 == p1 )THEN
-
-                     nBe = nBe + 1
-                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
-
-                  ELSEIF( p2 /= p1 .AND. p1 == procID )THEN
-
-                     nMPI = nMPI + 1 
-                     nBe = nBe + 1
-                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
-
-                  ELSEIF( p2 /= p1 .AND. p2 == procID )THEN
-
-                     nMPI = nMPI + 1 
-                     nBe = nBe + 1
-                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
-
-                  ENDIF
-
-               ENDIF
-
-            ENDDO
-
-            WRITE(msg,'(A,I5)') 'Process ID : ',procID
-            INFO( TRIM(msg) )
-            WRITE(msg,'(A,I5)') 'Number of MPI Communications : ',nMPI
-            INFO( TRIM(msg) )
-            WRITE(msg,'(A,I5)') 'Number of faces : ',npFaces
-            INFO( TRIM(msg) )
-            WRITE(msg,'(A,I5)') 'Number of boundary faces : ',nBe
-            INFO( TRIM(msg) )
-            WRITE(msg,'(A,I5)') 'Number of elements : ',nElPerProc(procID)
-            INFO( TRIM(msg) )
-
-            CALL procMesh % faces % Trash( )
-            CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
-            CALL procMesh % boundaryMap % Build( nBe )
-
-            iFaceLocal = 0
-            nBe        = 0
-            nMPI       = 0
-            DO iFace = 1, mesh % faces % nFaces
-
-               e1 = mesh % faces % elementIDs(1,iFace)
-               e2 = mesh % faces % elementIDs(2,iFace)
-
-               p1 = globalToLocal(e1,2)
-               IF( e2 > 0 )THEN
-                  p2 = globalToLocal(e2,2)
-               ELSE
-                  p2  = p1
-               ENDIF
-
-               IF( p1 == procID .OR. p2 == procID )THEN
-
-                  iFaceLocal = iFaceLocal + 1
-
-
-                  IF( p2 == p1 .AND. e2 > 0 )THEN ! Internal Face
-                    
-                     procMesh % faces % faceID(iFaceLocal)         = iFace
-                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
-                     procMesh % faces % elementIDs(2,iFaceLocal)   = globalToLocal( e2, 1 )
-                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-
-                  ELSEIF( p2 == p1 .AND. e2 < 0 )THEN ! Physical boundary
-
-                     procMesh % faces % faceID(iFaceLocal)         = iFace
-                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
-                     procMesh % faces % elementIDs(2,iFaceLocal)   = e2
-                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-
-                     nBe = nBe + 1
-                     procMesh % faces % boundaryID(iFaceLocal) = -nBe
-
-                     ! Physical boundary ID's will be set to negative for physical boundaryMap
-                     ! so that boundaryMap requiring communication can be separated from physical
-                     ! boundaryMap. This will allow more operations to be run concurrently with
-                     ! communication.
-                     procMesh % boundaryMap % boundaryIDs(nBe)       = iFaceLocal
-                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
-                     procMesh % boundaryMap % extProcIDs(nBe)        = procID
-
-                  ELSEIF( p2 /= p1 .AND. procID == p1 )THEN ! MPI Boundary
-                
-                     procMesh % faces % faceID(iFaceLocal)         = iFace
-                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
-                     procMesh % faces % elementIDs(2,iFaceLocal)   = -e2
-                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-
-                     nBe = nBe + 1
-                     procMesh % faces % boundaryID(iFaceLocal) = nBe
-
-                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
-                     ! so that they can be distinguished from physical boundaryMap that do not require
-                     ! communication with neighboring processes. 
-                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
-                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
-                     procMesh % boundaryMap % extProcIDs(nBe)  = p2
-
-
-                  ELSEIF( p2 /= p1 .AND. procID == p2 )THEN ! MPI Boundary
-                  
-                  
-                     procMesh % faces % faceID(iFaceLocal)         = iFace
-                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e2, 1 )
-                     procMesh % faces % elementIDs(2,iFaceLocal)   = -e1
-                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-                  
-                     nBe = nBe + 1
-                     procMesh % faces % boundaryID(iFaceLocal) = nBe
-
-                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
-                     ! so that they can be distinguished from physical boundaryMap that do not require
-                     ! communication with neighboring processes. 
-                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
-                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
-                     procMesh % boundaryMap % extProcIDs(nBe)  = p1
-
-
-                  ENDIF
-               ENDIF
-
-            ENDDO
-            
-! ----------------------------------------------------------------------------- !
-
-            WRITE( pIDChar, '(I4.4)' ) procID
-#ifdef TECPLOT
-            CALL procMesh % WriteTecplot( 'mesh.'//pIDChar )
-#endif
-            CALL procMesh % WriteSELFMeshFile( TRIM(params % SELFMeshFile)//'.'//pIDChar )
-            
-            CALL procMesh % Trash( )
-
-         ENDDO
-   
-
-      ! For visualizing the decomposition
-      materials = REAL( partitions, prec )
-#ifdef TECPLOT
-      CALL mesh % WriteMaterialTecplot( materials )
-#endif
-      
-
-      ! Clean up memory !
-      DEALLOCATE( materials, &
-                  faceProcCount, &
-                  faceProcOwners, &
-                  faceBoundaryIDs, &
-                  nLocMPI )
-      
-      CALL mesh % Trash( )
-      CALL nodal % Trash( )
-
-      ENDIF
-
-      INFO('End')
-
- END SUBROUTINE StructuredMeshGenerator_3D
+! SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess, nMPI_Ranks )
+!#undef __FUNC__
+!#define __FUNC__ "StructuredMeshGenerator_3D"
+! LOGICAL, INTENT(out)                      :: setupSuccess
+! CHARACTER(*), INTENT(in)                  :: paramFile
+! CHARACTER(*), INTENT(in)                  :: equationFile
+! INTEGER, INTENT(in)                       :: nMPI_Ranks
+!  ! Local
+! TYPE( NodalDG )                           :: nodal
+! TYPE( HexMesh )                           :: mesh
+! TYPE( HexMesh )                           :: procMesh
+! TYPE( ModelParameters )                   :: params
+! TYPE( Geom_EquationParser )               :: geomParser
+! INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
+! INTEGER                      :: procID, mpiErr
+! INTEGER                      :: nElems, nProc, pID, i, j
+! INTEGER                      :: iEl, jEl, iSide, iNode, nAdj, nID, elID, nMPI
+! INTEGER                      :: e1, e2, p1, p2, iFace, iFaceLocal, jFace, localID
+! INTEGER                      :: nBe, npFaces
+! INTEGER                      :: globalFaceID, localFaceID, bID, extProc, extBID
+! CHARACTER(4)                 :: pIDChar
+! INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
+! INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:), nLocMPI(:)
+! REAL(prec), ALLOCATABLE      :: materials(:)
+! INTEGER :: procDim(1:3), meshDim(1:3), dimIndex(1:3), temp
+! CHARACTER(50) :: msg
+! 
+!
+!      INFO('Start')
+!      ! Read in the parameters
+!      CALL params % Build( TRIM(paramFile), setupSuccess )
+!
+!#ifdef HAVE_MPI
+!      params % nProc = nMPI_Ranks
+!
+!      IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
+!
+!        INFO('Number of processes exceeds number of elements.')
+!        setupSuccess = .FALSE.
+!
+!      ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
+!
+!        params % nProcX = params % nXElem
+!        params % nProcY = params % nYElem
+!        params % nProcZ = params % nZElem
+!
+!      ELSE
+!
+!
+!        meshDim(1:3)  = (/ params % nXElem, params % nYElem, params % nZElem /) 
+!        dimIndex(1:3) = (/ 1, 2, 3 /) 
+!
+!        ! Sort from largest mesh dimension to smallest with insertion sort
+!        DO i = 2,  3
+!          j = i
+!          DO WHILE( j > 1 )
+!            IF( meshDim(j-1) < meshDim(j) )THEN
+!
+!              temp         = meshDim(j)
+!              meshDim(j)   = meshDim(j-1)
+!              meshDim(j-1) = temp 
+!
+!              temp          = dimIndex(j)
+!              dimIndex(j)   = dimIndex(j-1)
+!              dimIndex(j-1) = temp 
+!              j = j-1
+!
+!            ELSE
+!              EXIT
+!            ENDIF
+!          ENDDO
+!        ENDDO
+!        
+!        procDim(1:3)  = (/ params % nProc, 1, 1 /)
+!
+!        DO WHILE( procDim(1) > meshDim(1) )
+!
+!          DO i = 2, procDim(1)
+!            IF( MOD( procDim(1), i ) == 0 )THEN
+!              j = i
+!              EXIT
+!            ENDIF
+!          ENDDO
+!
+!          procDim(1) = procDim(1)/j
+!
+!        ENDDO
+!
+!        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
+!
+!          procDim(2) = params % nProc/procDim(1)
+!
+!          IF( procDim(2) > 1 )THEN
+!            DO WHILE( procDim(2) > meshDim(2) )
+!  
+!              DO i = 2, procDim(2)
+!                IF( MOD( procDim(2), i ) == 0 )THEN
+!                  j = i
+!                  EXIT
+!                ENDIF
+!              ENDDO
+!  
+!              procDim(2) = procDim(2)/j
+!  
+!            ENDDO
+!  
+!          ENDIF
+!
+!        ENDIF
+!
+!        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
+!
+!          procDim(3) = params % nProc/(procDim(1)*procDim(2))
+!          IF( procDim(3) > 1 )THEN
+!            DO WHILE( procDim(3) > meshDim(3) )
+!  
+!              DO i = 2, procDim(3)
+!                IF( MOD( procDim(3), i ) == 0 )THEN
+!                  j = i
+!                  EXIT
+!                ENDIF
+!              ENDDO
+!  
+!              procDim(3) = procDim(3)/j
+!  
+!            ENDDO
+!  
+!          ENDIF
+!
+!        ENDIF
+!
+!        DO i = 1, 3
+!
+!          IF( dimIndex(i) == 1 )THEN
+!            params % nProcX = procDim(i)
+!          ELSEIF( dimIndex(i) == 2 )THEN
+!            params % nProcY = procDim(i)
+!          ELSE
+!            params % nProcZ = procDim(i)
+!          ENDIF
+!
+!        ENDDO
+!
+!      ENDIF
+!
+!      WRITE(msg,'(A,I5)')'nProcX :', params % nProcX
+!      INFO( TRIM(msg) )
+!      WRITE(msg,'(A,I5)')'nProcY :', params % nProcY
+!      INFO( TRIM(msg) )
+!      WRITE(msg,'(A,I5)')'nProcZ :', params % nProcZ
+!      INFO( TRIM(msg) )
+!      
+!#endif
+!      CALL geomParser % Build( equationFile )
+!
+!      IF( setupSuccess )THEN
+!         ! Build an interpolant
+!         CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
+!                             N = params % polyDeg, &
+!                             nTargetPoints = params % nPlot, &
+!                             quadrature = GAUSS_LOBATTO )
+!   
+!         ! Build the Geometry
+!         IF( TRIM( params % UCDMeshFile ) == '' )THEN
+!              CALL mesh % ConstructStructuredMesh( nodal % interp, &
+!                params % nXelem, &
+!                params % nYelem, &
+!                params % nZelem, &
+!                geomParser )
+!         ELSE   
+!
+!           CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
+!#ifdef TECPLOT
+!           CALL mesh % WriteTecplot( 'mesh' )
+!#endif
+!
+!         ENDIF
+!
+!         nElems = mesh % elements % nElements
+!         nProc  = params % nProcX*params % nProcY*params % nProcZ
+!         IF( nProc == 0 )THEN
+!            nProc = 1
+!         ENDIF
+!         ALLOCATE( materials(1:nElems), &
+!                   globalToLocal(1:nElems,1:2), &
+!                   nElPerProc(0:nProc-1), &
+!                   nodeLogic(1:mesh % nodes % nNodes, 0:nProc-1), &
+!                   nNodePerProc(0:nProc-1), &
+!                   globalToLocalNode(1:mesh % nodes % nNodes, 0:nProc-1), &
+!                   nLocMPI(0:nProc-1) )
+!                   
+!         materials     = 0.0_prec
+!         globalToLocal = 0
+!         nElPerProc    = 0
+!         nodeLogic     = 0
+!         nNodePerProc  = 0
+!         
+!         ALLOCATE( partitions(1:nElems) )
+!         ALLOCATE( faceProcCount(1:mesh % faces % nFaces), &
+!                   faceProcOwners(1:mesh % faces % nFaces,1:2), &
+!                   faceBoundaryIDs(1:mesh % faces % nFaces,1:2), &
+!                   faceProcTable(1:mesh % faces % nFaces, 0:nProc-1) )
+!         faceProcCount   = 0
+!         faceProcOwners  = -1
+!         faceBoundaryIDs = 0
+!         faceProcTable   = -5000
+!
+!         CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
+!                                                          globalToLocal, nodeLogic, nNodePerProc, &
+!                                                          globalToLocalNode, nProc )
+!
+!   
+!            
+!         ! Now we generate the local mesh for each process
+!
+!         DO procID = 0, nProc-1
+!            CALL procMesh % Build( nNodePerProc(procID), &
+!                                   nElPerProc(procID), &
+!                                   1, params % polyDeg )
+!! ----------------------------------------------------------------------------- !
+!
+!            DO nID = 1, mesh % nodes % nNodes
+!            
+!               ! We only assign node information if it is "owned" by this process
+!               IF( nodeLogic(nID,procID) == 1 )THEN 
+!
+!                  localID = globalToLocalNode( nID, procID )
+!                  procMesh % nodes % nodeID(localID)   = nID
+!                  procMesh % nodes % nodeType(localID) = mesh % nodes % nodeTYPE(nID)
+!                  procMesh % nodes % x(1:3,localID)    = mesh % nodes % x(1:3,nID)
+!
+!               ENDIF
+!               
+!            ENDDO
+!   
+!! ----------------------------------------------------------------------------- !
+!
+!            ! Set the element-node connectivity
+!            DO iEl = 1, mesh % elements % nElements
+!               ! We only assign element information if it is "owned" by this process
+!               IF( globalToLocal(iEl,2) == procID )THEN
+!                  elID = globalToLocal(iEl,1) ! Obtain the local element ID from the global-to-local array
+!                  
+!                  DO iNode = 1, 8
+!       
+!                    ! First we grab the global node ID for this element's corner node
+!                    nID = mesh % elements % nodeIDs(iNode,iEl)
+!                    ! THEN we convert this to a local node ID for this process
+!                    localID = globalToLocalNode( nID, procID )
+!                    ! And now we assign the local Node ID to the local element's corner node ID's
+!                    procMesh % elements % nodeIDs(iNode,elID)  = localID
+!       
+!                  ENDDO
+!                  procMesh % elements % elementID(elID) = iEl
+!                     
+!                  ! Set the geometry
+!                  procMesh % elements % nHat(:,:,:,:,elID)   = mesh % elements % nHat(:,:,:,:,iEl)
+!                  procMesh % elements % xBound(:,:,:,:,elID) = mesh % elements % xBound(:,:,:,:,iEl)
+!                  procMesh % elements % x(:,:,:,:,elID)      = mesh % elements % x(:,:,:,:,iEl)
+!                  procMesh % elements % J(:,:,:,elID)        = mesh % elements % J(:,:,:,iEl)
+!                  procMesh % elements % dxds(:,:,:,elID)     = mesh % elements % dxds(:,:,:,iEl)
+!                  procMesh % elements % dxdp(:,:,:,elID)     = mesh % elements % dxdp(:,:,:,iEl)
+!                  procMesh % elements % dxdq(:,:,:,elID)     = mesh % elements % dxdq(:,:,:,iEl)
+!                  procMesh % elements % dyds(:,:,:,elID)     = mesh % elements % dyds(:,:,:,iEl)
+!                  procMesh % elements % dydp(:,:,:,elID)     = mesh % elements % dydp(:,:,:,iEl)
+!                  procMesh % elements % dydq(:,:,:,elID)     = mesh % elements % dydq(:,:,:,iEl)
+!                  procMesh % elements % dzds(:,:,:,elID)     = mesh % elements % dzds(:,:,:,iEl)
+!                  procMesh % elements % dzdp(:,:,:,elID)     = mesh % elements % dzdp(:,:,:,iEl)
+!                  procMesh % elements % dzdq(:,:,:,elID)     = mesh % elements % dzdq(:,:,:,iEl)
+!                  procMesh % elements % Ja(:,:,:,:,:,elID)   = mesh % elements % Ja(:,:,:,:,:,iEl)
+!       
+!               ENDIF
+!               
+!            ENDDO
+!   
+!! ----------------------------------------------------------------------------- !
+!
+!            npFaces = 0 
+!            nBe     = 0
+!            iFaceLocal = 0
+!            nMPI       = 0
+!            DO iFace = 1, mesh % faces % nFaces
+!
+!               e1 = mesh % faces % elementIDs(1,iFace)
+!               e2 = mesh % faces % elementIDs(2,iFace)
+!
+!               p1 = globalToLocal(e1,2)
+!               IF( e2 > 0 )THEN
+!                  p2 = globalToLocal(e2,2)
+!               ELSE
+!                  p2  = p1
+!               ENDIF
+!               IF( p1 == procID .OR. p2 == procID )THEN
+!
+!                  faceProcTable(iFace,p1) = 1
+!                  faceProcTable(iFace,p2) = 1
+!                  iFaceLocal = iFaceLocal+1
+!
+!                  faceProcCount(iFace) = faceProcCount(iFace) + 1
+!                  faceProcOwners(iFace,faceProcCount(iFace)) = procID 
+!
+!                  npFaces = npFaces + 1
+!
+!                  IF( e2 < 0 .AND. p2 == p1 )THEN
+!
+!                     nBe = nBe + 1
+!                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
+!
+!                  ELSEIF( p2 /= p1 .AND. p1 == procID )THEN
+!
+!                     nMPI = nMPI + 1 
+!                     nBe = nBe + 1
+!                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
+!
+!                  ELSEIF( p2 /= p1 .AND. p2 == procID )THEN
+!
+!                     nMPI = nMPI + 1 
+!                     nBe = nBe + 1
+!                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
+!
+!                  ENDIF
+!
+!               ENDIF
+!
+!            ENDDO
+!
+!            WRITE(msg,'(A,I5)') 'Process ID : ',procID
+!            INFO( TRIM(msg) )
+!            WRITE(msg,'(A,I5)') 'Number of MPI Communications : ',nMPI
+!            INFO( TRIM(msg) )
+!            WRITE(msg,'(A,I5)') 'Number of faces : ',npFaces
+!            INFO( TRIM(msg) )
+!            WRITE(msg,'(A,I5)') 'Number of boundary faces : ',nBe
+!            INFO( TRIM(msg) )
+!            WRITE(msg,'(A,I5)') 'Number of elements : ',nElPerProc(procID)
+!            INFO( TRIM(msg) )
+!
+!            CALL procMesh % faces % Trash( )
+!            CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
+!            CALL procMesh % boundaryMap % Build( nBe, nMPI )
+!
+!            iFaceLocal = 0
+!            nBe        = 0
+!            nMPI       = 0
+!            DO iFace = 1, mesh % faces % nFaces
+!
+!               e1 = mesh % faces % elementIDs(1,iFace)
+!               e2 = mesh % faces % elementIDs(2,iFace)
+!
+!               p1 = globalToLocal(e1,2)
+!               IF( e2 > 0 )THEN
+!                  p2 = globalToLocal(e2,2)
+!               ELSE
+!                  p2  = p1
+!               ENDIF
+!
+!               IF( p1 == procID .OR. p2 == procID )THEN
+!
+!                  iFaceLocal = iFaceLocal + 1
+!
+!
+!                  IF( p2 == p1 .AND. e2 > 0 )THEN ! Internal Face
+!                    
+!                     procMesh % faces % faceID(iFaceLocal)         = iFace
+!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
+!                     procMesh % faces % elementIDs(2,iFaceLocal)   = globalToLocal( e2, 1 )
+!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
+!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
+!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
+!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
+!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
+!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
+!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
+!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
+!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
+!
+!                  ELSEIF( p2 == p1 .AND. e2 < 0 )THEN ! Physical boundary
+!
+!                     procMesh % faces % faceID(iFaceLocal)         = iFace
+!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
+!                     procMesh % faces % elementIDs(2,iFaceLocal)   = e2
+!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
+!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
+!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
+!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
+!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
+!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
+!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
+!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
+!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
+!
+!                     nBe = nBe + 1
+!                     procMesh % faces % boundaryID(iFaceLocal) = -nBe
+!
+!                     ! Physical boundary ID's will be set to negative for physical boundaryMap
+!                     ! so that boundaryMap requiring communication can be separated from physical
+!                     ! boundaryMap. This will allow more operations to be run concurrently with
+!                     ! communication.
+!                     procMesh % boundaryMap % boundaryIDs(nBe)       = iFaceLocal
+!                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
+!                     procMesh % boundaryMap % extProcIDs(nBe)        = procID
+!
+!                  ELSEIF( p2 /= p1 .AND. procID == p1 )THEN ! MPI Boundary
+!                
+!                     procMesh % faces % faceID(iFaceLocal)         = iFace
+!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
+!                     procMesh % faces % elementIDs(2,iFaceLocal)   = -e2
+!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
+!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
+!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
+!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
+!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
+!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
+!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
+!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
+!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
+!
+!                     nBe = nBe + 1
+!                     procMesh % faces % boundaryID(iFaceLocal) = nBe
+!
+!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
+!                     ! so that they can be distinguished from physical boundaryMap that do not require
+!                     ! communication with neighboring processes. 
+!                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
+!                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
+!                     procMesh % boundaryMap % extProcIDs(nBe)  = p2
+!
+!
+!                  ELSEIF( p2 /= p1 .AND. procID == p2 )THEN ! MPI Boundary
+!                  
+!                  
+!                     procMesh % faces % faceID(iFaceLocal)         = iFace
+!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e2, 1 )
+!                     procMesh % faces % elementIDs(2,iFaceLocal)   = -e1
+!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(2,iFace)
+!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(1,iFace)
+!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
+!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
+!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
+!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
+!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
+!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
+!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
+!                  
+!                     nBe = nBe + 1
+!                     procMesh % faces % boundaryID(iFaceLocal) = nBe
+!
+!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
+!                     ! so that they can be distinguished from physical boundaryMap that do not require
+!                     ! communication with neighboring processes. 
+!                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
+!                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
+!                     procMesh % boundaryMap % extProcIDs(nBe)  = p1
+!
+!
+!                  ENDIF
+!               ENDIF
+!
+!            ENDDO
+!            
+!! ----------------------------------------------------------------------------- !
+!
+!            WRITE( pIDChar, '(I4.4)' ) procID
+!#ifdef TECPLOT
+!            CALL procMesh % WriteTecplot( 'mesh.'//pIDChar )
+!#endif
+!            CALL procMesh % WriteSELFMeshFile( TRIM(params % SELFMeshFile)//'.'//pIDChar )
+!            
+!            CALL procMesh % Trash( )
+!
+!         ENDDO
+!   
+!
+!      ! For visualizing the decomposition
+!      materials = REAL( partitions, prec )
+!#ifdef TECPLOT
+!      CALL mesh % WriteMaterialTecplot( materials )
+!#endif
+!      
+!
+!      ! Clean up memory !
+!      DEALLOCATE( materials, &
+!                  faceProcCount, &
+!                  faceProcOwners, &
+!                  faceBoundaryIDs, &
+!                  nLocMPI )
+!      
+!      CALL mesh % Trash( )
+!      CALL nodal % Trash( )
+!
+!      ENDIF
+!
+!      INFO('End')
+!
+! END SUBROUTINE StructuredMeshGenerator_3D
 
 !
  FUNCTION NodesAreTheSame( nlist, mlist, N ) RESULT( NATS )

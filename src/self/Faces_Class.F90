@@ -48,6 +48,8 @@ MODULE Faces_Class
     PROCEDURE :: UpdateDevice => UpdateDevice_Faces
 #endif
 
+    PROCEDURE :: nBoundaryFaces
+
   END TYPE Faces
 
 
@@ -180,5 +182,19 @@ CONTAINS
   END SUBROUTINE UpdateDevice_Faces
 
 #endif
+
+  FUNCTION nBoundaryFaces( myFaces ) RESULT( nbf )
+    CLASS( Faces ) :: myFaces
+    INTEGER :: nbf
+    INTEGER :: i
+
+    nbf = 0
+    DO i = 1, myFaces % nFaces
+      IF( myFaces % elementIDs(2,i) < 0 )THEN
+        nbf = nbf + 1
+      ENDIF
+    ENDDO
+
+  END FUNCTION nBoundaryFaces
 
 END MODULE Faces_Class

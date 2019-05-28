@@ -18,16 +18,16 @@ PROGRAM SELF_Fluids_Driver
 #include "self_macros.h"
 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
-
 #undef __FUNC__
 #define __FUNC__ "Main"
-
   TYPE( Fluid )                :: myFluid
   LOGICAL                      :: setupSuccess
   LOGICAL                      :: meshgenSuccess
   LOGICAL                      :: initializeFromScratch
   LOGICAL                      :: pickupFileExists
-  LOGICAL                      :: run_MeshGenOnly, run_UpToInitOnly
+  LOGICAL                      :: run_MeshGenerator
+  LOGICAL                      :: run_Initializer
+  LOGICAL                      :: run_Integrator
   CHARACTER(500)               :: equationFile, paramFile
 
 
@@ -41,23 +41,20 @@ PROGRAM SELF_Fluids_Driver
 
   IF( setupSuccess )THEN
 
-    IF( run_MeshGenOnly )THEN
-
+    IF( run_MeshGenerator )THEN
       CALL MeshGen( )
-    
-    ELSE
+    ENDIF
 
+    IF( run_Initializer )THEN
       CALL myFluid % Build( equationFile, paramFile, setupSuccess )
-
       CALL Initialize( )
+    ENDIF
 
-      IF( .NOT. run_UpToInitOnly )THEN
+    IF( run_Integrator )THEN
         CALL MainLoop( )
-      ENDIF
+    ENDIF
 
       CALL Cleanup( )
-
-    ENDIF
 
   ENDIF
 
@@ -79,8 +76,9 @@ CONTAINS
     LOGICAL :: helpNeeded, equationFileProvided, paramFileProvided
 
     helpNeeded           = .FALSE.
-    run_MeshGenOnly      = .FALSE.
-    run_UpToInitOnly     = .FALSE.
+    run_MeshGenerator    = .FALSE.
+    run_Initializer      = .FALSE.
+    run_Integrator       = .FALSE.
     equationFileProvided = .FALSE.
     paramFileProvided    = .FALSE.
 
@@ -98,15 +96,23 @@ CONTAINS
 
         CASE( "meshgen" )
 
-          run_MeshGenOnly  = .TRUE.
-          run_UpToInitOnly = .FALSE.
-          setupSuccess     = .TRUE.
+          run_MeshGenerator = .TRUE.
+          run_Initializer   = .FALSE.
+          run_Integrator    = .FALSE.
+          setupSuccess      = .TRUE.
 
-        CASE( "init" )
+        CASE( "initialize" )
 
-          run_MeshGenOnly  = .FALSE.
-          run_UpToInitOnly = .TRUE.
-          setupSuccess     = .TRUE.
+          run_MeshGenerator = .FALSE.
+          run_Initializer   = .TRUE.
+          run_Integrator    = .FALSE.
+          setupSuccess      = .TRUE.
+
+       CASE( "integrate" )
+          run_MeshGenerator = .FALSE.
+          run_Initializer   = .FALSE.
+          run_Integrator    = .TRUE.
+          setupSuccess      = .TRUE.
 
         CASE( "help" )
           helpNeeded   = .TRUE.
@@ -119,6 +125,11 @@ CONTAINS
           equationFileProvided = .TRUE.
 
         CASE DEFAULT
+
+          run_MeshGenerator = .TRUE.
+          run_Initializer   = .TRUE.
+          run_Integrator    = .TRUE.
+          setupSuccess      = .TRUE.
 
           IF( paramFileProvided )THEN
 
@@ -140,7 +151,7 @@ CONTAINS
 
     IF( helpNeeded ) THEN
 
-      PRINT*, 'SELF-Fluids (sfluid) Command Line Tool'      
+      PRINT*, 'SELF-Fluids (sfluid) Command Line Interface'      
       PRINT*, ' '
       PRINT*, ' A program for solving Compressible Navier-Stokes using the'
       PRINT*, ' Nodal Discontinuous Galerkin Spectral Element Method.'
@@ -168,10 +179,14 @@ CONTAINS
       PRINT*, '     Future releases of SELF-Fluids will offer more complete support'
       PRINT*, '     for working with typical unstructured mesh formats. '
       PRINT*, ' '
-      PRINT*, '   init'
-      PRINT*, '     Run up to the initial condition generation and do not forward'
-      PRINT*, '     step the model. The initial conditions are read in from the '
-      PRINT*, '     self.equations file. '
+      PRINT*, '   initialize'
+      PRINT*, '     Generate model initial conditions but do not forward step the'
+      PRINT*, '     model. The initial conditions are read in from the self.equations file. '
+      PRINT*, ' '
+      PRINT*, '   integrate'
+      PRINT*, '     Forward step the model using provided mesh file and initial conditions.'
+      PRINT*, '     If no mesh file or initial conditions are provided, then they are generated. '
+      PRINT*, ' '
       PRINT*, ' '
       PRINT*, '  [options] can be :'
       PRINT*, ' '
@@ -202,12 +217,8 @@ CONTAINS
 
   SUBROUTINE MeshGen( )
 
-
-
       IF( myRank == 0 )THEN
-        PRINT*, '  Generating structured mesh...'
-        CALL StructuredMeshGenerator_3D( paramFile, equationFile, meshGenSuccess, nProc )
-        PRINT*, '  Done'
+        CALL Generate_SELFMesh(paramFile, equationFile, nProc)
       ENDIF
 
   END SUBROUTINE MeshGen
@@ -217,7 +228,10 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE Initialize( )
+#undef __FUNC__
+#define __FUNC__ "Initialize"
 
+    INFO('Start')
     ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
     ! returns FALSE.
     CALL myFluid % Read_from_HDF5( pickupFileExists ) 
@@ -226,17 +240,18 @@ CONTAINS
     ! from the equation parser.
     IF( .NOT. pickupFileExists )THEN
 
-      PRINT*,'[SELF_Fluids_Driver](Initialize) : Pickup file not found'
+      INFO('Pickup file not found')
 
     ENDIF
 
-    IF( .NOT. pickupFileExists .OR. run_UpToInitOnly )THEN
+    IF( .NOT. pickupFileExists .OR. run_Initializer )THEN
 
-      PRINT*,'[SELF_Fluids_Driver](Initialize) : Attempting initial condition generation from self.equations'
+      INFO('Generating initial conditions from self.equations')
       CALL myFluid % SetInitialConditions( )
       CALL myFluid % IO( )
 
     ENDIF
+    INFO('End')
 
   END SUBROUTINE Initialize
 
@@ -245,9 +260,16 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE Cleanup( )
-    
+#undef __FUNC__
+#define __FUNC__ "Cleanup"
 
-    CALL myFluid % Trash( )
+    INFO('Start')
+
+    IF( run_Initializer .OR. run_Integrator )THEN
+      CALL myFluid % Trash( )
+    ENDIF
+
+    INFO('End')
 
   END SUBROUTINE Cleanup
 
@@ -256,19 +278,26 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE MainLoop( )
-    
+#undef __FUNC__
+#define __FUNC__ "Cleanup"
     INTEGER    :: iT
+    CHARACTER(50) :: msg
 
+    INFO('Start')
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
     DO iT = 1, myFluid % params % nDumps ! Loop over time-steps
 
+      WRITE(msg,'(E15.5)')myFluid % simulationTime
+      msg = 'Starting time loop at t='//msg//'s'
+      INFO(TRIM(msg))
       CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
 
       CALL myFluid % IO( )
 
     ENDDO
+    INFO('End')
 
 
   END SUBROUTINE MainLoop
