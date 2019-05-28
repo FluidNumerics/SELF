@@ -97,6 +97,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: ConstructStructuredMesh
     PROCEDURE, PRIVATE :: Write_MeshElements
     PROCEDURE, PRIVATE :: Write_MeshFaces
+    PROCEDURE, PRIVATE :: Write_MeshNodes
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -2226,6 +2227,7 @@ CONTAINS
  
        CALL global_mesh % Write_MeshFaces( file_id )
 !
+       CALL global_mesh % Write_MeshNodes( file_id )
 !       CALL h5gcreate_f( file_id, "/mesh/global/nodes", group_id, error )
 !       CALL h5gclose_f( group_id, error )
 !
@@ -2358,6 +2360,38 @@ CONTAINS
    INFO('End')
 
  END SUBROUTINE Write_MeshFaces
+
+ SUBROUTINE Write_MeshNodes( global_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Write_MeshNodes"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: global_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:2)
+   INTEGER(HID_T)   :: memspace, dataset_id, group_id
+   CHARACTER(60)    :: variable_name
+   INTEGER          :: rank, error
+
+
+   INFO('Start')
+       CALL h5gcreate_f( file_id, "/mesh/global/nodes", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       rank            = 2
+       dimensions(1:2) = (/3, global_mesh % nodes % nNodes /)  
+       variable_name = '/mesh/global/nodes/positions'
+
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_IEEE_F32LE, memspace, dataset_id, error)
+
+       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, global_mesh % nodes % x, dimensions, error)
+
+       CALL h5dclose_f( dataset_id, error )
+       CALL h5sclose_f( memspace, error )
+   INFO('End')
+
+ END SUBROUTINE Write_MeshNodes
   
  SUBROUTINE Load_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
 #undef __FUNC__
