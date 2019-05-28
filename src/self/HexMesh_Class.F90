@@ -96,6 +96,7 @@ MODULE HexMesh_Class
     ! Support Routines
     PROCEDURE, PRIVATE :: ConstructStructuredMesh
     PROCEDURE, PRIVATE :: Write_MeshElements
+    PROCEDURE, PRIVATE :: Write_MeshFaces
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -2282,13 +2283,9 @@ CONTAINS
        CALL h5gcreate_f( file_id, "/mesh/global", group_id, error )
        CALL h5gclose_f( group_id, error )
 
-       CALL h5gcreate_f( file_id, "/mesh/global/elements", group_id, error )
-       CALL h5gclose_f( group_id, error )
-
        CALL global_mesh % Write_MeshElements( file_id )
  
-!       CALL h5gcreate_f( file_id, "/mesh/global/faces", group_id, error )
-!       CALL h5gclose_f( group_id, error )
+       CALL global_mesh % Write_MeshFaces( file_id )
 !
 !       CALL h5gcreate_f( file_id, "/mesh/global/nodes", group_id, error )
 !       CALL h5gclose_f( group_id, error )
@@ -2315,9 +2312,13 @@ CONTAINS
    INTEGER(HID_T), INTENT(in)      :: file_id
    !
    INTEGER(HSIZE_T) :: dimensions(1:2)
-   INTEGER(HID_T)   :: memspace, dataset_id
+   INTEGER(HID_T)   :: memspace, dataset_id, group_id
    CHARACTER(60)    :: variable_name
    INTEGER          :: rank, error
+
+
+       CALL h5gcreate_f( file_id, "/mesh/global/elements", group_id, error )
+       CALL h5gclose_f( group_id, error )
 
        rank            = 2
        dimensions(1:2) = (/8, global_mesh % elements % nElements /)  
@@ -2332,6 +2333,87 @@ CONTAINS
        CALL h5sclose_f( memspace, error )
 
  END SUBROUTINE Write_MeshElements
+
+ SUBROUTINE Write_MeshFaces( global_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Write_MeshFaces"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: global_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:3)
+   INTEGER(HID_T)   :: memspace, dataset_id, group_id
+   CHARACTER(60)    :: variable_name
+   INTEGER          :: rank, error
+
+
+       CALL h5gcreate_f( file_id, "/mesh/global/faces", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       rank          = 1
+       dimensions(1) = global_mesh % faces % nFaces
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+
+       variable_name = '/mesh/global/faces/boundary-ids'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % boundaryID, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       variable_name = '/mesh/global/faces/i-start'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % iStart, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       variable_name = '/mesh/global/faces/j-start'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % jStart, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       variable_name = '/mesh/global/faces/i-inc'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % iInc, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       variable_name = '/mesh/global/faces/j-inc'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % jInc, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       variable_name = '/mesh/global/faces/swap-dimension'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % swapDimensions, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       CALL h5sclose_f( memspace, error )
+
+       rank          = 2
+       dimensions(1:2) = (/4,global_mesh % faces % nFaces /)  
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+
+       variable_name = '/mesh/global/faces/node-ids'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % nodeIds, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       CALL h5sclose_f( memspace, error )
+
+       rank          = 2
+       dimensions(1:2) = (/2,global_mesh % faces % nFaces /)  
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+
+       variable_name = '/mesh/global/faces/element-ids'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % elementIds, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       variable_name = '/mesh/global/faces/element-sides'
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % elementSides, dimensions(1:rank), error)
+       CALL h5dclose_f( dataset_id, error )
+
+       CALL h5sclose_f( memspace, error )
+
+ END SUBROUTINE Write_MeshFaces
   
  SUBROUTINE Load_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
 #undef __FUNC__
@@ -2399,6 +2481,7 @@ CONTAINS
       DO i = 1, mesh % faces % nFaces
         IF( mesh % faces % elementIDs(2,i) < 0 )THEN
           nbf = nbf+1
+          mesh % faces % boundaryID(i)                = nbf  
           mesh % boundaryMap % boundaryIDs(nbf)       = i
           mesh % boundaryMap % boundaryGlobalIDs(nbf) = i
           mesh % boundaryMap % extProcIDs(nbf)        = 0
@@ -2541,6 +2624,7 @@ CONTAINS
               mesh % faces % elementIDs(2,iFace)   = -e2 ! Store the negative of the global element ID as the secondary element
               mesh % faces % elementSides(1,iFace) = s1  
               mesh % faces % elementSides(2,iFace) = s2  
+              mesh % faces % boundaryID(iFace)     = nbf  
 
               mesh % boundaryMap % extProcIDs(nbf)        = p2
               mesh % boundaryMap % boundaryIDs(nbf)       = iFace
@@ -2554,6 +2638,7 @@ CONTAINS
               mesh % faces % elementIDs(2,iFace)   = -e1 ! Store the negative of the global element ID as the secondary element
               mesh % faces % elementSides(1,iFace) = s2  
               mesh % faces % elementSides(2,iFace) = s1  
+              mesh % faces % boundaryID(iFace)     = nbf  
 
               mesh % boundaryMap % extProcIDs(nbf)        = p1
               mesh % boundaryMap % boundaryIDs(nbf)       = iFace
@@ -2569,6 +2654,7 @@ CONTAINS
          nbf = nbf + 1
          mesh % faces % elementIDs(1,iFace)   = e1local
          mesh % faces % elementSides(1,iFace) = s1  
+         mesh % faces % boundaryID(iFace)     = nbf  
 
          mesh % boundaryMap % extProcIDs(nbf)        = p1
          mesh % boundaryMap % boundaryIDs(nbf)       = iFace
