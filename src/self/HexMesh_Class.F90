@@ -103,6 +103,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: ConstructElementNeighbors    
     PROCEDURE, PRIVATE :: DetermineOrientation         
     PROCEDURE, PRIVATE :: ScaleTheMesh                 
+    PROCEDURE, PRIVATE :: SetupFaceMaps
 
     ! Visualization I/O Routines
 
@@ -324,6 +325,58 @@ CONTAINS
     
   END SUBROUTINE ConstructNodeToElementConnectivity
 !
+  SUBROUTINE SetupFaceMaps( mesh )
+#undef __FUNC__
+#define __FUNC__ "ConstructFaces"
+  CLASS( HexMesh ), INTENT(inout) :: mesh
+  ! Local
+  INTEGER :: i, j, k, ii, jj
+
+  INFO('Start')
+    DO k = 1, mesh % faces % nFaces
+      DO j = 0, mesh % faces % N
+        DO i = 0, mesh % faces % N
+
+          IF( i == 0 )THEN
+            IF( j == 0 )THEN
+              ii = (1-mesh % faces % swapDimensions(k))*&
+                (mesh % faces % iStart(k)) + &
+                (mesh % faces % swapDimensions(k))*&
+                (mesh % faces % jStart(k))
+              jj = (1-mesh % faces % swapDimensions(k))*&
+                (mesh % faces % jStart(k)) + &
+                (mesh % faces % swapDimensions(k))*&
+                (mesh % faces % iStart(k))
+            ELSE
+              ii = mesh % faces % swapDimensions(k)*&
+                (ii+mesh % faces % jInc(k)) + &
+                (1-mesh % faces % swapDimensions(k))*&
+                mesh % faces % iStart(k)
+              jj = (1-mesh % faces % swapDimensions(k))*&
+                (jj+mesh % faces % jInc(k)) +&
+                mesh % faces % swapDimensions(k)*&
+                mesh % faces % jStart(k)
+            ENDIF
+          ELSE
+            ii = (1-mesh % faces % swapDimensions(k))*&
+              (ii + mesh % faces % iInc(k)) +&
+              mesh % faces % swapDimensions(k)*ii
+            jj = mesh % faces % swapDimensions(k)*&
+              (jj+mesh % faces % iInc(k)) + &
+              (1-mesh % faces % swapDimensions(k))*jj
+          ENDIF
+
+          mesh % faces % iMap(i,j,k) = ii
+          mesh % faces % jMap(i,j,k) = jj
+
+        ENDDO
+      ENDDO
+    ENDDO
+
+  INFO('End')
+
+  END SUBROUTINE SetupFaceMaps
+!
   SUBROUTINE ConstructFaces( myHexMesh )
 #undef __FUNC__
 #define __FUNC__ "ConstructFaces"
@@ -489,45 +542,7 @@ CONTAINS
       CALL keyCabinet(k) % Trash( ) ! Trash the Facetable
     ENDDO
 
-    DO k = 1, nFaces
-      DO j = 0, N
-        DO i = 0, N
-
-          IF( i == 0 )THEN
-            IF( j == 0 )THEN
-              ii = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k))
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k))
-            ELSE
-              ii = myHexMesh % faces % swapDimensions(k)*&
-                (ii+myHexMesh % faces % jInc(k)) + &
-                (1-myHexMesh % faces % swapDimensions(k))*&
-                myHexMesh % faces % iStart(k)
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (jj+myHexMesh % faces % jInc(k)) +&
-                myHexMesh % faces % swapDimensions(k)*&
-                myHexMesh % faces % jStart(k)
-            ENDIF
-          ELSE
-            ii = (1-myHexMesh % faces % swapDimensions(k))*&
-              (ii + myHexMesh % faces % iInc(k)) +&
-              myHexMesh % faces % swapDimensions(k)*ii
-            jj = myHexMesh % faces % swapDimensions(k)*&
-              (jj+myHexMesh % faces % iInc(k)) + &
-              (1-myHexMesh % faces % swapDimensions(k))*jj
-          ENDIF
-
-          myHexMesh % faces % iMap(i,j,k) = ii
-          myHexMesh % faces % jMap(i,j,k) = jj
-
-        ENDDO
-      ENDDO
-    ENDDO
+    CALL myHexMesh % SetupFaceMaps( )
 
 #ifdef HAVE_CUDA
 
@@ -768,45 +783,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    DO k = 1, myHexMesh % faces % nFaces
-      DO j = 0, myHexMesh % elements % N
-        DO i = 0, myHexMesh % elements % N
-
-          IF( i == 0 )THEN
-            IF( j == 0 )THEN
-              ii = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k))
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k))
-            ELSE
-              ii = myHexMesh % faces % swapDimensions(k)*&
-                (ii+myHexMesh % faces % jInc(k)) + &
-                (1-myHexMesh % faces % swapDimensions(k))*&
-                myHexMesh % faces % iStart(k)
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (jj+myHexMesh % faces % jInc(k)) +&
-                myHexMesh % faces % swapDimensions(k)*&
-                myHexMesh % faces % jStart(k)
-            ENDIF
-          ELSE
-            ii = (1-myHexMesh % faces % swapDimensions(k))*&
-              (ii + myHexMesh % faces % iInc(k)) +&
-              myHexMesh % faces % swapDimensions(k)*ii
-            jj = myHexMesh % faces % swapDimensions(k)*&
-              (jj+myHexMesh % faces % iInc(k)) + &
-              (1-myHexMesh % faces % swapDimensions(k))*jj
-          ENDIF
-
-          myHexMesh % faces % iMap(i,j,k) = ii
-          myHexMesh % faces % jMap(i,j,k) = jj
-
-        ENDDO
-      ENDDO
-    ENDDO
+    CALL myHexMesh % SetupFaceMaps( )
 
 #ifdef HAVE_CUDA
 
@@ -1048,45 +1025,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    DO k = 1, myHexMesh % faces % nFaces
-      DO j = 0, myHexMesh % elements % N
-        DO i = 0, myHexMesh % elements % N
-
-          IF( i == 0 )THEN
-            IF( j == 0 )THEN
-              ii = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k))
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % jStart(k)) + &
-                (myHexMesh % faces % swapDimensions(k))*&
-                (myHexMesh % faces % iStart(k))
-            ELSE
-              ii = myHexMesh % faces % swapDimensions(k)*&
-                (ii+myHexMesh % faces % jInc(k)) + &
-                (1-myHexMesh % faces % swapDimensions(k))*&
-                myHexMesh % faces % iStart(k)
-              jj = (1-myHexMesh % faces % swapDimensions(k))*&
-                (jj+myHexMesh % faces % jInc(k)) +&
-                myHexMesh % faces % swapDimensions(k)*&
-                myHexMesh % faces % jStart(k)
-            ENDIF
-          ELSE
-            ii = (1-myHexMesh % faces % swapDimensions(k))*&
-              (ii + myHexMesh % faces % iInc(k)) +&
-              myHexMesh % faces % swapDimensions(k)*ii
-            jj = myHexMesh % faces % swapDimensions(k)*&
-              (jj+myHexMesh % faces % iInc(k)) + &
-              (1-myHexMesh % faces % swapDimensions(k))*jj
-          ENDIF
-
-          myHexMesh % faces % iMap(i,j,k) = ii
-          myHexMesh % faces % jMap(i,j,k) = jj
-
-        ENDDO
-      ENDDO
-    ENDDO
+    CALL myHexMesh % SetupFaceMaps( )
 
 #ifdef HAVE_CUDA
 
@@ -2317,6 +2256,7 @@ CONTAINS
    INTEGER          :: rank, error
 
 
+   INFO('Start')
        CALL h5gcreate_f( file_id, "/mesh/global/elements", group_id, error )
        CALL h5gclose_f( group_id, error )
 
@@ -2331,6 +2271,7 @@ CONTAINS
 
        CALL h5dclose_f( dataset_id, error )
        CALL h5sclose_f( memspace, error )
+   INFO('End')
 
  END SUBROUTINE Write_MeshElements
 
@@ -2346,6 +2287,7 @@ CONTAINS
    CHARACTER(60)    :: variable_name
    INTEGER          :: rank, error
 
+   INFO('Start')
 
        CALL h5gcreate_f( file_id, "/mesh/global/faces", group_id, error )
        CALL h5gclose_f( group_id, error )
@@ -2413,6 +2355,8 @@ CONTAINS
 
        CALL h5sclose_f( memspace, error )
 
+   INFO('End')
+
  END SUBROUTINE Write_MeshFaces
   
  SUBROUTINE Load_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
@@ -2430,6 +2374,7 @@ CONTAINS
    !       Then adjust the face information and create the boundary map 
 
       CALL mesh % Read_SELFMesh( meshfile, my_RankID, nMPI_Ranks )
+      CALL mesh % SetupFaceMaps( )
       CALL SetupProcessBoundaryMap( mesh, my_RankID )
 
 
