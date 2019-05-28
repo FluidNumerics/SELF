@@ -1,0 +1,38 @@
+Bootstrap: localimage
+From: /workspace/pgi-hdf5.sif 
+
+%help
+
+
+%setup
+
+
+%files
+
+   /workspace
+
+%post
+
+
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib
+   export PATH=${PATH}:/usr/local/hdf5/bin
+
+   cd ${SINGULARITY_ROOTFS}/workspace
+   autoreconf --install
+   FCFLAGS="-O3" \
+   ${SINGULARITY_ROOTFS}/workspace/configure --enable-timing \
+                                             --enable-diagnostics \
+                                             --enable-tecplot \
+                                             --enable-cuda \
+                                             --with-hdf5=/usr/local/hdf5/bin/h5cc
+   make
+   make install
+
+
+%environment
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/hdf5/lib
+   export PATH=${PATH}:/opt/hdf5/bin
+
+

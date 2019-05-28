@@ -9,17 +9,15 @@ AC_CONFIG_MACRO_DIRS([m4])
 
 # Find Fortran compilers
 AC_PROG_FC([pgfortran gfortran])
-FCFLAGS="-O3"
 
 AC_LANG_PUSH([Fortran])
-AX_CHECK_COMPILE_FLAG([-ffree-line-length-none], [FCFLAGS+=" -ffree-line-length-none"])
 
 # Check for CUDA-Fortran acceleration request
 # Set --enable-cuda-fortran yes turns on the -DHAVE_CUDA CPP-flag if the PGI compilers are used.
 AC_ARG_ENABLE( cuda, AS_HELP_STRING([--enable-cuda, default:no]))
 AS_IF([test "x$enable_cuda" = "xyes"],[
 
-  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
+  FCFLAGS+=" -DHAVE_CUDA -Mcuda"
 
 ])
 
@@ -31,7 +29,6 @@ AS_IF([test "x$enable_openmp" = "xyes"],[
   AX_CHECK_COMPILE_FLAG([-mp], [FCFLAGS+=" -mp"])
   AX_CHECK_COMPILE_FLAG([-openmp], [FCFLAGS+=" -openmp"])
   AX_CHECK_COMPILE_FLAG([-fopenmp], [FCFLAGS+=" -fopenmp"])
-
 
 ])
 

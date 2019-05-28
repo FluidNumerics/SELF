@@ -1,6 +1,5 @@
 Bootstrap: docker
-From : nvcr.io/hpc/pgi-compilers:ce
-
+From: gcr.io/self-fluids/pgi:latest 
 
 %help
   This image contains PGI 18.10 and a serial build of HDF5 1.10.5
@@ -10,32 +9,35 @@ From : nvcr.io/hpc/pgi-compilers:ce
   The generated images should be used in subsequent build steps for building SELF-Fluids. 
 
 %files
-  /workspace
-
 
 %post
 
 
-   cd ${SINGULARITY_ROOTFS}/workspace/
-   /opt/pgi/linux86-64/2018/bin/pgcc --version
+   export PGI_INSTALL_DIR=/usr/local/pgi
+
+   cd /tmp
    # HDF5 1.10.5
    wget https://github.com/live-clones/hdf5/archive/hdf5-1_10_5.tar.gz
    tar -xvzf hdf5-1_10_5.tar.gz
    cd /tmp/hdf5-hdf5-1_10_5
 
    CPP=cpp CFLAGS="-fPIC -m64 -tp=px" CXXFLAGS="-fPIC -m64 -tp=px" FCFLAGS="-fPIC -m64 -tp=px" \
-   CC=/opt/pgi/linux86-64/2018/bin/pgcc CXX=/opt/pgi/linux86-64/2018/bin/pgc++ FC=/opt/pgi/linux86-64/2018/bin/pgfortran \
-   ./configure --enable-threadsafe --enable-cxx --enable-fortran --enable-unsupported
+   CC=${PGI_INSTALL_DIR}/linux86-64/2018/bin/pgcc \
+   CXX=${PGI_INSTALL_DIR}/linux86-64/2018/bin/pgc++ \
+   FC=${PGI_INSTALL_DIR}/linux86-64/2018/bin/pgfortran \
+   ./configure --enable-threadsafe --enable-cxx --enable-fortran --enable-unsupported --prefix=/usr/local/hdf5
 
    make
    make install
    cd /
-   rm -rf /tmp/*
+   rm -rf /tmp/hdf5*
 
    exit 0
 
 %environment
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib   
+   export PATH=${PATH}:/usr/local/hdf5/bin
 
    export PGI_VERSION 18.10
    export PGI_INSTALL_DIR /usr/local/pgi
