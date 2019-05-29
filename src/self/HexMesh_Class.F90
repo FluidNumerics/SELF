@@ -98,6 +98,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: Write_MeshElements
     PROCEDURE, PRIVATE :: Write_MeshFaces
     PROCEDURE, PRIVATE :: Write_MeshNodes
+    PROCEDURE, PRIVATE :: Write_MeshGeometry
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -116,6 +117,8 @@ MODULE HexMesh_Class
   PRIVATE :: CreateMeshObjLists
   PRIVATE :: StructuredMeshToBlocks
   PRIVATE :: StructuredDecompose
+  PRIVATE :: Add_FloatMeshObj_to_HDF5
+  PRIVATE :: Add_IntMeshObj_to_HDF5
 
 CONTAINS
 !
@@ -2224,15 +2227,9 @@ CONTAINS
        CALL h5gclose_f( group_id, error )
 
        CALL global_mesh % Write_MeshElements( file_id )
- 
        CALL global_mesh % Write_MeshFaces( file_id )
-!
        CALL global_mesh % Write_MeshNodes( file_id )
-!       CALL h5gcreate_f( file_id, "/mesh/global/nodes", group_id, error )
-!       CALL h5gclose_f( group_id, error )
-!
-!       CALL h5gcreate_f( file_id, "/mesh/global/geometry", group_id, error )
-!       CALL h5gclose_f( group_id, error )
+       CALL global_mesh % Write_MeshGeometry( file_id )
 
 !       CALL h5gcreate_f( file_id, "/mesh/decomp", group_id, error )
 !       CALL h5gclose_f( group_id, error )
@@ -2392,6 +2389,100 @@ CONTAINS
    INFO('End')
 
  END SUBROUTINE Write_MeshNodes
+
+ SUBROUTINE Write_MeshGeometry( global_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Write_MeshGeometry"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: global_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:5)
+   INTEGER(HID_T)   :: memspace, dataset_id, group_id
+   CHARACTER(60)    :: variable_name
+   INTEGER          :: rank, error
+
+
+   INFO('Start')
+       CALL h5gcreate_f( file_id, "/mesh/global/geometry", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       rank            = 5
+       dimensions(1:5) = (/global_mesh % elements % N+1, &
+                           global_mesh % elements % N+1, &
+                           global_mesh % elements % N+1, &
+                           3, &
+                           global_mesh % elements % nElements /)  
+       variable_name = '/mesh/global/geometry/positions'
+
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_IEEE_F32LE, memspace, dataset_id, error)
+
+       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, global_mesh % elements % x, dimensions, error)
+
+       CALL h5dclose_f( dataset_id, error )
+       CALL h5sclose_f( memspace, error )
+
+       rank            = 5
+       dimensions(1:5) = (/global_mesh % elements % N+1, &
+                           global_mesh % elements % N+1, &
+                           3, 6, &
+                           global_mesh % elements % nElements /)  
+       variable_name = '/mesh/global/geometry/boundary-positions'
+
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_IEEE_F32LE, memspace, dataset_id, error)
+
+       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, global_mesh % elements % xBound, dimensions, error)
+
+       CALL h5dclose_f( dataset_id, error )
+       CALL h5sclose_f( memspace, error )
+
+   INFO('End')
+
+ END SUBROUTINE Write_MeshGeometry
+
+ SUBROUTINE Add_FloatMeshObj_to_HDF5( rank, dimensions, variable_name, float_variable, file_id )
+#undef __FUNC__
+#define __FUNC__ "Add_FloatMeshObj_to_HDF5"
+   IMPLICIT NONE
+   INTEGER, INTENT(in)          :: rank
+   INTEGER(HSIZE_T), INTENT(in) :: dimensions(1:rank)
+   CHARACTER(*)                 :: variable_name
+   REAL(prec), INTENT(in)       :: float_variable(*)
+   INTEGER(HID_T), INTENT(in)   :: file_id
+   ! local
+   INTEGER(HID_T)   :: memspace, dataset_id
+   INTEGER          :: error
+
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL h5dcreate_f( file_id, TRIM(variable_name), H5T_IEEE_F32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, float_variable, dimensions, error)
+       CALL h5dclose_f( dataset_id, error )
+       CALL h5sclose_f( memspace, error )
+
+ END SUBROUTINE Add_FloatMeshObj_to_HDF5
+
+ SUBROUTINE Add_IntMeshObj_to_HDF5( rank, dimensions, variable_name, int_variable, file_id )
+#undef __FUNC__
+#define __FUNC__ "Add_IntMeshObj_to_HDF5"
+   IMPLICIT NONE
+   INTEGER, INTENT(in)          :: rank
+   INTEGER(HSIZE_T), INTENT(in) :: dimensions(1:rank)
+   CHARACTER(*)                 :: variable_name
+   INTEGER, INTENT(in)          :: int_variable(*)
+   INTEGER(HID_T), INTENT(in)   :: file_id
+   ! local
+   INTEGER(HID_T)   :: memspace, dataset_id
+   INTEGER          :: error
+
+       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL h5dcreate_f( file_id, TRIM(variable_name), H5T_STD_I32LE, memspace, dataset_id, error)
+       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE , int_variable, dimensions, error)
+       CALL h5dclose_f( dataset_id, error )
+       CALL h5sclose_f( memspace, error )
+
+ END SUBROUTINE Add_IntMeshObj_to_HDF5
   
  SUBROUTINE Load_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
 #undef __FUNC__
