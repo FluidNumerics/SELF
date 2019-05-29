@@ -99,6 +99,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: Write_MeshFaces
     PROCEDURE, PRIVATE :: Write_MeshNodes
     PROCEDURE, PRIVATE :: Write_MeshGeometry
+    PROCEDURE, PRIVATE :: Write_MeshDecomp
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -2230,9 +2231,7 @@ CONTAINS
        CALL global_mesh % Write_MeshFaces( file_id )
        CALL global_mesh % Write_MeshNodes( file_id )
        CALL global_mesh % Write_MeshGeometry( file_id )
-
-!       CALL h5gcreate_f( file_id, "/mesh/decomp", group_id, error )
-!       CALL h5gclose_f( group_id, error )
+       CALL global_mesh % Write_MeshDecomp( file_id )
 
        CALL h5fclose_f( file_id, error )
        CALL h5close_f( error )
@@ -2250,26 +2249,21 @@ CONTAINS
    INTEGER(HID_T), INTENT(in)      :: file_id
    !
    INTEGER(HSIZE_T) :: dimensions(1:2)
-   INTEGER(HID_T)   :: memspace, dataset_id, group_id
-   CHARACTER(60)    :: variable_name
-   INTEGER          :: rank, error
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
 
 
    INFO('Start')
        CALL h5gcreate_f( file_id, "/mesh/global/elements", group_id, error )
        CALL h5gclose_f( group_id, error )
 
-       rank            = 2
        dimensions(1:2) = (/8, global_mesh % elements % nElements /)  
-       variable_name = '/mesh/global/elements/node-ids'
+       CALL Add_IntMeshObj_to_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/elements/node-ids', &
+                                    int_variable=global_mesh % elements % nodeIDs,&
+                                    file_id=file_id )
 
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % elements % nodeIDs, dimensions, error)
-
-       CALL h5dclose_f( dataset_id, error )
-       CALL h5sclose_f( memspace, error )
    INFO('End')
 
  END SUBROUTINE Write_MeshElements
@@ -2282,77 +2276,70 @@ CONTAINS
    INTEGER(HID_T), INTENT(in)      :: file_id
    !
    INTEGER(HSIZE_T) :: dimensions(1:3)
-   INTEGER(HID_T)   :: memspace, dataset_id, group_id
-   CHARACTER(60)    :: variable_name
-   INTEGER          :: rank, error
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
 
    INFO('Start')
 
        CALL h5gcreate_f( file_id, "/mesh/global/faces", group_id, error )
        CALL h5gclose_f( group_id, error )
 
-       rank          = 1
        dimensions(1) = global_mesh % faces % nFaces
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/boundary-ids', &
+                                    int_variable=global_mesh % faces % boundaryID,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/boundary-ids'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % boundaryID, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/i-start', &
+                                    int_variable=global_mesh % faces % iStart,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/i-start'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % iStart, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/j-start', &
+                                    int_variable=global_mesh % faces % jStart,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/j-start'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % jStart, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/i-inc', &
+                                    int_variable=global_mesh % faces % iInc,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/i-inc'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % iInc, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/j-inc', &
+                                    int_variable=global_mesh % faces % jInc,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/j-inc'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % jInc, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/swap-dimension', &
+                                    int_variable=global_mesh % faces % swapDimensions,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/swap-dimension'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % swapDimensions, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
-
-       CALL h5sclose_f( memspace, error )
-
-       rank          = 2
        dimensions(1:2) = (/4,global_mesh % faces % nFaces /)  
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
+       CALL Add_IntMeshObj_to_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/faces/node-ids', &
+                                    int_variable=global_mesh % faces % nodeIds,&
+                                    file_id=file_id )
 
-       variable_name = '/mesh/global/faces/node-ids'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % nodeIds, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
+       dimensions(1:2) = (/2, global_mesh % faces % nFaces /)  
+       CALL Add_IntMeshObj_to_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/faces/element-ids', &
+                                    int_variable=global_mesh % faces % elementIds,&
+                                    file_id=file_id )
 
-       CALL h5sclose_f( memspace, error )
-
-       rank          = 2
-       dimensions(1:2) = (/2,global_mesh % faces % nFaces /)  
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
-
-       variable_name = '/mesh/global/faces/element-ids'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % elementIds, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
-
-       variable_name = '/mesh/global/faces/element-sides'
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_STD_I32LE, memspace, dataset_id, error)
-       CALL h5dwrite_f( dataset_id, H5T_STD_I32LE, global_mesh % faces % elementSides, dimensions(1:rank), error)
-       CALL h5dclose_f( dataset_id, error )
-
-       CALL h5sclose_f( memspace, error )
+       CALL Add_IntMeshObj_to_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/faces/element-sides', &
+                                    int_variable=global_mesh % faces % elementSides,&
+                                    file_id=file_id )
 
    INFO('End')
 
@@ -2366,26 +2353,20 @@ CONTAINS
    INTEGER(HID_T), INTENT(in)      :: file_id
    !
    INTEGER(HSIZE_T) :: dimensions(1:2)
-   INTEGER(HID_T)   :: memspace, dataset_id, group_id
-   CHARACTER(60)    :: variable_name
-   INTEGER          :: rank, error
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
 
 
    INFO('Start')
        CALL h5gcreate_f( file_id, "/mesh/global/nodes", group_id, error )
        CALL h5gclose_f( group_id, error )
 
-       rank            = 2
        dimensions(1:2) = (/3, global_mesh % nodes % nNodes /)  
-       variable_name = '/mesh/global/nodes/positions'
-
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_IEEE_F32LE, memspace, dataset_id, error)
-
-       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, global_mesh % nodes % x, dimensions, error)
-
-       CALL h5dclose_f( dataset_id, error )
-       CALL h5sclose_f( memspace, error )
+       CALL Add_FloatMeshObj_to_HDF5( rank=2,&
+                                      dimensions=dimensions,&
+                                      variable_name='/mesh/global/nodes/positions', &
+                                      float_variable=global_mesh % nodes % x,&
+                                      file_id=file_id )
    INFO('End')
 
  END SUBROUTINE Write_MeshNodes
@@ -2398,49 +2379,97 @@ CONTAINS
    INTEGER(HID_T), INTENT(in)      :: file_id
    !
    INTEGER(HSIZE_T) :: dimensions(1:5)
-   INTEGER(HID_T)   :: memspace, dataset_id, group_id
-   CHARACTER(60)    :: variable_name
-   INTEGER          :: rank, error
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
 
 
    INFO('Start')
+
        CALL h5gcreate_f( file_id, "/mesh/global/geometry", group_id, error )
        CALL h5gclose_f( group_id, error )
 
-       rank            = 5
-       dimensions(1:5) = (/global_mesh % elements % N+1, &
-                           global_mesh % elements % N+1, &
-                           global_mesh % elements % N+1, &
-                           3, &
-                           global_mesh % elements % nElements /)  
-       variable_name = '/mesh/global/geometry/positions'
+       dimensions(1:5) = (/global_mesh % elements % N+1, global_mesh % elements % N+1, global_mesh % elements % N+1, 3, global_mesh % elements % nElements /)  
+       CALL Add_FloatMeshObj_to_HDF5( rank=5,&
+                                      dimensions=dimensions,&
+                                      variable_name='/mesh/global/geometry/positions', &
+                                      float_variable=global_mesh % elements % x,&
+                                      file_id=file_id )
 
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_IEEE_F32LE, memspace, dataset_id, error)
-
-       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, global_mesh % elements % x, dimensions, error)
-
-       CALL h5dclose_f( dataset_id, error )
-       CALL h5sclose_f( memspace, error )
-
-       rank            = 5
-       dimensions(1:5) = (/global_mesh % elements % N+1, &
-                           global_mesh % elements % N+1, &
-                           3, 6, &
-                           global_mesh % elements % nElements /)  
-       variable_name = '/mesh/global/geometry/boundary-positions'
-
-       CALL h5screate_simple_f(rank, dimensions, memspace, error)
-       CALL h5dcreate_f( file_id, TRIM(variable_name),H5T_IEEE_F32LE, memspace, dataset_id, error)
-
-       CALL h5dwrite_f( dataset_id, H5T_IEEE_F32LE, global_mesh % elements % xBound, dimensions, error)
-
-       CALL h5dclose_f( dataset_id, error )
-       CALL h5sclose_f( memspace, error )
+       dimensions=(/global_mesh % elements % N+1, global_mesh % elements % N+1, 3, 6, global_mesh % elements % nElements /)
+       CALL Add_FloatMeshObj_to_HDF5( rank=5,&
+                                      dimensions=dimensions,&
+                                      variable_name='/mesh/global/geometry/boundary-positions', &
+                                      float_variable=global_mesh % elements % xBound,&
+                                      file_id=file_id )
 
    INFO('End')
 
  END SUBROUTINE Write_MeshGeometry
+
+ SUBROUTINE Write_MeshDecomp( global_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Write_MeshDecomp"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: global_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1)
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error, blockid
+   CHARACTER(6)     :: blockchar
+
+
+   INFO('Start')
+
+       CALL h5gcreate_f( file_id, "/mesh/decomp", group_id, error )
+       CALL h5gclose_f( group_id, error )
+
+       dimensions(1:1) = (/global_mesh % elements % nElements /)  
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/decomp/element-to-blockid', &
+                                    int_variable=global_mesh % decomp % element_to_blockID,&
+                                    file_id=file_id )
+
+       CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/decomp/global-to-localid', &
+                                    int_variable=global_mesh % decomp % global_to_localID,&
+                                    file_id=file_id )
+
+       DO blockid = 0, global_mesh % decomp % nBlocks-1
+         WRITE(blockchar,'(I6.6)')blockid
+
+         CALL h5gcreate_f( file_id, '/mesh/decomp/proc'//TRIM(blockchar), group_id, error )
+         CALL h5gclose_f( group_id, error )
+
+         dimensions(1:1) = (/global_mesh % decomp % mesh_obj(blockid) % nElements /)  
+         CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                      dimensions=dimensions(1:1),&
+                                      variable_name='/mesh/decomp/proc'//TRIM(blockchar)//'/element-ids', &
+                                      int_variable=global_mesh % decomp % mesh_obj(blockid) % elementids,&
+                                      file_id=file_id )
+
+         dimensions(1:1) = (/global_mesh % decomp % mesh_obj(blockid) % nNodes /)  
+         CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                      dimensions=dimensions(1:1),&
+                                      variable_name='/mesh/decomp/proc'//TRIM(blockchar)//'/node-ids', &
+                                      int_variable=global_mesh % decomp % mesh_obj(blockid) % nodeids,&
+                                      file_id=file_id )
+        
+         dimensions(1:1) = (/global_mesh % decomp % mesh_obj(blockid) % nFaces /)  
+         CALL Add_IntMeshObj_to_HDF5( rank=1,&
+                                      dimensions=dimensions(1:1),&
+                                      variable_name='/mesh/decomp/proc'//TRIM(blockchar)//'/face-ids', &
+                                      int_variable=global_mesh % decomp % mesh_obj(blockid) % faceids,&
+                                      file_id=file_id )
+        
+        
+       ENDDO
+
+   INFO('End')
+
+ END SUBROUTINE Write_MeshDecomp
 
  SUBROUTINE Add_FloatMeshObj_to_HDF5( rank, dimensions, variable_name, float_variable, file_id )
 #undef __FUNC__
@@ -2559,9 +2588,7 @@ CONTAINS
         ENDIF
       ENDDO
 
-      IF( nMPI_Ranks > 1 )THEN
-        CALL MeshDecompose(mesh, params, nMPI_Ranks )
-      ENDIF 
+      CALL MeshDecompose(mesh, params, nMPI_Ranks )
 
       CALL mesh % Write_TecplotMesh(TRIM(params % SELFMeshFile))
       CALL mesh % Write_SELFMesh(TRIM(params % SELFMeshFile), nMPI_Ranks)
@@ -2589,9 +2616,7 @@ CONTAINS
        STOP
      ENDIF
 
-#ifdef HAVE_MPI
      CALL StructuredDecompose( params, nMPI_Ranks )
-#endif
  
      ! TO DO : constructor for decomp
      ALLOCATE( mesh % decomp % element_to_blockID(1:mesh % elements % nElements) )
@@ -2864,7 +2889,6 @@ CONTAINS
    INFO('Start')
 
 
-      IF( params % nProc > 1 )THEN
         nxp = params % nXelem/params % nProcX
         IF( SUM(nxp) < params % nXElem )THEN
           DO iPx = 1, params % nProcX
@@ -2935,7 +2959,6 @@ CONTAINS
         ENDDO
 
 
-      ENDIF
    INFO('End')
 
  END SUBROUTINE StructuredMeshToBlocks
@@ -2954,123 +2977,133 @@ CONTAINS
    INFO('Start')
       params % nProc = nMPI_Ranks
 
-      IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
+      IF( nMPI_Ranks > 1 )THEN
 
-        INFO('Number of processes exceeds number of elements.')
-        INFO('Cannot decompose.')
-        INFO('Stopping.')
-        STOP
+         IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
 
-      ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
+           INFO('Number of processes exceeds number of elements.')
+           INFO('Cannot decompose.')
+           INFO('Stopping.')
+           STOP
 
-        params % nProcX = params % nXElem
-        params % nProcY = params % nYElem
-        params % nProcZ = params % nZElem
+         ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
 
-      ELSE
+           params % nProcX = params % nXElem
+           params % nProcY = params % nYElem
+           params % nProcZ = params % nZElem
 
-        meshDim(1:3)  = (/ params % nXElem, params % nYElem, params % nZElem /) 
-        dimIndex(1:3) = (/ 1, 2, 3 /) 
+         ELSE
 
-        ! Sort from largest mesh dimension to smallest with insertion sort
-        DO i = 2,  3
-          j = i
-          DO WHILE( j > 1 )
-            IF( meshDim(j-1) < meshDim(j) )THEN
+           meshDim(1:3)  = (/ params % nXElem, params % nYElem, params % nZElem /) 
+           dimIndex(1:3) = (/ 1, 2, 3 /) 
 
-              temp         = meshDim(j)
-              meshDim(j)   = meshDim(j-1)
-              meshDim(j-1) = temp 
+           ! Sort from largest mesh dimension to smallest with insertion sort
+           DO i = 2,  3
+             j = i
+             DO WHILE( j > 1 )
+               IF( meshDim(j-1) < meshDim(j) )THEN
 
-              temp          = dimIndex(j)
-              dimIndex(j)   = dimIndex(j-1)
-              dimIndex(j-1) = temp 
-              j = j-1
+                 temp         = meshDim(j)
+                 meshDim(j)   = meshDim(j-1)
+                 meshDim(j-1) = temp 
 
-            ELSE
-              EXIT
-            ENDIF
-          ENDDO
-        ENDDO
-        
-        procDim(1:3)  = (/ params % nProc, 1, 1 /)
+                 temp          = dimIndex(j)
+                 dimIndex(j)   = dimIndex(j-1)
+                 dimIndex(j-1) = temp 
+                 j = j-1
 
-        DO WHILE( procDim(1) > meshDim(1) )
+               ELSE
+                 EXIT
+               ENDIF
+             ENDDO
+           ENDDO
+           
+           procDim(1:3)  = (/ params % nProc, 1, 1 /)
 
-          DO i = 2, procDim(1)
-            IF( MOD( procDim(1), i ) == 0 )THEN
-              j = i
-              EXIT
-            ENDIF
-          ENDDO
+           DO WHILE( procDim(1) > meshDim(1) )
 
-          procDim(1) = procDim(1)/j
+             DO i = 2, procDim(1)
+               IF( MOD( procDim(1), i ) == 0 )THEN
+                 j = i
+                 EXIT
+               ENDIF
+             ENDDO
 
-        ENDDO
+             procDim(1) = procDim(1)/j
 
-        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
+           ENDDO
 
-          procDim(2) = params % nProc/procDim(1)
+           IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
 
-          IF( procDim(2) > 1 )THEN
-            DO WHILE( procDim(2) > meshDim(2) )
+             procDim(2) = params % nProc/procDim(1)
+
+             IF( procDim(2) > 1 )THEN
+               DO WHILE( procDim(2) > meshDim(2) )
   
-              DO i = 2, procDim(2)
-                IF( MOD( procDim(2), i ) == 0 )THEN
-                  j = i
-                  EXIT
-                ENDIF
-              ENDDO
+                 DO i = 2, procDim(2)
+                   IF( MOD( procDim(2), i ) == 0 )THEN
+                     j = i
+                     EXIT
+                   ENDIF
+                 ENDDO
   
-              procDim(2) = procDim(2)/j
+                 procDim(2) = procDim(2)/j
   
-            ENDDO
+               ENDDO
   
-          ENDIF
+             ENDIF
 
-        ENDIF
+           ENDIF
 
-        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
+           IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
 
-          procDim(3) = params % nProc/(procDim(1)*procDim(2))
-          IF( procDim(3) > 1 )THEN
-            DO WHILE( procDim(3) > meshDim(3) )
+             procDim(3) = params % nProc/(procDim(1)*procDim(2))
+             IF( procDim(3) > 1 )THEN
+               DO WHILE( procDim(3) > meshDim(3) )
   
-              DO i = 2, procDim(3)
-                IF( MOD( procDim(3), i ) == 0 )THEN
-                  j = i
-                  EXIT
-                ENDIF
-              ENDDO
+                 DO i = 2, procDim(3)
+                   IF( MOD( procDim(3), i ) == 0 )THEN
+                     j = i
+                     EXIT
+                   ENDIF
+                 ENDDO
   
-              procDim(3) = procDim(3)/j
+                 procDim(3) = procDim(3)/j
   
-            ENDDO
+               ENDDO
   
-          ENDIF
+             ENDIF
 
-        ENDIF
+           ENDIF
 
-        DO i = 1, 3
+           DO i = 1, 3
 
-          IF( dimIndex(i) == 1 )THEN
-            params % nProcX = procDim(i)
-          ELSEIF( dimIndex(i) == 2 )THEN
-            params % nProcY = procDim(i)
-          ELSE
-            params % nProcZ = procDim(i)
-          ENDIF
+             IF( dimIndex(i) == 1 )THEN
+               params % nProcX = procDim(i)
+             ELSEIF( dimIndex(i) == 2 )THEN
+               params % nProcY = procDim(i)
+             ELSE
+               params % nProcZ = procDim(i)
+             ENDIF
 
-        ENDDO
+           ENDDO
 
-      ENDIF
+         ENDIF
 
-      WRITE(msg,'(A,I5)')'nProcX :', params % nProcX
-      INFO( TRIM(msg) )
-      WRITE(msg,'(A,I5)')'nProcY :', params % nProcY
-      INFO( TRIM(msg) )
-      WRITE(msg,'(A,I5)')'nProcZ :', params % nProcZ
-      INFO( TRIM(msg) )
+       ELSE
+
+         params % nProcX = 1
+         params % nProcY = 1
+         params % nProcZ = 1
+ 
+       ENDIF
+
+       WRITE(msg,'(A,I5)')'nProcX :', params % nProcX
+       INFO( TRIM(msg) )
+       WRITE(msg,'(A,I5)')'nProcY :', params % nProcY
+       INFO( TRIM(msg) )
+       WRITE(msg,'(A,I5)')'nProcZ :', params % nProcZ
+       INFO( TRIM(msg) )
 
    INFO('End')
       
