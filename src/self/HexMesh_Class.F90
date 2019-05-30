@@ -118,8 +118,10 @@ MODULE HexMesh_Class
   PRIVATE :: CreateMeshObjLists
   PRIVATE :: StructuredMeshToBlocks
   PRIVATE :: StructuredDecompose
+  PRIVATE :: UnstructuredDecompose
   PRIVATE :: Add_FloatMeshObj_to_HDF5
   PRIVATE :: Add_IntMeshObj_to_HDF5
+  PRIVATE :: SetGlobalToLocalMapping
 
 CONTAINS
 !
@@ -2141,7 +2143,7 @@ CONTAINS
 
     ENDIF
 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "Jacobian", "dxds", "dxdp", "dxdq", "dyds", "dydp", "dydq", "dzds", "dzdp", "dzdq" '
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "Jacobian", "dxds", "dxdp", "dxdq", "dyds", "dydp", "dydq", "dzds", "dzdp", "dzdq", "process-id" '
 
 
     DO iEl = 1, myHexMesh % elements % nElements
@@ -2154,7 +2156,7 @@ CONTAINS
         DO j = 0, N
           DO i = 0,N
 
-            WRITE(fUnit,'(13(E15.7,1x))')  myHexMesh % elements % x(i,j,k,1,iEl), &
+            WRITE(fUnit,'(13(E15.7,1x), F10.4)')  myHexMesh % elements % x(i,j,k,1,iEl), &
               myHexMesh % elements % x(i,j,k,2,iEl), &
               myHexMesh % elements % x(i,j,k,3,iEl), &
               myHexMesh % elements % J(i,j,k,iEl), &
@@ -2166,7 +2168,8 @@ CONTAINS
               myHexMesh % elements % dydq(i,j,k,iEl), &
               myHexMesh % elements % dzds(i,j,k,iEl), &
               myHexMesh % elements % dzdp(i,j,k,iEl), &
-              myHexMesh % elements % dzdq(i,j,k,iEl)
+              myHexMesh % elements % dzdq(i,j,k,iEl), &
+              FLOAT(myHexMesh % decomp % element_to_blockID(iEl))
           ENDDO
         ENDDO
       ENDDO
@@ -2592,6 +2595,7 @@ CONTAINS
 
       CALL mesh % Write_TecplotMesh(TRIM(params % SELFMeshFile))
       CALL mesh % Write_SELFMesh(TRIM(params % SELFMeshFile), nMPI_Ranks)
+      CALL nodal % Trash( )
       CALL mesh % Trash( )
 
     INFO('End')
@@ -2609,15 +2613,7 @@ CONTAINS
    LOGICAL                 :: setupSuccess
 
    INFO('Start')
- 
-     IF( TRIM( params % UCDMeshFile ) /= '' )THEN
-       INFO('Cannot decompose unstructured UCD mesh yet.') 
-       INFO('Stopping.') 
-       STOP
-     ENDIF
 
-     CALL StructuredDecompose( params, nMPI_Ranks )
- 
      ! TO DO : constructor for decomp
      ALLOCATE( mesh % decomp % element_to_blockID(1:mesh % elements % nElements) )
      ALLOCATE( mesh % decomp % global_to_localID(1:mesh % elements % nElements) )
@@ -2625,13 +2621,68 @@ CONTAINS
      mesh % decomp % global_to_localID = 0
      mesh % decomp % nGlobalElements = 0
      mesh % decomp % nBlocks = nMPI_Ranks
-     CALL StructuredMeshToBlocks( mesh, params )
-     CALL CreateMeshObjLists( mesh, nMPI_Ranks )
 
+     IF( TRIM( params % UCDMeshFile ) /= '' )THEN
+       IF( nMPI_Ranks > 1 )THEN
+         CALL UnstructuredDecompose( mesh, nMPI_Ranks )
+       ENDIF
+     ELSE
+       CALL StructuredDecompose( params, nMPI_Ranks )
+       CALL StructuredMeshToBlocks( mesh, params )
+     ENDIF
+     CALL SetGlobalToLocalMapping( mesh, nMPI_Ranks )
+     CALL CreateMeshObjLists( mesh, nMPI_Ranks )
 
    INFO('End')
 
  END SUBROUTINE MeshDecompose
+
+ SUBROUTINE UnstructuredDecompose( global_mesh, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "UnstructuredDecompose"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout)        :: global_mesh
+   INTEGER, INTENT(in)                    :: nMPI_Ranks
+   ! Local
+   INTEGER :: i, iel, n
+   CHARACTER(60)  :: msg
+   INTEGER :: n_partitions, n_nodes, n_elements
+   INTEGER :: eptr(1:global_mesh % elements % nElements+1)
+   INTEGER :: eind(1:8*global_mesh % elements % nElements)
+   INTEGER :: epart(1:global_mesh % elements % nElements)
+   INTEGER :: npart(1:global_mesh % nodes % nNodes)
+   INTEGER, POINTER :: vwgt =>null(), vsize => null(), options => null()
+   REAL(8), POINTER :: tpwgts=>null()
+   EXTERNAL :: METIS_PartMeshNodal
+
+   INFO('Start')
+
+   ! Count the number of graph edges (number of internal faces)
+   n_nodes      = global_mesh % nodes % nNodes
+   n_elements   = global_mesh % elements % nElements
+   n_partitions = nMPI_Ranks
+
+   INFO('Passing off to METIS_PartMeshNodal')
+
+   DO iel = 1, global_mesh % elements % nElements
+     eptr(iel)   = 8*(iel-1)
+     eptr(iel+1) = 8*(iel)
+     DO i = 1, 8
+       eind(i+8*(iel-1)) = global_mesh % elements % nodeIDs(i,iel)-1
+     ENDDO
+   ENDDO
+
+   CALL METIS_PartMeshNodal(n_elements, n_nodes, eptr, eind, vwgt, vsize, n_partitions, tpwgts, options, n, epart, npart)
+
+   INFO('METIS_PartMeshNodal complete')
+
+   DO iel = 1, global_mesh % elements % nElements
+     global_mesh % decomp % element_to_blockID(iel) = epart(iel)
+   ENDDO
+
+   INFO('End')
+
+ END SUBROUTINE UnstructuredDecompose
 
  SUBROUTINE SetupProcessBoundaryMap( mesh, my_RankID )
 #undef __FUNC__
@@ -2869,6 +2920,28 @@ CONTAINS
 
  END SUBROUTINE CreateMeshObjLists
 
+ SUBROUTINE SetGlobalToLocalMapping( global_mesh, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "SetGlobalToLocalMapping"
+   IMPLICIT NONE
+   TYPE( HexMesh ), INTENT(inout) :: global_mesh
+   INTEGER, INTENT(in)            :: nMPI_Ranks
+   ! Local
+   INTEGER :: nEl(0:nMPI_Ranks), procID, iEl
+
+   INFO('Start')
+
+     nEl = 0
+     DO iEl = 1, global_mesh % elements % nElements
+       procID = global_mesh % decomp % element_to_blockID(iEl)
+       nEl(procID) = nEl(procID) + 1
+       global_mesh % decomp % global_to_localID(iEl) = nEl(procID)
+     ENDDO
+
+   INFO('End')
+
+ END SUBROUTINE SetGlobalToLocalMapping
+
  SUBROUTINE StructuredMeshToBlocks( global_mesh, params )
 #undef __FUNC__
 #define __FUNC__ "StructuredMeshToBlocks"
@@ -2949,13 +3022,6 @@ CONTAINS
             ENDDO
 
           ENDDO
-        ENDDO
-
-        nEl = 0
-        DO iEl = 1, global_mesh % elements % nElements
-          procID = global_mesh % decomp % element_to_blockID(iEl)
-          nEl(procID) = nEl(procID) + 1
-          global_mesh % decomp % global_to_localID(iEl) = nEl(procID)
         ENDDO
 
 
@@ -3138,7 +3204,7 @@ CONTAINS
 ! 
 !
 !      INFO('Start')
-!      ! Read in the parameters
+!      ! Read in the PARAMETERs
 !      CALL params % Build( TRIM(paramFile), setupSuccess )
 !
 !#ifdef HAVE_MPI
@@ -3529,7 +3595,7 @@ CONTAINS
 !                     nBe = nBe + 1
 !                     procMesh % faces % boundaryID(iFaceLocal) = nBe
 !
-!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
+!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive INTEGERs
 !                     ! so that they can be distinguished from physical boundaryMap that do not require
 !                     ! communication with neighboring processes. 
 !                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
@@ -3556,7 +3622,7 @@ CONTAINS
 !                     nBe = nBe + 1
 !                     procMesh % faces % boundaryID(iFaceLocal) = nBe
 !
-!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive integers
+!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive INTEGERs
 !                     ! so that they can be distinguished from physical boundaryMap that do not require
 !                     ! communication with neighboring processes. 
 !                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
