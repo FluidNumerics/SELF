@@ -107,6 +107,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: Write_MeshDecomp
     PROCEDURE, PRIVATE :: Read_MeshDecomp
     PROCEDURE, PRIVATE :: Read_MeshElements
+    PROCEDURE, PRIVATE :: Read_MeshFaces
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -2268,6 +2269,8 @@ CONTAINS
 
     CALL mesh % Read_MeshElements( file_id )
 
+    CALL mesh % Read_MeshFaces( file_id )
+
 STOP
 
 
@@ -2458,6 +2461,147 @@ STOP
    INFO('End')
 
  END SUBROUTINE Write_MeshFaces
+
+ SUBROUTINE Read_MeshFaces( local_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Read_MeshFaces"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: local_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:3)
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
+   INTEGER          :: iFace, iFace_global
+   INTEGER, ALLOCATABLE :: temp_var1d(:)
+   INTEGER, ALLOCATABLE :: temp_var2d(:,:)
+   INTEGER, ALLOCATABLE :: temp_var2d_2(:,:)
+
+   INFO('Start')
+
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/faces/swap-dimension', 1, dimensions(1:1) )
+       ALLOCATE( temp_var1d(1:dimensions(1)), temp_var2d(1:4,1:dimensions(1)), temp_var2d_2(1:2,1:dimensions(1)) )
+
+
+       CALL Get_IntMeshObj_from_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/i-start', &
+                                    int_variable=temp_var1d,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % iStart(iFace) = temp_var1d(iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % iStart = temp_var1d
+       ENDIF
+
+       CALL Get_IntMeshObj_from_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/j-start', &
+                                    int_variable=temp_var1d,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % jStart(iFace) = temp_var1d(iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % jStart = temp_var1d
+       ENDIF
+
+       CALL Get_IntMeshObj_from_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/i-inc', &
+                                    int_variable=temp_var1d,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % iInc(iFace) = temp_var1d(iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % iInc = temp_var1d
+       ENDIF
+
+       CALL Get_IntMeshObj_from_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/j-inc', &
+                                    int_variable=temp_var1d,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % jInc(iFace) = temp_var1d(iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % jInc = temp_var1d
+       ENDIF
+
+       CALL Get_IntMeshObj_from_HDF5( rank=1,&
+                                    dimensions=dimensions(1:1),&
+                                    variable_name='/mesh/global/faces/swap-dimension', &
+                                    int_variable=temp_var1d,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % swapdimensions(iFace) = temp_var1d(iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % swapdimensions = temp_var1d
+       ENDIF
+
+       dimensions(1:2) = (/4,local_mesh % faces % nFaces /)  
+       CALL Get_IntMeshObj_from_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/faces/node-ids', &
+                                    int_variable=temp_var2d,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % nodeIds(1:4,iFace) = temp_var2d(1:4,iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % nodeIds = temp_var2d
+       ENDIF
+
+       dimensions(1:2) = (/2, local_mesh % faces % nFaces /)  
+       CALL Get_IntMeshObj_from_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/faces/element-ids', &
+                                    int_variable=temp_var2d_2,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % elementIds(1:2,iFace) = temp_var2d_2(1:2,iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % elementIds = temp_var2d_2
+       ENDIF
+
+       CALL Get_IntMeshObj_from_HDF5( rank=2,&
+                                    dimensions=dimensions(1:2),&
+                                    variable_name='/mesh/global/faces/element-sides', &
+                                    int_variable=temp_var2d_2,&
+                                    file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
+           iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
+           local_mesh % faces % elementSides(1:2,iFace) = temp_var2d_2(1:2,iFace_global)
+         ENDDO
+       ELSE
+         local_mesh % faces % elementSides = temp_var2d_2
+       ENDIF
+
+       DEALLOCATE( temp_var1d, temp_var2d, temp_var2d_2 )
+
+   INFO('End')
+
+ END SUBROUTINE Read_MeshFaces
 
  SUBROUTINE Write_MeshNodes( global_mesh, file_id )
 #undef __FUNC__
@@ -2736,6 +2880,28 @@ STOP
        CALL h5sclose_f( memspace, error )
 
  END SUBROUTINE Add_IntMeshObj_to_HDF5
+
+ SUBROUTINE Get_IntMeshObj_from_HDF5( rank, dimensions, variable_name, int_variable, file_id )
+#undef __FUNC__
+#define __FUNC__ "Get_IntMeshObj_to_HDF5"
+   IMPLICIT NONE
+   INTEGER, INTENT(in)          :: rank
+   INTEGER(HSIZE_T), INTENT(in) :: dimensions(1:rank)
+   CHARACTER(*)                 :: variable_name
+   INTEGER, INTENT(out)         :: int_variable(*)
+   INTEGER(HID_T), INTENT(in)   :: file_id
+   ! local
+   INTEGER(HID_T)   :: filespace, dataset_id
+   INTEGER          :: error
+
+       CALL h5dopen_f(file_id, TRIM(variable_name), dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, int_variable, dimensions, error, H5S_ALL_F, filespace )
+       CALL h5sclose_f( filespace, error )
+       CALL h5dclose_f( dataset_id, error )
+
+
+ END SUBROUTINE Get_IntMeshObj_from_HDF5
   
  SUBROUTINE Load_SELFMesh( mesh, params, my_RankID, nMPI_Ranks, mpiCommunicator )
 #undef __FUNC__
