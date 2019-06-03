@@ -108,6 +108,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: Read_MeshDecomp
     PROCEDURE, PRIVATE :: Read_MeshElements
     PROCEDURE, PRIVATE :: Read_MeshFaces
+    PROCEDURE, PRIVATE :: Read_MeshNodes
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -129,6 +130,8 @@ MODULE HexMesh_Class
   PRIVATE :: UnstructuredDecompose
   PRIVATE :: Add_FloatMeshObj_to_HDF5
   PRIVATE :: Add_IntMeshObj_to_HDF5
+  PRIVATE :: Get_FloatMeshObj_from_HDF5
+  PRIVATE :: Get_IntMeshObj_from_HDF5
   PRIVATE :: SetGlobalToLocalMapping
   PRIVATE :: Get_HDF5_Obj_Dimensions
 
@@ -2271,6 +2274,8 @@ CONTAINS
 
     CALL mesh % Read_MeshFaces( file_id )
 
+    CALL mesh % Read_MeshNodes( file_id )
+
 STOP
 
 
@@ -2629,6 +2634,43 @@ STOP
 
  END SUBROUTINE Write_MeshNodes
 
+ SUBROUTINE Read_MeshNodes( local_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Read_MeshNodes"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: local_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:2)
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
+   INTEGER          :: iNode, iNode_local
+   REAL(prec), ALLOCATABLE :: nodes(:,:)
+
+
+   INFO('Start')
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/nodes/positions', 2, dimensions )
+       ALLOCATE( nodes(1:dimensions(1), 1:dimensions(2)) )
+
+       CALL Get_FloatMeshObj_from_HDF5( rank=2,&
+                                      dimensions=dimensions,&
+                                      variable_name='/mesh/global/nodes/positions', &
+                                      float_variable=nodes,&
+                                      file_id=file_id )
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+         DO iNode = 1, local_mesh % decomp % mesh_obj(0) % nNodes
+           iNode_local = local_mesh % decomp % mesh_obj(0) % nodeIds(iNode) 
+           local_mesh % nodes % x(1:3,iNode) = nodes(1:3,iNode_local)
+         ENDDO
+       ELSE
+         local_mesh % nodes % x = nodes
+       ENDIF
+
+       DEALLOCATE(nodes)
+   INFO('End')
+
+ END SUBROUTINE Read_MeshNodes
+
  SUBROUTINE Write_MeshGeometry( global_mesh, file_id )
 #undef __FUNC__
 #define __FUNC__ "Write_MeshGeometry"
@@ -2859,6 +2901,28 @@ STOP
        CALL h5sclose_f( memspace, error )
 
  END SUBROUTINE Add_FloatMeshObj_to_HDF5
+
+ SUBROUTINE Get_FloatMeshObj_from_HDF5( rank, dimensions, variable_name, float_variable, file_id )
+#undef __FUNC__
+#define __FUNC__ "Get_FloatMeshObj_to_HDF5"
+   IMPLICIT NONE
+   INTEGER, INTENT(in)          :: rank
+   INTEGER(HSIZE_T), INTENT(in) :: dimensions(1:rank)
+   CHARACTER(*)                 :: variable_name
+   REAL(prec), INTENT(out)      :: float_variable(*)
+   INTEGER(HID_T), INTENT(in)   :: file_id
+   ! local
+   INTEGER(HID_T)   :: filespace, dataset_id
+   INTEGER          :: error
+
+       CALL h5dopen_f(file_id, TRIM(variable_name), dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_IEEE_F32LE, float_variable, dimensions, error, H5S_ALL_F, filespace )
+       CALL h5sclose_f( filespace, error )
+       CALL h5dclose_f( dataset_id, error )
+
+
+ END SUBROUTINE Get_FloatMeshObj_from_HDF5
 
  SUBROUTINE Add_IntMeshObj_to_HDF5( rank, dimensions, variable_name, int_variable, file_id )
 #undef __FUNC__
