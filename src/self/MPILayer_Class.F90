@@ -14,9 +14,6 @@ MODULE MPILayer_Class
 
   IMPLICIT NONE
 
-#ifdef HAVE_MPI
-  INCLUDE 'mpif.h'
-#endif
 
 #include "self_macros.h"
 

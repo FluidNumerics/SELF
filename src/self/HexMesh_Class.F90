@@ -27,6 +27,7 @@ MODULE HexMesh_Class
 
   IMPLICIT NONE
 
+
 #include "self_macros.h"
 
 ! HexMesh
@@ -51,6 +52,10 @@ MODULE HexMesh_Class
     TYPE(MeshObjectList), ALLOCATABLE :: mesh_obj(:) 
     INTEGER, ALLOCATABLE              :: element_to_blockID(:) 
     INTEGER, ALLOCATABLE              :: global_to_localID(:) 
+
+    CONTAINS
+    PROCEDURE, PRIVATE :: Build => Build_DomainDecomposition
+
   END TYPE DomainDecomposition
 
   TYPE HexMesh
@@ -100,6 +105,8 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: Write_MeshNodes
     PROCEDURE, PRIVATE :: Write_MeshGeometry
     PROCEDURE, PRIVATE :: Write_MeshDecomp
+    PROCEDURE, PRIVATE :: Read_MeshDecomp
+    PROCEDURE, PRIVATE :: Read_MeshElements
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -122,6 +129,7 @@ MODULE HexMesh_Class
   PRIVATE :: Add_FloatMeshObj_to_HDF5
   PRIVATE :: Add_IntMeshObj_to_HDF5
   PRIVATE :: SetGlobalToLocalMapping
+  PRIVATE :: Get_HDF5_Obj_Dimensions
 
 CONTAINS
 !
@@ -132,11 +140,13 @@ CONTAINS
 !
 !
   SUBROUTINE Build_HexMesh( myHexMesh, nNodes, nElements, nFaces, N )
-
+#undef __FUNC__
+#define __FUNC__ "ConstructFaces"
     IMPLICIT NONE
-    CLASS(HexMesh), INTENT(out) :: myHexMesh
-    INTEGER, INTENT(in)         :: nNodes, nElements, nFaces, N
+    CLASS(HexMesh), INTENT(inout) :: myHexMesh
+    INTEGER, INTENT(in)           :: nNodes, nElements, nFaces, N
 
+    INFO('Start')
     ! A hexahedron element (hex-element for short) has six faces. Each face has geometry that
     ! requires the USE of two computational coordinates. The third computational coordinate is
     ! fixed. The sideMap gives the value of the remaining computational coordinate for each face
@@ -241,6 +251,8 @@ CONTAINS
 #endif
 
 
+    INFO('End')
+
   END SUBROUTINE Build_HexMesh
 !
   SUBROUTINE Trash_HexMesh( myHexMesh )
@@ -276,6 +288,39 @@ CONTAINS
     IF( ALLOCATED(myHexMesh % decomp % global_to_localID) )DEALLOCATE(myHexMesh % decomp % global_to_localID)
 
   END SUBROUTINE Trash_HexMesh
+!
+  SUBROUTINE  Build_DomainDecomposition( decomp, nGlobalElements, nBlocks, nLocalElements, nLocalFaces, nLocalNodes )
+
+    IMPLICIT NONE
+    CLASS( DomainDecomposition ), INTENT(out) :: decomp
+    INTEGER, INTENT(in)                       :: nGlobalElements, nBlocks
+    INTEGER, INTENT(in)                       :: nLocalElements(0:nBlocks-1), nLocalFaces(0:nBlocks-1), nLocalNodes(0:nBlocks-1)
+    ! Local
+    INTEGER :: i 
+
+     decomp % nGlobalElements = nGlobalElements
+     decomp % nBlocks         = nBlocks
+     ALLOCATE( decomp % element_to_blockID(1:nGlobalElements) )
+     ALLOCATE( decomp % global_to_localID(1:nGlobalElements) )
+     decomp % element_to_blockID = 0
+     decomp % global_to_localID = 0
+
+     ALLOCATE( decomp % mesh_obj(0:nBlocks-1) )
+     DO i = 0, nBlocks-1
+       decomp % mesh_obj(i) % nNodes    = nLocalNodes(i)
+       decomp % mesh_obj(i) % nElements = nLocalElements(i)
+       decomp % mesh_obj(i) % nFaces    = nLocalFaces(i)
+
+       ALLOCATE( decomp % mesh_obj(i) % nodeids(1:nLocalNodes(i)) )
+       ALLOCATE( decomp % mesh_obj(i) % elementids(1:nLocalElements(i)) )
+       ALLOCATE( decomp % mesh_obj(i) % faceids(1:nLocalFaces(i)) )
+
+       decomp % mesh_obj(i) % nodeids(1:nLocalNodes(i)) = 0
+       decomp % mesh_obj(i) % elementids(1:nLocalElements(i)) = 0
+       decomp % mesh_obj(i) % faceids(1:nLocalFaces(i)) = 0
+     ENDDO
+ 
+  END SUBROUTINE  Build_DomainDecomposition
 !
 #ifdef HAVE_CUDA
   SUBROUTINE UpdateDevice_HexMesh( myHexMesh )
@@ -2182,23 +2227,50 @@ CONTAINS
 
  END SUBROUTINE Write_TecplotMesh
 !
- SUBROUTINE Read_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
+ SUBROUTINE Read_SELFMesh( mesh, meshfile, polydeg, my_RankID, nMPI_Ranks, mpiCommunicator )
 #undef __FUNC__
 #define __FUNC__ "Read_SELFMesh"
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout) :: mesh 
    CHARACTER(*), INTENT(in)        :: meshfile
+   INTEGER, INTENT(in)             :: polydeg
    INTEGER, INTENT(in)             :: my_RankID
    INTEGER, INTENT(in)             :: nMPI_Ranks
+   INTEGER, INTENT(in)             :: mpiCommunicator
+   ! Local
+   INTEGER(HID_T) :: file_id, memspace, filespace, group_id
+   INTEGER(HID_T) :: plist_id
+   INTEGER        :: error
   
    INFO('Start')
 
-   IF( nMPI_Ranks > 1 )THEN
+   CALL h5open_f(error)  
 
-     ! Need to load the decomposition mesh object lists
+#ifdef HAVE_MPI
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, plist_id, error)
+    CALL h5pset_fapl_mpio_f(plist_id, mpiCommunicator, MPI_INFO_NULL, error)
+    CALL h5fopen_f(TRIM(meshfile), H5F_ACC_RDWR_F, file_id, error, access_prp=plist_id)
+    CALL h5pclose_f(plist_id,error)
+#else
+    CALL h5fopen_f(TRIM(meshfile), H5F_ACC_RDWR_F, file_id, error)
+#endif
+
+    IF( error /= 0 )THEN
+      INFO('HDF5 file open failed')
+      STOP
+    ENDIF
+
+    CALL mesh % Read_MeshDecomp( file_id, my_RankID )
+
+    CALL mesh % Build( mesh % decomp % mesh_obj(0) % nNodes, &
+                       mesh % decomp % mesh_obj(0) % nElements, &
+                       mesh % decomp % mesh_obj(0) % nFaces, polydeg )
+
+    CALL mesh % Read_MeshElements( file_id )
+
+STOP
 
 
-   ENDIF
 
    INFO('End')
 
@@ -2213,8 +2285,6 @@ CONTAINS
    CHARACTER(*), INTENT(in)        :: meshfile
    INTEGER, INTENT(in)             :: nMPI_Ranks
    ! Local 
-   INTEGER(HSIZE_T) :: starts(1), counts(1), strides(1)
-   INTEGER(HSIZE_T) :: dimensions(1)
    INTEGER(HID_T)   :: file_id, memspace, filespace, group_id
    INTEGER          :: error
 
@@ -2270,6 +2340,47 @@ CONTAINS
    INFO('End')
 
  END SUBROUTINE Write_MeshElements
+
+ SUBROUTINE Read_MeshElements( local_mesh, file_id )
+#undef __FUNC__
+#define __FUNC__ "Read_MeshElements"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: local_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:2)
+   INTEGER(HID_T)   :: dataset_id, filespace
+   INTEGER          :: error
+   INTEGER          :: node_ids(1:8,1:local_mesh % decomp % nGlobalElements)
+   INTEGER          :: iEl, iEl_global 
+   CHARACTER(50)    :: msg
+
+
+   INFO('Start')
+
+       dimensions(1:2) = (/8, local_mesh % decomp % nGlobalElements /)  
+       CALL h5dopen_f(file_id, '/mesh/global/elements/node-ids', dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, node_ids, dimensions, error, H5S_ALL_F, filespace )
+
+       IF( local_mesh % decomp % nBlocks >  1 )THEN
+
+         DO iEl = 1, local_mesh % decomp % mesh_obj(0) % nElements
+           iEl_global = local_mesh % decomp % mesh_obj(0) % elementIDs(iEl) 
+           local_mesh % elements % nodeIDs(1:8,iEl) = node_ids(1:8,iEl_global)
+         ENDDO
+  
+       ELSE
+
+         local_mesh % elements % nodeIDs = node_ids
+
+       ENDIF
+       CALL h5sclose_f( filespace, error)
+       CALL h5dclose_f( dataset_id, error )
+
+   INFO('End')
+
+ END SUBROUTINE Read_MeshElements
 
  SUBROUTINE Write_MeshFaces( global_mesh, file_id )
 #undef __FUNC__
@@ -2474,6 +2585,116 @@ CONTAINS
 
  END SUBROUTINE Write_MeshDecomp
 
+ SUBROUTINE Read_MeshDecomp( local_mesh, file_id, my_RankID )
+#undef __FUNC__
+#define __FUNC__ "Read_MeshDecomp"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: local_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   INTEGER, INTENT(in)             :: my_RankID
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:1)
+   INTEGER(HSIZE_T) :: maxdims(1:1)
+   INTEGER(HID_T)   :: dataset_id, filespace
+   INTEGER          :: error, blockid, ndims
+   INTEGER          :: nGlobalElements, nLocalNodes(0:0), nLocalFaces(0:0), nLocalElements(0:0)
+   CHARACTER(6)     :: blockchar
+   CHARACTER(50)    :: msg
+
+
+   INFO('Start')
+
+
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/decomp/element-to-blockid', 1, dimensions )
+       nGlobalElements = dimensions(1)
+
+       WRITE(blockchar,'(I6.6)')my_RankID
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/element-ids', 1, dimensions )
+       nLocalElements(0) = dimensions(1)
+
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/node-ids', 1, dimensions )
+       nLocalNodes(0) = dimensions(1)
+
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/face-ids', 1, dimensions )
+       nLocalFaces(0) = dimensions(1)
+
+       CALL local_mesh % decomp % Build( nGlobalElements, 1, nLocalElements, nLocalFaces, nLocalNodes )
+
+       WRITE(msg,'(I5)')nGlobalElements
+       msg = 'Number of Global Elements : '//TRIM(msg)
+       INFO(msg)
+
+       WRITE(msg,'(I5)')nLocalElements(0)
+       msg = 'Number of Local Elements : '//TRIM(msg)
+       INFO(msg)
+
+       WRITE(msg,'(I5)')nLocalFaces(0)
+       msg = 'Number of Faces : '//TRIM(msg)
+       INFO(msg)
+
+       WRITE(msg,'(I5)')nLocalNodes(0)
+       msg = 'Number of Nodes : '//TRIM(msg)
+       INFO(msg)
+       
+       dimensions(1:1) = nGlobalElements 
+       CALL h5dopen_f(file_id, '/mesh/decomp/element-to-blockid', dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
+                       local_mesh % decomp % element_to_blockID, &
+                       dimensions, error)
+
+       CALL h5dopen_f(file_id, '/mesh/decomp/global-to-localid', dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
+                       local_mesh % decomp % global_to_localID, &
+                       dimensions, error)
+
+       dimensions(1:1) = nLocalElements(0:0)  
+       CALL h5dopen_f(file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/element-ids', dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
+                       local_mesh % decomp % mesh_obj(0) % elementids, &
+                       dimensions, error)
+
+       dimensions(1:1) = nLocalNodes(0:0)
+       CALL h5dopen_f(file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/node-ids', dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
+                       local_mesh % decomp % mesh_obj(0) % nodeids, &
+                       dimensions, error)
+       
+       dimensions(1:1) = nLocalFaces(0:0)
+       CALL h5dopen_f(file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/face-ids', dataset_id, error)
+       CALL h5dget_space_f( dataset_id, filespace, error )
+       CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
+                       local_mesh % decomp % mesh_obj(0) % faceids, &
+                       dimensions, error)
+       
+        
+   INFO('End')
+
+ END SUBROUTINE Read_MeshDecomp
+
+ SUBROUTINE Get_HDF5_Obj_Dimensions( file_id, variable_name, rank, dimensions )
+#undef __FUNC__
+#define __FUNC__ "Get_HDF5_Obj_Dimensions"
+   IMPLICIT NONE
+   INTEGER(HID_T), INTENT(in)    :: file_id
+   CHARACTER(*)                  :: variable_name
+   INTEGER, INTENT(in)           :: rank
+   INTEGER(HSIZE_T), INTENT(out) :: dimensions(1:rank)
+   ! Local
+   INTEGER          :: error
+   INTEGER(HID_T)   :: dataset_id
+   INTEGER(HSIZE_T) :: maxdims(1:rank)
+   INTEGER(HID_T)   :: filespace
+
+        CALL h5dopen_f(file_id, TRIM(variable_name), dataset_id, error)
+        CALL h5dget_space_f(dataset_id, filespace, error)
+        CALL h5sget_simple_extent_dims_f(filespace, dimensions, maxdims, error) 
+        
+ END SUBROUTINE Get_HDF5_Obj_Dimensions
+
  SUBROUTINE Add_FloatMeshObj_to_HDF5( rank, dimensions, variable_name, float_variable, file_id )
 #undef __FUNC__
 #define __FUNC__ "Add_FloatMeshObj_to_HDF5"
@@ -2516,24 +2737,24 @@ CONTAINS
 
  END SUBROUTINE Add_IntMeshObj_to_HDF5
   
- SUBROUTINE Load_SELFMesh( mesh, meshfile, my_RankID, nMPI_Ranks )
+ SUBROUTINE Load_SELFMesh( mesh, params, my_RankID, nMPI_Ranks, mpiCommunicator )
 #undef __FUNC__
 #define __FUNC__ "Load_SELFMesh"
    IMPLICIT NONE
-   CLASS( HexMesh ), INTENT(inout) :: mesh 
-   CHARACTER(*), INTENT(in)        :: meshfile
-   INTEGER, INTENT(in)             :: my_RankID
-   INTEGER, INTENT(in)             :: nMPI_Ranks
+   CLASS( HexMesh ), INTENT(inout)     :: mesh 
+   TYPE( ModelParameters ), INTENT(in) :: params
+   INTEGER, INTENT(in)                 :: my_RankID
+   INTEGER, INTENT(in)                 :: nMPI_Ranks
+   INTEGER, INTENT(in)                 :: mpiCommunicator
 
    ! Read From HDF5
    !  - If serial, load in the global mesh. Then create the boundary map
    !  - If parallel, load in the local process mesh information, the element_to_blockID array and the decomp objects into decomp % mesh_obj(0). 
    !       Then adjust the face information and create the boundary map 
 
-      CALL mesh % Read_SELFMesh( meshfile, my_RankID, nMPI_Ranks )
+      CALL mesh % Read_SELFMesh( params % SELFMeshFile, params % polydeg, my_RankID, nMPI_Ranks, mpiCommunicator )
       CALL mesh % SetupFaceMaps( )
       CALL SetupProcessBoundaryMap( mesh, my_RankID )
-
 
 
  END SUBROUTINE Load_SELFMesh
@@ -2568,13 +2789,13 @@ CONTAINS
    
       ! Build the Geometry
       IF( TRIM( params % UCDMeshFile ) == '' )THEN
-           CALL mesh % ConstructStructuredMesh( nodal % interp, params % nXelem, params % nYelem, params % nZelem, &
-                                                geomParser )
+        CALL mesh % ConstructStructuredMesh( nodal % interp, params % nXelem, params % nYelem, params % nZelem,geomParser )
+        ! TO DO : push the mesh scaling inside the structured mesh construction
+        CALL mesh % ScaleTheMesh( nodal % interp, params % xScale, params % yScale, params % zScale  )
       ELSE   
         CALL mesh % Read_TrellisUCDMesh( nodal % interp, TRIM( params % UCDMeshFile ) )           
       ENDIF
 
-      CALL mesh % ScaleTheMesh( nodal % interp, params % xScale, params % yScale, params % zScale  )
 
       CALL mesh % boundaryMap % Build(mesh % faces % nBoundaryFaces(),0)
 
@@ -2614,12 +2835,11 @@ CONTAINS
 
    INFO('Start')
 
-     ! TO DO : constructor for decomp
      ALLOCATE( mesh % decomp % element_to_blockID(1:mesh % elements % nElements) )
      ALLOCATE( mesh % decomp % global_to_localID(1:mesh % elements % nElements) )
      mesh % decomp % element_to_blockID = 0
      mesh % decomp % global_to_localID = 0
-     mesh % decomp % nGlobalElements = 0
+     mesh % decomp % nGlobalElements = mesh % elements % nElements
      mesh % decomp % nBlocks = nMPI_Ranks
 
      IF( TRIM( params % UCDMeshFile ) /= '' )THEN

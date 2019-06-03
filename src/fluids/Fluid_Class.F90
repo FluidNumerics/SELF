@@ -172,7 +172,7 @@ CONTAINS
       myDGSEM % params % filter_b, &
       myDGSEM % params % filterType )
 
-    CALL myDGSEM % mesh % Load_SELFMesh( TRIM(myDGSEM % params % SELFMeshFile), myRank, nProc )
+    CALL myDGSEM % mesh % Load_SELFMesh( myDGSEM % params, myRank, nProc, mpiComm )
 
     CALL myDGSEM % sourceTerms % Build( myDGSEM % params % polyDeg, nEquations, &
       myDGSEM % mesh % elements % nElements )
@@ -3015,6 +3015,7 @@ CONTAINS
 
 #endif
 
+    CALL h5sclose_f( filespace, error)
     CALL h5dclose_f( dataset_id, error)
 
   END SUBROUTINE Add_Variable_to_HDF5
@@ -3071,6 +3072,7 @@ CONTAINS
 
 #endif
 
+    CALL h5sclose_f( filespace, error)
     CALL h5dclose_f( dataset_id, error)
 
   END SUBROUTINE Get_Variable_from_HDF5
