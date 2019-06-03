@@ -124,6 +124,7 @@ CONTAINS
     INTEGER    :: global_face_id
     INTEGER    :: local_element_id, e2, side_id, external_proc_id
     
+INFO('Start')
     message_id = 0
     DO bID = 1, state % nBoundaryFaces
 
@@ -154,6 +155,7 @@ CONTAINS
       ENDIF
     ENDDO
 
+INFO('End')
 #endif
 
   END SUBROUTINE MPI_Exchange

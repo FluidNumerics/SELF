@@ -3015,7 +3015,7 @@ CONTAINS
 
 #endif
 
-    CALL h5sclose_f( filespace, error)
+!    CALL h5sclose_f( filespace, error)
     CALL h5dclose_f( dataset_id, error)
 
   END SUBROUTINE Add_Variable_to_HDF5
@@ -3329,11 +3329,6 @@ CONTAINS
     IF( error /= 0 ) STOP
 
 
-!#ifdef HAVE_MPI
-!    CALL h5pcreate_f(H5P_DATASET_XFER_F, transfer_plist_id, error)
-!    CALL h5pset_dxpl_mpio_f(transfer_plist_id, H5FD_MPIO_COLLECTIVE_F, error)
-!#endif
-
     CALL Get_Variable_from_HDF5( file_id, "/model_output/x_momentum", myDGSEM % state % solution(:,:,:,1,:), &
                                filespace, memspace, plist_id, dimensions, &
                                myDGSEM % mesh % elements % elementID, N, &
@@ -3419,7 +3414,7 @@ CONTAINS
     CALL h5gclose_f( static_group_id, error )
     CALL h5gclose_f( conditions_group_id, error )
     CALL h5sclose_f( memspace, error )
-    CALL h5sclose_f( filespace, error )
+!    CALL h5sclose_f( filespace, error )
     CALL h5fclose_f( file_id, error )
     CALL h5close_f( error )
 
@@ -3438,13 +3433,11 @@ CONTAINS
 
   
   SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
-
 #undef __FUNC__
 #define __FUNC__ "UpdateExternalStaticState"
-
     CLASS( Fluid ), INTENT (inout) :: myDGSEM 
     ! Local
-    INTEGER :: bID, iFace, e1, s1, i, j, iEq
+    INTEGER :: bID, iFace, e1, s1, i, j, iEq, error
 #ifdef HAVE_CUDA
     INTEGER :: iStat
 #endif
@@ -3472,7 +3465,6 @@ CONTAINS
       ENDDO
   
     ENDDO
-
 
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % static, &

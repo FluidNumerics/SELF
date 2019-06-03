@@ -109,6 +109,7 @@ MODULE HexMesh_Class
     PROCEDURE, PRIVATE :: Read_MeshElements
     PROCEDURE, PRIVATE :: Read_MeshFaces
     PROCEDURE, PRIVATE :: Read_MeshNodes
+    PROCEDURE, PRIVATE :: Read_MeshGeometry
     PROCEDURE, PRIVATE :: ConstructFaces               
     PROCEDURE, PRIVATE :: ConstructStructuredFaces     
     PROCEDURE, PRIVATE :: ConstructDoublyPeriodicFaces 
@@ -145,7 +146,7 @@ CONTAINS
 !
   SUBROUTINE Build_HexMesh( myHexMesh, nNodes, nElements, nFaces, N )
 #undef __FUNC__
-#define __FUNC__ "ConstructFaces"
+#define __FUNC__ "Build"
     IMPLICIT NONE
     CLASS(HexMesh), INTENT(inout) :: myHexMesh
     INTEGER, INTENT(in)           :: nNodes, nElements, nFaces, N
@@ -383,7 +384,7 @@ CONTAINS
 !
   SUBROUTINE SetupFaceMaps( mesh )
 #undef __FUNC__
-#define __FUNC__ "ConstructFaces"
+#define __FUNC__ "SetupFaceMaps"
   CLASS( HexMesh ), INTENT(inout) :: mesh
   ! Local
   INTEGER :: i, j, k, ii, jj
@@ -2270,15 +2271,14 @@ CONTAINS
                        mesh % decomp % mesh_obj(0) % nElements, &
                        mesh % decomp % mesh_obj(0) % nFaces, polydeg )
 
-    CALL mesh % Read_MeshElements( file_id )
-
-    CALL mesh % Read_MeshFaces( file_id )
-
-    CALL mesh % Read_MeshNodes( file_id )
-
-STOP
+    CALL mesh % Read_MeshElements( file_id, nMPI_Ranks )
+    CALL mesh % Read_MeshFaces( file_id, nMPI_Ranks )
+    CALL mesh % Read_MeshNodes( file_id, nMPI_Ranks )
+    CALL mesh % Read_MeshGeometry( file_id, nMPI_Ranks )
 
 
+    CALL h5fclose_f(file_id, error)
+    CALL h5close_f(error)
 
    INFO('End')
 
@@ -2349,12 +2349,13 @@ STOP
 
  END SUBROUTINE Write_MeshElements
 
- SUBROUTINE Read_MeshElements( local_mesh, file_id )
+ SUBROUTINE Read_MeshElements( local_mesh, file_id, nMPI_Ranks )
 #undef __FUNC__
 #define __FUNC__ "Read_MeshElements"
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout) :: local_mesh 
    INTEGER(HID_T), INTENT(in)      :: file_id
+   INTEGER, INTENT(in)             :: nMPI_Ranks
    !
    INTEGER(HSIZE_T) :: dimensions(1:2)
    INTEGER(HID_T)   :: dataset_id, filespace
@@ -2370,21 +2371,25 @@ STOP
        CALL h5dopen_f(file_id, '/mesh/global/elements/node-ids', dataset_id, error)
        CALL h5dget_space_f( dataset_id, filespace, error )
        CALL h5dread_f( dataset_id, H5T_STD_I32LE, node_ids, dimensions, error, H5S_ALL_F, filespace )
+       CALL h5sclose_f( filespace, error)
+       CALL h5dclose_f( dataset_id, error )
 
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
 
          DO iEl = 1, local_mesh % decomp % mesh_obj(0) % nElements
            iEl_global = local_mesh % decomp % mesh_obj(0) % elementIDs(iEl) 
            local_mesh % elements % nodeIDs(1:8,iEl) = node_ids(1:8,iEl_global)
+           local_mesh % elements % elementID(iEl)  = iEl_global
          ENDDO
   
        ELSE
 
          local_mesh % elements % nodeIDs = node_ids
+         DO iEl = 1, local_mesh % decomp % mesh_obj(0) % nElements
+           local_mesh % elements % elementID(iEl)  = iEl
+         ENDDO
 
        ENDIF
-       CALL h5sclose_f( filespace, error)
-       CALL h5dclose_f( dataset_id, error )
 
    INFO('End')
 
@@ -2467,12 +2472,13 @@ STOP
 
  END SUBROUTINE Write_MeshFaces
 
- SUBROUTINE Read_MeshFaces( local_mesh, file_id )
+ SUBROUTINE Read_MeshFaces( local_mesh, file_id, nMPI_Ranks )
 #undef __FUNC__
 #define __FUNC__ "Read_MeshFaces"
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout) :: local_mesh 
    INTEGER(HID_T), INTENT(in)      :: file_id
+   INTEGER, INTENT(in)             :: nMPI_Ranks
    !
    INTEGER(HSIZE_T) :: dimensions(1:3)
    INTEGER(HID_T)   :: group_id
@@ -2480,12 +2486,11 @@ STOP
    INTEGER          :: iFace, iFace_global
    INTEGER, ALLOCATABLE :: temp_var1d(:)
    INTEGER, ALLOCATABLE :: temp_var2d(:,:)
-   INTEGER, ALLOCATABLE :: temp_var2d_2(:,:)
 
    INFO('Start')
 
        CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/faces/swap-dimension', 1, dimensions(1:1) )
-       ALLOCATE( temp_var1d(1:dimensions(1)), temp_var2d(1:4,1:dimensions(1)), temp_var2d_2(1:2,1:dimensions(1)) )
+       ALLOCATE( temp_var1d(1:dimensions(1)) )
 
 
        CALL Get_IntMeshObj_from_HDF5( rank=1,&
@@ -2493,7 +2498,7 @@ STOP
                                     variable_name='/mesh/global/faces/i-start', &
                                     int_variable=temp_var1d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
            local_mesh % faces % iStart(iFace) = temp_var1d(iFace_global)
@@ -2507,7 +2512,7 @@ STOP
                                     variable_name='/mesh/global/faces/j-start', &
                                     int_variable=temp_var1d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
            local_mesh % faces % jStart(iFace) = temp_var1d(iFace_global)
@@ -2521,7 +2526,7 @@ STOP
                                     variable_name='/mesh/global/faces/i-inc', &
                                     int_variable=temp_var1d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
            local_mesh % faces % iInc(iFace) = temp_var1d(iFace_global)
@@ -2535,7 +2540,7 @@ STOP
                                     variable_name='/mesh/global/faces/j-inc', &
                                     int_variable=temp_var1d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
            local_mesh % faces % jInc(iFace) = temp_var1d(iFace_global)
@@ -2549,7 +2554,7 @@ STOP
                                     variable_name='/mesh/global/faces/swap-dimension', &
                                     int_variable=temp_var1d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
            local_mesh % faces % swapdimensions(iFace) = temp_var1d(iFace_global)
@@ -2557,14 +2562,16 @@ STOP
        ELSE
          local_mesh % faces % swapdimensions = temp_var1d
        ENDIF
+       DEALLOCATE( temp_var1d )
 
-       dimensions(1:2) = (/4,local_mesh % faces % nFaces /)  
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/faces/node-ids', 2, dimensions(1:2) )
+       ALLOCATE( temp_var2d(1:dimensions(1),1:dimensions(2)) )
        CALL Get_IntMeshObj_from_HDF5( rank=2,&
                                     dimensions=dimensions(1:2),&
                                     variable_name='/mesh/global/faces/node-ids', &
                                     int_variable=temp_var2d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
            local_mesh % faces % nodeIds(1:4,iFace) = temp_var2d(1:4,iFace_global)
@@ -2572,37 +2579,39 @@ STOP
        ELSE
          local_mesh % faces % nodeIds = temp_var2d
        ENDIF
+       DEALLOCATE( temp_var2d )
 
-       dimensions(1:2) = (/2, local_mesh % faces % nFaces /)  
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/faces/element-ids', 2, dimensions(1:2) )
+       ALLOCATE( temp_var2d(1:dimensions(1),1:dimensions(2)) )
        CALL Get_IntMeshObj_from_HDF5( rank=2,&
                                     dimensions=dimensions(1:2),&
                                     variable_name='/mesh/global/faces/element-ids', &
-                                    int_variable=temp_var2d_2,&
+                                    int_variable=temp_var2d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
-           local_mesh % faces % elementIds(1:2,iFace) = temp_var2d_2(1:2,iFace_global)
+           local_mesh % faces % elementIds(1:2,iFace) = temp_var2d(1:2,iFace_global)
          ENDDO
        ELSE
-         local_mesh % faces % elementIds = temp_var2d_2
+         local_mesh % faces % elementIds = temp_var2d
        ENDIF
 
        CALL Get_IntMeshObj_from_HDF5( rank=2,&
                                     dimensions=dimensions(1:2),&
                                     variable_name='/mesh/global/faces/element-sides', &
-                                    int_variable=temp_var2d_2,&
+                                    int_variable=temp_var2d,&
                                     file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iFace = 1, local_mesh % decomp % mesh_obj(0) % nFaces
            iFace_global = local_mesh % decomp % mesh_obj(0) % faceIds(iFace) 
-           local_mesh % faces % elementSides(1:2,iFace) = temp_var2d_2(1:2,iFace_global)
+           local_mesh % faces % elementSides(1:2,iFace) = temp_var2d(1:2,iFace_global)
          ENDDO
        ELSE
-         local_mesh % faces % elementSides = temp_var2d_2
+         local_mesh % faces % elementSides = temp_var2d
        ENDIF
 
-       DEALLOCATE( temp_var1d, temp_var2d, temp_var2d_2 )
+       DEALLOCATE( temp_var2d )
 
    INFO('End')
 
@@ -2634,17 +2643,18 @@ STOP
 
  END SUBROUTINE Write_MeshNodes
 
- SUBROUTINE Read_MeshNodes( local_mesh, file_id )
+ SUBROUTINE Read_MeshNodes( local_mesh, file_id, nMPI_Ranks )
 #undef __FUNC__
 #define __FUNC__ "Read_MeshNodes"
    IMPLICIT NONE
    CLASS( HexMesh ), INTENT(inout) :: local_mesh 
    INTEGER(HID_T), INTENT(in)      :: file_id
+   INTEGER, INTENT(in)             :: nMPI_Ranks
    !
    INTEGER(HSIZE_T) :: dimensions(1:2)
    INTEGER(HID_T)   :: group_id
    INTEGER          :: error
-   INTEGER          :: iNode, iNode_local
+   INTEGER          :: iNode, iNode_global
    REAL(prec), ALLOCATABLE :: nodes(:,:)
 
 
@@ -2657,10 +2667,10 @@ STOP
                                       variable_name='/mesh/global/nodes/positions', &
                                       float_variable=nodes,&
                                       file_id=file_id )
-       IF( local_mesh % decomp % nBlocks >  1 )THEN
+       IF( nMPI_Ranks >  1 )THEN
          DO iNode = 1, local_mesh % decomp % mesh_obj(0) % nNodes
-           iNode_local = local_mesh % decomp % mesh_obj(0) % nodeIds(iNode) 
-           local_mesh % nodes % x(1:3,iNode) = nodes(1:3,iNode_local)
+           iNode_global = local_mesh % decomp % mesh_obj(0) % nodeIds(iNode) 
+           local_mesh % nodes % x(1:3,iNode) = nodes(1:3,iNode_global)
          ENDDO
        ELSE
          local_mesh % nodes % x = nodes
@@ -2705,6 +2715,66 @@ STOP
    INFO('End')
 
  END SUBROUTINE Write_MeshGeometry
+
+ SUBROUTINE Read_MeshGeometry( local_mesh, file_id, nMPI_Ranks )
+#undef __FUNC__
+#define __FUNC__ "Read_MeshGeometry"
+   IMPLICIT NONE
+   CLASS( HexMesh ), INTENT(inout) :: local_mesh 
+   INTEGER(HID_T), INTENT(in)      :: file_id
+   INTEGER, INTENT(in)             :: nMPI_Ranks
+   !
+   INTEGER(HSIZE_T) :: dimensions(1:5)
+   INTEGER(HID_T)   :: group_id
+   INTEGER          :: error
+   INTEGER          :: iEl, iEl_global
+   REAL(prec), ALLOCATABLE :: var(:,:,:,:,:)
+
+
+   INFO('Start')
+
+
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/geometry/positions', 5, dimensions )
+       ALLOCATE( var(1:dimensions(1), 1:dimensions(2), 1:dimensions(3), 1:dimensions(4), 1:dimensions(5)) )
+       CALL Get_FloatMeshObj_from_HDF5( rank=5,&
+                                      dimensions=dimensions,&
+                                      variable_name='/mesh/global/geometry/positions', &
+                                      float_variable=var,&
+                                      file_id=file_id )
+ 
+       IF( nMPI_Ranks >  1 )THEN
+         DO iEl = 1, local_mesh % decomp % mesh_obj(0) % nElements
+           iEl_global = local_mesh % decomp % mesh_obj(0) % elementIds(iel) 
+           local_mesh % elements % x(:,:,:,:,iEl) = var(:,:,:,:,iEl_global)
+         ENDDO
+       ELSE
+         local_mesh % elements % x = var
+       ENDIF
+
+       DEALLOCATE(var)
+
+       CALL Get_HDF5_Obj_Dimensions( file_id, '/mesh/global/geometry/boundary-positions', 5, dimensions )
+       ALLOCATE( var(1:dimensions(1), 1:dimensions(2), 1:dimensions(3), 1:dimensions(4), 1:dimensions(5)) )
+       CALL Get_FloatMeshObj_from_HDF5( rank=5,&
+                                      dimensions=dimensions,&
+                                      variable_name='/mesh/global/geometry/boundary-positions', &
+                                      float_variable=var,&
+                                      file_id=file_id )
+
+       IF( nMPI_Ranks >  1 )THEN
+         DO iEl = 1, local_mesh % decomp % mesh_obj(0) % nElements
+           iEl_global = local_mesh % decomp % mesh_obj(0) % elementIds(iel) 
+           local_mesh % elements % xBound(:,:,:,:,iEl) = var(:,:,:,:,iEl_global)
+         ENDDO
+       ELSE
+         local_mesh % elements % xBound = var
+       ENDIF
+
+       DEALLOCATE(var)
+
+   INFO('End')
+
+ END SUBROUTINE Read_MeshGeometry
 
  SUBROUTINE Write_MeshDecomp( global_mesh, file_id )
 #undef __FUNC__
@@ -2828,12 +2898,16 @@ STOP
        CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
                        local_mesh % decomp % element_to_blockID, &
                        dimensions, error)
+        CALL h5dclose_f(dataset_id, error)
+        CALL h5sclose_f(filespace, error)
 
        CALL h5dopen_f(file_id, '/mesh/decomp/global-to-localid', dataset_id, error)
        CALL h5dget_space_f( dataset_id, filespace, error )
        CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
                        local_mesh % decomp % global_to_localID, &
                        dimensions, error)
+        CALL h5dclose_f(dataset_id, error)
+        CALL h5sclose_f(filespace, error)
 
        dimensions(1:1) = nLocalElements(0:0)  
        CALL h5dopen_f(file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/element-ids', dataset_id, error)
@@ -2841,6 +2915,8 @@ STOP
        CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
                        local_mesh % decomp % mesh_obj(0) % elementids, &
                        dimensions, error)
+        CALL h5dclose_f(dataset_id, error)
+        CALL h5sclose_f(filespace, error)
 
        dimensions(1:1) = nLocalNodes(0:0)
        CALL h5dopen_f(file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/node-ids', dataset_id, error)
@@ -2848,6 +2924,8 @@ STOP
        CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
                        local_mesh % decomp % mesh_obj(0) % nodeids, &
                        dimensions, error)
+        CALL h5dclose_f(dataset_id, error)
+        CALL h5sclose_f(filespace, error)
        
        dimensions(1:1) = nLocalFaces(0:0)
        CALL h5dopen_f(file_id, '/mesh/decomp/proc'//TRIM(blockchar)//'/face-ids', dataset_id, error)
@@ -2855,6 +2933,8 @@ STOP
        CALL h5dread_f( dataset_id, H5T_STD_I32LE, &
                        local_mesh % decomp % mesh_obj(0) % faceids, &
                        dimensions, error)
+        CALL h5dclose_f(dataset_id, error)
+        CALL h5sclose_f(filespace, error)
        
         
    INFO('End')
@@ -2878,6 +2958,9 @@ STOP
         CALL h5dopen_f(file_id, TRIM(variable_name), dataset_id, error)
         CALL h5dget_space_f(dataset_id, filespace, error)
         CALL h5sget_simple_extent_dims_f(filespace, dimensions, maxdims, error) 
+
+        CALL h5dclose_f(dataset_id, error)
+        CALL h5sclose_f(filespace, error)
         
  END SUBROUTINE Get_HDF5_Obj_Dimensions
 
@@ -2976,16 +3059,34 @@ STOP
    INTEGER, INTENT(in)                 :: my_RankID
    INTEGER, INTENT(in)                 :: nMPI_Ranks
    INTEGER, INTENT(in)                 :: mpiCommunicator
-
+   ! Local
+   TYPE( NodalDG )             :: nodal
+   
    ! Read From HDF5
    !  - If serial, load in the global mesh. Then create the boundary map
    !  - If parallel, load in the local process mesh information, the element_to_blockID array and the decomp objects into decomp % mesh_obj(0). 
    !       Then adjust the face information and create the boundary map 
 
+
+      ! Build an interpolant
+      CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
+                          N = params % polyDeg, &
+                          nTargetPoints = params % nPlot, &
+                          quadrature = GAUSS )
+
+      ! Load in all of the variables from the HDF5 file
       CALL mesh % Read_SELFMesh( params % SELFMeshFile, params % polydeg, my_RankID, nMPI_Ranks, mpiCommunicator )
+
+      ! Calculate the metric terms
+      CALL mesh % elements % GenerateMetrics( nodal % interp )
+
+      ! Convert from (iStart,jStart,iInc,jInc,swapDimensions) to (iMap,jMap) for the faces
       CALL mesh % SetupFaceMaps( )
+
+      ! Find the boundary faces and establish the MPI communication patterns
       CALL SetupProcessBoundaryMap( mesh, my_RankID )
 
+      CALL nodal % Trash( )
 
  END SUBROUTINE Load_SELFMesh
 
@@ -3152,7 +3253,7 @@ STOP
    ! Local
    INTEGER :: iFace, e1, e2, p1, p2, e1Local, e2Local, s1, s2
    INTEGER :: nbf, nmpi
-   CHARACTER(30) :: msg
+   CHARACTER(50) :: msg
    
    INFO('Start')
 
@@ -3168,25 +3269,27 @@ STOP
        IF( e2 > 0 )THEN ! Global internal face
          p2 = mesh % decomp % element_to_blockID(e2)
 
-         IF( p1 == my_RankID .AND. p2 == my_RankID )THEN ! Local internal face
-          ! mesh % faces % elementIDs(1,iFace) = mesh % decomp % global_to_localID(e1)
-          ! mesh % faces % elementIDs(2,iFace) = mesh % decomp % global_to_localID(e2)
-         ELSE ! MPI Boundary
+         IF( p1 == my_RankID .AND. p2 /= my_RankID)THEN ! MPI Boundary
+            nbf = nbf + 1
+            nmpi = nmpi + 1
+         ELSEIF( p1 /= my_RankID .AND. p2 == my_RankID)THEN ! MPI Boundary
             nbf = nbf + 1
             nmpi = nmpi + 1
          ENDIF
 
        ELSE ! Physical Boundary
 
-         nbf = nbf + 1
+         IF( p1 == my_RankID )THEN
+           nbf = nbf + 1
+         ENDIF
 
        ENDIF
 
      ENDDO
 
-     WRITE(msg,'(A,I5)') 'Number of boundary faces : ',nbf
+     WRITE(msg,'(A30,I5)') 'Number of boundary faces : ',nbf
      INFO( TRIM(msg) )
-     WRITE(msg,'(A,I5)') 'Number of MPI exchanges : ',nmpi
+     WRITE(msg,'(A30,I5)') 'Number of MPI exchanges : ',nmpi
      INFO( TRIM(msg) )
 
      CALL mesh % boundaryMap % build( nbf, nmpi )
@@ -3197,65 +3300,70 @@ STOP
 
        e1 = mesh % faces % elementIDs(1,iFace)
        e2 = mesh % faces % elementIDs(2,iFace)
+       s1 = mesh % faces % elementSides(1,iFace)
+       s2 = mesh % faces % elementSides(2,iFace)
        p1 = mesh % decomp % element_to_blockID(e1)
+
+       ! Set the global face ID for the message tags
+       mesh % faces % faceID(iFace) = mesh % decomp % mesh_obj(0) % faceIDs(iFace)
+       e1local = mesh % decomp % global_to_localID(e1)
 
        IF( e2 > 0 )THEN ! Global internal face
          p2 = mesh % decomp % element_to_blockID(e2)
+         e2local = mesh % decomp % global_to_localID(e2)
 
          IF( p1 == my_RankID .AND. p2 == my_RankID )THEN ! Local internal face
            mesh % faces % elementIDs(1,iFace) = mesh % decomp % global_to_localID(e1)
            mesh % faces % elementIDs(2,iFace) = mesh % decomp % global_to_localID(e2)
-         ELSE ! MPI Boundary
+
+         ELSEIF( p1 == my_RankID .AND. p2 /= my_RankID)THEN ! MPI Boundary
+            nbf = nbf + 1
+            nmpi = nmpi + 1
+   
+
+            mesh % faces % elementIDs(1,iFace)   = e1local
+            mesh % faces % elementIDs(2,iFace)   = -e2 ! Store the negative of the global element ID as the secondary element
+            mesh % faces % elementSides(1,iFace) = s1  
+            mesh % faces % elementSides(2,iFace) = s2  
+            mesh % faces % boundaryID(iFace)     = nbf  
+
+            mesh % boundaryMap % extProcIDs(nbf)        = p2
+            mesh % boundaryMap % boundaryIDs(nbf)       = iFace
+            mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
+            mesh % boundaryMap % boundaryCondition(nbf) = MPI_BOUNDARY 
+            mesh % boundaryMap % boundary_to_mpi(nmpi)  = nbf
+
+         ELSEIF( p1 /= my_RankID .AND. p2 == my_RankID)THEN ! MPI Boundary
             nbf = nbf + 1
             nmpi = nmpi + 1
 
-            e1local = mesh % decomp % global_to_localID(e1)
-            e2local = mesh % decomp % global_to_localID(e2)
-            s1 = mesh % faces % elementSides(1,iFace)
-            s2 = mesh % faces % elementSides(2,iFace)
+            mesh % faces % elementIDs(1,iFace)   = e2local
+            mesh % faces % elementIDs(2,iFace)   = -e1 ! Store the negative of the global element ID as the secondary element
+            mesh % faces % elementSides(1,iFace) = s2  
+            mesh % faces % elementSides(2,iFace) = s1  
+            mesh % faces % boundaryID(iFace)     = nbf  
 
-            IF( p1 == my_RankID )THEN
+            mesh % boundaryMap % extProcIDs(nbf)        = p1
+            mesh % boundaryMap % boundaryIDs(nbf)       = iFace
+            mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
+            mesh % boundaryMap % boundaryCondition(nbf) = MPI_BOUNDARY 
+            mesh % boundaryMap % boundary_to_mpi(nmpi)  = nbf
 
-              mesh % faces % elementIDs(1,iFace)   = e1local
-              mesh % faces % elementIDs(2,iFace)   = -e2 ! Store the negative of the global element ID as the secondary element
-              mesh % faces % elementSides(1,iFace) = s1  
-              mesh % faces % elementSides(2,iFace) = s2  
-              mesh % faces % boundaryID(iFace)     = nbf  
-
-              mesh % boundaryMap % extProcIDs(nbf)        = p2
-              mesh % boundaryMap % boundaryIDs(nbf)       = iFace
-              mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
-              mesh % boundaryMap % boundaryCondition(nbf) = MPI_BOUNDARY 
-              mesh % boundaryMap % boundary_to_mpi(nmpi)  = nbf
-
-            ELSE ! this process owns the secondary element - need to swap the ids and sides
-
-              mesh % faces % elementIDs(1,iFace)   = e2local
-              mesh % faces % elementIDs(2,iFace)   = -e1 ! Store the negative of the global element ID as the secondary element
-              mesh % faces % elementSides(1,iFace) = s2  
-              mesh % faces % elementSides(2,iFace) = s1  
-              mesh % faces % boundaryID(iFace)     = nbf  
-
-              mesh % boundaryMap % extProcIDs(nbf)        = p1
-              mesh % boundaryMap % boundaryIDs(nbf)       = iFace
-              mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
-              mesh % boundaryMap % boundaryCondition(nbf) = MPI_BOUNDARY 
-              mesh % boundaryMap % boundary_to_mpi(nmpi)  = nbf
-
-            ENDIF
          ENDIF
 
        ELSE ! Physical Boundary
 
-         nbf = nbf + 1
-         mesh % faces % elementIDs(1,iFace)   = e1local
-         mesh % faces % elementSides(1,iFace) = s1  
-         mesh % faces % boundaryID(iFace)     = nbf  
+         IF( p1 == my_RankID )THEN
+           nbf = nbf + 1
+           mesh % faces % elementIDs(1,iFace)   = e1local
+           mesh % faces % elementSides(1,iFace) = s1  
+           mesh % faces % boundaryID(iFace)     = nbf  
 
-         mesh % boundaryMap % extProcIDs(nbf)        = p1
-         mesh % boundaryMap % boundaryIDs(nbf)       = iFace
-         mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
-         mesh % boundaryMap % boundaryCondition(nbf) = e2 ! Retain the boundary condition from the face information 
+           mesh % boundaryMap % extProcIDs(nbf)        = p1
+           mesh % boundaryMap % boundaryIDs(nbf)       = iFace
+           mesh % boundaryMap % boundaryGlobalIDs(nbf) = mesh % faces % faceID(iFace) 
+           mesh % boundaryMap % boundaryCondition(nbf) = e2 ! Retain the boundary condition from the face information 
+         ENDIF
 
        ENDIF
 
@@ -3284,7 +3392,6 @@ STOP
 
      nEl   = 0
      nodeLogic = 0
-     faceLogic = 0
      ! Set the logic mask for the nodes and count the number of elements
      DO iEl = 1, global_mesh % elements % nElements
        procID = global_mesh % decomp % element_to_blockID(iEl)
@@ -3295,15 +3402,23 @@ STOP
        ENDDO
      ENDDO
     
+     faceLogic = 0 
      ! Set the logic mask for the faces
      DO procID = 0, nMPI_Ranks -1
        DO iFace = 1, global_mesh % faces % nFaces
          e1 = global_mesh % faces % elementIDs(1,iFace)
          e2 = global_mesh % faces % elementIDs(2,iFace)
-         IF( global_mesh % decomp % element_to_blockID(e1) == procID .OR. &
-             global_mesh % decomp % element_to_blockID(e2) == procID )THEN
+     
+         IF( e2 > 0 )THEN
+           IF( global_mesh % decomp % element_to_blockID(e1) == procID .OR. &
+               global_mesh % decomp % element_to_blockID(e2) == procID )THEN
+             faceLogic(iFace,procID) = 1
+           ENDIF
 
-           faceLogic(iFace,procID) = 1
+         ELSE
+           IF( global_mesh % decomp % element_to_blockID(e1) == procID )THEN
+             faceLogic(iFace,procID) = 1
+           ENDIF
  
          ENDIF
        ENDDO
@@ -3314,6 +3429,7 @@ STOP
      ALLOCATE( global_mesh % decomp % mesh_obj(0:nMPI_Ranks-1) )
      global_mesh % decomp % nBlocks = nMPI_Ranks
      global_mesh % decomp % nGlobalElements = global_mesh % elements % nElements 
+
      DO procID = 0, nMPI_Ranks-1
        ALLOCATE( global_mesh % decomp % mesh_obj(procID) % elementids(1:nEl(procID)) ) 
        nNodes = SUM( nodeLogic(:,procID) )
@@ -3625,503 +3741,6 @@ STOP
       
  END SUBROUTINE StructuredDecompose     
 
-! SUBROUTINE StructuredMeshGenerator_3D( paramFile, equationFile, setupSuccess, nMPI_Ranks )
-!#undef __FUNC__
-!#define __FUNC__ "StructuredMeshGenerator_3D"
-! LOGICAL, INTENT(out)                      :: setupSuccess
-! CHARACTER(*), INTENT(in)                  :: paramFile
-! CHARACTER(*), INTENT(in)                  :: equationFile
-! INTEGER, INTENT(in)                       :: nMPI_Ranks
-!  ! Local
-! TYPE( NodalDG )                           :: nodal
-! TYPE( HexMesh )                           :: mesh
-! TYPE( HexMesh )                           :: procMesh
-! TYPE( ModelParameters )                   :: params
-! TYPE( Geom_EquationParser )               :: geomParser
-! INTEGER, ALLOCATABLE                      :: faceProcCount(:), faceProcTable(:,:), faceProcOwners(:,:), faceBoundaryIDs(:,:)
-! INTEGER                      :: procID, mpiErr
-! INTEGER                      :: nElems, nProc, pID, i, j
-! INTEGER                      :: iEl, jEl, iSide, iNode, nAdj, nID, elID, nMPI
-! INTEGER                      :: e1, e2, p1, p2, iFace, iFaceLocal, jFace, localID
-! INTEGER                      :: nBe, npFaces
-! INTEGER                      :: globalFaceID, localFaceID, bID, extProc, extBID
-! CHARACTER(4)                 :: pIDChar
-! INTEGER, ALLOCATABLE         :: globalToLocal(:,:), nElPerProc(:), nodeLogic(:,:), nNodePerProc(:), partitions(:)
-! INTEGER, ALLOCATABLE         :: globalToLocalNode(:,:), nLocMPI(:)
-! REAL(prec), ALLOCATABLE      :: materials(:)
-! INTEGER :: procDim(1:3), meshDim(1:3), dimIndex(1:3), temp
-! CHARACTER(50) :: msg
-! 
-!
-!      INFO('Start')
-!      ! Read in the PARAMETERs
-!      CALL params % Build( TRIM(paramFile), setupSuccess )
-!
-!#ifdef HAVE_MPI
-!      params % nProc = nMPI_Ranks
-!
-!      IF( params % nProc > params % nXElem*params % nYElem*params % nZElem )THEN
-!
-!        INFO('Number of processes exceeds number of elements.')
-!        setupSuccess = .FALSE.
-!
-!      ELSEIF( params % nProc == params % nXElem*params % nYElem*params % nZElem )THEN
-!
-!        params % nProcX = params % nXElem
-!        params % nProcY = params % nYElem
-!        params % nProcZ = params % nZElem
-!
-!      ELSE
-!
-!
-!        meshDim(1:3)  = (/ params % nXElem, params % nYElem, params % nZElem /) 
-!        dimIndex(1:3) = (/ 1, 2, 3 /) 
-!
-!        ! Sort from largest mesh dimension to smallest with insertion sort
-!        DO i = 2,  3
-!          j = i
-!          DO WHILE( j > 1 )
-!            IF( meshDim(j-1) < meshDim(j) )THEN
-!
-!              temp         = meshDim(j)
-!              meshDim(j)   = meshDim(j-1)
-!              meshDim(j-1) = temp 
-!
-!              temp          = dimIndex(j)
-!              dimIndex(j)   = dimIndex(j-1)
-!              dimIndex(j-1) = temp 
-!              j = j-1
-!
-!            ELSE
-!              EXIT
-!            ENDIF
-!          ENDDO
-!        ENDDO
-!        
-!        procDim(1:3)  = (/ params % nProc, 1, 1 /)
-!
-!        DO WHILE( procDim(1) > meshDim(1) )
-!
-!          DO i = 2, procDim(1)
-!            IF( MOD( procDim(1), i ) == 0 )THEN
-!              j = i
-!              EXIT
-!            ENDIF
-!          ENDDO
-!
-!          procDim(1) = procDim(1)/j
-!
-!        ENDDO
-!
-!        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
-!
-!          procDim(2) = params % nProc/procDim(1)
-!
-!          IF( procDim(2) > 1 )THEN
-!            DO WHILE( procDim(2) > meshDim(2) )
-!  
-!              DO i = 2, procDim(2)
-!                IF( MOD( procDim(2), i ) == 0 )THEN
-!                  j = i
-!                  EXIT
-!                ENDIF
-!              ENDDO
-!  
-!              procDim(2) = procDim(2)/j
-!  
-!            ENDDO
-!  
-!          ENDIF
-!
-!        ENDIF
-!
-!        IF( procDim(1)*procDim(2)*procDim(3) < params % nProc )THEN
-!
-!          procDim(3) = params % nProc/(procDim(1)*procDim(2))
-!          IF( procDim(3) > 1 )THEN
-!            DO WHILE( procDim(3) > meshDim(3) )
-!  
-!              DO i = 2, procDim(3)
-!                IF( MOD( procDim(3), i ) == 0 )THEN
-!                  j = i
-!                  EXIT
-!                ENDIF
-!              ENDDO
-!  
-!              procDim(3) = procDim(3)/j
-!  
-!            ENDDO
-!  
-!          ENDIF
-!
-!        ENDIF
-!
-!        DO i = 1, 3
-!
-!          IF( dimIndex(i) == 1 )THEN
-!            params % nProcX = procDim(i)
-!          ELSEIF( dimIndex(i) == 2 )THEN
-!            params % nProcY = procDim(i)
-!          ELSE
-!            params % nProcZ = procDim(i)
-!          ENDIF
-!
-!        ENDDO
-!
-!      ENDIF
-!
-!      WRITE(msg,'(A,I5)')'nProcX :', params % nProcX
-!      INFO( TRIM(msg) )
-!      WRITE(msg,'(A,I5)')'nProcY :', params % nProcY
-!      INFO( TRIM(msg) )
-!      WRITE(msg,'(A,I5)')'nProcZ :', params % nProcZ
-!      INFO( TRIM(msg) )
-!      
-!#endif
-!      CALL geomParser % Build( equationFile )
-!
-!      IF( setupSuccess )THEN
-!         ! Build an interpolant
-!         CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
-!                             N = params % polyDeg, &
-!                             nTargetPoints = params % nPlot, &
-!                             quadrature = GAUSS_LOBATTO )
-!   
-!         ! Build the Geometry
-!         IF( TRIM( params % UCDMeshFile ) == '' )THEN
-!              CALL mesh % ConstructStructuredMesh( nodal % interp, &
-!                params % nXelem, &
-!                params % nYelem, &
-!                params % nZelem, &
-!                geomParser )
-!         ELSE   
-!
-!           CALL mesh % ReadTrellisUCDMeshFile( nodal % interp, TRIM( params % UCDMeshFile ) )           
-!#ifdef TECPLOT
-!           CALL mesh % WriteTecplot( 'mesh' )
-!#endif
-!
-!         ENDIF
-!
-!         nElems = mesh % elements % nElements
-!         nProc  = params % nProcX*params % nProcY*params % nProcZ
-!         IF( nProc == 0 )THEN
-!            nProc = 1
-!         ENDIF
-!         ALLOCATE( materials(1:nElems), &
-!                   globalToLocal(1:nElems,1:2), &
-!                   nElPerProc(0:nProc-1), &
-!                   nodeLogic(1:mesh % nodes % nNodes, 0:nProc-1), &
-!                   nNodePerProc(0:nProc-1), &
-!                   globalToLocalNode(1:mesh % nodes % nNodes, 0:nProc-1), &
-!                   nLocMPI(0:nProc-1) )
-!                   
-!         materials     = 0.0_prec
-!         globalToLocal = 0
-!         nElPerProc    = 0
-!         nodeLogic     = 0
-!         nNodePerProc  = 0
-!         
-!         ALLOCATE( partitions(1:nElems) )
-!         ALLOCATE( faceProcCount(1:mesh % faces % nFaces), &
-!                   faceProcOwners(1:mesh % faces % nFaces,1:2), &
-!                   faceBoundaryIDs(1:mesh % faces % nFaces,1:2), &
-!                   faceProcTable(1:mesh % faces % nFaces, 0:nProc-1) )
-!         faceProcCount   = 0
-!         faceProcOwners  = -1
-!         faceBoundaryIDs = 0
-!         faceProcTable   = -5000
-!
-!         CALL mesh % PartitionStructuredElementsAndNodes( params, partitions, nElPerProc, &
-!                                                          globalToLocal, nodeLogic, nNodePerProc, &
-!                                                          globalToLocalNode, nProc )
-!
-!   
-!            
-!         ! Now we generate the local mesh for each process
-!
-!         DO procID = 0, nProc-1
-!            CALL procMesh % Build( nNodePerProc(procID), &
-!                                   nElPerProc(procID), &
-!                                   1, params % polyDeg )
-!! ----------------------------------------------------------------------------- !
-!
-!            DO nID = 1, mesh % nodes % nNodes
-!            
-!               ! We only assign node information if it is "owned" by this process
-!               IF( nodeLogic(nID,procID) == 1 )THEN 
-!
-!                  localID = globalToLocalNode( nID, procID )
-!                  procMesh % nodes % nodeID(localID)   = nID
-!                  procMesh % nodes % nodeType(localID) = mesh % nodes % nodeTYPE(nID)
-!                  procMesh % nodes % x(1:3,localID)    = mesh % nodes % x(1:3,nID)
-!
-!               ENDIF
-!               
-!            ENDDO
-!   
-!! ----------------------------------------------------------------------------- !
-!
-!            ! Set the element-node connectivity
-!            DO iEl = 1, mesh % elements % nElements
-!               ! We only assign element information if it is "owned" by this process
-!               IF( globalToLocal(iEl,2) == procID )THEN
-!                  elID = globalToLocal(iEl,1) ! Obtain the local element ID from the global-to-local array
-!                  
-!                  DO iNode = 1, 8
-!       
-!                    ! First we grab the global node ID for this element's corner node
-!                    nID = mesh % elements % nodeIDs(iNode,iEl)
-!                    ! THEN we convert this to a local node ID for this process
-!                    localID = globalToLocalNode( nID, procID )
-!                    ! And now we assign the local Node ID to the local element's corner node ID's
-!                    procMesh % elements % nodeIDs(iNode,elID)  = localID
-!       
-!                  ENDDO
-!                  procMesh % elements % elementID(elID) = iEl
-!                     
-!                  ! Set the geometry
-!                  procMesh % elements % nHat(:,:,:,:,elID)   = mesh % elements % nHat(:,:,:,:,iEl)
-!                  procMesh % elements % xBound(:,:,:,:,elID) = mesh % elements % xBound(:,:,:,:,iEl)
-!                  procMesh % elements % x(:,:,:,:,elID)      = mesh % elements % x(:,:,:,:,iEl)
-!                  procMesh % elements % J(:,:,:,elID)        = mesh % elements % J(:,:,:,iEl)
-!                  procMesh % elements % dxds(:,:,:,elID)     = mesh % elements % dxds(:,:,:,iEl)
-!                  procMesh % elements % dxdp(:,:,:,elID)     = mesh % elements % dxdp(:,:,:,iEl)
-!                  procMesh % elements % dxdq(:,:,:,elID)     = mesh % elements % dxdq(:,:,:,iEl)
-!                  procMesh % elements % dyds(:,:,:,elID)     = mesh % elements % dyds(:,:,:,iEl)
-!                  procMesh % elements % dydp(:,:,:,elID)     = mesh % elements % dydp(:,:,:,iEl)
-!                  procMesh % elements % dydq(:,:,:,elID)     = mesh % elements % dydq(:,:,:,iEl)
-!                  procMesh % elements % dzds(:,:,:,elID)     = mesh % elements % dzds(:,:,:,iEl)
-!                  procMesh % elements % dzdp(:,:,:,elID)     = mesh % elements % dzdp(:,:,:,iEl)
-!                  procMesh % elements % dzdq(:,:,:,elID)     = mesh % elements % dzdq(:,:,:,iEl)
-!                  procMesh % elements % Ja(:,:,:,:,:,elID)   = mesh % elements % Ja(:,:,:,:,:,iEl)
-!       
-!               ENDIF
-!               
-!            ENDDO
-!   
-!! ----------------------------------------------------------------------------- !
-!
-!            npFaces = 0 
-!            nBe     = 0
-!            iFaceLocal = 0
-!            nMPI       = 0
-!            DO iFace = 1, mesh % faces % nFaces
-!
-!               e1 = mesh % faces % elementIDs(1,iFace)
-!               e2 = mesh % faces % elementIDs(2,iFace)
-!
-!               p1 = globalToLocal(e1,2)
-!               IF( e2 > 0 )THEN
-!                  p2 = globalToLocal(e2,2)
-!               ELSE
-!                  p2  = p1
-!               ENDIF
-!               IF( p1 == procID .OR. p2 == procID )THEN
-!
-!                  faceProcTable(iFace,p1) = 1
-!                  faceProcTable(iFace,p2) = 1
-!                  iFaceLocal = iFaceLocal+1
-!
-!                  faceProcCount(iFace) = faceProcCount(iFace) + 1
-!                  faceProcOwners(iFace,faceProcCount(iFace)) = procID 
-!
-!                  npFaces = npFaces + 1
-!
-!                  IF( e2 < 0 .AND. p2 == p1 )THEN
-!
-!                     nBe = nBe + 1
-!                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
-!
-!                  ELSEIF( p2 /= p1 .AND. p1 == procID )THEN
-!
-!                     nMPI = nMPI + 1 
-!                     nBe = nBe + 1
-!                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
-!
-!                  ELSEIF( p2 /= p1 .AND. p2 == procID )THEN
-!
-!                     nMPI = nMPI + 1 
-!                     nBe = nBe + 1
-!                     faceBoundaryIDs(iFace, faceProcCount(iFace)) = nBe
-!
-!                  ENDIF
-!
-!               ENDIF
-!
-!            ENDDO
-!
-!            WRITE(msg,'(A,I5)') 'Process ID : ',procID
-!            INFO( TRIM(msg) )
-!            WRITE(msg,'(A,I5)') 'Number of MPI Communications : ',nMPI
-!            INFO( TRIM(msg) )
-!            WRITE(msg,'(A,I5)') 'Number of faces : ',npFaces
-!            INFO( TRIM(msg) )
-!            WRITE(msg,'(A,I5)') 'Number of boundary faces : ',nBe
-!            INFO( TRIM(msg) )
-!            WRITE(msg,'(A,I5)') 'Number of elements : ',nElPerProc(procID)
-!            INFO( TRIM(msg) )
-!
-!            CALL procMesh % faces % Trash( )
-!            CALL procMesh % faces % Build( npFaces, params % polyDeg ) 
-!            CALL procMesh % boundaryMap % Build( nBe, nMPI )
-!
-!            iFaceLocal = 0
-!            nBe        = 0
-!            nMPI       = 0
-!            DO iFace = 1, mesh % faces % nFaces
-!
-!               e1 = mesh % faces % elementIDs(1,iFace)
-!               e2 = mesh % faces % elementIDs(2,iFace)
-!
-!               p1 = globalToLocal(e1,2)
-!               IF( e2 > 0 )THEN
-!                  p2 = globalToLocal(e2,2)
-!               ELSE
-!                  p2  = p1
-!               ENDIF
-!
-!               IF( p1 == procID .OR. p2 == procID )THEN
-!
-!                  iFaceLocal = iFaceLocal + 1
-!
-!
-!                  IF( p2 == p1 .AND. e2 > 0 )THEN ! Internal Face
-!                    
-!                     procMesh % faces % faceID(iFaceLocal)         = iFace
-!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
-!                     procMesh % faces % elementIDs(2,iFaceLocal)   = globalToLocal( e2, 1 )
-!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-!
-!                  ELSEIF( p2 == p1 .AND. e2 < 0 )THEN ! Physical boundary
-!
-!                     procMesh % faces % faceID(iFaceLocal)         = iFace
-!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
-!                     procMesh % faces % elementIDs(2,iFaceLocal)   = e2
-!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-!
-!                     nBe = nBe + 1
-!                     procMesh % faces % boundaryID(iFaceLocal) = -nBe
-!
-!                     ! Physical boundary ID's will be set to negative for physical boundaryMap
-!                     ! so that boundaryMap requiring communication can be separated from physical
-!                     ! boundaryMap. This will allow more operations to be run concurrently with
-!                     ! communication.
-!                     procMesh % boundaryMap % boundaryIDs(nBe)       = iFaceLocal
-!                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
-!                     procMesh % boundaryMap % extProcIDs(nBe)        = procID
-!
-!                  ELSEIF( p2 /= p1 .AND. procID == p1 )THEN ! MPI Boundary
-!                
-!                     procMesh % faces % faceID(iFaceLocal)         = iFace
-!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e1, 1 )
-!                     procMesh % faces % elementIDs(2,iFaceLocal)   = -e2
-!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-!
-!                     nBe = nBe + 1
-!                     procMesh % faces % boundaryID(iFaceLocal) = nBe
-!
-!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive INTEGERs
-!                     ! so that they can be distinguished from physical boundaryMap that do not require
-!                     ! communication with neighboring processes. 
-!                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
-!                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
-!                     procMesh % boundaryMap % extProcIDs(nBe)  = p2
-!
-!
-!                  ELSEIF( p2 /= p1 .AND. procID == p2 )THEN ! MPI Boundary
-!                  
-!                  
-!                     procMesh % faces % faceID(iFaceLocal)         = iFace
-!                     procMesh % faces % elementIDs(1,iFaceLocal)   = globalToLocal( e2, 1 )
-!                     procMesh % faces % elementIDs(2,iFaceLocal)   = -e1
-!                     procMesh % faces % elementSides(1,iFaceLocal) = mesh % faces % elementSides(2,iFace)
-!                     procMesh % faces % elementSides(2,iFaceLocal) = mesh % faces % elementSides(1,iFace)
-!                     procMesh % faces % iStart(iFaceLocal)         = mesh % faces % iStart(iFace)
-!                     procMesh % faces % iInc(iFaceLocal)           = mesh % faces % iInc(iFace)
-!                     procMesh % faces % jStart(iFaceLocal)         = mesh % faces % jStart(iFace)
-!                     procMesh % faces % jInc(iFaceLocal)           = mesh % faces % jInc(iFace)
-!                     procMesh % faces % swapDimensions(iFaceLocal) = mesh % faces % swapDimensions(iFace)
-!                     procMesh % faces % iMap(:,:,iFaceLocal)       = mesh % faces % iMap(:,:,iFace)
-!                     procMesh % faces % jMap(:,:,iFaceLocal)       = mesh % faces % jMap(:,:,iFace)
-!                  
-!                     nBe = nBe + 1
-!                     procMesh % faces % boundaryID(iFaceLocal) = nBe
-!
-!                     ! Boundary ID's associated with MPI boundaryMap are reported as positive INTEGERs
-!                     ! so that they can be distinguished from physical boundaryMap that do not require
-!                     ! communication with neighboring processes. 
-!                     procMesh % boundaryMap % boundaryIDs(nBe) = iFaceLocal
-!                     procMesh % boundaryMap % boundaryGlobalIDs(nBe) = iFace
-!                     procMesh % boundaryMap % extProcIDs(nBe)  = p1
-!
-!
-!                  ENDIF
-!               ENDIF
-!
-!            ENDDO
-!            
-!! ----------------------------------------------------------------------------- !
-!
-!            WRITE( pIDChar, '(I4.4)' ) procID
-!#ifdef TECPLOT
-!            CALL procMesh % WriteTecplot( 'mesh.'//pIDChar )
-!#endif
-!            CALL procMesh % WriteSELFMeshFile( TRIM(params % SELFMeshFile)//'.'//pIDChar )
-!            
-!            CALL procMesh % Trash( )
-!
-!         ENDDO
-!   
-!
-!      ! For visualizing the decomposition
-!      materials = REAL( partitions, prec )
-!#ifdef TECPLOT
-!      CALL mesh % WriteMaterialTecplot( materials )
-!#endif
-!      
-!
-!      ! Clean up memory !
-!      DEALLOCATE( materials, &
-!                  faceProcCount, &
-!                  faceProcOwners, &
-!                  faceBoundaryIDs, &
-!                  nLocMPI )
-!      
-!      CALL mesh % Trash( )
-!      CALL nodal % Trash( )
-!
-!      ENDIF
-!
-!      INFO('End')
-!
-! END SUBROUTINE StructuredMeshGenerator_3D
-
-!
  FUNCTION NodesAreTheSame( nlist, mlist, N ) RESULT( NATS )
    IMPLICIT NONE
    INTEGER :: N
