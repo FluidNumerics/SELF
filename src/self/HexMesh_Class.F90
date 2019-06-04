@@ -2276,7 +2276,6 @@ CONTAINS
     CALL mesh % Read_MeshNodes( file_id, nMPI_Ranks )
     CALL mesh % Read_MeshGeometry( file_id, nMPI_Ranks )
 
-
     CALL h5fclose_f(file_id, error)
     CALL h5close_f(error)
 
@@ -3060,13 +3059,8 @@ CONTAINS
    INTEGER, INTENT(in)                 :: nMPI_Ranks
    INTEGER, INTENT(in)                 :: mpiCommunicator
    ! Local
-   TYPE( NodalDG )             :: nodal
+   TYPE( NodalDG ) :: nodal
    
-   ! Read From HDF5
-   !  - If serial, load in the global mesh. Then create the boundary map
-   !  - If parallel, load in the local process mesh information, the element_to_blockID array and the decomp objects into decomp % mesh_obj(0). 
-   !       Then adjust the face information and create the boundary map 
-
 
       ! Build an interpolant
       CALL nodal % Build( targetPoints = UniformPoints(-1.0_prec,1.0_prec,params % nPlot), &
@@ -3087,6 +3081,10 @@ CONTAINS
       CALL SetupProcessBoundaryMap( mesh, my_RankID )
 
       CALL nodal % Trash( )
+
+#ifdef HAVE_CUDA
+      CALL mesh % faces % UpdateDevice( )
+#endif
 
  END SUBROUTINE Load_SELFMesh
 

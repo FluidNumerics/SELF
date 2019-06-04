@@ -144,7 +144,7 @@ CONTAINS
 #endif
     INTEGER :: nB, nEl, nFace, threadID, remainder
 
-
+    INFO('Start')
     CALL myDGSEM % params % Build( TRIM( paramFile), setupSuccess )
     myDGSEM % simulationTime = myDGSEM % params % startTime
 
@@ -263,10 +263,8 @@ CONTAINS
   END SUBROUTINE Build_Fluid
 !
   SUBROUTINE Trash_Fluid( myDGSEM )
-
 #undef __FUNC__
 #define __FUNC__ "Trash_Fluid"
-
     CLASS(Fluid), INTENT(inout) :: myDGSEM
     INFO('Start')
 
@@ -291,10 +289,8 @@ CONTAINS
   END SUBROUTINE Trash_Fluid
 !
   SUBROUTINE SetInitialConditions_Fluid( myDGSEM )
-
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
-
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     INTEGER    :: i, j, k, iEl, istat
@@ -325,12 +321,10 @@ CONTAINS
               Tbar = myDGSEM % static % solution(i,j,k,5,iEl)/myDGSEM % static % solution(i,j,k,4,iEl)
 
               myDGSEM % state % solution(i,j,k,4,iEl) = -myDGSEM % static % solution(i,j,k,4,iEl)*T/(Tbar + T)
-#ifndef POTENTIAL_TEMPERATURE
               ! In the in-situ temperature formulation, the potential temperature is calculated from the
               ! equations file, and we convert to the in-situ temperature here
               ! Since (rho*T)' = 0 in this setting, the pressure anomaly is also zero.
               T  = T*( (myDGSEM % static % solution(i,j,k,7,iEl))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
-#endif
 
               myDGSEM % state % solution(i,j,k,1,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*u
               myDGSEM % state % solution(i,j,k,2,iEl) = ( myDGSEM % state % solution(i,j,k,4,iEl) + myDGSEM % static % solution(i,j,k,4,iEl) )*v
@@ -426,12 +420,10 @@ CONTAINS
                s = myDGSEM % fluidEquations % tracer % evaluate( x )
       
                Tbar = myDGSEM % static % boundarySolution(i,j,5,s1,e1)/myDGSEM % static % boundarySolution(i,j,4,s1,e1)
-#ifndef POTENTIAL_TEMPERATURE
-              ! In the in-situ temperature formulation, the potential temperature is calculated from the
-              ! equations file, and we convert to the in-situ temperature here
-              ! Since (rho*T)' = 0 in this setting, the pressure anomaly is also zero.
-              T  = T*( (myDGSEM % static % boundarySolution(i,j,7,s1,e1))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
-#endif
+               ! In the in-situ temperature formulation, the potential temperature is calculated from the
+               ! equations file, and we convert to the in-situ temperature here
+               ! Since (rho*T)' = 0 in this setting, the pressure anomaly is also zero.
+               T  = T*( (myDGSEM % static % boundarySolution(i,j,7,s1,e1))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
       
                myDGSEM % state % prescribedState(i,j,4,bID) = -myDGSEM % static % boundarySolution(i,j,4,s1,e1)*T/(Tbar + T)
                myDGSEM % state % prescribedState(i,j,1,bID) = ( myDGSEM % state % prescribedState(i,j,4,bID) + myDGSEM % static % boundarySolution(i,j,4,s1,e1) )*u
@@ -1514,28 +1506,12 @@ CONTAINS
                   (myDGSEM % static % boundarySolution(ii,jj,4,s2,e2) + myDGSEM % state % boundarySolution(ii,jj,4,s2,e2))
 
             ! Sound speed estimate for the external and internal states
-#ifdef POTENTIAL_TEMPERATURE
-            cOut = sqrt( myDGSEM % params % R *T* &
-              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
-              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC   )
-#else
             cOut = sqrt( myDGSEM % params % R*T )
-#endif
 
-            T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + &
-              myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
-              (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + &
-              myDGSEM % state % boundarySolution(i,j,4,s1,e1) )
+            T =   (myDGSEM % static % boundarySolution(i,j,5,s1,e1) + myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
+                  (myDGSEM % static % boundarySolution(i,j,4,s1,e1) + myDGSEM % state % boundarySolution(i,j,4,s1,e1))
 
-#ifdef POTENTIAL_TEMPERATURE
-            cIn = sqrt( myDGSEM % params % R *T* &
-              ( (myDGSEM % state % boundarySolution(ii,jj,nEquations,s2,e2)+&
-              myDGSEM % static % boundarySolution(ii,jj,nEquations,s2,e2))/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC   )
-#else
             cIn = sqrt( myDGSEM % params % R*T )
-#endif
             ! External normal velocity component
             uOut = ( myDGSEM % state % boundarySolution(ii,jj,1,s2,e2)*nHat(1) + &
                      myDGSEM % state % boundarySolution(ii,jj,2,s2,e2)*nHat(2) + &
@@ -1684,26 +1660,12 @@ CONTAINS
             T = (myDGSEM % static % externalState(ii,jj,5,bID)+myDGSEM % state % externalState(ii,jj,5,bID))/&
                 (myDGSEM % static % externalState(ii,jj,4,bID)+myDGSEM % state % externalState(ii,jj,4,bID))
 
-#ifdef POTENTIAL_TEMPERATURE
-            cOut = sqrt( myDGSEM % params % R *T* &
-              ( (myDGSEM % state % externalState(ii,jj,nEquations,bID)+&
-              myDGSEM % static % externalState(ii,jj,nEquations,bID))/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC   )
-#else
             cOut = sqrt( myDGSEM % params % R*T )
-#endif
 
             T = (myDGSEM % static % boundarySolution(i,j,5,s1,e1)+myDGSEM % state % boundarySolution(i,j,5,s1,e1))/&
                 (myDGSEM % static % boundarySolution(i,j,4,s1,e1)+myDGSEM % state % boundarySolution(i,j,4,s1,e1))
 
-#ifdef POTENTIAL_TEMPERATURE
-            cIn = sqrt( myDGSEM % params % R *T* &
-              ( (myDGSEM % state % boundarySolution(i,j,nEquations,s1,e1)+&
-              myDGSEM % static % boundarySolution(i,j,nEquations,s1,e1))/&
-              myDGSEM % params % P0 )**myDGSEM % params % rC   )
-#else
             cIn = sqrt( myDGSEM % params % R*T )
-#endif
 
             uOut = ( myDGSEM % state % externalState(ii,jj,1,bID)*nHat(1) + &
                      myDGSEM % state % externalState(ii,jj,2,bID)*nHat(2) + &
@@ -1991,7 +1953,6 @@ CONTAINS
             ENDDO
           ENDDO
 
-#ifndef POTENTIAL_TEMPERATURE
         ! When the in-situ temperature formulation is used, we must add in the adiabatic heating term
         ! due to fluid convergences. This term is -( P_{total}/C_v )*div( u )
         ELSEIF( iEq == 5 )THEN
@@ -2008,7 +1969,6 @@ CONTAINS
               ENDDO
             ENDDO
           ENDDO
-#endif
    
         ENDIF
 
@@ -2577,16 +2537,7 @@ CONTAINS
 
             ! Pressure = rho*R*T
             ! And P' = P - P_static
-#ifdef POTENTIAL_TEMPERATURE
-            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( (myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl))*&
-                                                                                       myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio -&
-                                                      myDGSEM % static % solution(i,j,k,nEquations,iEl)
-
-#else
-            !myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
-            myDGSEM % state % solution(i,j,k,nEquations,iEl) = (myDGSEM % state % solution(i,j,k,5,iEl) + myDGSEM % static % solution(i,j,k,5,iEl))*myDGSEM % params % R - &
-                                                                 myDGSEM % static % solution(i,j,k,7,iEl)
-#endif
+            myDGSEM % state % solution(i,j,k,nEquations,iEl) = myDGSEM % state % solution(i,j,k,5,iEl)*myDGSEM % params % R
 
           ENDDO
         ENDDO
@@ -2598,10 +2549,8 @@ CONTAINS
   END SUBROUTINE EquationOfState_Fluid
 !
   SUBROUTINE CalculateStaticState_Fluid( myDGSEM )
-
 #undef __FUNC__
 #define __FUNC__ "CalculateStaticState"
-
     CLASS( Fluid ), INTENT(inout) :: myDGSEM
     ! Local
     INTEGER    :: i, j, k, iEl,iEq
@@ -2650,18 +2599,8 @@ CONTAINS
             ! Density
             myDGSEM % static % solution(i,j,k,4,iEl) = myDGSEM % params % rho0*( fs )**hCapRatio
 
-#ifdef POTENTIAL_TEMPERATURE
-
-            myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T0
-            myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % params % P0*( myDGSEM % static % solution(i,j,k,5,iEl)*&
-                                                                                        myDGSEM % params % R/myDGSEM % params % P0 )**myDGSEM % params % hCapRatio
-
-#else
-
             myDGSEM % static % solution(i,j,k,5,iEl) = myDGSEM % static % solution(i,j,k,4,iEl)*T0*( fs )**( R/Cp )
             myDGSEM % static % solution(i,j,k,nEquations,iEl) = myDGSEM % static % solution(i,j,k,5,iEl)*myDGSEM % params % R
-
-#endif
 
           ENDDO
         ENDDO
@@ -2756,7 +2695,7 @@ CONTAINS
       STATUS='replace')
 
 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho","In-situ Temp.", "Pot. Temp.", "Tracer", "Pressure"'
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "Z", "u", "v", "w", "rho", "rho-bar", "In-situ Temp.", "Pot. Temp.", "Tracer", "Pressure"'
 
 
     DO iEl = 1, myDGsem % mesh % elements % nElements
@@ -2770,14 +2709,8 @@ CONTAINS
         DO j = 0, myDGSEM % params % nPlot
           DO i = 0, myDGSEM % params % nPlot
 
-#ifdef POTENTIAL_TEMPERATURE
-            pottemp = ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) )
-            insitu  = pottemp*( (bsol(i,j,k,7,iEl) + sol(i,j,k,7,iEl))/myDGSEM % params % P0 )**( myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
-#else
             insitu  = ( sol(i,j,k,5,iEl) + bsol(i,j,k,5,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) )
             pottemp = insitu*( (bsol(i,j,k,7,iEl) + sol(i,j,k,7,iEl))/myDGSEM % params % P0 )**(-myDGSEM % params % R/( myDGSEM % params % R + myDGSEM % params % Cv ) ) 
-#endif
-
 
 
             WRITE(fUnit,'(17(E15.7,1x))') x(i,j,k,1,iEl), &
@@ -2787,6 +2720,7 @@ CONTAINS
                                           sol(i,j,k,2,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
                                           sol(i,j,k,3,iEl)/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ), &
                                           sol(i,j,k,4,iEl), &
+                                          bsol(i,j,k,4,iEl), &
                                           insitu, pottemp, &
                                           ( sol(i,j,k,6,iEl) + bsol(i,j,k,6,iEl) )/( sol(i,j,k,4,iEl) + bsol(i,j,k,4,iEl) ),  &
                                           sol(i,j,k,nEquations,iEl)
@@ -3414,7 +3348,6 @@ CONTAINS
     CALL h5gclose_f( static_group_id, error )
     CALL h5gclose_f( conditions_group_id, error )
     CALL h5sclose_f( memspace, error )
-!    CALL h5sclose_f( filespace, error )
     CALL h5fclose_f( file_id, error )
     CALL h5close_f( error )
 
@@ -3798,22 +3731,12 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                  (boundarySolution(ii,jj,4,s2,e2)+boundarySolution_static(ii,jj,4,s2,e2) )
                  
         ! Sound speed estimate for the external and internal states
-#ifdef POTENTIAL_TEMPERATURE
-        cOut = sqrt( R_dev*T* &
-                    ( (boundarySolution(ii,jj,nEq_dev,s2,e2)+boundarySolution_static(ii,jj,nEq_dev,s2,e2))/ P0_dev )**rC_dev   )
-#else
         cOut = sqrt( R_dev*T )
-#endif
 
         T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
                 (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )        
 
-#ifdef POTENTIAL_TEMPERATURE
-        cIn = sqrt( R_dev*T* &
-                    ( (boundarySolution(ii,jj,nEq_dev,s2,e2)+boundarySolution_static(ii,jj,nEq_dev,s2,e2))/ P0_dev )**rC_dev   )
-#else
         cIn = sqrt( R_dev*T )
-#endif
                      
         ! External normal velocity component
         uOut = ( boundarySolution(ii,jj,1,s2,e2)*nHat(1,i,j,s1,e1)/norm + &
@@ -3933,22 +3856,12 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                   T =   (externalStatic(ii,jj,5,bID) + externalState(ii,jj,5,bID))/&
                           (externalState(ii,jj,4,bID)+externalStatic(ii,jj,4,bID) )
 
-#ifdef POTENTIAL_TEMPERATURE
-                  cOut = sqrt( R_dev*T* &
-                              ( (externalState(ii,jj,7,bID)+externalStatic(ii,jj,7,bID))/ P0_dev )**rC_dev   )
-#else
                   cOut = sqrt( R_dev*T )
-#endif
                   
                   T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
                           (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
                                    
-#ifdef POTENTIAL_TEMPERATURE
-                  cIn  = sqrt( R_dev*T* &
-                              ( (boundarySolution(i,j,7,s1,e1)+boundarySolution_static(i,j,7,s1,e1))/P0_dev )**rC_dev  )
-#else
                   cIn = sqrt( R_dev*T )
-#endif
                                
                   ! External normal velocity component
                   uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
@@ -4115,7 +4028,6 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                             solution(i,j,k,1,iEl)*fRotY_dev -&
                             solution(i,j,k,4,iEl)*g_dev
 
-#ifndef POTENTIAL_TEMPERATURE
     ! When the in-situ temperature formulation is used, we must add in the adiabatic heating term
     ! due to fluid convergences. This term is -( P_{total}/C_v )*div( u )
     ELSEIF( iEq == 5 )THEN 
@@ -4125,8 +4037,6 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
                                solutionGradient(2,i,j,k,2,iEl) + &
                                solutionGradient(3,i,j,k,3,iEl) )/Cv_dev
 
-#endif
-    
 
     ENDIF
   
@@ -4325,13 +4235,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, ele
     k   = threadIdx % z - 1
     
      ! Pressure = rho*R*T
-     
-#ifdef POTENTIAL_TEMPERATURE
-     solution(i,j,k,nEq_dev,iEl) = P0_dev*( (static(i,j,k,5,iEl) + solution(i,j,k,5,iEl))*R_dev/P0_dev )**hCapRatio_dev - static(i,j,k,nEq_dev,iEl)
-#else
      solution(i,j,k,nEq_dev,iEl) = solution(i,j,k,5,iEl)*R_dev
-     !solution(i,j,k,nEq_dev,iEl) = (solution(i,j,k,5,iEl)+static(i,j,k,5,iEl))*R_dev - static(i,j,k,7,iEl)
-#endif
 
   END SUBROUTINE EquationOfState_CUDAKernel
 !
