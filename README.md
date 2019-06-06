@@ -38,7 +38,7 @@ make install
 This installs the `sfluid` binary in the directory specified by the `prefix` argument
 at the configure stage. To make this binary visible, add
 ```
-export PATH=${PATH}:/path/to/install/directory/bin
+export PATH=$PATH}:/path/to/install/directory/bin
 ```
 to your `.bashrc` file.
 
@@ -48,7 +48,6 @@ Additional options for the configure step include
   --enable-openmp
   --enable-cuda
   --enable-double-precision
-  --enable-timing
 ```
 
 
@@ -62,22 +61,6 @@ make install
 ```
 To use MPI, it is necessary to have an MPI library, like OpenMPI or MPICH, installed
 and have binaries in your path.
-
-
-### OpenMP Multi-Threaded Acceleration
-To enable building of the sfluid executable with multi-threading support via OpenMP,
- you can add the flag `--enable-openmp` at the configure stage.
-```
-./configure --enable-openmp --prefix=/path/to/install/directory
-make
-make install
-```
-This adds the appropriate flag to `FCFLAGS` so that OpenMP directives within the
-SELF-Fluids source are interpreted. Note that OpenMP support can be used with MPI, 
-but cannot be enabled when GPU accelerations are enabled.
-
-At runtime, you will need to set the environment variable `OMP_NUM_THREADS` to
-the desired number of threads.
 
 
 ### GPU Acceleration
@@ -122,13 +105,88 @@ you can run
 sfluid init
 ```
 
+If you have initial conditions and a mesh file, you can run
+```
+sfluid integrate
+```
+
 Note that if you are running with MPI enabled, you will need to prepend `mpirun -np XX`, replacing
 `XX` with the number of MPI processes.
 
+## Output
 
-### Output
-The sfluid executable will generate some files specific to SELF-Fluids ( .mesh, .bcm, and .pickup )
-and tecplot output ( .tec ) that can be visualized in VisIt, Paraview, or TecPlot. There are currently
-plans to switch to VTK output to replace the tecplot output in later versions.
+### Mesh Files
+The mesh files are stored in HDF5 format. The mesh file has the following data layout
+```
+   GROUP "mesh" 
+      GROUP "global" 
+         GROUP "elements" 
+            DATASET "node-ids" 
+         GROUP "faces" 
+            DATASET "boundary-ids" 
+            DATASET "element-ids" 
+            DATASET "element-sides" 
+            DATASET "i-inc" 
+            DATASET "i-start" 
+            DATASET "j-inc" 
+            DATASET "j-start" 
+            DATASET "node-ids" 
+            DATASET "swap-dimension" 
+         GROUP "geometry" 
+            DATASET "boundary-positions" 
+            DATASET "positions" 
+         GROUP "nodes" 
+            DATASET "positions" 
 
+      GROUP "decomp" 
+         DATASET "element-to-blockid" 
+         GROUP "proc000000" 
+            DATASET "element-ids" 
+            DATASET "face-ids" 
+            DATASET "node-ids" 
+         GROUP "proc000001" 
+            DATASET "element-ids" 
+            DATASET "face-ids" 
+         GROUP "proc000002" 
+            DATASET "element-ids" 
+            DATASET "face-ids" 
+            DATASET "node-ids" 
+         GROUP "proc000003" 
+            DATASET "element-ids" 
+            DATASET "face-ids" 
+            DATASET "node-ids" 
+```
+The `global` group contains the global mesh structure. SELF-Fluids works with a hexahedral unstructured nodal spectral element isoparametric mesh.
+
+#### Nodes, Elements, and Faces
+The hexahedral unstructured characteristic of the mesh means the we store the mesh as logical cube elements with 8 corner nodes. The nodes in the mesh
+are defined by their physical position ( /mesh/global/nodes/positions ). The elements (connectivity) are defined by 8 corner nodes (/mesh/global/elements/node-ids).
+
+Although its not required to completely define the unstructured mesh, we also store faces in the mesh in this file (/mesh/global/faces). Faces are defined by
+four corner nodes. This definition leads to other defining features, such as the elements that share the face (/mesh/global/faces/element-ids). The relative orientation
+of the two elements sharing the face is important for flux calculations in spectral element methods. This orientiation information is stored in
+* /mesh/global/faces/element-sides
+* /mesh/global/faces/i-inc
+* /mesh/global/faces/i-start
+* /mesh/global/faces/j-inc
+* /mesh/global/faces/j-start
+* /mesh/global/faces/swap-dimensions
+For faces that are not shared by two elements, they are marked as boundary faces. Along these faces, boundary conditions are typically applied. SELF-Fluids contains solution
+storage data structure attributes specifically for handling external boundary states. To index those attributes, the faces are also aligned with a boundary ID (/mesh/global/faces/boundary-ids).
+
+#### Element Geometry
+The isoparametric characteristic of the mesh means that the elements can have curved boundaries. This geometry is defined by the physical positions (/mesh/global/geometry/positions) of the
+element at the quadrature points within the element. Further, we opt to store the boundary positions of the element faces (/mesh/global/geometry/boundary-positions). The physical positions 
+at quadrature points define a mapping from physical space to a computational space. When the mesh is read in from file, we can calculate the covariant and contravariant basis vectors in 
+addition to boundary normals and the Jacobian of the mapping.
+
+
+#### Domain Decomposition
+SELF-Fluids is parallelized using data-parallelism. Since the mesh determines the amount of work and (in part) the communication patterns with Spectral Element PDE solvers, the mesh is decomposed
+into blocks and assigned to MPI ranks. The decomposition is defined by a mapping of the elements to blocks ( /mesh/decomp/element-to-blockid ). From this, we can derive a group for each MPI rank that
+contains
+* global element ID's (/mesh/decomp/procXXXXXX/element-ids)
+* face ID's (/mesh/decomp/procXXXXXX/face-ids)
+* node ID's (/mesh/decomp/procXXXXXX/node-ids)
+owned by that rank. The XXXXXX, in practice, are replaced with a 0 padded integer for each rank.
 

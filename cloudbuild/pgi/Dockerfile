@@ -34,6 +34,25 @@ RUN export PGI_SILENT=true && \
     /tmp/install && \
     rm -rf /tmp/*
 
+ADD hdf5-1.10.5.tar.gz /tmp
+
+# HDF5
+RUN ls /tmp/
+
+RUN CPP=cpp CFLAGS="-fPIC -m64 -tp=px" CXXFLAGS="-fPIC -m64 -tp=px" FCFLAGS="-fPIC -m64 -tp=px" \
+    CC=${PGI_INSTALL_DIR}/linux86-64/2018/bin/pgcc \
+    CXX=${PGI_INSTALL_DIR}/linux86-64/2018/bin/pgc++ \
+    FC=${PGI_INSTALL_DIR}/linux86-64/2018/bin/pgfortran \
+    /tmp/hdf5-1.10.5/configure --enable-threadsafe --enable-cxx --enable-fortran --enable-unsupported --prefix=/usr/local/hdf5
+RUN make
+RUN make install
+
+# METIS
+ADD metis-5.1.0.tar.gz /tmp
+RUN make config prefix=/usr/local/metis -f /tmp/metis-5.1.0/Makefile 
+RUN make install -f /tmp/metis-5.1.0/Makefile 
+
+
 RUN echo "${PGI_LIB_DIR}" >> /etc/ld.so.conf.d/pgi.conf
 
 ENV PATH            ${PGI_BIN_DIR}:${PATH}
