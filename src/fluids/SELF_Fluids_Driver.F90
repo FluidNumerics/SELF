@@ -15,42 +15,51 @@ PROGRAM SELF_Fluids_Driver
 
   IMPLICIT NONE
 
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+#include "self_macros.h"
 
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+#undef __FUNC__
+#define __FUNC__ "Main"
   TYPE( Fluid )                :: myFluid
   LOGICAL                      :: setupSuccess
   LOGICAL                      :: meshgenSuccess
   LOGICAL                      :: initializeFromScratch
   LOGICAL                      :: pickupFileExists
-  LOGICAL                      :: run_MeshGenOnly, run_UpToInitOnly
+  LOGICAL                      :: run_MeshGenerator
+  LOGICAL                      :: run_Initializer
+  LOGICAL                      :: run_Integrator
   CHARACTER(500)               :: equationFile, paramFile
 
 
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 
 
-  CALL Setup( )
+  INFO('Start')
+
+  CALL Initialize_MPILayer()
+
+  CALL GetCLIConf( )
 
   IF( setupSuccess )THEN
 
-    IF( run_MeshGenOnly )THEN
-
+    IF( run_MeshGenerator )THEN
       CALL MeshGen( )
-    
-    ELSE
+    ENDIF
 
+    IF( run_Initializer )THEN
       CALL Initialize( )
-
-      IF( .NOT. run_UpToInitOnly )THEN
-        CALL MainLoop( )
-      ENDIF
-
-      CALL Cleanup( )
-
+    ENDIF
+  
+    IF( run_Integrator )THEN
+      CALL Integrate( )
     ENDIF
 
 
   ENDIF
+
+  CALL Finalize_MPILayer( )
+
+  INFO('End')
 
 CONTAINS
 
@@ -58,16 +67,17 @@ CONTAINS
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
 
-  SUBROUTINE Setup( )
-    IMPLICIT NONE
+  SUBROUTINE GetCLIConf( )
+    
     ! Local
     INTEGER :: nArg, argID
     CHARACTER(500) :: argName
     LOGICAL :: helpNeeded, equationFileProvided, paramFileProvided
 
     helpNeeded           = .FALSE.
-    run_MeshGenOnly      = .FALSE.
-    run_UpToInitOnly     = .FALSE.
+    run_MeshGenerator    = .FALSE.
+    run_Initializer      = .FALSE.
+    run_Integrator       = .FALSE.
     equationFileProvided = .FALSE.
     paramFileProvided    = .FALSE.
 
@@ -76,6 +86,7 @@ CONTAINS
 
     nArg = command_argument_count( )
 
+    setupSuccess = .TRUE.
     DO argID = 1, nArg
 
       CALL get_command_argument( argID, argName )
@@ -84,15 +95,17 @@ CONTAINS
 
         CASE( "meshgen" )
 
-          run_MeshGenOnly  = .TRUE.
-          run_UpToInitOnly = .FALSE.
-          setupSuccess     = .TRUE.
+          run_MeshGenerator = .TRUE.
+          setupSuccess      = .TRUE.
 
-        CASE( "init" )
+        CASE( "initialize" )
 
-          run_MeshGenOnly  = .FALSE.
-          run_UpToInitOnly = .TRUE.
-          setupSuccess     = .TRUE.
+          run_Initializer = .TRUE.
+          setupSuccess    = .TRUE.
+
+       CASE( "integrate" )
+          run_Integrator    = .TRUE.
+          setupSuccess      = .TRUE.
 
         CASE( "help" )
           helpNeeded   = .TRUE.
@@ -105,6 +118,11 @@ CONTAINS
           equationFileProvided = .TRUE.
 
         CASE DEFAULT
+
+          run_MeshGenerator = .TRUE.
+          run_Initializer   = .TRUE.
+          run_Integrator    = .TRUE.
+          setupSuccess      = .TRUE.
 
           IF( paramFileProvided )THEN
 
@@ -124,11 +142,9 @@ CONTAINS
 
     ENDDO
 
-    PRINT*, TRIM(equationFile)
-
     IF( helpNeeded ) THEN
 
-      PRINT*, 'SELF-Fluids (sfluid) Command Line Tool'      
+      PRINT*, 'SELF-Fluids (sfluid) Command Line Interface'      
       PRINT*, ' '
       PRINT*, ' A program for solving Compressible Navier-Stokes using the'
       PRINT*, ' Nodal Discontinuous Galerkin Spectral Element Method.'
@@ -156,10 +172,14 @@ CONTAINS
       PRINT*, '     Future releases of SELF-Fluids will offer more complete support'
       PRINT*, '     for working with typical unstructured mesh formats. '
       PRINT*, ' '
-      PRINT*, '   init'
-      PRINT*, '     Run up to the initial condition generation and do not forward'
-      PRINT*, '     step the model. The initial conditions are read in from the '
-      PRINT*, '     self.equations file. '
+      PRINT*, '   initialize'
+      PRINT*, '     Generate model initial conditions but do not forward step the'
+      PRINT*, '     model. The initial conditions are read in from the self.equations file. '
+      PRINT*, ' '
+      PRINT*, '   integrate'
+      PRINT*, '     Forward step the model using provided mesh file and initial conditions.'
+      PRINT*, '     If no mesh file or initial conditions are provided, then they are generated. '
+      PRINT*, ' '
       PRINT*, ' '
       PRINT*, '  [options] can be :'
       PRINT*, ' '
@@ -180,12 +200,9 @@ CONTAINS
       RETURN
     ENDIF
 
-    IF( .NOT. run_MeshGenOnly )THEN
-      CALL myFluid % Build( equationFile, paramFile, setupSuccess )
-    ENDIF
 
 
-  END SUBROUTINE Setup
+  END SUBROUTINE GetCLIConf
 
 ! ------------------------------------------------------------------------------ !
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
@@ -193,17 +210,9 @@ CONTAINS
 
   SUBROUTINE MeshGen( )
 
-
-      CALL myFluid % ExtComm % SetRanks( )
-
-      IF( myFluid % ExtComm % myRank == 0 )THEN
-        PRINT*, '  Generating structured mesh...'
-        CALL StructuredMeshGenerator_3D( paramFile, equationFile, meshGenSuccess )
-        PRINT*, '  Done'
+      IF( myRank == 0 )THEN
+        CALL Generate_SELFMesh(paramFile, equationFile, nProc)
       ENDIF
-
-      CALL myFluid % ExtComm % Finalize( )
-
 
   END SUBROUTINE MeshGen
 
@@ -212,26 +221,15 @@ CONTAINS
 ! ------------------------------------------------------------------------------ !
 
   SUBROUTINE Initialize( )
+#undef __FUNC__
+#define __FUNC__ "Initialize"
 
-    ! Attempt to read the fluid pickup file. If it doesn't exist, this routine
-    ! returns FALSE.
-    CALL myFluid % Read_from_HDF5( pickupFileExists ) 
-
-    ! If the pickup file doesn't exist, then the initial conditions are generated
-    ! from the equation parser.
-    IF( .NOT. pickupFileExists )THEN
-
-      PRINT(MsgFMT), 'Pickup file not found.'
-
-    ENDIF
-
-    IF( .NOT. pickupFileExists .OR. run_UpToInitOnly )THEN
-
-      PRINT(MsgFMT), 'Attempting initial condition generation from self.equations'
-      CALL myFluid % SetInitialConditions( )
-      CALL myFluid % IO( )
-
-    ENDIF
+    INFO('Start')
+    CALL myFluid % Build( equationFile, paramFile, setupSuccess )
+    CALL myFluid % SetInitialConditions( )
+    CALL myFluid % IO( )
+    CALL myFluid % Trash( )
+    INFO('End')
 
   END SUBROUTINE Initialize
 
@@ -239,34 +237,39 @@ CONTAINS
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
 
-  SUBROUTINE Cleanup( )
-    IMPLICIT NONE
+  SUBROUTINE Integrate( )
+#undef __FUNC__
+#define __FUNC__ "Integrate"
+    INTEGER    :: iT
+    CHARACTER(50) :: msg
+
+    INFO('Start')
+
+    CALL myFluid % Build( equationFile, paramFile, setupSuccess )
+    CALL myFluid % Read_from_HDF5( pickupFileExists ) 
+
+    IF( pickupFileExists )THEN
+      DO iT = 1, myFluid % params % nDumps ! Loop over time-steps
+
+        WRITE(msg,'(E15.5)')myFluid % simulationTime
+        msg = 'Starting time loop at t='//msg//'s'
+        INFO(TRIM(msg))
+
+        CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
+        CALL myFluid % IO( )
+
+      ENDDO
+    ELSE
+      INFO('Pickup file not found')
+      INFO('Integration not executed')
+    ENDIF
 
     CALL myFluid % Trash( )
 
-  END SUBROUTINE Cleanup
-
-! ------------------------------------------------------------------------------ !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
-! ------------------------------------------------------------------------------ !
-
-  SUBROUTINE MainLoop( )
-    IMPLICIT NONE
-    INTEGER    :: iT
-
-! ------------------------------------------------------------------------------ !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
-! ------------------------------------------------------------------------------ !
-    DO iT = 1, myFluid % params % nDumps ! Loop over time-steps
-
-      CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
-
-      CALL myFluid % IO( )
-
-    ENDDO
+    INFO('End')
 
 
-  END SUBROUTINE MainLoop
+  END SUBROUTINE Integrate
 
 
 END PROGRAM SELF_Fluids_Driver

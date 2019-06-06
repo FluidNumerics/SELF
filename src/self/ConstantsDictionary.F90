@@ -10,6 +10,12 @@
 
    USE ModelPrecision
 
+   IMPLICIT NONE
+
+#ifdef HAVE_MPI
+  INCLUDE 'mpif.h'
+#endif
+
   !*************************************************************!
   ! ------------------ MATHEMATICAL CONSTANTS ------------------!
   ! ************************************************************!
@@ -110,11 +116,13 @@
   !==============================================!
   ! --------- Discontinuous Galerkin ----------- !
   !==============================================!
+   INTEGER, PARAMETER :: MPI_BOUNDARY   = -99
    INTEGER, PARAMETER :: NO_NORMAL_FLOW = -100
    INTEGER, PARAMETER :: RADIATION      = -101
    INTEGER, PARAMETER :: PRESCRIBED     = -102
    INTEGER, PARAMETER :: DRAG_SLIP      = -103
    INTEGER, PARAMETER :: INFLOW         = -104
+   INTEGER, PARAMETER :: PERIODIC       = -105
   !
   !==============================================!
   ! ---------- Continuous Galerkin ------------- !

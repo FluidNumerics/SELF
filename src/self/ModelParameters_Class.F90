@@ -71,34 +71,10 @@ MODULE ModelParameters_CLASS
     REAL(prec)    :: hCapRatio
     REAL(prec)    :: rC
 
-#ifdef HAVE_CUDA
-    INTEGER, DEVICE, ALLOCATABLE       :: polyDeg_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: dt_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: viscosity_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: viscLengthScale_dev
-    ! Physical
-    REAL(prec), DEVICE, ALLOCATABLE    :: fRotX_dev  ! coriolis parameter (x-component)
-    REAL(prec), DEVICE, ALLOCATABLE    :: fRotY_dev   ! "                " (y-component)
-    REAL(prec), DEVICE, ALLOCATABLE    :: fRotZ_dev   ! "                " (z-component)
-    REAL(prec), DEVICE, ALLOCATABLE    :: Cd_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: dragscale_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: g_dev   ! gravitational acceleration
-    REAL(prec), DEVICE, ALLOCATABLE    :: Cv_dev  ! Heat Capacity at constant volume
-    REAL(prec), DEVICE, ALLOCATABLE    :: R_dev   ! "Ideal gas constant"
-    REAL(prec), DEVICE, ALLOCATABLE    :: T0_dev  ! Reference Temperature
-    REAL(prec), DEVICE, ALLOCATABLE    :: dTdz_dev  ! Linear temperature stratIFication
-    REAL(prec), DEVICE, ALLOCATABLE    :: rho0_dev  ! Reference density
-    REAL(prec), DEVICE, ALLOCATABLE    :: P0_dev    ! reference pressure
-    REAL(prec), DEVICE, ALLOCATABLE    :: v0_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: hCapRatio_dev
-    REAL(prec), DEVICE, ALLOCATABLE    :: rC_dev
-
-#endif
 
   CONTAINS
 
     PROCEDURE :: Build => Build_ModelParameters
-    PROCEDURE :: Trash => Trash_ModelParameters
 
 #ifdef HAVE_CUDA
     PROCEDURE :: UpdateDevice => UpdateDevice_ModelParameters
@@ -114,6 +90,29 @@ MODULE ModelParameters_CLASS
   INTEGER, PARAMETER :: SpectralFiltering = 102
   !=================================================================!
 
+#ifdef HAVE_CUDA
+    INTEGER, CONSTANT       :: polyDeg_dev
+    REAL(prec), CONSTANT    :: dt_dev
+    REAL(prec), CONSTANT    :: viscosity_dev
+    REAL(prec), CONSTANT    :: viscLengthScale_dev
+    ! Physical
+    REAL(prec), CONSTANT    :: fRotX_dev  ! coriolis parameter (x-component)
+    REAL(prec), CONSTANT    :: fRotY_dev   ! "                " (y-component)
+    REAL(prec), CONSTANT    :: fRotZ_dev   ! "                " (z-component)
+    REAL(prec), CONSTANT    :: Cd_dev
+    REAL(prec), CONSTANT    :: dragscale_dev
+    REAL(prec), CONSTANT    :: g_dev   ! gravitational acceleration
+    REAL(prec), CONSTANT    :: Cv_dev  ! Heat Capacity at constant volume
+    REAL(prec), CONSTANT    :: R_dev   ! "Ideal gas constant"
+    REAL(prec), CONSTANT    :: T0_dev  ! Reference Temperature
+    REAL(prec), CONSTANT    :: dTdz_dev  ! Linear temperature stratIFication
+    REAL(prec), CONSTANT    :: rho0_dev  ! Reference density
+    REAL(prec), CONSTANT    :: P0_dev    ! reference pressure
+    REAL(prec), CONSTANT    :: v0_dev
+    REAL(prec), CONSTANT    :: hCapRatio_dev
+    REAL(prec), CONSTANT    :: rC_dev
+
+#endif
 CONTAINS
 
 
@@ -386,89 +385,39 @@ CONTAINS
     params % rC        =   params % R / ( params % R + params % Cv )
 
 #ifdef HAVE_CUDA
-
-    ALLOCATE( params % polyDeg_dev, &
-      params % dt_dev, &
-      params % viscosity_dev, &
-      params % viscLengthScale_dev, &
-      params % fRotX_dev, &
-      params % fRotY_dev, &
-      params % fRotZ_dev, &
-      params % Cd_dev, &
-      params % dragscale_dev, &
-      params % g_dev, &
-      params % Cv_dev, &
-      params % R_dev, &
-      params % T0_dev, &
-      params % dTdz_dev, &
-      params % rho0_dev, &
-      params % P0_dev, &
-      params % v0_dev, &
-      params % hCapRatio_dev, &
-      params % rC_dev )
-
     CALL params % UpdateDevice( )
 #endif
 
 
   END SUBROUTINE Build_ModelParameters
 
-  SUBROUTINE Trash_ModelParameters( params )
-    IMPLICIT NONE
-    CLASS( ModelParameters ), INTENT(inout) :: params
-
-#ifdef HAVE_CUDA
-
-    DEALLOCATE( params % polyDeg_dev, &
-      params % dt_dev, &
-      params % viscosity_dev, &
-      params % viscLengthScale_dev, &
-      params % fRotX_dev, &
-      params % fRotY_dev, &
-      params % fRotZ_dev, &
-      params % Cd_dev, &
-      params % dragscale_dev, &
-      params % g_dev, &
-      params % Cv_dev, &
-      params % R_dev, &
-      params % T0_dev, &
-      params % dTdz_dev, &
-      params % rho0_dev, &
-      params % P0_dev, &
-      params % v0_dev, &
-      params % hCapRatio_dev, &
-      params % rC_dev )
-
-#endif
-
-  END SUBROUTINE Trash_ModelParameters
 
 #ifdef HAVE_CUDA
   SUBROUTINE UpdateDevice_ModelParameters( params )
     IMPLICIT NONE
     CLASS( ModelParameters ), INTENT(inout) :: params
 
-    params % polyDeg_dev         = params % polyDeg
-    params % dt_dev              = params % dt
-    params % viscosity_dev       = params % viscosity
-    params % viscLengthScale_dev = params % viscLengthScale
+    polyDeg_dev         = params % polyDeg
+    dt_dev              = params % dt
+    viscosity_dev       = params % viscosity
+    viscLengthScale_dev = params % viscLengthScale
 
-    params % fRotX_dev     = params % fRotX
-    params % fRotY_dev     = params % fRotY
-    params % fRotZ_dev     = params % fRotZ
-    params % Cd_dev        = params % Cd
-    params % dragScale_dev = params % dragScale
-    params % g_dev         = params % g
-    params % Cv_dev        = params % Cv
-    params % R_dev         = params % R
-    params % T0_dev        = params % T0
-    params % dTdz_dev      = params % dTdz
-    params % rho0_dev      = params % rho0
-    params % P0_dev        = params % P0
-    params % v0_dev        = params % v0
+    fRotX_dev     = params % fRotX
+    fRotY_dev     = params % fRotY
+    fRotZ_dev     = params % fRotZ
+    Cd_dev        = params % Cd
+    dragScale_dev = params % dragScale
+    g_dev         = params % g
+    Cv_dev        = params % Cv
+    R_dev         = params % R
+    T0_dev        = params % T0
+    dTdz_dev      = params % dTdz
+    rho0_dev      = params % rho0
+    P0_dev        = params % P0
+    v0_dev        = params % v0
 
-    params % hCapRatio_dev = params % hCapRatio
-    params % rC_dev        = params % rC
+    hCapRatio_dev = params % hCapRatio
+    rC_dev        = params % rC
 
   END SUBROUTINE UpdateDevice_ModelParameters
 #endif

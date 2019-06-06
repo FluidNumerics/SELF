@@ -91,6 +91,13 @@ CONTAINS
          ELSEIF( functionLine(1:3) == 'top' )THEN
   
            geomEqs % boundaryConditionFlags(6) = Parse_BCLine( functionLine )
+
+         ELSEIF( functionLine(1:5) == 'sides' )THEN
+ 
+           geomEqs % boundaryConditionFlags(1) = Parse_BCLine( functionLine )
+           geomEqs % boundaryConditionFlags(2) = Parse_BCLine( functionLine )
+           geomEqs % boundaryConditionFlags(3) = Parse_BCLine( functionLine )
+           geomEqs % boundaryConditionFlags(4) = Parse_BCLine( functionLine )
   
          ENDIF      
        ENDIF
@@ -123,6 +130,10 @@ CONTAINS
         ELSEIF( TRIM( UpperCase(bcString) ) == 'RADIATION' )THEN
 
           bcFlag = RADIATION
+
+        ELSEIF( TRIM( UpperCase(bcString) ) == 'PERIODIC' )THEN
+
+          bcFlag = PERIODIC
 
         ENDIF
 
