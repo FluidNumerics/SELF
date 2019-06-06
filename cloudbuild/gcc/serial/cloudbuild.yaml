@@ -1,0 +1,14 @@
+# 
+# To use this build,
+# gcloud builds submit --config=cloudbuild.yaml . --timeout=2h 
+#
+
+steps:
+- name: 'gcr.io/$PROJECT_ID/singularity'
+  args: ['build','gcc-8.3.0.sif','base.def']
+  timeout: 7200s
+
+artifacts:
+  objects:
+    location: 'gs://${PROJECT_ID}-singularity/base/${BRANCH_NAME}'
+    paths: ['gcc-8.3.0.sif']

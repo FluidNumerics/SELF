@@ -1,0 +1,6 @@
+# In this directory, run the following command to build this builder.
+# $ gcloud builds submit --config=singularity_buildstep.yaml --substitutions=_SINGULARITY_VERSION="3.1.1" .
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--build-arg', 'singularity_version=${_SINGULARITY_VERSION}', '-t', 'gcr.io/${PROJECT_ID}/singularity:${_SINGULARITY_VERSION}', '-t', 'gcr.io/${PROJECT_ID}/singularity:latest', '.']
+images: ['gcr.io/${PROJECT_ID}/singularity']

@@ -1,0 +1,34 @@
+Bootstrap: localimage
+From: /workspace/gcc-8.3.0.sif 
+
+%help
+
+How to use this container to run the SELF-Fluids code.
+
+%setup
+
+
+%files
+
+   /workspace
+
+%post
+
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib
+   export PATH=${PATH}:/usr/local/hdf5/bin
+
+   cd ${SINGULARITY_ROOTFS}/workspace
+   FCFLAGS="-O3 -ffree-line-length-none"\
+   ${SINGULARITY_ROOTFS}/workspace/configure --enable-timing \
+                                             --enable-diagnostics \
+                                             --enable-tecplot
+   make
+   make install
+
+
+%environment
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
+   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib
+   export PATH=${PATH}:/usr/local/hdf5/bin
+
