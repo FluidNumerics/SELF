@@ -1950,12 +1950,12 @@ CONTAINS
     grid = dim3(myDGSEM % mesh % faces % nFaces,myDGSEM % stressTensor % nEquations,1)
 
     CALL Update_FluidStress_BCs_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % decomp % element_to_blockID_dev, &            ! I
-                                                            myDGSEM % mehs % faces % boundaryID_dev, &
-                                                            myDGSEM % mesh % faces % elementIDs_dev, &         ! I
-                                                            myDGSEM % mesh % faces % elementSides_dev, &       ! I
-                                                            myDGSEM % stressTensor % externalState_dev, &                    ! O
-                                                            myDGSEM % stressTensor % boundarySolution_dev, &   ! I
-                                                            myDGSEM % stressTensor % prescribedState_dev )
+                                                              myDGSEM % mesh % faces % boundaryID_dev, &
+                                                              myDGSEM % mesh % faces % elementIDs_dev, &         ! I
+                                                              myDGSEM % mesh % faces % elementSides_dev, &       ! I
+                                                              myDGSEM % stressTensor % externalState_dev, &                    ! O
+                                                              myDGSEM % stressTensor % boundarySolution_dev, &   ! I
+                                                              myDGSEM % stressTensor % prescribedState_dev )
 #else
     ! Local
     INTEGER    :: iEl, iFace, i, j, k, iEq
@@ -3151,7 +3151,7 @@ CONTAINS
     REAL(prec), DEVICE, INTENT(in)    :: nhat(1:3,0:polyDeg_dev,0:polyDeg_dev,1:6,1:nEl_dev)
      ! Local
     INTEGER    :: iEl, iFace, bID, i, j, k, iEq
-    INTEGER    :: iFace, p2
+    INTEGER    :: p2
     INTEGER    :: e1, e2, s1, s2
     REAL(prec) :: norm, un, ut, us, speed
     REAL(prec) :: nx, ny, nz
@@ -3665,14 +3665,13 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
     INTEGER, DEVICE, INTENT(in)     :: boundaryID(1:nFaces_dev)
     INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
     INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
-    INTEGER, DEVICE, INTENT(in)     :: procIDs(1:nBoundaryFaces_dev)
     REAL(prec), DEVICE, INTENT(inout) :: externalStress(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:nBoundaryFaces_dev)
     REAL(prec), DEVICE, INTENT(in)  :: stressBsols(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)  :: prescribedStress(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:nBoundaryFaces_dev)
      ! Local
     INTEGER    :: iEq, bID, i, j, k
     INTEGER    :: iFace, p2
-    INTEGER    :: e1, s1, s2, m
+    INTEGER    :: e1, e2, s1, s2, m
     
     iFace = blockIdx % x
     iEq   = blockIDx % y
@@ -4020,9 +4019,9 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
 
       DO k = 1, 6
 
-        boundaryStress(i,j,iEq,k,iEl) = visocity_dev*( fAtBoundaries(1,k)*nHat(1,i,j,k,iEl) + &
-                                                       fAtBoundaries(2,k)*nHat(2,i,j,k,iEl) + &
-                                                       fAtBoundaries(3,k)*nHat(3,i,j,k,iEl) )
+        boundaryStress(i,j,iEq,k,iEl) = viscosity_dev*( fAtBoundaries(1,k)*nHat(1,i,j,k,iEl) + &
+                                                        fAtBoundaries(2,k)*nHat(2,i,j,k,iEl) + &
+                                                        fAtBoundaries(3,k)*nHat(3,i,j,k,iEl) )
 
       ENDDO
 
