@@ -141,6 +141,17 @@ CONTAINS
         message_id = message_id + 1
         global_face_id   = mesh % faces % faceID(iFace) 
 
+#ifdef HAVE_CUDA
+        CALL MPI_IRECV( state % externalState_dev(:,:,:,bID), &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, external_proc_id, global_face_id,  &
+                        mpiComm, myMPI % requestHandle(message_id*2-1), iError )
+  
+        CALL MPI_ISEND( state % boundarySolution_dev(:,:,:,s1,e1), &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, external_proc_id, global_face_id, &
+                        mpiComm, myMPI % requestHandle(message_id*2), iError)
+#else
         CALL MPI_IRECV( state % externalState(:,:,:,bID), &
                         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
                         mpiPrec, external_proc_id, global_face_id,  &
@@ -150,6 +161,7 @@ CONTAINS
                         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
                         mpiPrec, external_proc_id, global_face_id, &
                         mpiComm, myMPI % requestHandle(message_id*2), iError)
+#endif
   
       ENDIF
     ENDDO
