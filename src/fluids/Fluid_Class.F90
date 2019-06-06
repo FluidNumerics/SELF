@@ -86,7 +86,7 @@ MODULE Fluid_Class
     PROCEDURE :: InternalFace_StressFlux           => InternalFace_StressFlux_Fluid
     PROCEDURE :: BoundaryFace_StressFlux           => BoundaryFace_StressFlux_Fluid
 
-    PROCEDURE ::  UpdateExternalStaticState => UpdateExternalStaticState_Fluid
+    PROCEDURE ::  Update_FluidStatics_BCs 
 
   END TYPE Fluid
 
@@ -298,7 +298,7 @@ CONTAINS
 
     CALL myDGSEM % EquationOfState( ) ! GPU Kernel (if CUDA)
 
-    CALL myDGSEM % UpdateExternalStaticState( ) ! GPU Kernel (if CUDA)
+    CALL myDGSEM % Update_FluidStatics_BCs( ) ! GPU Kernel (if CUDA)
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
@@ -1138,8 +1138,7 @@ CONTAINS
                   1 )
     grid = dim3(myDGSEM % mesh % faces % nFaces,1,1)
 
-    CALL InternalFace_StateFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % decomp % element_to_blockID_dev, &
-                                                              myDGSEM % mesh % faces % elementIDs_dev, &
+    CALL InternalFace_StateFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % faces % elementIDs_dev, &
                                                               myDGSEM % mesh % faces % elementSides_dev, &
                                                               myDGSEM % mesh % faces % boundaryID_dev, &
                                                               myDGSEM % mesh % faces % iMap_dev, &
@@ -1155,7 +1154,7 @@ CONTAINS
     INTEGER    :: iFace
     INTEGER    :: i, j, k, m, iEq
     INTEGER    :: ii, jj
-    INTEGER    :: e1, s1, e2, s2, p2, thread_id
+    INTEGER    :: e1, s1, e2, s2, bID
     REAL(prec) :: nHat(1:3), norm
     REAL(prec) :: uOut, uIn, cIn, cOut, T
     REAL(prec) :: jump(1:myDGSEM % state % nEquations-1), aS(1:myDGSEM % state % nEquations-1)
@@ -1164,18 +1163,13 @@ CONTAINS
 
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
-
       e1 = myDGSEM % mesh % faces % elementIDs(1,iFace)
       s1 = myDGSEM % mesh % faces % elementSides(1,iFace)
       e2 = myDGSEM % mesh % faces % elementIDs(2,iFace)
       s2 = ABS(myDGSEM % mesh % faces % elementSides(2,iFace))
-      IF( e2 > 0 )THEN
-        p2 = myDGSEM % mesh % decomp % element_to_blockID(e2)
-      ELSE
-        p2 = myRank 
-      ENDIF
+      bID = myDGSEM % mesh % faces % boundaryID(iFace)
 
-      IF( e2 > 0 .AND. p2 == myRank )THEN
+      IF( bID == 0 )THEN
 
         DO j = 0, myDGSEM % params % polyDeg
           DO i = 0, myDGSEM % params % polyDeg
@@ -1962,7 +1956,6 @@ CONTAINS
     INTEGER    :: bID, p2
     INTEGER    :: e1, e2, s1, s2
 
-    bID = 0
     DO iFace = 1, myDGSEM % mesh % faces % nFaces
 
       e1  = myDGSEM % mesh % faces % elementIDs(1,iFace)
@@ -2001,8 +1994,7 @@ CONTAINS
                   1 )
     grid = dim3(myDGSEM % mesh % faces % nFaces,myDGSEM % stressTensor % nEquations,1)
 
-    CALL InternalFace_StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % mesh % decomp % element_to_blockID_dev, &
-                                                               myDGSEM % state % boundarySolution_dev, &
+    CALL InternalFace_StressFlux_CUDAKernel<<<grid, tBlock>>>( myDGSEM % state % boundarySolution_dev, &
                                                                myDGSEM % stressTensor % boundarySolution_dev, &
                                                                myDGSEM % static % boundarySolution_dev, &
                                                                myDGSEM % mesh % elements % boundaryLengthScale_dev, &
@@ -2289,7 +2281,7 @@ CONTAINS
     istat = cudaDeviceSynchronize( )
 #endif
 
-    CALL myDGSEM % UpdateExternalStaticState( )
+    CALL myDGSEM % Update_FluidStatics_BCs( )
     INFO('End')
 
   END SUBROUTINE CalculateStaticState_Fluid
@@ -3043,7 +3035,7 @@ CONTAINS
 
 
     CALL myDGSEM % SetPrescribedState( )
-    CALL myDGSEM % UpdateExternalStaticState( )
+    CALL myDGSEM % Update_FluidStatics_BCs( )
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
@@ -3054,9 +3046,9 @@ CONTAINS
 
   END SUBROUTINE Read_from_HDF5
 
-  SUBROUTINE UpdateExternalStaticState_Fluid( myDGSEM )
+  SUBROUTINE Update_FluidStatics_BCs( myDGSEM )
 #undef __FUNC__
-#define __FUNC__ "UpdateExternalStaticState"
+#define __FUNC__ "Update_FluidStatics_BCs"
     IMPLICIT NONE
     CLASS( Fluid ), INTENT (inout) :: myDGSEM 
     ! Local
@@ -3107,7 +3099,7 @@ CONTAINS
      
      INFO('End')
 
-  END SUBROUTINE UpdateExternalStaticState_Fluid
+  END SUBROUTINE Update_FluidStatics_BCs
 
 !
 #ifdef HAVE_CUDA
@@ -3293,11 +3285,10 @@ CONTAINS
     
   END SUBROUTINE Update_FluidState_BCs_CUDAKernel
 !
-ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_blockID, elementIDs, elementSides, boundaryID, iMap, jMap, &
+ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( elementIDs, elementSides, boundaryID, iMap, jMap, &
                                                                  nHat, boundarySolution, boundarySolution_static, &
                                                                  boundaryFlux, stressFlux )
    IMPLICIT NONE
-   INTEGER, DEVICE, INTENT(in)     :: element_to_blockID(1:nGlobalElements_dev)
    INTEGER, DEVICE, INTENT(in)     :: elementIDs(1:2,1:nFaces_dev)
    INTEGER, DEVICE, INTENT(in)     :: elementSides(1:2,1:nFaces_dev)
    INTEGER, DEVICE, INTENT(in)     :: boundaryID(1:nFaces_dev)
@@ -3313,7 +3304,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
    INTEGER    :: iEl, iFace
    INTEGER    :: i, j, k, iEq
    INTEGER    :: ii, jj
-   INTEGER    :: e1, s1, e2, s2, p2
+   INTEGER    :: e1, s1, e2, s2, bID
    REAL(prec) :: uOut, uIn, cIn, cOut, norm
    REAL(prec) :: aS(1:6)
    REAL(prec) :: fac, jump, T
@@ -3327,13 +3318,9 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
       e2 = elementIDs(2,iFace)
       s1 = elementSides(1,iFace)
       s2 = ABS(elementSides(2,iFace))
-      IF( e2 > 0 )THEN
-        p2 = element_to_blockID(e2)
-      ELSE
-        p2 = myRank_dev 
-      ENDIF
+      bID = boundaryID(iFace)
 
-      IF( e2 > 0 .AND. p2 == myRank_dev )THEN
+      IF( bID == 0 )THEN
 
         ii = iMap(i,j,iFace)
         jj = jMap(i,j,iFace)
@@ -3448,89 +3435,89 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
       j     = threadIdx % y - 1
       i     = threadIdx % x -1
      
-         e1 = elementIDs(1,iFace)
-         s1 = elementSides(1,iFace)
-         e2 = elementIDs(2,iFace)
-         s2 = ABS(elementSides(2,iFace))
-         bID  = boundaryID(iFace)
+      e1 = elementIDs(1,iFace)
+      s1 = elementSides(1,iFace)
+      e2 = elementIDs(2,iFace)
+      s2 = ABS(elementSides(2,iFace))
+      bID  = boundaryID(iFace)
 
-               ii = iMap(i,j,iFace)
-               jj = jMap(i,j,iFace)
-               
-               norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
-                            nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
-                            nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
+      ii = iMap(i,j,iFace)
+      jj = jMap(i,j,iFace)
+      
+      norm = sqrt( nHat(1,i,j,s1,e1)*nHat(1,i,j,s1,e1) + &
+                   nHat(2,i,j,s1,e1)*nHat(2,i,j,s1,e1) + &
+                   nHat(3,i,j,s1,e1)*nHat(3,i,j,s1,e1) )
 
-               
-               IF( e2 < 0 )THEN
-               
-                  
-                  DO iEq = 1, nEq_dev-1              
-                  jump(iEq)  = externalState(ii,jj,iEq,bID)-boundarySolution(i,j,iEq,s1,e1)
-                  ENDDO
-                 
-                  T =   (externalStatic(ii,jj,5,bID) + externalState(ii,jj,5,bID))/&
-                          (externalState(ii,jj,4,bID)+externalStatic(ii,jj,4,bID) )
+      
+      IF( e2 < 0 )THEN
+      
+         
+         DO iEq = 1, nEq_dev-1              
+         jump(iEq)  = externalState(ii,jj,iEq,bID)-boundarySolution(i,j,iEq,s1,e1)
+         ENDDO
+        
+         T =   (externalStatic(ii,jj,5,bID) + externalState(ii,jj,5,bID))/&
+                 (externalState(ii,jj,4,bID)+externalStatic(ii,jj,4,bID) )
 
-                  cOut = sqrt( R_dev*T )
-                  
-                  T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
-                          (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
-                                   
-                  cIn = sqrt( R_dev*T )
-                               
-                  ! External normal velocity component
-                  uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
-                           externalState(ii,jj,2,bID)*nHat(2,i,j,s1,e1)/norm + &
-                           externalState(ii,jj,3,bID)*nHat(3,i,j,s1,e1)/norm )/& 
-                         ( externalState(ii,jj,4,bID) + externalStatic(ii,jj,4,bID) )
-                  ! Internal normal velocity component
-                  uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
-                           boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
-                           boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
-                         ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
-
-
-                  fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
-
-                  DO iEq = 1, nEq_dev-1
-                        aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
-                                 uOut*( externalState(ii,jj,iEq,bID) + externalStatic(i,j,iEq,bID) )
-                  ENDDO
-                  
-                  ! Pressure !
-                  DO k = 1, 3         
-                  aS(k) = aS(k) + (boundarySolution(i,j,7,s1,e1)+externalState(ii,jj,7,bID))*nHat(k,i,j,s1,e1)/norm
-                  ENDDO
-                  
+         cOut = sqrt( R_dev*T )
+         
+         T =   (boundarySolution_static(i,j,5,s1,e1) + boundarySolution(i,j,5,s1,e1))/&
+                 (boundarySolution(i,j,4,s1,e1)+boundarySolution_static(i,j,4,s1,e1) )  
                           
-                  DO iEq = 1, nEq_dev-1
+         cIn = sqrt( R_dev*T )
+                      
+         ! External normal velocity component
+         uOut = ( externalState(ii,jj,1,bID)*nHat(1,i,j,s1,e1)/norm + &
+                  externalState(ii,jj,2,bID)*nHat(2,i,j,s1,e1)/norm + &
+                  externalState(ii,jj,3,bID)*nHat(3,i,j,s1,e1)/norm )/& 
+                ( externalState(ii,jj,4,bID) + externalStatic(ii,jj,4,bID) )
+         ! Internal normal velocity component
+         uIn  = ( boundarySolution(i,j,1,s1,e1)*nHat(1,i,j,s1,e1)/norm + &
+                  boundarySolution(i,j,2,s1,e1)*nHat(2,i,j,s1,e1)/norm + &
+                  boundarySolution(i,j,3,s1,e1)*nHat(3,i,j,s1,e1)/norm )/& 
+                ( boundarySolution(i,j,4,s1,e1) + boundarySolution_static(i,j,4,s1,e1) )
 
-                     boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
 
-                     IF( iEq == 4 )THEN
-                        DO k = 1, 3
-                           ! Calculate the Bassi-Rebay flux for the stress tensor.
-                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
-                                                                    externalState(ii,jj,iEq,bID)  )*& 
-                                                                  nHat(k,i,j,s1,e1)
-                        ENDDO
-                     ELSE
-                        DO k = 1, 3
-                           ! Calculate the Bassi-Rebay flux for the stress tensor.
-                           stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
-                                                                  (boundarySolution(i,j,4,s1,e1)+&
-                                                                   boundarySolution_static(i,j,4,s1,e1)) +&
-                                                                  externalState(ii,jj,iEq,bID)/&
-                                                                  (externalState(ii,jj,4,bID)+&
-                                                                   externalStatic(ii,jj,4,bID))  )*& 
-                                                                  nHat(k,i,j,s1,e1)
-                        ENDDO
-                     ENDIF
-                     
-                  ENDDO
-                  
-               ENDIF 
+         fac = max( abs(uIn+cIn), abs(uIn-cIn), abs(uOut+cOut), abs(uOut-cOut) )
+
+         DO iEq = 1, nEq_dev-1
+               aS(iEq) = uIn*( boundarySolution(i,j,iEq,s1,e1) + boundarySolution_static(i,j,iEq,s1,e1) ) +&
+                        uOut*( externalState(ii,jj,iEq,bID) + externalStatic(i,j,iEq,bID) )
+         ENDDO
+         
+         ! Pressure !
+         DO k = 1, 3         
+         aS(k) = aS(k) + (boundarySolution(i,j,7,s1,e1)+externalState(ii,jj,7,bID))*nHat(k,i,j,s1,e1)/norm
+         ENDDO
+         
+                 
+         DO iEq = 1, nEq_dev-1
+
+            boundaryFlux(i,j,iEq,s1,e1) = 0.5_prec*( aS(iEq) - fac*jump(iEq) )*norm
+
+            IF( iEq == 4 )THEN
+               DO k = 1, 3
+                  ! Calculate the Bassi-Rebay flux for the stress tensor.
+                  stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1) +&
+                                                           externalState(ii,jj,iEq,bID)  )*& 
+                                                         nHat(k,i,j,s1,e1)
+               ENDDO
+            ELSE
+               DO k = 1, 3
+                  ! Calculate the Bassi-Rebay flux for the stress tensor.
+                  stressFlux(k,i,j,iEq,s1,e1) = 0.5_prec*( boundarySolution(i,j,iEq,s1,e1)/&
+                                                         (boundarySolution(i,j,4,s1,e1)+&
+                                                          boundarySolution_static(i,j,4,s1,e1)) +&
+                                                         externalState(ii,jj,iEq,bID)/&
+                                                         (externalState(ii,jj,4,bID)+&
+                                                          externalStatic(ii,jj,4,bID))  )*& 
+                                                         nHat(k,i,j,s1,e1)
+               ENDDO
+            ENDIF
+            
+         ENDDO
+         
+      ENDIF 
 
 
  END SUBROUTINE BoundaryFace_StateFlux_CUDAKernel
@@ -3689,12 +3676,11 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
   
   END SUBROUTINE Update_FluidStress_BCs_CUDAKernel
 !
-  ATTRIBUTES(Global) SUBROUTINE InternalFace_StressFlux_CUDAKernel( element_to_blockID, boundarySolution, boundaryStress, &
+  ATTRIBUTES(Global) SUBROUTINE InternalFace_StressFlux_CUDAKernel( boundarySolution, boundaryStress, &
                                                                     staticBoundarySolution, lengthScale, nHat, boundaryStressFlux, &
                                                                     elementIDs, elementSides, boundaryID, iMap, jMap )
   
     IMPLICIT NONE
-    INTEGER, DEVICE, INTENT(in)     :: element_to_blockID(1:nGlobalElements_dev)
     REAL(prec), DEVICE, INTENT(in)  :: boundarySolution(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:6,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)  :: boundaryStress(0:polyDeg_dev,0:polyDeg_dev,1:nStress_dev,1:6,1:nEl_dev)
     REAL(prec), DEVICE, INTENT(in)  :: staticBoundarySolution(0:polyDeg_dev,0:polyDeg_dev,1:nEq_dev,1:6,1:nEl_dev)
@@ -3710,7 +3696,7 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
     INTEGER    :: iEl, iFace
     INTEGER    :: i, j, iEq
     INTEGER    :: ii, jj
-    INTEGER    :: e1, s1, e2, s2, p2
+    INTEGER    :: e1, s1, e2, s2, bID
     INTEGER    :: m
     REAL(prec) :: norm, rhoOut, rhoIn
     
@@ -3723,17 +3709,13 @@ ATTRIBUTES(Global) SUBROUTINE InternalFace_StateFlux_CUDAKernel( element_to_bloc
     s1 = elementSides(1,iFace)
     e2 = elementIDs(2,iFace)
     s2 = ABS(elementSides(2,iFace))
-    IF( e2 > 0 )THEN
-      p2 = element_to_blockID(e2)
-    ELSE
-      p2 = myRank_dev 
-    ENDIF
+    bID = boundaryID(iFace)
     
     ii = iMap(i,j,iFace)
     jj = jMap(i,j,iFace)
     
     norm = sqrt( nHat(1,i,j,s1,e1)**2 + nHat(2,i,j,s1,e1)**2 + nHat(3,i,j,s1,e1)**2 )
-    IF( e2 > 0 .AND. p2 == myRank_dev )THEN
+    IF( bID == 0 )THEN
 
       IF( iEq == 4 )THEN
 

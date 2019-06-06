@@ -2873,8 +2873,6 @@ CONTAINS
 
             mesh % faces % elementIDs(1,iFace)   = e1local
             mesh % faces % elementIDs(2,iFace)   = e2
-            mesh % faces % elementSides(1,iFace) = s1  
-            mesh % faces % elementSides(2,iFace) = s2  
             mesh % faces % boundaryID(iFace)     = nbf  
 
          ELSEIF( p1 /= my_RankID .AND. p2 == my_RankID)THEN ! MPI Boundary
@@ -2894,7 +2892,6 @@ CONTAINS
          IF( p1 == my_RankID )THEN
            nbf = nbf + 1
            mesh % faces % elementIDs(1,iFace)   = e1local
-           mesh % faces % elementSides(1,iFace) = s1  
            mesh % faces % boundaryID(iFace)     = nbf  
 
          ENDIF

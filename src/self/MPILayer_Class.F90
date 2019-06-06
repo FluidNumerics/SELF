@@ -10,7 +10,7 @@ MODULE MPILayer_Class
 
   USE ModelPrecision
   USE NodalDGSolution_3D_Class
-  USE Faces_Class
+  USE HexMesh_Class
 
   IMPLICIT NONE
 
@@ -109,53 +109,51 @@ CONTAINS
 
   END SUBROUTINE Finalize_MPILayer
 
-  SUBROUTINE MPI_Exchange( myMPI, state, meshfaces, boundaryToFaceID, boundaryToProcID )
+  SUBROUTINE MPI_Exchange( myMPI, state, mesh )
 #undef __FUNC__
 #define __FUNC__ "MPI_Exchange"
     CLASS( MPILayer ), INTENT(inout)          :: myMPI
     TYPE( NodalDGSolution_3D ), INTENT(inout) :: state
-    TYPE( Faces ), INTENT(in)                 :: meshFaces
-    INTEGER, INTENT(in)                       :: boundaryToFaceID(1:myMPI % nMessages)
-    INTEGER, INTENT(in)                       :: boundaryToProcID(1:myMPI % nMessages)
+    TYPE( HexMesh ), INTENT(in)               :: mesh
 #ifdef HAVE_MPI
     ! Local
     INTEGER    :: iError
-    INTEGER    :: local_face_id, bID, message_id
+    INTEGER    :: iFace, bID, message_id
     INTEGER    :: global_face_id
-    INTEGER    :: local_element_id, e2, side_id, external_proc_id
+    INTEGER    :: e1, e2, s1, external_proc_id
     
-INFO('Start')
     message_id = 0
-    DO bID = 1, state % nBoundaryFaces
+    DO iFace = 1, mesh % faces % nFaces
 
-      local_face_id    = boundaryToFaceID(bID)
-      external_proc_id = boundaryToProcID(bID)
+      e1  = mesh % faces % elementIDs(1,iFace)
+      s1  = mesh % faces % elementSides(1,iFace)
+      e2  = mesh % faces % elementIDs(2,iFace)
+      bID = mesh % faces % boundaryID(iFace)
+      
+      IF( e2 > 0 )THEN
+        external_proc_id = mesh % decomp % element_to_blockID(e2) 
+      ELSE ! Physical boundary 
+        external_proc_id = myRank
+      ENDIF
 
-      IF( external_proc_id /= myRank )THEN
+      IF( external_proc_id /= myRank .AND. bID > 0 )THEN
  
         message_id = message_id + 1
-        local_element_id = meshFaces % elementIDs(1,local_face_id)
-        side_id          = meshFaces % elementSides(1,local_face_id)
-        global_face_id   = meshFaces % faceID(local_face_id) 
+        global_face_id   = mesh % faces % faceID(iFace) 
 
         CALL MPI_IRECV( state % externalState(:,:,:,bID), &
                         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
-                        mpiPrec,   &
-                        external_proc_id, global_face_id,  &
-                        mpiComm,   &
-                        myMPI % requestHandle(message_id*2-1), iError )
+                        mpiPrec, external_proc_id, global_face_id,  &
+                        mpiComm, myMPI % requestHandle(message_id*2-1), iError )
   
-        CALL MPI_ISEND( state % boundarySolution(:,:,:,side_id,local_element_id), &
+        CALL MPI_ISEND( state % boundarySolution(:,:,:,s1,e1), &
                         (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
-                        mpiPrec, &
-                        external_proc_id, global_face_id, &
-                        mpiComm, &
-                        myMPI % requestHandle(message_id*2), iError)
+                        mpiPrec, external_proc_id, global_face_id, &
+                        mpiComm, myMPI % requestHandle(message_id*2), iError)
   
       ENDIF
     ENDDO
 
-INFO('End')
 #endif
 
   END SUBROUTINE MPI_Exchange
