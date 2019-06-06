@@ -38,24 +38,18 @@ IMPLICIT NONE
     REAL(prec), ALLOCATABLE :: solution(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: boundarySolution(:,:,:,:,:) 
 
-    ! Used for setting prescribed boundary conditions and
-    ! handling the computed external state on mesh boundary faces
     REAL(prec), ALLOCATABLE :: prescribedState(:,:,:,:)
     REAL(prec), ALLOCATABLE :: externalState(:,:,:,:)
 
-    ! Used for calculating the gradient of the solution variables
     REAL(prec), ALLOCATABLE :: solutionGradient(:,:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: boundaryGradientFlux(:,:,:,:,:,:) 
    
-    ! Conservative flux and boundary Riemann flux
     REAL(prec), ALLOCATABLE :: flux(:,:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: boundaryFlux(:,:,:,:,:)
     REAL(prec), ALLOCATABLE :: fluxDivergence(:,:,:,:,:)
 
-    ! Non-conservative source terms for the solution variables
     REAL(prec), ALLOCATABLE :: source(:,:,:,:,:)
 
-    ! For conveniently storing fluxDivergence + source
     REAL(prec), ALLOCATABLE :: tendency(:,:,:,:,:)
 
 

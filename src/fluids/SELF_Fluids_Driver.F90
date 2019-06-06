@@ -26,7 +26,7 @@ PROGRAM SELF_Fluids_Driver
   LOGICAL                      :: initializeFromScratch
   LOGICAL                      :: pickupFileExists
   LOGICAL                      :: run_MeshGenerator
-  LOGICAL                      :: run_Setup
+  LOGICAL                      :: run_Initializer
   LOGICAL                      :: run_Integrator
   CHARACTER(500)               :: equationFile, paramFile
 
@@ -35,6 +35,7 @@ PROGRAM SELF_Fluids_Driver
 
 
   INFO('Start')
+
   CALL Initialize_MPILayer()
 
   CALL GetCLIConf( )
@@ -45,15 +46,14 @@ PROGRAM SELF_Fluids_Driver
       CALL MeshGen( )
     ENDIF
 
-      IF( run_Setup )THEN
-        CALL Setup( )
+    IF( run_Initializer )THEN
+      CALL Initialize( )
+    ENDIF
   
-        IF( run_Integrator )THEN
-          CALL MainLoop( )
-        ENDIF
+    IF( run_Integrator )THEN
+      CALL Integrate( )
+    ENDIF
 
-        CALL Cleanup( )
-      ENDIF
 
   ENDIF
 
@@ -76,7 +76,7 @@ CONTAINS
 
     helpNeeded           = .FALSE.
     run_MeshGenerator    = .FALSE.
-    run_Setup      = .FALSE.
+    run_Initializer      = .FALSE.
     run_Integrator       = .FALSE.
     equationFileProvided = .FALSE.
     paramFileProvided    = .FALSE.
@@ -100,11 +100,10 @@ CONTAINS
 
         CASE( "initialize" )
 
-          run_Setup   = .TRUE.
-          setupSuccess      = .TRUE.
+          run_Initializer = .TRUE.
+          setupSuccess    = .TRUE.
 
        CASE( "integrate" )
-          run_Setup   = .TRUE.
           run_Integrator    = .TRUE.
           setupSuccess      = .TRUE.
 
@@ -121,7 +120,7 @@ CONTAINS
         CASE DEFAULT
 
           run_MeshGenerator = .TRUE.
-          run_Setup   = .TRUE.
+          run_Initializer   = .TRUE.
           run_Integrator    = .TRUE.
           setupSuccess      = .TRUE.
 
@@ -221,73 +220,56 @@ CONTAINS
 ! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
 ! ------------------------------------------------------------------------------ !
 
-  SUBROUTINE Setup( )
+  SUBROUTINE Initialize( )
 #undef __FUNC__
-#define __FUNC__ "Setup"
+#define __FUNC__ "Initialize"
+
+    INFO('Start')
+    CALL myFluid % Build( equationFile, paramFile, setupSuccess )
+    CALL myFluid % SetInitialConditions( )
+    CALL myFluid % IO( )
+    CALL myFluid % Trash( )
+    INFO('End')
+
+  END SUBROUTINE Initialize
+
+! ------------------------------------------------------------------------------ !
+! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
+! ------------------------------------------------------------------------------ !
+
+  SUBROUTINE Integrate( )
+#undef __FUNC__
+#define __FUNC__ "Integrate"
+    INTEGER    :: iT
+    CHARACTER(50) :: msg
 
     INFO('Start')
 
     CALL myFluid % Build( equationFile, paramFile, setupSuccess )
     CALL myFluid % Read_from_HDF5( pickupFileExists ) 
 
-    IF( .NOT. pickupFileExists )THEN
+    IF( pickupFileExists )THEN
+      DO iT = 1, myFluid % params % nDumps ! Loop over time-steps
 
+        WRITE(msg,'(E15.5)')myFluid % simulationTime
+        msg = 'Starting time loop at t='//msg//'s'
+        INFO(TRIM(msg))
+
+        CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
+        CALL myFluid % IO( )
+
+      ENDDO
+    ELSE
       INFO('Pickup file not found')
-      INFO('Generating initial conditions from self.equations')
-      CALL myFluid % SetInitialConditions( )
-      CALL myFluid % IO( )
-
-    ENDIF
-    INFO('End')
-
-  END SUBROUTINE Setup
-
-! ------------------------------------------------------------------------------ !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
-! ------------------------------------------------------------------------------ !
-
-  SUBROUTINE Cleanup( )
-#undef __FUNC__
-#define __FUNC__ "Cleanup"
-
-    INFO('Start')
-
-    IF( run_Setup .OR. run_Integrator )THEN
-      CALL myFluid % Trash( )
+      INFO('Integration not executed')
     ENDIF
 
-    INFO('End')
+    CALL myFluid % Trash( )
 
-  END SUBROUTINE Cleanup
-
-! ------------------------------------------------------------------------------ !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
-! ------------------------------------------------------------------------------ !
-
-  SUBROUTINE MainLoop( )
-#undef __FUNC__
-#define __FUNC__ "MainLoop"
-    INTEGER    :: iT
-    CHARACTER(50) :: msg
-
-    INFO('Start')
-! ------------------------------------------------------------------------------ !
-! <><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><> !
-! ------------------------------------------------------------------------------ !
-    DO iT = 1, myFluid % params % nDumps ! Loop over time-steps
-
-      WRITE(msg,'(E15.5)')myFluid % simulationTime
-      msg = 'Starting time loop at t='//msg//'s'
-      INFO(TRIM(msg))
-
-      CALL myFluid % ForwardStepRK3( myFluid % params % nStepsPerDump ) ! Forward Step
-      CALL myFluid % IO( )
-
-    ENDDO
     INFO('End')
 
 
-  END SUBROUTINE MainLoop
+  END SUBROUTINE Integrate
 
 
 END PROGRAM SELF_Fluids_Driver
