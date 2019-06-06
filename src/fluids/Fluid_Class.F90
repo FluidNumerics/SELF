@@ -2578,7 +2578,7 @@ CONTAINS
     INTEGER(HSIZE_T)        :: starts(1:4), counts(1:4), strides(1:4)
     
 
-
+#ifdef HAVE_MPI
 
 #ifdef DOUBLE_PRECISION
     CALL h5dcreate_f( file_id, TRIM(variable_name), H5T_IEEE_F64LE, filespace, dataset_id, error, plist_id)
