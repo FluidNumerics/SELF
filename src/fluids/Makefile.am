@@ -3,7 +3,7 @@ bin_PROGRAMS=sfluid
 AM_FCFLAGS = -I ../self/ $(HDF5_FFLAGS)
 AM_LDFLAGS = $(HDF5_LDFLAGS)
 AM_CPPFLAGS = $(HDF5_CPPLAGS)
-sfluid_LDADD =../self/libSELF.a
+sfluid_LDADD = ../self/libSELF.a /usr/local/lib/libmetis.a
 
 DISTCLEANFILES = fluid_equationparser_class.mod bodyforces_class.mod fluid_class.mod
 include_HEADERS = fluid_equationparser_class.mod bodyforces_class.mod fluid_class.mod

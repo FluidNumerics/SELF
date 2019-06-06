@@ -1,6 +1,7 @@
 ! MPILayer_Class.f90
 !
-! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
+! Copyright 2019 Fluid Numerics LLC
+! Author : Joseph Schoonover <joe@fluidnumerics.com>, Fluid Numerics LLC
 ! All rights reserved.
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
@@ -9,367 +10,183 @@ MODULE MPILayer_Class
 
   USE ModelPrecision
   USE NodalDGSolution_3D_Class
-  USE Faces_Class
-  USE BoundaryCommunicator_Class
-
-#ifdef HAVE_CUDA
-  USE cudafor
-#endif
-
+  USE HexMesh_Class
 
   IMPLICIT NONE
 
 
+#include "self_macros.h"
+
   TYPE MPILayer
 
-    ! For the unstructured mesh, I opt for building my own DATA structure that bundles messages between neighboring
-    ! ranks, rather than attempting to build an MPI DATA structure. IF a structured mesh is USEd, one optimization
-    ! would be to USE MPI-DATA TYPEs to handle the message passing.
-
-    INTEGER :: nVars, N
-
-    INTEGER, ALLOCATABLE :: requestHandle(:)
-    INTEGER, ALLOCATABLE :: requestStats(:,:)
-
-#ifdef HAVE_CUDA
-    REAL(prec), DEVICE, ALLOCATABLE :: sendBuffer_dev(:,:,:,:,:)
-    REAL(prec), DEVICE, ALLOCATABLE :: recvBuffer_dev(:,:,:,:,:)
-
-    REAL(prec), PINNED, ALLOCATABLE :: sendBuffer(:,:,:,:,:)
-    REAL(prec), PINNED, ALLOCATABLE :: recvBuffer(:,:,:,:,:)
-
-#else
-    REAL(prec), ALLOCATABLE :: sendBuffer(:,:,:,:,:)
-    REAL(prec), ALLOCATABLE :: recvBuffer(:,:,:,:,:)
-#endif
+    INTEGER              :: nVars, N, nMessages
+    INTEGER, ALLOCATABLE :: boundaryToFaceID(:) 
+    INTEGER, ALLOCATABLE :: requestHandle(:), requestStats(:,:) 
 
     CONTAINS
 
       PROCEDURE :: Build => Build_MPILayer
       PROCEDURE :: Trash => Trash_MPILayer
+
       PROCEDURE :: MPI_Exchange
       PROCEDURE :: Finalize_MPI_Exchange
 
   END TYPE MPILayer
 
+  INTEGER :: mpiComm, mpiPrec, myRank, nProc
 CONTAINS
 
-  SUBROUTINE Build_MPILayer( myMPI, extComm, N, nVars )
+  SUBROUTINE Build_MPILayer( myMPI, N, nVars, nMessages )
+#undef __FUNC__
+#define __FUNC__ "Build_MPILayer"
+    CLASS( MPILayer ), INTENT(out) :: myMPI
+    INTEGER, INTENT(in)            :: N, nVars, nMessages
 
-    IMPLICIT NONE
-    CLASS( MPILayer ), INTENT(out)           :: myMPI
-    TYPE( BoundaryCommunicator ), INTENT(in) :: extComm
-    INTEGER, INTENT(in)                      :: N, nVars
-
-
-    myMPI % N     = N
-    myMPI % nVars = nVars
+    INFO('Start')
 #ifdef HAVE_MPI
-    ALLOCATE( myMPI % requestHandle(1:extComm % nNeighbors*2), &
-      myMPI % requestStats(MPI_STATUS_SIZE,1:extComm % nNeighbors*2), &
-      myMPI % recvBuffer(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &
-      myMPI % sendBuffer(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
+
+    ALLOCATE( myMPI % requestHandle(1:2*nMessages), &
+              myMPI % requestStats(MPI_STATUS_SIZE,1:2*nMessages) )
 
     myMPI % requestHandle = 0
     myMPI % requestStats  = 0
-    myMPI % recvBuffer    = 0.0_prec
-    myMPI % sendBuffer    = 0.0_prec
-
-
-#ifdef HAVE_CUDA
-
-    ALLOCATE( myMPI % recvBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors), &
-              myMPI % sendBuffer_dev(0:N, 0:N, 1:nVars, 1:extComm % maxBufferSize, 1:extComm % nNeighbors) )
-    myMPI % recvBuffer_dev = 0.0_prec
-    myMPI % sendBuffer_dev = 0.0_prec
-
 #endif
-#endif
+
+    myMPI % N         = N
+    myMPI % nVars     = nVars
+    myMPI % nMessages = nMessages
+
+    INFO('End')
 
   END SUBROUTINE Build_MPILayer
 !
   SUBROUTINE Trash_MPILayer( myMPI )
-
-    IMPLICIT NONE
+#undef __FUNC__
+#define __FUNC__ "Trash_MPILayer"
     CLASS( MPILayer ), INTENT(inout) :: myMPI
 
+#ifdef HAVE_MPI
     DEALLOCATE( myMPI % requestHandle, &
-                myMPI % requestStats, &
-                myMPI % recvBuffer, &
-                myMPI % sendBuffer )
-
-#ifdef HAVE_CUDA
-
-
-    DEALLOCATE( myMPI % recvBuffer_dev, myMPI % sendBuffer_dev )
-
+                myMPI % requestStats )
 #endif
-
 
   END SUBROUTINE Trash_MPILayer
 
-  SUBROUTINE MPI_Exchange( myMPI, state, meshFaces, extComm )
+  SUBROUTINE Initialize_MPILayer( )
+#undef __FUNC__
+#define __FUNC__ "Initialize_MPILayer"
+    INTEGER       :: ierror
+    CHARACTER(30) :: msg
 
-    IMPLICIT NONE
+    INFO('Start')
+    myRank = 0
+    nProc  = 1
+#ifdef HAVE_MPI
+    mpiComm = MPI_COMM_WORLD
+    CALL MPI_INIT( ierror )
+    CALL MPI_COMM_RANK( mpiComm, myRank, ierror )
+    CALL MPI_COMM_SIZE( mpiComm, nProc,  ierror )
+
+    IF( prec == sp )THEN
+      mpiPrec=MPI_FLOAT
+    ELSE
+      mpiPrec=MPI_DOUBLE
+    ENDIF
+#endif
+    WRITE(msg,'(I5)')myRank
+    msg="Greetings from rank "//TRIM(msg)//"."
+    INFO(TRIM(msg))
+    INFO('End')
+
+  END SUBROUTINE Initialize_MPILayer
+
+  SUBROUTINE Finalize_MPILayer( )
+
+    INTEGER    :: ierror
+#ifdef HAVE_MPI
+      CALL MPI_FINALIZE( ierror )
+#endif
+
+  END SUBROUTINE Finalize_MPILayer
+
+  SUBROUTINE MPI_Exchange( myMPI, state, mesh )
+#undef __FUNC__
+#define __FUNC__ "MPI_Exchange"
     CLASS( MPILayer ), INTENT(inout)          :: myMPI
     TYPE( NodalDGSolution_3D ), INTENT(inout) :: state
-    TYPE( Faces ), INTENT(in)                 :: meshFaces
-    TYPE( BoundaryCommunicator ), INTENT(in)  :: extComm
+    TYPE( HexMesh ), INTENT(in)               :: mesh
 #ifdef HAVE_MPI
     ! Local
-    INTEGER    :: iNeighbor, iError
+    INTEGER    :: iError
+    INTEGER    :: iFace, bID, message_id
+    INTEGER    :: global_face_id
+    INTEGER    :: e1, e2, s1, external_proc_id
+    
+    message_id = 0
+    DO iFace = 1, mesh % faces % nFaces
+
+      e1  = mesh % faces % elementIDs(1,iFace)
+      s1  = mesh % faces % elementSides(1,iFace)
+      e2  = mesh % faces % elementIDs(2,iFace)
+      bID = mesh % faces % boundaryID(iFace)
+      
+      IF( e2 > 0 )THEN
+        external_proc_id = mesh % decomp % element_to_blockID(e2) 
+      ELSE ! Physical boundary 
+        external_proc_id = myRank
+      ENDIF
+
+      IF( external_proc_id /= myRank .AND. bID > 0 )THEN
+ 
+        message_id = message_id + 1
+        global_face_id   = mesh % faces % faceID(iFace) 
+
 #ifdef HAVE_CUDA
-    TYPE(dim3) :: grid, tBlock
-
-
-    tBlock = dim3( state % N+1, state % N+1, 1 )
-    grid = dim3( state % nEquations, extComm % nBoundaries, 1 )
-
-    CALL BoundaryToBuffer_CUDAKernel<<<grid, tBlock>>>( myMPI % sendBuffer_dev, &
-                                                        state % boundarySolution_dev, &
-                                                        meshFaces % elementIDs_dev, &
-                                                        meshFaces % elementSides_dev, &
-                                                        extComm % boundaryIDs_dev, &
-                                                        extComm % extProcIDs_dev, &
-                                                        extComm % rankTable_dev,&
-                                                        extComm % bufferMap_dev,&
-                                                        meshFaces % nFaces, extComm % nBoundaries, &
-                                                        extComm % nProc, extComm % myRank, &
-                                                        state % N, state % nEquations,&
-                                                        extComm % nNeighbors, extComm % maxBufferSize, &
-                                                        state % nElements )
-
-#ifdef GPU_DIRECT
-    iError = cudaDeviceSynchronize( )
-    DO iNeighbor = 1, extComm % nNeighbors
-
-
-      CALL MPI_IRECV( myMPI % recvBuffer_dev(:,:,:,:,iNeighbor), &
-        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
-        extComm % MPI_PREC,   &
-        extComm % neighborRank(iNeighbor), 0,  &
-        extComm % MPI_COMM,   &
-        myMPI % requestHandle((iNeighbor-1)*2+1), iError )
-
-      CALL MPI_ISEND( myMPI % sendBuffer_dev(:,:,:,:,iNeighbor), &
-        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
-        extComm % MPI_PREC, &
-        extComm % neighborRank(iNeighbor), 0, &
-        extComm % MPI_COMM, &
-        myMPI % requestHandle(iNeighbor*2), iError)
-
-    ENDDO
-
+        CALL MPI_IRECV( state % externalState_dev(:,:,:,bID), &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, external_proc_id, global_face_id,  &
+                        mpiComm, myMPI % requestHandle(message_id*2-1), iError )
+  
+        CALL MPI_ISEND( state % boundarySolution_dev(:,:,:,s1,e1), &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, external_proc_id, global_face_id, &
+                        mpiComm, myMPI % requestHandle(message_id*2), iError)
 #else
-    myMPI % sendBuffer= myMPI % sendBuffer_dev
-    iError = cudaDeviceSynchronize( )
-
-    DO iNeighbor = 1, extComm % nNeighbors
-
-      CALL MPI_IRECV( myMPI % recvBuffer(:,:,:,:,iNeighbor), &
-        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
-        extComm % MPI_PREC,   &
-        extComm % neighborRank(iNeighbor), 0,  &
-        extComm % MPI_COMM,   &
-        myMPI % requestHandle(iNeighbor*2-1), iError )
-
-      CALL MPI_ISEND( myMPI % sendBuffer(:,:,:,:,iNeighbor), &
-        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
-        extComm % MPI_PREC, &
-        extComm % neighborRank(iNeighbor), 0, &
-        extComm % MPI_COMM, &
-        myMPI % requestHandle(iNeighbor*2), iError)
-
-    ENDDO
-
-
+        CALL MPI_IRECV( state % externalState(:,:,:,bID), &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, external_proc_id, global_face_id,  &
+                        mpiComm, myMPI % requestHandle(message_id*2-1), iError )
+  
+        CALL MPI_ISEND( state % boundarySolution(:,:,:,s1,e1), &
+                        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars, &
+                        mpiPrec, external_proc_id, global_face_id, &
+                        mpiComm, myMPI % requestHandle(message_id*2), iError)
 #endif
-
-#else
-    INTEGER    :: IFace, bID
-    INTEGER    :: tag
-    INTEGER    :: e1, e2, s1, p2
-
-    DO bID = 1, extComm % nBoundaries
-
-      IFace     = extComm % boundaryIDs( bID )
-      p2        = extComm % extProcIDs(bID)
-
-      IF( p2 /= extComm % myRank )THEN
-
-        e1        = meshFaces % elementIDs(1,IFace)
-        s1        = meshFaces % elementSides(1,IFace)
-        iNeighbor = extComm % rankTable(p2)
-
-        myMPI % sendBuffer(:,:,:,extComm % bufferMap(bID), iNeighbor ) = state % boundarySolution(:,:,:,s1,e1)
-
+  
       ENDIF
     ENDDO
-
-    DO iNeighbor = 1, extComm % nNeighbors
-
-      CALL MPI_IRECV( myMPI % recvBuffer(:,:,:,:,iNeighbor), &
-        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
-        extComm % MPI_PREC,   &
-        extComm % neighborRank(iNeighbor), 0,  &
-        extComm % MPI_COMM,   &
-        myMPI % requestHandle(iNeighbor*2-1), iError )
-
-      CALL MPI_ISEND( myMPI % sendBuffer(:,:,:,:,iNeighbor), &
-        (myMPI % N+1)*(myMPI % N+1)*myMPI % nVars*extComm % bufferSize(iNeighbor), &
-        extComm % MPI_PREC, &
-        extComm % neighborRank(iNeighbor), 0, &
-        extComm % MPI_COMM, &
-        myMPI % requestHandle(iNeighbor*2), iError)
-
-    ENDDO
-#endif
 
 #endif
 
   END SUBROUTINE MPI_Exchange
 !
-  SUBROUTINE Finalize_MPI_Exchange( myMPI, state, meshFaces, extComm )
-
-    IMPLICIT NONE
+  SUBROUTINE Finalize_MPI_Exchange( myMPI )
+#undef __FUNC__
+#define __FUNC__ "Finalize_MPI_Exchange"
     CLASS( MPILayer ), INTENT(inout)          :: myMPI
-    TYPE( NodalDGSolution_3D ), INTENT(inout) :: state
-    TYPE( Faces ), INTENT(in)                 :: meshFaces
-    TYPE( BoundaryCommunicator ), INTENT(in)  :: extComm
 #ifdef HAVE_MPI
     ! Local
-    INTEGER    :: IFace, bID
-    INTEGER    :: tag, ierror
-    INTEGER    :: e1, e2, s1, p2, iNeighbor, jUnpack
-    INTEGER    :: fUnit
-#ifdef HAVE_CUDA
-    TYPE(dim3) :: grid, tBlock
-#endif
+    INTEGER    :: ierror
 
-    CALL MPI_WaitAll( extComm % nNeighbors*2, &
+    CALL MPI_WaitAll( myMPI % nMessages*2, &
                       myMPI % requestHandle, &
                       myMPI % requestStats, &
                       iError)
 
-#ifdef HAVE_CUDA
-
-#ifndef GPU_DIRECT
-    myMPI % recvBuffer_dev = myMPI % recvBuffer
-#endif
-    tBlock = dim3(myMPI % N+1, &
-                  myMPI % N+1, &
-                  1 )
-    grid = dim3( myMPI % nVars, extComm % nBoundaries,1)
-
-    CALL BufferToBoundary_CUDAKernel<<<grid, tBlock>>>( myMPI % recvBuffer_dev, &
-      state % externalState_dev, &
-      extComm % boundaryIDs_dev, &
-      extComm % extProcIDs_dev, &
-      extComm % rankTable_dev, &
-      extComm % unPackMap_dev, &
-      meshFaces % nFaces, &
-      extComm % nBoundaries, &
-      extComm % nProc, extComm % myRank, &
-      myMPI % N, myMPI % nVars, extComm % nNeighbors, &
-      extComm % maxBufferSize )
-
-#else
-
-    DO bID = 1, extComm % nBoundaries
-
-      p2        = extComm % extProcIDs(bID)
-
-      IF( p2 /= extComm % myRank )THEN
-
-        iNeighbor = extComm % rankTable(p2)
-        jUnpack   = extComm % unpackMap(bID)
-
-        state % externalState(:,:,:,bID) = myMPI % recvBuffer(:,:,:,jUnpack,iNeighbor)
-
-      ENDIF
-
-    ENDDO
-
 #endif
 
-#endif
   END SUBROUTINE Finalize_MPI_Exchange
 !
-#ifdef HAVE_CUDA
-  ATTRIBUTES(Global) SUBROUTINE BoundaryToBuffer_CUDAKernel( sendBuffer, boundarySolution, faceToElement, faceToSide, boundaryToFaceID, &
-    boundaryToProcID, rankToNeighbor, boundaryToBuffer, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
-    bufferSize, nElements )
-
-    IMPLICIT NONE
-    INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-    INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, nElements, bufferSize
-    REAL(prec), DEVICE, INTENT(out)   :: sendBuffer(0:N,0:N,1:numEq,1:bufferSize,1:nNeighbors)
-    REAL(prec), DEVICE, INTENT(in)    :: boundarySolution(0:N,0:N,1:numEq,1:6,1:nElements)
-    INTEGER, DEVICE, INTENT(in)       :: faceToElement(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)       :: faceToSide(1:2,1:nFaces)
-    INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
-    INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
-    INTEGER, DEVICE, INTENT(in)       :: rankToNeighbor(0:nRanks-1)
-    INTEGER, DEVICE, INTENT(in)       :: boundaryToBuffer(1:nBoundaries)
-    ! Local
-    INTEGER :: bID, i, j, iEq
-    INTEGER :: IFace, p2, neighborID, bufferID, elementID, sideID
-
-    iEq = blockIdx % x
-    bID = blockIdx % y
-
-    i   = threadIdx % x - 1
-    j   = threadIdx % y - 1
-
-    p2 = boundaryToProcID(bID)
-
-  IF( p2 /= myRank )THEN
-
-    neighborID = rankToNeighbor(p2)
-    bufferID   = boundaryToBuffer(bID)
-    iFace      = boundaryToFaceID(bID)
-    elementID  = faceToElement(1,iFace)
-    sideID     = faceToSide(1,iFace)
-
-    sendBuffer(i,j,iEq,bufferID,neighborID) = boundarySolution(i,j,iEq,sideID,elementID)
-  ENDIF
-
-  END SUBROUTINE BoundaryToBuffer_CUDAKernel
-!
-ATTRIBUTES(Global) SUBROUTINE BufferToBoundary_CUDAKernel( recvBuffer, externalSolution, boundaryToFaceID, &
-  boundaryToProcID, rankTable, unPackMap, nFaces, nBoundaries, nRanks, myRank, N, numEq, nNeighbors, &
-  bufferSize )
-IMPLICIT NONE
-INTEGER, VALUE, INTENT(in)        :: nFaces, nBoundaries, nRanks, myRank
-INTEGER, VALUE, INTENT(in)        :: N, numEq, nNeighbors, bufferSize
-INTEGER, DEVICE, INTENT(in)       :: boundaryToFaceID(1:nBoundaries)
-INTEGER, DEVICE, INTENT(in)       :: boundaryToProcID(1:nBoundaries)
-INTEGER, DEVICE, INTENT(in)       :: rankTable(0:nRanks-1)
-INTEGER, DEVICE, INTENT(in)       :: unPackMap(1:nBoundaries)
-REAL(prec), DEVICE, INTENT(in)    :: recvBuffer(0:N,0:N,1:numEq,1:bufferSize,1:nNeighbors)
-REAL(prec), DEVICE, INTENT(inout) :: externalSolution(0:N,0:N,1:numEq,1:nBoundaries)
- ! Local
-INTEGER :: bID, i, j, iEq
-INTEGER :: p2
-
-iEq = blockIdx % x
-bID = blockIdx % y
-
-i   = threadIdx % x - 1
-j   = threadIdx % y - 1
-
-p2        = boundaryToProcID(bID)
-
-
-IF( p2 /= myRank )THEN
-  externalSolution(i,j,iEq,bID) = recvBuffer(i,j,iEq,unpackMap(bID),rankTable(p2))
-ENDIF
-
-
-END SUBROUTINE BufferToBoundary_CUDAKernel
-
-#endif
-
 END MODULE MPILayer_Class
 
 

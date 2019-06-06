@@ -21,6 +21,7 @@ USE ConstantsDictionary
 IMPLICIT NONE
 
 
+
 CONTAINS
 
 !> \addtogroup CommonRoutines
@@ -798,11 +799,11 @@ CONTAINS
       IF( units(1:1) == 's' ) THEN 
    
          ! Obtain the day
-         day    = INT( time_dp/86400.0_dp )
-         hour   = INT( (time_dp-86400.0_dp*day)/3600.0_dp )
-         minute = INT( (time_dp-3600.0_dp*hour-86400.0_dp*day)/60.0_dp )
-         second = INT( (time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day) )
-         milliSecond = INT( ((time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day)-REAL(second,dp))*1000.0_dp )
+         day    = NINT( time_dp/86400.0_dp )
+         hour   = NINT( (time_dp-86400.0_dp*day)/3600.0_dp )
+         minute = NINT( (time_dp-3600.0_dp*hour-86400.0_dp*day)/60.0_dp )
+         second = NINT( (time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day) )
+         milliSecond = NINT( ((time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day)-REAL(second,dp))*1000.0_dp )
 
          WRITE( dayStamp,'(I4.4)' ) day 
          WRITE( hourStamp,'(I2.2)' ) hour

@@ -15,7 +15,7 @@ MODULE Faces_Class
 
   TYPE Faces
     INTEGER              :: nFaces, N
-    INTEGER, ALLOCATABLE :: faceID(:)            ! The face ID
+    INTEGER, ALLOCATABLE :: faceID(:)            ! The global face ID
     INTEGER, ALLOCATABLE :: boundaryID(:)        ! IF the face is part of the mesh boundary, the face gets assigned a boundary face ID
     INTEGER, ALLOCATABLE :: nodeIDs(:,:)         ! Node IDs which start and terminate this face
     INTEGER, ALLOCATABLE :: elementIDs(:,:)      ! Neighboring elements IDs across the face
@@ -47,6 +47,8 @@ MODULE Faces_Class
     PROCEDURE :: UpdateHost => UpdateHost_Faces
     PROCEDURE :: UpdateDevice => UpdateDevice_Faces
 #endif
+
+    PROCEDURE :: nBoundaryFaces
 
   END TYPE Faces
 
@@ -180,5 +182,19 @@ CONTAINS
   END SUBROUTINE UpdateDevice_Faces
 
 #endif
+
+  FUNCTION nBoundaryFaces( myFaces ) RESULT( nbf )
+    CLASS( Faces ) :: myFaces
+    INTEGER :: nbf
+    INTEGER :: i
+
+    nbf = 0
+    DO i = 1, myFaces % nFaces
+      IF( myFaces % elementIDs(2,i) < 0 )THEN
+        nbf = nbf + 1
+      ENDIF
+    ENDDO
+
+  END FUNCTION nBoundaryFaces
 
 END MODULE Faces_Class
