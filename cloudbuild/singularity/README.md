@@ -25,8 +25,6 @@ After successfully building the build step, you can find build meta-data with
 ```
 gcloud builds list
 ```
-
-
 ## Usage
 This build step invokes singularity`commands in [Google Cloud Build](cloud.google.com/cloud-build/).
 
