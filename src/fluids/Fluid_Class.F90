@@ -526,6 +526,7 @@ CONTAINS
 
         CALL myDGSEM % EquationOfState( )
         CALL myDGSEM % GlobalTimeDerivative( t )
+       !$OMP BARRIER
 
         DO iEl = 1, myDGSEM % mesh % elements % nElements
           DO iEq = 1, myDGSEM % state % nEquations-1
@@ -552,6 +553,7 @@ CONTAINS
       myDGSEM % simulationTime = myDGSEM % simulationTime + dt
 
     ENDDO
+    !$OMP BARRIER
 
     ! Determine IF we need to take another step with reduced time step to get the solution
     ! at exactly t0+outputFrequency
@@ -2577,7 +2579,6 @@ CONTAINS
     
 
 
-#ifdef HAVE_MPI
 
 #ifdef DOUBLE_PRECISION
     CALL h5dcreate_f( file_id, TRIM(variable_name), H5T_IEEE_F64LE, filespace, dataset_id, error, plist_id)

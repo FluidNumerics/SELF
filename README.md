@@ -78,11 +78,13 @@ the PGI compilers ( https://www.pgroup.com/products/community.htm )
 
 
 
-## Running
+## Input
 At run-time, the sfluid executable uses the `runtime.params` file for determining the length of 
 the run, mesh size (if structured), and other numerical and physical parameters. Additionally,
-the initial conditions and drag forces are set in `self.equations`. 
+the initial conditions, drag forces, and boundary conditions and topography (for structured mesh) 
+are set in `self.equations`. Together, these two files can completely define a fluid simulation
 
+## Running
 The first time the `sfluid` is executed for an example, it will generate a mesh consistent with 
 the settings in `runtime.params` and initial conditions consistent with those specified in 
 `self.equations`. If `runtime.params` is not present, a sample will be generated for you.
@@ -190,3 +192,20 @@ contains
 * node ID's (/mesh/decomp/procXXXXXX/node-ids)
 owned by that rank. The XXXXXX, in practice, are replaced with a 0 padded integer for each rank.
 
+
+### Fluid State Files
+The fluid state files are HDF5 files containing the fluid state at each time level. The fluid state consists of the momentum vector, density, density-weighted temperature, pressure, and a
+passive density-weighted tracer. Each state variable is specified at the all of the quadrature points in each element of the mesh. 
+
+The index between "State" and "h5" is a 0-padded integer corresponding to the time stamp DDDDHHMMSSmmm,
+where D = day, H = hour, M = minute, S = second, m = millisecond
+
+These files are created during initial condition generation and forward integration. State files are read in during the start of forward integration
+
+
+
+## Future Development Plans
+
+* Variable viscosity (LES)
+* Implicit time integration
+* Topography input to mesh
