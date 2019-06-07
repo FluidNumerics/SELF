@@ -11,6 +11,7 @@ RUN yum -y update && \
                    automake \
                    make \
                    perl \
+                   cmake \
                    wget
 
 # Install PGI
@@ -49,7 +50,7 @@ RUN make install
 
 # METIS
 ADD metis-5.1.0.tar.gz /tmp
-RUN make config prefix=/usr/local/metis -f /tmp/metis-5.1.0/Makefile 
+RUN cd /tmp/metis-5.1.0/ && make config prefix=/usr/local/metis
 RUN make install -f /tmp/metis-5.1.0/Makefile 
 
 
