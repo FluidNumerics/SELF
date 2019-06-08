@@ -32,6 +32,7 @@ AS_IF([test "x$enable_openmp" = "xyes"],[
 
 ])
 
+AX_LIB_METIS()
 
 # Check for HDF5
 AX_LIB_HDF5()

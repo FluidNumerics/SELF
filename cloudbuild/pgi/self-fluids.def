@@ -1,5 +1,5 @@
-Bootstrap: localimage
-From: /workspace/pgi-hdf5.sif 
+Bootstrap: docker
+From: gcr.io/self-fluids/pgi:latest
 
 %help
 
@@ -9,7 +9,7 @@ From: /workspace/pgi-hdf5.sif
 
 %files
 
-   /workspace
+/workspace
 
 %post
 
@@ -18,16 +18,20 @@ From: /workspace/pgi-hdf5.sif
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib
    export PATH=${PATH}:/usr/local/hdf5/bin
 
-   cd ${SINGULARITY_ROOTFS}/workspace
+   cd ${SINGULARITY_ROOTFS}/workspace 
    autoreconf --install
    FCFLAGS="-O3" \
-   ${SINGULARITY_ROOTFS}/workspace/configure --enable-timing \
-                                             --enable-diagnostics \
+   ${SINGULARITY_ROOTFS}/workspace/configure --enable-diagnostics \
                                              --enable-tecplot \
                                              --enable-cuda \
-                                             --with-hdf5=/usr/local/hdf5/bin/h5cc
+                                             --with-metis=/usr/local/metis/lib/libmetis.a \
+                                             --with-hdf5=/usr/local/hdf5/bin/h5cc \
+                                             --prefix=/usr/local/self-fluids
    make
    make install
+
+   mkdir -p /samples
+   cp -r ${SINGULARITY_ROOTFS}/workspace/examples/* /samples/
 
 
 %environment
@@ -35,4 +39,9 @@ From: /workspace/pgi-hdf5.sif
    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/hdf5/lib
    export PATH=${PATH}:/opt/hdf5/bin
 
+
+%test
+   
+/usr/local/self-fluids/bin/sfluid --param-file /samples/thermalbubble/runtime.params \
+                                  --equation-file /samples/thermalbubble/self.equations
 
