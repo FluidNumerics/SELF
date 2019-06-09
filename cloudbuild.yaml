@@ -1,20 +1,16 @@
 # 
 # To use this build,
-# gcloud builds submit . --substitutions=_BUILD_BASE=pgi-hdf5
+# gcloud builds submit . --substitutions=_BUILD_BASE=pgi
 #
 
 steps:
-- name: 'gcr.io/cloud-builders/gsutil'
-  args: ['cp', 'gs://${PROJECT_ID}-singularity/base/${_BUILD_BASE}.sif', '/workspace']
-   
 - name: 'gcr.io/$PROJECT_ID/singularity'
-  args: ['build','self-fluids_${_BUILD_FLAVOR}.sif','./cloudbuild/self-fluids_${_BUILD_FLAVOR}.def']
+  args: ['build','--notest','self-fluids_${_BUILD_BASE}.sif','./cloudbuild/${_BUILD_BASE}/self-fluids.def']
 
 substitutions:
-  _BUILD_BASE: pgi-hdf5
-  _BUILD_FLAVOR: pgi-serial
+  _BUILD_BASE: pgi
 
 artifacts:
   objects:
     location: 'gs://${PROJECT_ID}-singularity/builds/${BRANCH_NAME}'
-    paths: ['self-fluids_${_BUILD_FLAVOR}.sif']
+    paths: ['self-fluids_${_BUILD_BASE}.sif']

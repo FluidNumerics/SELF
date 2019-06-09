@@ -17,7 +17,7 @@ AC_LANG_PUSH([Fortran])
 AC_ARG_ENABLE( cuda, AS_HELP_STRING([--enable-cuda, default:no]))
 AS_IF([test "x$enable_cuda" = "xyes"],[
 
-  FCFLAGS+=" -DHAVE_CUDA -Mcuda"
+  FCFLAGS+=" -DHAVE_CUDA -Mcuda=ptxinfo"
 
 ])
 
@@ -32,6 +32,7 @@ AS_IF([test "x$enable_openmp" = "xyes"],[
 
 ])
 
+AX_LIB_METIS()
 
 # Check for HDF5
 AX_LIB_HDF5()
