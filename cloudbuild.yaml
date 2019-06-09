@@ -2,11 +2,11 @@
 # To use this build,
 # gcloud builds submit . --substitutions=_BUILD_BASE=pgi
 #
+timeout: 30m
 
 steps:
 - name: 'gcr.io/$PROJECT_ID/singularity'
   args: ['build','--notest','self-fluids_${_BUILD_BASE}.sif','./cloudbuild/${_BUILD_BASE}/self-fluids.def']
-  timeout: 30m
 
 substitutions:
   _BUILD_BASE: pgi
