@@ -27,6 +27,20 @@ ensues.
 
 
 ## Compiling and Installing
+
+### Building with Google Cloud Build
+To get started, you'll need to build a dependency container for SELF-Fluids. For instructions
+on building the dependency container with [Google Cloud Build](https://cloud.google.com/cloud-build/),
+see the [cloudbuild README](cloudbuild/README.md).
+
+Once you have a dependency container stored in [Google Container Registry](https://cloud.google.com/container-registry/),
+you can build a SELF-Fluids singularity containter by executing
+```
+gcloud builds submit . --substitutions=_BUILD_BASE=<BUILD BASE>
+```
+where `<BUILD BASE>` is replaced with the prefix of the dependency container.
+
+### Autotools builds
 SELF-Fluids is built and installed using autotools. 
 For a serial build, with single precision, no diagnostics, no timers, and without GPU 
 acceleration, installation is as simple as
