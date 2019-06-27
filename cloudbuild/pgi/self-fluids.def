@@ -13,14 +13,20 @@ From: gcr.io/self-fluids/pgi:latest
 
 %post
 
+   #Nvidia driver file mount paths
+   mkdir /cuda
 
-   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
-   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib
-   export PATH=${PATH}:/usr/local/hdf5/bin
+   #Add nvidia driver paths to the environment variables
+   echo 'export PATH="/cuda/bin:$PATH"' >> $SINGULARITY_ENVIRONMENT
+   echo 'export LD_LIBRARY_PATH="/cuda/lib:$LD_LIBRARY_PATH"' >> $SINGULARITY_ENVIRONMENT
+
+#   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib
+#   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hdf5/lib
+#   export PATH=${PATH}:/usr/local/hdf5/bin
 
    cd ${SINGULARITY_ROOTFS}/workspace 
    autoreconf --install
-   FCFLAGS="-O3" \
+   FCFLAGS="-O3" cuda_toolkit_version="cuda10.0"\
    ${SINGULARITY_ROOTFS}/workspace/configure --enable-diagnostics \
                                              --enable-tecplot \
                                              --enable-cuda \
@@ -35,13 +41,11 @@ From: gcr.io/self-fluids/pgi:latest
 
 
 %environment
-   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/lib   
-   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/hdf5/lib
-   export PATH=${PATH}:/opt/hdf5/bin
-
 
 %test
    
 /usr/local/self-fluids/bin/sfluid --param-file /samples/thermalbubble/runtime.params \
                                   --equation-file /samples/thermalbubble/self.equations
+
+%labels
 

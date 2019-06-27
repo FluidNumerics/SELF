@@ -17,7 +17,7 @@ AC_LANG_PUSH([Fortran])
 AC_ARG_ENABLE( cuda, AS_HELP_STRING([--enable-cuda, default:no]))
 AS_IF([test "x$enable_cuda" = "xyes"],[
 
-  FCFLAGS+=" -DHAVE_CUDA -Mcuda=ptxinfo"
+  FCFLAGS+=" -DHAVE_CUDA -Mcuda=ptxinfo,ccall,$cuda_toolkit_version"
 
 ])
 
