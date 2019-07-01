@@ -112,12 +112,21 @@ CONTAINS
     CHARACTER(*) :: bcLine
     INTEGER      :: bcflag
     ! Local
-    INTEGER       :: nChar, equalSignLoc
+    INTEGER       :: nChar, rhsLoc, i
     CHARACTER(20) :: bcString
 
         nChar = LEN_TRIM( bcLine )
-        equalSignLoc = INDEX( bcLine, "=" )
-        bcString = bcLine(equalSignLoc+1:nChar) 
+        rhsLoc = INDEX( bcLine, "=" ) + 1
+
+        DO i = 1, 3
+          IF( bcLine(rhsLoc:rhsLoc) == ' ' )THEN
+            rhsLoc = rhsLoc + 1
+          ELSE
+            EXIT
+          ENDIF
+        ENDDO
+
+        bcString = bcLine(rhsLoc:nChar) 
 
         IF( TRIM( UpperCase(bcString) ) == 'NO_NORMAL_FLOW' )THEN
 
