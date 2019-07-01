@@ -287,7 +287,6 @@ CONTAINS
       ENDDO
     ENDDO
 
-    CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
@@ -299,6 +298,8 @@ CONTAINS
     CALL myDGSEM % EquationOfState( ) ! GPU Kernel (if CUDA)
 
     CALL myDGSEM % Update_FluidStatics_BCs( ) ! GPU Kernel (if CUDA)
+
+    CALL myDGSEM % SetPrescribedState( ) ! CPU Kernel
 
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateHost( )
@@ -3034,9 +3035,8 @@ CONTAINS
     CALL h5fclose_f( file_id, error )
     CALL h5close_f( error )
 
-
-    CALL myDGSEM % SetPrescribedState( )
     CALL myDGSEM % Update_FluidStatics_BCs( )
+    CALL myDGSEM % SetPrescribedState( )
 #ifdef HAVE_CUDA
     CALL myDGSEM % state % UpdateDevice( )
     CALL myDGSEM % static % UpdateDevice( )
@@ -3059,6 +3059,8 @@ CONTAINS
 #endif
 
      INFO('Start')
+
+     ! CPU Kernel
      myDGSEM % static % boundarySolution = CalculateFunctionsAtBoundaries_3D_NodalDG( myDGSEM % dgStorage, &
                                                                                       myDGSEM % static % solution, &
                                                                                       myDGSEM % static % nEquations, &
@@ -3088,7 +3090,6 @@ CONTAINS
 #ifdef HAVE_MPI
     CALL myDGSEM % mpiStateHandler % MPI_Exchange( myDGSEM % static, myDGSEM % mesh )
     CALL myDGSEM % mpiStateHandler % Finalize_MPI_Exchange( )
-
 #endif
 
 #ifdef HAVE_CUDA
