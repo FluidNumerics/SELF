@@ -34,6 +34,7 @@ IMPLICIT NONE
   INTEGER, PARAMETER, PRIVATE :: ClosingParentheses_Token = 6
   INTEGER, PARAMETER, PRIVATE :: Monadic_Token            = 7
 
+  INTEGER, PARAMETER, PRIVATE :: nFunctions = 14
   INTEGER, PARAMETER, PRIVATE :: nSeparators = 7
 
   TYPE String
@@ -43,7 +44,7 @@ IMPLICIT NONE
   CHARACTER(1), DIMENSION(7), PRIVATE  :: separators = (/ "+", "-", "*", "/", "(", ")", "^" /) 
   CHARACTER(1), DIMENSION(5), PRIVATE  :: operators  = (/ "+", "-", "*", "/", "^" /) 
   CHARACTER(1), DIMENSION(10), PRIVATE :: numbers    = (/ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" /) 
-  TYPE(String), DIMENSION(13), PRIVATE :: functions 
+  TYPE(String), DIMENSION(14), PRIVATE :: functions 
   CHARACTER(1), DIMENSION(4), PRIVATE  :: variables  = (/ "x", "y", "z", "t" /)
 
   ! Private Types !
@@ -155,6 +156,7 @@ CONTAINS
       functions(11) % str = "asin"
       functions(12) % str = "atan"
       functions(13) % str = "sech"
+      functions(14) % str = "rand"
 
       parser % inFixFormula = " "
       parser % equation = equation
@@ -809,7 +811,7 @@ CONTAINS
     INTEGER :: i
 
       IsFunction = .FALSE.
-      DO i = 1, 13
+      DO i = 1, nFunctions
 
         IF( eqChar == functions(i) % str(1:1) )THEN
           IsFunction = .TRUE.
@@ -837,6 +839,8 @@ CONTAINS
   REAL(prec) FUNCTION F_of_X( func, x ) 
     CHARACTER(*) :: func
     REAL(prec)   :: x
+    ! Local
+    REAL(prec)   :: r
 
       IF( TRIM( func ) == "cos" .OR. TRIM( func ) == "COS" )THEN
 
@@ -889,6 +893,11 @@ CONTAINS
       ELSEIF( TRIM( func ) == "atan" .OR. TRIM( func ) == "ATAN" )THEN
 
         F_of_X = atan( x )
+
+      ELSEIF( TRIM( func ) == "rand" .OR. TRIM( func ) == "RAND" )THEN
+
+        CALL RANDOM_NUMBER( r )
+        F_of_X = r*x
 
       ELSE
  
