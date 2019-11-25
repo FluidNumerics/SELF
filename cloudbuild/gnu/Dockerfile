@@ -59,7 +59,9 @@ FROM nvidia/cuda:10.1-runtime-centos7
 # Python
 RUN yum install -y \
         python2 \
-        python3 && \
+        python3 \
+        automake \
+        autoconf && \
     rm -rf /var/cache/yum/*
 
 # GNU compiler runtime
