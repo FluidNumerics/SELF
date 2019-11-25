@@ -41,8 +41,8 @@ Stage0 += python()
 compiler = pgi(eula=pgi_eula, version='19.4')
 Stage0 += compiler
 
-# MVAPICH2
-Stage0 += openmpi(version='4.0.1', cuda=True, toolchain=compiler.toolchain)
+# OpenMPI
+Stage0 += openmpi(version='4.0.1', cuda=True, infiniband=False, toolchain=compiler.toolchain)
 
 # HDF5
 Stage0 += hdf5(version='1.10.5', mpi=True, toolchain=compiler.toolchain)
@@ -50,7 +50,7 @@ Stage0 += hdf5(version='1.10.5', mpi=True, toolchain=compiler.toolchain)
 # Metis
 Stage0 += shell(commands=['mkdir -p /var/tmp',
                           'wget -q -nc --no-check-certificate -P /var/tmp http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz',
-                          'tar -x -f /var/tmp/metis-5.1.0.tar.gz -C /var/tmp -j',
+                          'tar -xzf /var/tmp/metis-5.1.0.tar.gz -C /var/tmp ',
                           'cd /var/tmp/metis-5.1.0',
                           'make config prefix=/usr/local/metis',
                           'make install'])

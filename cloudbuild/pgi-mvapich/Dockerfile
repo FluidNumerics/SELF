@@ -6,6 +6,7 @@
 #   HDF5 version 1.10.5
 #   MVAPICH2 version 2.3.1
 #   PGI compilers version 19.4
+#   Python 2 and 3 (upstream)
 # 
 
 FROM nvidia/cuda:10.1-devel-centos7 AS devel
@@ -49,7 +50,6 @@ RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://c
     find /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64 -regextype posix-extended -type f -regex ".*(libibmad|libibmad-devel|libibumad|libibumad-devel|libibverbs|libibverbs-devel|libibverbs-utils|libmlx4|libmlx4-devel|libmlx5|libmlx5-devel|librdmacm|librdmacm-devel)-[0-9].*x86_64.rpm" -not -path "*UPSTREAM*" -exec rpm --install {} + && \
     rm -rf /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64.tgz /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64
 
-
 # MVAPICH2 version 2.3.1
 RUN yum install -y \
         byacc \
@@ -70,7 +70,6 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libnvidia-ml.so /usr/local/cuda/lib64/stub
 ENV LD_LIBRARY_PATH=/usr/local/mvapich2/lib:$LD_LIBRARY_PATH \
     PATH=/usr/local/mvapich2/bin:$PATH \
     PROFILE_POSTLIB="-L/usr/local/cuda/lib64/stubs -lnvidia-ml -lcuda"
-
 
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH
 
@@ -104,7 +103,6 @@ RUN mkdir -p /var/tmp && \
     make install
 
 ENV LIB_METIS=/usr/local/metis/libmetis.a
-
 
 FROM nvidia/cuda:10.1-runtime-centos7
 
@@ -147,7 +145,7 @@ ENV LD_LIBRARY_PATH=/usr/local/mvapich2/lib:$LD_LIBRARY_PATH \
 
 ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH
 
-## HDF5
+# HDF5
 RUN yum install -y \
         zlib && \
     rm -rf /var/cache/yum/*

@@ -4,7 +4,6 @@ HPC Base image
 Contents:
   CUDA version 10.0
   HDF5 version 1.10.5
-  MVAPICH2 version 2.3.1
   PGI compilers version 19.4
   Python 2 and 3 (upstream)
 """
@@ -41,15 +40,8 @@ Stage0 += python()
 compiler = pgi(eula=pgi_eula, version='19.4')
 Stage0 += compiler
 
-# Mellanox OFED
-Stage0 += mlnx_ofed(version='4.6-1.0.1.1')
-
-# MVAPICH2
-Stage0 += mvapich2(version='2.3.1', cuda=True, toolchain=compiler.toolchain)
-
-
 # HDF5
-Stage0 += hdf5(version='1.10.5', mpi=True, toolchain=compiler.toolchain)
+Stage0 += hdf5(version='1.10.5', mpi=False, toolchain=compiler.toolchain)
 
 # Metis
 Stage0 += shell(commands=['yum install -y cmake'])
