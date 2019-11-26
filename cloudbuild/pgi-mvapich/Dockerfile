@@ -5,7 +5,7 @@
 #   CUDA version 10.0
 #   HDF5 version 1.10.5
 #   MVAPICH2 version 2.3.1
-#   PGI compilers version 19.4
+#   PGI compilers version 19.10
 #   Python 2 and 3 (upstream)
 # 
 
@@ -17,7 +17,7 @@ RUN yum install -y \
         python3 && \
     rm -rf /var/cache/yum/*
 
-# PGI compiler version 19.4
+# PGI compiler version 19.10
 RUN yum install -y \
         gcc \
         gcc-c++ \
@@ -28,14 +28,9 @@ RUN yum install -y \
 RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -O /var/tmp/pgi-community-linux-x64-latest.tar.gz --referer https://www.pgroup.com/products/community.htm?utm_source=hpccm\&utm_medium=wgt\&utm_campaign=CE\&nvid=nv-int-14-39155 -P /var/tmp https://www.pgroup.com/support/downloader.php?file=pgi-community-linux-x64 && \
     mkdir -p /var/tmp/pgi && tar -x -f /var/tmp/pgi-community-linux-x64-latest.tar.gz -C /var/tmp/pgi -z && \
     cd /var/tmp/pgi && PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/opt/pgi PGI_INSTALL_MPI=false PGI_INSTALL_NVIDIA=true PGI_MPI_GPU_SUPPORT=false PGI_SILENT=true ./install && \
-    echo "variable LIBRARY_PATH is environment(LIBRARY_PATH);" >> /opt/pgi/linux86-64/19.4/bin/siterc && \
-    echo "variable library_path is default(\$if(\$LIBRARY_PATH,\$foreach(ll,\$replace(\$LIBRARY_PATH,":",), -L\$ll)));" >> /opt/pgi/linux86-64/19.4/bin/siterc && \
-    echo "append LDLIBARGS=\$library_path;" >> /opt/pgi/linux86-64/19.4/bin/siterc && \
-    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.4/lib/libnuma.so && \
-    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.4/lib/libnuma.so.1 && \
     rm -rf /var/tmp/pgi-community-linux-x64-latest.tar.gz /var/tmp/pgi
-ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.4/lib:$LD_LIBRARY_PATH \
-    PATH=/opt/pgi/linux86-64/19.4/bin:$PATH
+ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH \
+    PATH=/opt/pgi/linux86-64/19.10/bin:$PATH
 
 # Mellanox OFED version 4.6-1.0.1.1
 RUN yum install -y \
@@ -118,11 +113,11 @@ RUN yum install -y \
 RUN yum install -y \
         numactl-libs && \
     rm -rf /var/cache/yum/*
-COPY --from=devel /opt/pgi/linux86-64-llvm/19.4/REDIST/*.so* /opt/pgi/linux86-64/19.4/lib/
-COPY --from=devel /opt/pgi/linux86-64/19.4/lib/libcudaforwrapblas.so /opt/pgi/linux86-64/19.4/lib/libcudaforwrapblas.so
-RUN ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.4/lib/libnuma.so && \
-    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.4/lib/libnuma.so.1
-ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.4/lib:$LD_LIBRARY_PATH
+COPY --from=devel /opt/pgi/linux86-64-llvm/19.10/REDIST/*.so* /opt/pgi/linux86-64/19.10/lib/
+COPY --from=devel /opt/pgi/linux86-64/19.10/lib/libcudaforwrapblas.so /opt/pgi/linux86-64/19.10/lib/libcudaforwrapblas.so
+RUN ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so && \
+    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so.1
+ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH
 
 # Mellanox OFED version 4.6-1.0.1.1
 RUN yum install -y \

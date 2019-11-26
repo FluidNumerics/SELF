@@ -5,7 +5,7 @@ Contents:
   CUDA version 10.0
   HDF5 version 1.10.5
   MVAPICH2 version 2.3.1
-  PGI compilers version 19.4
+  PGI compilers version 19.10
   Python 2 and 3 (upstream)
 """
 # pylint: disable=invalid-name, undefined-variable, used-before-assignment
@@ -33,7 +33,7 @@ Stage0 += baseimage(image=devel_image, _as='devel')
 Stage0 += python()
 
 # PGI compilers
-compiler = pgi(eula=pgi_eula, version='19.4')
+compiler = pgi(eula=pgi_eula, version='19.10')
 Stage0 += compiler
 
 # Mellanox OFED
