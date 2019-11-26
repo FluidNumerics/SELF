@@ -32,7 +32,7 @@ Stage0 += baseimage(image=devel_image, _as='devel')
 Stage0 += python()
 
 # PGI compilers
-compiler = pgi(eula=pgi_eula, version='19.4')
+compiler = pgi(eula=pgi_eula, version='19.10')
 Stage0 += compiler
 
 # HDF5
