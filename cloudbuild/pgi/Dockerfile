@@ -30,6 +30,8 @@ RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -O /var/tmp/pgi-comm
 ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH \
     PATH=/opt/pgi/linux86-64/19.10/bin:$PATH
 
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH
+
 # HDF5 version 1.10.5
 RUN yum install -y \
         bzip2 \
