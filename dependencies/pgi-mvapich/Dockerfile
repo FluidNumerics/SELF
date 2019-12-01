@@ -121,7 +121,8 @@ COPY --from=devel /opt/pgi/linux86-64-llvm/19.10/REDIST/*.so* /opt/pgi/linux86-6
 COPY --from=devel /opt/pgi/linux86-64/19.10/lib/libcudaforwrapblas.so /opt/pgi/linux86-64/19.10/lib/libcudaforwrapblas.so
 RUN ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so && \
     ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so.1
-ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH \
+    PATH=/opt/pgi/linux86-64/19.10/bin:$PATH
 
 # Mellanox OFED version 4.6-1.0.1.1
 RUN yum install -y \
