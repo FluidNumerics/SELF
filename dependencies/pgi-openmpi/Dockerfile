@@ -88,45 +88,4 @@ RUN mkdir -p /var/tmp && \
     make config prefix=/usr/local/metis && \
     make install
 
-ENV LIB_METIS=/usr/local/metis/libmetis.a
-
-FROM nvidia/cuda:10.1-runtime-centos7
-
-# Python
-RUN yum install -y \
-        python2 \
-        python3 \
-        automake \
-        autoconf && \
-    rm -rf /var/cache/yum/*
-
-# PGI compiler
-RUN yum install -y \
-        numactl-libs && \
-    rm -rf /var/cache/yum/*
-COPY --from=devel /opt/pgi/linux86-64-llvm/19.10/REDIST/*.so* /opt/pgi/linux86-64/19.10/lib/
-COPY --from=devel /opt/pgi/linux86-64/19.10/lib/libcudaforwrapblas.so /opt/pgi/linux86-64/19.10/lib/libcudaforwrapblas.so
-RUN ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so && \
-    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so.1
-ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH
-
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH \
-    PATH=/opt/pgi/linux86-64/19.10/bin:$PATH
-
-# OpenMPI
-RUN yum install -y \
-        hwloc \
-        openssh-clients && \
-    rm -rf /var/cache/yum/*
-COPY --from=devel /usr/local/openmpi /usr/local/openmpi
-ENV LD_LIBRARY_PATH=/usr/local/openmpi/lib:$LD_LIBRARY_PATH \
-    PATH=/usr/local/openmpi/bin:$PATH
-
-# HDF5
-RUN yum install -y \
-        zlib && \
-    rm -rf /var/cache/yum/*
-COPY --from=devel /usr/local/hdf5 /usr/local/hdf5
-ENV HDF5_DIR=/usr/local/hdf5 \
-    LD_LIBRARY_PATH=/usr/local/hdf5/lib:$LD_LIBRARY_PATH \
-    PATH=/usr/local/hdf5/bin:$PATH
+ENV LIB_METIS=/usr/local/metis/lib/libmetis.a

@@ -75,39 +75,4 @@ RUN mkdir -p /var/tmp && \
     make config prefix=/usr/local/metis && \
     make install
 
-ENV LIB_METIS=/usr/local/metis/libmetis.a
-
-FROM nvidia/cuda:10.1-runtime-centos7
-
-# Python
-RUN yum install -y \
-        python2 \
-        python3 \
-        automake \
-        autoconf && \
-    rm -rf /var/cache/yum/*
-
-# GNU compiler runtime
-RUN yum install -y centos-release-scl && \
-    yum install -y \
-        libgfortran \
-        libgomp && \
-    rm -rf /var/cache/yum/*
-
-# OpenMPI
-RUN yum install -y \
-        hwloc \
-        openssh-clients && \
-    rm -rf /var/cache/yum/*
-COPY --from=devel /usr/local/openmpi /usr/local/openmpi
-ENV LD_LIBRARY_PATH=/usr/local/openmpi/lib:$LD_LIBRARY_PATH \
-    PATH=/usr/local/openmpi/bin:$PATH
-
-# HDF5
-RUN yum install -y \
-        zlib && \
-    rm -rf /var/cache/yum/*
-COPY --from=devel /usr/local/hdf5 /usr/local/hdf5
-ENV HDF5_DIR=/usr/local/hdf5 \
-    LD_LIBRARY_PATH=/usr/local/hdf5/lib:$LD_LIBRARY_PATH \
-    PATH=/usr/local/hdf5/bin:$PATH
+ENV LIB_METIS=/usr/local/metis/lib/libmetis.a

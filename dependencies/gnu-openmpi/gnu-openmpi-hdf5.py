@@ -43,12 +43,4 @@ Stage0 += shell(commands=['mkdir -p /var/tmp',
                           'cd /var/tmp/metis-5.1.0',
                           'make config prefix=/usr/local/metis',
                           'make install'])
-Stage0 += environment(variables={'LIB_METIS':'/usr/local/metis/libmetis.a'})
-
-######
-# Runtime image
-######
-
-Stage1 += baseimage(image=runtime_image)
-
-Stage1 += Stage0.runtime(_from='devel')
+Stage0 += environment(variables={'LIB_METIS':'/usr/local/metis/lib/libmetis.a'})

@@ -35,6 +35,7 @@ Stage0 += python()
 # PGI compilers
 compiler = pgi(eula=pgi_eula, version='19.10')
 Stage0 += compiler
+Stage0 += environment(variables={'LD_LIBRARY_PATH':'/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH'})
 
 # OpenMPI
 Stage0 += openmpi(version='4.0.1', cuda=True, infiniband=False, toolchain=compiler.toolchain)
@@ -49,12 +50,4 @@ Stage0 += shell(commands=['mkdir -p /var/tmp',
                           'cd /var/tmp/metis-5.1.0',
                           'make config prefix=/usr/local/metis',
                           'make install'])
-Stage0 += environment(variables={'LIB_METIS':'/usr/local/metis/libmetis.a'})
-
-######
-# Runtime image
-######
-
-Stage1 += baseimage(image=runtime_image)
-
-Stage1 += Stage0.runtime(_from='devel')
+Stage0 += environment(variables={'LIB_METIS':'/usr/local/metis/lib/libmetis.a'})
