@@ -2,16 +2,35 @@
 # To use this build,
 # gcloud builds submit . --substitutions=_BUILD_BASE=pgi
 #
+# Options : 
+#   _BUILD_BASE=[ pgi | pgi-openmpi | pgi-mvapich | gnu | gnu-openmpi | gnu-mvapich ]
+#
 timeout: 1800s
 
 steps:
-- name: 'gcr.io/$PROJECT_ID/singularity'
-  args: ['build','--notest','self-fluids_${_BUILD_BASE}.sif','./cloudbuild/${_BUILD_BASE}/self-fluids.def']
+
+- id: SELF-Fluids Build
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg', 
+         'BUILD_FLAGS=${_BUILD_FLAGS}',
+         '--file',
+         './docker/build/${_BUILD_BASE}/Dockerfile',
+         '.',
+         '-t',
+         'gcr.io/${PROJECT_ID}/self-fluids:${_TAG}',
+         ]
 
 substitutions:
   _BUILD_BASE: pgi
+  _BUILD_FLAGS: '--enable-diagnostics --enable-tecplot --enable-cuda'
+  _TAG: 'pgi-gpu'
 
-artifacts:
-  objects:
-    location: 'gs://${PROJECT_ID}-singularity/builds/${BRANCH_NAME}'
-    paths: ['self-fluids_${_BUILD_BASE}.sif']
+images: ['gcr.io/${PROJECT_ID}/self-fluids:${_TAG}']
+
+  #artifacts:
+  #  objects:
+  #    location: 'gs://${PROJECT_ID}-singularity/builds/${BRANCH_NAME}'
+  #    paths: ['self-fluids_${_BUILD_BASE}.sif']
+  #
+    

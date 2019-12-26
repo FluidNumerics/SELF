@@ -642,6 +642,7 @@ CPP
 H5CC
 GREP
 SED
+METIS_LIB
 ac_ct_FC
 FCFLAGS
 FC
@@ -738,6 +739,7 @@ enable_silent_rules
 enable_dependency_tracking
 enable_cuda
 enable_openmp
+with_metis
 with_hdf5
 enable_mpi
 enable_pottemp
@@ -1409,6 +1411,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-metis=PATH       location of libmetis.a
   --with-hdf5=yes/no/PATH location of h5cc or h5pcc for HDF5 configuration
 
 Some influential environment variables:
@@ -4305,42 +4308,11 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-FCFLAGS="-O3"
 
 ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
 ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether Fortran compiler accepts -ffree-line-length-none" >&5
-$as_echo_n "checking whether Fortran compiler accepts -ffree-line-length-none... " >&6; }
-if ${ax_cv_check_fcflags___ffree_line_length_none+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$FCFLAGS
-  FCFLAGS="$FCFLAGS  -ffree-line-length-none"
-  cat > conftest.$ac_ext <<_ACEOF
-      program main
-
-      end
-_ACEOF
-if ac_fn_fc_try_compile "$LINENO"; then :
-  ax_cv_check_fcflags___ffree_line_length_none=yes
-else
-  ax_cv_check_fcflags___ffree_line_length_none=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  FCFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_fcflags___ffree_line_length_none" >&5
-$as_echo "$ax_cv_check_fcflags___ffree_line_length_none" >&6; }
-if test "x$ax_cv_check_fcflags___ffree_line_length_none" = xyes; then :
-  FCFLAGS+=" -ffree-line-length-none"
-else
-  :
-fi
 
 
 # Check for CUDA-Fortran acceleration request
@@ -4353,7 +4325,7 @@ fi
 if test "x$enable_cuda" = "xyes"; then :
 
 
-  FCFLAGS+=" -DHAVE_CUDA -Mcuda=$GPU_ARCH"
+  FCFLAGS+=" -DHAVE_CUDA -Mcuda=ptxinfo,ccall,$cuda_toolkit_version"
 
 
 fi
@@ -4363,6 +4335,7 @@ fi
 if test "${enable_openmp+set}" = set; then :
   enableval=$enable_openmp;
 fi
+
 
 if test "x$enable_openmp" = "xyes"; then :
 
@@ -4457,6 +4430,33 @@ fi
 
 
 
+fi
+
+
+
+
+
+# Check whether --with-metis was given.
+if test "${with_metis+set}" = set; then :
+  withval=$with_metis; if test "$withval" = ""; then
+     with_metis="no"
+   else
+     with_metis="yes"
+     METIS="$withval"
+   fi
+else
+  with_metis="yes"
+
+fi
+
+
+METIS_LIB=""
+
+if test "$with_metis" = "yes"; then
+  METIS_LIB=$METIS
+
+
+$as_echo "#define HAVE_METIS 1" >>confdefs.h
 
 fi
 
