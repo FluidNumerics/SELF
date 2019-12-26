@@ -1,0 +1,104 @@
+# 
+# HPC Base image
+# 
+# Contents:
+#   CUDA version 10.0
+#   HDF5 version 1.10.5
+#   MVAPICH2 version 2.3.1
+#   PGI compilers version 19.10
+#   Python 2 and 3 (upstream)
+# 
+
+FROM nvidia/cuda:10.1-devel-centos7 AS devel
+
+# Python
+RUN yum install -y \
+        python2 \
+        python3 && \
+    rm -rf /var/cache/yum/*
+
+# PGI compiler version 19.10
+RUN yum install -y \
+        gcc \
+        gcc-c++ \
+        numactl-libs \
+        perl \
+        wget && \
+    rm -rf /var/cache/yum/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -O /var/tmp/pgi-community-linux-x64-latest.tar.gz --referer https://www.pgroup.com/products/community.htm?utm_source=hpccm\&utm_medium=wgt\&utm_campaign=CE\&nvid=nv-int-14-39155 -P /var/tmp https://www.pgroup.com/support/downloader.php?file=pgi-community-linux-x64 && \
+    mkdir -p /var/tmp/pgi && tar -x -f /var/tmp/pgi-community-linux-x64-latest.tar.gz -C /var/tmp/pgi -z && \
+    cd /var/tmp/pgi && PGI_ACCEPT_EULA=accept PGI_INSTALL_DIR=/opt/pgi PGI_INSTALL_MPI=false PGI_INSTALL_NVIDIA=true PGI_MPI_GPU_SUPPORT=false PGI_SILENT=true ./install && \
+    echo "variable LIBRARY_PATH is environment(LIBRARY_PATH);" >> /opt/pgi/linux86-64/19.10/bin/siterc && \
+    echo "variable library_path is default(\$if(\$LIBRARY_PATH,\$foreach(ll,\$replace(\$LIBRARY_PATH,":",), -L\$ll)));" >> /opt/pgi/linux86-64/19.10/bin/siterc && \
+    echo "append LDLIBARGS=\$library_path;" >> /opt/pgi/linux86-64/19.10/bin/siterc && \
+    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so && \
+    ln -sf /usr/lib64/libnuma.so.1 /opt/pgi/linux86-64/19.10/lib/libnuma.so.1 && \
+    rm -rf /var/tmp/pgi-community-linux-x64-latest.tar.gz /var/tmp/pgi
+ENV LD_LIBRARY_PATH=/opt/pgi/linux86-64/19.10/lib:$LD_LIBRARY_PATH \
+    PATH=/opt/pgi/linux86-64/19.10/bin:$PATH
+
+ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH
+
+# Mellanox OFED version 4.6-1.0.1.1
+RUN yum install -y \
+        findutils \
+        libnl \
+        libnl3 \
+        numactl-libs \
+        wget && \
+    rm -rf /var/cache/yum/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://content.mellanox.com/ofed/MLNX_OFED-4.6-1.0.1.1/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64.tgz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64.tgz -C /var/tmp -z && \
+    find /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64 -regextype posix-extended -type f -regex ".*(libibmad|libibmad-devel|libibumad|libibumad-devel|libibverbs|libibverbs-devel|libibverbs-utils|libmlx4|libmlx4-devel|libmlx5|libmlx5-devel|librdmacm|librdmacm-devel)-[0-9].*x86_64.rpm" -not -path "*UPSTREAM*" -exec rpm --install {} + && \
+    rm -rf /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64.tgz /var/tmp/MLNX_OFED_LINUX-4.6-1.0.1.1-rhel7.2-x86_64
+
+# MVAPICH2 version 2.3.1
+RUN yum install -y \
+        byacc \
+        file \
+        make \
+        openssh-clients \
+        wget && \
+    rm -rf /var/cache/yum/*
+RUN ln -s /usr/local/cuda/lib64/stubs/libnvidia-ml.so /usr/local/cuda/lib64/stubs/libnvidia-ml.so.1 && \
+    ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://mvapich.cse.ohio-state.edu/download/mvapich/mv2/mvapich2-2.3.1.tar.gz && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/mvapich2-2.3.1.tar.gz -C /var/tmp -z && \
+    cd /var/tmp/mvapich2-2.3.1 &&  CC=pgcc CFLAGS=-ta=tesla:nordc CPPFLAGS='-D__x86_64 -D__align__\(n\)=__attribute__\(\(aligned\(n\)\)\) -D__location__\(a\)=__annotate__\(a\) -DCUDARTAPI=' CXX=pgc++ F77=pgfortran FC=pgfortran LD_LIBRARY_PATH='/usr/local/cuda/lib64/stubs:$LD_LIBRARY_PATH' ./configure --prefix=/usr/local/mvapich2 --disable-mcast --enable-cuda=basic --with-cuda=/usr/local/cuda --enable-fast=O1 && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/mvapich2-2.3.1.tar.gz /var/tmp/mvapich2-2.3.1
+ENV LD_LIBRARY_PATH=/usr/local/mvapich2/lib:$LD_LIBRARY_PATH \
+    PATH=/usr/local/mvapich2/bin:$PATH \
+    PROFILE_POSTLIB="-L/usr/local/cuda/lib64/stubs -lnvidia-ml -lcuda"
+
+# HDF5 version 1.10.5
+RUN yum install -y \
+        bzip2 \
+        file \
+        make \
+        wget \
+        zlib-devel && \
+    rm -rf /var/cache/yum/*
+RUN mkdir -p /var/tmp && wget -q -nc --no-check-certificate -P /var/tmp http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.bz2 && \
+    mkdir -p /var/tmp && tar -x -f /var/tmp/hdf5-1.10.5.tar.bz2 -C /var/tmp -j && \
+    cd /var/tmp/hdf5-1.10.5 && \
+    CPP=cpp CFLAGS="-fPIC -m64 -tp=px" CXXFLAGS="-fPIC -m64 -tp=px" FCFLAGS="-fPIC -m64 -tp=px" CC=mpicc CXX=mpic++ F77=mpif77 F90=mpif90 FC=mpifort ./configure --prefix=/usr/local/hdf5 --enable-threadsafe --enable-cxx --enable-fortran --enable-unsupported --enable-parallel || cat config.log && \
+    make -j$(nproc) && \
+    make -j$(nproc) install && \
+    rm -rf /var/tmp/hdf5-1.10.5.tar.bz2 /var/tmp/hdf5-1.10.5
+ENV HDF5_DIR=/usr/local/hdf5 \
+    LD_LIBRARY_PATH=/usr/local/hdf5/lib:$LD_LIBRARY_PATH \
+    PATH=/usr/local/hdf5/bin:$PATH
+
+# METIS
+RUN yum install -y \
+        cmake
+RUN mkdir -p /var/tmp && \
+    wget -q -nc --no-check-certificate -P /var/tmp http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.1.0.tar.gz && \
+    tar -xzf /var/tmp/metis-5.1.0.tar.gz -C /var/tmp  && \
+    cd /var/tmp/metis-5.1.0 && \
+    make config prefix=/usr/local/metis && \
+    make install
+
+ENV LIB_METIS=/usr/local/metis/lib/libmetis.a

@@ -419,11 +419,9 @@ CONTAINS
     REAL(prec) :: t, dt, rk3_a_local, rk3_g_local
     REAL(prec), ALLOCATABLE :: G3D(:,:,:,:,:)
     INTEGER    :: m, iEl, iT, i, j, k, iEq
-
 #endif
 
     INFO('Start')
-
 
 #ifdef HAVE_CUDA
 
@@ -611,7 +609,6 @@ CONTAINS
     DEALLOCATE( G3D )
 
 #endif
-
     INFO('End')
 
   END SUBROUTINE ForwardStepRK3_Fluid
