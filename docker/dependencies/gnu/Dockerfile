@@ -53,3 +53,13 @@ RUN mkdir -p /var/tmp && \
     make install
 
 ENV LIB_METIS=/usr/local/metis/lib/libmetis.a
+
+# JSON-Fortran
+RUN git clone --depth 1 https://github.com/jacobwilliams/json-fortran.git /var/tmp/json-fortran &&\
+    mkdir /var/tmp/json-fortran/build && \
+    cd /var/tmp/json-fortran/build && \
+    cmake -D SKIP_DOC_GEN=True ../ && \
+    make -j && \
+    make -j install
+    
+ENV LD_LIBRARY_PATH=/usr/local/jsonfortran-gnu-7.1.0/lib:$LD_LIBRARY_PATH \

@@ -17,9 +17,15 @@ RUN cd /build/self-fluids && \
 RUN mkdir -p /examples && \
     cp -r /build/self-fluids/examples/* /examples/
 
+# Tests
+RUN mkdir -p /tests && \
+    cd /build/self-fluids/tests/ && \
+    make lagrange_test && \
+    mv lagrange_test *.json /tests/
 
 FROM gcr.io/self-fluids/gnu
  
 COPY --from=devel /usr/local/self-fluids /usr/local/self-fluids
 COPY --from=devel /examples /examples
+COPY --from=devel /tests /tests
 
