@@ -61,7 +61,9 @@ IMPLICIT NONE
 !      PROCEDURE :: Interpolate_2D => Interpolate_2D_Lagrange
 !      PROCEDURE :: Interpolate_3D => Interpolate_3D_Lagrange
 
-!      PROCEDURE :: GridInterpolation_1D
+      GENERIC, PUBLIC :: GridInterpolate_1D => GridInterpolate_1D_cpu, GridInterpolate_1D_gpu
+      PROCEDURE, PRIVATE :: GridInterpolate_1D_cpu, GridInterpolate_1D_gpu
+
 !      PROCEDURE :: GridInterpolation_2D
 !      PROCEDURE :: GridInterpolation_3D
 
@@ -82,6 +84,14 @@ IMPLICIT NONE
       
     END TYPE Lagrange
 
+    INTERFACE
+      SUBROUTINE GridInterpolate_1D_gpu_wrapper(iMatrixT_dev, f_dev, fInterp_dev, N, M, nVar, nEl) bind(c,name="GridInterpolate_1D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
+        INTEGER, VALUE :: N, M, nVar, nEl
+      END SUBROUTINE GridInterpolate_1D_gpu_wrapper
+    END INTERFACE
  
  CONTAINS
 
@@ -437,80 +447,85 @@ IMPLICIT NONE
 !      
 !  END FUNCTION Interpolate_3D_Lagrange
 !
-!! ================================================================================================ !
-!!
-!! GridInterpolation_1D 
-!!
-!!   Interpolates an array of nodal values at the native nodes to nodal values at the target nodes.
-!!   
-!!   We can write the operations of interpolating data from one set of points to another (in this 
-!!   case from "controlPoints" to "targetPoints") as
-!!
-!!              fnew_a = \sum_{i=0}^N f_i l_i(\xi_a),   a=0,1,2,...,M
-!!             
-!!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!!   The interpolation matrix is T_{a,i} = l_i(\xi_a) maps an array of nodal values from the native
-!!   interpolation nodes to the target nodes. This routine serves as a wrapper to call either the CUDA
-!!   kernel (if CUDA is enabled) or the CPU version. 
-!! 
-!!   Usage : 
-!!
-!!     TYPE(Lagrange) :: interp
-!!     INTEGER        :: nVariables, nElements
-!!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements) 
-!!     REAL(prec)     :: fNew(0:interp % M,1:nVariables,1:nElements) 
-!!     
-!!       CALL interp % GridInterpolation_1D( fnative, fNew, nVariables, nElements ) 
-!! 
-!!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!!
-!!   Parameters :
-!!
-!!     interp (in) 
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)
-!!       Array of function nodal values at the native interpolation nodes.
-!!
-!!     nVariables (in)
-!!
-!!     nElements (in)
-!!
-!!     fNew (out) 
-!!      Array of function nodal values at the target interpolation nodes.
-!!   
-!! ================================================================================================ ! 
+! ================================================================================================ !
 !
-!  SUBROUTINE GridInterpolation_1D( myPoly, f, fNew, nVariables, nElements )  
-!    IMPLICIT NONE
-!    CLASS(Lagrange), INTENT(in) :: myPoly
+! GridInterpolation_1D 
 !
-!#ifdef GPU
-!    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
-!    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), DEVICE, INTENT(out) :: fNew(0:myPoly % M, 1:nVariables, 1:nElements)
-!    TYPE(dim3) :: grid, tBlock
-!    INTEGER    :: threadCount
-!  
-!      threadCount = MIN( 4*(ceiling( REAL(myPoly % M+1)/4 ) ), 8 )
+!   Interpolates an array of nodal values at the native nodes to nodal values at the target nodes.
+!   
+!   We can write the operations of interpolating data from one set of points to another (in this 
+!   case from "controlPoints" to "targetPoints") as
 !
-!      tBlock = dim3( threadCount, 1, 1 )
-!      grid   = dim3( nVariables, nElements, 1)
+!              fnew_a = \sum_{i=0}^N f_i l_i(\xi_a),   a=0,1,2,...,M
+!             
+!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
+!   The interpolation matrix is T_{a,i} = l_i(\xi_a) maps an array of nodal values from the native
+!   interpolation nodes to the target nodes. This routine serves as a wrapper to call either the CUDA
+!   kernel (if CUDA is enabled) or the CPU version. 
+! 
+!   Usage : 
+!
+!     TYPE(Lagrange) :: interp
+!     INTEGER        :: nVariables, nElements
+!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements) 
+!     REAL(prec)     :: fNew(0:interp % M,1:nVariables,1:nElements) 
 !     
-!      CALL GridInterpolation_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % iMatrixTranspose_dev, &
-!                                                                     f, fNew, myPoly % N_dev, myPoly % M_dev, &
-!                                                                     nVariables, nElements )
+!       CALL interp % GridInterpolation_1D( fnative, fNew, nVariables, nElements ) 
+! 
+!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
 !
-!#else
-!    INTEGER, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), INTENT(out) :: fNew(0:myPoly % M, 1:nVariables, 1:nElements)
+!   Parameters :
 !
-!      fNew = GridInterpolation_1D_Lagrange( myPoly, f, nVariables, nElements )
+!     interp (in) 
+!       A previously constructed Lagrange data-structure.
 !
-!#endif
+!     f (in)
+!       Array of function nodal values at the native interpolation nodes.
 !
-!  END SUBROUTINE GridInterpolation_1D
+!     nVariables (in)
+!
+!     nElements (in)
+!
+!     fNew (out) 
+!      Array of function nodal values at the target interpolation nodes.
+!   
+! ================================================================================================ ! 
+
+  SUBROUTINE GridInterpolate_1D_cpu( myPoly, f, fInterp, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: fInterp(0:myPoly % M, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER :: iVar, iEl, i, ii
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO i = 0, myPoly % M
+            fInterp(i,iVar,iEl) = 0.0_prec
+            DO ii = 0, myPoly % N
+              fInterp(i,iVar,iEl) = fInterp(i,iVar,iEl) + myPoly % iMatrixTranspose(ii,i)*f(ii,iVar,iEl)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE GridInterpolate_1D_cpu
+
+  SUBROUTINE GridInterpolate_1D_gpu( myPoly, f_dev, fInterp_dev, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in) :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)  :: f_dev
+    TYPE(c_ptr), INTENT(out) :: fInterp_dev
+
+      CALL GridInterpolate_1D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+                                          f_dev, fInterp_dev, &
+                                          myPoly % N, myPoly % M, &
+                                          nVariables, nElements)
+
+  END SUBROUTINE GridInterpolate_1D_gpu
 !
 !! ================================================================================================ !
 !!
@@ -1244,26 +1259,6 @@ IMPLICIT NONE
 !    INTEGER         :: nVariables, nElements
 !    REAL(prec)      :: f(0:myPoly % N, 1:nVariables, 1:nElements)
 !    REAL(prec)      :: fNew(0:myPoly % M, 1:nVariables, 1:nElements)
-!    ! Local
-!    INTEGER :: iVar, iEl, i, a 
-!
-!      DO iEl = 1, nElements
-!        DO iVar = 1, nVariables
-!
-!          DO a = 0, myPoly % M
-!
-!            fNew(a,iVar,iEl) = 0.0_prec
-!
-!            DO i = 0, myPoly % N
-!
-!              fNew(a,iVar,iEl) = fNew(a,iVar,iEl) + myPoly % iMatrixTranspose(i,a)*f(i,iVar,iEl)
-!
-!            ENDDO
-!
-!          ENDDO
-!
-!        ENDDO
-!      ENDDO
 !
 !  END FUNCTION GridInterpolation_1D_Lagrange
 !
