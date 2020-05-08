@@ -12,6 +12,9 @@ USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
 
+USE hip_fortran
+USE iso_c_binding
+
 IMPLICIT NONE
 
 
@@ -30,29 +33,29 @@ IMPLICIT NONE
 
   TYPE, PUBLIC :: Lagrange
 
-    INTEGER                 :: N     
-    INTEGER                 :: M 
-    REAL(prec), ALLOCATABLE :: controlPoints(:)
-    REAL(prec), ALLOCATABLE :: targetPoints(:)
-    REAL(prec), ALLOCATABLE :: bWeights(:)
-    REAL(prec), ALLOCATABLE :: iMatrix(:,:)
-    REAL(prec), ALLOCATABLE :: iMatrixTranspose(:,:)
-    REAL(prec), ALLOCATABLE :: dMatrix(:,:)  
-    REAL(prec), ALLOCATABLE :: dMatrixTranspose(:,:)  
+    INTEGER :: N     
+    INTEGER :: M 
+    REAL(prec), POINTER :: controlPoints(:)
+    REAL(prec), POINTER :: targetPoints(:)
+    REAL(prec), POINTER :: bWeights(:)
+    REAL(prec), POINTER :: iMatrix(:,:)
+    REAL(prec), POINTER :: iMatrixTranspose(:,:)
+    REAL(prec), POINTER :: dMatrix(:,:)  
+    REAL(prec), POINTER :: dMatrixTranspose(:,:)  
 
-!#ifdef GPU
-!    INTEGER, ALLOCATABLE, DEVICE    :: N_dev, M_dev
-!    REAL(prec), ALLOCATABLE, DEVICE :: bWeights_dev(:)  
-!    REAL(prec), ALLOCATABLE, DEVICE :: iMatrix_dev(:,:)
-!    REAL(prec), ALLOCATABLE, DEVICE :: iMatrixTranspose_dev(:,:)
-!    REAL(prec), ALLOCATABLE, DEVICE :: dMatrix_dev(:,:)  
-!    REAL(prec), ALLOCATABLE, DEVICE :: dMatrixTranspose_dev(:,:)  
-!#endif
+    TYPE(c_ptr) :: bWeights_dev
+    TYPE(c_ptr) :: iMatrix_dev
+    TYPE(c_ptr) :: iMatrixTranspose_dev
+    TYPE(c_ptr) :: dMatrix_dev
+    TYPE(c_ptr) :: dMatrixTranspose_dev 
 
     CONTAINS
       
       PROCEDURE :: Build => Build_Lagrange
       PROCEDURE :: Trash => Trash_Lagrange
+
+      PROCEDURE :: UpdateDevice => UpdateDevice_Lagrange
+      PROCEDURE :: UpdateHost => UpdateHost_Lagrange
       
 !      PROCEDURE :: Interpolate_1D => Interpolate_1D_Lagrange
 !      PROCEDURE :: Interpolate_2D => Interpolate_2D_Lagrange
@@ -62,7 +65,7 @@ IMPLICIT NONE
 !      PROCEDURE :: GridInterpolation_2D
 !      PROCEDURE :: GridInterpolation_3D
 
-!      PROCEDURE :: CalculateDerivative_1D
+!      PROCEDURE :: GridDerivative_1D
 !
 !      PROCEDURE :: CalculateGradient_2D
 !      PROCEDURE :: CalculateDivergence_2D
@@ -152,24 +155,15 @@ IMPLICIT NONE
       CALL myPoly % CalculateInterpolationMatrix( )
       CALL myPoly % CalculateDerivativeMatrix( )
 
-!#ifdef GPU
-!      ALLOCATE( myPoly % N_dev, myPoly % M_dev )
-!      ALLOCATE( myPoly % bWeights_dev(0:N), &
-!                myPoly % iMatrix_dev(0:M,0:N), &
-!                myPoly % iMatrixTranspose_dev(0:N,0:M), &
-!                myPoly % dMatrix_dev(0:N,0:N), &
-!                myPoly % dMatrixTranspose_dev(0:N,0:N) )
-! 
-!      myPoly % N_dev = N
-!      myPoly % M_dev = M
-!      
-!      myPoly % bWeights_dev           = myPoly % bWeights
-!      myPoly % iMatrix_dev          = myPoly % iMatrix
-!      myPoly % iMatrixTranspose_dev = myPoly % iMatrixTranspose
-!      myPoly % dMatrix_dev             = myPoly % dMatrix
-!      myPoly % dMatrixTranspose_dev    = myPoly % dMatrixTranspose
-!
-!#endif
+#ifdef GPU
+      CALL hfMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights))
+      CALL hfMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix))
+      CALL hfMalloc(myPoly % iMatrixTranspose_dev, SIZEOF(myPoly % iMatrixTranspose))
+      CALL hfMalloc(myPoly % dMatrix_dev, SIZEOF(myPoly % dMatrix))
+      CALL hfMalloc(myPoly % dMatrixTranspose_dev, SIZEOF(myPoly % dMatrixTranspose))
+
+      CALL myPoly % UpdateDevice()
+#endif
  
  END SUBROUTINE Build_Lagrange
 
@@ -192,16 +186,79 @@ IMPLICIT NONE
                   myPoly % iMatrixTranspose, &
                   myPoly % dMatrix, &
                   myPoly % dMatrixTranspose )
-!#ifdef GPU
-!      DEALLOCATE( myPoly % N_dev, myPoly % M_dev )
-!      DEALLOCATE( myPoly % bWeights_dev, &
-!                  myPoly % iMatrix_dev, &
-!                  myPoly % iMatrixTranspose_dev, &
-!                  myPoly % dMatrix_dev, &
-!                  myPoly % dMatrixTranspose_dev )
-!#endif
+#ifdef GPU
+      CALL hfFree(myPoly % bWeights_dev)
+      CALL hfFree(myPoly % iMatrix_dev)
+      CALL hfFree(myPoly % iMatrixTranspose_dev)
+      CALL hfFree(myPoly % dMatrix_dev)
+      CALL hfFree(myPoly % dMatrixTranspose_dev)
+#endif
 
   END SUBROUTINE Trash_Lagrange
+
+  SUBROUTINE UpdateDevice_Lagrange(myPoly)
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(inout) :: myPoly
+
+      CALL hipFortran(hipMemcpy(myPoly % bWeights_dev, &
+                                c_loc(myPoly % bWeights), &
+                                SIZEOF(myPoly % bWeights), &
+                                hipMemcpyHostToDevice))
+                        
+      CALL hipFortran(hipMemcpy(myPoly % iMatrix_dev, &
+                                c_loc(myPoly % iMatrix), &
+                                SIZEOF(myPoly % iMatrix), &
+                                hipMemcpyHostToDevice))
+
+      CALL hipFortran(hipMemcpy(myPoly % iMatrixTranspose_dev, &
+                                c_loc(myPoly % iMatrixTranspose), &
+                                SIZEOF(myPoly % iMatrixTranspose), &
+                                hipMemcpyHostToDevice))
+
+      CALL hipFortran(hipMemcpy(myPoly % dMatrix_dev, &
+                                c_loc(myPoly % dMatrix), &
+                                SIZEOF(myPoly % dMatrix), &
+                                hipMemcpyHostToDevice))
+
+      CALL hipFortran(hipMemcpy(myPoly % dMatrixTranspose_dev, &
+                                c_loc(myPoly % dMatrixTranspose), &
+                                SIZEOF(myPoly % dMatrixTranspose), &
+                                hipMemcpyHostToDevice))
+
+  END SUBROUTINE UpdateDevice_Lagrange
+
+  SUBROUTINE UpdateHost_Lagrange(myPoly)
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(inout) :: myPoly
+
+      CALL hipFortran(hipMemcpy(c_loc(myPoly % bWeights), &
+                                myPoly % bWeights_dev, &
+                                SIZEOF(myPoly % bWeights), &
+                                hipMemcpyDeviceToHost))
+                        
+      CALL hipFortran(hipMemcpy(c_loc(myPoly % iMatrix), &
+                                myPoly % iMatrix_dev, &
+                                SIZEOF(myPoly % iMatrix), &
+                                hipMemcpyDeviceToHost))
+
+      CALL hipFortran(hipMemcpy(c_loc(myPoly % iMatrixTranspose), &
+                                myPoly % iMatrixTranspose_dev, &
+                                SIZEOF(myPoly % iMatrixTranspose), &
+                                hipMemcpyDeviceToHost))
+
+      CALL hipFortran(hipMemcpy(c_loc(myPoly % dMatrix), &
+                                myPoly % dMatrix_dev, &
+                                SIZEOF(myPoly % dMatrix), &
+                                hipMemcpyDeviceToHost))
+
+      CALL hipFortran(hipMemcpy(c_loc(myPoly % dMatrixTranspose), &
+                                myPoly % dMatrixTranspose_dev, &
+                                SIZEOF(myPoly % dMatrixTranspose), &
+                                hipMemcpyDeviceToHost))
+
+  END SUBROUTINE UpdateHost_Lagrange
+
+
 
 !! ================================================================================================ !
 !!
@@ -606,7 +663,7 @@ IMPLICIT NONE
 !
 !! ================================================================================================ !
 !!
-!! CalculateDerivative_1D 
+!! GridDerivative_1D 
 !!
 !!   Calculates the derivative of the Lagrange interpolant given a set of nodal function values at
 !!   the native interpolation nodes
@@ -628,7 +685,7 @@ IMPLICIT NONE
 !!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements) 
 !!     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements) 
 !!     
-!!       CALL interp % CalculateDerivative_1D( f, derF, nVariables, nElements ) 
+!!       CALL interp % GridDerivative_1D( f, derF, nVariables, nElements ) 
 !! 
 !!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
 !!
@@ -649,7 +706,7 @@ IMPLICIT NONE
 !!   
 !! ================================================================================================ ! 
 !
-!  SUBROUTINE CalculateDerivative_1D( myPoly, f, derF, nVariables, nElements )
+!  SUBROUTINE GridDerivative_1D( myPoly, f, derF, nVariables, nElements )
 !    IMPLICIT NONE
 !    CLASS(Lagrange), INTENT(in) :: myPoly
 !
@@ -665,7 +722,7 @@ IMPLICIT NONE
 !      tBlock = dim3( threadCount, 1, 1 )
 !      grid   = dim3( nVariables, nElements, 1)
 !     
-!      CALL CalculateDerivative_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
+!      CALL GridDerivative_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
 !                                                                f, derF, myPoly % N_dev , nVariables, nElements )
 !
 !#else
@@ -673,11 +730,11 @@ IMPLICIT NONE
 !    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
 !    REAL(prec), INTENT(out) :: derF(0:myPoly % N, 1:nVariables, 1:nElements)
 !
-!      derF = CalculateDerivative_1D_Lagrange( myPoly, f, nVariables, nElements )
+!      derF = GridDerivative_1D_Lagrange( myPoly, f, nVariables, nElements )
 !
 !#endif
 !
-!  END SUBROUTINE CalculateDerivative_1D
+!  END SUBROUTINE GridDerivative_1D
 !
 !! ================================================================================================ !
 !!
@@ -1295,7 +1352,7 @@ IMPLICIT NONE
 !
 !  END FUNCTION GridInterpolation_3D_Lagrange
 !
-!  FUNCTION CalculateDerivative_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( derF )  
+!  FUNCTION GridDerivative_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( derF )  
 !    IMPLICIT NONE
 !    TYPE(Lagrange) :: myPoly
 !    INTEGER         :: nVariables, nElements
@@ -1319,7 +1376,7 @@ IMPLICIT NONE
 !        ENDDO
 !      ENDDO
 !
-!  END FUNCTION CalculateDerivative_1D_Lagrange
+!  END FUNCTION GridDerivative_1D_Lagrange
 !!
 !  FUNCTION CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
 !
@@ -1580,7 +1637,7 @@ IMPLICIT NONE
 !!
 !!  END SUBROUTINE GridInterpolation_3D_CUDAKernel
 !!!
-!!  ATTRIBUTES(Global) SUBROUTINE CalculateDerivative_1D_CUDAKernel( DMatT, f, derf, N, nVariables, nElems )
+!!  ATTRIBUTES(Global) SUBROUTINE GridDerivative_1D_CUDAKernel( DMatT, f, derf, N, nVariables, nElems )
 !!    ! Currently only works for M,N <= 7
 !!    IMPLICIT NONE
 !!    INTEGER, INTENT(in)             :: N, nVariables, nElems
@@ -1614,7 +1671,7 @@ IMPLICIT NONE
 !!
 !!      ENDIF
 !!    
-!!  END SUBROUTINE CalculateDerivative_1D_CUDAKernel
+!!  END SUBROUTINE GridDerivative_1D_CUDAKernel
 !!!
 !!  ATTRIBUTES(Global) SUBROUTINE CalculateGradient_2D_CUDAKernel( DMatT, f, gradf, N, nVariables, nElems )
 !!    ! Currently only works for M,N <= 7
