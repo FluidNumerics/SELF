@@ -223,19 +223,19 @@ CONTAINS
 
             ! ***** GridDerivative_1D Testing ****** !
             ! Estimate the derivative by applying the derivative matrix
-            !CALL interp % GridDerivative_1D(fNodal, dfdxInterp, 1, nElements)
+            CALL interp % GridDerivative_1D(fNodal, dfdxInterp, 1, nElements)
             fErr = 0.0_prec
-           ! DO iEl = 1, nElements
-           !   DO i = 0, pdeg
-           !     fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
-           !   ENDDO
-           ! ENDDO
+            DO iEl = 1, nElements
+              DO i = 0, pdeg
+                fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
+              ENDDO
+            ENDDO
 
             ! Estimate routine runtime
             CALL CPU_TIME(t1)
-           ! DO i = 1, nRepeats
-           !   CALL interp % GridDerivative_1D(fNodal, dfdxInterp, 1, nElements)
-           ! ENDDO
+            DO i = 1, nRepeats
+              CALL interp % GridDerivative_1D(fNodal, dfdxInterp, 1, nElements)
+            ENDDO
             CALL CPU_TIME(t2)
 
             CALL json_output % create_object(res,'')
@@ -256,22 +256,22 @@ CONTAINS
             ! ***** GridDerivative_1D Testing ****** !
             ! Estimate the derivative by applying the derivative matrix
             CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-           ! CALL interp % GridDerivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+            CALL interp % GridDerivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
             CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
 
             fErr = 0.0_prec
-           ! DO iEl = 1, nElements
-           !   DO i = 0, pdeg
-           !     fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
-           !   ENDDO
-           ! ENDDO
+            DO iEl = 1, nElements
+              DO i = 0, pdeg
+                fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
+              ENDDO
+            ENDDO
 
             ! Estimate routine runtime
             CALL CPU_TIME(t1)
-           ! DO i = 1, nRepeats
-           !   CALL interp % GridDerivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
-           ! ENDDO
-           ! CALL hipFortran(hipDeviceSynchronize()) 
+            DO i = 1, nRepeats
+              CALL interp % GridDerivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+            ENDDO
+            CALL hipFortran(hipDeviceSynchronize()) 
             CALL CPU_TIME(t2)
 
             CALL json_output % create_object(res,'')

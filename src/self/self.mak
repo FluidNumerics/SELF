@@ -1,13 +1,17 @@
 
 
 CXX=hipcc
-CXXFLAGS=-amdgpu-target=gfx900
+#CXXFLAGS=-amdgpu-target=gfx900
+CXXFLAGS=
 OPT=-O0 -g
-FC=gfortran-7
+#FC=gfortran-7
+FC=gfortran-8
 #FFLAGS=-ffree-line-length-none
 FFLAGS=-DGPU -ffree-line-length-none
-LIB=${HIPFORTRAN_LIB} -L/usr/local/jsonfortran-gnu-8.0.0/lib -ljsonfortran -L/usr/lib/gcc/x86_64-linux-gnu/7 -lgfortran -lstdc++
-INCLUDE=${HIPFORTRAN_INCLUDE} -I/usr/local/jsonfortran-gnu-8.0.0/lib
+#LIB=${HIPFORTRAN_LIB} -L/usr/local/jsonfortran-gnu-8.0.0/lib -ljsonfortran -L/usr/lib/gcc/x86_64-linux-gnu/7 -lgfortran -lstdc++
+LIB=${HIPFORTRAN_LIB} -L/apps/json-fortran/jsonfortran-gnu-7.1.0/lib -ljsonfortran -L/usr/lib/gcc/x86_64-linux-gnu/8 -lgfortran -lstdc++
+#INCLUDE=${HIPFORTRAN_INCLUDE} -I/usr/local/jsonfortran-gnu-8.0.0/lib
+INCLUDE=${HIPFORTRAN_INCLUDE} -I/apps/json-fortran/jsonfortran-gnu-7.1.0/lib
 
 
 LINK=${INCLUDE} ${LIB}

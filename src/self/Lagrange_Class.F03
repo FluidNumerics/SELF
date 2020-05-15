@@ -67,7 +67,8 @@ IMPLICIT NONE
 !      PROCEDURE :: GridInterpolation_2D
 !      PROCEDURE :: GridInterpolation_3D
 
-!      PROCEDURE :: GridDerivative_1D
+      GENERIC, PUBLIC :: GridDerivative_1D => GridDerivative_1D_cpu, GridDerivative_1D_gpu
+      PROCEDURE, PRIVATE :: GridDerivative_1D_cpu, GridDerivative_1D_gpu
 !
 !      PROCEDURE :: CalculateGradient_2D
 !      PROCEDURE :: CalculateDivergence_2D
@@ -91,6 +92,15 @@ IMPLICIT NONE
         TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
         INTEGER, VALUE :: N, M, nVar, nEl
       END SUBROUTINE GridInterpolate_1D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE GridDerivative_1D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="GridDerivative_1D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE GridDerivative_1D_gpu_wrapper
     END INTERFACE
  
  CONTAINS
@@ -676,80 +686,89 @@ IMPLICIT NONE
 !
 !  END SUBROUTINE GridInterpolation_3D
 !
-!! ================================================================================================ !
-!!
-!! GridDerivative_1D 
-!!
-!!   Calculates the derivative of the Lagrange interpolant given a set of nodal function values at
-!!   the native interpolation nodes
-!!   
-!!   Given a set of nodal values at the interpolation nodes, the derivative of a function through 
-!!   the interpolation nodes can be estimated by  
-!!
-!!                       f'_a = \sum_{i=0}^N f_{i} l'_i(\xi_a),   a=0,1,2,...,N
-!!             
-!!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
-!!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
-!!   kernel (if CUDA is enabled) or the CPU version. 
-!! 
-!!   Usage : 
-!!
-!!     TYPE(Lagrange) :: interp
-!!     INTEGER        :: nVariables, nElements
-!!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements) 
-!!     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements) 
-!!     
-!!       CALL interp % GridDerivative_1D( f, derF, nVariables, nElements ) 
-!! 
-!!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!!
-!!   Parameters :
-!!
-!!     interp (in) 
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)
-!!       Array of function nodal values at the native interpolation nodes.
-!!
-!!     nVariables (in)
-!!
-!!     nElements (in)
-!!
-!!     derF (out) 
-!!      Array of derivative values at the target interpolation nodes.
-!!   
-!! ================================================================================================ ! 
+! ================================================================================================ !
 !
-!  SUBROUTINE GridDerivative_1D( myPoly, f, derF, nVariables, nElements )
-!    IMPLICIT NONE
-!    CLASS(Lagrange), INTENT(in) :: myPoly
+! GridDerivative_1D 
 !
-!#ifdef GPU
-!    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
-!    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), DEVICE, INTENT(out) :: derF(0:myPoly % N, 1:nVariables, 1:nElements)
-!    TYPE(dim3) :: grid, tBlock
-!    INTEGER    :: threadCount
-!  
-!      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
+!   Calculates the derivative of the Lagrange interpolant given a set of nodal function values at
+!   the native interpolation nodes
+!   
+!   Given a set of nodal values at the interpolation nodes, the derivative of a function through 
+!   the interpolation nodes can be estimated by  
 !
-!      tBlock = dim3( threadCount, 1, 1 )
-!      grid   = dim3( nVariables, nElements, 1)
+!                       f'_a = \sum_{i=0}^N f_{i} l'_i(\xi_a),   a=0,1,2,...,N
+!             
+!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
+!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
+!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
+!   kernel (if CUDA is enabled) or the CPU version. 
+! 
+!   Usage : 
+!
+!     TYPE(Lagrange) :: interp
+!     INTEGER        :: nVariables, nElements
+!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements) 
+!     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements) 
 !     
-!      CALL GridDerivative_1D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
-!                                                                f, derF, myPoly % N_dev , nVariables, nElements )
+!       CALL interp % GridDerivative_1D( f, derF, nVariables, nElements ) 
+! 
+!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
 !
-!#else
-!    INTEGER, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), INTENT(out) :: derF(0:myPoly % N, 1:nVariables, 1:nElements)
+!   Parameters :
 !
-!      derF = GridDerivative_1D_Lagrange( myPoly, f, nVariables, nElements )
+!     interp (in) 
+!       A previously constructed Lagrange data-structure.
 !
-!#endif
+!     f (in)
+!       Array of function nodal values at the native interpolation nodes.
 !
-!  END SUBROUTINE GridDerivative_1D
+!     nVariables (in)
+!
+!     nElements (in)
+!
+!     derF (out) 
+!      Array of derivative values at the target interpolation nodes.
+!   
+! ================================================================================================ ! 
+
+  SUBROUTINE GridDerivative_1D_cpu( myPoly, f, df, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: df(0:myPoly % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER :: i, ii, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO i = 0, myPoly % N
+    
+            df(i,iVar,iEl) = 0.0_prec 
+            DO ii = 0, myPoly % N
+              df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,iVar,iEl)
+            ENDDO
+    
+          ENDDO
+        ENDDO
+      ENDDO
+
+
+  END SUBROUTINE GridDerivative_1D_cpu
+
+  SUBROUTINE GridDerivative_1D_gpu( myPoly, f_dev, df_dev, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in) :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)  :: f_dev
+    TYPE(c_ptr), INTENT(out) :: df_dev
+
+      CALL GridDerivative_1D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+                                         f_dev, df_dev, &
+                                         myPoly % N, &
+                                         nVariables, nElements)
+
+  END SUBROUTINE GridDerivative_1D_gpu
 !
 !! ================================================================================================ !
 !!
