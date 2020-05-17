@@ -17,6 +17,8 @@ IMPLICIT NONE
 
     CALL Scalar_1D_Tests(json)
 
+    CALL Scalar_2D_Tests(json)
+
 ! Read interpolators.test.json
 ! For each scalar_1d
 !   > Interpolate_1d + Validate
@@ -153,9 +155,9 @@ CONTAINS
                 dfdxActual(i,1,iEl) = dfdx % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
               ENDDO
             ENDDO
-            ! ***** GridInterpolate_1D Testing ****** !
+            ! ***** ScalarGridInterp_1D Testing ****** !
             ! Interpolate the function to the targetNodes
-            CALL interp % GridInterpolate_1D(fNodal, fInterp, 1, nElements)  
+            CALL interp % ScalarGridInterp_1D(fNodal, fInterp, 1, nElements)  
             fErr = 0.0_prec
             DO iEl = 1, nElements
               DO i = 0, nPlotPoints
@@ -166,12 +168,12 @@ CONTAINS
             ! Estimate routine runtime
             CALL CPU_TIME(t1)
             DO i = 1, nRepeats
-              CALL interp % GridInterpolate_1D(fNodal, fInterp, 1, nElements)
+              CALL interp % ScalarGridInterp_1D(fNodal, fInterp, 1, nElements)
             ENDDO
             CALL CPU_TIME(t2)
 
             CALL json_output % create_object(res,'')
-            CALL json_output % add(res, 'routine_name', 'GridInterpolate_1D')
+            CALL json_output % add(res, 'routine_name', 'ScalarGridInterp_1D')
             CALL json_output % add(res, 'polynomial_degree', pdeg)
             CALL json_output % add(res, 'n_variables', 1)
             CALL json_output % add(res, 'n_elements', nElements)
@@ -184,11 +186,11 @@ CONTAINS
 #ifdef GPU
             CALL hfMalloc(fNodal_dev, SIZEOF(fNodal))
 
-            ! ***** GridInterpolate_1D Testing ****** !
+            ! ***** ScalarGridInterp_1D Testing ****** !
             ! Interpolate the function to the targetNodes
             CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
 
-            CALL interp % GridInterpolate_1D(fNodal_dev, fInterp_dev, 1, nElements)  
+            CALL interp % ScalarGridInterp_1D(fNodal_dev, fInterp_dev, 1, nElements)  
 
             CALL hipFortran(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
 
@@ -202,13 +204,13 @@ CONTAINS
             ! Estimate routine runtime
             CALL CPU_TIME(t1)
             DO i = 1, nRepeats
-              CALL interp % GridInterpolate_1D(fNodal_dev, fInterp_dev, 1, nElements)
+              CALL interp % ScalarGridInterp_1D(fNodal_dev, fInterp_dev, 1, nElements)
             ENDDO
             CALL hipFortran(hipDeviceSynchronize()) 
             CALL CPU_TIME(t2)
 
             CALL json_output % create_object(res,'')
-            CALL json_output % add(res, 'routine_name', 'GridInterpolate_1D (GPU)')
+            CALL json_output % add(res, 'routine_name', 'ScalarGridInterp_1D (GPU)')
             CALL json_output % add(res, 'polynomial_degree', pdeg)
             CALL json_output % add(res, 'n_variables', 1)
             CALL json_output % add(res, 'n_elements', nElements)
@@ -305,7 +307,7 @@ CONTAINS
       ENDDO
 
       CALL json_output % add(p, resArray) ! Add the results array to the payload
-      CALL json_output % print(p,'lagrange.results.json')
+      CALL json_output % print(p,'lagrange_scalar1d.results.json')
 
       nullify(objPointer)
       nullify(p)
@@ -316,6 +318,291 @@ CONTAINS
 #endif
 
   END SUBROUTINE Scalar_1D_Tests
+
+  SUBROUTINE Scalar_2D_Tests(json)
+    USE ISO_FORTRAN_ENV
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    TYPE(JSON_FILE), INTENT(inout) :: json
+    ! Local
+    TYPE(EquationParser) :: f, dfdx
+    TYPE(Lagrange) :: interp
+    TYPE(JSON_VALUE), POINTER :: objPointer, testPointer
+    TYPE(JSON_CORE) :: jCore
+    INTEGER(JSON_IK) :: nTests, iTest
+    LOGICAL :: found
+    CHARACTER(50) :: funcName, funcValue, funcDerivative 
+    INTEGER, ALLOCATABLE :: polyDeg(:) 
+    INTEGER :: nPlotPoints, i, j, iX, iY, iEl, pdeg, nelements, nRepeats
+    REAL(prec), ALLOCATABLE :: interpNodes(:), qWeights(:), targetNodes(:)
+    REAL(prec), ALLOCATABLE, TARGET :: fNodal(:,:,:,:), fInterp(:,:,:,:), dfdxInterp(:,:,:,:),  fActual(:,:,:,:), dfdxActual(:,:,:,:)  
+#ifdef GPU
+    TYPE(c_ptr) :: fNodal_dev, fInterp_dev, dfdxInterp_dev
+#endif
+    REAL(prec) :: fErr, t1, t2, dx, x, y, xL, xR, yL, yR
+    TYPE(JSON_CORE) :: json_output
+    TYPE(JSON_VALUE), POINTER :: p, resArray, res, buildconf
+  
+
+      ! Initialize output json
+      CALL json_output % Initialize()
+      CALL json_output % create_object(p,'')
+      ! Record system information
+      CALL json_output % create_object(buildconf,'build')
+      CALL json_output % add(p, buildconf)
+      CALL json_output % add(buildconf, 'compiler', COMPILER_VERSION())
+      CALL json_output % add(buildconf, 'compiler_options', COMPILER_OPTIONS())
+      CALL json_output % add(buildconf, 'precision', prec)
+
+      CALL json_output % create_array(resArray,'results')
+
+
+      CALL json % info('scalar_2d', n_children=nTests)
+      CALL json % get('scalar_2d', objPointer, found)
+      CALL json % get('polynomial_range', polyDeg, found)
+      CALL json % get('n_plot_points', nPlotPoints, found)
+      CALL json % get('element_dimensions', nElements, found)
+      CALL json % get('n_timing_repeats', nRepeats, found)
+      CALL json % get_core(jCore)
+
+      ALLOCATE(targetNodes(0:nPlotPoints), fActual(0:nPlotPoints,0:nPlotPoints,1,1:nElements*nElements), fInterp(0:nPlotPoints,0:nPlotPoints,1,1:nElements*nElements))
+#ifdef GPU      
+      CALL hfMalloc(fInterp_dev, SIZEOF(fInterp))
+#endif
+
+      targetNodes = UniformPoints(-1.0_prec,1.0_prec,nPlotPoints)
+
+      dx = 2.0_prec/REAL(nElements,prec)
+
+      DO iTest = 1, nTests
+ 
+        ! Point to the i-th scalar_1d function for testing
+        CALL jCore % get_child(objPointer, iTest, testPointer, found)
+        IF( found )THEN
+
+         ! Pull the function and derivative strings from the JSON
+         CALL Get_Char_Obj(jCore, testPointer, 'name', funcName)
+         CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
+!         CALL Get_Char_Obj(jCore, testPointer, 'derivative', funcDerivative)
+
+          ! Create the exact function equation parsers
+          f = EquationParser(funcValue)
+!          dfdx = EquationParser(funcDerivative)
+
+          ! Create the exact function equation parsers
+          DO iY = 1, nElements
+            yL = -1.0_prec + REAL((iY-1),prec)*dx
+            yR = yL + dx
+            DO iX = 1, nElements
+              xL = -1.0_prec + REAL((iX-1),prec)*dx
+              xR = xL + dx
+              DO j = 0, nPlotPoints
+                y = 0.5_prec*( yR*(targetNodes(j)+1.0_prec) - yL*(targetNodes(j)-1.0_prec) )
+                DO i = 0, nPlotPoints
+                  x = 0.5_prec*( xR*(targetNodes(i)+1.0_prec) - xL*(targetNodes(i)-1.0_prec) )
+                  iEl = iX + nElements*(iY-1)
+                  fActual(i,j,1,iEl) = f % Evaluate( (/ x, y, 0.0_prec /) )          
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+
+
+          DO pdeg = polyDeg(1), polyDeg(2)
+
+            ALLOCATE(interpNodes(0:pdeg), qWeights(0:pdeg), fNodal(0:pdeg,0:pdeg,1,1:nElements*nElements), &
+                     dfdxInterp(0:pdeg,0:pdeg,1,1:nElements*nElements), dfdxActual(0:pdeg,0:pdeg,1,1:nElements*nElements))
+
+            CALL LegendreQuadrature( pdeg, interpNodes, qWeights, GAUSS )
+            CALL interp % Build(pdeg, nPlotPoints, interpNodes, targetNodes)
+
+            ! Evaluate the nodal values at quadrature points and the exact derivative
+            DO iY = 1, nElements
+              yL = -1.0_prec + REAL((iY-1),prec)*dx
+              yR = yL + dx
+              DO iX = 1, nElements
+                xL = -1.0_prec + REAL((iX-1),prec)*dx
+                xR = xL + dx
+                DO j = 0, pdeg
+                  y = 0.5_prec*( yR*(interpNodes(j)+1.0_prec) - yL*(interpNodes(j)-1.0_prec) )
+                  DO i = 0, pdeg
+                    x = 0.5_prec*( xR*(interpNodes(i)+1.0_prec) - xL*(interpNodes(i)-1.0_prec) )
+                    iEl = iX + nElements*(iY-1)
+                    fNodal(i,j,1,iEl) = f % Evaluate( (/ x, y, 0.0_prec /) )          
+                   ! dfdxActual(i,1,iEl) = dfdx % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
+                  ENDDO
+                ENDDO
+              ENDDO
+            ENDDO
+
+            ! ***** ScalarGridInterp_2D Testing ****** !
+            ! Interpolate the function to the targetNodes
+            CALL interp % ScalarGridInterp_2D(fNodal, fInterp, 1, nElements*nElements)  
+            fErr = 0.0_prec
+            DO iEl = 1, nElements*nElements
+              DO j = 0, nPlotPoints
+                DO i = 0, nPlotPoints
+                  fErr = MAX(ABS(fInterp(i,j,1,iEl) -fActual(i,j,1,iEl)),fErr)
+                ENDDO
+              ENDDO
+            ENDDO
+
+            ! Estimate routine runtime
+            CALL CPU_TIME(t1)
+            DO i = 1, nRepeats
+              CALL interp % ScalarGridInterp_2D(fNodal, fInterp, 1, nElements*nElements)
+            ENDDO
+            CALL CPU_TIME(t2)
+
+            CALL json_output % create_object(res,'')
+            CALL json_output % add(res, 'routine_name', 'ScalarGridInterp_2D')
+            CALL json_output % add(res, 'polynomial_degree', pdeg)
+            CALL json_output % add(res, 'n_variables', 1)
+            CALL json_output % add(res, 'n_elements', nElements*nElements)
+            CALL json_output % add(res, 'function', TRIM(funcValue))
+            CALL json_output % add(res, 'max_error', fErr)
+            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
+            CALL json_output % add(resArray, res)
+            nullify(res)
+            ! ***** !
+#ifdef GPU
+            CALL hfMalloc(fNodal_dev, SIZEOF(fNodal))
+
+            ! ***** ScalarGridInterp_2D Testing ****** !
+            ! Interpolate the function to the targetNodes
+            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+
+            CALL interp % ScalarGridInterp_2D(fNodal_dev, fInterp_dev, 1, nElements*nElements)  
+
+            CALL hipFortran(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
+
+            fErr = 0.0_prec
+            DO iEl = 1, nElements*nElements
+              DO j = 0, nPlotPoints
+                DO i = 0, nPlotPoints
+                  fErr = MAX(ABS(fInterp(i,j,1,iEl) -fActual(i,j,1,iEl)),fErr)
+                ENDDO
+              ENDDO
+            ENDDO
+
+            ! Estimate routine runtime
+            CALL CPU_TIME(t1)
+            DO i = 1, nRepeats
+              CALL interp % ScalarGridInterp_2D(fNodal_dev, fInterp_dev, 1, nElements*nElements)
+            ENDDO
+
+            CALL hipFortran(hipDeviceSynchronize()) 
+            CALL CPU_TIME(t2)
+
+            CALL json_output % create_object(res,'')
+            CALL json_output % add(res, 'routine_name', 'ScalarGridInterp_2D (GPU)')
+            CALL json_output % add(res, 'polynomial_degree', pdeg)
+            CALL json_output % add(res, 'n_variables', 1)
+            CALL json_output % add(res, 'n_elements', nElements*nElements)
+            CALL json_output % add(res, 'function', TRIM(funcValue))
+            CALL json_output % add(res, 'max_error', fErr)
+            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
+            CALL json_output % add(resArray, res)
+            nullify(res)
+            ! ***** !
+#endif
+
+!
+!            ! ***** GridDerivative_2D Testing ****** !
+!            ! Estimate the derivative by applying the derivative matrix
+!            CALL interp % GridDerivative_2D(fNodal, dfdxInterp, 1, nElements)
+!            fErr = 0.0_prec
+!            DO iEl = 1, nElements
+!              DO i = 0, pdeg
+!                fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
+!              ENDDO
+!            ENDDO
+!
+!            ! Estimate routine runtime
+!            CALL CPU_TIME(t1)
+!            DO i = 1, nRepeats
+!              CALL interp % GridDerivative_2D(fNodal, dfdxInterp, 1, nElements)
+!            ENDDO
+!            CALL CPU_TIME(t2)
+!
+!            CALL json_output % create_object(res,'')
+!            CALL json_output % add(res, 'routine_name', 'GridDerivative_2D')
+!            CALL json_output % add(res, 'polynomial_degree', pdeg)
+!            CALL json_output % add(res, 'n_variables', 1)
+!            CALL json_output % add(res, 'n_elements', nElements)
+!            CALL json_output % add(res, 'function', TRIM(funcValue))
+!            CALL json_output % add(res, 'max_error', fErr)
+!            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
+!            CALL json_output % add(resArray, res)
+!            nullify(res)
+!            ! ***** !
+!
+!#ifdef GPU
+!            CALL hfMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp))
+!
+!            ! ***** GridDerivative_2D Testing ****** !
+!            ! Estimate the derivative by applying the derivative matrix
+!            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+!            CALL interp % GridDerivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!            CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
+!
+!            fErr = 0.0_prec
+!            DO iEl = 1, nElements
+!              DO i = 0, pdeg
+!                fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
+!              ENDDO
+!            ENDDO
+!
+!            ! Estimate routine runtime
+!            CALL CPU_TIME(t1)
+!            DO i = 1, nRepeats
+!              CALL interp % GridDerivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!            ENDDO
+!            CALL hipFortran(hipDeviceSynchronize()) 
+!            CALL CPU_TIME(t2)
+!
+!            CALL json_output % create_object(res,'')
+!            CALL json_output % add(res, 'routine_name', 'GridDerivative_2D (GPU)')
+!            CALL json_output % add(res, 'polynomial_degree', pdeg)
+!            CALL json_output % add(res, 'n_variables', 1)
+!            CALL json_output % add(res, 'n_elements', nElements)
+!            CALL json_output % add(res, 'function', TRIM(funcValue))
+!            CALL json_output % add(res, 'max_error', fErr)
+!            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
+!            CALL json_output % add(resArray, res)
+!            nullify(res)
+!            ! ***** !
+!#endif
+
+            DEALLOCATE(interpNodes, qWeights, fNodal, dfdxInterp, dfdxActual)
+#ifdef GPU      
+            CALL hfFree(fNodal_dev)
+!            CALL hfFree(dfdxInterp_dev)
+#endif
+
+          ENDDO
+
+        ELSE
+          PRINT*, 'FAIL!'
+          STOP 1
+        ENDIF
+             
+        nullify(testPointer)
+        
+      ENDDO
+
+      CALL json_output % add(p, resArray) ! Add the results array to the payload
+      CALL json_output % print(p,'lagrange_scalar2d.results.json')
+
+      nullify(objPointer)
+      nullify(p)
+      CALL json_output % Destroy()
+      DEALLOCATE(targetNodes, fActual, fInterp)
+#ifdef GPU      
+      CALL hfFree(fInterp_dev)
+#endif
+
+  END SUBROUTINE Scalar_2D_Tests
 
   SUBROUTINE Get_Char_Obj(jCore, testPointer, key, charValue)
     IMPLICIT NONE

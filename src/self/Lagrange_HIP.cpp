@@ -2,8 +2,8 @@
 #include "SELF_Macros.h"
 
 
-// GridInterpolate_1D //
-__global__ void GridInterpolate_1D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
+// ScalarGridInterp_1D //
+__global__ void ScalarGridInterp_1D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
@@ -11,17 +11,45 @@ __global__ void GridInterpolate_1D_gpu(real *iMatrix, real *f, real *fInterp, in
 
   real fm = 0.0;
   for (int ii=0; ii<N+1; ii++) {
-    fm += f[SP_1D_INDEX(ii,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+    fm += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
   }
-  fInterp[SP_1D_INDEX(i,iVar,iEl,M,nVar)] = fm;
+  fInterp[SC_1D_INDEX(i,iVar,iEl,M,nVar)] = fm;
 
 }
 
 extern "C"
 {
-  void GridInterpolate_1D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
+  void ScalarGridInterp_1D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((GridInterpolate_1D_gpu), dim3(nVar,nEl,1), dim3(M+1,1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  hipLaunchKernelGGL((ScalarGridInterp_1D_gpu), dim3(nVar,nEl,1), dim3(M+1,1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+  } 
+}
+
+// ScalarGridInterp_2D //
+__global__ void ScalarGridInterp_2D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  real fij = 0.0;
+  for (int jj=0; jj<N+1; jj++) {
+    real fi = 0.0;
+    for (int ii=0; ii<N+1; ii++) {
+      fi += f[SC_2D_INDEX(ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+    }
+    fij += fi*iMatrix[jj+j*(N+1)];
+  }
+  fInterp[SC_2D_INDEX(i,j,iVar,iEl,M,nVar)] = fij;
+
+}
+
+extern "C"
+{
+  void ScalarGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ScalarGridInterp_2D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
@@ -35,9 +63,9 @@ __global__ void GridDerivative_1D_gpu(real *dMatrix, real *f, real *df, int N, i
 
   real fm = 0.0;
   for (int ii=0; ii<N+1; ii++) {
-    fm += f[SP_1D_INDEX(ii,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    fm += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
   }
-  df[SP_1D_INDEX(i,iVar,iEl,N,nVar)] = fm;
+  df[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = fm;
 
 }
 
