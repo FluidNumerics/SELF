@@ -1,7 +1,7 @@
 {
-  "n_plot_points": 10,
+  "n_plot_points": 7,
   "polynomial_range":[1, 7],
-  "element_dimensions": 5,
+  "element_dimensions": 2,
   "n_timing_repeats": 1000,
   "scalar_1d": 
   [
@@ -26,44 +26,44 @@
     {
       "name":"constant",
       "function":"f = 1.0",
-      "gradient":["0.0",
-                  "0.0"]
+      "gradient":["dfdx = 0.0",
+                  "dfdy = 0.0"]
     },
     {
       "name":"linear",
       "function":"f = x*y",
-      "gradient":["y",
-                  "x"]
+      "gradient":["dfdx = y",
+                  "dfdy = x"]
     },
     {
       "name":"gaussian",
       "function":"f = exp( -(x^2 + y^2) )",
-      "gradient":["-2x*exp( -(x^2 + y^2) )",
-                  "-2y*exp( -(x^2 + y^2) )"]
+      "gradient":["dfdx = -2x*exp( -(x^2 + y^2) )",
+                  "dfdy = -2y*exp( -(x^2 + y^2) )"]
     }
   ],
   "scalar_3d": 
   [
     {
       "name":"constant",
-      "function":"1.0",
-      "gradient":["0.0",
-                  "0.0",
-                  "0.0"]
+      "function":"f = 1.0",
+      "gradient":["dfdx = 0.0",
+                  "dfdy = 0.0",
+                  "dfdz = 0.0"]
     },
     {
       "name":"linear",
-      "function":"x*y*z",
-      "gradient":["y*z",
-                  "x*z",
-                  "x*y"]
+      "function":"f = x*y*z",
+      "gradient":["dfdx = y*z",
+                  "dfdy = x*z",
+                  "dfdz = x*y"]
     },
     {
       "name":"gaussian",
-      "function":"exp( -(x^2 + y^2 + z^2) )",
-      "gradient":["-2x*exp( -(x^2 + y^2 + z^2) )",
-                  "-2y*exp( -(x^2 + y^2 + z^2) )",
-                  "-2z*exp( -(x^2 + y^2 + z^2) )"]
+      "function":"f = exp( -(x^2 + y^2 + z^2) )",
+      "gradient":["dfdx = -2x*exp( -(x^2 + y^2 + z^2) )",
+                  "dfdy = -2y*exp( -(x^2 + y^2 + z^2) )",
+                  "dfdz = -2z*exp( -(x^2 + y^2 + z^2) )"]
     }
   ]
 }
