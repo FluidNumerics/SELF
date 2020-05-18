@@ -123,7 +123,7 @@ CONTAINS
          ! Pull the function and derivative strings from the JSON
          CALL Get_Char_Obj(jCore, testPointer, 'name', funcName)
          CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
-         CALL Get_Char_Obj(jCore, testPointer, 'derivative', funcDerivative)
+         CALL Get_Char_Obj(jCore, testPointer, 'dfdx', funcDerivative)
 
           ! Create the exact function equation parsers
           f = EquationParser(funcValue)
@@ -327,19 +327,19 @@ CONTAINS
     IMPLICIT NONE
     TYPE(JSON_FILE), INTENT(inout) :: json
     ! Local
-    TYPE(EquationParser) :: f, dfdx
+    TYPE(EquationParser) :: f, dfdx, dfdy
     TYPE(Lagrange) :: interp
     TYPE(JSON_VALUE), POINTER :: objPointer, testPointer
     TYPE(JSON_CORE) :: jCore
     INTEGER(JSON_IK) :: nTests, iTest
     LOGICAL :: found
-    CHARACTER(50) :: funcName, funcValue, funcDerivative 
+    CHARACTER(50) :: funcName, funcValue, dfdx_str, dfdy_str 
     INTEGER, ALLOCATABLE :: polyDeg(:) 
     INTEGER :: nPlotPoints, i, j, iX, iY, iEl, pdeg, nelements, nRepeats
     REAL(prec), ALLOCATABLE :: interpNodes(:), qWeights(:), targetNodes(:)
-    REAL(prec), ALLOCATABLE, TARGET :: fNodal(:,:,:,:), fInterp(:,:,:,:), dfdxInterp(:,:,:,:),  fActual(:,:,:,:), dfdxActual(:,:,:,:)  
+    REAL(prec), ALLOCATABLE, TARGET :: fNodal(:,:,:,:), fInterp(:,:,:,:), gradFInterp(:,:,:,:,:),  fActual(:,:,:,:), gradFActual(:,:,:,:,:)  
 #ifdef GPU
-    TYPE(c_ptr) :: fNodal_dev, fInterp_dev, dfdxInterp_dev
+    TYPE(c_ptr) :: fNodal_dev, fInterp_dev, gradFInterp_dev
 #endif
     REAL(prec) :: fErr, t1, t2, dx, x, y, xL, xR, yL, yR
     TYPE(JSON_CORE) :: json_output
@@ -367,7 +367,9 @@ CONTAINS
       CALL json % get('n_timing_repeats', nRepeats, found)
       CALL json % get_core(jCore)
 
-      ALLOCATE(targetNodes(0:nPlotPoints), fActual(0:nPlotPoints,0:nPlotPoints,1,1:nElements*nElements), fInterp(0:nPlotPoints,0:nPlotPoints,1,1:nElements*nElements))
+      ALLOCATE(targetNodes(0:nPlotPoints), &
+               fActual(0:nPlotPoints,0:nPlotPoints,1,1:nElements*nElements), &
+               fInterp(0:nPlotPoints,0:nPlotPoints,1,1:nElements*nElements))
 #ifdef GPU      
       CALL hfMalloc(fInterp_dev, SIZEOF(fInterp))
 #endif
@@ -385,11 +387,13 @@ CONTAINS
          ! Pull the function and derivative strings from the JSON
          CALL Get_Char_Obj(jCore, testPointer, 'name', funcName)
          CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
-!         CALL Get_Char_Obj(jCore, testPointer, 'derivative', funcDerivative)
+         CALL Get_Char_Obj(jCore, testPointer, 'dfdx', dfdx_str)
+         CALL Get_Char_Obj(jCore, testPointer, 'dfdy', dfdy_str)
 
           ! Create the exact function equation parsers
           f = EquationParser(funcValue)
-!          dfdx = EquationParser(funcDerivative)
+          dfdx = EquationParser(dfdx_str)
+          dfdy = EquationParser(dfdy_str)
 
           ! Create the exact function equation parsers
           DO iY = 1, nElements
@@ -413,7 +417,8 @@ CONTAINS
           DO pdeg = polyDeg(1), polyDeg(2)
 
             ALLOCATE(interpNodes(0:pdeg), qWeights(0:pdeg), fNodal(0:pdeg,0:pdeg,1,1:nElements*nElements), &
-                     dfdxInterp(0:pdeg,0:pdeg,1,1:nElements*nElements), dfdxActual(0:pdeg,0:pdeg,1,1:nElements*nElements))
+                     gradFInterp(1:2,0:pdeg,0:pdeg,1,1:nElements*nElements), &
+                     gradFActual(1:2,0:pdeg,0:pdeg,1,1:nElements*nElements))
 
             CALL LegendreQuadrature( pdeg, interpNodes, qWeights, GAUSS )
             CALL interp % Build(pdeg, nPlotPoints, interpNodes, targetNodes)
@@ -431,7 +436,8 @@ CONTAINS
                     x = 0.5_prec*( xR*(interpNodes(i)+1.0_prec) - xL*(interpNodes(i)-1.0_prec) )
                     iEl = iX + nElements*(iY-1)
                     fNodal(i,j,1,iEl) = f % Evaluate( (/ x, y, 0.0_prec /) )          
-                   ! dfdxActual(i,1,iEl) = dfdx % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
+                    gradFActual(1,i,j,1,iEl) = dfdx % Evaluate( (/ x, y, 0.0_prec /) )
+                    gradFActual(2,i,j,1,iEl) = dfdy % Evaluate( (/ x, y, 0.0_prec /) )
                   ENDDO
                 ENDDO
               ENDDO
@@ -512,26 +518,29 @@ CONTAINS
 !
 !            ! ***** Derivative_2D Testing ****** !
 !            ! Estimate the derivative by applying the derivative matrix
-!            CALL interp % Derivative_2D(fNodal, dfdxInterp, 1, nElements)
+!            CALL interp % ScalarGradient_2D(fNodal, gradFInterp, 1, nElements*nElements)
 !            fErr = 0.0_prec
-!            DO iEl = 1, nElements
-!              DO i = 0, pdeg
-!                fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
+!            DO iEl = 1, nElements*nElements
+!              DO j = 0, pdeg
+!                DO i = 0, pdeg
+!                  fErr = MAX(ABS(gradFInterp(1,i,j,1,iEl)*2.0_prec/dx - gradFActual(1,i,j,1,iEl)),fErr)
+!                  fErr = MAX(ABS(gradFInterp(2,i,j,1,iEl)*2.0_prec/dx - gradFActual(2,i,j,1,iEl)),fErr)
+!                ENDDO
 !              ENDDO
 !            ENDDO
 !
 !            ! Estimate routine runtime
 !            CALL CPU_TIME(t1)
 !            DO i = 1, nRepeats
-!              CALL interp % Derivative_2D(fNodal, dfdxInterp, 1, nElements)
+!              CALL interp % ScalarGradient_2D(fNodal, gradFInterp, 1, nElements*nElements)
 !            ENDDO
 !            CALL CPU_TIME(t2)
 !
 !            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'Derivative_2D')
+!            CALL json_output % add(res, 'routine_name', 'ScalarGradient_2D')
 !            CALL json_output % add(res, 'polynomial_degree', pdeg)
 !            CALL json_output % add(res, 'n_variables', 1)
-!            CALL json_output % add(res, 'n_elements', nElements)
+!            CALL json_output % add(res, 'n_elements', nElements*nElements)
 !            CALL json_output % add(res, 'function', TRIM(funcValue))
 !            CALL json_output % add(res, 'max_error', fErr)
 !            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
@@ -545,26 +554,29 @@ CONTAINS
 !            ! ***** Derivative_2D Testing ****** !
 !            ! Estimate the derivative by applying the derivative matrix
 !            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-!            CALL interp % Derivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
-!            CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
+!            CALL interp % Derivative_2D(fNodal_dev, gradFInterp_dev, 1, nElements*nElements)
+!            CALL hipFortran(hipMemcpy(c_loc(gradFInterp), gradFInterp_dev, SIZEOF(gradFInterp), hipMemcpyDeviceToHost))
 !
 !            fErr = 0.0_prec
-!            DO iEl = 1, nElements
-!              DO i = 0, pdeg
-!                fErr = MAX(ABS(dfdxInterp(i,1,iEl)*2.0_prec/dx - dfdxActual(i,1,iEl)),fErr)
+!            DO iEl = 1, nElements*nElements
+!              DO j = 0, pdeg
+!                DO i = 0, pdeg
+!                  fErr = MAX(ABS(gradFInterp(1,i,j,1,iEl)*2.0_prec/dx - gradFActual(1,i,j,1,iEl)),fErr)
+!                  fErr = MAX(ABS(gradFInterp(2,i,j,1,iEl)*2.0_prec/dx - gradFActual(2,i,j,1,iEl)),fErr)
+!                ENDDO
 !              ENDDO
 !            ENDDO
 !
 !            ! Estimate routine runtime
 !            CALL CPU_TIME(t1)
 !            DO i = 1, nRepeats
-!              CALL interp % Derivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!              CALL interp % ScalarGradient_2D(fNodal_dev, gradFInterp_dev, 1, nElements)
 !            ENDDO
 !            CALL hipFortran(hipDeviceSynchronize()) 
 !            CALL CPU_TIME(t2)
 !
 !            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'Derivative_2D (GPU)')
+!            CALL json_output % add(res, 'routine_name', 'ScalarGradient_2D (GPU)')
 !            CALL json_output % add(res, 'polynomial_degree', pdeg)
 !            CALL json_output % add(res, 'n_variables', 1)
 !            CALL json_output % add(res, 'n_elements', nElements)
@@ -576,10 +588,10 @@ CONTAINS
 !            ! ***** !
 !#endif
 
-            DEALLOCATE(interpNodes, qWeights, fNodal, dfdxInterp, dfdxActual)
+            DEALLOCATE(interpNodes, qWeights, fNodal, gradFInterp, gradFActual)
 #ifdef GPU      
             CALL hfFree(fNodal_dev)
-!            CALL hfFree(dfdxInterp_dev)
+!            CALL hfFree(gradFInterp_dev)
 #endif
 
           ENDDO
@@ -672,7 +684,7 @@ CONTAINS
          ! Pull the function and derivative strings from the JSON
          CALL Get_Char_Obj(jCore, testPointer, 'name', funcName)
          CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
-!         CALL Get_Char_Obj(jCore, testPointer, 'derivative', funcDerivative)
+         CALL Get_Char_Obj(jCore, testPointer, 'derivative', funcDerivative)
 
           ! Create the exact function equation parsers
           f = EquationParser(funcValue)

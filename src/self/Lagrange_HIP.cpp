@@ -87,8 +87,8 @@ extern "C"
 }
 
 
-// GridDerivative_1D //
-__global__ void GridDerivative_1D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+// Derivative_1D //
+__global__ void Derivative_1D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
@@ -104,8 +104,8 @@ __global__ void GridDerivative_1D_gpu(real *dMatrix, real *f, real *df, int N, i
 
 extern "C"
 {
-  void GridDerivative_1D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  void Derivative_1D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((GridDerivative_1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  hipLaunchKernelGGL((Derivative_1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
   } 
 }
