@@ -78,16 +78,40 @@ IMPLICIT NONE
 !      GENERIC, PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
 !      PROCEDURE, PRIVATE :: TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
 
-      GENERIC, PUBLIC :: GridDerivative_1D => GridDerivative_1D_cpu, GridDerivative_1D_gpu
-      PROCEDURE, PRIVATE :: GridDerivative_1D_cpu, GridDerivative_1D_gpu
+      GENERIC, PUBLIC :: Derivative_1D => Derivative_1D_cpu, Derivative_1D_gpu
+      PROCEDURE, PRIVATE :: Derivative_1D_cpu, Derivative_1D_gpu
+
+!      Takes in Scalar and Returns Vector
+!      GENERIC, PUBLIC :: ScalarGradient_2D => ScalarGradient_1D_cpu, ScalarGradient_1D_gpu
+!      PROCEDURE, PRIVATE :: ScalarGradient_2D_cpu, ScalarGradient_1D_gpu
+
+!      Takes in Vector and Returns Tensor
+!      GENERIC, PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu, VectorGradient_2D_gpu
+!      PROCEDURE, PRIVATE :: VectorGradient_2D_cpu, VectorGradient_2D_gpu
+
+!      Takes in Vector and Returns Scalar
+!      GENERIC, PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu, VectorDivergence_2D_gpu
+!      PROCEDURE, PRIVATE :: VectorDivergence_2D_cpu, VectorDivergence_2D_gpu
+
+!      Takes in Vector and Returns Vector
+!      GENERIC, PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu, VectorCurl_2D_gpu
+!      PROCEDURE, PRIVATE :: VectorCurl_2D_cpu, VectorCurl_2D_gpu
 !
-!      PROCEDURE :: CalculateGradient_2D
-!      PROCEDURE :: CalculateDivergence_2D
-!!      PROCEDURE :: CalculateCurl_2D
-!
-!      PROCEDURE :: CalculateGradient_3D
-!      PROCEDURE :: CalculateDivergence_3D
-!!      PROCEDURE :: CalculateCurl_3D
+!      Takes in Scalar and Returns Vector
+!      GENERIC, PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
+!      PROCEDURE, PRIVATE :: ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
+
+!      Takes in Vector and Returns Tensor
+!      GENERIC, PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu, VectorGradient_3D_gpu
+!      PROCEDURE, PRIVATE :: VectorGradient_3D_cpu, VectorGradient_3D_gpu
+
+!      Takes in Vector and Returns Scalar
+!      GENERIC, PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
+!      PROCEDURE, PRIVATE :: VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
+
+!      Takes in Vector and Returns Vector
+!      GENERIC, PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu, VectorCurl_3D_gpu
+!      PROCEDURE, PRIVATE :: VectorCurl_3D_cpu, VectorCurl_3D_gpu
 
       PROCEDURE, PRIVATE :: CalculateBarycentricWeights  => CalculateBarycentricWeights_Lagrange
       PROCEDURE, PRIVATE :: CalculateInterpolationMatrix => CalculateInterpolationMatrix_Lagrange
@@ -124,12 +148,12 @@ IMPLICIT NONE
     END INTERFACE
 
     INTERFACE
-      SUBROUTINE GridDerivative_1D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="GridDerivative_1D_gpu_wrapper")
+      SUBROUTINE Derivative_1D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="Derivative_1D_gpu_wrapper")
         USE iso_c_binding
         IMPLICIT NONE
         TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
         INTEGER, VALUE :: N, nVar, nEl
-      END SUBROUTINE GridDerivative_1D_gpu_wrapper
+      END SUBROUTINE Derivative_1D_gpu_wrapper
     END INTERFACE
  
  CONTAINS
@@ -757,7 +781,7 @@ IMPLICIT NONE
 !
 ! ================================================================================================ !
 !
-! GridDerivative_1D 
+! Derivative_1D 
 !
 !   Calculates the derivative of the Lagrange interpolant given a set of nodal function values at
 !   the native interpolation nodes
@@ -779,7 +803,7 @@ IMPLICIT NONE
 !     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements) 
 !     REAL(prec)     :: derF(0:interp % N,1:nVariables,1:nElements) 
 !     
-!       CALL interp % GridDerivative_1D( f, derF, nVariables, nElements ) 
+!       CALL interp % Derivative_1D( f, derF, nVariables, nElements ) 
 ! 
 !     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
 !
@@ -800,7 +824,7 @@ IMPLICIT NONE
 !   
 ! ================================================================================================ ! 
 
-  SUBROUTINE GridDerivative_1D_cpu( myPoly, f, df, nVariables, nElements )
+  SUBROUTINE Derivative_1D_cpu( myPoly, f, df, nVariables, nElements )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -823,21 +847,21 @@ IMPLICIT NONE
       ENDDO
 
 
-  END SUBROUTINE GridDerivative_1D_cpu
+  END SUBROUTINE Derivative_1D_cpu
 
-  SUBROUTINE GridDerivative_1D_gpu( myPoly, f_dev, df_dev, nVariables, nElements )
+  SUBROUTINE Derivative_1D_gpu( myPoly, f_dev, df_dev, nVariables, nElements )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
     INTEGER, INTENT(in) :: nVariables, nElements
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: df_dev
 
-      CALL GridDerivative_1D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL Derivative_1D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
                                          f_dev, df_dev, &
                                          myPoly % N, &
                                          nVariables, nElements)
 
-  END SUBROUTINE GridDerivative_1D_gpu
+  END SUBROUTINE Derivative_1D_gpu
 !
 !! ================================================================================================ !
 !!
@@ -1368,7 +1392,7 @@ IMPLICIT NONE
 !
 !  END FUNCTION GridInterpolation_3D_Lagrange
 !
-!  FUNCTION GridDerivative_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( derF )  
+!  FUNCTION Derivative_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( derF )  
 !    IMPLICIT NONE
 !    TYPE(Lagrange) :: myPoly
 !    INTEGER         :: nVariables, nElements
@@ -1392,7 +1416,7 @@ IMPLICIT NONE
 !        ENDDO
 !      ENDDO
 !
-!  END FUNCTION GridDerivative_1D_Lagrange
+!  END FUNCTION Derivative_1D_Lagrange
 !!
 !  FUNCTION CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
 !
@@ -1653,7 +1677,7 @@ IMPLICIT NONE
 !!
 !!  END SUBROUTINE GridInterpolation_3D_CUDAKernel
 !!!
-!!  ATTRIBUTES(Global) SUBROUTINE GridDerivative_1D_CUDAKernel( DMatT, f, derf, N, nVariables, nElems )
+!!  ATTRIBUTES(Global) SUBROUTINE Derivative_1D_CUDAKernel( DMatT, f, derf, N, nVariables, nElems )
 !!    ! Currently only works for M,N <= 7
 !!    IMPLICIT NONE
 !!    INTEGER, INTENT(in)             :: N, nVariables, nElems
@@ -1687,7 +1711,7 @@ IMPLICIT NONE
 !!
 !!      ENDIF
 !!    
-!!  END SUBROUTINE GridDerivative_1D_CUDAKernel
+!!  END SUBROUTINE Derivative_1D_CUDAKernel
 !!!
 !!  ATTRIBUTES(Global) SUBROUTINE CalculateGradient_2D_CUDAKernel( DMatT, f, gradf, N, nVariables, nElems )
 !!    ! Currently only works for M,N <= 7

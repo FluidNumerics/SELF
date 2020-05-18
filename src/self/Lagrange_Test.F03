@@ -225,9 +225,9 @@ CONTAINS
 #endif
 
 
-            ! ***** GridDerivative_1D Testing ****** !
+            ! ***** Derivative_1D Testing ****** !
             ! Estimate the derivative by applying the derivative matrix
-            CALL interp % GridDerivative_1D(fNodal, dfdxInterp, 1, nElements)
+            CALL interp % Derivative_1D(fNodal, dfdxInterp, 1, nElements)
             fErr = 0.0_prec
             DO iEl = 1, nElements
               DO i = 0, pdeg
@@ -238,12 +238,12 @@ CONTAINS
             ! Estimate routine runtime
             CALL CPU_TIME(t1)
             DO i = 1, nRepeats
-              CALL interp % GridDerivative_1D(fNodal, dfdxInterp, 1, nElements)
+              CALL interp % Derivative_1D(fNodal, dfdxInterp, 1, nElements)
             ENDDO
             CALL CPU_TIME(t2)
 
             CALL json_output % create_object(res,'')
-            CALL json_output % add(res, 'routine_name', 'GridDerivative_1D')
+            CALL json_output % add(res, 'routine_name', 'Derivative_1D')
             CALL json_output % add(res, 'polynomial_degree', pdeg)
             CALL json_output % add(res, 'n_variables', 1)
             CALL json_output % add(res, 'n_elements', nElements)
@@ -257,10 +257,10 @@ CONTAINS
 #ifdef GPU
             CALL hfMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp))
 
-            ! ***** GridDerivative_1D Testing ****** !
+            ! ***** Derivative_1D Testing ****** !
             ! Estimate the derivative by applying the derivative matrix
             CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-            CALL interp % GridDerivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+            CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
             CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
 
             fErr = 0.0_prec
@@ -273,13 +273,13 @@ CONTAINS
             ! Estimate routine runtime
             CALL CPU_TIME(t1)
             DO i = 1, nRepeats
-              CALL interp % GridDerivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+              CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, 1, nElements)
             ENDDO
             CALL hipFortran(hipDeviceSynchronize()) 
             CALL CPU_TIME(t2)
 
             CALL json_output % create_object(res,'')
-            CALL json_output % add(res, 'routine_name', 'GridDerivative_1D (GPU)')
+            CALL json_output % add(res, 'routine_name', 'Derivative_1D (GPU)')
             CALL json_output % add(res, 'polynomial_degree', pdeg)
             CALL json_output % add(res, 'n_variables', 1)
             CALL json_output % add(res, 'n_elements', nElements)
@@ -510,9 +510,9 @@ CONTAINS
 #endif
 
 !
-!            ! ***** GridDerivative_2D Testing ****** !
+!            ! ***** Derivative_2D Testing ****** !
 !            ! Estimate the derivative by applying the derivative matrix
-!            CALL interp % GridDerivative_2D(fNodal, dfdxInterp, 1, nElements)
+!            CALL interp % Derivative_2D(fNodal, dfdxInterp, 1, nElements)
 !            fErr = 0.0_prec
 !            DO iEl = 1, nElements
 !              DO i = 0, pdeg
@@ -523,12 +523,12 @@ CONTAINS
 !            ! Estimate routine runtime
 !            CALL CPU_TIME(t1)
 !            DO i = 1, nRepeats
-!              CALL interp % GridDerivative_2D(fNodal, dfdxInterp, 1, nElements)
+!              CALL interp % Derivative_2D(fNodal, dfdxInterp, 1, nElements)
 !            ENDDO
 !            CALL CPU_TIME(t2)
 !
 !            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'GridDerivative_2D')
+!            CALL json_output % add(res, 'routine_name', 'Derivative_2D')
 !            CALL json_output % add(res, 'polynomial_degree', pdeg)
 !            CALL json_output % add(res, 'n_variables', 1)
 !            CALL json_output % add(res, 'n_elements', nElements)
@@ -542,10 +542,10 @@ CONTAINS
 !#ifdef GPU
 !            CALL hfMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp))
 !
-!            ! ***** GridDerivative_2D Testing ****** !
+!            ! ***** Derivative_2D Testing ****** !
 !            ! Estimate the derivative by applying the derivative matrix
 !            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-!            CALL interp % GridDerivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!            CALL interp % Derivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
 !            CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
 !
 !            fErr = 0.0_prec
@@ -558,13 +558,13 @@ CONTAINS
 !            ! Estimate routine runtime
 !            CALL CPU_TIME(t1)
 !            DO i = 1, nRepeats
-!              CALL interp % GridDerivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!              CALL interp % Derivative_2D(fNodal_dev, dfdxInterp_dev, 1, nElements)
 !            ENDDO
 !            CALL hipFortran(hipDeviceSynchronize()) 
 !            CALL CPU_TIME(t2)
 !
 !            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'GridDerivative_2D (GPU)')
+!            CALL json_output % add(res, 'routine_name', 'Derivative_2D (GPU)')
 !            CALL json_output % add(res, 'polynomial_degree', pdeg)
 !            CALL json_output % add(res, 'n_variables', 1)
 !            CALL json_output % add(res, 'n_elements', nElements)
@@ -816,9 +816,9 @@ CONTAINS
 #endif
 
 !
-!            ! ***** GridDerivative_3D Testing ****** !
+!            ! ***** Derivative_3D Testing ****** !
 !            ! Estimate the derivative by applying the derivative matrix
-!            CALL interp % GridDerivative_3D(fNodal, dfdxInterp, 1, nElements)
+!            CALL interp % Derivative_3D(fNodal, dfdxInterp, 1, nElements)
 !            fErr = 0.0_prec
 !            DO iEl = 1, nElements
 !              DO i = 0, pdeg
@@ -829,12 +829,12 @@ CONTAINS
 !            ! Estimate routine runtime
 !            CALL CPU_TIME(t1)
 !            DO i = 1, nRepeats
-!              CALL interp % GridDerivative_3D(fNodal, dfdxInterp, 1, nElements)
+!              CALL interp % Derivative_3D(fNodal, dfdxInterp, 1, nElements)
 !            ENDDO
 !            CALL CPU_TIME(t2)
 !
 !            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'GridDerivative_3D')
+!            CALL json_output % add(res, 'routine_name', 'Derivative_3D')
 !            CALL json_output % add(res, 'polynomial_degree', pdeg)
 !            CALL json_output % add(res, 'n_variables', 1)
 !            CALL json_output % add(res, 'n_elements', nElements)
@@ -848,10 +848,10 @@ CONTAINS
 !#ifdef GPU
 !            CALL hfMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp))
 !
-!            ! ***** GridDerivative_3D Testing ****** !
+!            ! ***** Derivative_3D Testing ****** !
 !            ! Estimate the derivative by applying the derivative matrix
 !            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-!            CALL interp % GridDerivative_3D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!            CALL interp % Derivative_3D(fNodal_dev, dfdxInterp_dev, 1, nElements)
 !            CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
 !
 !            fErr = 0.0_prec
@@ -864,13 +864,13 @@ CONTAINS
 !            ! Estimate routine runtime
 !            CALL CPU_TIME(t1)
 !            DO i = 1, nRepeats
-!              CALL interp % GridDerivative_3D(fNodal_dev, dfdxInterp_dev, 1, nElements)
+!              CALL interp % Derivative_3D(fNodal_dev, dfdxInterp_dev, 1, nElements)
 !            ENDDO
 !            CALL hipFortran(hipDeviceSynchronize()) 
 !            CALL CPU_TIME(t2)
 !
 !            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'GridDerivative_3D (GPU)')
+!            CALL json_output % add(res, 'routine_name', 'Derivative_3D (GPU)')
 !            CALL json_output % add(res, 'polynomial_degree', pdeg)
 !            CALL json_output % add(res, 'n_variables', 1)
 !            CALL json_output % add(res, 'n_elements', nElements)
