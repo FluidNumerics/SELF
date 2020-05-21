@@ -11,6 +11,7 @@ MODULE Lagrange_Class
 USE ModelPrecision
 USE ConstantsDictionary
 USE CommonRoutines
+USE Quadrature
 
 USE hip_fortran
 USE iso_c_binding
@@ -38,12 +39,14 @@ IMPLICIT NONE
     REAL(prec), POINTER :: controlPoints(:)
     REAL(prec), POINTER :: targetPoints(:)
     REAL(prec), POINTER :: bWeights(:)
+    REAL(prec), POINTER :: qWeights(:)
     REAL(prec), POINTER :: iMatrix(:,:)
     REAL(prec), POINTER :: iMatrixTranspose(:,:)
     REAL(prec), POINTER :: dMatrix(:,:)  
     REAL(prec), POINTER :: dMatrixTranspose(:,:)  
 
     TYPE(c_ptr) :: bWeights_dev
+    TYPE(c_ptr) :: qWeights_dev
     TYPE(c_ptr) :: iMatrix_dev
     TYPE(c_ptr) :: iMatrixTranspose_dev
     TYPE(c_ptr) :: dMatrix_dev
@@ -196,17 +199,20 @@ IMPLICIT NONE
 !
 ! =============================================================================================== !
 
-  SUBROUTINE Build_Lagrange( myPoly, N, M, interpNodes, targetNodes )
+  SUBROUTINE Build_Lagrange( myPoly, N, controlNodeType, M, targetNodeType )
     IMPLICIT NONE
-    CLASS(Lagrange), INTENT(out)   :: myPoly
-    INTEGER, INTENT(in)            :: N, M
-    REAL(prec), INTENT(in)         :: interpNodes(0:N), targetNodes(0:M)
+    CLASS(Lagrange), INTENT(out) :: myPoly
+    INTEGER, INTENT(in)          :: N, M
+    INTEGER, INTENT(in)          :: controlNodeType, targetNodeType
+    ! Local
+    REAL(prec) :: q(0:M)
     
       myPoly % N  = N
       myPoly % M  = M
      
       ALLOCATE( myPoly % controlPoints(0:N), &
                 myPoly % bWeights(0:N), &
+                myPoly % qWeights(0:N), &
                 myPoly % targetPoints(0:M), &
                 myPoly % iMatrix(0:M,0:N), &
                 myPoly % iMatrixTranspose(0:N,0:M), &
@@ -215,14 +221,42 @@ IMPLICIT NONE
 
       myPoly % controlPoints = 0.0_prec
       myPoly % bWeights = 0.0_prec
+      myPoly % qWeights = 0.0_prec
       myPoly % targetPoints  = 0.0_prec
       myPoly % iMatrix = 0.0_prec
       myPoly % iMatrixTranspose = 0.0_prec
       myPoly % dMatrix = 0.0_prec
       myPoly % dMatrixTranspose  = 0.0_prec
       
-      myPoly % controlPoints(0:N) = interpNodes(0:N)
-      myPoly % targetPoints(0:M) = targetNodes(0:M)
+     
+      IF(controlNodeType == GAUSS .OR. controlNodeType == GAUSS_LOBATTO)THEN
+
+        CALL LegendreQuadrature(N, & 
+                                myPoly % controlPoints, &
+                                myPoly % qWeights, &
+                                controlNodeType )
+
+      ELSEIF(controlNodeType == UNIFORM)THEN
+
+        myPoly % controlPoints = UniformPoints(-1.0_prec,1.0_prec,N)
+        myPoly % qWeights = 2.0_prec/REAL(N,prec)
+
+      ENDIF
+
+      ! Target Points
+      IF(targetNodeType == GAUSS .OR. targetNodeType == GAUSS_LOBATTO)THEN
+
+        CALL LegendreQuadrature(N, & 
+                                myPoly % targetPoints, &
+                                q, &
+                                targetNodeType )
+
+      ELSEIF(targetNodeType == UNIFORM)THEN
+
+        myPoly % targetPoints = UniformPoints(-1.0_prec,1.0_prec,M)
+
+      ENDIF
+
 
       CALL myPoly % CalculateBarycentricWeights( )
       CALL myPoly % CalculateInterpolationMatrix( )
@@ -230,6 +264,7 @@ IMPLICIT NONE
 
 #ifdef GPU
       CALL hfMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights))
+      CALL hfMalloc(myPoly % qWeights_dev, SIZEOF(myPoly % qWeights))
       CALL hfMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix))
       CALL hfMalloc(myPoly % iMatrixTranspose_dev, SIZEOF(myPoly % iMatrixTranspose))
       CALL hfMalloc(myPoly % dMatrix_dev, SIZEOF(myPoly % dMatrix))
@@ -261,6 +296,7 @@ IMPLICIT NONE
                   myPoly % dMatrixTranspose )
 #ifdef GPU
       CALL hfFree(myPoly % bWeights_dev)
+      CALL hfFree(myPoly % qWeights_dev)
       CALL hfFree(myPoly % iMatrix_dev)
       CALL hfFree(myPoly % iMatrixTranspose_dev)
       CALL hfFree(myPoly % dMatrix_dev)
@@ -276,6 +312,11 @@ IMPLICIT NONE
       CALL hipFortran(hipMemcpy(myPoly % bWeights_dev, &
                                 c_loc(myPoly % bWeights), &
                                 SIZEOF(myPoly % bWeights), &
+                                hipMemcpyHostToDevice))
+
+      CALL hipFortran(hipMemcpy(myPoly % qWeights_dev, &
+                                c_loc(myPoly % qWeights), &
+                                SIZEOF(myPoly % qWeights), &
                                 hipMemcpyHostToDevice))
                         
       CALL hipFortran(hipMemcpy(myPoly % iMatrix_dev, &
@@ -307,6 +348,11 @@ IMPLICIT NONE
       CALL hipFortran(hipMemcpy(c_loc(myPoly % bWeights), &
                                 myPoly % bWeights_dev, &
                                 SIZEOF(myPoly % bWeights), &
+                                hipMemcpyDeviceToHost))
+
+      CALL hipFortran(hipMemcpy(c_loc(myPoly % qWeights), &
+                                myPoly % qWeights_dev, &
+                                SIZEOF(myPoly % qWeights), &
                                 hipMemcpyDeviceToHost))
                         
       CALL hipFortran(hipMemcpy(c_loc(myPoly % iMatrix), &

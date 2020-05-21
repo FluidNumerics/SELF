@@ -144,8 +144,7 @@ CONTAINS
 
             ALLOCATE(interpNodes(0:pdeg), qWeights(0:pdeg), fNodal(0:pdeg,1,1:nElements), dfdxInterp(0:pdeg,1,1:nElements), dfdxActual(0:pdeg,1,1:nElements))
 
-            CALL LegendreQuadrature( pdeg, interpNodes, qWeights, GAUSS )
-            CALL interp % Build(pdeg, nPlotPoints, interpNodes, targetNodes)
+            CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
 
              ! Evaluate the nodal values at quadrature points and the exact derivative
             DO iEl = 1, nElements
@@ -420,8 +419,7 @@ CONTAINS
                      gradFInterp(1:2,0:pdeg,0:pdeg,1,1:nElements*nElements), &
                      gradFActual(1:2,0:pdeg,0:pdeg,1,1:nElements*nElements))
 
-            CALL LegendreQuadrature( pdeg, interpNodes, qWeights, GAUSS )
-            CALL interp % Build(pdeg, nPlotPoints, interpNodes, targetNodes)
+            CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
 
             ! Evaluate the nodal values at quadrature points and the exact derivative
             DO iY = 1, nElements
@@ -723,8 +721,7 @@ CONTAINS
                      dfdxInterp(0:pdeg,0:pdeg,0:pdeg,1,1:nElements*nElements*nElements),&
                      dfdxActual(0:pdeg,0:pdeg,0:pdeg,1,1:nElements*nElements*nElements))
 
-            CALL LegendreQuadrature( pdeg, interpNodes, qWeights, GAUSS )
-            CALL interp % Build(pdeg, nPlotPoints, interpNodes, targetNodes)
+            CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
 
             ! Evaluate the nodal values at quadrature points and the exact derivative
             DO iz = 1, nElements

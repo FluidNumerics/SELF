@@ -153,7 +153,8 @@
   ! --------------- Quadrature------------------ !
   !==============================================!
    INTEGER, PARAMETER :: GAUSS = 1
-   INTEGER, PARAMETER :: GAUSS_LOBATTO = -1
+   INTEGER, PARAMETER :: GAUSS_LOBATTO = 2
+   INTEGER, PARAMETER :: UNIFORM = 3
    INTEGER, PARAMETER :: DG = 2000
    INTEGER, PARAMETER :: CG = 2001
   !==============================================!
@@ -181,28 +182,5 @@
 ! Misc. INTEGER and CHARACTER flag definitions
   CHARACTER(1), PARAMETER :: nada = ' '
   CHARACTER(6), PARAMETER :: MsgFmt = '(2x,A)'
-
-#ifdef HAVE_CUDA
-  REAL(prec), DEVICE, ALLOCATABLE, PUBLIC :: rk3_a_dev(:), rk3_g_dev(:), rk3_b_dev(:)
-
-CONTAINS
-
-  SUBROUTINE UpdateDeviceDictionary( )
-
-    ALLOCATE( rk3_a_dev(1:3), rk3_g_dev(1:3), rk3_b_dev(1:3) )
-
-    rk3_a_dev(1:3) = rk3_a
-    rk3_g_dev(1:3) = rk3_g
-    rk3_b_dev(1:3) = rk3_b
-
-  END SUBROUTINE UpdateDeviceDictionary
-
-  SUBROUTINE TrashDeviceDictionary( )
-
-    DEALLOCATE( rk3_a_dev, rk3_g_dev, rk3_b_dev )
-
-  END SUBROUTINE TrashDeviceDictionary
-
-#endif
 
  END MODULE ConstantsDictionary
