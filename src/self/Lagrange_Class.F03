@@ -69,8 +69,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
       PROCEDURE, PRIVATE :: VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
 
-!      GENERIC, PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
-!      PROCEDURE, PRIVATE :: TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
+      GENERIC, PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
+      PROCEDURE, PRIVATE :: TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
 
       GENERIC, PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu, ScalarGridInterp_3D_gpu
       PROCEDURE, PRIVATE :: ScalarGridInterp_3D_cpu, ScalarGridInterp_3D_gpu
@@ -78,8 +78,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
       PROCEDURE, PRIVATE :: VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
 
-!      GENERIC, PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
-!      PROCEDURE, PRIVATE :: TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
+      GENERIC, PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
+      PROCEDURE, PRIVATE :: TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
 
       GENERIC, PUBLIC :: Derivative_1D => Derivative_1D_cpu, Derivative_1D_gpu
       PROCEDURE, PRIVATE :: Derivative_1D_cpu, Derivative_1D_gpu
@@ -151,6 +151,15 @@ IMPLICIT NONE
     END INTERFACE
 
     INTERFACE
+      SUBROUTINE TensorGridInterp_2D_gpu_wrapper(iMatrixT_dev, f_dev, fInterp_dev, N, M, nVar, nEl) bind(c,name="TensorGridInterp_2D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
+        INTEGER, VALUE :: N, M, nVar, nEl
+      END SUBROUTINE TensorGridInterp_2D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
       SUBROUTINE ScalarGridInterp_3D_gpu_wrapper(iMatrixT_dev, f_dev, fInterp_dev, N, M, nVar, nEl) bind(c,name="ScalarGridInterp_3D_gpu_wrapper")
         USE iso_c_binding
         IMPLICIT NONE
@@ -166,6 +175,15 @@ IMPLICIT NONE
         TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
         INTEGER, VALUE :: N, M, nVar, nEl
       END SUBROUTINE VectorGridInterp_3D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE TensorGridInterp_3D_gpu_wrapper(iMatrixT_dev, f_dev, fInterp_dev, N, M, nVar, nEl) bind(c,name="TensorGridInterp_3D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
+        INTEGER, VALUE :: N, M, nVar, nEl
+      END SUBROUTINE TensorGridInterp_3D_gpu_wrapper
     END INTERFACE
 
     INTERFACE
@@ -756,7 +774,7 @@ IMPLICIT NONE
     REAL(prec), INTENT(out) :: fNew(1:2,0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
     ! Local
     INTEGER :: i, j, ii, jj, p, iEl, iVar
-    REAL(prec) :: f1, f2
+    REAL(prec) :: fi(1:2)
    
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
@@ -768,15 +786,12 @@ IMPLICIT NONE
 
               DO jj = 0, myPoly % N
                    
-                f1 = 0.0_prec
-                f2 = 0.0_prec
+                fi(1:2) = 0.0_prec
                 DO ii = 0, myPoly % N
-                  f1 = f1 + f(1,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
-                  f2 = f2 + f(2,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                  fi(1:2)= fi(1:2) + f(1:2,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
                 ENDDO
                       
-                fNew(1,i,j,iVar,iEl) = fNew(1,i,j,iVar,iEl) + f1*myPoly % iMatrixTranspose(jj,j)
-                fNew(2,i,j,iVar,iEl) = fNew(2,i,j,iVar,iEl) + f2*myPoly % iMatrixTranspose(jj,j)
+                fNew(1:2,i,j,iVar,iEl) = fNew(1:2,i,j,iVar,iEl) + fi(1:2)*myPoly % iMatrixTranspose(jj,j)
 
               ENDDO
                    
@@ -801,6 +816,56 @@ IMPLICIT NONE
                                                 nVariables, nElements)
 
   END SUBROUTINE VectorGridInterp_2D_gpu
+
+  SUBROUTINE TensorGridInterp_2D_cpu( myPoly, f, fNew, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:2,1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: fNew(1:2,1:2,0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER :: i, j, ii, jj, p, iEl, iVar
+    REAL(prec) :: fi(1:2,1:2)
+   
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO j = 0, myPoly % M
+            DO i = 0, myPoly % M
+             
+              fNew(1:2,1:2,i,j,iVar,iEl) = 0.0_prec
+
+              DO jj = 0, myPoly % N
+                   
+                fi(1:2,1:2) = 0.0_prec
+                DO ii = 0, myPoly % N
+                  fi(1:2,1:2)= fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                ENDDO
+                      
+                fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrixTranspose(jj,j)
+
+              ENDDO
+                   
+            ENDDO
+          ENDDO
+        ENDDO   
+      ENDDO
+
+
+  END SUBROUTINE TensorGridInterp_2D_cpu
+!
+  SUBROUTINE TensorGridInterp_2D_gpu( myPoly, f_dev, fInterp_dev, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in) :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)  :: f_dev
+    TYPE(c_ptr), INTENT(out) :: fInterp_dev
+
+      CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+                                                f_dev, fInterp_dev, &
+                                                myPoly % N, myPoly % M, &
+                                                nVariables, nElements)
+
+  END SUBROUTINE TensorGridInterp_2D_gpu
 
 ! ================================================================================================ !
 !
@@ -948,6 +1013,57 @@ IMPLICIT NONE
 
   END SUBROUTINE VectorGridInterp_3D_gpu
 !
+  SUBROUTINE TensorGridInterp_3D_cpu( myPoly, f, fInterp, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:3,1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: fInterp(1:3,1:3,0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER :: iEl, iVar, i, j, k, ii, jj, kk
+    REAL(prec) :: fi(1:3,1:3), fij(1:3,1:3)
+   
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myPoly % M
+            DO j = 0, myPoly % M
+              DO i = 0, myPoly % M
+               
+                fInterp(1:3,1:3,i,j,k,iVar,iEl) = 0.0_prec
+                DO kk = 0, myPoly % N
+                  fij(1:3,1:3) = 0.0_prec
+                  DO jj = 0, myPoly % N
+                    fi(1:3,1:3) = 0.0_prec
+                    DO ii = 0, myPoly % N
+                      fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                    ENDDO
+                    fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrixTranspose(jj,j)
+                  ENDDO
+                  fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + fij(1:3,1:3)*myPoly % iMatrixTranspose(kk,k)
+                ENDDO
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO   
+      ENDDO
+
+  END SUBROUTINE TensorGridInterp_3D_cpu
+!
+  SUBROUTINE TensorGridInterp_3D_gpu( myPoly, f_dev, fInterp_dev, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in) :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)  :: f_dev
+    TYPE(c_ptr), INTENT(out) :: fInterp_dev
+
+      CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+                                                f_dev, fInterp_dev, &
+                                                myPoly % N, myPoly % M, &
+                                                nVariables, nElements)
+
+  END SUBROUTINE TensorGridInterp_3D_gpu
+
 ! ================================================================================================ !
 !
 ! Derivative_1D 

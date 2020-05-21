@@ -74,7 +74,7 @@ CONTAINS
     CHARACTER(50) :: funcName, funcValue, funcDerivative 
     INTEGER, ALLOCATABLE :: polyDeg(:) 
     INTEGER :: nPlotPoints, i, iEl, pdeg, nelements, nRepeats
-    REAL(prec), ALLOCATABLE :: interpNodes(:), qWeights(:), targetNodes(:)
+    REAL(prec), ALLOCATABLE :: targetNodes(:)
     REAL(prec), ALLOCATABLE, TARGET :: fNodal(:,:,:), fInterp(:,:,:), dfdxInterp(:,:,:),  fActual(:,:,:), dfdxActual(:,:,:)  
 #ifdef GPU
     TYPE(c_ptr) :: fNodal_dev, fInterp_dev, dfdxInterp_dev
@@ -142,7 +142,7 @@ CONTAINS
 
           DO pdeg = polyDeg(1), polyDeg(2)
 
-            ALLOCATE(interpNodes(0:pdeg), qWeights(0:pdeg), fNodal(0:pdeg,1,1:nElements), dfdxInterp(0:pdeg,1,1:nElements), dfdxActual(0:pdeg,1,1:nElements))
+            ALLOCATE(fNodal(0:pdeg,1,1:nElements), dfdxInterp(0:pdeg,1,1:nElements), dfdxActual(0:pdeg,1,1:nElements))
 
             CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
 
@@ -151,7 +151,7 @@ CONTAINS
               DO i = 0, pdeg
                 xL = -1.0_prec + REAL((iEl-1),prec)*dx
                 xR = xL + dx
-                x = 0.5_prec*( xR*(interpNodes(i)+1.0_prec) - xL*(interpNodes(i)-1.0_prec) )
+                x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
                 fNodal(i,1,iEl) = f % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
                 dfdxActual(i,1,iEl) = dfdx % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
               ENDDO
@@ -290,7 +290,7 @@ CONTAINS
             ! ***** !
 #endif
 
-            DEALLOCATE(interpNodes, qWeights, fNodal, dfdxInterp, dfdxActual)
+            DEALLOCATE(fNodal, dfdxInterp, dfdxActual)
 #ifdef GPU      
             CALL hfFree(fNodal_dev)
             CALL hfFree(dfdxInterp_dev)
@@ -335,7 +335,7 @@ CONTAINS
     CHARACTER(50) :: funcName, funcValue, dfdx_str, dfdy_str 
     INTEGER, ALLOCATABLE :: polyDeg(:) 
     INTEGER :: nPlotPoints, i, j, iX, iY, iEl, pdeg, nelements, nRepeats
-    REAL(prec), ALLOCATABLE :: interpNodes(:), qWeights(:), targetNodes(:)
+    REAL(prec), ALLOCATABLE :: targetNodes(:)
     REAL(prec), ALLOCATABLE, TARGET :: fNodal(:,:,:,:), fInterp(:,:,:,:), gradFInterp(:,:,:,:,:),  fActual(:,:,:,:), gradFActual(:,:,:,:,:)  
 #ifdef GPU
     TYPE(c_ptr) :: fNodal_dev, fInterp_dev, gradFInterp_dev
@@ -415,7 +415,7 @@ CONTAINS
 
           DO pdeg = polyDeg(1), polyDeg(2)
 
-            ALLOCATE(interpNodes(0:pdeg), qWeights(0:pdeg), fNodal(0:pdeg,0:pdeg,1,1:nElements*nElements), &
+            ALLOCATE(fNodal(0:pdeg,0:pdeg,1,1:nElements*nElements), &
                      gradFInterp(1:2,0:pdeg,0:pdeg,1,1:nElements*nElements), &
                      gradFActual(1:2,0:pdeg,0:pdeg,1,1:nElements*nElements))
 
@@ -429,9 +429,9 @@ CONTAINS
                 xL = -1.0_prec + REAL((iX-1),prec)*dx
                 xR = xL + dx
                 DO j = 0, pdeg
-                  y = 0.5_prec*( yR*(interpNodes(j)+1.0_prec) - yL*(interpNodes(j)-1.0_prec) )
+                  y = 0.5_prec*( yR*(interp % controlPoints(j)+1.0_prec) - yL*(interp % controlPoints(j)-1.0_prec) )
                   DO i = 0, pdeg
-                    x = 0.5_prec*( xR*(interpNodes(i)+1.0_prec) - xL*(interpNodes(i)-1.0_prec) )
+                    x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
                     iEl = iX + nElements*(iY-1)
                     fNodal(i,j,1,iEl) = f % Evaluate( (/ x, y, 0.0_prec /) )          
                     gradFActual(1,i,j,1,iEl) = dfdx % Evaluate( (/ x, y, 0.0_prec /) )
@@ -586,7 +586,7 @@ CONTAINS
 !            ! ***** !
 !#endif
 
-            DEALLOCATE(interpNodes, qWeights, fNodal, gradFInterp, gradFActual)
+            DEALLOCATE(fNodal, gradFInterp, gradFActual)
 #ifdef GPU      
             CALL hfFree(fNodal_dev)
 !            CALL hfFree(gradFInterp_dev)
@@ -631,7 +631,7 @@ CONTAINS
     CHARACTER(50) :: funcName, funcValue, funcDerivative 
     INTEGER, ALLOCATABLE :: polyDeg(:) 
     INTEGER :: nPlotPoints, i, j, k, iX, iY, iZ, iEl, pdeg, nelements, nRepeats
-    REAL(prec), ALLOCATABLE :: interpNodes(:), qWeights(:), targetNodes(:)
+    REAL(prec), ALLOCATABLE :: targetNodes(:)
     REAL(prec), ALLOCATABLE, TARGET :: fNodal(:,:,:,:,:), fInterp(:,:,:,:,:), dfdxInterp(:,:,:,:,:),  fActual(:,:,:,:,:), dfdxActual(:,:,:,:,:)  
 #ifdef GPU
     TYPE(c_ptr) :: fNodal_dev, fInterp_dev, dfdxInterp_dev
@@ -716,8 +716,7 @@ CONTAINS
 
           DO pdeg = polyDeg(1), polyDeg(2)
 
-            ALLOCATE(interpNodes(0:pdeg), qWeights(0:pdeg), &
-                     fNodal(0:pdeg,0:pdeg,0:pdeg,1,1:nElements*nElements*nElements), &
+            ALLOCATE(fNodal(0:pdeg,0:pdeg,0:pdeg,1,1:nElements*nElements*nElements), &
                      dfdxInterp(0:pdeg,0:pdeg,0:pdeg,1,1:nElements*nElements*nElements),&
                      dfdxActual(0:pdeg,0:pdeg,0:pdeg,1,1:nElements*nElements*nElements))
 
@@ -734,11 +733,11 @@ CONTAINS
                   xL = -1.0_prec + REAL((iX-1),prec)*dx
                   xR = xL + dx
                   DO k = 0, pdeg
-                    z = 0.5_prec*( zR*(interpNodes(k)+1.0_prec) - zL*(interpNodes(k)-1.0_prec) )
+                    z = 0.5_prec*( zR*(interp % controlPoints(k)+1.0_prec) - zL*(interp % controlPoints(k)-1.0_prec) )
                     DO j = 0, pdeg
-                      y = 0.5_prec*( yR*(interpNodes(j)+1.0_prec) - yL*(interpNodes(j)-1.0_prec) )
+                      y = 0.5_prec*( yR*(interp % controlPoints(j)+1.0_prec) - yL*(interp % controlPoints(j)-1.0_prec) )
                       DO i = 0, pdeg
-                        x = 0.5_prec*( xR*(interpNodes(i)+1.0_prec) - xL*(interpNodes(i)-1.0_prec) )
+                        x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
                         iEl = iX + nElements*(iY-1) + nElements*nElements*(iZ-1)
                         fNodal(i,j,k,1,iEl) = f % Evaluate( (/ x, y, z /) )          
                       ENDDO
@@ -891,7 +890,7 @@ CONTAINS
 !            ! ***** !
 !#endif
 
-            DEALLOCATE(interpNodes, qWeights, fNodal, dfdxInterp, dfdxActual)
+            DEALLOCATE(fNodal, dfdxInterp, dfdxActual)
 #ifdef GPU      
             CALL hfFree(fNodal_dev)
 !            CALL hfFree(dfdxInterp_dev)
