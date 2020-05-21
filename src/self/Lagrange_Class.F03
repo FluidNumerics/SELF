@@ -66,8 +66,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: ScalarGridInterp_2D => ScalarGridInterp_2D_cpu, ScalarGridInterp_2D_gpu
       PROCEDURE, PRIVATE :: ScalarGridInterp_2D_cpu, ScalarGridInterp_2D_gpu
 
-!      GENERIC, PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
-!      PROCEDURE, PRIVATE :: VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
+      GENERIC, PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
+      PROCEDURE, PRIVATE :: VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
 
 !      GENERIC, PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
 !      PROCEDURE, PRIVATE :: TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
@@ -139,6 +139,15 @@ IMPLICIT NONE
         TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
         INTEGER, VALUE :: N, M, nVar, nEl
       END SUBROUTINE ScalarGridInterp_2D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE VectorGridInterp_2D_gpu_wrapper(iMatrixT_dev, f_dev, fInterp_dev, N, M, nVar, nEl) bind(c,name="VectorGridInterp_2D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
+        INTEGER, VALUE :: N, M, nVar, nEl
+      END SUBROUTINE VectorGridInterp_2D_gpu_wrapper
     END INTERFACE
 
     INTERFACE
@@ -729,6 +738,60 @@ IMPLICIT NONE
                                                 nVariables, nElements)
 
   END SUBROUTINE ScalarGridInterp_2D_gpu
+
+  SUBROUTINE VectorGridInterp_2D_cpu( myPoly, f, fNew, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: fNew(1:2,0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER :: i, j, ii, jj, p, iEl, iVar
+    REAL(prec) :: f1, f2
+   
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO j = 0, myPoly % M
+            DO i = 0, myPoly % M
+             
+              fNew(1,i,j,iVar,iEl) = 0.0_prec
+              fNew(2,i,j,iVar,iEl) = 0.0_prec
+
+              DO jj = 0, myPoly % N
+                   
+                f1 = 0.0_prec
+                f2 = 0.0_prec
+                DO ii = 0, myPoly % N
+                  f1 = f1 + f(1,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                  f2 = f2 + f(2,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                ENDDO
+                      
+                fNew(1,i,j,iVar,iEl) = fNew(1,i,j,iVar,iEl) + f1*myPoly % iMatrixTranspose(jj,j)
+                fNew(2,i,j,iVar,iEl) = fNew(2,i,j,iVar,iEl) + f2*myPoly % iMatrixTranspose(jj,j)
+
+              ENDDO
+                   
+            ENDDO
+          ENDDO
+        ENDDO   
+      ENDDO
+
+
+  END SUBROUTINE VectorGridInterp_2D_cpu
+!
+  SUBROUTINE VectorGridInterp_2D_gpu( myPoly, f_dev, fInterp_dev, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in) :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)  :: f_dev
+    TYPE(c_ptr), INTENT(out) :: fInterp_dev
+
+      CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+                                                f_dev, fInterp_dev, &
+                                                myPoly % N, myPoly % M, &
+                                                nVariables, nElements)
+
+  END SUBROUTINE VectorGridInterp_2D_gpu
 
 ! ================================================================================================ !
 !

@@ -53,6 +53,39 @@ extern "C"
   } 
 }
 
+// VectorGridInterp_2D //
+__global__ void VectorGridInterp_2D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  real fij1 = 0.0;
+  real fij2 = 0.0;
+  for (int jj=0; jj<N+1; jj++) {
+    real fi1 = 0.0;
+    real fi2 = 0.0;
+    for (int ii=0; ii<N+1; ii++) {
+      fi1 += f[VE_2D_INDEX(1,ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+      fi2 += f[VE_2D_INDEX(2,ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+    }
+    fij1 += fi1*iMatrix[jj+j*(N+1)];
+    fij2 += fi2*iMatrix[jj+j*(N+1)];
+  }
+  fInterp[VE_2D_INDEX(1,i,j,iVar,iEl,M,nVar)] = fij1;
+  fInterp[VE_2D_INDEX(2,i,j,iVar,iEl,M,nVar)] = fij2;
+
+}
+
+extern "C"
+{
+  void VectorGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorGridInterp_2D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+  } 
+}
+
 // ScalarGridInterp_3D //
 __global__ void ScalarGridInterp_3D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
