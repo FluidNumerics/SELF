@@ -75,8 +75,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu, ScalarGridInterp_3D_gpu
       PROCEDURE, PRIVATE :: ScalarGridInterp_3D_cpu, ScalarGridInterp_3D_gpu
 
-!      GENERIC, PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
-!      PROCEDURE, PRIVATE :: VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
+      GENERIC, PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
+      PROCEDURE, PRIVATE :: VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
 
 !      GENERIC, PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
 !      PROCEDURE, PRIVATE :: TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
@@ -157,6 +157,15 @@ IMPLICIT NONE
         TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
         INTEGER, VALUE :: N, M, nVar, nEl
       END SUBROUTINE ScalarGridInterp_3D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE VectorGridInterp_3D_gpu_wrapper(iMatrixT_dev, f_dev, fInterp_dev, N, M, nVar, nEl) bind(c,name="VectorGridInterp_3D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: iMatrixT_dev, f_dev, fInterp_dev
+        INTEGER, VALUE :: N, M, nVar, nEl
+      END SUBROUTINE VectorGridInterp_3D_gpu_wrapper
     END INTERFACE
 
     INTERFACE
@@ -887,6 +896,57 @@ IMPLICIT NONE
                                                 nVariables, nElements)
 
   END SUBROUTINE ScalarGridInterp_3D_gpu
+
+  SUBROUTINE VectorGridInterp_3D_cpu( myPoly, f, fInterp, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: fInterp(1:3,0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER :: iEl, iVar, i, j, k, ii, jj, kk
+    REAL(prec) :: fi(1:3), fij(1:3)
+   
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myPoly % M
+            DO j = 0, myPoly % M
+              DO i = 0, myPoly % M
+               
+                fInterp(1:3,i,j,k,iVar,iEl) = 0.0_prec
+                DO kk = 0, myPoly % N
+                  fij(1:3) = 0.0_prec
+                  DO jj = 0, myPoly % N
+                    fi(1:3) = 0.0_prec
+                    DO ii = 0, myPoly % N
+                      fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                    ENDDO
+                    fij(1:3) = fij(1:3) + fi(1:3)*myPoly % iMatrixTranspose(jj,j)
+                  ENDDO
+                  fInterp(1:3,i,j,k,iVar,iEl) = fInterp(1:3,i,j,k,iVar,iEl) + fij(1:3)*myPoly % iMatrixTranspose(kk,k)
+                ENDDO
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO   
+      ENDDO
+
+  END SUBROUTINE VectorGridInterp_3D_cpu
+!
+  SUBROUTINE VectorGridInterp_3D_gpu( myPoly, f_dev, fInterp_dev, nVariables, nElements )  
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in) :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)  :: f_dev
+    TYPE(c_ptr), INTENT(out) :: fInterp_dev
+
+      CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+                                                f_dev, fInterp_dev, &
+                                                myPoly % N, myPoly % M, &
+                                                nVariables, nElements)
+
+  END SUBROUTINE VectorGridInterp_3D_gpu
 !
 ! ================================================================================================ !
 !
