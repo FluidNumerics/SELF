@@ -85,8 +85,8 @@ IMPLICIT NONE
       PROCEDURE, PRIVATE :: Derivative_1D_cpu, Derivative_1D_gpu
 
 !      Takes in Scalar and Returns Vector
-!      GENERIC, PUBLIC :: ScalarGradient_2D => ScalarGradient_1D_cpu, ScalarGradient_1D_gpu
-!      PROCEDURE, PRIVATE :: ScalarGradient_2D_cpu, ScalarGradient_1D_gpu
+      GENERIC, PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu, ScalarGradient_2D_gpu
+      PROCEDURE, PRIVATE :: ScalarGradient_2D_cpu, ScalarGradient_2D_gpu
 
 !      Takes in Vector and Returns Tensor
 !      GENERIC, PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu, VectorGradient_2D_gpu
@@ -194,6 +194,15 @@ IMPLICIT NONE
         INTEGER, VALUE :: N, nVar, nEl
       END SUBROUTINE Derivative_1D_gpu_wrapper
     END INTERFACE
+
+    INTERFACE
+      SUBROUTINE ScalarGradient_2D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="ScalarGradient_2D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE ScalarGradient_2D_gpu_wrapper
+    END INTERFACE
  
  CONTAINS
 
@@ -299,6 +308,9 @@ IMPLICIT NONE
       CALL myPoly % CalculateDerivativeMatrix( )
 
 #ifdef GPU
+!      IF( N > 7 )THEN
+!         CALL Logging( WARN, 'Number of control points > 7 not fully supported for 3-D SEM operations.' )
+!      ENDIF
       CALL hfMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights))
       CALL hfMalloc(myPoly % qWeights_dev, SIZEOF(myPoly % qWeights))
       CALL hfMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix))
@@ -1193,35 +1205,48 @@ IMPLICIT NONE
 !!   
 !! ================================================================================================ ! 
 !
-!  SUBROUTINE CalculateGradient_2D( myPoly, f, gradF, nVariables, nElements )
-!    IMPLICIT NONE
-!    CLASS(Lagrange), INTENT(in) :: myPoly
-!
-!#ifdef GPU
-!    INTEGER, DEVICE, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), DEVICE, INTENT(out) :: gradF(1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    TYPE(dim3) :: grid, tBlock
-!    INTEGER    :: threadCount
-!  
-!      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
-!
-!      tBlock = dim3( threadCount, threadCount, 1 )
-!      grid   = dim3( nVariables, nElements, 1)
-!
-!      CALL CalculateGradient_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
-!                                                                f, gradF, myPoly % N_dev, nVariables, nElements )
-!
-!#else
-!    INTEGER, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), INTENT(out) :: gradF(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!
-!      gradF = CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements )
-!
-!#endif
-!
-!  END SUBROUTINE CalculateGradient_2D
+  SUBROUTINE ScalarGradient_2D_cpu( myPoly, f, gradF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: gradF(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER    :: i, j, ii, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO j = 0, myPoly % N
+            DO i = 0, myPoly % N
+    
+              gradF(1,i,j,iVar,iEl) = 0.0_prec 
+              gradF(2,i,j,iVar,iEl) = 0.0_prec 
+              DO ii = 0, myPoly % N
+                gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,j,iVar,iEl)
+                gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(i,ii,iVar,iEl)
+              ENDDO
+    
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ScalarGradient_2D_cpu
+
+  SUBROUTINE ScalarGradient_2D_gpu( myPoly, f_dev, gradF_dev, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)     :: f_dev
+    TYPE(c_ptr), INTENT(out)    :: gradF_dev
+    ! Local
+    INTEGER    :: i, j, ii, iVar, iEl
+
+      CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+                                         f_dev, gradF_dev, myPoly % N, &
+                                         nVariables, nElements)
+
+  END SUBROUTINE ScalarGradient_2D_gpu
 !
 !! ================================================================================================ !
 !!
@@ -1710,25 +1735,6 @@ IMPLICIT NONE
 !    INTEGER         :: nVariables, nElements
 !    REAL(prec)      :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
 !    REAL(prec)      :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    ! Local
-!    INTEGER    :: i, j, ii, iVar, iEl
-!
-!      DO iEl = 1, nElements
-!        DO iVar = 1, nVariables
-!          DO j = 0, myPoly % N
-!            DO i = 0, myPoly % N
-!    
-!              gradF(1,i,j,iVar,iEl) = 0.0_prec 
-!              gradF(2,i,j,iVar,iEl) = 0.0_prec 
-!              DO ii = 0, myPoly % N
-!                gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,j,iVar,iEl)
-!                gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(i,ii,iVar,iEl)
-!              ENDDO
-!    
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!      ENDDO
 !
 !  END FUNCTION CalculateGradient_2D_Lagrange
 !!

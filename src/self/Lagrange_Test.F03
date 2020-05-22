@@ -513,83 +513,83 @@ CONTAINS
             ! ***** !
 #endif
 
-!
-!            ! ***** Derivative_2D Testing ****** !
-!            ! Estimate the derivative by applying the derivative matrix
-!            CALL interp % ScalarGradient_2D(fNodal, gradFInterp, 1, nElements*nElements)
-!            fErr = 0.0_prec
-!            DO iEl = 1, nElements*nElements
-!              DO j = 0, pdeg
-!                DO i = 0, pdeg
-!                  fErr = MAX(ABS(gradFInterp(1,i,j,1,iEl)*2.0_prec/dx - gradFActual(1,i,j,1,iEl)),fErr)
-!                  fErr = MAX(ABS(gradFInterp(2,i,j,1,iEl)*2.0_prec/dx - gradFActual(2,i,j,1,iEl)),fErr)
-!                ENDDO
-!              ENDDO
-!            ENDDO
-!
-!            ! Estimate routine runtime
-!            CALL CPU_TIME(t1)
-!            DO i = 1, nRepeats
-!              CALL interp % ScalarGradient_2D(fNodal, gradFInterp, 1, nElements*nElements)
-!            ENDDO
-!            CALL CPU_TIME(t2)
-!
-!            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'ScalarGradient_2D')
-!            CALL json_output % add(res, 'polynomial_degree', pdeg)
-!            CALL json_output % add(res, 'n_variables', 1)
-!            CALL json_output % add(res, 'n_elements', nElements*nElements)
-!            CALL json_output % add(res, 'function', TRIM(funcValue))
-!            CALL json_output % add(res, 'max_error', fErr)
-!            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
-!            CALL json_output % add(resArray, res)
-!            nullify(res)
-!            ! ***** !
-!
-!#ifdef GPU
-!            CALL hfMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp))
-!
-!            ! ***** Derivative_2D Testing ****** !
-!            ! Estimate the derivative by applying the derivative matrix
-!            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-!            CALL interp % Derivative_2D(fNodal_dev, gradFInterp_dev, 1, nElements*nElements)
-!            CALL hipFortran(hipMemcpy(c_loc(gradFInterp), gradFInterp_dev, SIZEOF(gradFInterp), hipMemcpyDeviceToHost))
-!
-!            fErr = 0.0_prec
-!            DO iEl = 1, nElements*nElements
-!              DO j = 0, pdeg
-!                DO i = 0, pdeg
-!                  fErr = MAX(ABS(gradFInterp(1,i,j,1,iEl)*2.0_prec/dx - gradFActual(1,i,j,1,iEl)),fErr)
-!                  fErr = MAX(ABS(gradFInterp(2,i,j,1,iEl)*2.0_prec/dx - gradFActual(2,i,j,1,iEl)),fErr)
-!                ENDDO
-!              ENDDO
-!            ENDDO
-!
-!            ! Estimate routine runtime
-!            CALL CPU_TIME(t1)
-!            DO i = 1, nRepeats
-!              CALL interp % ScalarGradient_2D(fNodal_dev, gradFInterp_dev, 1, nElements)
-!            ENDDO
-!            CALL hipFortran(hipDeviceSynchronize()) 
-!            CALL CPU_TIME(t2)
-!
-!            CALL json_output % create_object(res,'')
-!            CALL json_output % add(res, 'routine_name', 'ScalarGradient_2D (GPU)')
-!            CALL json_output % add(res, 'polynomial_degree', pdeg)
-!            CALL json_output % add(res, 'n_variables', 1)
-!            CALL json_output % add(res, 'n_elements', nElements)
-!            CALL json_output % add(res, 'function', TRIM(funcValue))
-!            CALL json_output % add(res, 'max_error', fErr)
-!            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
-!            CALL json_output % add(resArray, res)
-!            nullify(res)
-!            ! ***** !
-!#endif
+
+            ! ***** Derivative_2D Testing ****** !
+            ! Estimate the derivative by applying the derivative matrix
+            CALL interp % ScalarGradient_2D(fNodal, gradFInterp, 1, nElements*nElements)
+            fErr = 0.0_prec
+            DO iEl = 1, nElements*nElements
+              DO j = 0, pdeg
+                DO i = 0, pdeg
+                  fErr = MAX(ABS(gradFInterp(1,i,j,1,iEl)*2.0_prec/dx - gradFActual(1,i,j,1,iEl)),fErr)
+                  fErr = MAX(ABS(gradFInterp(2,i,j,1,iEl)*2.0_prec/dx - gradFActual(2,i,j,1,iEl)),fErr)
+                ENDDO
+              ENDDO
+            ENDDO
+
+            ! Estimate routine runtime
+            CALL CPU_TIME(t1)
+            DO i = 1, nRepeats
+              CALL interp % ScalarGradient_2D(fNodal, gradFInterp, 1, nElements*nElements)
+            ENDDO
+            CALL CPU_TIME(t2)
+
+            CALL json_output % create_object(res,'')
+            CALL json_output % add(res, 'routine_name', 'ScalarGradient_2D')
+            CALL json_output % add(res, 'polynomial_degree', pdeg)
+            CALL json_output % add(res, 'n_variables', 1)
+            CALL json_output % add(res, 'n_elements', nElements*nElements)
+            CALL json_output % add(res, 'function', TRIM(funcValue))
+            CALL json_output % add(res, 'max_error', fErr)
+            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
+            CALL json_output % add(resArray, res)
+            nullify(res)
+            ! ***** !
+
+#ifdef GPU
+            CALL hfMalloc(gradFInterp_dev, SIZEOF(gradFInterp))
+
+            ! ***** Derivative_2D Testing ****** !
+            ! Estimate the derivative by applying the derivative matrix
+            CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+            CALL interp % ScalarGradient_2D(fNodal_dev, gradFInterp_dev, 1, nElements*nElements)
+            CALL hipFortran(hipMemcpy(c_loc(gradFInterp), gradFInterp_dev, SIZEOF(gradFInterp), hipMemcpyDeviceToHost))
+
+            fErr = 0.0_prec
+            DO iEl = 1, nElements*nElements
+              DO j = 0, pdeg
+                DO i = 0, pdeg
+                  fErr = MAX(ABS(gradFInterp(1,i,j,1,iEl)*2.0_prec/dx - gradFActual(1,i,j,1,iEl)),fErr)
+                  fErr = MAX(ABS(gradFInterp(2,i,j,1,iEl)*2.0_prec/dx - gradFActual(2,i,j,1,iEl)),fErr)
+                ENDDO
+              ENDDO
+            ENDDO
+
+            ! Estimate routine runtime
+            CALL CPU_TIME(t1)
+            DO i = 1, nRepeats
+              CALL interp % ScalarGradient_2D(fNodal_dev, gradFInterp_dev, 1, nElements*nElements)
+            ENDDO
+            CALL hipFortran(hipDeviceSynchronize()) 
+            CALL CPU_TIME(t2)
+
+            CALL json_output % create_object(res,'')
+            CALL json_output % add(res, 'routine_name', 'ScalarGradient_2D (GPU)')
+            CALL json_output % add(res, 'polynomial_degree', pdeg)
+            CALL json_output % add(res, 'n_variables', 1)
+            CALL json_output % add(res, 'n_elements', nElements*nElements)
+            CALL json_output % add(res, 'function', TRIM(funcValue))
+            CALL json_output % add(res, 'max_error', fErr)
+            CALL json_output % add(res, 'runtime_ms', (t2-t1)*REAL(nRepeats,prec)/1000.0_prec)
+            CALL json_output % add(resArray, res)
+            nullify(res)
+            ! ***** !
+#endif
 
             DEALLOCATE(fNodal, gradFInterp, gradFActual)
 #ifdef GPU      
             CALL hfFree(fNodal_dev)
-!            CALL hfFree(gradFInterp_dev)
+            CALL hfFree(gradFInterp_dev)
 #endif
 
           ENDDO

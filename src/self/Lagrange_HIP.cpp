@@ -315,3 +315,30 @@ extern "C"
 	  hipLaunchKernelGGL((Derivative_1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
   } 
 }
+
+// ScalarGradient_2D //
+__global__ void ScalarGradient_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  real fs = 0.0;
+  real fp = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    fs += f[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    fp += f[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+  }
+  df[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = fs;
+  df[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = fp;
+
+}
+
+extern "C"
+{
+  void ScalarGradient_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ScalarGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
