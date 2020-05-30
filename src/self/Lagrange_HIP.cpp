@@ -342,3 +342,83 @@ extern "C"
 	  hipLaunchKernelGGL((ScalarGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
   } 
 }
+
+// VectorGradient_2D //
+__global__ void VectorGradient_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  real dfloc[4] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc[0] += f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[1] += f[VE_2D_INDEX(2,ii,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[2] += f[VE_2D_INDEX(1,i,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+    dfloc[3] += f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+  }
+  df[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = dfloc[0];
+  df[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)] = dfloc[1];
+  df[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)] = dfloc[2];
+  df[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)] = dfloc[3];
+
+}
+
+extern "C"
+{
+  void VectorGradient_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
+
+// VectorDivergence_2D //
+__global__ void VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  real dfloc = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc += f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
+            +f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+  }
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc; 
+
+}
+
+extern "C"
+{
+  void VectorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
+
+// VectorCurl_2D //
+__global__ void VectorCurl_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  real dfloc = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc += f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)] 
+            -f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+  }
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc; 
+
+}
+
+extern "C"
+{
+  void VectorCurl_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorCurl_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
