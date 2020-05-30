@@ -422,3 +422,130 @@ extern "C"
 	  hipLaunchKernelGGL((VectorCurl_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
   } 
 }
+
+// ScalarGradient_3D //
+__global__ void ScalarGradient_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+  real dfloc[3] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc[0] += f[SC_3D_INDEX(ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[1] += f[SC_3D_INDEX(i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+    dfloc[2] += f[SC_3D_INDEX(i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
+  }
+  df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dfloc[0];
+  df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dfloc[1];
+  df[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dfloc[2];
+}
+
+extern "C"
+{
+  void ScalarGradient_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ScalarGradient_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
+
+// VectorGradient_3D //
+__global__ void VectorGradient_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+  real dfloc[9] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc[0] += f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[1] += f[VE_3D_INDEX(2,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[2] += f[VE_3D_INDEX(3,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[3] += f[VE_3D_INDEX(1,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+    dfloc[4] += f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+    dfloc[5] += f[VE_3D_INDEX(3,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+    dfloc[6] += f[VE_3D_INDEX(1,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
+    dfloc[7] += f[VE_3D_INDEX(2,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
+    dfloc[8] += f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
+  }
+  df[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)] = dfloc[0];
+  df[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)] = dfloc[1];
+  df[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)] = dfloc[2];
+  df[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)] = dfloc[3];
+  df[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)] = dfloc[4];
+  df[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)] = dfloc[5];
+  df[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)] = dfloc[6];
+  df[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)] = dfloc[7];
+  df[TE_3D_INDEX(3,3,i,j,k,iVar,iEl,N,nVar)] = dfloc[8];
+}
+
+extern "C"
+{
+  void VectorGradient_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorGradient_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
+
+// VectorDivergence_3D //
+__global__ void VectorDivergence_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+  real dfloc = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc += f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
+            +f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)]
+            +f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+  }
+  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = dfloc; 
+
+}
+
+extern "C"
+{
+  void VectorDivergence_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}
+
+// VectorCurl_3D //
+__global__ void VectorCurl_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+  real dfloc[3] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc[0] += f[VE_3D_INDEX(3,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)] 
+               -f[VE_3D_INDEX(2,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
+    dfloc[1] += f[VE_3D_INDEX(1,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)] 
+               -f[VE_3D_INDEX(3,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+    dfloc[2] += f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)] 
+               -f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+  }
+  df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dfloc[0]; 
+  df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dfloc[1]; 
+  df[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dfloc[2]; 
+
+}
+
+extern "C"
+{
+  void VectorCurl_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorCurl_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+  } 
+}

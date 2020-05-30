@@ -99,22 +99,22 @@ IMPLICIT NONE
 !      Takes in Vector and Returns Vector
       GENERIC, PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu, VectorCurl_2D_gpu
       PROCEDURE, PRIVATE :: VectorCurl_2D_cpu, VectorCurl_2D_gpu
-!
+
 !      Takes in Scalar and Returns Vector
-!      GENERIC, PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
-!      PROCEDURE, PRIVATE :: ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
+      GENERIC, PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
+      PROCEDURE, PRIVATE :: ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
 
 !      Takes in Vector and Returns Tensor
-!      GENERIC, PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu, VectorGradient_3D_gpu
-!      PROCEDURE, PRIVATE :: VectorGradient_3D_cpu, VectorGradient_3D_gpu
+      GENERIC, PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu, VectorGradient_3D_gpu
+      PROCEDURE, PRIVATE :: VectorGradient_3D_cpu, VectorGradient_3D_gpu
 
 !      Takes in Vector and Returns Scalar
-!      GENERIC, PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
-!      PROCEDURE, PRIVATE :: VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
+      GENERIC, PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
+      PROCEDURE, PRIVATE :: VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
 
 !      Takes in Vector and Returns Vector
-!      GENERIC, PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu, VectorCurl_3D_gpu
-!      PROCEDURE, PRIVATE :: VectorCurl_3D_cpu, VectorCurl_3D_gpu
+      GENERIC, PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu, VectorCurl_3D_gpu
+      PROCEDURE, PRIVATE :: VectorCurl_3D_cpu, VectorCurl_3D_gpu
 
       PROCEDURE, PRIVATE :: CalculateBarycentricWeights  => CalculateBarycentricWeights_Lagrange
       PROCEDURE, PRIVATE :: CalculateInterpolationMatrix => CalculateInterpolationMatrix_Lagrange
@@ -229,6 +229,42 @@ IMPLICIT NONE
         TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
         INTEGER, VALUE :: N, nVar, nEl
       END SUBROUTINE VectorCurl_2D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE ScalarGradient_3D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="ScalarGradient_3D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE ScalarGradient_3D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE VectorGradient_3D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="VectorGradient_3D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE VectorGradient_3D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE VectorDivergence_3D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="VectorDivergence_3D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE VectorDivergence_3D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE VectorCurl_3D_gpu_wrapper(dMatrixT_dev, f_dev, df_dev, N, nVar, nEl) bind(c,name="VectorCurl_3D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: dMatrixT_dev, f_dev, df_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE VectorCurl_3D_gpu_wrapper
     END INTERFACE
  
  CONTAINS
@@ -1412,6 +1448,216 @@ IMPLICIT NONE
                                          nVariables, nElements)
 
   END SUBROUTINE VectorCurl_2D_gpu
+
+  SUBROUTINE ScalarGradient_3D_cpu( myPoly, f, gradF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: gradF(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER    :: i, j, k, ii, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myPoly % N
+            DO j = 0, myPoly % N
+              DO i = 0, myPoly % N
+    
+                gradF(1,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(2,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(3,i,j,k,iVar,iEl) = 0.0_prec 
+                DO ii = 0, myPoly % N
+                  gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,j,k,iVar,iEl)
+                  gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(i,ii,k,iVar,iEl)
+                  gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(i,j,ii,iVar,iEl)
+                ENDDO
+    
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ScalarGradient_3D_cpu
+
+  SUBROUTINE ScalarGradient_3D_gpu( myPoly, f_dev, gradF_dev, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)     :: f_dev
+    TYPE(c_ptr), INTENT(out)    :: gradF_dev
+    ! Local
+    INTEGER    :: i, j, ii, iVar, iEl
+
+      CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+                                         f_dev, gradF_dev, myPoly % N, &
+                                         nVariables, nElements)
+
+  END SUBROUTINE ScalarGradient_3D_gpu
+!
+  SUBROUTINE VectorGradient_3D_cpu( myPoly, f, gradF, nVariables, nElements )
+  !
+  ! Input : Vector(1:3,...)
+  ! Output : Tensor(1:3,1:3,....)
+  !          > Tensor(1,1) = d/ds1( Vector(1,...) )
+  !          > Tensor(2,1) = d/ds1( Vector(2,...) )
+  !          > Tensor(3,1) = d/ds1( Vector(3,...) )
+  !          > Tensor(1,2) = d/ds2( Vector(1,...) )
+  !          > Tensor(2,2) = d/ds2( Vector(2,...) )
+  !          > Tensor(3,2) = d/ds2( Vector(3,...) )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: gradF(1:3,1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER    :: i, j, k, ii, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myPoly % N
+            DO j = 0, myPoly % N
+              DO i = 0, myPoly % N
+    
+                gradF(1,1,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(2,1,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(3,1,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(1,2,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(2,2,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(3,2,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(1,3,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(2,3,i,j,k,iVar,iEl) = 0.0_prec 
+                gradF(3,3,i,j,k,iVar,iEl) = 0.0_prec 
+                DO ii = 0, myPoly % N
+                  gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl)
+                  gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(2,ii,j,k,iVar,iEl)
+                  gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(3,ii,j,k,iVar,iEl)
+                  gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(1,i,ii,k,iVar,iEl)
+                  gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl)
+                  gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(3,i,ii,k,iVar,iEl)
+                  gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(1,i,j,ii,iVar,iEl)
+                  gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(2,i,j,ii,iVar,iEl)
+                  gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                ENDDO
+    
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE VectorGradient_3D_cpu
+
+  SUBROUTINE VectorGradient_3D_gpu( myPoly, f_dev, gradF_dev, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)     :: f_dev
+    TYPE(c_ptr), INTENT(out)    :: gradF_dev
+    ! Local
+    INTEGER    :: i, j, ii, iVar, iEl
+
+      CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+                                         f_dev, gradF_dev, myPoly % N, &
+                                         nVariables, nElements)
+
+  END SUBROUTINE VectorGradient_3D_gpu
+
+  SUBROUTINE VectorDivergence_3D_cpu( myPoly, f, dF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: dF(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER    :: i, j, k, ii, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myPoly % N
+            DO j = 0, myPoly % N
+              DO i = 0, myPoly % N
+    
+                dF(i,j,k,iVar,iEl) = 0.0_prec 
+                DO ii = 0, myPoly % N
+                  dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) +&
+                                                            myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) +&
+                                                            myPoly % dMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                ENDDO
+    
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE VectorDivergence_3D_cpu
+
+  SUBROUTINE VectorDivergence_3D_gpu( myPoly, f_dev, dF_dev, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)     :: f_dev
+    TYPE(c_ptr), INTENT(out)    :: dF_dev
+    ! Local
+    INTEGER    :: i, j, ii, iVar, iEl
+
+      CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+                                         f_dev, dF_dev, myPoly % N, &
+                                         nVariables, nElements)
+
+  END SUBROUTINE VectorDivergence_3D_gpu
+
+  SUBROUTINE VectorCurl_3D_cpu( myPoly, f, dF, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)     :: nVariables, nElements
+    REAL(prec), INTENT(in)  :: f(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out) :: dF(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    ! Local
+    INTEGER    :: i, j, k, ii, iVar, iEl
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO k = 0, myPoly % N
+            DO j = 0, myPoly % N
+              DO i = 0, myPoly % N
+    
+                dF(1,i,j,k,iVar,iEl) = 0.0_prec 
+                dF(2,i,j,k,iVar,iEl) = 0.0_prec 
+                dF(3,i,j,k,iVar,iEl) = 0.0_prec 
+                DO ii = 0, myPoly % N
+                  dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(3,i,ii,k,iVar,iEl) -&
+                                                                myPoly % dMatrixTranspose(ii,k)*f(2,i,j,ii,iVar,iEl)
+                  dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(1,i,j,ii,iVar,iEl) -&
+                                                                myPoly % dMatrixTranspose(ii,i)*f(3,ii,j,k,iVar,iEl)
+                  dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(2,ii,j,k,iVar,iEl) -&
+                                                                myPoly % dMatrixTranspose(ii,j)*f(1,i,ii,k,iVar,iEl)
+                ENDDO  
+    
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE VectorCurl_3D_cpu
+
+  SUBROUTINE VectorCurl_3D_gpu( myPoly, f_dev, dF_dev, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    TYPE(c_ptr), INTENT(in)     :: f_dev
+    TYPE(c_ptr), INTENT(out)    :: dF_dev
+    ! Local
+    INTEGER    :: i, j, ii, iVar, iEl
+
+      CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+                                         f_dev, dF_dev, myPoly % N, &
+                                         nVariables, nElements)
+
+  END SUBROUTINE VectorCurl_3D_gpu
 !! ================================================================================================ !
 !!
 !! CalculateDivergence_2D 
