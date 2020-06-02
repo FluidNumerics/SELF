@@ -83,15 +83,9 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
       PROCEDURE, PRIVATE :: TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
 
-!      GENERIC, PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu, ScalarBoundaryInterp_1D_gpu
-!      PROCEDURE, PRIVATE :: ScalarBoundaryInterp_1D_cpu, ScalarBoundary_1D_gpu
+      GENERIC, PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu, ScalarBoundaryInterp_1D_gpu
+      PROCEDURE, PRIVATE :: ScalarBoundaryInterp_1D_cpu, ScalarBoundaryInterp_1D_gpu
 
-!      GENERIC, PUBLIC :: VectorBoundaryInterp_1D => VectorBoundaryInterp_1D_cpu, VectorBoundaryInterp_1D_gpu
-!      PROCEDURE, PRIVATE :: VectorBoundaryInterp_1D_cpu, VectorBoundary_1D_gpu
-
-!      GENERIC, PUBLIC :: TensorBoundaryInterp_1D => TensorBoundaryInterp_1D_cpu, TensorBoundaryInterp_1D_gpu
-!      PROCEDURE, PRIVATE :: TensorBoundaryInterp_1D_cpu, TensorBoundary_1D_gpu
-!
       GENERIC, PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu, ScalarBoundaryInterp_2D_gpu
       PROCEDURE, PRIVATE :: ScalarBoundaryInterp_2D_cpu, ScalarBoundaryInterp_2D_gpu
 
@@ -145,10 +139,12 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu, VectorCurl_3D_gpu
       PROCEDURE, PRIVATE :: VectorCurl_3D_cpu, VectorCurl_3D_gpu
 
-      PROCEDURE, PRIVATE :: CalculateBarycentricWeights  => CalculateBarycentricWeights_Lagrange
-      PROCEDURE, PRIVATE :: CalculateInterpolationMatrix => CalculateInterpolationMatrix_Lagrange
-      PROCEDURE, PRIVATE :: CalculateDerivativeMatrix    => CalculateDerivativeMatrix_Lagrange
-      PROCEDURE          :: CalculateLagrangePolynomials  
+   
+      ! Internal Use Only !
+      PROCEDURE, PRIVATE :: CalculateBarycentricWeights 
+      PROCEDURE, PRIVATE :: CalculateInterpolationMatrix
+      PROCEDURE, PRIVATE :: CalculateDerivativeMatrix
+      PROCEDURE, PRIVATE :: CalculateLagrangePolynomials
       
     END TYPE Lagrange
 
@@ -217,6 +213,15 @@ IMPLICIT NONE
 
     ! /////////////// !
     ! Boundary Interpolation Routines
+
+    INTERFACE
+      SUBROUTINE ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev, f_dev, fBound_dev, N, nVar, nEl) bind(c,name="ScalarBoundaryInterp_1D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: bMatrix_dev, f_dev, fBound_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE ScalarBoundaryInterp_1D_gpu_wrapper
+    END INTERFACE
 
     INTERFACE
       SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev, f_dev, fBound_dev, N, nVar, nEl) bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
@@ -1764,6 +1769,44 @@ IMPLICIT NONE
   ! /////////////////////////////// !
   ! Boundary Interpolation Routines !
 
+  SUBROUTINE ScalarBoundaryInterp_1D_cpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    REAL(prec), INTENT(in)      :: f(0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out)     :: fBound(1:nVariables, 1:2, 1:nElements)
+    ! Local
+    INTEGER :: i, j, ii, iVar, iEl
+    REAL(prec) :: fb(1:2)
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          fb(1:2) = 0.0_prec
+          
+          DO ii = 0, myPoly % N
+            fb(1) = fb(1) + myPoly % bMatrix(ii,1)*f(ii,iVar,iEl) ! East
+            fb(2) = fb(2) + myPoly % bMatrix(ii,0)*f(ii,iVar,iEl) ! West
+          ENDDO
+
+          fBound(iVar,1:2,iEl) = fb(1:2)
+          
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ScalarBoundaryInterp_1D_cpu
+
+  SUBROUTINE ScalarBoundaryInterp_1D_gpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER       , INTENT(in)  :: nVariables, nElements
+    TYPE(c_ptr)    , INTENT(in)  :: f
+    TYPE(c_ptr)    , INTENT(out)  :: fBound
+
+      CALL ScalarBoundaryInterp_1D_gpu_wrapper(myPoly % bMatrix_dev, &
+                                               f, fBound, myPoly % N, nVariables, nElements)
+
+  END SUBROUTINE ScalarBoundaryInterp_1D_gpu
+
   SUBROUTINE ScalarBoundaryInterp_2D_cpu( myPoly, f, fBound, nVariables, nElements )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
@@ -2297,7 +2340,7 @@ IMPLICIT NONE
 
 ! ================================================================================================ !
 !
-! CalculateBarycentricWeights_Lagrange (PRIVATE)
+! CalculateBarycentricWeights (PRIVATE)
 !
 !   A PRIVATE routine that calculates and stores the barycentric weights for the Lagrange 
 !   data-structure.
@@ -2306,7 +2349,7 @@ IMPLICIT NONE
 ! 
 ! ================================================================================================ ! 
 
-  SUBROUTINE CalculateBarycentricWeights_Lagrange( myPoly )
+  SUBROUTINE CalculateBarycentricWeights( myPoly )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
     ! Local
@@ -2332,11 +2375,11 @@ IMPLICIT NONE
         myPoly % bWeights(j) = 1.0_prec/myPoly % bWeights(j)
       ENDDO 
 
-  END SUBROUTINE CalculateBarycentricWeights_Lagrange
+  END SUBROUTINE CalculateBarycentricWeights
 
 ! ================================================================================================ !
 !
-! CalculateInterpolationMatrix_Lagrange (PRIVATE) 
+! CalculateInterpolationMatrix (PRIVATE) 
 !
 !   A PRIVATE routine that fills in the interpolation matrix for the Lagrange data structure.
 !
@@ -2344,7 +2387,7 @@ IMPLICIT NONE
 !
 ! ================================================================================================ ! 
 
-  SUBROUTINE CalculateInterpolationMatrix_Lagrange( myPoly )  
+  SUBROUTINE CalculateInterpolationMatrix( myPoly )  
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
     ! Local
@@ -2387,11 +2430,11 @@ IMPLICIT NONE
 
       myPoly % iMatrixTranspose = TRANSPOSE( myPoly % iMatrix )
 
- END SUBROUTINE CalculateInterpolationMatrix_Lagrange
+ END SUBROUTINE CalculateInterpolationMatrix
 
 ! ================================================================================================ !
 !
-! CalculateDerivativeMatrix_Lagrange (PRIVATE) 
+! CalculateDerivativeMatrix (PRIVATE) 
 !
 !   Calculates and stores the derivative matrix and its transpose. 
 !   Generates a matrix that can be used to approximate derivatives at the interpolation nodes.
@@ -2400,7 +2443,7 @@ IMPLICIT NONE
 !
 ! ================================================================================================ ! 
 
-  SUBROUTINE CalculateDerivativeMatrix_Lagrange( myPoly )  
+  SUBROUTINE CalculateDerivativeMatrix( myPoly )  
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
     ! Local
@@ -2429,7 +2472,7 @@ IMPLICIT NONE
       
       myPoly % dMatrixTranspose = TRANSPOSE( myPoly % dMatrix )
 
-  END SUBROUTINE CalculateDerivativeMatrix_Lagrange
+  END SUBROUTINE CalculateDerivativeMatrix
 
 ! ================================================================================================ !
 !

@@ -293,6 +293,27 @@ extern "C"
   } 
 }
 
+// ScalarBoundaryInterp_1D //
+__global__ void ScalarBoundaryInterp_1D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t bid = hipThreadIdx_x;
+
+  real fb = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    fb += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*bMatrix[ii+bid*(N+1)];
+  }
+  fBound[SCB_1D_INDEX(iVar,bid+1,iEl,N,nVar)] = fb;
+}
+
+extern "C"
+{
+  void ScalarBoundaryInterp_1D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ScalarBoundaryInterp_1D_gpu), dim3(nVar,nEl,1), dim3(2,1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+  } 
+}
 // ScalarBoundaryInterp_2D //
 __global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
