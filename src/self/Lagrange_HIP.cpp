@@ -293,6 +293,96 @@ extern "C"
   } 
 }
 
+// ScalarBoundaryInterp_2D //
+__global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+
+  real fb[6] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    fb[0] += f[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
+    fb[1] += f[SC_2D_INDEX(ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+    fb[2] += f[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+    fb[3] += f[SC_2D_INDEX(ii,i,iVar,iEl,N,nVar)]*bMatrix[ii];
+  }
+  fBound[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)] = fb[0];
+  fBound[SCB_2D_INDEX(i,iVar,2,iEl,N,nVar)] = fb[1];
+  fBound[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)] = fb[2];
+  fBound[SCB_2D_INDEX(i,iVar,4,iEl,N,nVar)] = fb[3];
+}
+
+extern "C"
+{
+  void ScalarBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ScalarBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+  } 
+}
+
+// VectorBoundaryInterp_2D //
+__global__ void VectorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t idir = hipThreadIdx_x+1;
+  size_t i = hipThreadIdx_y;
+
+  real fb[4] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+      fb[0] += f[VE_2D_INDEX(idir,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
+      fb[1] += f[VE_2D_INDEX(idir,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+      fb[2] += f[VE_2D_INDEX(idir,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+      fb[3] += f[VE_2D_INDEX(idir,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii];
+  }
+  fBound[VEB_2D_INDEX(idir,i,iVar,1,iEl,N,nVar)] = fb[0];
+  fBound[VEB_2D_INDEX(idir,i,iVar,2,iEl,N,nVar)] = fb[1];
+  fBound[VEB_2D_INDEX(idir,i,iVar,3,iEl,N,nVar)] = fb[2];
+  fBound[VEB_2D_INDEX(idir,i,iVar,4,iEl,N,nVar)] = fb[3];
+}
+
+extern "C"
+{
+  void VectorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((VectorBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(2,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+  } 
+}
+
+// TensorBoundaryInterp_2D //
+__global__ void TensorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t tid = hipThreadIdx_x;
+  size_t i = hipThreadIdx_y;
+
+  // tid varies from 0 to 8 - we want to calculate the row and column for the tensor
+  int col = tid/2+1;
+  int row = tid-col*2+1;
+
+  real fb[4] = {0.0};
+  for (int ii=0; ii<N+1; ii++) {
+    fb[0] += f[TE_2D_INDEX(row,col,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
+    fb[1] += f[TE_2D_INDEX(row,col,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+    fb[2] += f[TE_2D_INDEX(row,col,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+    fb[3] += f[TE_2D_INDEX(row,col,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii];
+  }
+  fBound[TEB_2D_INDEX(row,col,i,iVar,1,iEl,N,nVar)] = fb[0];
+  fBound[TEB_2D_INDEX(row,col,i,iVar,2,iEl,N,nVar)] = fb[1];
+  fBound[TEB_2D_INDEX(row,col,i,iVar,3,iEl,N,nVar)] = fb[2];
+  fBound[TEB_2D_INDEX(row,col,i,iVar,4,iEl,N,nVar)] = fb[3];
+
+}
+
+extern "C"
+{
+  void TensorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((TensorBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(4,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+  } 
+}
 // ScalarBoundaryInterp_3D //
 __global__ void ScalarBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
@@ -331,35 +421,32 @@ __global__ void VectorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t idir = hipThreadIdx_x+1;
+  size_t i = hipThreadIdx_y;
+  size_t j = hipThreadIdx_z;
 
-  real fb[18] = {0.0};
+  real fb[6] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
-    for (int idir=1; idir<4; idir++) {
-      fb[idir+3*0] += f[VE_3D_INDEX(idir,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii];
-      fb[idir+3*1] += f[VE_3D_INDEX(idir,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
-      fb[idir+3*2] += f[VE_3D_INDEX(idir,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
-      fb[idir+3*3] += f[VE_3D_INDEX(idir,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii];
-      fb[idir+3*4] += f[VE_3D_INDEX(idir,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
-      fb[idir+3*5] += f[VE_3D_INDEX(idir,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
-    }
+      fb[0] += f[VE_3D_INDEX(idir,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii];
+      fb[1] += f[VE_3D_INDEX(idir,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+      fb[2] += f[VE_3D_INDEX(idir,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+      fb[3] += f[VE_3D_INDEX(idir,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii];
+      fb[4] += f[VE_3D_INDEX(idir,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
+      fb[5] += f[VE_3D_INDEX(idir,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
   }
-  for (int idir=1; idir<4; idir++) {
-    fBound[VEB_3D_INDEX(idir,i,j,iVar,1,iEl,N,nVar)] = fb[idir+3*0];
-    fBound[VEB_3D_INDEX(idir,i,j,iVar,2,iEl,N,nVar)] = fb[idir+3*1];
-    fBound[VEB_3D_INDEX(idir,i,j,iVar,3,iEl,N,nVar)] = fb[idir+3*2];
-    fBound[VEB_3D_INDEX(idir,i,j,iVar,4,iEl,N,nVar)] = fb[idir+3*3];
-    fBound[VEB_3D_INDEX(idir,i,j,iVar,5,iEl,N,nVar)] = fb[idir+3*4];
-    fBound[VEB_3D_INDEX(idir,i,j,iVar,6,iEl,N,nVar)] = fb[idir+3*5];
-  }
+  fBound[VEB_3D_INDEX(idir,i,j,iVar,1,iEl,N,nVar)] = fb[0];
+  fBound[VEB_3D_INDEX(idir,i,j,iVar,2,iEl,N,nVar)] = fb[1];
+  fBound[VEB_3D_INDEX(idir,i,j,iVar,3,iEl,N,nVar)] = fb[2];
+  fBound[VEB_3D_INDEX(idir,i,j,iVar,4,iEl,N,nVar)] = fb[3];
+  fBound[VEB_3D_INDEX(idir,i,j,iVar,5,iEl,N,nVar)] = fb[4];
+  fBound[VEB_3D_INDEX(idir,i,j,iVar,6,iEl,N,nVar)] = fb[5];
 }
 
 extern "C"
 {
   void VectorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  hipLaunchKernelGGL((VectorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(3,N+1,N+1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
@@ -368,39 +455,36 @@ __global__ void TensorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t tid = hipThreadIdx_x;
+  size_t i = hipThreadIdx_y;
+  size_t j = hipThreadIdx_z;
 
-  real fb[54] = {0.0};
+  // tid varies from 0 to 8 - we want to calculate the row and column for the tensor
+  int col = tid/3+1;
+  int row = tid-col*3+1;
+
+  real fb[6] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
-    for (int jdir=1; jdir<4; jdir++) {
-      for (int idir=1; idir<4; idir++) {
-        fb[idir+3*(jdir+3*0)] += f[TE_3D_INDEX(idir,jdir,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii];
-        fb[idir+3*(jdir+3*1)] += f[TE_3D_INDEX(idir,jdir,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
-        fb[idir+3*(jdir+3*2)] += f[TE_3D_INDEX(idir,jdir,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
-        fb[idir+3*(jdir+3*3)] += f[TE_3D_INDEX(idir,jdir,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii];
-        fb[idir+3*(jdir+3*4)] += f[TE_3D_INDEX(idir,jdir,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
-        fb[idir+3*(jdir+3*5)] += f[TE_3D_INDEX(idir,jdir,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
-      }
-    }
+    fb[0] += f[TE_3D_INDEX(row,col,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii];
+    fb[1] += f[TE_3D_INDEX(row,col,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+    fb[2] += f[TE_3D_INDEX(row,col,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
+    fb[3] += f[TE_3D_INDEX(row,col,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii];
+    fb[4] += f[TE_3D_INDEX(row,col,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii];
+    fb[5] += f[TE_3D_INDEX(row,col,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)];
   }
-  for (int jdir=1; jdir<4; jdir++) {
-    for (int idir=1; idir<4; idir++) {
-      fBound[TEB_3D_INDEX(idir,jdir,i,j,iVar,1,iEl,N,nVar)] = fb[idir+3*(jdir+3*0)];
-      fBound[TEB_3D_INDEX(idir,jdir,i,j,iVar,2,iEl,N,nVar)] = fb[idir+3*(jdir+3*1)];
-      fBound[TEB_3D_INDEX(idir,jdir,i,j,iVar,3,iEl,N,nVar)] = fb[idir+3*(jdir+3*2)];
-      fBound[TEB_3D_INDEX(idir,jdir,i,j,iVar,4,iEl,N,nVar)] = fb[idir+3*(jdir+3*3)];
-      fBound[TEB_3D_INDEX(idir,jdir,i,j,iVar,5,iEl,N,nVar)] = fb[idir+3*(jdir+3*4)];
-      fBound[TEB_3D_INDEX(idir,jdir,i,j,iVar,6,iEl,N,nVar)] = fb[idir+3*(jdir+3*5)];
-    }
-  }
+  fBound[TEB_3D_INDEX(row,col,i,j,iVar,1,iEl,N,nVar)] = fb[0];
+  fBound[TEB_3D_INDEX(row,col,i,j,iVar,2,iEl,N,nVar)] = fb[1];
+  fBound[TEB_3D_INDEX(row,col,i,j,iVar,3,iEl,N,nVar)] = fb[2];
+  fBound[TEB_3D_INDEX(row,col,i,j,iVar,4,iEl,N,nVar)] = fb[3];
+  fBound[TEB_3D_INDEX(row,col,i,j,iVar,5,iEl,N,nVar)] = fb[4];
+  fBound[TEB_3D_INDEX(row,col,i,j,iVar,6,iEl,N,nVar)] = fb[5];
 }
 
 extern "C"
 {
   void TensorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  hipLaunchKernelGGL((TensorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(9,N+1,N+1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
   } 
 }
 

@@ -92,14 +92,14 @@ IMPLICIT NONE
 !      GENERIC, PUBLIC :: TensorBoundaryInterp_1D => TensorBoundaryInterp_1D_cpu, TensorBoundaryInterp_1D_gpu
 !      PROCEDURE, PRIVATE :: TensorBoundaryInterp_1D_cpu, TensorBoundary_1D_gpu
 !
-!      GENERIC, PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu, ScalarBoundaryInterp_2D_gpu
-!      PROCEDURE, PRIVATE :: ScalarBoundaryInterp_2D_cpu, ScalarBoundary_2D_gpu
-!
-!      GENERIC, PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu, VectorBoundaryInterp_2D_gpu
-!      PROCEDURE, PRIVATE :: VectorBoundaryInterp_2D_cpu, VectorBoundary_2D_gpu
-!
-!      GENERIC, PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu, TensorBoundaryInterp_2D_gpu
-!      PROCEDURE, PRIVATE :: TensorBoundaryInterp_2D_cpu, TensorBoundary_2D_gpu
+      GENERIC, PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu, ScalarBoundaryInterp_2D_gpu
+      PROCEDURE, PRIVATE :: ScalarBoundaryInterp_2D_cpu, ScalarBoundaryInterp_2D_gpu
+
+      GENERIC, PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu, VectorBoundaryInterp_2D_gpu
+      PROCEDURE, PRIVATE :: VectorBoundaryInterp_2D_cpu, VectorBoundaryInterp_2D_gpu
+
+      GENERIC, PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu, TensorBoundaryInterp_2D_gpu
+      PROCEDURE, PRIVATE :: TensorBoundaryInterp_2D_cpu, TensorBoundaryInterp_2D_gpu
 
       GENERIC, PUBLIC :: ScalarBoundaryInterp_3D => ScalarBoundaryInterp_3D_cpu, ScalarBoundaryInterp_3D_gpu
       PROCEDURE, PRIVATE :: ScalarBoundaryInterp_3D_cpu, ScalarBoundaryInterp_3D_gpu
@@ -217,6 +217,33 @@ IMPLICIT NONE
 
     ! /////////////// !
     ! Boundary Interpolation Routines
+
+    INTERFACE
+      SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev, f_dev, fBound_dev, N, nVar, nEl) bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: bMatrix_dev, f_dev, fBound_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev, f_dev, fBound_dev, N, nVar, nEl) bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: bMatrix_dev, f_dev, fBound_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
+    END INTERFACE
+
+    INTERFACE
+      SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev, f_dev, fBound_dev, N, nVar, nEl) bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
+        USE iso_c_binding
+        IMPLICIT NONE
+        TYPE(c_ptr) :: bMatrix_dev, f_dev, fBound_dev
+        INTEGER, VALUE :: N, nVar, nEl
+      END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
+    END INTERFACE
 
     INTERFACE
       SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev, f_dev, fBound_dev, N, nVar, nEl) bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
@@ -1736,6 +1763,145 @@ IMPLICIT NONE
 
   ! /////////////////////////////// !
   ! Boundary Interpolation Routines !
+
+  SUBROUTINE ScalarBoundaryInterp_2D_cpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)         :: nVariables, nElements
+    REAL(prec), INTENT(in)      :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec), INTENT(out)     :: fBound(0:myPoly % N, 1:nVariables, 1:4, 1:nElements)
+    ! Local
+    INTEGER :: i, j, ii, iVar, iEl
+    REAL(prec) :: fb(1:4)
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO i = 0, myPoly % N
+          
+            fb(1:4) = 0.0_prec
+            
+            DO ii = 0, myPoly % N
+              fb(1) = fb(1) + myPoly % bMatrix(ii,0)*f(i,ii,iVar,iEl) ! South
+              fb(2) = fb(2) + myPoly % bMatrix(ii,1)*f(ii,i,iVar,iEl) ! East
+              fb(3) = fb(3) + myPoly % bMatrix(ii,1)*f(i,ii,iVar,iEl) ! North
+              fb(4) = fb(4) + myPoly % bMatrix(ii,0)*f(ii,i,iVar,iEl) ! West
+            ENDDO
+
+            fBound(i,iVar,1:4,iEl) = fb(1:4)
+            
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ScalarBoundaryInterp_2D_cpu
+
+  SUBROUTINE ScalarBoundaryInterp_2D_gpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER       , INTENT(in)  :: nVariables, nElements
+    TYPE(c_ptr)    , INTENT(in)  :: f
+    TYPE(c_ptr)    , INTENT(out)  :: fBound
+
+      CALL ScalarBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix_dev, &
+                                               f, fBound, myPoly % N, nVariables, nElements)
+
+  END SUBROUTINE ScalarBoundaryInterp_2D_gpu
+
+  SUBROUTINE VectorBoundaryInterp_2D_cpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER       , INTENT(in)  :: nVariables, nElements
+    REAL(prec)    , INTENT(in)  :: f(1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec)    , INTENT(out)  :: fBound(1:2,0:myPoly % N, 1:nVariables, 1:4, 1:nElements)
+    ! Local
+    INTEGER :: i, j, ii, idir, iVar, iEl
+    REAL(prec) :: fb(1:2,1:4)
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO i = 0, myPoly % N
+
+            fb(1:2,1:4) = 0.0_prec
+            DO ii = 0, myPoly % N
+              DO idir = 1, 2
+                fb(idir,1) = fb(idir,1) + myPoly % bMatrix(ii,0)*f(idir,i,ii,iVar,iEl) ! South
+                fb(idir,2) = fb(idir,2) + myPoly % bMatrix(ii,1)*f(idir,ii,i,iVar,iEl) ! East
+                fb(idir,3) = fb(idir,3) + myPoly % bMatrix(ii,1)*f(idir,i,ii,iVar,iEl) ! North
+                fb(idir,4) = fb(idir,4) + myPoly % bMatrix(ii,0)*f(idir,ii,i,iVar,iEl) ! West
+              ENDDO
+            ENDDO
+
+            DO idir = 1, 2
+              fBound(idir,i,iVar,1:4,iEl) = fb(idir,1:4)
+            ENDDO
+            
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE VectorBoundaryInterp_2D_cpu
+
+  SUBROUTINE VectorBoundaryInterp_2D_gpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER       , INTENT(in)  :: nVariables, nElements
+    TYPE(c_ptr)    , INTENT(in)  :: f
+    TYPE(c_ptr)    , INTENT(out)  :: fBound
+
+      CALL VectorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix_dev, &
+                                               f, fBound, myPoly % N, nVariables, nElements)
+
+  END SUBROUTINE VectorBoundaryInterp_2D_gpu
+
+  SUBROUTINE TensorBoundaryInterp_2D_cpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER       , INTENT(in)  :: nVariables, nElements
+    REAL(prec)    , INTENT(in)  :: f(1:2,1:2,0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
+    REAL(prec)    , INTENT(out)  :: fBound(1:2,1:2,0:myPoly % N, 1:nVariables, 1:4, 1:nElements)
+    ! Local
+    INTEGER :: i, j, ii, idir, jdir, iVar, iEl
+    REAL(prec) :: fb(1:2,1:2,1:4)
+
+      DO iEl = 1, nElements
+        DO iVar = 1, nVariables
+          DO i = 0, myPoly % N
+
+            fb(1:2,1:2,1:4) = 0.0_prec
+            DO ii = 0, myPoly % N
+              DO jdir = 1, 2
+                DO idir = 1, 2
+                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix(ii,0)*f(idir,jdir,i,ii,iVar,iEl) ! South
+                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix(ii,1)*f(idir,jdir,ii,i,iVar,iEl) ! East
+                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix(ii,1)*f(idir,jdir,i,ii,iVar,iEl) ! North
+                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix(ii,0)*f(idir,jdir,ii,i,iVar,iEl) ! West
+                ENDDO
+              ENDDO
+            ENDDO
+
+            DO jdir = 1, 2
+              DO idir = 1, 2
+                fBound(idir,jdir,i,iVar,1:4,iEl) = fb(idir,jdir,1:4)
+              ENDDO
+            ENDDO
+            
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE TensorBoundaryInterp_2D_cpu
+
+  SUBROUTINE TensorBoundaryInterp_2D_gpu( myPoly, f, fBound, nVariables, nElements )
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: myPoly
+    INTEGER, INTENT(in)  :: nVariables, nElements
+    TYPE(c_ptr)    , INTENT(in)  :: f
+    TYPE(c_ptr)    , INTENT(out)  :: fBound
+
+      CALL TensorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix_dev, &
+                                               f, fBound, myPoly % N, nVariables, nElements)
+
+  END SUBROUTINE TensorBoundaryInterp_2D_gpu
 
   SUBROUTINE ScalarBoundaryInterp_3D_cpu( myPoly, f, fBound, nVariables, nElements )
     IMPLICIT NONE
