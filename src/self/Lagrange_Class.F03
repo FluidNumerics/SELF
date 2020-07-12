@@ -21,7 +21,6 @@ IMPLICIT NONE
 
 ! =============================================================================================== !
 !
-! A data-structure for handling Lagrange interpolation in one, two, or three dimensions
 !
 ! The Lagrange data-structure stores the information necessary to interpolate between two
 ! sets of grid-points and to estimate the derivative of data at native grid points. Routines for
@@ -33,6 +32,21 @@ IMPLICIT NONE
 ! =============================================================================================== !
 
   TYPE, PUBLIC :: Lagrange
+  !> A data structure for working with Lagrange Interpolating Polynomials in one, two, and three dimensions.
+  !>
+  !> attribute : controlPoints(0:N) : The set of nodes in one dimension where data is known. To create higher dimension interpolation and differentiation operators, structured grids in two and three dimensions are created by tensor products of the controlPoints. This design decision implies that all Spectral Element Methods supported by the Lagrange class have the same polynomial degree in each computational/spatial dimension. In practice, the controlPoints are the Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss, Chebyshev-Gauss-Lobatto, or Chebyshev-Gauss-Radau quadrature points over the domain [-1,1] (computational space). The Build routine for this class restricts controlPoints to one of these quadrature types or uniform points on [-1,1].
+  !
+  !> attribute : targetPoints(0:M) : The set of nodes in one dimension where data is to be interpolated to. To create higher dimension interpolation and differentiation operators, structured grids in two and three dimensions are created by tensor products of the targetPoints. In practice, the targetPoints are set to a uniformly distributed set of points between [-1,1] (computational space) to allow for interpolation from unevenly spaced quadrature points to a plotting grid.
+  !
+  !> attribute : bWeights(0:N) : The barycentric weights that are calculated from the controlPoints and used for interpolation.
+  !
+  !> attribute : qWeights(0:N) : The quadrature weights for discrete integration. The quadradture weights depend on the type of controlPoints provided; one of Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss, Chebyshev-Gauss-Lobatto, Chebyshev-Gauss Radau, or Uniform. If Uniform, the quadrature weights are constant = dx = 2.0/(N+1).
+  ! 
+  !> attribute : iMatrix(0:N,0:M) : TO DO
+  !> attribute : iMatrixTranspose(0:M,0:N) : TO DO
+  !> attribute : dMatrix(0:N,0:N) : TO DO
+  !> attribute : dMatrixTranspose(0:N,0:N) : TO DO
+  !> attribute : bMatrix(0:N,1:2) : TO DO
 
     INTEGER :: N     
     INTEGER :: M 
@@ -56,11 +70,11 @@ IMPLICIT NONE
 
     CONTAINS
       
-      PROCEDURE :: Build => Build_Lagrange
-      PROCEDURE :: Trash => Trash_Lagrange
+      PROCEDURE, PUBLIC :: Build => Build_Lagrange
+      PROCEDURE, PUBLIC :: Trash => Trash_Lagrange
 
-      PROCEDURE :: UpdateDevice => UpdateDevice_Lagrange
-      PROCEDURE :: UpdateHost => UpdateHost_Lagrange
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Lagrange
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Lagrange
       
       GENERIC, PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu, ScalarGridInterp_1D_gpu
       PROCEDURE, PRIVATE :: ScalarGridInterp_1D_cpu, ScalarGridInterp_1D_gpu
@@ -107,40 +121,30 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: Derivative_1D => Derivative_1D_cpu, Derivative_1D_gpu
       PROCEDURE, PRIVATE :: Derivative_1D_cpu, Derivative_1D_gpu
 
-!      Takes in Scalar and Returns Vector
       GENERIC, PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu, ScalarGradient_2D_gpu
       PROCEDURE, PRIVATE :: ScalarGradient_2D_cpu, ScalarGradient_2D_gpu
 
-!      Takes in Vector and Returns Tensor
       GENERIC, PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu, VectorGradient_2D_gpu
       PROCEDURE, PRIVATE :: VectorGradient_2D_cpu, VectorGradient_2D_gpu
 
-!      Takes in Vector and Returns Scalar
       GENERIC, PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu, VectorDivergence_2D_gpu
       PROCEDURE, PRIVATE :: VectorDivergence_2D_cpu, VectorDivergence_2D_gpu
 
-!      Takes in Vector and Returns Vector
       GENERIC, PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu, VectorCurl_2D_gpu
       PROCEDURE, PRIVATE :: VectorCurl_2D_cpu, VectorCurl_2D_gpu
 
-!      Takes in Scalar and Returns Vector
       GENERIC, PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
       PROCEDURE, PRIVATE :: ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
 
-!      Takes in Vector and Returns Tensor
       GENERIC, PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu, VectorGradient_3D_gpu
       PROCEDURE, PRIVATE :: VectorGradient_3D_cpu, VectorGradient_3D_gpu
 
-!      Takes in Vector and Returns Scalar
       GENERIC, PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
       PROCEDURE, PRIVATE :: VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
 
-!      Takes in Vector and Returns Vector
       GENERIC, PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu, VectorCurl_3D_gpu
       PROCEDURE, PRIVATE :: VectorCurl_3D_cpu, VectorCurl_3D_gpu
-
    
-      ! Internal Use Only !
       PROCEDURE, PRIVATE :: CalculateBarycentricWeights 
       PROCEDURE, PRIVATE :: CalculateInterpolationMatrix
       PROCEDURE, PRIVATE :: CalculateDerivativeMatrix
@@ -2096,248 +2100,6 @@ IMPLICIT NONE
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE TensorBoundaryInterp_3D_gpu
-!! ================================================================================================ !
-!!
-!! CalculateDivergence_2D 
-!!
-!!   Calculates the gradient of a 2-D function, represented by a 2-D array of nodal values.
-!!  
-!!   Let \vec{F} = f \hat{x} + g \hat{y}. 
-!!
-!!   Given a set of nodal values at the interpolation nodes, the divergence of a vector function
-!!   through the interpolation nodes can be estimated by  
-!!
-!!                      div( \vec{F} )_{a,b} = (df/dx)_{a,b} + (dg/dy)_{a,b}
-!!   where
-!!                       (df/dx)_{a,b} = \sum_{i=0}^N f_{i,b} l'_i(\xi_a),   a,b=0,1,2,...,N
-!!                       (dg/dy)_{a,b} = \sum_{j=0}^N g_{a,j} l'_j(\xi_b),   a,b=0,1,2,...,N
-!!             
-!!   
-!!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
-!!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
-!!   kernel (if CUDA is enabled) or the CPU version. 
-!! 
-!!   Usage : 
-!!
-!!     TYPE(Lagrange) :: interp
-!!     INTEGER        :: nVariables, nElements
-!!     REAL(prec)     :: f(1:2,0:interp % N,0:interp % N,1:nVariables,1:nElements) 
-!!     REAL(prec)     :: divF(0:interp % N,0:interp % N,1:nVariables,1:nElements) 
-!!     
-!!       CALL interp % CalculateDivergence_2D( f, divF, nVariables, nElements ) 
-!! 
-!!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!!
-!!   Parameters :
-!!
-!!     interp (in) 
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)
-!!       Array of function nodal values at the native interpolation nodes.
-!!
-!!     nVariables (in)
-!!
-!!     nElements (in)
-!!
-!!     divF (out) 
-!!      Array of derivative values at the target interpolation nodes.
-!!   
-!! ================================================================================================ ! 
-!
-!  SUBROUTINE CalculateDivergence_2D( myPoly, f, divF, nVariables, nElements )
-!    IMPLICIT NONE
-!    CLASS(Lagrange), INTENT(in) :: myPoly
-!
-!#ifdef GPU
-!    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
-!    REAL(prec), DEVICE, INTENT(in)  :: f(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), DEVICE, INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    TYPE(dim3) :: grid, tBlock
-!    INTEGER    :: threadCount
-!  
-!      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
-!
-!      tBlock = dim3( threadCount, threadCount, 1 )
-!      grid   = dim3( nVariables, nElements, 1)
-!
-!      CALL CalculateDivergence_2D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
-!                                                                f, divF, myPoly % N_dev, nVariables, nElements )
-!
-!#else
-!    INTEGER, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), INTENT(in)  :: f(1:2, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!
-!      divF = CalculateDivergence_2D_Lagrange( myPoly, f, nVariables, nElements )
-!
-!#endif
-!
-!  END SUBROUTINE CalculateDivergence_2D
-!
-!! ================================================================================================ !
-!!
-!! CalculateGradient_3D 
-!!
-!!   Calculates the gradient of a 3-D function, represented by a 3-D array of nodal values.
-!!   
-!!   Given a set of nodal values at the interpolation nodes, the gradient of a function through 
-!!   the interpolation nodes can be estimated by  
-!!
-!!               (df/dx)_{a,b,c} = \sum_{i=0}^N f_{i,b,c} l'_i(\xi_a),   a,b,c=0,1,2,...,N
-!!               (df/dy)_{a,b,c} = \sum_{j=0}^N f_{a,j,c} l'_j(\xi_b),   a,b,c=0,1,2,...,N
-!!               (df/dz)_{a,b,c} = \sum_{k=0}^N f_{a,b,k} l'_k(\xi_c),   a,b,c=0,1,2,...,N
-!!             
-!!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
-!!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
-!!   kernel (if CUDA is enabled) or the CPU version. 
-!! 
-!!   Usage : 
-!!
-!!     TYPE(Lagrange) :: interp
-!!     INTEGER        :: nVariables, nElements
-!!     REAL(prec)     :: f(0:interp % N,0:interp % N,0:interp % N,1:nVariables,1:nElements) 
-!!     REAL(prec)     :: gradF(1:3,0:interp % N,0:interp % N,0:interp % N,1:nVariables,1:nElements) 
-!!     
-!!       CALL interp % CalculateGradient_3D( f, gradF, nVariables, nElements ) 
-!! 
-!!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!!
-!!   Parameters :
-!!
-!!     interp (in) 
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)
-!!       Array of function nodal values at the native interpolation nodes.
-!!
-!!     nVariables (in)
-!!
-!!     nElements (in)
-!!
-!!     gradF (out) 
-!!      Array of derivative values at the target interpolation nodes.
-!!   
-!! ================================================================================================ ! 
-!
-!  SUBROUTINE CalculateGradient_3D( myPoly, f, gradF, nVariables, nElements )
-!    IMPLICIT NONE
-!    CLASS(Lagrange), INTENT(in) :: myPoly
-!
-!#ifdef GPU
-!    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
-!    REAL(prec), DEVICE, INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), DEVICE, INTENT(out) :: gradF(1:3,0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    TYPE(dim3) :: grid, tBlock
-!    INTEGER    :: threadCount
-!  
-!      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
-!
-!      tBlock = dim3( threadCount, threadCount, threadCount )
-!      grid   = dim3( nVariables, nElements, 1)
-!
-!      CALL CalculateGradient_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
-!                                                              f, gradF, myPoly % N_dev, nVariables, nElements )
-!
-!#else
-!    INTEGER, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), INTENT(in)  :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), INTENT(out) :: gradF(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!
-!      gradF = CalculateGradient_3D_Lagrange( myPoly, f, nVariables, nElements )
-!
-!#endif
-!
-!  END SUBROUTINE CalculateGradient_3D
-!
-!! ================================================================================================ !
-!!
-!! CalculateDivergence_3D 
-!!
-!!   Calculates the gradient of a 3-D function, represented by a 3-D array of nodal values.
-!!  
-!!   Let \vec{F} = f \hat{x} + g \hat{y} + h \hat{z}. 
-!!
-!!   Given a set of nodal values at the interpolation nodes, the divergence of a vector function
-!!   through the interpolation nodes can be estimated by  
-!!
-!!            div( \vec{F} )_{a,b,c} = (df/dx)_{a,b,c} + (dg/dy)_{a,b,c} + (dh/dy)_{a,b,c}
-!!   where
-!!             (df/dx)_{a,b,c} = \sum_{i=0}^N f_{i,b,c} l'_i(\xi_a),   a,b,c=0,1,2,...,N
-!!             (dg/dy)_{a,b,c} = \sum_{j=0}^N g_{a,j,c} l'_j(\xi_b),   a,b,c=0,1,2,...,N
-!!             (dg/dy)_{a,b,c} = \sum_{k=0}^N g_{a,b,k} l'_k(\xi_c),   a,b,c=0,1,2,...,N
-!!             
-!!   
-!!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!!   The derivative matrix is D_{a,i} = l'_i(\xi_a) maps an array of nodal values at the interpolation
-!!   nodes to its estimated derivative. This routine serves as a wrapper to call either the CUDA
-!!   kernel (if CUDA is enabled) or the CPU version. 
-!! 
-!!   Usage : 
-!!
-!!     TYPE(Lagrange) :: interp
-!!     INTEGER        :: nVariables, nElements
-!!     REAL(prec)     :: f(1:3,0:interp % N,0:interp % N,0:interp % N,1:nVariables,1:nElements) 
-!!     REAL(prec)     :: divF(0:interp % N,0:interp % N,0:interp %N,1:nVariables,1:nElements) 
-!!     
-!!       CALL interp % CalculateDivergence_3D( f, divF, nVariables, nElements ) 
-!! 
-!!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!!
-!!   Parameters :
-!!
-!!     interp (in) 
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)
-!!       Array of function nodal values at the native interpolation nodes.
-!!
-!!     nVariables (in)
-!!
-!!     nElements (in)
-!!
-!!     divF (out) 
-!!      Array of derivative values at the target interpolation nodes.
-!!   
-!! ================================================================================================ ! 
-!
-!  SUBROUTINE CalculateDivergence_3D( myPoly, f, divF, nVariables, nElements )
-!    IMPLICIT NONE
-!    CLASS(Lagrange), INTENT(in) :: myPoly
-!
-!#ifdef GPU
-!    INTEGER, DEVICE, INTENT(in)    :: nVariables, nElements
-!    REAL(prec), DEVICE, INTENT(in)  :: f(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), DEVICE, INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    TYPE(dim3) :: grid, tBlock
-!    INTEGER    :: threadCount
-!  
-!      threadCount = MIN( 4*(ceiling( REAL(myPoly % N+1)/4 ) ), 8 )
-!
-!      tBlock = dim3( threadCount, threadCount, threadCount )
-!      grid   = dim3( nVariables, nElements, 1)
-!
-!      CALL CalculateDivergence_3D_CUDAKernel<<<grid, tBlock>>>( myPoly % dMatrixTranspose_dev, &
-!                                                                f, divF, myPoly % N_dev, nVariables, nElements )
-!
-!#else
-!    INTEGER, INTENT(in)     :: nVariables, nElements
-!    REAL(prec), INTENT(in)  :: f(1:3, 0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec), INTENT(out) :: divF(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!
-!      divF = CalculateDivergence_3D_Lagrange( myPoly, f, nVariables, nElements )
-!
-!#endif
-!
-!  END SUBROUTINE CalculateDivergence_3D
-! 
-! ================================================================================================ !
-! ------------------------------------- PRIVATE ROUTINES ----------------------------------------- !
-! ================================================================================================ !
-
-
 ! ================================================================================================ !
 !
 ! CalculateBarycentricWeights (PRIVATE)
@@ -2522,502 +2284,5 @@ IMPLICIT NONE
       lAtS = lAtS/temp1 
 
   END FUNCTION CalculateLagrangePolynomials
-!
-!  FUNCTION GridInterpolation_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( fNew )  
-!    IMPLICIT NONE
-!    TYPE(Lagrange) :: myPoly
-!    INTEGER         :: nVariables, nElements
-!    REAL(prec)      :: f(0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec)      :: fNew(0:myPoly % M, 1:nVariables, 1:nElements)
-!
-!  END FUNCTION GridInterpolation_1D_Lagrange
-!
-!  FUNCTION GridInterpolation_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( fNew )  
-!    IMPLICIT NONE
-!    TYPE(Lagrange) :: myPoly
-!    INTEGER         :: nVariables, nElements
-!    REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec)      :: fNew(0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
-!
-!  END FUNCTION GridInterpolation_2D_Lagrange
-!
-!  FUNCTION GridInterpolation_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( fNew )  
-!    IMPLICIT NONE
-!    TYPE(Lagrange) :: myPoly
-!    INTEGER         :: nElements, nVariables
-!    REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N, 1:nVariables, 1:nElements)
-!    REAL(prec)      :: fNew(0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
-!
-!  END FUNCTION GridInterpolation_3D_Lagrange
-!
-!  FUNCTION Derivative_1D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( derF )  
-!    IMPLICIT NONE
-!    TYPE(Lagrange) :: myPoly
-!    INTEGER         :: nVariables, nElements
-!    REAL(prec)      :: f(0:myPoly % N,1:nVariables,1:nElements)
-!    REAL(prec)      :: derF(0:myPoly % N,1:nVariables,1:nElements)
-!    ! Local
-!    INTEGER :: i, ii, iVar, iEl
-!
-!      DO iEl = 1, nElements
-!        DO iVar = 1, nVariables
-! 
-!          DO i = 0, myPoly % N
-!    
-!            derF(i,iVar,iEl) = 0.0_prec 
-!            DO ii = 0, myPoly % N
-!              derF(i,iVar,iEl) = derF(i,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,iVar,iEl)
-!            ENDDO
-!    
-!          ENDDO
-!
-!        ENDDO
-!      ENDDO
-!
-!  END FUNCTION Derivative_1D_Lagrange
-!!
-!  FUNCTION CalculateGradient_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
-!
-!    IMPLICIT NONE
-!    TYPE(Lagrange) :: myPoly
-!    INTEGER         :: nVariables, nElements
-!    REAL(prec)      :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    REAL(prec)      :: gradF(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!
-!  END FUNCTION CalculateGradient_2D_Lagrange
-!!
-!  FUNCTION CalculateDivergence_2D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( divF )  
-!    IMPLICIT NONE
-!    TYPE( Lagrange ) :: myPoly
-!    INTEGER          :: nVariables, nElements
-!    REAL(prec)       :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    REAL(prec)       :: divF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    ! Local
-!    INTEGER :: i, j, iEl, iVar, ii
-!  
-!      
-!      DO iEl = 1, nElements
-!        DO iVar = 1, nVariables
-!          DO j = 0, myPoly % N
-!            DO i = 0, myPoly % N
-!               
-!              divf(i,j,iVar,iEl) = 0.0_prec
-!
-!              DO ii = 0, myPoly % N  
-!                divf(i,j,iVar,iEl) = divf(i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,iVar,iEl) + &
-!                                                            myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,iVar,iEl)
-!              ENDDO
-!
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!      ENDDO
-!      
-!  END FUNCTION CalculateDivergence_2D_Lagrange
-!!
-!  FUNCTION CalculateGradient_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( gradF )  
-!    IMPLICIT NONE
-!    TYPE( Lagrange ) :: myPoly
-!    INTEGER          :: nVariables, nElements
-!    REAL(prec)       :: f(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    REAL(prec)       :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    ! Local
-!    INTEGER :: i, j, k, iEl, iVar, ii
-!  
-!      
-!      DO iEl = 1, nElements
-!        DO iVar = 1, nVariables
-!          DO k = 0, myPoly % N
-!            DO j = 0, myPoly % N
-!              DO i = 0, myPoly % N
-!               
-!                gradf(1,i,j,k,iVar,iEl) = 0.0_prec
-!                gradf(2,i,j,k,iVar,iEl) = 0.0_prec
-!                gradf(3,i,j,k,iVar,iEl) = 0.0_prec
-!
-!                DO ii = 0, myPoly % N  
-!                  gradf(1,i,j,k,iVar,iEl) = gradf(1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,j,k,iVar,iEl)
-!                  gradf(2,i,j,k,iVar,iEl) = gradf(2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(i,ii,k,iVar,iEl)
-!                  gradf(3,i,j,k,iVar,iEl) = gradf(3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(i,j,ii,iVar,iEl)
-!                ENDDO
-!
-!              ENDDO
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!      ENDDO
-!      
-!  END FUNCTION CalculateGradient_3D_Lagrange
-!!
-!  FUNCTION CalculateDivergence_3D_Lagrange( myPoly, f, nVariables, nElements ) RESULT( divF )  
-!    IMPLICIT NONE
-!    TYPE( Lagrange ) :: myPoly
-!    INTEGER          :: nVariables, nElements
-!    REAL(prec)       :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    REAL(prec)       :: divF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-!    ! Local
-!    INTEGER :: i, j, k, iEl, iVar, ii
-!  
-!      DO iEl = 1, nElements
-!        DO iVar = 1, nVariables
-!          DO k = 0, myPoly % N
-!            DO j = 0, myPoly % N
-!              DO i = 0, myPoly % N
-!               
-!                divf(i,j,k,iVar,iEl) = 0.0_prec
-!
-!                DO ii = 0, myPoly % N  
-!                  divf(i,j,k,iVar,iEl) = divf(i,j,k,iVar,iEl) + &
-!                                         myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) + &
-!                                         myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) + &
-!                                         myPoly % dMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
-!                ENDDO
-!
-!              ENDDO
-!            ENDDO
-!          ENDDO
-!        ENDDO
-!      ENDDO
-!      
-!  END FUNCTION CalculateDivergence_3D_Lagrange
-!
-!!#ifdef GPU
-!!
-!!  ATTRIBUTES(Global) SUBROUTINE GridInterpolation_1D_CUDAKernel( IntMatT, f, fNew, N, M, nVariables, nElems  )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, M, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: IntMatT(0:N,0:M)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: fnew(0:M,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, a, iEl, iVar
-!!    REAL(prec), SHARED :: floc(0:7)
-!!    REAL(prec)         :: fm
-!!   
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      a = threadIdx % x-1 + (blockIDx % y-1)*blockDim % x
-!!      
-!!      IF( a <= M )THEN
-!!
-!!        ! Pre-fetch data
-!!        IF( a <= N )THEN
-!!          floc(a) = f(a,iVar,iEl)
-!!        ENDIF
-!!        
-!!        CALL syncthreads( )
-!!      
-!!        fm = 0.0_prec
-!!        DO i = 0, N
-!!          fm = fm + floc(i)*IntMatT(i,a)
-!!        ENDDO
-!!               
-!!        fnew(a,iVar,iEl) = fm
-!!         
-!!      ENDIF
-!!
-!!  END SUBROUTINE GridInterpolation_1D_CUDAKernel
-!!!
-!!  ATTRIBUTES(Global) SUBROUTINE GridInterpolation_2D_CUDAKernel( IntMatT, f, fNew, N, M, nVariables, nElems  )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, M, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: IntMatT(0:N,0:M)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: fnew(0:M,0:M,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, a, b, iEl, iVar
-!!    REAL(prec), SHARED :: floc(0:7,0:7)
-!!    REAL(prec)         :: fm, fmn
-!!   
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      a = threadIdx % x-1 + (blockIDx % y-1)*blockDim % x
-!!      b = threadIdx % y-1 + (blockIDx % y-1)*blockDim % y
-!!      
-!!      IF( a <= M .AND. b <= M )THEN
-!!
-!!        ! Pre-fetch data
-!!        IF( a <= N .AND. b <= N )THEN
-!!          floc(a,b) = f(a,b,iVar,iEl)
-!!        ENDIF
-!!        
-!!        CALL syncthreads( )
-!!               
-!!        fmn = 0.0_prec
-!!        DO j = 0, N
-!!            
-!!          fm = 0.0_prec
-!!          DO i = 0, N
-!!            fm = fm + floc(i,j)*IntMatT(i,a)
-!!          ENDDO
-!!               
-!!          fmn = fmn + fm*IntMatT(j,b)
-!!
-!!        ENDDO
-!!            
-!!        fnew(a,b,iVar,iEl) = fmn
-!!         
-!!      ENDIF
-!!
-!!  END SUBROUTINE GridInterpolation_2D_CUDAKernel
-!!
-!!  ATTRIBUTES(Global) SUBROUTINE GridInterpolation_3D_CUDAKernel( IntMatT, f, fNew, N, M, nVariables, nElems  )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, M, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: IntMatT(0:N,0:M)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: fnew(0:M,0:M,0:M,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, k, a, b, c, iEl, iVar
-!!    REAL(prec), SHARED :: floc(0:7,0:7,0:7)
-!!    REAL(prec)         :: fm, fmn, fmnp
-!!   
-!!   
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      a = threadIdx % x-1 + (blockIDx % y-1)*blockDim % x
-!!      b = threadIdx % y-1 + (blockIDx % y-1)*blockDim % y
-!!      c = threadIdx % z-1 + (blockIDx % y-1)*blockDim % z
-!!      
-!!      IF( a <= M .AND. b <= M .AND. c <= M )THEN
-!!
-!!        ! Pre-fetch data
-!!        IF( a <= N .AND. b <= N .AND. c <= N )THEN
-!!          floc(a,b,c) = f(a,b,c,iVar,iEl)
-!!        ENDIF
-!!        
-!!        CALL syncthreads( )
-!!      
-!!              
-!!        fmnp = 0.0_prec
-!!        DO k = 0, N
-!!         
-!!          fmn = 0.0_prec
-!!          DO j = 0, N
-!!          
-!!            fm = 0.0_prec
-!!            DO i = 0, N
-!!              fm = fm + floc(i,j,k)*IntMatT(i,a)
-!!            ENDDO
-!!             
-!!            fmn = fmn + fm*IntMatT(j,b)
-!!          ENDDO
-!!           
-!!          fmnp = fmnp + fmn*IntMatT(k,c)
-!!
-!!        ENDDO
-!!         
-!!         fnew(a,b,c,iVar,iEl) = fmnp
-!!         
-!!      ENDIF
-!!
-!!  END SUBROUTINE GridInterpolation_3D_CUDAKernel
-!!!
-!!  ATTRIBUTES(Global) SUBROUTINE Derivative_1D_CUDAKernel( DMatT, f, derf, N, nVariables, nElems )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: derf(0:N,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, iEl, iVar, ii
-!!    REAL(prec), SHARED :: floc(0:7)
-!!    REAL(prec)         :: df
-!!  
-!!  
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      i    = threadIdx % x-1
-!!      
-!!      IF( i <= N )THEN
-!!      
-!!         ! Pre-fetch into shared memory for this block
-!!         floc(i) = f(i,iVar,iEl)
-!!
-!!         CALL syncthreads( )
-!!
-!!         df = 0.0_prec
-!!
-!!         DO ii = 0, N
-!!            df = df + DMatT(ii,i)*floc(ii)
-!!         ENDDO
-!!                  
-!!         derf(i,iVar,iEl) = df
-!!
-!!      ENDIF
-!!    
-!!  END SUBROUTINE Derivative_1D_CUDAKernel
-!!!
-!!  ATTRIBUTES(Global) SUBROUTINE CalculateGradient_2D_CUDAKernel( DMatT, f, gradf, N, nVariables, nElems )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: gradf(1:2,0:N,0:N,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, iEl, iVar, ii
-!!    REAL(prec), SHARED :: floc(0:7,0:7)
-!!    REAL(prec)         :: df(1:2)
-!!  
-!!  
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      i    = threadIdx % x-1
-!!      j    = threadIdx % y-1
-!!      
-!!      IF( i <= N .AND. j <= N )THEN
-!!      
-!!         ! Pre-fetch into shared memory for this block
-!!         floc(i,j) = f(i,j,iVar,iEl)
-!!
-!!         CALL syncthreads( )
-!!
-!!         df(1) = 0.0_prec
-!!         df(2) = 0.0_prec
-!!
-!!         DO ii = 0, N
-!!            df(1) = df(1) + DMatT(ii,i)*floc(ii,j)
-!!            df(2) = df(2) + DMatT(ii,j)*floc(i,ii)
-!!         ENDDO
-!!                  
-!!         gradf(1,i,j,iVar,iEl) = df(1)
-!!         gradf(2,i,j,iVar,iEl) = df(2)
-!!
-!!      ENDIF
-!!    
-!!  END SUBROUTINE CalculateGradient_2D_CUDAKernel
-!!!
-!!  ATTRIBUTES(Global) SUBROUTINE CalculateDivergence_2D_CUDAKernel( DMatT, f, divf, N, nVariables, nElems )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(1:2,0:N,0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: divf(0:N,0:N,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, k, iEl, iVar, ii
-!!    REAL(prec), SHARED :: floc(1:2,0:7,0:7)
-!!    REAL(prec) :: df
-!!  
-!!  
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      i    = threadIdx % x-1
-!!      j    = threadIdx % y-1
-!!      
-!!      IF( i <= N .AND. j <= N )THEN
-!!      
-!!         ! Pre-fetch into shared memory for this block
-!!         floc(1,i,j) = f(1,i,j,iVar,iEl)
-!!         floc(2,i,j) = f(2,i,j,iVar,iEl)
-!!
-!!         CALL syncthreads( )
-!!
-!!         df = 0.0_prec
-!!         DO ii = 0, N
-!!            df = df + DMatT(ii,i)*floc(1,ii,j) + &
-!!                      DMatT(ii,j)*floc(2,i,ii)
-!!         ENDDO
-!!                  
-!!         divf(i,j,iVar,iEl) = df
-!!
-!!      ENDIF
-!!    
-!!  END SUBROUTINE CalculateDivergence_2D_CUDAKernel 
-!!!
-!!  ATTRIBUTES(Global) SUBROUTINE CalculateGradient_3D_CUDAKernel( DMatT, f, gradf, N, nVariables, nElems )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(0:N,0:N,0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: gradf(1:3,0:N,0:N,0:N,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, k, iEl, iVar, ii
-!!    REAL(prec), SHARED :: floc(0:7,0:7,0:7)
-!!    REAL(prec)         :: df(1:3)
-!!  
-!!  
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      i    = threadIdx % x-1
-!!      j    = threadIdx % y-1
-!!      k    = threadIdx % z-1
-!!      
-!!      IF( i <= N .AND. j <= N .AND. k <= N )THEN
-!!      
-!!         ! Pre-fetch into shared memory for this block
-!!         floc(i,j,k) = f(i,j,k,iVar,iEl)
-!!
-!!         CALL syncthreads( )
-!!
-!!         df(1) = 0.0_prec
-!!         df(2) = 0.0_prec
-!!         df(3) = 0.0_prec
-!!
-!!         DO ii = 0, N
-!!            df(1) = df(1) + DMatT(ii,i)*floc(ii,j,k)
-!!            df(2) = df(2) + DMatT(ii,j)*floc(i,ii,k)
-!!            df(3) = df(3) + DMatT(ii,k)*floc(i,j,ii)
-!!         ENDDO
-!!                  
-!!         gradf(1,i,j,k,iVar,iEl) = df(1)
-!!         gradf(2,i,j,k,iVar,iEl) = df(2)
-!!         gradf(3,i,j,k,iVar,iEl) = df(3)
-!!
-!!      ENDIF
-!!    
-!!  END SUBROUTINE CalculateGradient_3D_CUDAKernel
-!!!
-!!  ATTRIBUTES(Global) SUBROUTINE CalculateDivergence_3D_CUDAKernel( DMatT, f, divf, N, nVariables, nElems )
-!!    ! Currently only works for M,N <= 7
-!!    IMPLICIT NONE
-!!    INTEGER, INTENT(in)             :: N, nVariables, nElems
-!!    REAL(prec), DEVICE, INTENT(in)  :: DMatT(0:N,0:N)
-!!    REAL(prec), DEVICE, INTENT(in)  :: f(1:3,0:N,0:N,0:N,1:nVariables,1:nElems)
-!!    REAL(prec), DEVICE, INTENT(out) :: divf(0:N,0:N,0:N,1:nVariables,1:nElems)
-!!    ! Local
-!!    INTEGER            :: i, j, k, iEl, iVar, ii
-!!    REAL(prec), SHARED :: floc(1:3,0:7,0:7,0:7)
-!!    REAL(prec) :: df
-!!  
-!!  
-!!      iVar = blockIdx % x
-!!      iEl  = blockIdx % y
-!!      i    = threadIdx % x-1
-!!      j    = threadIdx % y-1
-!!      k    = threadIdx % z-1
-!!      
-!!      IF( i <= N .AND. j <= N .AND. k <= N )THEN
-!!      
-!!         ! Pre-fetch into shared memory for this block
-!!         floc(1,i,j,k) = f(1,i,j,k,iVar,iEl)
-!!         floc(2,i,j,k) = f(2,i,j,k,iVar,iEl)
-!!         floc(3,i,j,k) = f(3,i,j,k,iVar,iEl)
-!!      ENDIF
-!!      
-!!         CALL syncthreads( )
-!! 
-!!      IF( i <= N .AND. j <= N .AND. k <= N )THEN
-!!      
-!!         df = 0.0_prec
-!!         DO ii = 0, N
-!!            df = df + DMatT(ii,i)*floc(1,ii,j,k) + &
-!!                      DMatT(ii,j)*floc(2,i,ii,k) + &
-!!                      DMatT(ii,k)*floc(3,i,j,ii)
-!!         ENDDO
-!!                  
-!!         divf(i,j,k,iVar,iEl) = df
-!!
-!!      ENDIF
-!!    
-!! END SUBROUTINE CalculateDivergence_3D_CUDAKernel
-!! 
-!!#endif
 
 END MODULE Lagrange_Class
