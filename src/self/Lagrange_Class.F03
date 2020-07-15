@@ -42,10 +42,8 @@ IMPLICIT NONE
   !
   !> attribute : qWeights(0:N) : The quadrature weights for discrete integration. The quadradture weights depend on the type of controlPoints provided; one of Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss, Chebyshev-Gauss-Lobatto, Chebyshev-Gauss Radau, or Uniform. If Uniform, the quadrature weights are constant = dx = 2.0/(N+1).
   ! 
-  !> attribute : iMatrix(0:N,0:M) : TO DO
-  !> attribute : iMatrixTranspose(0:M,0:N) : TO DO
+  !> attribute : iMatrix(0:N,0:M) :
   !> attribute : dMatrix(0:N,0:N) : TO DO
-  !> attribute : dMatrixTranspose(0:N,0:N) : TO DO
   !> attribute : bMatrix(0:N,1:2) : TO DO
 
     INTEGER :: N     
@@ -55,17 +53,13 @@ IMPLICIT NONE
     REAL(prec), POINTER :: bWeights(:)
     REAL(prec), POINTER :: qWeights(:)
     REAL(prec), POINTER :: iMatrix(:,:)
-    REAL(prec), POINTER :: iMatrixTranspose(:,:)
     REAL(prec), POINTER :: dMatrix(:,:)  
-    REAL(prec), POINTER :: dMatrixTranspose(:,:)  
     REAL(prec), POINTER :: bMatrix(:,:)
 
     TYPE(c_ptr) :: bWeights_dev
     TYPE(c_ptr) :: qWeights_dev
     TYPE(c_ptr) :: iMatrix_dev
-    TYPE(c_ptr) :: iMatrixTranspose_dev
     TYPE(c_ptr) :: dMatrix_dev
-    TYPE(c_ptr) :: dMatrixTranspose_dev 
     TYPE(c_ptr) :: bMatrix_dev
 
     CONTAINS
@@ -419,10 +413,8 @@ IMPLICIT NONE
                 myPoly % bWeights(0:N), &
                 myPoly % qWeights(0:N), &
                 myPoly % targetPoints(0:M), &
-                myPoly % iMatrix(0:M,0:N), &
-                myPoly % iMatrixTranspose(0:N,0:M), &
+                myPoly % iMatrix(0:N,0:M), &
                 myPoly % dMatrix(0:N,0:N), &
-                myPoly % dMatrixTranspose(0:N,0:N), &
                 myPoly % bMatrix(0:N,0:1))
 
       myPoly % controlPoints = 0.0_prec
@@ -430,9 +422,7 @@ IMPLICIT NONE
       myPoly % qWeights = 0.0_prec
       myPoly % targetPoints  = 0.0_prec
       myPoly % iMatrix = 0.0_prec
-      myPoly % iMatrixTranspose = 0.0_prec
       myPoly % dMatrix = 0.0_prec
-      myPoly % dMatrixTranspose  = 0.0_prec
       myPoly % bMatrix = 0.0_prec
       
      
@@ -479,9 +469,7 @@ IMPLICIT NONE
       CALL hfMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights))
       CALL hfMalloc(myPoly % qWeights_dev, SIZEOF(myPoly % qWeights))
       CALL hfMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix))
-      CALL hfMalloc(myPoly % iMatrixTranspose_dev, SIZEOF(myPoly % iMatrixTranspose))
       CALL hfMalloc(myPoly % dMatrix_dev, SIZEOF(myPoly % dMatrix))
-      CALL hfMalloc(myPoly % dMatrixTranspose_dev, SIZEOF(myPoly % dMatrixTranspose))
       CALL hfMalloc(myPoly % bMatrix_dev, SIZEOF(myPoly % bMatrix))
 
       CALL myPoly % UpdateDevice()
@@ -505,16 +493,14 @@ IMPLICIT NONE
                   myPoly % bWeights, &
                   myPoly % targetPoints, &
                   myPoly % iMatrix, &
-                  myPoly % iMatrixTranspose, &
                   myPoly % dMatrix, &
-                  myPoly % dMatrixTranspose )
+                  myPoly % bMatrix )
 #ifdef GPU
       CALL hfFree(myPoly % bWeights_dev)
       CALL hfFree(myPoly % qWeights_dev)
       CALL hfFree(myPoly % iMatrix_dev)
-      CALL hfFree(myPoly % iMatrixTranspose_dev)
       CALL hfFree(myPoly % dMatrix_dev)
-      CALL hfFree(myPoly % dMatrixTranspose_dev)
+      CALL hfFree(myPoly % bMatrix_dev)
 #endif
 
   END SUBROUTINE Trash_Lagrange
@@ -538,19 +524,10 @@ IMPLICIT NONE
                                 SIZEOF(myPoly % iMatrix), &
                                 hipMemcpyHostToDevice))
 
-      CALL hipFortran(hipMemcpy(myPoly % iMatrixTranspose_dev, &
-                                c_loc(myPoly % iMatrixTranspose), &
-                                SIZEOF(myPoly % iMatrixTranspose), &
-                                hipMemcpyHostToDevice))
 
       CALL hipFortran(hipMemcpy(myPoly % dMatrix_dev, &
                                 c_loc(myPoly % dMatrix), &
                                 SIZEOF(myPoly % dMatrix), &
-                                hipMemcpyHostToDevice))
-
-      CALL hipFortran(hipMemcpy(myPoly % dMatrixTranspose_dev, &
-                                c_loc(myPoly % dMatrixTranspose), &
-                                SIZEOF(myPoly % dMatrixTranspose), &
                                 hipMemcpyHostToDevice))
 
       CALL hipFortran(hipMemcpy(myPoly % bMatrix_dev, &
@@ -579,19 +556,9 @@ IMPLICIT NONE
                                 SIZEOF(myPoly % iMatrix), &
                                 hipMemcpyDeviceToHost))
 
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % iMatrixTranspose), &
-                                myPoly % iMatrixTranspose_dev, &
-                                SIZEOF(myPoly % iMatrixTranspose), &
-                                hipMemcpyDeviceToHost))
-
       CALL hipFortran(hipMemcpy(c_loc(myPoly % dMatrix), &
                                 myPoly % dMatrix_dev, &
                                 SIZEOF(myPoly % dMatrix), &
-                                hipMemcpyDeviceToHost))
-
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % dMatrixTranspose), &
-                                myPoly % dMatrixTranspose_dev, &
-                                SIZEOF(myPoly % dMatrixTranspose), &
                                 hipMemcpyDeviceToHost))
 
       CALL hipFortran(hipMemcpy(c_loc(myPoly % bMatrix), &
@@ -836,7 +803,7 @@ IMPLICIT NONE
           DO i = 0, myPoly % M
             fInterp(i,iVar,iEl) = 0.0_prec
             DO ii = 0, myPoly % N
-              fInterp(i,iVar,iEl) = fInterp(i,iVar,iEl) + myPoly % iMatrixTranspose(ii,i)*f(ii,iVar,iEl)
+              fInterp(i,iVar,iEl) = fInterp(i,iVar,iEl) + myPoly % iMatrix(ii,i)*f(ii,iVar,iEl)
             ENDDO
           ENDDO
         ENDDO
@@ -851,7 +818,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -923,10 +890,10 @@ IMPLICIT NONE
                    
                 fa = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fa = fa + f(ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                  fa = fa + f(ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
                 ENDDO
                       
-                fNew(i,j,iVar,iEl) = fNew(i,j,iVar,iEl) + fa*myPoly % iMatrixTranspose(jj,j)
+                fNew(i,j,iVar,iEl) = fNew(i,j,iVar,iEl) + fa*myPoly % iMatrix(jj,j)
 
               ENDDO
                    
@@ -945,7 +912,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -974,10 +941,10 @@ IMPLICIT NONE
                    
                 fi(1:2) = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fi(1:2)= fi(1:2) + f(1:2,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                  fi(1:2)= fi(1:2) + f(1:2,ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
                 ENDDO
                       
-                fNew(1:2,i,j,iVar,iEl) = fNew(1:2,i,j,iVar,iEl) + fi(1:2)*myPoly % iMatrixTranspose(jj,j)
+                fNew(1:2,i,j,iVar,iEl) = fNew(1:2,i,j,iVar,iEl) + fi(1:2)*myPoly % iMatrix(jj,j)
 
               ENDDO
                    
@@ -996,7 +963,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1024,10 +991,10 @@ IMPLICIT NONE
                    
                 fi(1:2,1:2) = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fi(1:2,1:2)= fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                  fi(1:2,1:2)= fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
                 ENDDO
                       
-                fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrixTranspose(jj,j)
+                fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrix(jj,j)
 
               ENDDO
                    
@@ -1046,7 +1013,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1119,11 +1086,11 @@ IMPLICIT NONE
                   DO jj = 0, myPoly % N
                     fi = 0.0_prec
                     DO ii = 0, myPoly % N
-                      fi = fi + f(ii,jj,kk,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                      fi = fi + f(ii,jj,kk,iVar,iEl)*myPoly % iMatrix(ii,i)
                     ENDDO
-                    fij = fij + fi*myPoly % iMatrixTranspose(jj,j)
+                    fij = fij + fi*myPoly % iMatrix(jj,j)
                   ENDDO
-                  fInterp(i,j,k,iVar,iEl) = fInterp(i,j,k,iVar,iEl) + fij*myPoly % iMatrixTranspose(kk,k)
+                  fInterp(i,j,k,iVar,iEl) = fInterp(i,j,k,iVar,iEl) + fij*myPoly % iMatrix(kk,k)
                 ENDDO
 
               ENDDO
@@ -1141,7 +1108,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL ScalarGridInterp_3D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL ScalarGridInterp_3D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1170,11 +1137,11 @@ IMPLICIT NONE
                   DO jj = 0, myPoly % N
                     fi(1:3) = 0.0_prec
                     DO ii = 0, myPoly % N
-                      fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                      fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix(ii,i)
                     ENDDO
-                    fij(1:3) = fij(1:3) + fi(1:3)*myPoly % iMatrixTranspose(jj,j)
+                    fij(1:3) = fij(1:3) + fi(1:3)*myPoly % iMatrix(jj,j)
                   ENDDO
-                  fInterp(1:3,i,j,k,iVar,iEl) = fInterp(1:3,i,j,k,iVar,iEl) + fij(1:3)*myPoly % iMatrixTranspose(kk,k)
+                  fInterp(1:3,i,j,k,iVar,iEl) = fInterp(1:3,i,j,k,iVar,iEl) + fij(1:3)*myPoly % iMatrix(kk,k)
                 ENDDO
 
               ENDDO
@@ -1192,7 +1159,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1221,11 +1188,11 @@ IMPLICIT NONE
                   DO jj = 0, myPoly % N
                     fi(1:3,1:3) = 0.0_prec
                     DO ii = 0, myPoly % N
-                      fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrixTranspose(ii,i)
+                      fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix(ii,i)
                     ENDDO
-                    fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrixTranspose(jj,j)
+                    fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrix(jj,j)
                   ENDDO
-                  fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + fij(1:3,1:3)*myPoly % iMatrixTranspose(kk,k)
+                  fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + fij(1:3,1:3)*myPoly % iMatrix(kk,k)
                 ENDDO
 
               ENDDO
@@ -1243,7 +1210,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrixTranspose_dev, &
+      CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix_dev, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1310,7 +1277,7 @@ IMPLICIT NONE
     
             df(i,iVar,iEl) = 0.0_prec 
             DO ii = 0, myPoly % N
-              df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,iVar,iEl)
+              df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dMatrix(ii,i)*f(ii,iVar,iEl)
             ENDDO
     
           ENDDO
@@ -1327,7 +1294,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: df_dev
 
-      CALL Derivative_1D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL Derivative_1D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, df_dev, &
                                          myPoly % N, &
                                          nVariables, nElements)
@@ -1396,8 +1363,8 @@ IMPLICIT NONE
               gradF(1,i,j,iVar,iEl) = 0.0_prec 
               gradF(2,i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,j,iVar,iEl)
-                gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(i,ii,iVar,iEl)
+                gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(ii,j,iVar,iEl)
+                gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(i,ii,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1416,7 +1383,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1448,10 +1415,10 @@ IMPLICIT NONE
               gradF(1,2,i,j,iVar,iEl) = 0.0_prec 
               gradF(2,2,i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,iVar,iEl)
-                gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(2,ii,j,iVar,iEl)
-                gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(1,i,ii,iVar,iEl)
-                gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,iVar,iEl)
+                gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,iVar,iEl)
+                gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(2,ii,j,iVar,iEl)
+                gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(1,i,ii,iVar,iEl)
+                gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(2,i,ii,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1470,7 +1437,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1492,8 +1459,8 @@ IMPLICIT NONE
     
               dF(i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,iVar,iEl) +&
-                                                      myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,iVar,iEl)
+                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,iVar,iEl) +&
+                                                      myPoly % dMatrix(ii,j)*f(2,i,ii,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1512,7 +1479,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1534,8 +1501,8 @@ IMPLICIT NONE
     
               dF(i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(1,i,ii,iVar,iEl) -&
-                                                      myPoly % dMatrixTranspose(ii,i)*f(2,ii,j,iVar,iEl)
+                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(1,i,ii,iVar,iEl) -&
+                                                      myPoly % dMatrix(ii,i)*f(2,ii,j,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1554,7 +1521,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1579,9 +1546,9 @@ IMPLICIT NONE
                 gradF(2,i,j,k,iVar,iEl) = 0.0_prec 
                 gradF(3,i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(ii,j,k,iVar,iEl)
-                  gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(i,ii,k,iVar,iEl)
-                  gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(i,j,ii,iVar,iEl)
+                  gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(ii,j,k,iVar,iEl)
+                  gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(i,ii,k,iVar,iEl)
+                  gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(i,j,ii,iVar,iEl)
                 ENDDO
     
               ENDDO
@@ -1601,7 +1568,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1641,15 +1608,15 @@ IMPLICIT NONE
                 gradF(2,3,i,j,k,iVar,iEl) = 0.0_prec 
                 gradF(3,3,i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl)
-                  gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(2,ii,j,k,iVar,iEl)
-                  gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(3,ii,j,k,iVar,iEl)
-                  gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(1,i,ii,k,iVar,iEl)
-                  gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl)
-                  gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(3,i,ii,k,iVar,iEl)
-                  gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(1,i,j,ii,iVar,iEl)
-                  gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(2,i,j,ii,iVar,iEl)
-                  gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                  gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,k,iVar,iEl)
+                  gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(2,ii,j,k,iVar,iEl)
+                  gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(3,ii,j,k,iVar,iEl)
+                  gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(1,i,ii,k,iVar,iEl)
+                  gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(2,i,ii,k,iVar,iEl)
+                  gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(3,i,ii,k,iVar,iEl)
+                  gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(1,i,j,ii,iVar,iEl)
+                  gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(2,i,j,ii,iVar,iEl)
+                  gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
     
               ENDDO
@@ -1669,7 +1636,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1692,9 +1659,9 @@ IMPLICIT NONE
     
                 dF(i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(1,ii,j,k,iVar,iEl) +&
-                                                            myPoly % dMatrixTranspose(ii,j)*f(2,i,ii,k,iVar,iEl) +&
-                                                            myPoly % dMatrixTranspose(ii,k)*f(3,i,j,ii,iVar,iEl)
+                  dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,k,iVar,iEl) +&
+                                                            myPoly % dMatrix(ii,j)*f(2,i,ii,k,iVar,iEl) +&
+                                                            myPoly % dMatrix(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
     
               ENDDO
@@ -1714,7 +1681,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1739,12 +1706,12 @@ IMPLICIT NONE
                 dF(2,i,j,k,iVar,iEl) = 0.0_prec 
                 dF(3,i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,j)*f(3,i,ii,k,iVar,iEl) -&
-                                                                myPoly % dMatrixTranspose(ii,k)*f(2,i,j,ii,iVar,iEl)
-                  dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,k)*f(1,i,j,ii,iVar,iEl) -&
-                                                                myPoly % dMatrixTranspose(ii,i)*f(3,ii,j,k,iVar,iEl)
-                  dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrixTranspose(ii,i)*f(2,ii,j,k,iVar,iEl) -&
-                                                                myPoly % dMatrixTranspose(ii,j)*f(1,i,ii,k,iVar,iEl)
+                  dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(3,i,ii,k,iVar,iEl) -&
+                                                                myPoly % dMatrix(ii,k)*f(2,i,j,ii,iVar,iEl)
+                  dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(1,i,j,ii,iVar,iEl) -&
+                                                                myPoly % dMatrix(ii,i)*f(3,ii,j,k,iVar,iEl)
+                  dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(2,ii,j,k,iVar,iEl) -&
+                                                                myPoly % dMatrix(ii,j)*f(1,i,ii,k,iVar,iEl)
                 ENDDO  
     
               ENDDO
@@ -1764,7 +1731,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrixTranspose_dev, &
+      CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix_dev, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -2163,11 +2130,11 @@ IMPLICIT NONE
        
          DO col = 0, myPoly % N
 
-            myPoly % iMatrix(row,col) = 0.0_prec
+            myPoly % iMatrix(col,row) = 0.0_prec
            
             IF( AlmostEqual( myPoly % targetPoints(row), myPoly % controlPoints(col) ) )THEN
                rowHasMatch = .TRUE.
-               myPoly % iMatrix(row,col) = 1.0_prec
+               myPoly % iMatrix(col,row) = 1.0_prec
             ENDIF
 
          ENDDO 
@@ -2178,19 +2145,17 @@ IMPLICIT NONE
 
             DO col = 0, myPoly % N        
                temp2 = myPoly % bWeights(col)/( myPoly % targetPoints(row) - myPoly % controlPoints(col) )
-               myPoly % iMatrix(row,col) = temp2
+               myPoly % iMatrix(col,row) = temp2
                temp1 = temp1 + temp2
             ENDDO 
 
             DO col = 0, myPoly % N 
-               myPoly % iMatrix(row,col) = myPoly % iMatrix(row,col)/temp1
+               myPoly % iMatrix(col,row) = myPoly % iMatrix(col,row)/temp1
             ENDDO
 
          ENDIF 
 
       ENDDO
-
-      myPoly % iMatrixTranspose = TRANSPOSE( myPoly % iMatrix )
 
  END SUBROUTINE CalculateInterpolationMatrix
 
@@ -2210,21 +2175,22 @@ IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
     ! Local
     INTEGER    :: row, col
+    REAL(prec) :: dmat(0:myPoly % N, 0:myPoly % N)
 
       DO row = 0, myPoly % N
          
-        myPoly % dMatrix(row,row) = 0.0_prec
+        dmat(row,row) = 0.0_prec
 
         DO col = 0, myPoly % N
            
           IF( .NOT. (col == row) )THEN
 
-            myPoly % dMatrix(row,col) = myPoly % bWeights(col)/&
+            dmat(row,col) = myPoly % bWeights(col)/&
                                                  ( myPoly % bWeights(row)*&
                                                    ( myPoly % controlPoints(row) - &
                                                      myPoly % controlPoints(col) ) )
 
-            myPoly % dMatrix(row,row) = myPoly % dMatrix(row,row) - myPoly % dMatrix(row,col)
+            dmat(row,row) = dmat(row,row) - dmat(row,col)
 
           ENDIF
         
@@ -2232,7 +2198,7 @@ IMPLICIT NONE
 
       ENDDO 
       
-      myPoly % dMatrixTranspose = TRANSPOSE( myPoly % dMatrix )
+      myPoly % dMatrix = TRANSPOSE( dmat )
 
   END SUBROUTINE CalculateDerivativeMatrix
 

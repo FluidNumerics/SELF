@@ -16,8 +16,8 @@ INCLUDE=${HIPFORTRAN_INCLUDE} -I/apps/json-fortran/jsonfortran-gnu-7.1.0/lib
 
 LINK=${INCLUDE} ${LIB}
 
-test: ModelPrecision.o ConstantsDictionary.o CommonRoutines.o EquationParser_Class.o Quadrature.o Lagrange_Class.o Lagrange_Test.o
-	${CXX} ${CXXFLAGS} *.o ${LINK} -o $@
+#test: ModelPrecision.o ConstantsDictionary.o CommonRoutines.o EquationParser_Class.o Quadrature.o Lagrange_Class.o Lagrange_Test.o
+#	${CXX} ${CXXFLAGS} *.o ${LINK} -o $@
 
 ModelPrecision.o: ModelPrecision.F03
 	${FC} ${OPT} ${FFLAGS} -c ModelPrecision.F03 -o $@
@@ -40,8 +40,11 @@ Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagra
 Lagrange_HIP.o : Lagrange_HIP.cpp SELF_Macros.h
 	${CXX} ${OPT} ${CXXFLAGS} -c ${HIPFORTRAN_INCLUDE} Lagrange_HIP.cpp -o $@
 
-Lagrange_Test.o : Lagrange_Test.F03 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o EquationParser_Class.o Lagrange_HIP.o
-	${FC} ${OPT} ${FFLAGS} ${LINK} -c Lagrange_Test.F03 -o $@
+#Lagrange_Test.o : Lagrange_Test.F03 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o EquationParser_Class.o Lagrange_HIP.o
+#	${FC} ${OPT} ${FFLAGS} ${LINK} -c Lagrange_Test.F03 -o $@
+
+Lagrange_Class_Tests.o : Lagrange_Class_Tests.F03 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o EquationParser_Class.o Lagrange_HIP.o
+	${FC} ${OPT} ${FFLAGS} ${LINK} -c Lagrange_Class_Tests.F03 -o $@
 
 
 

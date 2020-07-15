@@ -126,36 +126,40 @@ CONTAINS
          CALL Get_Char_Obj(jCore, testPointer, 'dfdx', funcDerivative)
 
           ! Create the exact function equation parsers
-          f = EquationParser(funcValue)
-          dfdx = EquationParser(funcDerivative)
+          f(iTest) = EquationParser(funcValue)
+          dfdx(iTest) = EquationParser(funcDerivative)
 
-          ! Create the exact function equation parsers
-          DO iEl = 1, nElements
-            DO i = 0, nPlotPoints
-              xL = -1.0_prec + REAL((iEl-1),prec)*dx
-              xR = xL + dx
-              x = 0.5_prec*( xR*(targetNodes(i)+1.0_prec) - xL*(targetNodes(i)-1.0_prec) )
-              fActual(i,1,iEl) = f % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
-            ENDDO
-          ENDDO
+          !! Create the exact function equation parsers
+          !DO iEl = 1, nElements
+          !  DO i = 0, nPlotPoints
+          !    xL = -1.0_prec + REAL((iEl-1),prec)*dx
+          !    xR = xL + dx
+          !    x = 0.5_prec*( xR*(targetNodes(i)+1.0_prec) - xL*(targetNodes(i)-1.0_prec) )
+          !    fActual(i,1,iEl) = f(itest) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
+          !  ENDDO
+          !ENDDO
+
+         ENDIF
+
+       ENDDO
 
 
-          DO pdeg = polyDeg(1), polyDeg(2)
+       DO pdeg = polyDeg(1), polyDeg(2)
 
-            ALLOCATE(fNodal(0:pdeg,1,1:nElements), dfdxInterp(0:pdeg,1,1:nElements), dfdxActual(0:pdeg,1,1:nElements))
+          !  ALLOCATE(fNodal(0:pdeg,1,1:nElements), dfdxInterp(0:pdeg,1,1:nElements), dfdxActual(0:pdeg,1,1:nElements))
 
-            CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
+         CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
 
              ! Evaluate the nodal values at quadrature points and the exact derivative
-            DO iEl = 1, nElements
-              DO i = 0, pdeg
-                xL = -1.0_prec + REAL((iEl-1),prec)*dx
-                xR = xL + dx
-                x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
-                fNodal(i,1,iEl) = f % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
-                dfdxActual(i,1,iEl) = dfdx % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
-              ENDDO
-            ENDDO
+        !    DO iEl = 1, nElements
+        !      DO i = 0, pdeg
+        !        xL = -1.0_prec + REAL((iEl-1),prec)*dx
+        !        xR = xL + dx
+        !        x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
+        !        fNodal(i,1,iEl) = f % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
+        !        dfdxActual(i,1,iEl) = dfdx % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
+        !      ENDDO
+        !    ENDDO
             ! ***** ScalarGridInterp_1D Testing ****** !
             ! Interpolate the function to the targetNodes
             CALL interp % ScalarGridInterp_1D(fNodal, fInterp, 1, nElements)  
@@ -319,6 +323,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE Scalar_1D_Tests
+
 
   SUBROUTINE Scalar_2D_Tests(json)
     USE ISO_FORTRAN_ENV
