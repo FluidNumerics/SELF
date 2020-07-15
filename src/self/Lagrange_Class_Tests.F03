@@ -5,6 +5,9 @@ USE EquationParser_Class
 USE Lagrange_Class
 USE json_module
 
+USE ISO_C_BINDING
+USE hip_fortran
+
 IMPLICIT NONE
 
    TYPE, EXTENDS(Lagrange) :: Lagrange_Tests
@@ -105,93 +108,110 @@ SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctio
 
 END SUBROUTINE Report_JSON
 
-!SUBROUTINE Scalar_Derivative_1D_Test(myPoly, f, dfdx, nFunctions, nElements )
-!  IMPLICIT NONE
-!  CLASS(Lagrange_Tests), INTENT(in) :: myPoly
-!  TYPE(EquationParser), INTENT(in)  :: f(1:nFunctions)
-!  TYPE(EquationParser), INTENT(in)  :: dfdx(1:nFunctions)
-!  INTEGER, INTENT(in) :: nFunctions
-!  INTEGER, INTENT(in) :: nElements
-!  ! Local
-!  TYPE(Phrase) :: functionNames(1:nFunctions)
-!
-!
+SUBROUTINE Scalar_Derivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRepeats)
+  IMPLICIT NONE
+  CLASS(Lagrange_Tests), INTENT(in) :: interp
+  TYPE(EquationParser), INTENT(in)  :: f(1:nFunctions)
+  TYPE(EquationParser), INTENT(in)  :: dfdx(1:nFunctions)
+  INTEGER, INTENT(in) :: nFunctions
+  INTEGER, INTENT(in) :: nElements
+  INTEGER, INTENT(in) :: nRepeats
+  ! Local
+  TYPE(Phrase) :: functionNames(1:nFunctions)
+  INTEGER :: iEl, iVar, i
+  REAL(prec) :: xL, xR, x, dx, t1, t2, runtime
+  REAL(prec), POINTER :: fNodal(:,:,:)
+  REAL(prec), POINTER :: dfdxInterp(:,:,:)
+  REAL(prec), POINTER :: dfdxActual(:,:,:)
+  REAL(prec) :: errors(1:nFunctions)
+#ifdef GPU
+  TYPE(c_ptr) :: fNodal_dev, fInterp_dev, dfdxInterp_dev
+#endif
+
+
+     ALLOCATE(fNodal(0:interp % N, 1:nFunctions, 1:nElements),&
+              dfdxInterp(0:interp % N, 1:nFunctions, 1:nElements),&
+              dfdxActual(0:interp % N, 1:nFunctions, 1:nElements))
 !     DO iVar = 1, nFunctions
 !       ! Pull out the function Names
 !     ENDDO
-!
-!     ! Evaluate the exact functions and derivatives at the control points
-!     DO iEl = 1, nElements
-!       DO iVar = 1, nFunctions
-!         DO i = 0, pdeg
-!           xL = -1.0_prec + REAL((iEl-1),prec)*dx
-!           xR = xL + dx
-!           x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
-!           fNodal(i,iVar,iEl) = f(iVar) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
-!           dfdxActual(i,iVar,iEl) = dfdx(iVar) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
-!         ENDDO
-!       ENDDO
-!     ENDDO
-!
-!     ! Derivative_1D
-!     CALL interp % Derivative_1D(fNodal, dfdxInterp, nFunctions, nElements)
-!     errors = 0.0_prec
-!     DO iEl = 1, nElements
-!       DO iVar = 1, nFunctions
-!         DO i = 0, pdeg
-!           errors(iVar) = MAX(ABS(dfdxInterp(i,iVar,iEl)*2.0_prec/dx - dfdxActual(i,iVar,iEl)),fErr)
-!         ENDDO
-!       ENDDO
-!     ENDDO
-!
-!     ! Estimate routine runtime
-!     CALL CPU_TIME(t1)
-!     DO i = 1, nRepeats
-!       CALL interp % Derivative_1D(fNodal, dfdxInterp, nFunctions, nElements)
-!     ENDDO
-!     CALL CPU_TIME(t2)
-!     CALL myPoly % Report_JSON('Derivative_1D', &
-!                               functionNames, &
-!                               runtime, &
-!                               errors, &
-!                               nFunctions, &
-!                               nElements)
-!#ifdef GPU
-!     CALL hfMalloc(fNodal_dev, SIZEOF(fNodal))
-!     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-!
-!     CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
-!
-!     CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
-!
-!     fErr = 0.0_prec
-!     DO iEl = 1, nElements
-!       DO iVar = 1, nFunctions
-!         DO i = 0, pdeg
-!           fErr = MAX(ABS(dfdxInterp(i,iVar,iEl)*2.0_prec/dx - dfdxActual(i,iVar,iEl)),fErr)
-!         ENDDO
-!       ENDDO
-!     ENDDO
-!
-!     ! Estimate routine runtime
-!     CALL CPU_TIME(t1)
-!     DO i = 1, nRepeats
-!       CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
-!     ENDDO
-!     CALL hipFortran(hipDeviceSynchronize()) 
-!     CALL CPU_TIME(t2)
-!
-!     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
-!     CALL myPoly % Report_JSON('Derivative_1D - GPU', &
-!                               functionNames, &
-!                               runtime, &
-!                               errors, &
-!                               nFunctions, &
-!                               nElements)
-!
-!#endif
-!
-!END SUBROUTINE Scalar_Derivative_1D_Test
+
+     dx = 2.0_prec/REAL(nElements,prec)
+     ! Evaluate the exact functions and derivatives at the control points
+     DO iEl = 1, nElements
+       DO iVar = 1, nFunctions
+         DO i = 0, interp % N
+           xL = -1.0_prec + REAL((iEl-1),prec)*dx
+           xR = xL + dx
+           x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
+           fNodal(i,iVar,iEl) = f(iVar) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
+           dfdxActual(i,iVar,iEl) = dfdx(iVar) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
+         ENDDO
+       ENDDO
+     ENDDO
+
+     ! Derivative_1D
+     CALL interp % Derivative_1D(fNodal, dfdxInterp, nFunctions, nElements)
+
+     errors = 0.0_prec
+     DO iEl = 1, nElements
+       DO iVar = 1, nFunctions
+         DO i = 0, interp % N
+           errors(iVar) = MAX(ABS(dfdxInterp(i,iVar,iEl)*2.0_prec/dx - dfdxActual(i,iVar,iEl)),errors(iVar))
+         ENDDO
+       ENDDO
+     ENDDO
+
+     ! Estimate routine runtime
+     CALL CPU_TIME(t1)
+     DO i = 1, nRepeats
+       CALL interp % Derivative_1D(fNodal, dfdxInterp, nFunctions, nElements)
+     ENDDO
+     CALL CPU_TIME(t2)
+     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+     CALL interp % Report_JSON('Derivative_1D', &
+                               functionNames, &
+                               runtime, &
+                               errors, &
+                               nFunctions, &
+                               nElements)
+#ifdef GPU
+     CALL hfMalloc(fNodal_dev, SIZEOF(fNodal))
+     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+
+     CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
+
+     CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
+
+     errors = 0.0_prec
+     DO iEl = 1, nElements
+       DO iVar = 1, nFunctions
+         DO i = 0, interp % N
+           errors(iVar) = MAX(ABS(dfdxInterp(i,iVar,iEl)*2.0_prec/dx - dfdxActual(i,iVar,iEl)),errors(iVar))
+         ENDDO
+       ENDDO
+     ENDDO
+
+     ! Estimate routine runtime
+     CALL CPU_TIME(t1)
+     DO i = 1, nRepeats
+       CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
+     ENDDO
+     CALL hipFortran(hipDeviceSynchronize()) 
+     CALL CPU_TIME(t2)
+
+     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+     CALL interp % Report_JSON('Derivative_1D - GPU', &
+                               functionNames, &
+                               runtime, &
+                               errors, &
+                               nFunctions, &
+                               nElements)
+
+#endif
+     DEALLOCATE(fNodal,dfdxInterp, dfdxActual)
+
+END SUBROUTINE Scalar_Derivative_1D_Test
 !
 !SUBROUTINE Scalar_GridInterp_1D_Test(myPoly, f, nFunctions, nElements )
 !  IMPLICIT NONE
