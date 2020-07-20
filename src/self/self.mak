@@ -34,14 +34,14 @@ EquationParser_Class.o: EquationParser_Class.F03 ModelPrecision.o ConstantsDicti
 Quadrature.o: Quadrature.F03 ModelPrecision.o ConstantsDictionary.o
 	${FC} ${OPT} ${FFLAGS} -c Quadrature.F03 -o $@
 
-Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.F03 Lagrange_HIP.o
+Lagrange_Class.o : ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Quadrature.o Lagrange_HIP.o Lagrange_Class.F03
 	${FC} ${OPT} ${FFLAGS} ${HIPFORTRAN_INCLUDE} -c Lagrange_Class.F03 -o $@
 
 Lagrange_HIP.o : Lagrange_HIP.cpp SELF_Macros.h
 	${CXX} ${OPT} ${CXXFLAGS} -c ${HIPFORTRAN_INCLUDE} Lagrange_HIP.cpp -o $@
 
-#Lagrange_Test.o : Lagrange_Test.F03 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o EquationParser_Class.o Lagrange_HIP.o
-#	${FC} ${OPT} ${FFLAGS} ${LINK} -c Lagrange_Test.F03 -o $@
+Lagrange_Test.o : Lagrange_Test.F03 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o Lagrange_Class_Tests.o EquationParser_Class.o Lagrange_HIP.o
+	${FC} ${OPT} ${FFLAGS} ${LINK} -c Lagrange_Test.F03 -o $@
 
 Lagrange_Class_Tests.o : Lagrange_Class_Tests.F03 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o EquationParser_Class.o Lagrange_HIP.o
 	${FC} ${OPT} ${FFLAGS} ${LINK} -c Lagrange_Class_Tests.F03 -o $@

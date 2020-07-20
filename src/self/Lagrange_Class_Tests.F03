@@ -15,7 +15,7 @@ IMPLICIT NONE
      CONTAINS
 
      ! GENERIC, PUBLIC :: Derivative_1D => Derivative_1D_cpu, Derivative_1D_gpu
-!     PROCEDURE :: Scalar_Derivative_1D_Test
+     PROCEDURE :: Scalar_Derivative_1D_Test
      ! GENERIC, PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu, ScalarGridInterp_1D_gpu
 !     PROCEDURE :: Scalar_GridInterp_1D_Test
 !     ! GENERIC, PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu, ScalarBoundaryInterp_1D_gpu
@@ -75,6 +75,7 @@ IMPLICIT NONE
 CONTAINS
 
 SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctions, nElements)
+  USE ISO_FORTRAN_ENV
   IMPLICIT NONE
   CLASS(Lagrange_Tests), INTENT(in) :: myPoly 
   INTEGER, INTENT(in)              :: nFunctions
@@ -84,27 +85,41 @@ SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctio
   REAL(prec), INTENT(in)           :: runtime
   REAL(prec), INTENT(in)           :: errors(1:nFunctions)
   ! Local
-  TYPE(JSON_VALUE), POINTER :: p, resArray, res
+  TYPE(JSON_VALUE), POINTER :: p, res, conf
   TYPE(JSON_CORE) :: json
   CHARACTER(10) :: date
   CHARACTER(8) :: time
   CHARACTER(5) :: zone
 
     CALL DATE_AND_TIME(date, time, zone)
-    
-    CALL json % create_object(res,'')
+    CALL json % initialize()
+    CALL json % create_object(p,'')
+
+    CALL json % create_object(conf,'build_conf')
+    CALL json % add(p, conf)
+    CALL json % add(conf, 'compiler', COMPILER_VERSION())
+    CALL json % add(conf, 'compiler_options', COMPILER_OPTIONS())
+    CALL json % add(conf, 'precision', prec)
+
+    CALL json % create_object(res,'test_output')
+    CALL json % add(p, res)
+
     CALL json % add(res, 'date_time', date//' '//time//' '//zone )
     CALL json % add(res, 'routine_name', TRIM(routineName))
     CALL json % add(res, 'polynomial_degree', myPoly % N)
     CALL json % add(res, 'n_variables', nFunctions)
     CALL json % add(res, 'n_elements', nElements)
-    ! Need to make functions an array
-    CALL json % add(res, 'function', TRIM(functions(1) % val))
-    ! Need to make max_error an array
+    CALL json % add(res, 'function', [TRIM(functions(1) % val)])
     CALL json % add(res, 'max_error', errors)
     CALL json % add(res, 'runtime_ms', runtime)
-    CALL json % add(resArray, res)
+
     nullify(res)
+    nullify(conf)
+
+    CALL json % print(res)
+
+    CALL json % destroy(res)
+    IF( json % failed() ) STOP 1
 
 END SUBROUTINE Report_JSON
 
