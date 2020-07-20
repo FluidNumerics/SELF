@@ -192,11 +192,10 @@ SUBROUTINE Scalar_Derivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRe
                                nFunctions, &
                                nElements)
 #ifdef GPU
-     CALL hfMalloc(fNodal_dev, SIZEOF(fNodal))
+     CALL hipFortran(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
+     CALL hipFortran(hipMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp)))
      CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
-
      CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
-
      CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
 
      errors = 0.0_prec
@@ -224,6 +223,8 @@ SUBROUTINE Scalar_Derivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRe
                                nFunctions, &
                                nElements)
 
+     CALL hipFortran(hipFree(fNodal_dev))
+     CALL hipFortran(hipFree(dfdxInterp_dev))
 #endif
      DEALLOCATE(fNodal,dfdxInterp, dfdxActual)
 
