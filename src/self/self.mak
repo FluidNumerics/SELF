@@ -16,8 +16,8 @@ INCLUDE=${HIPFORTRAN_INCLUDE} -I/apps/json-fortran/jsonfortran-gnu-7.1.0/lib
 
 LINK=${INCLUDE} ${LIB}
 
-#test: ModelPrecision.o ConstantsDictionary.o CommonRoutines.o EquationParser_Class.o Quadrature.o Lagrange_Class.o Lagrange_Test.o
-#	${CXX} ${CXXFLAGS} *.o ${LINK} -o $@
+test: ModelPrecision.o ConstantsDictionary.o CommonRoutines.o EquationParser_Class.o Quadrature.o Lagrange_Class.o Lagrange_Class_Tests.o Lagrange_Test.o
+	${CXX} ${CXXFLAGS} *.o ${LINK} -o $@
 
 ModelPrecision.o: ModelPrecision.F03
 	${FC} ${OPT} ${FFLAGS} -c ModelPrecision.F03 -o $@

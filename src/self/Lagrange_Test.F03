@@ -44,6 +44,26 @@ IMPLICIT NONE
 
 CONTAINS
 
+  SUBROUTINE Get_Char_Obj(jCore, testPointer, key, charValue)
+    IMPLICIT NONE
+    TYPE(JSON_CORE), INTENT(inout) :: jCore
+    TYPE(JSON_VALUE), POINTER, INTENT(inout) :: testPointer
+    CHARACTER(*), INTENT(in) :: key
+    CHARACTER(*), INTENT(out) :: charValue
+    ! Local
+    TYPE(JSON_VALUE), POINTER :: p
+    CHARACTER(KIND=JSON_CK, LEN=:), ALLOCATABLE :: var
+    LOGICAL :: found
+
+      CALL jCore % get_child(testPointer, TRIM(key), p, Found)
+      IF( found )THEN
+        CALL jCore % get(p, var)
+        charValue = TRIM(var)
+      ENDIF
+      nullify(p)
+
+  END SUBROUTINE Get_Char_Obj
+
   SUBROUTINE Scalar_1D_Tests()
     USE ISO_FORTRAN_ENV
     USE ISO_C_BINDING
@@ -62,14 +82,20 @@ CONTAINS
     INTEGER :: nPlotPoints, i, iEl, pdeg, nelements, nRepeats
     REAL(prec), ALLOCATABLE :: targetNodes(:)
   
+      PRINT*, 'Starting Scalar_1D_Tests'
       CALL json % Initialize()
+      PRINT*, 'Loading lagrange.test.json'
       CALL json % Load(filename = './lagrange.test.json')
       CALL json % info('scalar_1d', n_children=nFunctions)
+      PRINT*, 'nFunctions : ', nFunctions
       CALL json % get('scalar_1d', objPointer, found)
       CALL json % get('polynomial_range', polyDeg, found)
       CALL json % get('n_plot_points', nPlotPoints, found)
+      PRINT*, 'nPlotPoints : ', nPlotPoints
       CALL json % get('element_dimensions', nElements, found)
+      PRINT*, 'nElements : ', nElements
       CALL json % get('n_timing_repeats', nRepeats, found)
+      PRINT*, 'nRepeats : ', nRepeats
       CALL json % get_core(jCore)
 
       ALLOCATE(targetNodes(0:nPlotPoints), f(1:nFunctions), dfdx(1:nFunctions))
@@ -700,25 +726,6 @@ CONTAINS
 !  END SUBROUTINE Scalar_3D_Tests
 !
 !
-!  SUBROUTINE Get_Char_Obj(jCore, testPointer, key, charValue)
-!    IMPLICIT NONE
-!    TYPE(JSON_CORE), INTENT(inout) :: jCore
-!    TYPE(JSON_VALUE), POINTER, INTENT(inout) :: testPointer
-!    CHARACTER(*), INTENT(in) :: key
-!    CHARACTER(*), INTENT(out) :: charValue
-!    ! Local
-!    TYPE(JSON_VALUE), POINTER :: p
-!    CHARACTER(KIND=JSON_CK, LEN=:), ALLOCATABLE :: var
-!    LOGICAL :: found
-!
-!      CALL jCore % get_child(testPointer, TRIM(key), p, Found)
-!      IF( found )THEN
-!        CALL jCore % get(p, var)
-!        charValue = TRIM(var)
-!      ENDIF
-!      nullify(p)
-!
-!  END SUBROUTINE Get_Char_Obj
 !
 !! SUBROUTINE Scalar_2D_Tests()
 !! END SUBROUTINE Scalar_2D_Tests

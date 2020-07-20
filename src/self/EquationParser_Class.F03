@@ -568,7 +568,6 @@ CONTAINS
         PRINT*, TRIM( parser % inFix % tokens(i) % tokenString )
       ENDDO
 
-
   END SUBROUTINE Print_InfixTokens
 
   SUBROUTINE Print_PostfixTokens( parser )
@@ -579,7 +578,6 @@ CONTAINS
       DO i = 1, parser % postFix % top_index
         PRINT*, TRIM( parser % postFix % tokens(i) % tokenString )
       ENDDO
-
 
   END SUBROUTINE Print_PostfixTokens
 

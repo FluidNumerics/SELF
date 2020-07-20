@@ -81,15 +81,16 @@ SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctio
   INTEGER, INTENT(in)              :: nFunctions
   INTEGER, INTENT(in)              :: nElements
   CHARACTER(*), INTENT(in)         :: routineName
-  TYPE(Phrase), INTENT(in)         :: functions(1:nFunctions)
+  CHARACTER(LEN=15),DIMENSION(1:nFunctions), INTENT(in) :: functions
   REAL(prec), INTENT(in)           :: runtime
   REAL(prec), INTENT(in)           :: errors(1:nFunctions)
   ! Local
-  TYPE(JSON_VALUE), POINTER :: p, res, conf
+  TYPE(JSON_VALUE), POINTER :: p, res, conf, fArray
   TYPE(JSON_CORE) :: json
   CHARACTER(10) :: date
   CHARACTER(8) :: time
   CHARACTER(5) :: zone
+  INTEGER :: i
 
     CALL DATE_AND_TIME(date, time, zone)
     CALL json % initialize()
@@ -104,19 +105,19 @@ SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctio
     CALL json % create_object(res,'test_output')
     CALL json % add(p, res)
 
-    CALL json % add(res, 'date_time', date//' '//time//' '//zone )
+    CALL json % add(res, 'date_time', TRIM(date)//' '//TRIM(time)//' '//TRIM(zone) )
     CALL json % add(res, 'routine_name', TRIM(routineName))
     CALL json % add(res, 'polynomial_degree', myPoly % N)
     CALL json % add(res, 'n_variables', nFunctions)
     CALL json % add(res, 'n_elements', nElements)
-    CALL json % add(res, 'function', [TRIM(functions(1) % val)])
-    CALL json % add(res, 'max_error', errors)
+    CALL json % add(res, 'functions', functions)
+    CALL json % add(res, 'max_errors', errors)
     CALL json % add(res, 'runtime_ms', runtime)
 
     nullify(res)
     nullify(conf)
 
-    CALL json % print(res)
+    CALL json % print(p)
 
     CALL json % destroy(res)
     IF( json % failed() ) STOP 1
@@ -132,7 +133,7 @@ SUBROUTINE Scalar_Derivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRe
   INTEGER, INTENT(in) :: nElements
   INTEGER, INTENT(in) :: nRepeats
   ! Local
-  TYPE(Phrase) :: functionNames(1:nFunctions)
+  CHARACTER(LEN=15), DIMENSION(1:nFunctions) :: functionNames
   INTEGER :: iEl, iVar, i
   REAL(prec) :: xL, xR, x, dx, t1, t2, runtime
   REAL(prec), POINTER :: fNodal(:,:,:)
@@ -147,9 +148,9 @@ SUBROUTINE Scalar_Derivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRe
      ALLOCATE(fNodal(0:interp % N, 1:nFunctions, 1:nElements),&
               dfdxInterp(0:interp % N, 1:nFunctions, 1:nElements),&
               dfdxActual(0:interp % N, 1:nFunctions, 1:nElements))
-!     DO iVar = 1, nFunctions
-!       ! Pull out the function Names
-!     ENDDO
+     DO iVar = 1, nFunctions
+       functionNames(iVar) = f(iVar) % equation
+     ENDDO
 
      dx = 2.0_prec/REAL(nElements,prec)
      ! Evaluate the exact functions and derivatives at the control points
