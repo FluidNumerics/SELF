@@ -14,7 +14,7 @@ IMPLICIT NONE
 
     CALL Scalar_1D_Tests()
 
-!    CALL Scalar_2D_Tests(json)
+    CALL Scalar_2D_Tests()
 !
 !    CALL Scalar_3D_Tests(json)
 
@@ -107,16 +107,76 @@ CONTAINS
           f(iTest) = EquationParser(funcValue)
           dfdx(iTest) = EquationParser(funcDerivative)
         ENDIF
-       ENDDO
+      ENDDO
 
-       DO pdeg = polyDeg(1), polyDeg(2)
-         CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
-         !CALL interp % Scalar_GridInterp_1D_Test(f, nFunctions, nElements, nRepeats)
-         CALL interp % Scalar_Derivative_1D_Test(f, dfdx, nFunctions, nElements, nRepeats)
-         CALL interp % Trash()
-       ENDDO
+      DO pdeg = polyDeg(1), polyDeg(2)
+        CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
+        CALL interp % ScalarGridInterp_1D_Test(f, nFunctions, nElements, nRepeats)
+        CALL interp % ScalarDerivative_1D_Test(f, dfdx, nFunctions, nElements, nRepeats)
+        CALL interp % Trash()
+      ENDDO
+
+      DEALLOCATE(targetNodes, f, dfdx)
 
   END SUBROUTINE Scalar_1D_Tests
+
+  SUBROUTINE Scalar_2D_Tests()
+    USE ISO_FORTRAN_ENV
+    USE ISO_C_BINDING
+    IMPLICIT NONE
+    ! Local
+    TYPE(EquationParser), ALLOCATABLE :: f(:), dfdx(:), dfdy(:)
+    TYPE(Lagrange_Tests) :: interp
+    TYPE(JSON_FILE) :: json
+    TYPE(JSON_VALUE), POINTER :: objPointer, testPointer
+    TYPE(JSON_CORE) :: jCore
+    INTEGER(JSON_IK) :: nFunctions, iTest
+    LOGICAL :: found
+    CHARACTER(50) :: funcName, funcValue, dfdxChar, dfdyChar 
+    !INTEGER :: polyDeg(1:2) 
+    INTEGER, ALLOCATABLE :: polyDeg(:) 
+    INTEGER :: nPlotPoints, i, iEl, pdeg, nelements, nRepeats
+    REAL(prec), ALLOCATABLE :: targetNodes(:)
+  
+      CALL json % Initialize()
+      CALL json % Load(filename = './lagrange.test.json')
+      CALL json % info('scalar_2d', n_children=nFunctions)
+      CALL json % get('scalar_2d', objPointer, found)
+      CALL json % get('polynomial_range', polyDeg, found)
+      CALL json % get('n_plot_points', nPlotPoints, found)
+      CALL json % get('element_dimensions', nElements, found)
+      CALL json % get('n_timing_repeats', nRepeats, found)
+      CALL json % get_core(jCore)
+
+      ALLOCATE(targetNodes(0:nPlotPoints), f(1:nFunctions), dfdx(1:nFunctions), dfdy(1:nFunctions))
+      targetNodes = UniformPoints(-1.0_prec,1.0_prec,nPlotPoints)
+
+      DO iTest = 1, nFunctions
+        ! Point to the i-th scalar_1d function for testing
+        CALL jCore % get_child(objPointer, iTest, testPointer, found)
+        IF( found )THEN
+          ! Pull the function and derivative strings from the JSON
+          CALL Get_Char_Obj(jCore, testPointer, 'name', funcName)
+          CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
+          CALL Get_Char_Obj(jCore, testPointer, 'dfdx', dfdxChar)
+          CALL Get_Char_Obj(jCore, testPointer, 'dfdy', dfdyChar)
+          ! Create the exact function equation parsers
+          f(iTest) = EquationParser(funcValue)
+          dfdx(iTest) = EquationParser(dfdxChar)
+          dfdy(iTest) = EquationParser(dfdyChar)
+        ENDIF
+      ENDDO
+
+      DO pdeg = polyDeg(1), polyDeg(2)
+        CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
+        CALL interp % ScalarGridInterp_2D_Test(f, nFunctions, nElements, nRepeats)
+        CALL interp % ScalarGradient_2D_Test(f, dfdx, dfdy, nFunctions, nElements, nRepeats)
+        CALL interp % Trash()
+      ENDDO
+
+      DEALLOCATE(targetNodes, f, dfdx, dfdy)
+
+  END SUBROUTINE Scalar_2D_Tests
 
 !
 !  SUBROUTINE Scalar_2D_Tests(json)

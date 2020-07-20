@@ -877,25 +877,22 @@ IMPLICIT NONE
     REAL(prec), INTENT(out) :: fNew(0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
     ! Local
     INTEGER :: i, j, ii, jj, p, iEl, iVar
-    REAL(prec) :: fa
+    REAL(prec) :: fi, fij
    
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           DO j = 0, myPoly % M
             DO i = 0, myPoly % M
              
-              fNew(i,j,iVar,iEl) = 0.0_prec
-
+              fij = 0.0_prec
               DO jj = 0, myPoly % N
-                   
-                fa = 0.0_prec
+                fi = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fa = fa + f(ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
+                  fi = fi + f(ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
                 ENDDO
-                      
-                fNew(i,j,iVar,iEl) = fNew(i,j,iVar,iEl) + fa*myPoly % iMatrix(jj,j)
-
+                fij = fij + fi*myPoly % iMatrix(jj,j)
               ENDDO
+              fNew(i,j,iVar,iEl) = fij
                    
             ENDDO
           ENDDO
@@ -913,9 +910,9 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
       CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
-                                                f_dev, fInterp_dev, &
-                                                myPoly % N, myPoly % M, &
-                                                nVariables, nElements)
+                                           f_dev, fInterp_dev, &
+                                           myPoly % N, myPoly % M, &
+                                           nVariables, nElements)
 
   END SUBROUTINE ScalarGridInterp_2D_gpu
 
@@ -2123,6 +2120,7 @@ IMPLICIT NONE
     REAL(prec) :: temp1, temp2
     INTEGER    :: row, col
     LOGICAL    :: rowHasMatch 
+    REAL(prec) :: iMatrix(0:myPoly % M, 0:myPoly % N)
 
       DO row = 0, myPoly % M
 
@@ -2130,11 +2128,11 @@ IMPLICIT NONE
        
          DO col = 0, myPoly % N
 
-            myPoly % iMatrix(col,row) = 0.0_prec
+            iMatrix(row,col) = 0.0_prec
            
             IF( AlmostEqual( myPoly % targetPoints(row), myPoly % controlPoints(col) ) )THEN
                rowHasMatch = .TRUE.
-               myPoly % iMatrix(col,row) = 1.0_prec
+               iMatrix(row,col) = 1.0_prec
             ENDIF
 
          ENDDO 
@@ -2145,17 +2143,19 @@ IMPLICIT NONE
 
             DO col = 0, myPoly % N        
                temp2 = myPoly % bWeights(col)/( myPoly % targetPoints(row) - myPoly % controlPoints(col) )
-               myPoly % iMatrix(col,row) = temp2
+               iMatrix(row,col) = temp2
                temp1 = temp1 + temp2
             ENDDO 
 
             DO col = 0, myPoly % N 
-               myPoly % iMatrix(col,row) = myPoly % iMatrix(col,row)/temp1
+               iMatrix(row,col) = iMatrix(row,col)/temp1
             ENDDO
 
          ENDIF 
 
       ENDDO
+
+      myPoly % iMatrix = TRANSPOSE(iMatrix)
 
  END SUBROUTINE CalculateInterpolationMatrix
 
