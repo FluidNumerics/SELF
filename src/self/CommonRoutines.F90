@@ -1,9 +1,8 @@
 ! CommonRoutines.f90
 ! 
-! Copyright 2017 Joseph Schoonover <joe@fluidnumerics.consulting>, Fluid Numerics LLC
-! All rights reserved.
-!
-! CommonRoutines.f90 is part of the Spectral Element Libraries in Fortran (SELF).
+! Copyright 2020 Fluid Numerics LLC
+! Author : Joseph Schoonover (joe@fluidnumerics.com)
+! Support : self-fluids@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 

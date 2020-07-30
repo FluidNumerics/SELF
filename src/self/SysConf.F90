@@ -1,7 +1,12 @@
-! Copyright 2020 Fluid Numerics LLC
-! All Rights Reserved.
+! SysConf.F90
 !
-! A module for obtain system configuration information
+! Copyright 2020 Fluid Numerics LLC
+! Author : Joseph Schoonover (joe@fluidnumerics.com)
+! Support : self-fluids@fluidnumerics.com
+!
+!> A module for obtain system configuration information
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
 MODULE SysConf
 

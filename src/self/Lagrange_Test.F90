@@ -1,3 +1,11 @@
+! Lagrange_Test.F90
+! 
+! Copyright 2020 Fluid Numerics LLC
+! Author : Joseph Schoonover (joe@fluidnumerics.com)
+! Support : self-fluids@fluidnumerics.com
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
+
 PROGRAM Lagrange_Test
 
 USE ModelPrecision
