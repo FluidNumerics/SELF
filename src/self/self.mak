@@ -35,5 +35,9 @@ Lagrange_Test.o : Lagrange_Test.F90 ModelPrecision.o ConstantsDictionary.o Commo
 Lagrange_Class_Tests.o : Lagrange_Class_Tests.F90 ModelPrecision.o ConstantsDictionary.o CommonRoutines.o Lagrange_Class.o Lagrange_HIP.o SysConf.o
 	${FC} ${FFLAGS} -c Lagrange_Class_Tests.F90 -o $@
 
+NodalSEMData.o: NodalSEMData.F90 ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o
+	${FC} ${FFLAGS} -c NodalSEMData.F90 -o $@
+
+
 
 

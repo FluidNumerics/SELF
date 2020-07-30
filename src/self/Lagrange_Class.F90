@@ -15,7 +15,7 @@ USE CommonRoutines
 USE Quadrature
 
 USE hip
-USE iso_c_binding
+USE ISO_C_BINDING
 
 IMPLICIT NONE
 
