@@ -13,7 +13,7 @@ USE ConstantsDictionary
 USE CommonRoutines
 USE Quadrature
 
-USE hip_fortran
+USE hip
 USE iso_c_binding
 
 IMPLICIT NONE
@@ -466,11 +466,11 @@ IMPLICIT NONE
 !      IF( N > 7 )THEN
 !         CALL Logging( WARN, 'Number of control points > 7 not fully supported for 3-D SEM operations.' )
 !      ENDIF
-      CALL hfMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights))
-      CALL hfMalloc(myPoly % qWeights_dev, SIZEOF(myPoly % qWeights))
-      CALL hfMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix))
-      CALL hfMalloc(myPoly % dMatrix_dev, SIZEOF(myPoly % dMatrix))
-      CALL hfMalloc(myPoly % bMatrix_dev, SIZEOF(myPoly % bMatrix))
+      CALL hipCheck(hipMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights)))
+      CALL hipCheck(hipMalloc(myPoly % qWeights_dev, SIZEOF(myPoly % qWeights)))
+      CALL hipCheck(hipMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix)))
+      CALL hipCheck(hipMalloc(myPoly % dMatrix_dev, SIZEOF(myPoly % dMatrix)))
+      CALL hipCheck(hipMalloc(myPoly % bMatrix_dev, SIZEOF(myPoly % bMatrix)))
 
       CALL myPoly % UpdateDevice()
 #endif
@@ -496,11 +496,11 @@ IMPLICIT NONE
                   myPoly % dMatrix, &
                   myPoly % bMatrix )
 #ifdef GPU
-      CALL hfFree(myPoly % bWeights_dev)
-      CALL hfFree(myPoly % qWeights_dev)
-      CALL hfFree(myPoly % iMatrix_dev)
-      CALL hfFree(myPoly % dMatrix_dev)
-      CALL hfFree(myPoly % bMatrix_dev)
+      CALL hipCheck(hipFree(myPoly % bWeights_dev))
+      CALL hipCheck(hipFree(myPoly % qWeights_dev))
+      CALL hipCheck(hipFree(myPoly % iMatrix_dev))
+      CALL hipCheck(hipFree(myPoly % dMatrix_dev))
+      CALL hipCheck(hipFree(myPoly % bMatrix_dev))
 #endif
 
   END SUBROUTINE Trash_Lagrange
@@ -509,28 +509,28 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
-      CALL hipFortran(hipMemcpy(myPoly % bWeights_dev, &
+      CALL hipCheck(hipMemcpy(myPoly % bWeights_dev, &
                                 c_loc(myPoly % bWeights), &
                                 SIZEOF(myPoly % bWeights), &
                                 hipMemcpyHostToDevice))
 
-      CALL hipFortran(hipMemcpy(myPoly % qWeights_dev, &
+      CALL hipCheck(hipMemcpy(myPoly % qWeights_dev, &
                                 c_loc(myPoly % qWeights), &
                                 SIZEOF(myPoly % qWeights), &
                                 hipMemcpyHostToDevice))
                         
-      CALL hipFortran(hipMemcpy(myPoly % iMatrix_dev, &
+      CALL hipCheck(hipMemcpy(myPoly % iMatrix_dev, &
                                 c_loc(myPoly % iMatrix), &
                                 SIZEOF(myPoly % iMatrix), &
                                 hipMemcpyHostToDevice))
 
 
-      CALL hipFortran(hipMemcpy(myPoly % dMatrix_dev, &
+      CALL hipCheck(hipMemcpy(myPoly % dMatrix_dev, &
                                 c_loc(myPoly % dMatrix), &
                                 SIZEOF(myPoly % dMatrix), &
                                 hipMemcpyHostToDevice))
 
-      CALL hipFortran(hipMemcpy(myPoly % bMatrix_dev, &
+      CALL hipCheck(hipMemcpy(myPoly % bMatrix_dev, &
                                 c_loc(myPoly % bMatrix), &
                                 SIZEOF(myPoly % bMatrix), &
                                 hipMemcpyHostToDevice))
@@ -541,27 +541,27 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % bWeights), &
+      CALL hipCheck(hipMemcpy(c_loc(myPoly % bWeights), &
                                 myPoly % bWeights_dev, &
                                 SIZEOF(myPoly % bWeights), &
                                 hipMemcpyDeviceToHost))
 
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % qWeights), &
+      CALL hipCheck(hipMemcpy(c_loc(myPoly % qWeights), &
                                 myPoly % qWeights_dev, &
                                 SIZEOF(myPoly % qWeights), &
                                 hipMemcpyDeviceToHost))
                         
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % iMatrix), &
+      CALL hipCheck(hipMemcpy(c_loc(myPoly % iMatrix), &
                                 myPoly % iMatrix_dev, &
                                 SIZEOF(myPoly % iMatrix), &
                                 hipMemcpyDeviceToHost))
 
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % dMatrix), &
+      CALL hipCheck(hipMemcpy(c_loc(myPoly % dMatrix), &
                                 myPoly % dMatrix_dev, &
                                 SIZEOF(myPoly % dMatrix), &
                                 hipMemcpyDeviceToHost))
 
-      CALL hipFortran(hipMemcpy(c_loc(myPoly % bMatrix), &
+      CALL hipCheck(hipMemcpy(c_loc(myPoly % bMatrix), &
                                 myPoly % bMatrix_dev, &
                                 SIZEOF(myPoly % bMatrix), &
                                 hipMemcpyDeviceToHost))

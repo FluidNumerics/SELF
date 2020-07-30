@@ -1,12 +1,13 @@
 MODULE Lagrange_Class_Tests
 
 USE ModelPrecision
-USE EquationParser_Class
+USE SysConf
 USE Lagrange_Class
+USE FEQParse
 USE json_module
 
 USE ISO_C_BINDING
-USE hip_fortran
+USE hip
 
 IMPLICIT NONE
 
@@ -74,12 +75,14 @@ IMPLICIT NONE
 
 CONTAINS
 
-SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctions, nElements)
+SUBROUTINE Report_JSON(myPoly, routineName, cpu, gpu, functions, runtime, errors, nFunctions, nElements)
   USE ISO_FORTRAN_ENV
   IMPLICIT NONE
   CLASS(Lagrange_Tests), INTENT(in) :: myPoly 
   INTEGER, INTENT(in)              :: nFunctions
   INTEGER, INTENT(in)              :: nElements
+  CHARACTER(*), INTENT(in)         :: cpu
+  CHARACTER(*), INTENT(in)         :: gpu
   CHARACTER(*), INTENT(in)         :: routineName
   CHARACTER(LEN=50),DIMENSION(1:nFunctions), INTENT(in) :: functions
   REAL(prec), INTENT(in)           :: runtime
@@ -93,37 +96,82 @@ SUBROUTINE Report_JSON(myPoly, routineName, functions, runtime, errors, nFunctio
   INTEGER :: i
 
     CALL DATE_AND_TIME(date, time, zone)
-    CALL json % initialize()
-    CALL json % create_object(p,'')
+    DO i = 1, nFunctions
+      CALL json % initialize()
+      CALL json % create_object(p,'')
 
-    CALL json % create_object(conf,'build_conf')
-    CALL json % add(p, conf)
-    CALL json % add(conf, 'compiler', COMPILER_VERSION())
-    CALL json % add(conf, 'compiler_options', COMPILER_OPTIONS())
-    CALL json % add(conf, 'precision', prec)
+      CALL json % add(p, 'fortran_compiler', COMPILER_VERSION())
+      CALL json % add(p, 'fortran_compiler_options', COMPILER_OPTIONS())
+      CALL json % add(p, 'c_compiler', 'Unknown')
+      CALL json % add(p, 'c_compiler_options', 'Unknown')
+      CALL json % add(p, 'precision', prec)
+      CALL json % add(p, 'cpu', TRIM(cpu))
+      CALL json % add(p, 'gpu', TRIM(gpu))
 
-    CALL json % create_object(res,'test_output')
-    CALL json % add(p, res)
+      CALL json % add(p, 'date_time', TRIM(date(1:4))//'-'//TRIM(date(5:6))//'-'//TRIM(date(7:8))//'T'//&
+                                        TRIM(time(1:2))//':'//TRIM(time(3:4))//':'//TRIM(time(5:6))//TRIM(zone) )
+      CALL json % add(p, 'routine_name', TRIM(routineName))
+      CALL json % add(p, 'polynomial_degree', myPoly % N)
+      CALL json % add(p, 'n_function_batch', nFunctions)
+      CALL json % add(p, 'n_elements', nElements)
+      CALL json % add(p, 'functions', TRIM(functions(i)))
+      CALL json % add(p, 'max_errors', errors(i))
+      CALL json % add(p, 'runtime_ms', runtime)
 
-    CALL json % add(res, 'date_time', TRIM(date(1:4))//'-'//TRIM(date(5:6))//'-'//TRIM(date(7:8))//'T'//&
-                                      TRIM(time(1:2))//':'//TRIM(time(3:4))//':'//TRIM(time(5:6))//TRIM(zone) )
-    CALL json % add(res, 'routine_name', TRIM(routineName))
-    CALL json % add(res, 'polynomial_degree', myPoly % N)
-    CALL json % add(res, 'n_variables', nFunctions)
-    CALL json % add(res, 'n_elements', nElements)
-    CALL json % add(res, 'functions', functions)
-    CALL json % add(res, 'max_errors', errors)
-    CALL json % add(res, 'runtime_ms', runtime)
+      nullify(res)
+      nullify(conf)
 
-    nullify(res)
-    nullify(conf)
+      CALL json % print(p)
 
-    CALL json % print(p)
-
-    CALL json % destroy(res)
-    IF( json % failed() ) STOP 1
+      CALL json % destroy(res)
+      IF( json % failed() ) STOP 1
+    ENDDO
 
 END SUBROUTINE Report_JSON
+
+FUNCTION FillScalarValues1D(f, cpoints, N, nFunctions, nElem) RESULT(fNodal)
+  IMPLICIT NONE
+  TYPE(EquationParser) :: f(1:nFunctions)
+  INTEGER :: N, nFunctions, nElem
+  REAL(prec) :: fNodal(0:N,1:nFunctions,1:nElem)
+  REAL(prec) :: cpoints(0:N) 
+  ! Local
+  INTEGER :: iEl, iVar, i
+  REAL(prec) :: xL, xR, x, dx
+
+     dx = 2.0_prec/REAL(nElem,prec)
+     DO iEl = 1, nElem
+       DO iVar = 1, nFunctions
+         DO i = 0, N
+           xL = -1.0_prec + REAL((iEl-1),prec)*dx
+           xR = xL + dx
+           x = 0.5_prec*( xR*(cpoints(i)+1.0_prec) - xL*(cpoints(i)-1.0_prec) )
+           fNodal(i,iVar,iEl) = f(iVar) % Evaluate( (/x/) )          
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION FillScalarValues1D
+
+FUNCTION GetMaxErrorsScalar1D(fEst, fAct, N, nFunctions, nElem) RESULT(errors)
+  IMPLICIT NONE
+  INTEGER :: N, nFunctions, nElem
+  REAL(prec) :: fEst(0:N,1:nFunctions,1:nElem)
+  REAL(prec) :: fAct(0:N,1:nFunctions,1:nElem)
+  REAL(prec) :: errors(1:nFunctions)
+  ! Local
+  INTEGER :: iEl, iVar, i
+
+     errors = 0.0_prec
+     DO iEl = 1, nElem
+       DO iVar = 1, nFunctions
+         DO i = 0, N
+           errors(iVar) = MAX(ABS(fEst(i,iVar,iEl) - fAct(i,iVar,iEl)),errors(iVar))
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION GetMaxErrorsScalar1D
 
 SUBROUTINE ScalarDerivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRepeats)
   IMPLICIT NONE
@@ -135,8 +183,10 @@ SUBROUTINE ScalarDerivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRep
   INTEGER, INTENT(in) :: nRepeats
   ! Local
   CHARACTER(LEN=50), DIMENSION(1:nFunctions) :: functionNames
+  CHARACTER(LEN=50) :: cpuModel
+  CHARACTER(LEN=50) :: gpuModel
   INTEGER :: iEl, iVar, i
-  REAL(prec) :: xL, xR, x, dx, t1, t2, runtime
+  REAL(prec) :: t1, t2, runtime
   REAL(prec), POINTER :: fNodal(:,:,:)
   REAL(prec), POINTER :: dfdxInterp(:,:,:)
   REAL(prec), POINTER :: dfdxActual(:,:,:)
@@ -145,6 +195,8 @@ SUBROUTINE ScalarDerivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRep
   TYPE(c_ptr) :: fNodal_dev, fInterp_dev, dfdxInterp_dev
 #endif
 
+     cpuModel = GetCPUModel_Linux()
+     gpuModel = 'None'
 
      ALLOCATE(fNodal(0:interp % N, 1:nFunctions, 1:nElements),&
               dfdxInterp(0:interp % N, 1:nFunctions, 1:nElements),&
@@ -153,31 +205,15 @@ SUBROUTINE ScalarDerivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRep
        functionNames(iVar) = f(iVar) % equation
      ENDDO
 
-     dx = 2.0_prec/REAL(nElements,prec)
-     ! Evaluate the exact functions and derivatives at the control points
-     DO iEl = 1, nElements
-       DO iVar = 1, nFunctions
-         DO i = 0, interp % N
-           xL = -1.0_prec + REAL((iEl-1),prec)*dx
-           xR = xL + dx
-           x = 0.5_prec*( xR*(interp % controlPoints(i)+1.0_prec) - xL*(interp % controlPoints(i)-1.0_prec) )
-           fNodal(i,iVar,iEl) = f(iVar) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )          
-           dfdxActual(i,iVar,iEl) = dfdx(iVar) % Evaluate( (/ x, 0.0_prec, 0.0_prec /) )
-         ENDDO
-       ENDDO
-     ENDDO
-
+     fNodal = FillScalarValues1D(f, interp % controlPoints, interp % N, nFunctions, nElements)
+     dfdxActual = FillScalarValues1D(dfdx, interp % controlPoints, interp % N, nFunctions, nElements)
+     
      ! Derivative_1D
      CALL interp % Derivative_1D(fNodal, dfdxInterp, nFunctions, nElements)
+     ! Transform from computational coordinates to physical
+     dfdxInterp = dfdxInterp*REAL(nElements,prec)
 
-     errors = 0.0_prec
-     DO iEl = 1, nElements
-       DO iVar = 1, nFunctions
-         DO i = 0, interp % N
-           errors(iVar) = MAX(ABS(dfdxInterp(i,iVar,iEl)*2.0_prec/dx - dfdxActual(i,iVar,iEl)),errors(iVar))
-         ENDDO
-       ENDDO
-     ENDDO
+     errors = GetMaxErrorsScalar1D(dfdxInterp, dfdxActual, interp % N, nFunctions, nElements)
 
      ! Estimate routine runtime
      CALL CPU_TIME(t1)
@@ -186,46 +222,46 @@ SUBROUTINE ScalarDerivative_1D_Test(interp, f, dfdx, nFunctions, nElements, nRep
      ENDDO
      CALL CPU_TIME(t2)
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+
      CALL interp % Report_JSON('Derivative_1D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElements)
 #ifdef GPU
-     CALL hipFortran(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
-     CALL hipFortran(hipMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp)))
-     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+     CALL hipCheck(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
+     CALL hipCheck(hipMalloc(dfdxInterp_dev, SIZEOF(dfdxInterp)))
+     CALL hipCheck(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
      CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
-     CALL hipFortran(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
+     CALL hipCheck(hipMemcpy(c_loc(dfdxInterp), dfdxInterp_dev, SIZEOF(dfdxInterp), hipMemcpyDeviceToHost))
+     ! Transform from computational coordinates to physical
+     dfdxInterp = dfdxInterp*REAL(nElements,prec)
 
-     errors = 0.0_prec
-     DO iEl = 1, nElements
-       DO iVar = 1, nFunctions
-         DO i = 0, interp % N
-           errors(iVar) = MAX(ABS(dfdxInterp(i,iVar,iEl)*2.0_prec/dx - dfdxActual(i,iVar,iEl)),errors(iVar))
-         ENDDO
-       ENDDO
-     ENDDO
+     errors = GetMaxErrorsScalar1D(dfdxInterp, dfdxActual, interp % N, nFunctions, nElements)
 
      ! Estimate routine runtime
      CALL CPU_TIME(t1)
      DO i = 1, nRepeats
        CALL interp % Derivative_1D(fNodal_dev, dfdxInterp_dev, nFunctions, nElements)
      ENDDO
-     CALL hipFortran(hipDeviceSynchronize()) 
+     CALL hipCheck(hipDeviceSynchronize()) 
      CALL CPU_TIME(t2)
 
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
-     CALL interp % Report_JSON('Derivative_1D - GPU', &
+     CALL interp % Report_JSON('Derivative_1D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElements)
 
-     CALL hipFortran(hipFree(fNodal_dev))
-     CALL hipFortran(hipFree(dfdxInterp_dev))
+     CALL hipCheck(hipFree(fNodal_dev))
+     CALL hipCheck(hipFree(dfdxInterp_dev))
 #endif
      DEALLOCATE(fNodal,dfdxInterp, dfdxActual)
 
@@ -240,6 +276,8 @@ SUBROUTINE ScalarGridInterp_1D_Test(interp, f, nFunctions, nElements, nRepeats)
   INTEGER, INTENT(in) :: nRepeats
   ! Local
   CHARACTER(LEN=50), DIMENSION(1:nFunctions) :: functionNames
+  CHARACTER(LEN=50) :: cpuModel
+  CHARACTER(LEN=50) :: gpuModel
   INTEGER :: iEl, iVar, i
   REAL(prec) :: xL, xR, x, dx, t1, t2, runtime
   REAL(prec), POINTER :: fNodal(:,:,:)
@@ -250,6 +288,8 @@ SUBROUTINE ScalarGridInterp_1D_Test(interp, f, nFunctions, nElements, nRepeats)
   TYPE(c_ptr) :: fNodal_dev, fInterp_dev
 #endif
 
+     cpuModel = GetCPUModel_Linux()
+     gpuModel = 'None'
 
      ALLOCATE(fNodal(0:interp % N, 1:nFunctions, 1:nElements),&
               fInterp(0:interp % M, 1:nFunctions, 1:nElements),&
@@ -294,17 +334,19 @@ SUBROUTINE ScalarGridInterp_1D_Test(interp, f, nFunctions, nElements, nRepeats)
      CALL CPU_TIME(t2)
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
      CALL interp % Report_JSON('ScalarGridInterp_1D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElements)
 #ifdef GPU
-     CALL hipFortran(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
-     CALL hipFortran(hipMalloc(fInterp_dev, SIZEOF(fInterp)))
-     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+     CALL hipCheck(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
+     CALL hipCheck(hipMalloc(fInterp_dev, SIZEOF(fInterp)))
+     CALL hipCheck(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
      CALL interp % ScalarGridInterp_1D(fNodal_dev, fInterp_dev, nFunctions, nElements)
-     CALL hipFortran(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
+     CALL hipCheck(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
 
      errors = 0.0_prec
      DO iEl = 1, nElements
@@ -320,19 +362,21 @@ SUBROUTINE ScalarGridInterp_1D_Test(interp, f, nFunctions, nElements, nRepeats)
      DO i = 1, nRepeats
        CALL interp % ScalarGridInterp_1D(fNodal_dev, fInterp_dev, nFunctions, nElements)
      ENDDO
-     CALL hipFortran(hipDeviceSynchronize()) 
+     CALL hipCheck(hipDeviceSynchronize()) 
      CALL CPU_TIME(t2)
 
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
-     CALL interp % Report_JSON('ScalarGridInterp_1D - GPU', &
+     CALL interp % Report_JSON('ScalarGridInterp_1D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElements)
 
-     CALL hipFortran(hipFree(fNodal_dev))
-     CALL hipFortran(hipFree(fInterp_dev))
+     CALL hipCheck(hipFree(fNodal_dev))
+     CALL hipCheck(hipFree(fInterp_dev))
 #endif
      DEALLOCATE(fNodal,fInterp, fActual)
 
@@ -349,6 +393,8 @@ SUBROUTINE ScalarGradient_2D_Test(interp, f, dfdx, dfdy, nFunctions, nElements, 
   INTEGER, INTENT(in) :: nRepeats
   ! Local
   CHARACTER(LEN=50), DIMENSION(1:nFunctions) :: functionNames
+  CHARACTER(LEN=50) :: cpuModel
+  CHARACTER(LEN=50) :: gpuModel
   INTEGER :: iX, iY, iEl, iVar, i, j
   INTEGER :: nElem
   REAL(prec) :: xL, xR, yS, yN, x, y, dx, t1, t2, runtime
@@ -359,6 +405,9 @@ SUBROUTINE ScalarGradient_2D_Test(interp, f, dfdx, dfdy, nFunctions, nElements, 
 #ifdef GPU
   TYPE(c_ptr) :: fNodal_dev, gradF_dev
 #endif
+
+     cpuModel = GetCPUModel_Linux()
+     gpuModel = 'None'
 
      nElem = nElements*nElements
      ALLOCATE(fNodal(0:interp % N, 0:interp % N, 1:nFunctions, 1:nElem),&
@@ -415,17 +464,19 @@ SUBROUTINE ScalarGradient_2D_Test(interp, f, dfdx, dfdy, nFunctions, nElements, 
      CALL CPU_TIME(t2)
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
      CALL interp % Report_JSON('ScalarGradient_2D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElem)
 #ifdef GPU
-     CALL hipFortran(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
-     CALL hipFortran(hipMalloc(gradF_dev, SIZEOF(gradF)))
-     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+     CALL hipCheck(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
+     CALL hipCheck(hipMalloc(gradF_dev, SIZEOF(gradF)))
+     CALL hipCheck(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
      CALL interp % ScalarGradient_2D(fNodal_dev, gradF_dev, nFunctions, nElem)
-     CALL hipFortran(hipMemcpy(c_loc(gradF), gradF_dev, SIZEOF(gradF), hipMemcpyDeviceToHost))
+     CALL hipCheck(hipMemcpy(c_loc(gradF), gradF_dev, SIZEOF(gradF), hipMemcpyDeviceToHost))
 
      errors = 0.0_prec
      DO iEl = 1, nElem
@@ -444,19 +495,21 @@ SUBROUTINE ScalarGradient_2D_Test(interp, f, dfdx, dfdy, nFunctions, nElements, 
      DO i = 1, nRepeats
        CALL interp % ScalarGradient_2D(fNodal_dev, gradF_dev, nFunctions, nElem)
      ENDDO
-     CALL hipFortran(hipDeviceSynchronize()) 
+     CALL hipCheck(hipDeviceSynchronize()) 
      CALL CPU_TIME(t2)
 
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
-     CALL interp % Report_JSON('ScalarGradient_2D - GPU', &
+     CALL interp % Report_JSON('ScalarGradient_2D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElem)
 
-     CALL hipFortran(hipFree(fNodal_dev))
-     CALL hipFortran(hipFree(gradF_dev))
+     CALL hipCheck(hipFree(fNodal_dev))
+     CALL hipCheck(hipFree(gradF_dev))
 #endif
      DEALLOCATE(fNodal,gradF,gradFActual)
 
@@ -471,6 +524,8 @@ SUBROUTINE ScalarGridInterp_2D_Test(interp, f, nFunctions, nElements, nRepeats)
   INTEGER, INTENT(in) :: nRepeats
   ! Local
   CHARACTER(LEN=50), DIMENSION(1:nFunctions) :: functionNames
+  CHARACTER(LEN=50) :: cpuModel
+  CHARACTER(LEN=50) :: gpuModel
   INTEGER :: iX, iY, iEl, iVar, i, j
   INTEGER :: nElem
   REAL(prec) :: xL, xR, yS, yN, x, y, dx, t1, t2, runtime
@@ -482,6 +537,8 @@ SUBROUTINE ScalarGridInterp_2D_Test(interp, f, nFunctions, nElements, nRepeats)
   TYPE(c_ptr) :: fNodal_dev, fInterp_dev
 #endif
 
+     cpuModel = GetCPUModel_Linux()
+     gpuModel = 'None'
      nElem = nElements*nElements
      ALLOCATE(fNodal(0:interp % N, 0:interp % N, 1:nFunctions, 1:nElem),&
               fInterp(0:interp % M, 0:interp % M, 1:nFunctions, 1:nElem),&
@@ -544,17 +601,19 @@ SUBROUTINE ScalarGridInterp_2D_Test(interp, f, nFunctions, nElements, nRepeats)
      CALL CPU_TIME(t2)
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
      CALL interp % Report_JSON('ScalarGridInterp_2D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElem)
 #ifdef GPU
-     CALL hipFortran(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
-     CALL hipFortran(hipMalloc(fInterp_dev, SIZEOF(fInterp)))
-     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+     CALL hipCheck(hipMalloc(fNodal_dev, SIZEOF(fNodal)))
+     CALL hipCheck(hipMalloc(fInterp_dev, SIZEOF(fInterp)))
+     CALL hipCheck(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
      CALL interp % ScalarGridInterp_2D(fNodal_dev, fInterp_dev, nFunctions, nElem)
-     CALL hipFortran(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
+     CALL hipCheck(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
 
      errors = 0.0_prec
      DO iEl = 1, nElem
@@ -572,19 +631,21 @@ SUBROUTINE ScalarGridInterp_2D_Test(interp, f, nFunctions, nElements, nRepeats)
      DO i = 1, nRepeats
        CALL interp % ScalarGridInterp_2D(fNodal_dev, fInterp_dev, nFunctions, nElem)
      ENDDO
-     CALL hipFortran(hipDeviceSynchronize()) 
+     CALL hipCheck(hipDeviceSynchronize()) 
      CALL CPU_TIME(t2)
 
      runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
-     CALL interp % Report_JSON('ScalarGridInterp_2D - GPU', &
+     CALL interp % Report_JSON('ScalarGridInterp_2D', &
+                               cpuModel, &
+                               gpuModel, &
                                functionNames, &
                                runtime, &
                                errors, &
                                nFunctions, &
                                nElem)
 
-     CALL hipFortran(hipFree(fNodal_dev))
-     CALL hipFortran(hipFree(fInterp_dev))
+     CALL hipCheck(hipFree(fNodal_dev))
+     CALL hipCheck(hipFree(fInterp_dev))
 #endif
      DEALLOCATE(fNodal,fInterp,fActual)
 
@@ -658,11 +719,11 @@ END SUBROUTINE ScalarGridInterp_2D_Test
 !
 !#ifdef GPU
 !     CALL hfMalloc(fNodal_dev, SIZEOF(fNodal))
-!     CALL hipFortran(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
+!     CALL hipCheck(hipMemcpy(fNodal_dev, c_loc(fNodal), SIZEOF(fNodal), hipMemcpyHostToDevice))
 !
 !     CALL interp % ScalarGridInterp_1D(fNodal_dev, fInterp_dev, nFunctions, nElements)  
 !
-!     CALL hipFortran(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
+!     CALL hipCheck(hipMemcpy(c_loc(fInterp), fInterp_dev, SIZEOF(fInterp), hipMemcpyDeviceToHost))
 !
 !     fErr = 0.0_prec
 !     DO iEl = 1, nElements
@@ -678,7 +739,7 @@ END SUBROUTINE ScalarGridInterp_2D_Test
 !     DO i = 1, nRepeats
 !       CALL interp % ScalarGridInterp_1D(fNodal_dev, fInterp_dev, nFunctions, nElements)
 !     ENDDO
-!     CALL hipFortran(hipDeviceSynchronize()) 
+!     CALL hipCheck(hipDeviceSynchronize()) 
 !     CALL CPU_TIME(t2)
 !
 !     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec

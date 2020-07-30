@@ -5,7 +5,7 @@ USE ConstantsDictionary
 USE CommonRoutines
 USE Lagrange_Class
 USE Lagrange_Class_Tests
-USE EquationParser_Class
+USE FEQParse
 USE Quadrature
 
 USE json_module
@@ -14,7 +14,7 @@ IMPLICIT NONE
 
     CALL Scalar_1D_Tests()
 
-    CALL Scalar_2D_Tests()
+!    CALL Scalar_2D_Tests()
 !
 !    CALL Scalar_3D_Tests(json)
 
@@ -104,14 +104,14 @@ CONTAINS
           CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
           CALL Get_Char_Obj(jCore, testPointer, 'dfdx', funcDerivative)
           ! Create the exact function equation parsers
-          f(iTest) = EquationParser(funcValue)
-          dfdx(iTest) = EquationParser(funcDerivative)
+          f(iTest) = EquationParser(funcValue,(/'x'/))
+          dfdx(iTest) = EquationParser(funcDerivative,(/'x'/))
         ENDIF
       ENDDO
 
       DO pdeg = polyDeg(1), polyDeg(2)
         CALL interp % Build(pdeg, GAUSS, nPlotPoints, UNIFORM)
-        CALL interp % ScalarGridInterp_1D_Test(f, nFunctions, nElements, nRepeats)
+        !CALL interp % ScalarGridInterp_1D_Test(f, nFunctions, nElements, nRepeats)
         CALL interp % ScalarDerivative_1D_Test(f, dfdx, nFunctions, nElements, nRepeats)
         CALL interp % Trash()
       ENDDO
@@ -161,9 +161,9 @@ CONTAINS
           CALL Get_Char_Obj(jCore, testPointer, 'dfdx', dfdxChar)
           CALL Get_Char_Obj(jCore, testPointer, 'dfdy', dfdyChar)
           ! Create the exact function equation parsers
-          f(iTest) = EquationParser(funcValue)
-          dfdx(iTest) = EquationParser(dfdxChar)
-          dfdy(iTest) = EquationParser(dfdyChar)
+          f(iTest) = EquationParser(funcValue,(/'x','y'/))
+          dfdx(iTest) = EquationParser(dfdxChar,(/'x','y'/))
+          dfdy(iTest) = EquationParser(dfdyChar,(/'x','y'/))
         ENDIF
       ENDDO
 
