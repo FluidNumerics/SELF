@@ -130,16 +130,16 @@ IMPLICIT NONE
 
     CONTAINS
 
-!      PROCEDURE, PUBLIC :: Build => Build_SEMVector3D
-!      PROCEDURE, PUBLIC :: Trash => Trash_SEMVector3D
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMVector3D
-!      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMVector3D
-!#endif
-!      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMVector3D
-!      PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector3D
-!      PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector3D
-!      PROCEDURE, PUBLIC :: Curl => Curl_SEMVector3D
+      PROCEDURE, PUBLIC :: Build => Build_SEMVector3D
+      PROCEDURE, PUBLIC :: Trash => Trash_SEMVector3D
+#ifdef GPU
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMVector3D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMVector3D
+#endif
+      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMVector3D
+      PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector3D
+      PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector3D
+      PROCEDURE, PUBLIC :: Curl => Curl_SEMVector3D
 
   END TYPE SEMVector3D
 !
@@ -788,5 +788,181 @@ FUNCTION Curl_SEMVector2D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
     ENDIF
 
 END FUNCTION Curl_SEMVector2D
+
+! -- SEMVector3D -- !
+
+SUBROUTINE Build_SEMVector3D( SEMStorage, N, nVar, nElem ) 
+  IMPLICIT NONE
+  CLASS(SEMVector3D), INTENT(out) :: SEMStorage
+  INTEGER, INTENT(in) :: N
+  INTEGER, INTENT(in) :: nVar
+  INTEGER, INTENT(in) :: nElem
+
+    SEMStorage % N = N
+    SEMStorage % nVar = nVar
+    SEMStorage % nElem = nElem
+
+    ALLOCATE( SEMStorage % fInterior(1:3,0:N,0:N,0:N,1:nVar,1:nElem), &
+              SEMStorage % fBoundary(1:3,0:N,0:N,1:nVar,1:6,1:nElem) )
+
+#ifdef GPU
+    CALL hipCheck(hipMalloc(SEMStorage % fInterior_dev, SIZEOF(SEMStorage % fInterior)))
+    CALL hipCheck(hipMalloc(SEMStorage % fBoundary_dev, SIZEOF(SEMStorage % fBoundary)))
+#endif
+
+
+END SUBROUTINE Build_SEMVector3D
+
+SUBROUTINE Trash_SEMVector3D( SEMStorage ) 
+  IMPLICIT NONE
+  CLASS(SEMVector3D), INTENT(inout) :: SEMStorage
+
+    DEALLOCATE( SEMStorage % fInterior, &
+                SEMStorage % fBoundary )
+#ifdef GPU
+    CALL hipCheck(hipFree(SEMStorage % fInterior_dev))
+    CALL hipCheck(hipFree(SEMStorage % fBoundary_dev))
+#endif
+
+END SUBROUTINE Trash_SEMVector3D
+
+#ifdef GPU
+SUBROUTINE UpdateHost_SEMVector3D( SEMStorage )
+  IMPLICIT NONE
+  CLASS(SEMVector3D), INTENT(inout) :: SEMStorage
+
+     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % fInterior), &
+                             SEMStorage % fInterior_dev, &
+                             SIZEOF(SEMStorage % fInterior), &
+                             hipMemcpyDeviceToHost))
+
+     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % fBoundary), &
+                             SEMStorage % fBoundary_dev, &
+                             SIZEOF(SEMStorage % fBoundary), &
+                             hipMemcpyDeviceToHost))
+
+END SUBROUTINE UpdateHost_SEMVector3D
+
+SUBROUTINE UpdateDevice_SEMVector3D( SEMStorage )
+  IMPLICIT NONE
+  CLASS(SEMVector3D), INTENT(inout) :: SEMStorage
+
+     CALL hipCheck(hipMemcpy(SEMStorage % fInterior_dev, &
+                             c_loc(SEMStorage % fInterior), &
+                             SIZEOF(SEMStorage % fInterior), &
+                             hipMemcpyHostToDevice))
+
+     CALL hipCheck(hipMemcpy(SEMStorage % fBoundary_dev, &
+                             c_loc(SEMStorage % fBoundary), &
+                             SIZEOF(SEMStorage % fBoundary), &
+                             hipMemcpyHostToDevice))
+
+END SUBROUTINE UpdateDevice_SEMVector3D
+#endif
+
+FUNCTION BoundaryInterp_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMVector3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMVector3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % VectorBoundaryInterp_3D( SEMStorage % fInterior_dev, &
+                                         SEMout % fInterior_dev, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ELSE
+      CALL interp % VectorBoundaryInterp_3D( SEMStorage % fInterior, &
+                                         SEMout % fInterior, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION BoundaryInterp_SEMVector3D
+
+FUNCTION GridInterp_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMVector3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMVector3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % VectorGridInterp_3D( SEMStorage % fInterior_dev, &
+                                         SEMout % fInterior_dev, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ELSE
+      CALL interp % VectorGridInterp_3D( SEMStorage % fInterior, &
+                                         SEMout % fInterior, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION GridInterp_SEMVector3D
+
+FUNCTION Gradient_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMVector3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMTensor3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % VectorGradient_3D( SEMStorage % fInterior_dev, &
+                                       SEMout % fInterior_dev, &
+                                       SEMStorage % nVar, &
+                                       SEMStorage % nElem )  
+    ELSE
+      CALL interp % VectorGradient_3D( SEMStorage % fInterior, &
+                                       SEMout % fInterior, &
+                                       SEMStorage % nVar, &
+                                       SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION Gradient_SEMVector3D
+
+FUNCTION Divergence_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMVector3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMScalar3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % VectorDivergence_3D( SEMStorage % fInterior_dev, &
+                                       SEMout % fInterior_dev, &
+                                       SEMStorage % nVar, &
+                                       SEMStorage % nElem )  
+    ELSE
+      CALL interp % VectorDivergence_3D( SEMStorage % fInterior, &
+                                       SEMout % fInterior, &
+                                       SEMStorage % nVar, &
+                                       SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION Divergence_SEMVector3D
+
+FUNCTION Curl_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMVector3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMVector3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % VectorCurl_3D( SEMStorage % fInterior_dev, &
+                                       SEMout % fInterior_dev, &
+                                       SEMStorage % nVar, &
+                                       SEMStorage % nElem )  
+    ELSE
+      CALL interp % VectorCurl_3D( SEMStorage % fInterior, &
+                                       SEMout % fInterior, &
+                                       SEMStorage % nVar, &
+                                       SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION Curl_SEMVector3D
 
 END MODULE NodalSEMData
