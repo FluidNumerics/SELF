@@ -111,6 +111,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMVector2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMVector2D
 #endif
+      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMVector2D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMVector2D
       PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector2D
       PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector2D
@@ -136,6 +137,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMVector3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMVector3D
 #endif
+      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMVector3D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMVector3D
       PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector3D
       PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector3D
@@ -155,26 +157,17 @@ IMPLICIT NONE
     TYPE(c_ptr) :: fInterior_dev
     TYPE(c_ptr) :: fBoundary_dev
 
-!    CONTAINS
-!
-!      PROCEDURE, PUBLIC :: Build
-!      PROCEDURE, PUBLIC :: Trash
-!
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost
-!      PROCEDURE, PUBLIC :: UpdateDevice
-!#endif
-!
-!      PROCEDURE, PUBLIC :: Set
-!      PROCEDURE, PUBLIC :: SetInterior
-!      PROCEDURE, PUBLIC :: SetBoundary
-!      PROCEDURE, PUBLIC :: GetInterior
-!      PROCEDURE, PUBLIC :: GetBoundary
-!
-!      PROCEDURE, PUBLIC :: GridInterp 
-!      PROCEDURE, PUBLIC :: Divergence
-!      PROCEDURE, PUBLIC :: Rotate 
-!
+    CONTAINS
+
+      PROCEDURE, PUBLIC :: Build => Build_SEMTensor2D
+      PROCEDURE, PUBLIC :: Trash => Trash_SEMTensor2D
+#ifdef GPU
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMTensor2D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMTensor2D
+#endif
+      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMTensor2D
+      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMTensor2D 
+
   END TYPE SEMTensor2D
 
   TYPE, PUBLIC :: SEMTensor3D
@@ -187,26 +180,17 @@ IMPLICIT NONE
     TYPE(c_ptr) :: fInterior_dev
     TYPE(c_ptr) :: fBoundary_dev
 
-!    CONTAINS
-!
-!      PROCEDURE, PUBLIC :: Build
-!      PROCEDURE, PUBLIC :: Trash
-!
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost
-!      PROCEDURE, PUBLIC :: UpdateDevice
-!#endif
-!
-!      PROCEDURE, PUBLIC :: Set
-!      PROCEDURE, PUBLIC :: SetInterior
-!      PROCEDURE, PUBLIC :: SetBoundary
-!      PROCEDURE, PUBLIC :: GetInterior
-!      PROCEDURE, PUBLIC :: GetBoundary
-!
-!      PROCEDURE, PUBLIC :: GridInterp 
-!      PROCEDURE, PUBLIC :: Divergence
-!      PROCEDURE, PUBLIC :: Rotate 
-!
+    CONTAINS
+
+      PROCEDURE, PUBLIC :: Build => Build_SEMTensor3D
+      PROCEDURE, PUBLIC :: Trash => Trash_SEMTensor3D
+#ifdef GPU
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMTensor3D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMTensor3D
+#endif
+      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMTensor3D
+      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMTensor3D 
+
   END TYPE SEMTensor3D
 
 
@@ -964,5 +948,231 @@ FUNCTION Curl_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
     ENDIF
 
 END FUNCTION Curl_SEMVector3D
+
+! -- SEMTensor2D -- !
+
+SUBROUTINE Build_SEMTensor2D( SEMStorage, N, nVar, nElem ) 
+  IMPLICIT NONE
+  CLASS(SEMTensor2D), INTENT(out) :: SEMStorage
+  INTEGER, INTENT(in) :: N
+  INTEGER, INTENT(in) :: nVar
+  INTEGER, INTENT(in) :: nElem
+
+    SEMStorage % N = N
+    SEMStorage % nVar = nVar
+    SEMStorage % nElem = nElem
+
+    ALLOCATE( SEMStorage % fInterior(1:2,1:2,0:N,0:N,1:nVar,1:nElem), &
+              SEMStorage % fBoundary(1:2,1:2,0:N,1:nVar,1:4,1:nElem) )
+
+#ifdef GPU
+    CALL hipCheck(hipMalloc(SEMStorage % fInterior_dev, SIZEOF(SEMStorage % fInterior)))
+    CALL hipCheck(hipMalloc(SEMStorage % fBoundary_dev, SIZEOF(SEMStorage % fBoundary)))
+#endif
+
+
+END SUBROUTINE Build_SEMTensor2D
+
+SUBROUTINE Trash_SEMTensor2D( SEMStorage ) 
+  IMPLICIT NONE
+  CLASS(SEMTensor2D), INTENT(inout) :: SEMStorage
+
+    DEALLOCATE( SEMStorage % fInterior, &
+                SEMStorage % fBoundary )
+#ifdef GPU
+    CALL hipCheck(hipFree(SEMStorage % fInterior_dev))
+    CALL hipCheck(hipFree(SEMStorage % fBoundary_dev))
+#endif
+
+END SUBROUTINE Trash_SEMTensor2D
+
+#ifdef GPU
+SUBROUTINE UpdateHost_SEMTensor2D( SEMStorage )
+  IMPLICIT NONE
+  CLASS(SEMTensor2D), INTENT(inout) :: SEMStorage
+
+     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % fInterior), &
+                             SEMStorage % fInterior_dev, &
+                             SIZEOF(SEMStorage % fInterior), &
+                             hipMemcpyDeviceToHost))
+
+     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % fBoundary), &
+                             SEMStorage % fBoundary_dev, &
+                             SIZEOF(SEMStorage % fBoundary), &
+                             hipMemcpyDeviceToHost))
+
+END SUBROUTINE UpdateHost_SEMTensor2D
+
+SUBROUTINE UpdateDevice_SEMTensor2D( SEMStorage )
+  IMPLICIT NONE
+  CLASS(SEMTensor2D), INTENT(inout) :: SEMStorage
+
+     CALL hipCheck(hipMemcpy(SEMStorage % fInterior_dev, &
+                             c_loc(SEMStorage % fInterior), &
+                             SIZEOF(SEMStorage % fInterior), &
+                             hipMemcpyHostToDevice))
+
+     CALL hipCheck(hipMemcpy(SEMStorage % fBoundary_dev, &
+                             c_loc(SEMStorage % fBoundary), &
+                             SIZEOF(SEMStorage % fBoundary), &
+                             hipMemcpyHostToDevice))
+
+END SUBROUTINE UpdateDevice_SEMTensor2D
+#endif
+
+FUNCTION BoundaryInterp_SEMTensor2D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMTensor2D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMTensor2D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % TensorBoundaryInterp_2D( SEMStorage % fInterior_dev, &
+                                         SEMout % fInterior_dev, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ELSE
+      CALL interp % TensorBoundaryInterp_2D( SEMStorage % fInterior, &
+                                         SEMout % fInterior, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION BoundaryInterp_SEMTensor2D
+
+FUNCTION GridInterp_SEMTensor2D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMTensor2D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMTensor2D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % TensorGridInterp_2D( SEMStorage % fInterior_dev, &
+                                         SEMout % fInterior_dev, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ELSE
+      CALL interp % TensorGridInterp_2D( SEMStorage % fInterior, &
+                                         SEMout % fInterior, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION GridInterp_SEMTensor2D
+
+! -- SEMTensor3D -- !
+
+SUBROUTINE Build_SEMTensor3D( SEMStorage, N, nVar, nElem ) 
+  IMPLICIT NONE
+  CLASS(SEMTensor3D), INTENT(out) :: SEMStorage
+  INTEGER, INTENT(in) :: N
+  INTEGER, INTENT(in) :: nVar
+  INTEGER, INTENT(in) :: nElem
+
+    SEMStorage % N = N
+    SEMStorage % nVar = nVar
+    SEMStorage % nElem = nElem
+
+    ALLOCATE( SEMStorage % fInterior(1:3,1:3,0:N,0:N,0:N,1:nVar,1:nElem), &
+              SEMStorage % fBoundary(1:3,1:3,0:N,0:N,1:nVar,1:6,1:nElem) )
+
+#ifdef GPU
+    CALL hipCheck(hipMalloc(SEMStorage % fInterior_dev, SIZEOF(SEMStorage % fInterior)))
+    CALL hipCheck(hipMalloc(SEMStorage % fBoundary_dev, SIZEOF(SEMStorage % fBoundary)))
+#endif
+
+
+END SUBROUTINE Build_SEMTensor3D
+
+SUBROUTINE Trash_SEMTensor3D( SEMStorage ) 
+  IMPLICIT NONE
+  CLASS(SEMTensor3D), INTENT(inout) :: SEMStorage
+
+    DEALLOCATE( SEMStorage % fInterior, &
+                SEMStorage % fBoundary )
+#ifdef GPU
+    CALL hipCheck(hipFree(SEMStorage % fInterior_dev))
+    CALL hipCheck(hipFree(SEMStorage % fBoundary_dev))
+#endif
+
+END SUBROUTINE Trash_SEMTensor3D
+
+#ifdef GPU
+SUBROUTINE UpdateHost_SEMTensor3D( SEMStorage )
+  IMPLICIT NONE
+  CLASS(SEMTensor3D), INTENT(inout) :: SEMStorage
+
+     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % fInterior), &
+                             SEMStorage % fInterior_dev, &
+                             SIZEOF(SEMStorage % fInterior), &
+                             hipMemcpyDeviceToHost))
+
+     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % fBoundary), &
+                             SEMStorage % fBoundary_dev, &
+                             SIZEOF(SEMStorage % fBoundary), &
+                             hipMemcpyDeviceToHost))
+
+END SUBROUTINE UpdateHost_SEMTensor3D
+
+SUBROUTINE UpdateDevice_SEMTensor3D( SEMStorage )
+  IMPLICIT NONE
+  CLASS(SEMTensor3D), INTENT(inout) :: SEMStorage
+
+     CALL hipCheck(hipMemcpy(SEMStorage % fInterior_dev, &
+                             c_loc(SEMStorage % fInterior), &
+                             SIZEOF(SEMStorage % fInterior), &
+                             hipMemcpyHostToDevice))
+
+     CALL hipCheck(hipMemcpy(SEMStorage % fBoundary_dev, &
+                             c_loc(SEMStorage % fBoundary), &
+                             SIZEOF(SEMStorage % fBoundary), &
+                             hipMemcpyHostToDevice))
+
+END SUBROUTINE UpdateDevice_SEMTensor3D
+#endif
+
+FUNCTION BoundaryInterp_SEMTensor3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMTensor3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMTensor3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % TensorBoundaryInterp_3D( SEMStorage % fInterior_dev, &
+                                         SEMout % fInterior_dev, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ELSE
+      CALL interp % TensorBoundaryInterp_3D( SEMStorage % fInterior, &
+                                         SEMout % fInterior, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION BoundaryInterp_SEMTensor3D
+
+FUNCTION GridInterp_SEMTensor3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
+  IMPLICIT NONE
+  CLASS(SEMTensor3D) :: SEMStorage
+  TYPE(Lagrange) :: interp
+  TYPE(SEMTensor3D) :: SEMOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL interp % TensorGridInterp_3D( SEMStorage % fInterior_dev, &
+                                         SEMout % fInterior_dev, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ELSE
+      CALL interp % TensorGridInterp_3D( SEMStorage % fInterior, &
+                                         SEMout % fInterior, &
+                                         SEMStorage % nVar, &
+                                         SEMStorage % nElem )  
+    ENDIF
+
+END FUNCTION GridInterp_SEMTensor3D
 
 END MODULE NodalSEMData
