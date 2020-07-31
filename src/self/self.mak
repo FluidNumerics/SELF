@@ -38,6 +38,9 @@ Lagrange_Class_Tests.o : Lagrange_Class_Tests.F90 ModelPrecision.o ConstantsDict
 NodalSEMData.o: NodalSEMData.F90 ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o
 	${FC} ${FFLAGS} -c NodalSEMData.F90 -o $@
 
+SEMMesh.o: SEMMesh.F90 ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o NodalSEMData.o
+	${FC} ${FFLAGS} -c SEMMesh.F90 -o $@
+
 
 
 
