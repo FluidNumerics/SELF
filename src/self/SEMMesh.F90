@@ -10,6 +10,7 @@ IMPLICIT NONE
 
   TYPE, PUBLIC :: SEMGeometry2D
     INTEGER :: qType ! Quadrature Type
+    INTEGER :: nElem
     TYPE(Lagrange) :: interp ! Interpolant for the Geometry
     TYPE(SEMVector2D) :: x ! Physical positions
     TYPE(SEMTensor2D) :: dxds ! Covariant basis vectors
@@ -24,11 +25,14 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMGeometry2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMGeometry2D
 #endif
+      PROCEDURE, PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMGeometry2D
+      PROCEDURE, PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMGeometry2D
 
   END TYPE SEMGeometry2D
 
   TYPE, PUBLIC :: SEMGeometry3D
     INTEGER :: qType ! Quadrature Type
+    INTEGER :: nElem
     TYPE(Lagrange) :: interp ! Interpolant
     TYPE(SEMVector3D) :: x ! Physical positions
     TYPE(SEMTensor3D) :: dxds ! Covariant basis vectors
@@ -43,6 +47,9 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMGeometry3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMGeometry3D
 #endif
+
+      PROCEDURE, PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMGeometry3D
+      PROCEDURE, PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMGeometry3D
 
   END TYPE SEMGeometry3D
 
@@ -174,6 +181,7 @@ SUBROUTINE Build_SEMGeometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nEl
   INTEGER, INTENT(in) :: nElem
 
     myGeom % qType = quadrature
+    myGeom % nElem = nElem
     CALL myGeom % interp % Build( N = polyDegree, &
                                   controlNodeType = quadrature, &
                                   M = nPlotPoints, &
@@ -234,6 +242,66 @@ SUBROUTINE UpdateDevice_SEMGeometry2D( myGeom )
 END SUBROUTINE UpdateDevice_SEMGeometry2D
 #endif
 
+SUBROUTINE CalculateContravariantBasis_SEMGeometry2D( myGeom )
+  IMPLICIT NONE
+  CLASS(SEMGeometry2D), INTENT(inout) :: myGeom
+  ! Local
+  INTEGER :: iEl, i, j, k
+  REAL(prec) :: fac
+
+
+    ! Now calculate the contravariant basis vectors
+    DO iEl = 1, myGeom % nElem
+      DO j = 0, myGeom % interp % N
+        DO i = 0, myGeom % interp % N
+
+          myGeom % dsdx % interior(1,1,i,j,1,iEl) = myGeom % dxds % interior(2,2,i,j,1,iEl)
+          myGeom % dsdx % interior(2,1,i,j,1,iEl) = -myGeom % dxds % interior(1,2,i,j,1,iEl)
+          myGeom % dsdx % interior(1,2,i,j,1,iEl) = -myGeom % dxds % interior(2,1,i,j,1,iEl)
+          myGeom % dsdx % interior(2,2,i,j,1,iEl) = myGeom % dxds % interior(1,1,i,j,1,iEl)
+
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Interpolate the contravariant tensor to the boundaries
+    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( myGeom % interp )
+
+    ! Now, modify the sign of dsdx so that
+    ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
+    DO iEl = 1, myGeom % nElem
+      DO k = 1, 4
+        DO i = 0, myGeom % interp % N
+          IF( k == TOP .OR. k == EAST .OR. k == NORTH )THEN
+            fac = SIGN(1.0_prec, myGeom % J % boundary(i,1,k,iEl))
+          ELSE
+            fac = -SIGN(1.0_prec, myGeom % J % boundary(i,1,k,iEl))
+          ENDIF
+
+          myGeom % dsdx % boundary(1:2,1:2,i,1,k,iEl) = fac*myGeom % dsdx % boundary(1:2,1:2,i,1,k,iEl)
+        ENDDO
+      ENDDO
+    ENDDO
+
+END SUBROUTINE CalculateContravariantBasis_SEMGeometry2D
+
+SUBROUTINE CalculateMetricTerms_SEMGeometry2D( myGeom )
+  IMPLICIT NONE
+  CLASS(SEMGeometry2D), INTENT(inout) :: myGeom
+
+    myGeom % dxds = myGeom % x % Gradient(myGeom % interp)
+    myGeom % dxds = myGeom % dxds % BoundaryInterp(myGeom % interp)
+
+    ! Calculate the Jacobian = determinant of the covariant matrix at each point
+    myGeom % J = myGeom % dxds % Determinant()
+    myGeom % J = myGeom % J % BoundaryInterp(myGeom % interp)
+
+    CALL myGeom % CalculateContravariantBasis()
+
+    CALL myGeom % UpdateDevice()
+
+END SUBROUTINE CalculateMetricTerms_SEMGeometry2D
+
 SUBROUTINE Build_SEMGeometry3D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
   IMPLICIT NONE
   CLASS(SEMGeometry3D), INTENT(out) :: myGeom
@@ -243,6 +311,7 @@ SUBROUTINE Build_SEMGeometry3D( myGeom, quadrature, polyDegree, nPlotPoints, nEl
   INTEGER, INTENT(in) :: nElem
 
     myGeom % qType = quadrature
+    myGeom % nElem = nElem
     CALL myGeom % interp % Build( N = polyDegree, &
                                   controlNodeType = quadrature, &
                                   M = nPlotPoints, &
@@ -302,5 +371,110 @@ SUBROUTINE UpdateDevice_SEMGeometry3D( myGeom )
 
 END SUBROUTINE UpdateDevice_SEMGeometry3D
 #endif
+
+SUBROUTINE CalculateContravariantBasis_SEMGeometry3D( myGeom )
+  IMPLICIT NONE
+  CLASS(SEMGeometry3D), INTENT(inout) :: myGeom
+  ! Local
+  INTEGER :: iEl, i, j, k
+  REAL(prec) :: fac
+
+
+    ! Now calculate the contravariant basis vectors
+    DO iEl = 1, myGeom % nElem
+      DO k = 0, myGeom % interp % N
+        DO j = 0, myGeom % interp % N
+          DO i = 0, myGeom % interp % N
+
+            myGeom % dsdx % interior(1,1,i,j,k,1,iEl) = myGeom % dxds % interior(2,2,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,3,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(3,2,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,3,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(2,1,i,j,k,1,iEl) = myGeom % dxds % interior(3,2,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(1,3,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(1,2,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(3,3,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(3,1,i,j,k,1,iEl) = myGeom % dxds % interior(1,2,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,3,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(2,2,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(1,3,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(1,2,i,j,k,1,iEl) = myGeom % dxds % interior(2,3,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(3,1,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(3,3,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,1,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(2,2,i,j,k,1,iEl) = myGeom % dxds % interior(3,3,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(1,1,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(1,3,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(3,1,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(3,2,i,j,k,1,iEl) = myGeom % dxds % interior(1,3,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,1,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(2,3,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(1,1,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(1,3,i,j,k,1,iEl) = myGeom % dxds % interior(2,1,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(3,2,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(3,1,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,2,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(2,3,i,j,k,1,iEl) = myGeom % dxds % interior(3,1,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(1,2,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(1,1,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(3,2,i,j,k,1,iEl)
+
+            myGeom % dsdx % interior(3,3,i,j,k,1,iEl) = myGeom % dxds % interior(1,1,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(2,2,i,j,k,1,iEl)-&
+                                             myGeom % dxds % interior(2,1,i,j,k,1,iEl)*&
+                                             myGeom % dxds % interior(1,2,i,j,k,1,iEl)
+
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Interpolate the contravariant tensor to the boundaries
+    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( myGeom % interp )
+
+    ! Now, modify the sign of dsdx so that
+    ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
+    DO iEl = 1, myGeom % nElem
+      DO k = 1, 6
+        DO j = 0, myGeom % interp % N
+          DO i = 0, myGeom % interp % N
+            IF( k == TOP .OR. k == EAST .OR. k == NORTH )THEN
+              fac = SIGN(1.0_prec, myGeom % J % boundary(i,j,1,k,iEl))
+            ELSE
+              fac = -SIGN(1.0_prec, myGeom % J % boundary(i,j,1,k,iEl))
+            ENDIF
+
+            myGeom % dsdx % boundary(1:3,1:3,i,j,1,k,iEl) = fac*myGeom % dsdx % boundary(1:3,1:3,i,j,1,k,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+END SUBROUTINE CalculateContravariantBasis_SEMGeometry3D
+
+SUBROUTINE CalculateMetricTerms_SEMGeometry3D( myGeom )
+  IMPLICIT NONE
+  CLASS(SEMGeometry3D), INTENT(inout) :: myGeom
+
+    myGeom % dxds = myGeom % x % Gradient(myGeom % interp)
+    myGeom % dxds = myGeom % dxds % BoundaryInterp(myGeom % interp)
+
+    ! Calculate the Jacobian = determinant of the covariant matrix at each point
+    myGeom % J = myGeom % dxds % Determinant()
+    myGeom % J = myGeom % J % BoundaryInterp(myGeom % interp)
+
+    CALL myGeom % CalculateContravariantBasis()
+
+    CALL myGeom % UpdateDevice()
+
+END SUBROUTINE CalculateMetricTerms_SEMGeometry3D
 
 END MODULE SEMMesh
