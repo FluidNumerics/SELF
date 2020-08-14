@@ -117,6 +117,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector2D
       PROCEDURE, PUBLIC :: Curl => Curl_SEMVector2D
 
+
   END TYPE SEMVector2D
 
   TYPE, PUBLIC :: SEMVector3D
@@ -142,6 +143,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector3D
       PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector3D
       PROCEDURE, PUBLIC :: Curl => Curl_SEMVector3D
+
 
   END TYPE SEMVector3D
 !
@@ -197,6 +199,33 @@ IMPLICIT NONE
 
   END TYPE SEMTensor3D
 
+  INTERFACE ASSIGNMENT (=)
+    MODULE PROCEDURE Equals_SEMScalar1D
+    MODULE PROCEDURE Equals_SEMScalar2D
+    MODULE PROCEDURE Equals_SEMScalar3D
+    MODULE PROCEDURE Equals_SEMVector2D
+    MODULE PROCEDURE Equals_SEMVector3D
+    MODULE PROCEDURE Equals_SEMTensor2D
+    MODULE PROCEDURE Equals_SEMTensor3D
+  END INTERFACE
+
+!  INTERFACE OPERATOR (+)
+!    MODULE PROCEDURE Add_SEMScalar1D
+!    MODULE PROCEDURE Add_SEMScalar2D
+!    MODULE PROCEDURE Add_SEMScalar3D
+!    MODULE PROCEDURE Add_SEMVector2D
+!    MODULE PROCEDURE Add_SEMVector3D
+!    MODULE PROCEDURE Add_SEMTensor2D
+!  END INTERFACE
+!
+!  INTERFACE OPERATOR (-)
+!    MODULE PROCEDURE Subtract_SEMScalar1D
+!    MODULE PROCEDURE Subtract_SEMScalar2D
+!    MODULE PROCEDURE Subtract_SEMScalar3D
+!    MODULE PROCEDURE Subtract_SEMVector2D
+!    MODULE PROCEDURE Subtract_SEMVector3D
+!    MODULE PROCEDURE Subtract_SEMTensor2D
+!  END INTERFACE
 
 CONTAINS
 
@@ -334,6 +363,16 @@ FUNCTION Derivative_SEMScalar1D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
 
 END FUNCTION Derivative_SEMScalar1D
 
+SUBROUTINE Equals_SEMScalar1D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMScalar1D), INTENT(out) :: SEMOut
+  TYPE(SEMScalar1D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMScalar1D
+
 ! -- SEMScalar2D -- !
 
 SUBROUTINE Build_SEMScalar2D( SEMStorage, N, nVar, nElem ) 
@@ -468,6 +507,16 @@ FUNCTION Gradient_SEMScalar2D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
 
 END FUNCTION Gradient_SEMScalar2D
 
+SUBROUTINE Equals_SEMScalar2D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMScalar2D), INTENT(out) :: SEMOut
+  TYPE(SEMScalar2D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMScalar2D
+
 ! -- SEMScalar3D -- !
 
 SUBROUTINE Build_SEMScalar3D( SEMStorage, N, nVar, nElem ) 
@@ -600,6 +649,16 @@ FUNCTION Gradient_SEMScalar3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
     ENDIF
 
 END FUNCTION Gradient_SEMScalar3D
+
+SUBROUTINE Equals_SEMScalar3D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMScalar3D), INTENT(out) :: SEMOut
+  TYPE(SEMScalar3D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMScalar3D
 
 ! -- SEMVector2D -- !
 
@@ -777,6 +836,16 @@ FUNCTION Curl_SEMVector2D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
 
 END FUNCTION Curl_SEMVector2D
 
+SUBROUTINE Equals_SEMVector2D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMVector2D), INTENT(out) :: SEMOut
+  TYPE(SEMVector2D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMVector2D
+
 ! -- SEMVector3D -- !
 
 SUBROUTINE Build_SEMVector3D( SEMStorage, N, nVar, nElem ) 
@@ -953,6 +1022,16 @@ FUNCTION Curl_SEMVector3D( SEMStorage, interp, gpuAccel ) RESULT( SEMout )
 
 END FUNCTION Curl_SEMVector3D
 
+SUBROUTINE Equals_SEMVector3D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMVector3D), INTENT(out) :: SEMOut
+  TYPE(SEMVector3D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMVector3D
+
 ! -- SEMTensor2D -- !
 
 SUBROUTINE Build_SEMTensor2D( SEMStorage, N, nVar, nElem ) 
@@ -1090,6 +1169,16 @@ FUNCTION Determinant_SEMTensor2D( SEMStorage ) RESULT( SEMout )
     ENDDO
     
 END FUNCTION Determinant_SEMTensor2D
+
+SUBROUTINE Equals_SEMTensor2D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMTensor2D), INTENT(out) :: SEMOut
+  TYPE(SEMTensor2D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMTensor2D
 
 ! -- SEMTensor2D -- !
 
@@ -1241,5 +1330,15 @@ FUNCTION Determinant_SEMTensor3D( SEMStorage ) RESULT( SEMout )
     ENDDO
     
 END FUNCTION Determinant_SEMTensor3D
+
+SUBROUTINE Equals_SEMTensor3D( SEMOut, SEMStorage )
+  IMPLICIT NONE
+  TYPE(SEMTensor3D), INTENT(out) :: SEMOut
+  TYPE(SEMTensor3D), INTENT(in) :: SEMStorage
+
+    SEMOut % interior = SEMStorage % interior
+    SEMOut % boundary = SEMStorage % boundary
+  
+END SUBROUTINE Equals_SEMTensor3D
 
 END MODULE NodalSEMData

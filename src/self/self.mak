@@ -41,6 +41,10 @@ NodalSEMData.o: NodalSEMData.F90 ModelPrecision.o ConstantsDictionary.o Lagrange
 SEMMesh.o: SEMMesh.F90 ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o NodalSEMData.o
 	${FC} ${FFLAGS} -c SEMMesh.F90 -o $@
 
+MappedNodalSEMData.o: MappedNodalSEMData.F90 SEMMesh.o ModelPrecision.o ConstantsDictionary.o Lagrange_Class.o NodalSEMData.o
+	${FC} ${FFLAGS} -c MappedNodalSEMData.F90 -o $@
+
+
 
 
 
