@@ -14,7 +14,7 @@ USE ConstantsDictionary
 USE CommonRoutines
 USE Quadrature
 
-USE hip
+USE hipfort
 USE ISO_C_BINDING
 
 IMPLICIT NONE

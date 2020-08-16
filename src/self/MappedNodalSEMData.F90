@@ -35,183 +35,63 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Gradient => Gradient_MappedSEMScalar2D
+      PROCEDURE, PUBLIC :: MappedGradient => MappedGradient_MappedSEMScalar2D
 
   END TYPE MappedSEMScalar2D
-!
-!  TYPE, PUBLIC :: SEMScalar3D
-!
-!    INTEGER :: N
-!    INTEGER :: nVar
-!    INTEGER :: nElem
-!    REAL(prec), POINTER :: interior(:,:,:,:,:)
-!    REAL(prec), POINTER :: boundary(:,:,:,:,:)
-!    TYPE(c_ptr) :: interior_dev
-!    TYPE(c_ptr) :: boundary_dev
+
+!  TYPE, EXTENDS(SEMScalar3D), PUBLIC :: MappedSEMScalar3D
 !
 !    CONTAINS
 !
-!      PROCEDURE, PUBLIC :: Build => Build_SEMScalar3D
-!      PROCEDURE, PUBLIC :: Trash => Trash_SEMScalar3D
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMScalar3D
-!      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMScalar3D
-!#endif
-!      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMScalar3D
-!      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMScalar3D
-!      PROCEDURE, PUBLIC :: Gradient => Gradient_SEMScalar3D
+!      PROCEDURE, PUBLIC :: Gradient => MappedGradient_MappedSEMScalar3D
 !
-!  END TYPE SEMScalar3D
+!  END TYPE MappedSEMScalar3D
 !
-!! ---------------------- Vectors ---------------------- !
-!
-!  TYPE, PUBLIC :: SEMVector2D
-!
-!    INTEGER :: N
-!    INTEGER :: nVar
-!    INTEGER :: nElem
-!    REAL(prec), POINTER :: interior(:,:,:,:,:)
-!    REAL(prec), POINTER :: boundary(:,:,:,:,:)
-!    TYPE(c_ptr) :: interior_dev
-!    TYPE(c_ptr) :: boundary_dev
+!  TYPE, EXTENDS(SEMVector2D), PUBLIC :: MappedSEMVector2D
 !
 !    CONTAINS
 !
-!      PROCEDURE, PUBLIC :: Build => Build_SEMVector2D
-!      PROCEDURE, PUBLIC :: Trash => Trash_SEMVector2D
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMVector2D
-!      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMVector2D
-!#endif
-!      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMVector2D
-!      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMVector2D
-!      PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector2D
-!      PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector2D
-!      PROCEDURE, PUBLIC :: Curl => Curl_SEMVector2D
+!      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedSEMVector2D
+!      PROCEDURE, PUBLIC :: CovariantProjection => CovariantProjection_MappedSEMVector2D
+!      PROCEDURE, PUBLIC :: Gradient => Gradient_MappedSEMVector2D
+!      PROCEDURE, PUBLIC :: Divergence => Divergence_MappedSEMVector2D
+!      PROCEDURE, PUBLIC :: Curl => Curl_MappedSEMVector2D
 !
+!  END TYPE MappedSEMVector2D
 !
-!  END TYPE SEMVector2D
-!
-!  TYPE, PUBLIC :: SEMVector3D
-!
-!    INTEGER :: N
-!    INTEGER :: nVar
-!    INTEGER :: nElem
-!    REAL(prec), POINTER :: interior(:,:,:,:,:,:)
-!    REAL(prec), POINTER :: boundary(:,:,:,:,:,:)
-!    TYPE(c_ptr) :: interior_dev
-!    TYPE(c_ptr) :: boundary_dev
+!  TYPE, EXTENDS(SEMVector3D), PUBLIC :: MappedSEMVector3D
 !
 !    CONTAINS
 !
-!      PROCEDURE, PUBLIC :: Build => Build_SEMVector3D
-!      PROCEDURE, PUBLIC :: Trash => Trash_SEMVector3D
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMVector3D
-!      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMVector3D
-!#endif
-!      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMVector3D
-!      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMVector3D
-!      PROCEDURE, PUBLIC :: Gradient => Gradient_SEMVector3D
-!      PROCEDURE, PUBLIC :: Divergence => Divergence_SEMVector3D
-!      PROCEDURE, PUBLIC :: Curl => Curl_SEMVector3D
+!      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedSEMVector3D
+!      PROCEDURE, PUBLIC :: CovariantProjection => CovariantProjection_MappedSEMVector3D
+!      PROCEDURE, PUBLIC :: Gradient => Gradient_MappedSEMVector3D
+!      PROCEDURE, PUBLIC :: Divergence => Divergence_MappedSEMVector3D
+!      PROCEDURE, PUBLIC :: Curl => Curl_MappedSEMVector3D
 !
+!  END TYPE MappedSEMVector3D
 !
-!  END TYPE SEMVector3D
-!!
-!!! ---------------------- Tensors ---------------------- !
-!!
-!  TYPE, PUBLIC :: SEMTensor2D
-!
-!    INTEGER :: N
-!    INTEGER :: nVar
-!    INTEGER :: nElem
-!    REAL(prec), POINTER :: interior(:,:,:,:,:,:)
-!    REAL(prec), POINTER :: boundary(:,:,:,:,:,:)
-!    TYPE(c_ptr) :: interior_dev
-!    TYPE(c_ptr) :: boundary_dev
+!  TYPE, EXTENDS(SEMTensor2D), PUBLIC :: MappedSEMTensor2D
 !
 !    CONTAINS
 !
-!      PROCEDURE, PUBLIC :: Build => Build_SEMTensor2D
-!      PROCEDURE, PUBLIC :: Trash => Trash_SEMTensor2D
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMTensor2D
-!      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMTensor2D
-!#endif
-!      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMTensor2D
-!      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMTensor2D 
+!  END TYPE MappedSEMTensor2D
 !
-!      PROCEDURE, PUBLIC :: Determinant => Determinant_SEMTensor2D
-!
-!  END TYPE SEMTensor2D
-!
-!  TYPE, PUBLIC :: SEMTensor3D
-!
-!    INTEGER :: N
-!    INTEGER :: nVar
-!    INTEGER :: nElem
-!    REAL(prec), POINTER :: interior(:,:,:,:,:,:,:)
-!    REAL(prec), POINTER :: boundary(:,:,:,:,:,:,:)
-!    TYPE(c_ptr) :: interior_dev
-!    TYPE(c_ptr) :: boundary_dev
+!  TYPE, EXTENDS(SEMTensor3D), PUBLIC :: MappedSEMTensor3D
 !
 !    CONTAINS
 !
-!      PROCEDURE, PUBLIC :: Build => Build_SEMTensor3D
-!      PROCEDURE, PUBLIC :: Trash => Trash_SEMTensor3D
-!#ifdef GPU
-!      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_SEMTensor3D
-!      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_SEMTensor3D
-!#endif
-!      PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_SEMTensor3D
-!      PROCEDURE, PUBLIC :: GridInterp => GridInterp_SEMTensor3D 
-!
-!      PROCEDURE, PUBLIC :: Determinant => Determinant_SEMTensor3D
-!
-!  END TYPE SEMTensor3D
-!
-!  INTERFACE ASSIGNMENT (=)
-!    MODULE PROCEDURE Equals_SEMScalar1D
-!    MODULE PROCEDURE Equals_SEMScalar2D
-!    MODULE PROCEDURE Equals_SEMScalar3D
-!    MODULE PROCEDURE Equals_SEMVector2D
-!    MODULE PROCEDURE Equals_SEMVector3D
-!    MODULE PROCEDURE Equals_SEMTensor2D
-!    MODULE PROCEDURE Equals_SEMTensor3D
-!  END INTERFACE
-!
-!  INTERFACE OPERATOR (+)
-!    MODULE PROCEDURE Add_SEMScalar1D
-!    MODULE PROCEDURE Add_SEMScalar2D
-!    MODULE PROCEDURE Add_SEMScalar3D
-!    MODULE PROCEDURE Add_SEMVector2D
-!    MODULE PROCEDURE Add_SEMVector3D
-!    MODULE PROCEDURE Add_SEMTensor2D
-!  END INTERFACE
-!
-!  INTERFACE OPERATOR (-)
-!    MODULE PROCEDURE Subtract_SEMScalar1D
-!    MODULE PROCEDURE Subtract_SEMScalar2D
-!    MODULE PROCEDURE Subtract_SEMScalar3D
-!    MODULE PROCEDURE Subtract_SEMVector2D
-!    MODULE PROCEDURE Subtract_SEMVector3D
-!    MODULE PROCEDURE Subtract_SEMTensor2D
-!  END INTERFACE
-!
+!  END TYPE MappedSEMTensor3D
+
 CONTAINS
-!
-!! -- SEMScalar1D -- !
-!
+
 FUNCTION MappedGradient_SEMScalar2D( SEMStorage, mesh ) RESULT( SEMOut )
   IMPLICIT NONE
-  CLASS(SEMScalar2D) :: SEMStorage
-  TYPE(Lagrange) :: interp
-  TYPE(SEMVector2D) :: SEMOut
-  !LOGICAL, OPTIONAL :: gpuAccel
-
+  CLASS(MappedSEMScalar2D) :: SEMStorage
+  TYPE(SEMMesh_2D) :: mesh
+  TYPE(MappedSEMVector2D) :: SEMOut
   
- 
+    SEMOut = SEMStorage % Gradient( 
   
 END FUNCTION MappedGradient_SEMScalar2D
 !SUBROUTINE Build_SEMScalar1D( SEMStorage, N, nVar, nElem ) 
