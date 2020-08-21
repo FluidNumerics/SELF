@@ -5,8 +5,19 @@ USE ConstantsDictionary
 USE NodalSEMData
 USE Lagrange_Class
 
+USE hipfort
+USE ISO_C_BINDING
+
+INCLUDE "SELF_Macros.h"
+
 
 IMPLICIT NONE
+  
+  INTEGER, PARAMETER :: selfMinNodalValence2D = 4
+  INTEGER, PARAMETER :: selfMinNodalValence3D = 8
+  INTEGER, PARAMETER :: selfMaxNodalValence2D = 6
+  INTEGER, PARAMETER :: selfMaxNodalValence3D = 10
+
 
   TYPE, PUBLIC :: SEMGeometry2D
     INTEGER :: qType ! Quadrature Type
@@ -51,22 +62,33 @@ IMPLICIT NONE
 
   END TYPE SEMGeometry3D
 
-  TYPE, PUBLIC :: Nodes
+  TYPE, PUBLIC :: MeshNodes
     INTEGER :: objCount
     INTEGER :: ndim
     INTEGER, POINTER :: id(:)
-    INTEGER, POINTER :: nodeFlag(:)
+    INTEGER, POINTER :: flag(:)
     INTEGER, POINTER :: eValence(:)
     INTEGER, POINTER :: elements(:,:)
     INTEGER, POINTER :: elementNodes(:,:)
     REAL(prec), ALLOCATABLE :: x(:,:)
 
-!    CONTAINS
-!
-!      PROCEDURE, PUBLIC :: Build => Build_Nodes
-!      PROCEDURE, PUBLIC :: Trash => Trash_Nodes
+    TYPE(c_ptr) :: id_dev
+    TYPE(c_ptr) :: flag_dev
+    TYPE(c_ptr) :: eValence_dev
+    TYPE(c_ptr) :: elements_dev
+    TYPE(c_ptr) :: elementNodes_dev
+    TYPE(c_ptr) :: x_dev
 
-  END TYPE Nodes
+    CONTAINS
+
+      PROCEDURE, PUBLIC :: Build => Build_MeshNodes
+      PROCEDURE, PUBLIC :: Trash => Trash_MeshNodes
+#ifdef GPU
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_MeshNodes
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_MeshNodes
+#endif
+
+  END TYPE MeshNodes
 
   TYPE, PUBLIC :: Edges
     INTEGER :: objCount
@@ -108,7 +130,7 @@ IMPLICIT NONE
   END TYPE Elements
 
 !  TYPE, PUBLIC :: MeshObjHandles
-!    INTEGER :: nNodes, nEdges, nFaces, nElements
+!    INTEGER :: nMeshNodes, nEdges, nFaces, nElements
 !    INTEGER, POINTER :: nodeids(:)
 !    INTEGER, POINTER :: edgeids(:)
 !    INTEGER, POINTER :: faceids(:)
@@ -131,7 +153,7 @@ IMPLICIT NONE
   TYPE, PUBLIC :: SEMMesh2D
     TYPE( SEMGeometry2D ) :: geometry
     TYPE( Elements ) :: elements
-    TYPE( Nodes  ) :: nodes
+    TYPE( MeshNodes  ) :: nodes
     TYPE( Edges ) :: edges 
     !TYPE( DomainDecomposition ) :: decomp 
     INTEGER :: cornerMap(1:2,1:4)
@@ -145,7 +167,7 @@ IMPLICIT NONE
   TYPE, PUBLIC :: SEMMesh3D
     TYPE( SEMGeometry3D ) :: geometry
     TYPE( Elements ) :: elements
-    TYPE( Nodes  ) :: nodes
+    TYPE( MeshNodes  ) :: nodes
     TYPE( Edges ) :: edges 
     TYPE( Faces ) :: faces
     !TYPE( DomainDecomposition ) :: decomp 
@@ -211,6 +233,82 @@ SUBROUTINE Build_SEMGeometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nEl
     
 END SUBROUTINE Build_SEMGeometry2D
 
+SUBROUTINE Build_MeshNodes( nodes, nNodes, nDim, maxValence )
+#undef __FUNC__
+#define __FUNC__ "Build_MeshNodes"
+  IMPLICIT NONE
+  CLASS( MeshNodes ), INTENT(out) :: nodes
+  INTEGER, INTENT(in) :: nNodes
+  INTEGER, INTENT(in) :: nDim
+  INTEGER, INTENT(in), OPTIONAL :: maxValence
+  ! LOGICAL
+  INTEGER :: eValence
+
+    nodes % objCount = nNodes
+    nodes % nDim = nDim
+
+    ! set the element valence size
+    IF( PRESENT(maxValence) )THEN
+
+      INFO("User provided optional maxValence")
+      IF( nDim == 2 )THEN
+
+        IF(maxValence >= selfMinNodalValence2D)THEN
+          eValence = maxValence
+        ELSE
+          ERROR("Max nodal valence is too small") 
+          STOP
+        ENDIF
+
+      ELSE IF( nDim == 3 )THEN
+
+        IF(maxValence >= selfMinNodalValence3D)THEN
+          eValence = maxValence
+        ELSE
+          ERROR("Max nodal valence is too small") 
+          STOP
+        ENDIF
+
+      ENDIF
+
+    ELSE
+
+      INFO("Setting nodal valence to SELF default")
+      IF( nDim == 2 )THEN
+        eValence = selfMaxNodalValence2D
+      ELSE IF( nDim == 3 )THEN
+        eValence = selfMaxNodalValence2D
+      ENDIF
+
+    ENDIF
+
+    ! Allocate space
+    ALLOCATE( nodes % id(1:nNodes), &
+              nodes % flag(1:nNodes), &
+              nodes % eValence(1:nNodes), &
+              nodes % elements(1:eValence,1:nNodes), &
+              nodes % elementNodes(1:eValence,1:nNodes), &
+              nodes % x(1:nDim,1:nNodes) )
+
+    nodes % id = 0
+    nodes % flag = 0
+    nodes % eValence = 0
+    nodes % elements = 0
+    nodes % elementNodes = 0
+    nodes % x = 0.0_prec
+
+#ifdef GPU
+    CALL hipCheck(hipMalloc(nodes % id_dev, SIZEOF(nodes % id)))
+    CALL hipCheck(hipMalloc(nodes % flag_dev, SIZEOF(nodes % flag)))
+    CALL hipCheck(hipMalloc(nodes % eValence_dev, SIZEOF(nodes % eValence)))
+    CALL hipCheck(hipMalloc(nodes % elements_dev, SIZEOF(nodes % elements)))
+    CALL hipCheck(hipMalloc(nodes % elementNodes_dev, SIZEOF(nodes % elementNodes)))
+    CALL hipCheck(hipMalloc(nodes % x_dev, SIZEOF(nodes % x)))
+#endif
+  
+
+END SUBROUTINE Build_MeshNodes
+
 SUBROUTINE Trash_SEMGeometry2D( myGeom ) 
   IMPLICIT NONE
   CLASS(SEMGeometry2D), INTENT(inout) :: myGeom
@@ -221,6 +319,31 @@ SUBROUTINE Trash_SEMGeometry2D( myGeom )
     CALL myGeom % J % Trash()
   
 END SUBROUTINE Trash_SEMGeometry2D 
+
+SUBROUTINE Trash_MeshNodes( nodes )
+#undef __FUNC__
+#define __FUNC__ "Trash_MeshNodes"
+  IMPLICIT NONE
+  CLASS( MeshNodes ), INTENT(inout) :: nodes
+
+    DEALLOCATE( nodes % id, &
+                nodes % flag, &
+                nodes % eValence, &
+                nodes % elements, &
+                nodes % elementNodes, &
+                nodes % x )
+
+#ifdef GPU
+    CALL hipCheck(hipFree(nodes % id_dev))
+    CALL hipCheck(hipFree(nodes % flag_dev))
+    CALL hipCheck(hipFree(nodes % eValence_dev))
+    CALL hipCheck(hipFree(nodes % elements_dev))
+    CALL hipCheck(hipFree(nodes % elementNodes_dev))
+    CALL hipCheck(hipFree(nodes % x_dev))
+#endif
+
+END SUBROUTINE Trash_MeshNodes
+
 #ifdef GPU
 SUBROUTINE UpdateHost_SEMGeometry2D( myGeom )
   IMPLICIT NONE
@@ -233,6 +356,44 @@ SUBROUTINE UpdateHost_SEMGeometry2D( myGeom )
 
 END SUBROUTINE UpdateHost_SEMGeometry2D
 
+SUBROUTINE UpdateHost_MeshNodes( nodes )
+#undef __FUNC__
+#define __FUNC__ "UpdateHost_MeshNodes"
+  IMPLICIT NONE
+  CLASS( MeshNodes ), INTENT(inout) :: nodes
+
+    CALL hipCheck(hipMemcpy(c_loc(nodes % id), &
+                            nodes % id_dev, &
+                            SIZEOF(nodes % id), &
+                            hipMemcpyDeviceToHost))
+
+    CALL hipCheck(hipMemcpy(c_loc(nodes % flag ), &
+                            nodes % flag_dev, &
+                            SIZEOF(nodes % flag), &
+                            hipMemcpyDeviceToHost))
+
+    CALL hipCheck(hipMemcpy(c_loc(nodes % eValence), &
+                            nodes % eValence_dev, &
+                            SIZEOF(nodes % eValence), &
+                            hipMemcpyDeviceToHost))
+
+    CALL hipCheck(hipMemcpy(c_loc(nodes % elements), &
+                            nodes % elements_dev, &
+                            SIZEOF(nodes % elements), &
+                            hipMemcpyDeviceToHost))
+
+    CALL hipCheck(hipMemcpy(c_loc(nodes % elementNodes), &
+                            nodes % elementNodes_dev, &
+                            SIZEOF(nodes % elementNodes), &
+                            hipMemcpyDeviceToHost))
+
+    CALL hipCheck(hipMemcpy(c_loc(nodes % x), &
+                            nodes % x_dev, &
+                            SIZEOF(nodes % x), &
+                            hipMemcpyDeviceToHost))
+
+END SUBROUTINE UpdateHost_MeshNodes
+
 SUBROUTINE UpdateDevice_SEMGeometry2D( myGeom )
   IMPLICIT NONE
   CLASS(SEMGeometry2D), INTENT(inout) :: myGeom
@@ -243,6 +404,44 @@ SUBROUTINE UpdateDevice_SEMGeometry2D( myGeom )
     CALL myGeom % J % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMGeometry2D
+
+SUBROUTINE UpdateDevice_MeshNodes( nodes )
+#undef __FUNC__
+#define __FUNC__ "UpdateDevice_MeshNodes"
+  IMPLICIT NONE
+  CLASS( MeshNodes ), INTENT(inout) :: nodes
+
+    CALL hipCheck(hipMemcpy(nodes % id_dev, &
+                            c_loc(nodes % id), &
+                            SIZEOF(nodes % id), &
+                            hipMemcpyHostToDevice))
+
+    CALL hipCheck(hipMemcpy(nodes % flag_dev, &
+                            c_loc(nodes % flag), &
+                            SIZEOF(nodes % flag), &
+                            hipMemcpyHostToDevice))
+
+    CALL hipCheck(hipMemcpy(nodes % eValence_dev, &
+                            c_loc(nodes % eValence), &
+                            SIZEOF(nodes % eValence), &
+                            hipMemcpyHostToDevice))
+
+    CALL hipCheck(hipMemcpy(nodes % elements_dev, &
+                            c_loc(nodes % elements), &
+                            SIZEOF(nodes % elements), &
+                            hipMemcpyHostToDevice))
+
+    CALL hipCheck(hipMemcpy(nodes % elementNodes_dev, &
+                            c_loc(nodes % elementNodes), &
+                            SIZEOF(nodes % elementNodes), &
+                            hipMemcpyHostToDevice))
+
+    CALL hipCheck(hipMemcpy(nodes % x_dev, &
+                            c_loc(nodes % x), &
+                            SIZEOF(nodes % x), &
+                            hipMemcpyHostToDevice))
+
+END SUBROUTINE UpdateDevice_MeshNodes
 #endif
 
 SUBROUTINE CalculateContravariantBasis_SEMGeometry2D( myGeom )

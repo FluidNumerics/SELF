@@ -37,4 +37,6 @@
 #define TEB_3D_INDEX(row,col,i,j,iVar,iSide,iel,N,nVar) row-1 + 3*(col-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel)))))
 
 #define __FUNC__
-#define INFO(msg) PRINT('("[",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
+#define INFO(msg) PRINT('("INFO : [",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
+#define WARNING(msg) PRINT('("WARNING : [",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
+#define ERROR(msg) PRINT('("ERROR : [",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
