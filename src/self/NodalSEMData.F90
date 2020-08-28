@@ -8,8 +8,7 @@
 
 MODULE NodalSEMData
 
-USE ModelPrecision
-USE ConstantsDictionary
+USE SELFConstants
 USE Lagrange_Class
 
 USE hipfort
@@ -25,10 +24,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r3) :: interior
+    TYPE(hfReal_r3) :: boundary
 
     CONTAINS
 
@@ -50,10 +47,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r4) :: interior
+    TYPE(hfReal_r4) :: boundary
 
     CONTAINS
 
@@ -75,10 +70,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r5) :: interior
+    TYPE(hfReal_r5) :: boundary
 
     CONTAINS
 
@@ -102,10 +95,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r5) :: interior
+    TYPE(hfReal_r5) :: boundary
 
     CONTAINS
 
@@ -130,10 +121,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:,:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:,:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r6) :: interior
+    TYPE(hfReal_r6) :: boundary
 
     CONTAINS
 
@@ -160,10 +149,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:,:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:,:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r6) :: interior
+    TYPE(hfReal_r6) :: boundary
 
     CONTAINS
 
@@ -186,10 +173,8 @@ IMPLICIT NONE
     INTEGER :: nVar
     INTEGER :: nElem
     TYPE(Lagrange) :: interp
-    REAL(prec), POINTER :: interior(:,:,:,:,:,:,:)
-    REAL(prec), POINTER :: boundary(:,:,:,:,:,:,:)
-    TYPE(c_ptr) :: interior_dev
-    TYPE(c_ptr) :: boundary_dev
+    TYPE(hfReal_r7) :: interior
+    TYPE(hfReal_r7) :: boundary
 
     CONTAINS
 
@@ -252,18 +237,16 @@ SUBROUTINE Build_SEMScalar1D( SEMStorage, N, quadratureType, M, targetNodeType, 
     SEMStorage % nVar = nVar
     SEMStorage % nElem = nElem
 
-    CALL SEMStorage % interp % Build( N = N, &
-                                      controlNodeType = quadratureType, &
-                                      M = M, &
-                                      targetNodeType = targetNodeType )
+    CALL SEMStorage % interp % Build(N = N, &
+                                     controlNodeType = quadratureType, &
+                                     M = M, &
+                                     targetNodeType = targetNodeType)
 
-    ALLOCATE( SEMStorage % interior(0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(1:nVar,1:2,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/0, 1, 1/),&
+                                       upBound = (/N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
+    CALL SEMStorage % boundary % Alloc(loBound = (/1, 1, 1/),&
+                                       upBound = (/nVar, 2, nElem/))
 
 
 END SUBROUTINE Build_SEMScalar1D
@@ -272,12 +255,12 @@ SUBROUTINE Trash_SEMScalar1D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar1D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMScalar1D
 
@@ -286,17 +269,9 @@ SUBROUTINE UpdateHost_SEMScalar1D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar1D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMScalar1D
 
@@ -304,17 +279,9 @@ SUBROUTINE UpdateDevice_SEMScalar1D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar1D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMScalar1D
 #endif
@@ -326,13 +293,13 @@ FUNCTION BoundaryInterp_SEMScalar1D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarBoundaryInterp_1D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % ScalarBoundaryInterp_1D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarBoundaryInterp_1D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % ScalarBoundaryInterp_1D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -346,13 +313,13 @@ FUNCTION GridInterp_SEMScalar1D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarGridInterp_1D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % ScalarGridInterp_1D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarGridInterp_1D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % ScalarGridInterp_1D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -366,13 +333,13 @@ FUNCTION Derivative_SEMScalar1D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % Derivative_1D( SEMStorage % interior_dev, &
-                                                SEMout % interior_dev, &
+      CALL SEMStorage % interp % Derivative_1D( SEMStorage % interior % deviceData, &
+                                                SEMout % interior % deviceData, &
                                                 SEMStorage % nVar, &
                                                 SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % Derivative_1D( SEMStorage % interior, &
-                                                SEMout % interior, &
+      CALL SEMStorage % interp % Derivative_1D( SEMStorage % interior % hostData, &
+                                                SEMout % interior % hostData, &
                                                 SEMStorage % nVar, &
                                                 SEMStorage % nElem )  
     ENDIF
@@ -384,8 +351,8 @@ SUBROUTINE Equals_SEMScalar1D( SEMOut, SEMStorage )
   TYPE(SEMScalar1D), INTENT(out) :: SEMOut
   TYPE(SEMScalar1D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMScalar1D
 
@@ -410,13 +377,11 @@ SUBROUTINE Build_SEMScalar2D( SEMStorage, N, quadratureType, M, targetNodeType, 
                                       M = M, &
                                       targetNodeType = targetNodeType )
 
-    ALLOCATE( SEMStorage % interior(0:N,0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(0:N,1:nVar,1:4,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/0, 0, 1, 1/),&
+                                       upBound = (/N, N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
+    CALL SEMStorage % boundary % Alloc(loBound = (/0, 1, 1, 1/),&
+                                       upBound = (/N, nVar, 4, nElem/))
 
 
 END SUBROUTINE Build_SEMScalar2D
@@ -425,15 +390,12 @@ SUBROUTINE Trash_SEMScalar2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar2D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-
-    CALL SEMStorage % interp % Trash( )
-
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMScalar2D
 
@@ -442,35 +404,19 @@ SUBROUTINE UpdateHost_SEMScalar2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar2D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMScalar2D
 
 SUBROUTINE UpdateDevice_SEMScalar2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar2D), INTENT(inout) :: SEMStorage
-
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+          
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMScalar2D
 #endif
@@ -482,13 +428,13 @@ FUNCTION BoundaryInterp_SEMScalar2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarBoundaryInterp_2D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % ScalarBoundaryInterp_2D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarBoundaryInterp_2D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % ScalarBoundaryInterp_2D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -502,13 +448,13 @@ FUNCTION GridInterp_SEMScalar2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarGridInterp_2D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % ScalarGridInterp_2D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarGridInterp_2D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % ScalarGridInterp_2D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -522,13 +468,13 @@ FUNCTION Gradient_SEMScalar2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarGradient_2D( SEMStorage % interior_dev, &
-                                                    SEMout % interior_dev, &
+      CALL SEMStorage % interp % ScalarGradient_2D( SEMStorage % interior % deviceData, &
+                                                    SEMout % interior % deviceData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarGradient_2D( SEMStorage % interior, &
-                                                    SEMout % interior, &
+      CALL SEMStorage % interp % ScalarGradient_2D( SEMStorage % interior % hostData, &
+                                                    SEMout % interior % hostData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ENDIF
@@ -540,8 +486,8 @@ SUBROUTINE Equals_SEMScalar2D( SEMOut, SEMStorage )
   TYPE(SEMScalar2D), INTENT(out) :: SEMOut
   TYPE(SEMScalar2D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMScalar2D
 
@@ -566,13 +512,11 @@ SUBROUTINE Build_SEMScalar3D( SEMStorage, N, quadratureType, M, targetNodeType, 
                                       M = M, &
                                       targetNodeType = targetNodeType )
 
-    ALLOCATE( SEMStorage % interior(0:N,0:N,0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(0:N,0:N,1:nVar,1:6,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/0, 0, 0, 1, 1/),&
+                                       upBound = (/N, N, N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
+    CALL SEMStorage % boundary % Alloc(loBound = (/0, 0, 1, 1, 1/),&
+                                       upBound = (/N, N, nVar, 6, nElem/))
 
 END SUBROUTINE Build_SEMScalar3D
 
@@ -580,15 +524,12 @@ SUBROUTINE Trash_SEMScalar3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar3D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-
-    CALL SEMStorage % interp % Trash( )
-
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMScalar3D
 
@@ -597,17 +538,9 @@ SUBROUTINE UpdateHost_SEMScalar3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar3D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMScalar3D
 
@@ -615,17 +548,9 @@ SUBROUTINE UpdateDevice_SEMScalar3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMScalar3D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMScalar3D
 #endif
@@ -637,13 +562,13 @@ FUNCTION BoundaryInterp_SEMScalar3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarBoundaryInterp_3D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % ScalarBoundaryInterp_3D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarBoundaryInterp_3D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % ScalarBoundaryInterp_3D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -657,13 +582,13 @@ FUNCTION GridInterp_SEMScalar3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarGridInterp_3D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % ScalarGridInterp_3D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarGridInterp_3D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % ScalarGridInterp_3D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -677,13 +602,13 @@ FUNCTION Gradient_SEMScalar3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % ScalarGradient_3D( SEMStorage % interior_dev, &
-                                                    SEMout % interior_dev, &
+      CALL SEMStorage % interp % ScalarGradient_3D( SEMStorage % interior % deviceData, &
+                                                    SEMout % interior % deviceData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % ScalarGradient_3D( SEMStorage % interior, &
-                                                    SEMout % interior, &
+      CALL SEMStorage % interp % ScalarGradient_3D( SEMStorage % interior % hostData, &
+                                                    SEMout % interior % hostData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ENDIF
@@ -695,8 +620,8 @@ SUBROUTINE Equals_SEMScalar3D( SEMOut, SEMStorage )
   TYPE(SEMScalar3D), INTENT(out) :: SEMOut
   TYPE(SEMScalar3D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMScalar3D
 
@@ -721,14 +646,11 @@ SUBROUTINE Build_SEMVector2D( SEMStorage, N, quadratureType, M, targetNodeType, 
                                       M = M, &
                                       targetNodeType = targetNodeType )
 
-    ALLOCATE( SEMStorage % interior(1:2,0:N,0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(1:2,0:N,1:nVar,1:4,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/1, 0, 0, 1, 1/),&
+                                       upBound = (/2, N, N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
-
+    CALL SEMStorage % boundary % Alloc(loBound = (/1, 0, 1, 1, 1/),&
+                                       upBound = (/2, N, nVar, 4, nElem/))
 
 END SUBROUTINE Build_SEMVector2D
 
@@ -736,15 +658,12 @@ SUBROUTINE Trash_SEMVector2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMVector2D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-
-    CALL SEMStorage % interp % Trash( )
-
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMVector2D
 
@@ -753,17 +672,9 @@ SUBROUTINE UpdateHost_SEMVector2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMVector2D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMVector2D
 
@@ -771,17 +682,9 @@ SUBROUTINE UpdateDevice_SEMVector2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMVector2D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMVector2D
 #endif
@@ -793,13 +696,13 @@ FUNCTION BoundaryInterp_SEMVector2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorBoundaryInterp_2D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % VectorBoundaryInterp_2D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorBoundaryInterp_2D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % VectorBoundaryInterp_2D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -813,13 +716,13 @@ FUNCTION GridInterp_SEMVector2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorGridInterp_2D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorGridInterp_2D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorGridInterp_2D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % VectorGridInterp_2D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -833,13 +736,13 @@ FUNCTION Gradient_SEMVector2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorGradient_2D( SEMStorage % interior_dev, &
-                                                    SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorGradient_2D( SEMStorage % interior % deviceData, &
+                                                    SEMout % interior % deviceData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorGradient_2D( SEMStorage % interior, &
-                                                    SEMout % interior, &
+      CALL SEMStorage % interp % VectorGradient_2D( SEMStorage % interior % hostData, &
+                                                    SEMout % interior % hostData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ENDIF
@@ -853,13 +756,13 @@ FUNCTION Divergence_SEMVector2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorDivergence_2D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorDivergence_2D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorDivergence_2D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % VectorDivergence_2D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -873,13 +776,13 @@ FUNCTION Curl_SEMVector2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorCurl_2D( SEMStorage % interior_dev, &
-                                                SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorCurl_2D( SEMStorage % interior % deviceData, &
+                                                SEMout % interior % deviceData, &
                                                 SEMStorage % nVar, &
                                                 SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorCurl_2D( SEMStorage % interior, &
-                                                SEMout % interior, &
+      CALL SEMStorage % interp % VectorCurl_2D( SEMStorage % interior % hostData, &
+                                                SEMout % interior % hostData, &
                                                 SEMStorage % nVar, &
                                                 SEMStorage % nElem )  
     ENDIF
@@ -891,8 +794,8 @@ SUBROUTINE Equals_SEMVector2D( SEMOut, SEMStorage )
   TYPE(SEMVector2D), INTENT(out) :: SEMOut
   TYPE(SEMVector2D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMVector2D
 
@@ -917,14 +820,11 @@ SUBROUTINE Build_SEMVector3D( SEMStorage, N, quadratureType, M, targetNodeType, 
                                       M = M, &
                                       targetNodeType = targetNodeType )
 
-    ALLOCATE( SEMStorage % interior(1:3,0:N,0:N,0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(1:3,0:N,0:N,1:nVar,1:6,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/1, 0, 0, 0, 1, 1/),&
+                                       upBound = (/3, N, N, N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
-
+    CALL SEMStorage % boundary % Alloc(loBound = (/1, 0, 0, 1, 1, 1/),&
+                                       upBound = (/3, N, N, nVar, 6, nElem/))
 
 END SUBROUTINE Build_SEMVector3D
 
@@ -932,15 +832,12 @@ SUBROUTINE Trash_SEMVector3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMVector3D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-
-    CALL SEMStorage % interp % Trash( )
-
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMVector3D
 
@@ -949,17 +846,9 @@ SUBROUTINE UpdateHost_SEMVector3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMVector3D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMVector3D
 
@@ -967,17 +856,9 @@ SUBROUTINE UpdateDevice_SEMVector3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMVector3D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMVector3D
 #endif
@@ -989,13 +870,13 @@ FUNCTION BoundaryInterp_SEMVector3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorBoundaryInterp_3D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % VectorBoundaryInterp_3D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorBoundaryInterp_3D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % VectorBoundaryInterp_3D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -1009,13 +890,13 @@ FUNCTION GridInterp_SEMVector3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorGridInterp_3D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorGridInterp_3D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorGridInterp_3D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % VectorGridInterp_3D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -1029,13 +910,13 @@ FUNCTION Gradient_SEMVector3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorGradient_3D( SEMStorage % interior_dev, &
-                                                    SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorGradient_3D( SEMStorage % interior % deviceData, &
+                                                    SEMout % interior % deviceData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorGradient_3D( SEMStorage % interior, &
-                                                    SEMout % interior, &
+      CALL SEMStorage % interp % VectorGradient_3D( SEMStorage % interior % hostData, &
+                                                    SEMout % interior % hostData, &
                                                     SEMStorage % nVar, &
                                                     SEMStorage % nElem )  
     ENDIF
@@ -1049,13 +930,13 @@ FUNCTION Divergence_SEMVector3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorDivergence_3D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorDivergence_3D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorDivergence_3D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % VectorDivergence_3D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -1069,13 +950,13 @@ FUNCTION Curl_SEMVector3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % VectorCurl_3D( SEMStorage % interior_dev, &
-                                                SEMout % interior_dev, &
+      CALL SEMStorage % interp % VectorCurl_3D( SEMStorage % interior % deviceData, &
+                                                SEMout % interior % deviceData, &
                                                 SEMStorage % nVar, &
                                                 SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % VectorCurl_3D( SEMStorage % interior, &
-                                                SEMout % interior, &
+      CALL SEMStorage % interp % VectorCurl_3D( SEMStorage % interior % hostData, &
+                                                SEMout % interior % hostData, &
                                                 SEMStorage % nVar, &
                                                 SEMStorage % nElem )  
     ENDIF
@@ -1087,8 +968,8 @@ SUBROUTINE Equals_SEMVector3D( SEMOut, SEMStorage )
   TYPE(SEMVector3D), INTENT(out) :: SEMOut
   TYPE(SEMVector3D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMVector3D
 
@@ -1113,14 +994,11 @@ SUBROUTINE Build_SEMTensor2D( SEMStorage, N, quadratureType, M, targetNodeType, 
                                       M = M, &
                                       targetNodeType = targetNodeType )
 
-    ALLOCATE( SEMStorage % interior(1:2,1:2,0:N,0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(1:2,1:2,0:N,1:nVar,1:4,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/1, 1, 0, 0, 1, 1/),&
+                                       upBound = (/2, 2, N, N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
-
+    CALL SEMStorage % boundary % Alloc(loBound = (/1, 1, 0, 1, 1, 1/),&
+                                       upBound = (/2, 2, N, nVar, 4, nElem/))
 
 END SUBROUTINE Build_SEMTensor2D
 
@@ -1128,15 +1006,12 @@ SUBROUTINE Trash_SEMTensor2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMTensor2D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-
-    CALL SEMStorage % interp % Trash( )
-
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMTensor2D
 
@@ -1145,17 +1020,9 @@ SUBROUTINE UpdateHost_SEMTensor2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMTensor2D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMTensor2D
 
@@ -1163,17 +1030,9 @@ SUBROUTINE UpdateDevice_SEMTensor2D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMTensor2D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMTensor2D
 #endif
@@ -1185,13 +1044,13 @@ FUNCTION BoundaryInterp_SEMTensor2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % TensorBoundaryInterp_2D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % TensorBoundaryInterp_2D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % TensorBoundaryInterp_2D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % TensorBoundaryInterp_2D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -1205,13 +1064,13 @@ FUNCTION GridInterp_SEMTensor2D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % TensorGridInterp_2D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % TensorGridInterp_2D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % TensorGridInterp_2D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % TensorGridInterp_2D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -1230,10 +1089,10 @@ FUNCTION Determinant_SEMTensor2D( SEMStorage ) RESULT( SEMout )
           DO j = 0, SEMStorage % N
             DO i = 0, SEMStorage % N
 
-              SEMOut % interior(i,j,iVar,iEl) = SEMStorage % interior(1,1,i,j,iVar,iEl)*&
-                                                SEMStorage % interior(2,2,i,j,iVar,iEl)-&
-                                                SEMStorage % interior(1,2,i,j,iVar,iEl)*&
-                                                SEMStorage % interior(2,1,i,j,iVar,iEl)
+              SEMOut % interior % hostData(i,j,iVar,iEl) = SEMStorage % interior % hostData(1,1,i,j,iVar,iEl)*&
+                                                           SEMStorage % interior % hostData(2,2,i,j,iVar,iEl)-&
+                                                           SEMStorage % interior % hostData(1,2,i,j,iVar,iEl)*&
+                                                           SEMStorage % interior % hostData(2,1,i,j,iVar,iEl)
                                                      
 
             ENDDO
@@ -1248,12 +1107,12 @@ SUBROUTINE Equals_SEMTensor2D( SEMOut, SEMStorage )
   TYPE(SEMTensor2D), INTENT(out) :: SEMOut
   TYPE(SEMTensor2D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMTensor2D
 
-! -- SEMTensor2D -- !
+! -- SEMTensor3D -- !
 
 SUBROUTINE Build_SEMTensor3D( SEMStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
@@ -1274,14 +1133,11 @@ SUBROUTINE Build_SEMTensor3D( SEMStorage, N, quadratureType, M, targetNodeType, 
                                       M = M, &
                                       targetNodeType = targetNodeType )
 
-    ALLOCATE( SEMStorage % interior(1:3,1:3,0:N,0:N,0:N,1:nVar,1:nElem), &
-              SEMStorage % boundary(1:3,1:3,0:N,0:N,1:nVar,1:6,1:nElem) )
+    CALL SEMStorage % interior % Alloc(loBound = (/1, 1, 0, 0, 0, 1, 1/),&
+                                       upBound = (/3, 3, N, N, N, nVar, nElem/))
 
-#ifdef GPU
-    CALL hipCheck(hipMalloc(SEMStorage % interior_dev, SIZEOF(SEMStorage % interior)))
-    CALL hipCheck(hipMalloc(SEMStorage % boundary_dev, SIZEOF(SEMStorage % boundary)))
-#endif
-
+    CALL SEMStorage % boundary % Alloc(loBound = (/1, 1, 0, 0, 1, 1, 1/),&
+                                       upBound = (/3, 3, N, N, nVar, 6, nElem/))
 
 END SUBROUTINE Build_SEMTensor3D
 
@@ -1289,15 +1145,12 @@ SUBROUTINE Trash_SEMTensor3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMTensor3D), INTENT(inout) :: SEMStorage
 
-    DEALLOCATE( SEMStorage % interior, &
-                SEMStorage % boundary )
-
-    CALL SEMStorage % interp % Trash( )
-
-#ifdef GPU
-    CALL hipCheck(hipFree(SEMStorage % interior_dev))
-    CALL hipCheck(hipFree(SEMStorage % boundary_dev))
-#endif
+    SEMStorage % N = 0
+    SEMStorage % nVar = 0
+    SEMStorage % nElem = 0
+    CALL SEMStorage % interp % Trash()
+    CALL SEMStorage % interior % Free()
+    CALL SEMStorage % boundary % Free()
 
 END SUBROUTINE Trash_SEMTensor3D
 
@@ -1306,17 +1159,9 @@ SUBROUTINE UpdateHost_SEMTensor3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMTensor3D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateHost()
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % interior), &
-                             SEMStorage % interior_dev, &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyDeviceToHost))
-
-     CALL hipCheck(hipMemcpy(c_loc(SEMStorage % boundary), &
-                             SEMStorage % boundary_dev, &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyDeviceToHost))
+     CALL SEMStorage % interp % UpdateHost()
+     CALL SEMStorage % interior % UpdateHost()
+     CALL SEMStorage % boundary % UpdateHost()
 
 END SUBROUTINE UpdateHost_SEMTensor3D
 
@@ -1324,17 +1169,9 @@ SUBROUTINE UpdateDevice_SEMTensor3D( SEMStorage )
   IMPLICIT NONE
   CLASS(SEMTensor3D), INTENT(inout) :: SEMStorage
 
-     CALL SEMStorage % UpdateDevice()
-
-     CALL hipCheck(hipMemcpy(SEMStorage % interior_dev, &
-                             c_loc(SEMStorage % interior), &
-                             SIZEOF(SEMStorage % interior), &
-                             hipMemcpyHostToDevice))
-
-     CALL hipCheck(hipMemcpy(SEMStorage % boundary_dev, &
-                             c_loc(SEMStorage % boundary), &
-                             SIZEOF(SEMStorage % boundary), &
-                             hipMemcpyHostToDevice))
+     CALL SEMStorage % interp % UpdateDevice()
+     CALL SEMStorage % interior % UpdateDevice()
+     CALL SEMStorage % boundary % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_SEMTensor3D
 #endif
@@ -1346,13 +1183,13 @@ FUNCTION BoundaryInterp_SEMTensor3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % TensorBoundaryInterp_3D( SEMStorage % interior_dev, &
-                                                          SEMout % boundary_dev, &
+      CALL SEMStorage % interp % TensorBoundaryInterp_3D( SEMStorage % interior % deviceData, &
+                                                          SEMout % boundary % deviceData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % TensorBoundaryInterp_3D( SEMStorage % interior, &
-                                                          SEMout % boundary, &
+      CALL SEMStorage % interp % TensorBoundaryInterp_3D( SEMStorage % interior % hostData, &
+                                                          SEMout % boundary % hostData, &
                                                           SEMStorage % nVar, &
                                                           SEMStorage % nElem )  
     ENDIF
@@ -1366,13 +1203,13 @@ FUNCTION GridInterp_SEMTensor3D( SEMStorage, gpuAccel ) RESULT( SEMout )
   LOGICAL, OPTIONAL :: gpuAccel
 
     IF( PRESENT(gpuAccel) )THEN
-      CALL SEMStorage % interp % TensorGridInterp_3D( SEMStorage % interior_dev, &
-                                                      SEMout % interior_dev, &
+      CALL SEMStorage % interp % TensorGridInterp_3D( SEMStorage % interior % deviceData, &
+                                                      SEMout % interior % deviceData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ELSE
-      CALL SEMStorage % interp % TensorGridInterp_3D( SEMStorage % interior, &
-                                                      SEMout % interior, &
+      CALL SEMStorage % interp % TensorGridInterp_3D( SEMStorage % interior % hostData, &
+                                                      SEMout % interior % hostData, &
                                                       SEMStorage % nVar, &
                                                       SEMStorage % nElem )  
     ENDIF
@@ -1392,21 +1229,21 @@ FUNCTION Determinant_SEMTensor3D( SEMStorage ) RESULT( SEMout )
           DO j = 0, SEMStorage % N
             DO i = 0, SEMStorage % N
 
-              SEMOut % interior(i,j,k,iVar,iEl) = SEMStorage % interior(1,1,i,j,k,iVar,iEl)*&
-                                                  ( SEMStorage % interior(2,2,i,j,k,iVar,iEl)*&
-                                                    SEMStorage % interior(3,3,i,j,k,iVar,iEl)-&
-                                                    SEMStorage % interior(2,3,i,j,k,iVar,iEl)*&
-                                                    SEMStorage % interior(3,2,i,j,k,iVar,iEl) )-&
-                                                 SEMStorage % interior(2,1,i,j,k,iVar,iEl)*&
-                                                  ( SEMStorage % interior(1,2,i,j,k,iVar,iEl)*&
-                                                    SEMStorage % interior(3,3,i,j,k,iVar,iEl)-&
-                                                    SEMStorage % interior(1,3,i,j,k,iVar,iEl)*&
-                                                    SEMStorage % interior(3,2,i,j,k,iVar,iEl) )+&
-                                                 SEMStorage % interior(3,1,i,j,k,iVar,iEl)*&
-                                                  ( SEMStorage % interior(1,2,i,j,k,iVar,iEl)*&
-                                                    SEMStorage % interior(2,3,i,j,k,iVar,iEl)-&
-                                                    SEMStorage % interior(1,3,i,j,k,iVar,iEl)*&
-                                                    SEMStorage % interior(2,2,i,j,k,iVar,iEl) )
+              SEMOut % interior % hostData(i,j,k,iVar,iEl) = SEMStorage % interior % hostData(1,1,i,j,k,iVar,iEl)*&
+                                                  ( SEMStorage % interior % hostData(2,2,i,j,k,iVar,iEl)*&
+                                                    SEMStorage % interior % hostData(3,3,i,j,k,iVar,iEl)-&
+                                                    SEMStorage % interior % hostData(2,3,i,j,k,iVar,iEl)*&
+                                                    SEMStorage % interior % hostData(3,2,i,j,k,iVar,iEl) )-&
+                                                 SEMStorage % interior % hostData(2,1,i,j,k,iVar,iEl)*&
+                                                  ( SEMStorage % interior % hostData(1,2,i,j,k,iVar,iEl)*&
+                                                    SEMStorage % interior % hostData(3,3,i,j,k,iVar,iEl)-&
+                                                    SEMStorage % interior % hostData(1,3,i,j,k,iVar,iEl)*&
+                                                    SEMStorage % interior % hostData(3,2,i,j,k,iVar,iEl) )+&
+                                                 SEMStorage % interior % hostData(3,1,i,j,k,iVar,iEl)*&
+                                                  ( SEMStorage % interior % hostData(1,2,i,j,k,iVar,iEl)*&
+                                                    SEMStorage % interior % hostData(2,3,i,j,k,iVar,iEl)-&
+                                                    SEMStorage % interior % hostData(1,3,i,j,k,iVar,iEl)*&
+                                                    SEMStorage % interior % hostData(2,2,i,j,k,iVar,iEl) )
                                                      
 
             ENDDO
@@ -1422,8 +1259,8 @@ SUBROUTINE Equals_SEMTensor3D( SEMOut, SEMStorage )
   TYPE(SEMTensor3D), INTENT(out) :: SEMOut
   TYPE(SEMTensor3D), INTENT(in) :: SEMStorage
 
-    SEMOut % interior = SEMStorage % interior
-    SEMOut % boundary = SEMStorage % boundary
+    SEMOut % interior % hostData = SEMStorage % interior % hostData
+    SEMOut % boundary % hostData = SEMStorage % boundary % hostData
   
 END SUBROUTINE Equals_SEMTensor3D
 

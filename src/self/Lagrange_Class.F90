@@ -8,9 +8,8 @@
 
 MODULE Lagrange_Class
 
-!src/self
-USE ModelPrecision
-USE ConstantsDictionary
+USE SELFConstants
+USE SELFMemory
 USE CommonRoutines
 USE Quadrature
 
@@ -19,6 +18,7 @@ USE ISO_C_BINDING
 
 IMPLICIT NONE
 
+!INCLUDE 'SELF_Macros.h'
 
 ! =============================================================================================== !
 !
@@ -49,19 +49,13 @@ IMPLICIT NONE
 
     INTEGER :: N     
     INTEGER :: M 
-    REAL(prec), POINTER :: controlPoints(:)
-    REAL(prec), POINTER :: targetPoints(:)
-    REAL(prec), POINTER :: bWeights(:)
-    REAL(prec), POINTER :: qWeights(:)
-    REAL(prec), POINTER :: iMatrix(:,:)
-    REAL(prec), POINTER :: dMatrix(:,:)  
-    REAL(prec), POINTER :: bMatrix(:,:)
-
-    TYPE(c_ptr) :: bWeights_dev
-    TYPE(c_ptr) :: qWeights_dev
-    TYPE(c_ptr) :: iMatrix_dev
-    TYPE(c_ptr) :: dMatrix_dev
-    TYPE(c_ptr) :: bMatrix_dev
+    TYPE(hfReal_r1) :: controlPoints
+    TYPE(hfReal_r1) :: targetPoints
+    TYPE(hfReal_r1) :: bWeights
+    TYPE(hfReal_r1) :: qWeights
+    TYPE(hfReal_r2) :: iMatrix
+    TYPE(hfReal_r2) :: dMatrix
+    TYPE(hfReal_r2) :: bMatrix
 
     CONTAINS
       
@@ -410,34 +404,38 @@ IMPLICIT NONE
       myPoly % N  = N
       myPoly % M  = M
      
-      ALLOCATE( myPoly % controlPoints(0:N), &
-                myPoly % bWeights(0:N), &
-                myPoly % qWeights(0:N), &
-                myPoly % targetPoints(0:M), &
-                myPoly % iMatrix(0:N,0:M), &
-                myPoly % dMatrix(0:N,0:N), &
-                myPoly % bMatrix(0:N,0:1))
+      CALL myPoly % controlPoints % Alloc( loBound = 0,&
+                                           upBound = N )
 
-      myPoly % controlPoints = 0.0_prec
-      myPoly % bWeights = 0.0_prec
-      myPoly % qWeights = 0.0_prec
-      myPoly % targetPoints  = 0.0_prec
-      myPoly % iMatrix = 0.0_prec
-      myPoly % dMatrix = 0.0_prec
-      myPoly % bMatrix = 0.0_prec
-      
-     
+      CALL myPoly % targetPoints % Alloc( loBound = 0,&
+                                          upBound = M )
+
+      CALL myPoly % bWeights % Alloc( loBound = 0,&
+                                      upBound = N )
+
+      CALL myPoly % qWeights % Alloc( loBound = 0,&
+                                      upBound = N )
+
+      CALL myPoly % iMatrix % Alloc( loBound = (/0, 0/),&
+                                     upBound = (/N, M/) )
+
+      CALL myPoly % dMatrix % Alloc( loBound = (/0, 0/),&
+                                     upBound = (/N, N/) )
+
+      CALL myPoly % bMatrix % Alloc( loBound = (/0, 0/),&
+                                     upBound = (/N, 1/) )
+
       IF(controlNodeType == GAUSS .OR. controlNodeType == GAUSS_LOBATTO)THEN
 
         CALL LegendreQuadrature(N, & 
-                                myPoly % controlPoints, &
-                                myPoly % qWeights, &
+                                myPoly % controlPoints % hostData, &
+                                myPoly % qWeights % hostData, &
                                 controlNodeType )
 
       ELSEIF(controlNodeType == UNIFORM)THEN
 
-        myPoly % controlPoints = UniformPoints(-1.0_prec,1.0_prec,N)
-        myPoly % qWeights = 2.0_prec/REAL(N,prec)
+        myPoly % controlPoints % hostData = UniformPoints(-1.0_prec,1.0_prec,N)
+        myPoly % qWeights % hostData = 2.0_prec/REAL(N,prec)
 
       ENDIF
 
@@ -445,34 +443,23 @@ IMPLICIT NONE
       IF(targetNodeType == GAUSS .OR. targetNodeType == GAUSS_LOBATTO)THEN
 
         CALL LegendreQuadrature(N, & 
-                                myPoly % targetPoints, &
+                                myPoly % targetPoints % hostData, &
                                 q, &
                                 targetNodeType )
 
       ELSEIF(targetNodeType == UNIFORM)THEN
 
-        myPoly % targetPoints = UniformPoints(-1.0_prec,1.0_prec,M)
+        myPoly % targetPoints % hostData= UniformPoints(-1.0_prec,1.0_prec,M)
 
       ENDIF
-
 
       CALL myPoly % CalculateBarycentricWeights( )
       CALL myPoly % CalculateInterpolationMatrix( )
       CALL myPoly % CalculateDerivativeMatrix( )
-      myPoly % bMatrix(0:N,0) = myPoly % CalculateLagrangePolynomials( -1.0_prec)
-      myPoly % bMatrix(0:N,1) = myPoly % CalculateLagrangePolynomials( 1.0_prec )
-
+      myPoly % bMatrix % hostData(0:N,0) = myPoly % CalculateLagrangePolynomials( -1.0_prec)
+      myPoly % bMatrix % hostData(0:N,1) = myPoly % CalculateLagrangePolynomials( 1.0_prec )
 
 #ifdef GPU
-!      IF( N > 7 )THEN
-!         CALL Logging( WARN, 'Number of control points > 7 not fully supported for 3-D SEM operations.' )
-!      ENDIF
-      CALL hipCheck(hipMalloc(myPoly % bWeights_dev, SIZEOF(myPoly % bWeights)))
-      CALL hipCheck(hipMalloc(myPoly % qWeights_dev, SIZEOF(myPoly % qWeights)))
-      CALL hipCheck(hipMalloc(myPoly % iMatrix_dev, SIZEOF(myPoly % iMatrix)))
-      CALL hipCheck(hipMalloc(myPoly % dMatrix_dev, SIZEOF(myPoly % dMatrix)))
-      CALL hipCheck(hipMalloc(myPoly % bMatrix_dev, SIZEOF(myPoly % bMatrix)))
-
       CALL myPoly % UpdateDevice()
 #endif
  
@@ -490,51 +477,28 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
-      DEALLOCATE( myPoly % controlPoints, &
-                  myPoly % bWeights, &
-                  myPoly % targetPoints, &
-                  myPoly % iMatrix, &
-                  myPoly % dMatrix, &
-                  myPoly % bMatrix )
-#ifdef GPU
-      CALL hipCheck(hipFree(myPoly % bWeights_dev))
-      CALL hipCheck(hipFree(myPoly % qWeights_dev))
-      CALL hipCheck(hipFree(myPoly % iMatrix_dev))
-      CALL hipCheck(hipFree(myPoly % dMatrix_dev))
-      CALL hipCheck(hipFree(myPoly % bMatrix_dev))
-#endif
+      CALL myPoly % controlPoints % Free() 
+      CALL myPoly % targetPoints % Free()
+      CALL myPoly % bWeights % Free()
+      CALL myPoly % qWeights % Free()
+      CALL myPoly % iMatrix % Free()
+      CALL myPoly % dMatrix % Free()
+      CALL myPoly % bMatrix % Free()
 
   END SUBROUTINE Trash_Lagrange
 
+#ifdef GPU
   SUBROUTINE UpdateDevice_Lagrange(myPoly)
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
-      CALL hipCheck(hipMemcpy(myPoly % bWeights_dev, &
-                                c_loc(myPoly % bWeights), &
-                                SIZEOF(myPoly % bWeights), &
-                                hipMemcpyHostToDevice))
-
-      CALL hipCheck(hipMemcpy(myPoly % qWeights_dev, &
-                                c_loc(myPoly % qWeights), &
-                                SIZEOF(myPoly % qWeights), &
-                                hipMemcpyHostToDevice))
-                        
-      CALL hipCheck(hipMemcpy(myPoly % iMatrix_dev, &
-                                c_loc(myPoly % iMatrix), &
-                                SIZEOF(myPoly % iMatrix), &
-                                hipMemcpyHostToDevice))
-
-
-      CALL hipCheck(hipMemcpy(myPoly % dMatrix_dev, &
-                                c_loc(myPoly % dMatrix), &
-                                SIZEOF(myPoly % dMatrix), &
-                                hipMemcpyHostToDevice))
-
-      CALL hipCheck(hipMemcpy(myPoly % bMatrix_dev, &
-                                c_loc(myPoly % bMatrix), &
-                                SIZEOF(myPoly % bMatrix), &
-                                hipMemcpyHostToDevice))
+      CALL myPoly % controlPoints % UpdateDevice()
+      CALL myPoly % targetPoints % UpdateDevice()
+      CALL myPoly % bWeights % UpdateDevice()
+      CALL myPoly % qWeights % UpdateDevice()
+      CALL myPoly % iMatrix % UpdateDevice()
+      CALL myPoly % dMatrix % UpdateDevice()
+      CALL myPoly % bMatrix % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Lagrange
 
@@ -542,210 +506,17 @@ IMPLICIT NONE
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
-      CALL hipCheck(hipMemcpy(c_loc(myPoly % bWeights), &
-                                myPoly % bWeights_dev, &
-                                SIZEOF(myPoly % bWeights), &
-                                hipMemcpyDeviceToHost))
-
-      CALL hipCheck(hipMemcpy(c_loc(myPoly % qWeights), &
-                                myPoly % qWeights_dev, &
-                                SIZEOF(myPoly % qWeights), &
-                                hipMemcpyDeviceToHost))
-                        
-      CALL hipCheck(hipMemcpy(c_loc(myPoly % iMatrix), &
-                                myPoly % iMatrix_dev, &
-                                SIZEOF(myPoly % iMatrix), &
-                                hipMemcpyDeviceToHost))
-
-      CALL hipCheck(hipMemcpy(c_loc(myPoly % dMatrix), &
-                                myPoly % dMatrix_dev, &
-                                SIZEOF(myPoly % dMatrix), &
-                                hipMemcpyDeviceToHost))
-
-      CALL hipCheck(hipMemcpy(c_loc(myPoly % bMatrix), &
-                                myPoly % bMatrix_dev, &
-                                SIZEOF(myPoly % bMatrix), &
-                                hipMemcpyDeviceToHost))
+      CALL myPoly % controlPoints % UpdateHost()
+      CALL myPoly % targetPoints % UpdateHost()
+      CALL myPoly % bWeights % UpdateHost()
+      CALL myPoly % qWeights % UpdateHost()
+      CALL myPoly % iMatrix % UpdateHost()
+      CALL myPoly % dMatrix % UpdateHost()
+      CALL myPoly % bMatrix % UpdateHost()
 
   END SUBROUTINE UpdateHost_Lagrange
+#endif
 
-!! ================================================================================================ !
-!!
-!! Interpolate_1D_Lagrange
-!!
-!!   Interpolates an array of data onto a desired location using Lagrange interpolation.
-!!
-!!   Usage :
-!!
-!!     TYPE(Lagrange) :: interp
-!!     REAL(prec)     :: f(0:interp % N) 
-!!     REAL(prec)     :: sE 
-!!     REAL(prec)     :: fAtSE 
-!!         
-!!       fAtSE = interp % Interpolate_1D( f, sE ) 
-!! 
-!!   Parameters :
-!!  
-!!     myPoly (in)
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)  
-!!       An array of function nodal values located at the native interpolation nodes.
-!!
-!!     sE (in) 
-!!       The location where you want to interpolate to.
-!!
-!!     fAtSE (out)
-!!       The interpolant evaluated at sE.  
-!!
-!! ================================================================================================ ! 
-!
-!  FUNCTION Interpolate_1D_Lagrange( myPoly, f, sE ) RESULT( interpF )  
-!    IMPLICIT NONE
-!    CLASS(Lagrange) :: myPoly
-!    REAL(prec)      :: sE
-!    REAL(prec)      :: f(0:myPoly % N)
-!    REAL(prec)      :: interpF
-!    ! Local
-!    REAL(prec) :: lAtS(0:myPoly % N)
-!    INTEGER    :: i
-!   
-!      lAtS = myPoly % CalculateLagrangePolynomials( sE )
-!
-!      interpF = 0.0_prec
-!      DO i = 0, myPoly % N
-!        interpF = interpF + lAtS(i)*f(i)
-!      ENDDO
-!    
-!  END FUNCTION Interpolate_1D_Lagrange
-!
-!! ================================================================================================ !
-!!
-!! Interpolate_2D_Lagrange
-!!
-!!   Interpolates an array of data onto a desired location using Lagrange interpolation.
-!!
-!!   Usage :
-!!
-!!     TYPE(Lagrange) :: interp
-!!     REAL(prec)     :: f(0:interp % N,0:interp % N) 
-!!     REAL(prec)     :: sE(1:2) 
-!!     REAL(prec)     :: fAtSE 
-!!         
-!!       fAtSE = interp % Interpolate_2D( f, sE ) 
-!! 
-!!   Parameters :
-!!  
-!!     myPoly (in)
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)  
-!!       An array of function nodal values located at the native interpolation nodes.
-!!
-!!     sE (in) 
-!!       The location where you want to interpolate to.
-!!
-!!     fAtSE (out)
-!!       The interpolant evaluated at sE.  
-!!
-!! ================================================================================================ ! 
-!
-!  FUNCTION Interpolate_2D_Lagrange( myPoly, f, sE ) RESULT( interpF )  
-!    IMPLICIT NONE
-!    CLASS(Lagrange) :: myPoly
-!    REAL(prec)      :: sE(1:2)
-!    REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N)
-!    REAL(prec)      :: interpF
-!    ! Local
-!    REAL(prec) :: fj
-!    REAL(prec) :: ls(0:myPoly % N)
-!    REAL(prec) :: lp(0:myPoly % N)
-!    INTEGER    :: i, j
-!
-!      ls = myPoly % CalculateLagrangePolynomials( sE(1) ) 
-!      lp = myPoly % CalculateLagrangePolynomials( sE(2) )
-!      
-!      interpF = 0.0_prec
-!      DO j = 0, myPoly % N
-!     
-!        fj = 0.0_prec
-!        DO i = 0, myPoly % N
-!          fj = fj + f(i,j)*ls(i)
-!        ENDDO
-!            
-!        interpF = interpF + fj*lp(j)
-!
-!      ENDDO
-!      
-! END FUNCTION Interpolate_2D_Lagrange
-!
-!! ================================================================================================ !
-!!
-!! Interpolate_3D_Lagrange
-!!
-!!   Interpolates an array of data onto a desired location using Lagrange interpolation.
-!!
-!!   Usage :
-!!
-!!     TYPE(Lagrange) :: interp
-!!     REAL(prec)     :: f(0:interp % N,0:interp % N,0:interp % N) 
-!!     REAL(prec)     :: sE(1:3) 
-!!     REAL(prec)     :: fAtSE 
-!!         
-!!       fAtSE = interp % Interpolate_3D( f, sE ) 
-!! 
-!!   Parameters :
-!!  
-!!     myPoly (in)
-!!       A previously constructed Lagrange data-structure.
-!!
-!!     f (in)  
-!!       An array of function nodal values located at the native interpolation nodes.
-!!
-!!     sE (in) 
-!!       The location where you want to interpolate to.
-!!
-!!     fAtSE (out)
-!!       The interpolant evaluated at sE.  
-!!
-!! ================================================================================================ ! 
-!
-!  FUNCTION Interpolate_3D_Lagrange( myPoly, f, sE ) RESULT( interpF )  
-!    IMPLICIT NONE
-!    CLASS(Lagrange) :: myPoly
-!    REAL(prec)      :: sE(1:3)
-!    REAL(prec)      :: f(0:myPoly % N, 0:myPoly % N, 0:myPoly % N)
-!    REAL(prec)      :: interpF
-!    ! Local
-!    REAL(prec) :: fjk, fk
-!    REAL(prec) :: ls(0:myPoly % N)
-!    REAL(prec) :: lp(0:myPoly % N)
-!    REAL(prec) :: lq(0:myPoly % N)
-!    INTEGER    ::  i, j, k
-!
-!      ls = myPoly % CalculateLagrangePolynomials( sE(1) ) 
-!      lp = myPoly % CalculateLagrangePolynomials( sE(2) )
-!      lq = myPoly % CalculateLagrangePolynomials( sE(3) )
-!      
-!      interpF = 0.0_prec
-!      DO k = 0, myPoly % N
-!      
-!         fk = 0.0_prec
-!         DO j = 0, myPoly % N
-!         
-!            fjk = 0.0_prec
-!            DO i = 0, myPoly % N
-!               fjk = fjk + f(i,j,k)*ls(i)
-!            ENDDO
-!            
-!            fk = fk + fjk*lp(j)
-!         ENDDO
-!         
-!         interpF = interpF + fk*lq(k)
-!      ENDDO
-!      
-!  END FUNCTION Interpolate_3D_Lagrange
-!
 ! ================================================================================================ !
 !
 ! ScalarGridInterp_1D 
@@ -804,7 +575,7 @@ IMPLICIT NONE
           DO i = 0, myPoly % M
             fInterp(i,iVar,iEl) = 0.0_prec
             DO ii = 0, myPoly % N
-              fInterp(i,iVar,iEl) = fInterp(i,iVar,iEl) + myPoly % iMatrix(ii,i)*f(ii,iVar,iEl)
+              fInterp(i,iVar,iEl) = fInterp(i,iVar,iEl) + myPoly % iMatrix % hostData(ii,i)*f(ii,iVar,iEl)
             ENDDO
           ENDDO
         ENDDO
@@ -819,10 +590,10 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrix_dev, &
-                                                f_dev, fInterp_dev, &
-                                                myPoly % N, myPoly % M, &
-                                                nVariables, nElements)
+      CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrix % deviceData, &
+                                           f_dev, fInterp_dev, &
+                                           myPoly % N, myPoly % M, &
+                                           nVariables, nElements)
 
   END SUBROUTINE ScalarGridInterp_1D_gpu
 !
@@ -889,9 +660,9 @@ IMPLICIT NONE
               DO jj = 0, myPoly % N
                 fi = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fi = fi + f(ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
+                  fi = fi + f(ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                 ENDDO
-                fij = fij + fi*myPoly % iMatrix(jj,j)
+                fij = fij + fi*myPoly % iMatrix % hostData(jj,j)
               ENDDO
               fNew(i,j,iVar,iEl) = fij
                    
@@ -910,7 +681,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
+      CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                            f_dev, fInterp_dev, &
                                            myPoly % N, myPoly % M, &
                                            nVariables, nElements)
@@ -939,10 +710,10 @@ IMPLICIT NONE
                    
                 fi(1:2) = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fi(1:2)= fi(1:2) + f(1:2,ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
+                  fi(1:2)= fi(1:2) + f(1:2,ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                 ENDDO
                       
-                fNew(1:2,i,j,iVar,iEl) = fNew(1:2,i,j,iVar,iEl) + fi(1:2)*myPoly % iMatrix(jj,j)
+                fNew(1:2,i,j,iVar,iEl) = fNew(1:2,i,j,iVar,iEl) + fi(1:2)*myPoly % iMatrix % hostData(jj,j)
 
               ENDDO
                    
@@ -961,7 +732,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
+      CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -989,10 +760,10 @@ IMPLICIT NONE
                    
                 fi(1:2,1:2) = 0.0_prec
                 DO ii = 0, myPoly % N
-                  fi(1:2,1:2)= fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrix(ii,i)
+                  fi(1:2,1:2)= fi(1:2,1:2) + f(1:2,1:2,ii,jj,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                 ENDDO
                       
-                fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrix(jj,j)
+                fNew(1:2,1:2,i,j,iVar,iEl) = fNew(1:2,1:2,i,j,iVar,iEl) + fi(1:2,1:2)*myPoly % iMatrix % hostData(jj,j)
 
               ENDDO
                    
@@ -1011,7 +782,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix_dev, &
+      CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1084,11 +855,11 @@ IMPLICIT NONE
                   DO jj = 0, myPoly % N
                     fi = 0.0_prec
                     DO ii = 0, myPoly % N
-                      fi = fi + f(ii,jj,kk,iVar,iEl)*myPoly % iMatrix(ii,i)
+                      fi = fi + f(ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                     ENDDO
-                    fij = fij + fi*myPoly % iMatrix(jj,j)
+                    fij = fij + fi*myPoly % iMatrix % hostData(jj,j)
                   ENDDO
-                  fInterp(i,j,k,iVar,iEl) = fInterp(i,j,k,iVar,iEl) + fij*myPoly % iMatrix(kk,k)
+                  fInterp(i,j,k,iVar,iEl) = fInterp(i,j,k,iVar,iEl) + fij*myPoly % iMatrix % hostData(kk,k)
                 ENDDO
 
               ENDDO
@@ -1106,7 +877,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL ScalarGridInterp_3D_gpu_wrapper(myPoly % iMatrix_dev, &
+      CALL ScalarGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1135,11 +906,11 @@ IMPLICIT NONE
                   DO jj = 0, myPoly % N
                     fi(1:3) = 0.0_prec
                     DO ii = 0, myPoly % N
-                      fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix(ii,i)
+                      fi(1:3) = fi(1:3) + f(1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                     ENDDO
-                    fij(1:3) = fij(1:3) + fi(1:3)*myPoly % iMatrix(jj,j)
+                    fij(1:3) = fij(1:3) + fi(1:3)*myPoly % iMatrix % hostData(jj,j)
                   ENDDO
-                  fInterp(1:3,i,j,k,iVar,iEl) = fInterp(1:3,i,j,k,iVar,iEl) + fij(1:3)*myPoly % iMatrix(kk,k)
+                  fInterp(1:3,i,j,k,iVar,iEl) = fInterp(1:3,i,j,k,iVar,iEl) + fij(1:3)*myPoly % iMatrix % hostData(kk,k)
                 ENDDO
 
               ENDDO
@@ -1157,7 +928,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrix_dev, &
+      CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1186,11 +957,11 @@ IMPLICIT NONE
                   DO jj = 0, myPoly % N
                     fi(1:3,1:3) = 0.0_prec
                     DO ii = 0, myPoly % N
-                      fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix(ii,i)
+                      fi(1:3,1:3) = fi(1:3,1:3) + f(1:3,1:3,ii,jj,kk,iVar,iEl)*myPoly % iMatrix % hostData(ii,i)
                     ENDDO
-                    fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrix(jj,j)
+                    fij(1:3,1:3) = fij(1:3,1:3) + fi(1:3,1:3)*myPoly % iMatrix % hostData(jj,j)
                   ENDDO
-                  fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + fij(1:3,1:3)*myPoly % iMatrix(kk,k)
+                  fInterp(1:3,1:3,i,j,k,iVar,iEl) = fInterp(1:3,1:3,i,j,k,iVar,iEl) + fij(1:3,1:3)*myPoly % iMatrix % hostData(kk,k)
                 ENDDO
 
               ENDDO
@@ -1208,7 +979,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: fInterp_dev
 
-      CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix_dev, &
+      CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                                 f_dev, fInterp_dev, &
                                                 myPoly % N, myPoly % M, &
                                                 nVariables, nElements)
@@ -1275,7 +1046,7 @@ IMPLICIT NONE
     
             df(i,iVar,iEl) = 0.0_prec 
             DO ii = 0, myPoly % N
-              df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dMatrix(ii,i)*f(ii,iVar,iEl)
+              df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,iVar,iEl)
             ENDDO
     
           ENDDO
@@ -1292,7 +1063,7 @@ IMPLICIT NONE
     TYPE(c_ptr), INTENT(in)  :: f_dev
     TYPE(c_ptr), INTENT(out) :: df_dev
 
-      CALL Derivative_1D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL Derivative_1D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, df_dev, &
                                          myPoly % N, &
                                          nVariables, nElements)
@@ -1361,8 +1132,8 @@ IMPLICIT NONE
               gradF(1,i,j,iVar,iEl) = 0.0_prec 
               gradF(2,i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(ii,j,iVar,iEl)
-                gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(i,ii,iVar,iEl)
+                gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,iVar,iEl)
+                gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1381,7 +1152,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1413,10 +1184,10 @@ IMPLICIT NONE
               gradF(1,2,i,j,iVar,iEl) = 0.0_prec 
               gradF(2,2,i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,iVar,iEl)
-                gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(2,ii,j,iVar,iEl)
-                gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(1,i,ii,iVar,iEl)
-                gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(2,i,ii,iVar,iEl)
+                gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+                gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+                gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+                gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1435,7 +1206,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1457,8 +1228,8 @@ IMPLICIT NONE
     
               dF(i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,iVar,iEl) +&
-                                                      myPoly % dMatrix(ii,j)*f(2,i,ii,iVar,iEl)
+                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) +&
+                                                      myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1477,7 +1248,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1499,8 +1270,8 @@ IMPLICIT NONE
     
               dF(i,j,iVar,iEl) = 0.0_prec 
               DO ii = 0, myPoly % N
-                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix(ii,j)*f(1,i,ii,iVar,iEl) -&
-                                                      myPoly % dMatrix(ii,i)*f(2,ii,j,iVar,iEl)
+                dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl) -&
+                                                      myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
               ENDDO
     
             ENDDO
@@ -1519,7 +1290,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1544,9 +1315,9 @@ IMPLICIT NONE
                 gradF(2,i,j,k,iVar,iEl) = 0.0_prec 
                 gradF(3,i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(ii,j,k,iVar,iEl)
-                  gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(i,ii,k,iVar,iEl)
-                  gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(i,j,ii,iVar,iEl)
+                  gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iVar,iEl)
+                  gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iVar,iEl)
+                  gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iVar,iEl)
                 ENDDO
     
               ENDDO
@@ -1566,7 +1337,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1606,15 +1377,15 @@ IMPLICIT NONE
                 gradF(2,3,i,j,k,iVar,iEl) = 0.0_prec 
                 gradF(3,3,i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,k,iVar,iEl)
-                  gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(2,ii,j,k,iVar,iEl)
-                  gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(3,ii,j,k,iVar,iEl)
-                  gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(1,i,ii,k,iVar,iEl)
-                  gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(2,i,ii,k,iVar,iEl)
-                  gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(3,i,ii,k,iVar,iEl)
-                  gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(1,i,j,ii,iVar,iEl)
-                  gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(2,i,j,ii,iVar,iEl)
-                  gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(3,i,j,ii,iVar,iEl)
+                  gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl)
+                  gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl)
+                  gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+                  gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
+                  gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl)
+                  gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl)
+                  gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl)
+                  gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+                  gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
     
               ENDDO
@@ -1634,7 +1405,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, gradF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1657,9 +1428,9 @@ IMPLICIT NONE
     
                 dF(i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(1,ii,j,k,iVar,iEl) +&
-                                                            myPoly % dMatrix(ii,j)*f(2,i,ii,k,iVar,iEl) +&
-                                                            myPoly % dMatrix(ii,k)*f(3,i,j,ii,iVar,iEl)
+                  dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl) +&
+                                                            myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl) +&
+                                                            myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
                 ENDDO
     
               ENDDO
@@ -1679,7 +1450,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1704,12 +1475,12 @@ IMPLICIT NONE
                 dF(2,i,j,k,iVar,iEl) = 0.0_prec 
                 dF(3,i,j,k,iVar,iEl) = 0.0_prec 
                 DO ii = 0, myPoly % N
-                  dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,j)*f(3,i,ii,k,iVar,iEl) -&
-                                                                myPoly % dMatrix(ii,k)*f(2,i,j,ii,iVar,iEl)
-                  dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,k)*f(1,i,j,ii,iVar,iEl) -&
-                                                                myPoly % dMatrix(ii,i)*f(3,ii,j,k,iVar,iEl)
-                  dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrix(ii,i)*f(2,ii,j,k,iVar,iEl) -&
-                                                                myPoly % dMatrix(ii,j)*f(1,i,ii,k,iVar,iEl)
+                  dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl) -&
+                                                                myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+                  dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl) -&
+                                                                myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+                  dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl) -&
+                                                                myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
                 ENDDO  
     
               ENDDO
@@ -1729,7 +1500,7 @@ IMPLICIT NONE
     ! Local
     INTEGER    :: i, j, ii, iVar, iEl
 
-      CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix_dev, &
+      CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev, dF_dev, myPoly % N, &
                                          nVariables, nElements)
 
@@ -1753,8 +1524,8 @@ IMPLICIT NONE
           fb(1:2) = 0.0_prec
           
           DO ii = 0, myPoly % N
-            fb(1) = fb(1) + myPoly % bMatrix(ii,1)*f(ii,iVar,iEl) ! East
-            fb(2) = fb(2) + myPoly % bMatrix(ii,0)*f(ii,iVar,iEl) ! West
+            fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,1)*f(ii,iVar,iEl) ! East
+            fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,0)*f(ii,iVar,iEl) ! West
           ENDDO
 
           fBound(iVar,1:2,iEl) = fb(1:2)
@@ -1771,7 +1542,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL ScalarBoundaryInterp_1D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL ScalarBoundaryInterp_1D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE ScalarBoundaryInterp_1D_gpu
@@ -1793,10 +1564,10 @@ IMPLICIT NONE
             fb(1:4) = 0.0_prec
             
             DO ii = 0, myPoly % N
-              fb(1) = fb(1) + myPoly % bMatrix(ii,0)*f(i,ii,iVar,iEl) ! South
-              fb(2) = fb(2) + myPoly % bMatrix(ii,1)*f(ii,i,iVar,iEl) ! East
-              fb(3) = fb(3) + myPoly % bMatrix(ii,1)*f(i,ii,iVar,iEl) ! North
-              fb(4) = fb(4) + myPoly % bMatrix(ii,0)*f(ii,i,iVar,iEl) ! West
+              fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,iVar,iEl) ! South
+              fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,iVar,iEl) ! East
+              fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,iVar,iEl) ! North
+              fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,iVar,iEl) ! West
             ENDDO
 
             fBound(i,iVar,1:4,iEl) = fb(1:4)
@@ -1814,7 +1585,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL ScalarBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL ScalarBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE ScalarBoundaryInterp_2D_gpu
@@ -1836,10 +1607,10 @@ IMPLICIT NONE
             fb(1:2,1:4) = 0.0_prec
             DO ii = 0, myPoly % N
               DO idir = 1, 2
-                fb(idir,1) = fb(idir,1) + myPoly % bMatrix(ii,0)*f(idir,i,ii,iVar,iEl) ! South
-                fb(idir,2) = fb(idir,2) + myPoly % bMatrix(ii,1)*f(idir,ii,i,iVar,iEl) ! East
-                fb(idir,3) = fb(idir,3) + myPoly % bMatrix(ii,1)*f(idir,i,ii,iVar,iEl) ! North
-                fb(idir,4) = fb(idir,4) + myPoly % bMatrix(ii,0)*f(idir,ii,i,iVar,iEl) ! West
+                fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,iVar,iEl) ! South
+                fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,iVar,iEl) ! East
+                fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,iVar,iEl) ! North
+                fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,iVar,iEl) ! West
               ENDDO
             ENDDO
 
@@ -1860,7 +1631,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL VectorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL VectorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE VectorBoundaryInterp_2D_gpu
@@ -1883,10 +1654,10 @@ IMPLICIT NONE
             DO ii = 0, myPoly % N
               DO jdir = 1, 2
                 DO idir = 1, 2
-                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix(ii,0)*f(idir,jdir,i,ii,iVar,iEl) ! South
-                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix(ii,1)*f(idir,jdir,ii,i,iVar,iEl) ! East
-                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix(ii,1)*f(idir,jdir,i,ii,iVar,iEl) ! North
-                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix(ii,0)*f(idir,jdir,ii,i,iVar,iEl) ! West
+                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,iVar,iEl) ! South
+                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,iVar,iEl) ! East
+                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,iVar,iEl) ! North
+                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,iVar,iEl) ! West
                 ENDDO
               ENDDO
             ENDDO
@@ -1910,7 +1681,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL TensorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL TensorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE TensorBoundaryInterp_2D_gpu
@@ -1933,12 +1704,12 @@ IMPLICIT NONE
               fb(1:6) = 0.0_prec
               
               DO ii = 0, myPoly % N
-                fb(1) = fb(1) + myPoly % bMatrix(ii,0)*f(i,ii,j,iVar,iEl) ! South
-                fb(2) = fb(2) + myPoly % bMatrix(ii,1)*f(ii,i,j,iVar,iEl) ! East
-                fb(3) = fb(3) + myPoly % bMatrix(ii,1)*f(i,ii,j,iVar,iEl) ! North
-                fb(4) = fb(4) + myPoly % bMatrix(ii,0)*f(ii,i,j,iVar,iEl) ! West
-                fb(5) = fb(5) + myPoly % bMatrix(ii,0)*f(i,j,ii,iVar,iEl) ! Bottom
-                fb(6) = fb(6) + myPoly % bMatrix(ii,1)*f(i,j,ii,iVar,iEl) ! Top
+                fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,j,iVar,iEl) ! South
+                fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,j,iVar,iEl) ! East
+                fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,j,iVar,iEl) ! North
+                fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,j,iVar,iEl) ! West
+                fb(5) = fb(5) + myPoly % bMatrix % hostData(ii,0)*f(i,j,ii,iVar,iEl) ! Bottom
+                fb(6) = fb(6) + myPoly % bMatrix % hostData(ii,1)*f(i,j,ii,iVar,iEl) ! Top
               ENDDO
 
               fBound(i,j,iVar,1:6,iEl) = fb(1:6)
@@ -1957,7 +1728,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL ScalarBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL ScalarBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE ScalarBoundaryInterp_3D_gpu
@@ -1980,12 +1751,12 @@ IMPLICIT NONE
               fb(1:3,1:6) = 0.0_prec
               DO ii = 0, myPoly % N
                 DO idir = 1, 3
-                  fb(idir,1) = fb(idir,1) + myPoly % bMatrix(ii,0)*f(idir,i,ii,j,iVar,iEl) ! South
-                  fb(idir,2) = fb(idir,2) + myPoly % bMatrix(ii,1)*f(idir,ii,i,j,iVar,iEl) ! East
-                  fb(idir,3) = fb(idir,3) + myPoly % bMatrix(ii,1)*f(idir,i,ii,j,iVar,iEl) ! North
-                  fb(idir,4) = fb(idir,4) + myPoly % bMatrix(ii,0)*f(idir,ii,i,j,iVar,iEl) ! West
-                  fb(idir,5) = fb(idir,5) + myPoly % bMatrix(ii,0)*f(idir,i,j,ii,iVar,iEl) ! Bottom
-                  fb(idir,6) = fb(idir,6) + myPoly % bMatrix(ii,1)*f(idir,i,j,ii,iVar,iEl) ! Top
+                  fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,j,iVar,iEl) ! South
+                  fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,j,iVar,iEl) ! East
+                  fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,j,iVar,iEl) ! North
+                  fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,j,iVar,iEl) ! West
+                  fb(idir,5) = fb(idir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,j,ii,iVar,iEl) ! Bottom
+                  fb(idir,6) = fb(idir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,j,ii,iVar,iEl) ! Top
                 ENDDO
               ENDDO
 
@@ -2007,7 +1778,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL VectorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL VectorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE VectorBoundaryInterp_3D_gpu
@@ -2031,12 +1802,12 @@ IMPLICIT NONE
               DO ii = 0, myPoly % N
                 DO jdir = 1, 3
                   DO idir = 1, 3
-                    fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix(ii,0)*f(idir,jdir,i,ii,j,iVar,iEl) ! South
-                    fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix(ii,1)*f(idir,jdir,ii,i,j,iVar,iEl) ! East
-                    fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix(ii,1)*f(idir,jdir,i,ii,j,iVar,iEl) ! North
-                    fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix(ii,0)*f(idir,jdir,ii,i,j,iVar,iEl) ! West
-                    fb(idir,jdir,5) = fb(idir,jdir,5) + myPoly % bMatrix(ii,0)*f(idir,jdir,i,j,ii,iVar,iEl) ! Bottom
-                    fb(idir,jdir,6) = fb(idir,jdir,6) + myPoly % bMatrix(ii,1)*f(idir,jdir,i,j,ii,iVar,iEl) ! Top
+                    fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,j,iVar,iEl) ! South
+                    fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,j,iVar,iEl) ! East
+                    fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,j,iVar,iEl) ! North
+                    fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,j,iVar,iEl) ! West
+                    fb(idir,jdir,5) = fb(idir,jdir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,j,ii,iVar,iEl) ! Bottom
+                    fb(idir,jdir,6) = fb(idir,jdir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,j,ii,iVar,iEl) ! Top
                   ENDDO
                 ENDDO
               ENDDO
@@ -2061,7 +1832,7 @@ IMPLICIT NONE
     TYPE(c_ptr)    , INTENT(in)  :: f
     TYPE(c_ptr)    , INTENT(out)  :: fBound
 
-      CALL TensorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix_dev, &
+      CALL TensorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                                f, fBound, myPoly % N, nVariables, nElements)
 
   END SUBROUTINE TensorBoundaryInterp_3D_gpu
@@ -2083,23 +1854,23 @@ IMPLICIT NONE
     INTEGER :: i, j
    
       DO i = 0, myPoly % N
-        myPoly % bWeights(i) = 1.0_prec
+        myPoly % bWeights % hostData(i) = 1.0_prec
       ENDDO
 
       ! Computes the product w_k = w_k*(s_k - s_j), k /= j
       DO j = 1, myPoly % N
         DO i = 0, j-1
 
-          myPoly % bWeights(i) = myPoly % bWeights(i)*&
-                                           ( myPoly % controlPoints(i) - myPoly % controlPoints(j) )
-          myPoly % bWeights(j) = myPoly % bWeights(j)*&
-                                           ( myPoly % controlPoints(j) - myPoly % controlPoints(i) )
+          myPoly % bWeights % hostData(i) = myPoly % bWeights % hostData(i)*&
+                                           ( myPoly % controlPoints % hostData(i) - myPoly % controlPoints % hostData(j) )
+          myPoly % bWeights % hostData(j) = myPoly % bWeights % hostData(j)*&
+                                           ( myPoly % controlPoints % hostData(j) - myPoly % controlPoints % hostData(i) )
 
          ENDDO 
       ENDDO 
  
       DO j = 0, myPoly % N
-        myPoly % bWeights(j) = 1.0_prec/myPoly % bWeights(j)
+        myPoly % bWeights % hostData(j) = 1.0_prec/myPoly % bWeights % hostData(j)
       ENDDO 
 
   END SUBROUTINE CalculateBarycentricWeights
@@ -2131,7 +1902,7 @@ IMPLICIT NONE
 
             iMatrix(row,col) = 0.0_prec
            
-            IF( AlmostEqual( myPoly % targetPoints(row), myPoly % controlPoints(col) ) )THEN
+            IF( AlmostEqual( myPoly % targetPoints % hostData(row), myPoly % controlPoints % hostData(col) ) )THEN
                rowHasMatch = .TRUE.
                iMatrix(row,col) = 1.0_prec
             ENDIF
@@ -2143,7 +1914,7 @@ IMPLICIT NONE
             temp1 = 0.0_prec
 
             DO col = 0, myPoly % N        
-               temp2 = myPoly % bWeights(col)/( myPoly % targetPoints(row) - myPoly % controlPoints(col) )
+               temp2 = myPoly % bWeights % hostData(col)/( myPoly % targetPoints % hostData(row) - myPoly % controlPoints % hostData(col) )
                iMatrix(row,col) = temp2
                temp1 = temp1 + temp2
             ENDDO 
@@ -2156,7 +1927,7 @@ IMPLICIT NONE
 
       ENDDO
 
-      myPoly % iMatrix = TRANSPOSE(iMatrix)
+      myPoly % iMatrix % hostData = TRANSPOSE(iMatrix)
 
  END SUBROUTINE CalculateInterpolationMatrix
 
@@ -2186,10 +1957,10 @@ IMPLICIT NONE
            
           IF( .NOT. (col == row) )THEN
 
-            dmat(row,col) = myPoly % bWeights(col)/&
-                                                 ( myPoly % bWeights(row)*&
-                                                   ( myPoly % controlPoints(row) - &
-                                                     myPoly % controlPoints(col) ) )
+            dmat(row,col) = myPoly % bWeights % hostData(col)/&
+                                                 ( myPoly % bWeights % hostData(row)*&
+                                                   ( myPoly % controlPoints % hostData(row) - &
+                                                     myPoly % controlPoints % hostData(col) ) )
 
             dmat(row,row) = dmat(row,row) - dmat(row,col)
 
@@ -2199,7 +1970,7 @@ IMPLICIT NONE
 
       ENDDO 
       
-      myPoly % dMatrix = TRANSPOSE( dmat )
+      myPoly % dMatrix % hostData = TRANSPOSE( dmat )
 
   END SUBROUTINE CalculateDerivativeMatrix
 
@@ -2229,7 +2000,7 @@ IMPLICIT NONE
         
          lAtS(j) = 0.0_prec
 
-         IF( AlmostEqual(sE, myPoly % controlPoints(j)) ) THEN
+         IF( AlmostEqual(sE, myPoly % controlPoints % hostData(j)) ) THEN
             lAtS(j) = 1.0_prec
             xMatchesNode = .TRUE.
          ENDIF 
@@ -2243,7 +2014,7 @@ IMPLICIT NONE
       temp1 = 0.0_prec
      
       DO j = 0, myPoly % N 
-         temp2 = myPoly % bWeights(j)/(sE - myPoly % controlPoints(j))
+         temp2 = myPoly % bWeights % hostData(j)/(sE - myPoly % controlPoints % hostData(j))
          lAtS(j) = temp2
          temp1 = temp1 + temp2
       ENDDO 

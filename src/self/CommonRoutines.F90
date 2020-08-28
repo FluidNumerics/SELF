@@ -13,9 +13,8 @@
 !! This module defines a set of general purpose routines.
 
 MODULE CommonRoutines
-! src/common
-USE ModelPrecision
-USE ConstantsDictionary
+!USE SELFPrecision
+USE SELFConstants
 
 IMPLICIT NONE
 
@@ -790,19 +789,19 @@ CONTAINS
    CHARACTER(4) :: dayStamp
    CHARACTER(2) :: hourStamp, minuteStamp, secondStamp
    CHARACTER(3) :: milliSecondStamp
-   REAL(dp)     :: time_dp
+   REAL(real64)     :: time_real64
 
 
-      time_dp = REAL( time, dp )
+      time_real64 = REAL( time, real64 )
       ! Units in "seconds"
       IF( units(1:1) == 's' ) THEN 
    
          ! Obtain the day
-         day    = INT( time_dp/86400.0_dp )
-         hour   = INT( (time_dp-86400.0_dp*day)/3600.0_dp )
-         minute = INT( (time_dp-3600.0_dp*hour-86400.0_dp*day)/60.0_dp )
-         second = INT( (time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day) )
-         milliSecond = NINT( ((time_dp-60.0_dp*minute-3600.0_dp*hour-86400.0_dp*day)-REAL(second,dp))*1000.0_dp )
+         day    = INT( time_real64/86400.0_real64 )
+         hour   = INT( (time_real64-86400.0_real64*day)/3600.0_real64 )
+         minute = INT( (time_real64-3600.0_real64*hour-86400.0_real64*day)/60.0_real64 )
+         second = INT( (time_real64-60.0_real64*minute-3600.0_real64*hour-86400.0_real64*day) )
+         milliSecond = NINT( ((time_real64-60.0_real64*minute-3600.0_real64*hour-86400.0_real64*day)-REAL(second,real64))*1000.0_real64 )
 
          WRITE( dayStamp,'(I4.4)' ) day 
          WRITE( hourStamp,'(I2.2)' ) hour
