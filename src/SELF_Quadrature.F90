@@ -1,4 +1,4 @@
-! Quadrature.f90
+! SELF_Quadrature.f90
 ! 
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
@@ -12,14 +12,13 @@
 ! Routines are defined for computing Legendre and Chebyshev Gauss and Gauss-Lobatto
 ! quadrature nodes and weights.
  
-MODULE Quadrature
+MODULE SELF_Quadrature
 
-!USE SELFPrecision
-USE SELFConstants
+USE SELF_Constants
 
 IMPLICIT NONE
 
-  PUBLIC  :: ChebyshevQuadrature, LegendreQuadrature
+  PUBLIC  :: ChebyshevSELF_Quadrature, LegendreSELF_Quadrature
   PRIVATE :: ChebyshevGauss, ChebyshevGaussLobatto, &
              LegendreGauss, LegendreGaussLobatto, &
              LegendreQandL
@@ -27,7 +26,7 @@ IMPLICIT NONE
   CONTAINS
 
 ! =============================================================================================== !
-! LegendreQuadrature  
+! LegendreSELF_Quadrature  
 !   Returns the specified Legendre quadrature nodes and integration weights. 
 ! 
 !   Given a polynomial degree, and quadrature type (Gauss or Gauss Lobatto), this subroutine manages
@@ -38,7 +37,7 @@ IMPLICIT NONE
 !     INTEGER    :: N, quadType 
 !     REAL(prec) :: nodes(0:N), weights(0:N) 
 !
-!       CALL LegendreQuadrature( N, quadType, nodes, weights ) 
+!       CALL LegendreSELF_Quadrature( N, quadType, nodes, weights ) 
 ! 
 !   Parameters :
 !
@@ -56,7 +55,7 @@ IMPLICIT NONE
 !   
 ! =============================================================================================== !
 
-  SUBROUTINE LegendreQuadrature( N, nodes, weights, QuadType )
+  SUBROUTINE LegendreSELF_Quadrature( N, nodes, weights, QuadType )
     IMPLICIT NONE
     INTEGER, INTENT(in)     :: N
     REAL(prec), INTENT(out) :: nodes(0:N)
@@ -73,10 +72,10 @@ IMPLICIT NONE
 
       ENDIF
 
-  END SUBROUTINE LegendreQuadrature
+  END SUBROUTINE LegendreSELF_Quadrature
 
 ! =============================================================================================== !
-! ChebyshevQuadrature  
+! ChebyshevSELF_Quadrature  
 !
 !   Returns the specified Chebyshev quadrature nodes and integration weights. 
 ! 
@@ -88,7 +87,7 @@ IMPLICIT NONE
 !     INTEGER    :: N, quadType 
 !     REAL(prec) :: nodes(0:N), weights(0:N) 
 !
-!       CALL ChebyshevQuadrature( N, quadType, nodes, weights ) 
+!       CALL ChebyshevSELF_Quadrature( N, quadType, nodes, weights ) 
 ! 
 !   Input/Output : 
 !
@@ -106,7 +105,7 @@ IMPLICIT NONE
 !   
 ! ================================================================================================ ! 
 
-  SUBROUTINE ChebyshevQuadrature( N, quadType, nodes, weights )
+  SUBROUTINE ChebyshevSELF_Quadrature( N, quadType, nodes, weights )
     IMPLICIT NONE
     INTEGER, INTENT(in)     :: N
     REAL(prec), INTENT(out) :: nodes(0:N)
@@ -124,7 +123,7 @@ IMPLICIT NONE
 
       ENDIF
 
-  END SUBROUTINE ChebyshevQuadrature
+  END SUBROUTINE ChebyshevSELF_Quadrature
 
 ! =============================================================================================== !
 ! S/R ChebyshevGauss
@@ -408,4 +407,4 @@ IMPLICIT NONE
 
   END SUBROUTINE LegendreQandL
 
-END MODULE Quadrature
+END MODULE SELF_Quadrature

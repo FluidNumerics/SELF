@@ -1,6 +1,7 @@
-MODULE SELFMemory
+MODULE SELF_Memory
 
-USE SELFConstants
+USE SELF_Constants
+
 USE hipfort
 USE ISO_FORTRAN_ENV
 USE ISO_C_BINDING
@@ -1398,4 +1399,4 @@ SUBROUTINE UpdateDevice_hfInt64_r7(this)
 END SUBROUTINE UpdateDevice_hfInt64_r7
 #endif
 
-END MODULE SELFMemory
+END MODULE SELF_Memory

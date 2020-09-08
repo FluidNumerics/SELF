@@ -1,4 +1,4 @@
-! SELFConstants.f90
+! SELF_Constants.f90
 ! 
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
@@ -7,7 +7,7 @@
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
 
-MODULE SELFConstants
+MODULE SELF_Constants
 
 USE ISO_FORTRAN_ENV
 !USE SELFPrecision
@@ -187,4 +187,4 @@ INTEGER, PARAMETER :: Gaussian = 102
 CHARACTER(1), PARAMETER :: nada = ' '
 CHARACTER(6), PARAMETER :: MsgFmt = '(2x,A)'
 
-END MODULE SELFConstants
+END MODULE SELF_Constants

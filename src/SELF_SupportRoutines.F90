@@ -1,4 +1,4 @@
-! CommonRoutines.f90
+! SELF_SupportRoutines.f90
 ! 
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
@@ -6,15 +6,15 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-!> \file CommonRoutines.f90
-!! Contains the \ref CommonRoutines module
+!> \file SELF_SupportRoutines.f90
+!! Contains the \ref SELF_SupportRoutines module
 
-!> \defgroup CommonRoutines CommonRoutines
+!> \defgroup SELF_SupportRoutines SELF_SupportRoutines
 !! This module defines a set of general purpose routines.
 
-MODULE CommonRoutines
-!USE SELFPrecision
-USE SELFConstants
+MODULE SELF_SupportRoutines
+
+USE SELF_Constants
 
 IMPLICIT NONE
 
@@ -22,7 +22,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-!> \addtogroup CommonRoutines
+!> \addtogroup SELF_SupportRoutines
 !! @{ 
 ! ================================================================================================ !
 ! Function AlmostEqual 
@@ -73,7 +73,7 @@ CONTAINS
 
  END FUNCTION AlmostEqual
 !
-!> \addtogroup CommonRoutines
+!> \addtogroup SELF_SupportRoutines
 !! @{ 
 ! ================================================================================================ !
 ! S/R InsertionSort
@@ -129,7 +129,7 @@ CONTAINS
 
  END SUBROUTINE InsertionSort
 !
-!> \addtogroup CommonRoutines
+!> \addtogroup SELF_SupportRoutines
 !! @{ 
 ! ================================================================================================ !
 ! S/R SortArray 
@@ -176,7 +176,7 @@ CONTAINS
 
  END SUBROUTINE SortArray
 !
-!> \addtogroup CommonRoutines
+!> \addtogroup SELF_SupportRoutines
 !! @{ 
 ! ================================================================================================ !
 ! S/R SortAndSum 
@@ -231,7 +231,7 @@ CONTAINS
 
  END SUBROUTINE SortAndSum
 !
-!> \addtogroup CommonRoutines
+!> \addtogroup SELF_SupportRoutines
 !! @{ 
 ! ================================================================================================ !
 ! S/R ReverseArray 
@@ -276,7 +276,7 @@ CONTAINS
 
  END SUBROUTINE ReverseArray
 !
-!> \addtogroup CommonRoutines
+!> \addtogroup SELF_SupportRoutines
 !! @{ 
 ! ================================================================================================ !
 ! S/R ForwardShift
@@ -320,7 +320,7 @@ CONTAINS
 
  END SUBROUTINE ForwardShift
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! S/R CompareArray 
@@ -380,7 +380,7 @@ CONTAINS
 
  END FUNCTION CompareArray
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! S/R NewUnit
@@ -426,7 +426,7 @@ CONTAINS
  
  END FUNCTION NewUnit
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! S/R UniformPoints 
@@ -475,7 +475,7 @@ CONTAINS
    
  END FUNCTION UniformPoints
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! S/R Determinant 
@@ -526,7 +526,7 @@ CONTAINS
  
  END FUNCTION Determinant
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! Function GetMinor 
@@ -584,7 +584,7 @@ CONTAINS
 
  END FUNCTION GetMinor
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! Function Invert_2x2 
@@ -625,7 +625,7 @@ CONTAINS
 
  END FUNCTION Invert_2x2
 !
-!> \addtogroup CommonRoutines 
+!> \addtogroup SELF_SupportRoutines 
 !! @{ 
 ! ================================================================================================ !
 ! Function Invert_3x3 
@@ -897,4 +897,4 @@ CONTAINS
 
  END FUNCTION FloorCURT
 
-END MODULE CommonRoutines
+END MODULE SELF_SupportRoutines

@@ -1,5 +1,5 @@
 #include <hip/hip_runtime.h>
-#include "SELF_Macros.h"
+#include "SELF_HIP_Macros.h"
 
 
 // ScalarGridInterp_1D //

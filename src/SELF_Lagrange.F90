@@ -1,4 +1,4 @@
-! Lagrange_Class.f90
+! SELF_Lagrange.f90
 ! 
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
@@ -6,12 +6,12 @@
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
-MODULE Lagrange_Class
+MODULE SELF_Lagrange
 
-USE SELFConstants
-USE SELFMemory
-USE CommonRoutines
-USE Quadrature
+USE SELF_Constants
+USE SELF_Memory
+USE SELF_SupportRoutines
+USE SELF_Quadrature
 
 USE hipfort
 USE ISO_C_BINDING
@@ -2023,4 +2023,4 @@ IMPLICIT NONE
 
   END FUNCTION CalculateLagrangePolynomials
 
-END MODULE Lagrange_Class
+END MODULE SELF_Lagrange
