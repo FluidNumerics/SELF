@@ -12,11 +12,72 @@ USE ISO_C_BINDING
 IMPLICIT NONE
 
 #include "SELF_Macros.h"
+! ========================================================================= !
+! Node, Edge, Face, Element and Connectivity Standard
+! ========================================================================= !
+!
+! To define the element corner nodes, the side order and side connectivity, 
+! we follow the standard from CGNS SIDS (CFD General Notation System, 
+! Standard Interface Data Structures, http: //cgns.sourceforge.net/ ).
+!
+! Computational coordinate directions are defined as follows
+!
+! xi1 direction points from "West" (xi1=-1) to "East" (xi1=1)
+! xi2 direction points from "South" (xi2=-1) to "North" (xi2=1)
+! xi3 direction points from "Bottom" (xi3=-1) to "Top" (xi3=1)
+!
+! 2-D Hexahedreal Element sides are defined as
+!
+! Side 1 = South  (xi2 = -1) = [CN1, CN2]
+! Side 2 = East   (xi1 = 1) = [CN2, CN3]
+! Side 3 = North  (xi2 = 1) = [CN4, CN3]
+! Side 4 = West   (xi1 = -1) = [CN1, CN4]
+!
+! 3-D Hexahedreal Element sides are defined as
+!
+! Side 1 = Bottom (xi3 = -1) = [CN1, CN4, CN3, CN2]
+! Side 2 = South  (xi2 = -1) = [CN1, CN2, CN6, CN5]
+! Side 3 = East   (xi1 = 1) = [CN2, CN3, CN7, CN6]
+! Side 4 = North  (xi2 = 1) = [CN3, CN4, CN8, CN7]
+! Side 5 = West   (xi1 = -1) = [CN1, CN5, CN8, CN4]
+! Side 6 = Top    (xi3 = 1) = [CN5, CN6, CN7, CN8]
+!
+! In 2-D, corner nodes are order counter-clockwise (looking in the -xi3 direction).
+! 
+! CornerNode 1 = South-West = (-1,-1)
+! CornerNode 2 = South-East = ( 1,-1)
+! CornerNode 3 = North-East = ( 1, 1)
+! CornerNode 4 = North-West = (-1, 1)
+!
+! In 3-D, corner nodes are order counter-clockwise (looking in the -xi3 direction) from
+! bottom to top.
+! 
+! CornerNode 1 = Bottom-South-West = (-1,-1,-1)
+! CornerNode 2 = Bottom-South-East = ( 1,-1,-1)
+! CornerNode 3 = Bottom-North-East = ( 1, 1,-1)
+! CornerNode 4 = Bottom-North-West = (-1, 1,-1)
+! CornerNode 5 = Top-South-West = (-1,-1, 1)
+! CornerNode 6 = Top-South-East = ( 1,-1, 1)
+! CornerNode 7 = Top-North-East = ( 1, 1, 1)
+! CornerNode 8 = Top-North-West = (-1, 1, 1)
+!
+! ========================================================================= !
   
   INTEGER, PARAMETER :: selfMinNodalValence2D = 4
   INTEGER, PARAMETER :: selfMinNodalValence3D = 8
   INTEGER, PARAMETER :: selfMaxNodalValence2D = 6
   INTEGER, PARAMETER :: selfMaxNodalValence3D = 10
+  ! Side Ordering
+  INTEGER, PARAMETER :: selfSide2D_South = 1
+  INTEGER, PARAMETER :: selfSide2D_East = 2
+  INTEGER, PARAMETER :: selfSide2D_North = 3
+  INTEGER, PARAMETER :: selfSide2D_West = 4
+  INTEGER, PARAMETER :: selfSide3D_Bottom = 1
+  INTEGER, PARAMETER :: selfSide3D_South = 2
+  INTEGER, PARAMETER :: selfSide3D_East = 3
+  INTEGER, PARAMETER :: selfSide3D_North = 4
+  INTEGER, PARAMETER :: selfSide3D_West = 5
+  INTEGER, PARAMETER :: selfSide3D_Top = 6
 
 
   TYPE, PUBLIC :: Geometry2D
@@ -62,118 +123,62 @@ IMPLICIT NONE
 
   END TYPE Geometry3D
 
-  TYPE, PUBLIC :: MeshNodes
-    INTEGER :: objCount
-    INTEGER :: ndim
-    TYPE(hfInt32_r1) :: id
-    TYPE(hfInt32_r1) :: flag
-    TYPE(hfInt32_r1) :: eValence
-    TYPE(hfInt32_r2) :: elements
-    TYPE(hfInt32_r2) :: elementNodes
-    TYPE(hfReal_r2) :: x
-
-    CONTAINS
-
-      PROCEDURE, PUBLIC :: Build => Build_MeshNodes
-      PROCEDURE, PUBLIC :: Trash => Trash_MeshNodes
-#ifdef GPU
-      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_MeshNodes
-      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_MeshNodes
-#endif
-
-  END TYPE MeshNodes
-
-  TYPE, PUBLIC :: Edges
-    INTEGER :: objCount
-    TYPE(hfInt32_r1) :: id
-    TYPE(hfInt32_r1) :: eValence
-    TYPE(hfInt32_r1) :: boundaryID
-    TYPE(hfInt32_r2) :: nodes
-    TYPE(hfInt32_r2) :: elements
-    TYPE(hfInt32_r2) :: elementEdges
-
-!    CONTAINS
-
-  END TYPE Edges
-
-  TYPE, PUBLIC :: Faces
-    INTEGER :: N
-    INTEGER :: objCount
-    TYPE(hfInt32_r1) :: id
-    TYPE(hfInt32_r1) :: boundaryID
-    TYPE(hfInt32_r2) :: nodes
-    TYPE(hfInt32_r2) :: elements
-    TYPE(hfInt32_r2) :: elementFaces
-    TYPE(hfInt32_r3) :: iMap
-    TYPE(hfInt32_r3) :: jMap
-
-!    CONTAINS
-
-  END TYPE Faces
-
-  TYPE, PUBLIC :: Elements
-    INTEGER :: objCount
-    INTEGER :: objType
-    TYPE(hfInt32_r1) :: id
-    TYPE(hfInt32_r2) :: nodes
-    TYPE(hfInt32_r2) :: neighbors
-
-!    CONTAINS
-
-  END TYPE Elements
-
-!  TYPE, PUBLIC :: MeshObjHandles
-!    INTEGER :: nMeshNodes, nEdges, nFaces, nElements
-!    INTEGER, POINTER :: nodeids(:)
-!    INTEGER, POINTER :: edgeids(:)
-!    INTEGER, POINTER :: faceids(:)
-!    INTEGER, POINTER :: elementids(:)
-!
-!    CONTAINS
-!
-!  END TYPE MeshObjHandles
-!
-!  TYPE, PUBLIC :: DomainDecomposition
-!    INTEGER :: nBlocks, nGlobalElements, nMPIMessages, nBoundaryFaces
-!    INTEGER, POINTER :: blockID(:) 
-!    INTEGER, POINTER :: localID(:) 
-!    TYPE(MeshObjectList), ALLOCATABLE :: mesh_obj(:) 
-!
-!    CONTAINS
-!
-!  END TYPE DomainDecomposition
+  ! Mesh format is set up as the HOPr format
+  ! See https://hopr-project.org/externals/MeshFormat.pdf
 
   TYPE, PUBLIC :: Mesh2D
+    INTEGER :: nGeo
+    INTEGER :: nElem
+    INTEGER :: nSides
+    INTEGER :: nNodes
+    INTEGER :: nUniqueSides
+    INTEGER :: nUniqueNodes
+    INTEGER :: nBCs
     TYPE( Geometry2D ) :: geometry
-    TYPE( Elements ) :: elements
-    TYPE( MeshNodes  ) :: nodes
-    TYPE( Edges ) :: edges 
-    !TYPE( DomainDecomposition ) :: decomp 
-    INTEGER :: cornerMap(1:2,1:4)
-    INTEGER :: sideMap(1:4)
-    INTEGER :: edgeMap(1:2,1:4)
+    TYPE( hfInt32_r2 ) :: elemInfo
+    TYPE( hfInt32_r2 ) :: sideInfo
+    TYPE( hfReal_r2 )  :: nodeCoords
+    TYPE( hfInt32_r1 ) :: globalNodeIDs 
+    TYPE( hfInt32_r2 ) :: BCType
+    CHARACTER(LEN=255), ALLOCATABLE :: BCNames(:)
 
-!    CONTAINS
+    CONTAINS
+      PROCEDURE, PUBLIC :: Build => Build_Mesh2D
+      PROCEDURE, PUBLIC :: Trash => Trash_Mesh2D
+#ifdef GPU
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Mesh2D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
+#endif
 
   END TYPE Mesh2D
 
-  TYPE, PUBLIC :: Mesh3D
-    TYPE( Geometry3D ) :: geometry
-    TYPE( Elements ) :: elements
-    TYPE( MeshNodes  ) :: nodes
-    TYPE( Edges ) :: edges 
-    TYPE( Faces ) :: faces
-    !TYPE( DomainDecomposition ) :: decomp 
-    INTEGER :: cornerMap(1:3,1:8)
-    INTEGER :: sideMap(1:6)
-    INTEGER :: faceMap(1:4,1:6)
-    INTEGER :: edgeMap(1:2,1:12)
-    INTEGER :: edgeFaceMap(1:2,1:4)
-  
-!    CONTAINS
 
-!      PROCEDURE, PUBLIC :: Build => Build_Mesh3D
-!      PROCEDURE, PUBLIC :: Trash => Trash_Mesh3D
+  TYPE, PUBLIC :: Mesh3D
+    INTEGER :: nGeo
+    INTEGER :: nElem
+    INTEGER :: nSides
+    INTEGER :: nNodes
+    INTEGER :: nUniqueSides
+    INTEGER :: nUniqueNodes
+    INTEGER :: nBCs
+    TYPE( Geometry3D ) :: geometry
+    TYPE( hfInt32_r2 ) :: elemInfo
+    TYPE( hfInt32_r2 ) :: sideInfo
+    TYPE( hfReal_r2 )  :: nodeCoords
+    TYPE( hfInt32_r1 ) :: globalNodeIDs 
+    TYPE( hfInt32_r2 ) :: BCType
+    CHARACTER(LEN=255), ALLOCATABLE :: BCNames(:)
+    
+    CONTAINS
+
+      PROCEDURE, PUBLIC :: Build => Build_Mesh3D
+      PROCEDURE, PUBLIC :: Trash => Trash_Mesh3D
+#ifdef GPU
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Mesh3D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
+#endif
+
+!      PROCEDURE, PUBLIC :: LoadHOPRMesh => LoadHOPRMesh_3D
 !
 !      PROCEDURE, PUBLIC :: Read_CGNSMesh
 !      PROCEDURE, PUBLIC :: Read_UCDMesh
@@ -183,8 +188,97 @@ IMPLICIT NONE
 
   END TYPE Mesh3D
 
+
 CONTAINS
 
+SUBROUTINE Build_Mesh2D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
+  IMPLICIT NONE
+  CLASS(Mesh2D), INTENT(out) :: myMesh
+  INTEGER, INTENT(in) :: quadrature
+  INTEGER, INTENT(in) :: polyDegree
+  INTEGER, INTENT(in) :: nPlotPoints
+  INTEGER, INTENT(in) :: nElem
+  INTEGER, INTENT(in) :: nSides
+  INTEGER, INTENT(in) :: nNodes
+  INTEGER, INTENT(in) :: nUniqueSides
+  INTEGER, INTENT(in) :: nUniqueNodes
+  INTEGER, INTENT(in) :: nBCs
+
+    myMesh % nElem = nElem
+    myMesh % nSides = nSides
+    myMesh % nNodes = nNodes
+    myMesh % nUniqueSides = nUniqueSides
+    myMesh % nUniqueNodes = nUniqueNodes
+    myMesh % nBCs = nBCs
+
+    CALL myMesh % geometry % Build( quadrature, polyDegree, nPlotPoints, nElem )
+
+    CALL myMesh % elemInfo % Alloc(loBound = (/1, 1/),&
+                                   upBound = (/6, nElem /) )
+
+    CALL myMesh % sideInfo % Alloc(loBound = (/1, 1/),&
+                                   upBound = (/5, nSides/) )
+
+    CALL myMesh % nodeCoords % Alloc(loBound = (/1, 1/),&
+                                     upBound = (/3, nNodes/) )
+
+    CALL myMesh % globalNodeIDs % Alloc(loBound = 1,&
+                                        upBound = nNodes )
+
+    CALL myMesh % BCType % Alloc(loBound = (/1, 1/),&
+                                 upBound = (/4, nBCs/) )
+
+    ALLOCATE( myMesh % BCNames(1:nBCs) )
+
+END SUBROUTINE Build_Mesh2D
+
+SUBROUTINE Trash_Mesh2D( myMesh )
+  IMPLICIT NONE
+  CLASS(Mesh2D), INTENT(inout) :: myMesh
+
+    myMesh % nElem = 0
+    myMesh % nSides = 0
+    myMesh % nNodes = 0
+    myMesh % nUniqueSides = 0
+    myMesh % nUniqueNodes = 0
+    myMesh % nBCs = 0
+
+    CALL myMesh % elemInfo % Free()
+    CALL myMesh % sideInfo % Free()
+    CALL myMesh % nodeCoords % Free()
+    CALL myMesh % globalNodeIDs % Free()
+    CALL myMesh % BCType % Free()
+
+    DEALLOCATE( myMesh % BCNames )
+
+END SUBROUTINE Trash_Mesh2D
+#ifdef GPU
+SUBROUTINE UpdateHost_Mesh2D( myMesh )
+  IMPLICIT NONE
+  CLASS(Mesh2D), INTENT(inout) :: myMesh
+ 
+    CALL myMesh % geometry % UpdateHost() 
+    CALL myMesh % elemInfo % UpdateHost()
+    CALL myMesh % sideInfo % UpdateHost()
+    CALL myMesh % nodeCoords % UpdateHost()
+    CALL myMesh % globalNodeIDs % UpdateHost()
+    CALL myMesh % BCType % UpdateHost()
+
+END SUBROUTINE UpdateHost_Mesh2D
+
+SUBROUTINE UpdateDevice_Mesh2D( myMesh )
+  IMPLICIT NONE
+  CLASS(Mesh2D), INTENT(inout) :: myMesh
+
+    CALL myMesh % geometry % UpdateDevice() 
+    CALL myMesh % elemInfo % UpdateDevice()
+    CALL myMesh % sideInfo % UpdateDevice()
+    CALL myMesh % nodeCoords % UpdateDevice()
+    CALL myMesh % globalNodeIDs % UpdateDevice()
+    CALL myMesh % BCType % UpdateDevice()
+
+END SUBROUTINE UpdateDevice_Mesh2D
+#endif
 SUBROUTINE Build_Geometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(out) :: myGeom
@@ -226,76 +320,6 @@ SUBROUTINE Build_Geometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nElem 
     
 END SUBROUTINE Build_Geometry2D
 
-SUBROUTINE Build_MeshNodes( nodes, nNodes, nDim, maxValence )
-#undef __FUNC__
-#define __FUNC__ "Build_MeshNodes"
-  IMPLICIT NONE
-  CLASS( MeshNodes ), INTENT(out) :: nodes
-  INTEGER, INTENT(in) :: nNodes
-  INTEGER, INTENT(in) :: nDim
-  INTEGER, INTENT(in), OPTIONAL :: maxValence
-  ! LOGICAL
-  INTEGER :: eValence
-
-    nodes % objCount = nNodes
-    nodes % nDim = nDim
-
-    ! set the element valence size
-    IF( PRESENT(maxValence) )THEN
-
-      INFO("User provided optional maxValence")
-      IF( nDim == 2 )THEN
-
-        IF(maxValence >= selfMinNodalValence2D)THEN
-          eValence = maxValence
-        ELSE
-          ERROR("Max nodal valence is too small") 
-          STOP
-        ENDIF
-
-      ELSE IF( nDim == 3 )THEN
-
-        IF(maxValence >= selfMinNodalValence3D)THEN
-          eValence = maxValence
-        ELSE
-          ERROR("Max nodal valence is too small") 
-          STOP
-        ENDIF
-
-      ENDIF
-
-    ELSE
-
-      INFO("Setting nodal valence to SELF default")
-      IF( nDim == 2 )THEN
-        eValence = selfMaxNodalValence2D
-      ELSE IF( nDim == 3 )THEN
-        eValence = selfMaxNodalValence2D
-      ENDIF
-
-    ENDIF
-
-    ! Allocate space
-    CALL nodes % id % Alloc( loBound = 1, &
-                             upBound = nNodes )
-
-    CALL nodes % flag % Alloc( loBound = 1, &
-                               upBound = nNodes )
-
-    CALL nodes % eValence % Alloc( loBound = 1, &
-                                   upBound = nNodes )
-
-    CALL nodes % elements % Alloc( loBound = (/1, 1/), &
-                                   upBound = (/eValence, nNodes/) )
-
-    CALL nodes % elementNodes % Alloc( loBound = (/1, 1/), &
-                                       upBound = (/eValence, nNodes/) )
-
-    CALL nodes % x % Alloc( loBound = (/1, 1/), &
-                            upBound = (/nDim, nNodes/) )
-
-END SUBROUTINE Build_MeshNodes
-
 SUBROUTINE Trash_Geometry2D( myGeom ) 
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(inout) :: myGeom
@@ -306,22 +330,6 @@ SUBROUTINE Trash_Geometry2D( myGeom )
     CALL myGeom % J % Trash()
   
 END SUBROUTINE Trash_Geometry2D 
-
-SUBROUTINE Trash_MeshNodes( nodes )
-#undef __FUNC__
-#define __FUNC__ "Trash_MeshNodes"
-  IMPLICIT NONE
-  CLASS( MeshNodes ), INTENT(inout) :: nodes
-
-    CALL nodes % id % Free()
-    CALL nodes % flag % Free()
-    CALL nodes % eValence % Free()
-    CALL nodes % elements % Free()
-    CALL nodes % elementNodes % Free()
-    CALL nodes % x % Free()
-
-END SUBROUTINE Trash_MeshNodes
-
 #ifdef GPU
 SUBROUTINE UpdateHost_Geometry2D( myGeom )
   IMPLICIT NONE
@@ -334,21 +342,6 @@ SUBROUTINE UpdateHost_Geometry2D( myGeom )
 
 END SUBROUTINE UpdateHost_Geometry2D
 
-SUBROUTINE UpdateHost_MeshNodes( nodes )
-#undef __FUNC__
-#define __FUNC__ "UpdateHost_MeshNodes"
-  IMPLICIT NONE
-  CLASS( MeshNodes ), INTENT(inout) :: nodes
-
-    CALL nodes % id % UpdateHost()
-    CALL nodes % flag % UpdateHost()
-    CALL nodes % eValence % UpdateHost()
-    CALL nodes % elements % UpdateHost()
-    CALL nodes % elementNodes % UpdateHost()
-    CALL nodes % x % UpdateHost()
-
-END SUBROUTINE UpdateHost_MeshNodes
-
 SUBROUTINE UpdateDevice_Geometry2D( myGeom )
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(inout) :: myGeom
@@ -359,23 +352,7 @@ SUBROUTINE UpdateDevice_Geometry2D( myGeom )
     CALL myGeom % J % UpdateDevice()
 
 END SUBROUTINE UpdateDevice_Geometry2D
-
-SUBROUTINE UpdateDevice_MeshNodes( nodes )
-#undef __FUNC__
-#define __FUNC__ "UpdateDevice_MeshNodes"
-  IMPLICIT NONE
-  CLASS( MeshNodes ), INTENT(inout) :: nodes
-
-    CALL nodes % id % UpdateDevice()
-    CALL nodes % flag % UpdateDevice()
-    CALL nodes % eValence % UpdateDevice()
-    CALL nodes % elements % UpdateDevice()
-    CALL nodes % elementNodes % UpdateDevice()
-    CALL nodes % x % UpdateDevice()
-
-END SUBROUTINE UpdateDevice_MeshNodes
 #endif
-
 SUBROUTINE CalculateContravariantBasis_Geometry2D( myGeom )
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(inout) :: myGeom
@@ -432,10 +409,101 @@ SUBROUTINE CalculateMetricTerms_Geometry2D( myGeom )
 
     CALL myGeom % CalculateContravariantBasis()
 
+#ifdef GPU
     CALL myGeom % UpdateDevice()
+#endif
 
 END SUBROUTINE CalculateMetricTerms_Geometry2D
 
+SUBROUTINE Build_Mesh3D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
+  IMPLICIT NONE
+  CLASS(Mesh3D), INTENT(out) :: myMesh
+  INTEGER, INTENT(in) :: quadrature
+  INTEGER, INTENT(in) :: polyDegree
+  INTEGER, INTENT(in) :: nPlotPoints
+  INTEGER, INTENT(in) :: nElem
+  INTEGER, INTENT(in) :: nSides
+  INTEGER, INTENT(in) :: nNodes
+  INTEGER, INTENT(in) :: nUniqueSides
+  INTEGER, INTENT(in) :: nUniqueNodes
+  INTEGER, INTENT(in) :: nBCs
+
+    myMesh % nElem = nElem
+    myMesh % nSides = nSides
+    myMesh % nNodes = nNodes
+    myMesh % nUniqueSides = nUniqueSides
+    myMesh % nUniqueNodes = nUniqueNodes
+    myMesh % nBCs = nBCs
+
+    CALL myMesh % geometry % Build( quadrature, polyDegree, nPlotPoints, nElem )
+
+    CALL myMesh % elemInfo % Alloc(loBound = (/1, 1/),&
+                                   upBound = (/6, nElem /) )
+
+    CALL myMesh % sideInfo % Alloc(loBound = (/1, 1/),&
+                                   upBound = (/5, nSides/) )
+
+    CALL myMesh % nodeCoords % Alloc(loBound = (/1, 1/),&
+                                     upBound = (/3, nNodes/) )
+
+    CALL myMesh % globalNodeIDs % Alloc(loBound = 1,&
+                                        upBound = nNodes )
+
+    CALL myMesh % BCType % Alloc(loBound = (/1, 1/),&
+                                 upBound = (/4, nBCs/) )
+
+    ALLOCATE( myMesh % BCNames(1:nBCs) )
+
+
+END SUBROUTINE Build_Mesh3D
+
+SUBROUTINE Trash_Mesh3D( myMesh )
+  IMPLICIT NONE
+  CLASS(Mesh3D), INTENT(inout) :: myMesh
+
+    myMesh % nElem = 0
+    myMesh % nSides = 0
+    myMesh % nNodes = 0
+    myMesh % nUniqueSides = 0
+    myMesh % nUniqueNodes = 0
+    myMesh % nBCs = 0
+
+    CALL myMesh % elemInfo % Free()
+    CALL myMesh % sideInfo % Free()
+    CALL myMesh % nodeCoords % Free()
+    CALL myMesh % globalNodeIDs % Free()
+    CALL myMesh % BCType % Free()
+
+    DEALLOCATE( myMesh % BCNames )
+
+END SUBROUTINE Trash_Mesh3D
+#ifdef GPU
+SUBROUTINE UpdateHost_Mesh3D( myMesh )
+  IMPLICIT NONE
+  CLASS(Mesh3D), INTENT(inout) :: myMesh
+ 
+    CALL myMesh % geometry % UpdateHost() 
+    CALL myMesh % elemInfo % UpdateHost()
+    CALL myMesh % sideInfo % UpdateHost()
+    CALL myMesh % nodeCoords % UpdateHost()
+    CALL myMesh % globalNodeIDs % UpdateHost()
+    CALL myMesh % BCType % UpdateHost()
+
+END SUBROUTINE UpdateHost_Mesh3D
+
+SUBROUTINE UpdateDevice_Mesh3D( myMesh )
+  IMPLICIT NONE
+  CLASS(Mesh3D), INTENT(inout) :: myMesh
+
+    CALL myMesh % geometry % UpdateDevice() 
+    CALL myMesh % elemInfo % UpdateDevice()
+    CALL myMesh % sideInfo % UpdateDevice()
+    CALL myMesh % nodeCoords % UpdateDevice()
+    CALL myMesh % globalNodeIDs % UpdateDevice()
+    CALL myMesh % BCType % UpdateDevice()
+
+END SUBROUTINE UpdateDevice_Mesh3D
+#endif
 SUBROUTINE Build_Geometry3D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
   IMPLICIT NONE
   CLASS(Geometry3D), INTENT(out) :: myGeom
@@ -611,8 +679,9 @@ SUBROUTINE CalculateMetricTerms_Geometry3D( myGeom )
     myGeom % J = myGeom % J % BoundaryInterp()
 
     CALL myGeom % CalculateContravariantBasis()
-
+#ifdef GPU
     CALL myGeom % UpdateDevice()
+#endif
 
 END SUBROUTINE CalculateMetricTerms_Geometry3D
 
