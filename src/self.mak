@@ -24,16 +24,16 @@ SELF_SupportRoutines.o: SELF_SupportRoutines.F90 SELF_Constants.o
 SELF_Quadrature.o: SELF_Quadrature.F90 SELF_Constants.o
 	${FC} ${FFLAGS} -c SELF_Quadrature.F90 -o $@
 
-SELF_Lagrange.o : SELF_Constants.o SELF_Memory.o SELF_SupportRoutines.o SELF_Quadrature.o Lagrange_HIP.o SELF_Lagrange.F90
+SELF_Lagrange.o : SELF_Constants.o SELF_Memory.o SELF_SupportRoutines.o SELF_Quadrature.o SELF_Lagrange_HIP.o SELF_Lagrange.F90
 	${FC} ${FFLAGS} -c SELF_Lagrange.F90 -o $@
 
-Lagrange_HIP.o : Lagrange_HIP.cpp SELF_Macros.h
-	${FC} ${GFLAGS} -c Lagrange_HIP.cpp -o $@
+SELF_Lagrange_HIP.o : SELF_Lagrange_HIP.cpp SELF_Macros.h
+	${FC} ${GFLAGS} -c SELF_Lagrange_HIP.cpp -o $@
 
-Lagrange_Test.o : Lagrange_Test.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_Tests.o Lagrange_HIP.o
+Lagrange_Test.o : Lagrange_Test.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_Tests.o SELF_Lagrange_HIP.o
 	${FC} ${FFLAGS} -c Lagrange_Test.F90 -o $@
 
-SELF_Lagrange_Tests.o : SELF_Lagrange_Tests.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o Lagrange_HIP.o SysConf.o
+SELF_Lagrange_Tests.o : SELF_Lagrange_Tests.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_HIP.o SysConf.o
 	${FC} ${FFLAGS} -c SELF_Lagrange_Tests.F90 -o $@
 
 SELF_Data.o: SELF_Data.F90 SELF_Constants.o SELF_Lagrange.o
