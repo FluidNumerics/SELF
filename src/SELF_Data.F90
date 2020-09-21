@@ -160,10 +160,12 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Tensor2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Tensor2D
 #endif
+      PROCEDURE, PUBLIC :: Divergence => Divergence_Tensor2D
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor2D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Tensor2D 
 
       PROCEDURE, PUBLIC :: Determinant => Determinant_Tensor2D
+
 
   END TYPE Tensor2D
 
@@ -184,6 +186,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Tensor3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Tensor3D
 #endif
+      PROCEDURE, PUBLIC :: Divergence => Divergence_Tensor3D
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor3D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Tensor3D 
 
@@ -1077,6 +1080,26 @@ FUNCTION GridInterp_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION GridInterp_Tensor2D
 
+FUNCTION Divergence_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+  IMPLICIT NONE
+  CLASS(Tensor2D) :: SELFStorage
+  TYPE(Vector2D) :: SELFOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL SELFStorage % interp % TensorDivergence_2D( SELFStorage % interior % deviceData, &
+                                                      SELFout % interior % deviceData, &
+                                                      SELFStorage % nVar, &
+                                                      SELFStorage % nElem )  
+    ELSE
+      CALL SELFStorage % interp % TensorDivergence_2D( SELFStorage % interior % hostData, &
+                                                      SELFout % interior % hostData, &
+                                                      SELFStorage % nVar, &
+                                                      SELFStorage % nElem )  
+    ENDIF
+
+END FUNCTION Divergence_Tensor2D
+
 FUNCTION Determinant_Tensor2D( SELFStorage ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor2D) :: SELFStorage
@@ -1215,6 +1238,26 @@ FUNCTION GridInterp_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
     ENDIF
 
 END FUNCTION GridInterp_Tensor3D
+
+FUNCTION Divergence_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+  IMPLICIT NONE
+  CLASS(Tensor3D) :: SELFStorage
+  TYPE(Vector3D) :: SELFOut
+  LOGICAL, OPTIONAL :: gpuAccel
+
+    IF( PRESENT(gpuAccel) )THEN
+      CALL SELFStorage % interp % TensorDivergence_3D( SELFStorage % interior % deviceData, &
+                                                      SELFout % interior % deviceData, &
+                                                      SELFStorage % nVar, &
+                                                      SELFStorage % nElem )  
+    ELSE
+      CALL SELFStorage % interp % TensorDivergence_3D( SELFStorage % interior % hostData, &
+                                                      SELFout % interior % hostData, &
+                                                      SELFStorage % nVar, &
+                                                      SELFStorage % nElem )  
+    ENDIF
+
+END FUNCTION Divergence_Tensor3D
 
 FUNCTION Determinant_Tensor3D( SELFStorage ) RESULT( SELFout )
   IMPLICIT NONE

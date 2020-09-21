@@ -1321,6 +1321,7 @@ IMPLICIT NONE
   END SUBROUTINE VectorCurl_2D_gpu
 
   SUBROUTINE TensorDivergence_2D_cpu( myPoly, f, dF, nVariables, nElements )
+    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
     INTEGER, INTENT(in)     :: nVariables, nElements
@@ -1576,6 +1577,7 @@ IMPLICIT NONE
   END SUBROUTINE VectorCurl_3D_gpu
 
   SUBROUTINE TensorDivergence_3D_cpu( myPoly, f, dF, nVariables, nElements )
+    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(in) :: myPoly
     INTEGER, INTENT(in)     :: nVariables, nElements
