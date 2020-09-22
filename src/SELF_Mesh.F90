@@ -96,8 +96,6 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Geometry2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Geometry2D
 #endif
-      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_Geometry2D
-
       PROCEDURE, PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry2D
       PROCEDURE, PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_Geometry2D
 
@@ -119,8 +117,6 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Geometry3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Geometry3D
 #endif
-      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_Geometry3D
-
       PROCEDURE, PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry3D
       PROCEDURE, PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_Geometry3D
 
@@ -420,39 +416,6 @@ SUBROUTINE CalculateMetricTerms_Geometry2D( myGeom )
 
 END SUBROUTINE CalculateMetricTerms_Geometry2D
 
-SUBROUTINE ContravariantProjection_Geometry2D( myGeom, physVector, compVector )
-  ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
-  ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
-  ! vectors are really the Jacobian weighted contravariant basis vectors
-  IMPLICIT NONE
-  CLASS(Geometry2D), INTENT(in) :: myGeom
-  TYPE(Vector2D), INTENT(in) :: physVector
-  TYPE(Vector2D), INTENT(inout) :: compVector
-  ! Local
-  INTEGER :: i, j, iVar, iEl
-
-  ! Assume that tensor(j,i) is vector i, component j => dot product is done along first dimension to project onto physical space
-    DO iEl = 1, physVector % nElem
-      DO iVar = 1, physVector % nVar
-        DO j = 0, physVector % N
-          DO i = 0, physVector % N
-            
-             compVector % interior % hostData(1,i,j,iVar,iEl) = myGeom % dsdx % interior % hostData(1,1,i,j,1,iEl)*&
-                                                                physVector % interior % hostData(1,i,j,iVar,iEl)+&
-                                                                myGeom % dsdx % interior % hostData(2,1,i,j,1,iEl)*&
-                                                                physVector % interior % hostData(2,i,j,iVar,iEl)
-
-             compVector % interior % hostData(2,i,j,iVar,iEl) = myGeom % dsdx % interior % hostData(1,2,i,j,1,iEl)*&
-                                                                physVector % interior % hostData(1,i,j,iVar,iEl)+&
-                                                                myGeom % dsdx % interior % hostData(2,2,i,j,1,iEl)*&
-                                                                physVector % interior % hostData(2,i,j,iVar,iEl)
-
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-END SUBROUTINE ContravariantProjection_Geometry2D
 
 SUBROUTINE Build_Mesh3D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
   IMPLICIT NONE
@@ -726,51 +689,5 @@ SUBROUTINE CalculateMetricTerms_Geometry3D( myGeom )
 
 END SUBROUTINE CalculateMetricTerms_Geometry3D
 
-SUBROUTINE ContravariantProjection_Geometry3D( myGeom, physVector, compVector )
-  ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
-  ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
-  ! vectors are really the Jacobian weighted contravariant basis vectors
-  IMPLICIT NONE
-  CLASS(Geometry3D), INTENT(in) :: myGeom
-  TYPE(Vector3D), INTENT(in) :: physVector
-  TYPE(Vector3D), INTENT(inout) :: compVector
-  ! Local
-  INTEGER :: i, j, k, iVar, iEl, iDir
-
-  ! Assume that tensor(j,i) is vector i, component j => dot product is done along first dimension to project onto physical space
-    DO iEl = 1, physVector % nElem
-      DO iVar = 1, physVector % nVar
-        DO k = 0, physVector % N
-          DO j = 0, physVector % N
-            DO i = 0, physVector % N
-
-               compVector % interior % hostData(1,i,j,k,iVar,iEl) = myGeom % dsdx % interior % hostData(1,1,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(1,i,j,k,iVar,iEl)+&
-                                                                    myGeom % dsdx % interior % hostData(2,1,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(2,i,j,k,iVar,iEl)+&
-                                                                    myGeom % dsdx % interior % hostData(3,1,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(3,i,j,k,iVar,iEl)
-
-               compVector % interior % hostData(2,i,j,k,iVar,iEl) = myGeom % dsdx % interior % hostData(1,2,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(1,i,j,k,iVar,iEl)+&
-                                                                    myGeom % dsdx % interior % hostData(2,2,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(2,i,j,k,iVar,iEl)+&
-                                                                    myGeom % dsdx % interior % hostData(3,2,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(3,i,j,k,iVar,iEl)
-
-               compVector % interior % hostData(3,i,j,k,iVar,iEl) = myGeom % dsdx % interior % hostData(1,3,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(1,i,j,k,iVar,iEl)+&
-                                                                    myGeom % dsdx % interior % hostData(2,3,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(2,i,j,k,iVar,iEl)+&
-                                                                    myGeom % dsdx % interior % hostData(3,3,i,j,k,1,iEl)*&
-                                                                    physVector % interior % hostData(3,i,j,k,iVar,iEl)
-
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-END SUBROUTINE ContravariantProjection_Geometry3D
 
 END MODULE SELF_Mesh

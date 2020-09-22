@@ -44,7 +44,7 @@ IMPLICIT NONE
 
     CONTAINS
 
-!      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector2D
+      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector2D
 !      PROCEDURE, PUBLIC :: Divergence => Divergence_MappedVector2D
 !      PROCEDURE, PUBLIC :: Curl => Curl_MappedVector2D
 
@@ -52,9 +52,9 @@ IMPLICIT NONE
 
   TYPE, EXTENDS(Vector3D), PUBLIC :: MappedVector3D
 
-!    CONTAINS
-!
-!      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector3D
+    CONTAINS
+
+      PROCEDURE, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector3D
 !      PROCEDURE, PUBLIC :: Divergence => Divergence_MappedVector3D
 !      PROCEDURE, PUBLIC :: Curl => Curl_MappedVector3D
 
@@ -204,6 +204,90 @@ SUBROUTINE ContravariantWeight_MappedScalar3D_cpu( SELFStorage, workTensor, mesh
     ENDDO
 
 END SUBROUTINE ContravariantWeight_MappedScalar3D_cpu
+
+! ---------------------- Vectors ---------------------- !
+
+SUBROUTINE ContravariantProjection_MappedVector2D( physVector, compVector, mesh )
+  ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
+  ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
+  ! vectors are really the Jacobian weighted contravariant basis vectors
+  IMPLICIT NONE
+  CLASS(MappedVector2D), INTENT(in) :: physVector
+  TYPE(Vector2D), INTENT(inout) :: compVector
+  TYPE(Mesh2D), INTENT(in) :: mesh
+  ! Local
+  INTEGER :: i, j, iVar, iEl
+
+  ! Assume that tensor(j,i) is vector i, component j => dot product is done along first dimension to project onto computational
+    DO iEl = 1, physVector % nElem
+      DO iVar = 1, physVector % nVar
+        DO j = 0, physVector % N
+          DO i = 0, physVector % N
+            
+             compVector % interior % hostData(1,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % hostData(1,1,i,j,1,iEl)*&
+                                                                physVector % interior % hostData(1,i,j,iVar,iEl)+&
+                                                                mesh % geometry % dsdx % interior % hostData(2,1,i,j,1,iEl)*&
+                                                                physVector % interior % hostData(2,i,j,iVar,iEl)
+
+             compVector % interior % hostData(2,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % hostData(1,2,i,j,1,iEl)*&
+                                                                physVector % interior % hostData(1,i,j,iVar,iEl)+&
+                                                                mesh % geometry % dsdx % interior % hostData(2,2,i,j,1,iEl)*&
+                                                                physVector % interior % hostData(2,i,j,iVar,iEl)
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+END SUBROUTINE ContravariantProjection_MappedVector2D
+
+SUBROUTINE ContravariantProjection_MappedVector3D( physVector, compVector, mesh )
+  ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
+  ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
+  ! vectors are really the Jacobian weighted contravariant basis vectors
+  IMPLICIT NONE
+  CLASS(MappedVector3D), INTENT(in) :: physVector
+  TYPE(MappedVector3D), INTENT(inout) :: compVector
+  TYPE(Mesh3D), INTENT(in) :: mesh
+  ! Local
+  INTEGER :: i, j, k, iVar, iEl, iDir
+
+  ! Assume that tensor(j,i) is vector i, component j => dot product is done along first dimension to project onto computational
+  ! space
+    DO iEl = 1, physVector % nElem
+      DO iVar = 1, physVector % nVar
+        DO k = 0, physVector % N
+          DO j = 0, physVector % N
+            DO i = 0, physVector % N
+
+               compVector % interior % hostData(1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(1,i,j,k,iVar,iEl)+&
+                                                                    mesh % geometry % dsdx % interior % hostData(2,1,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(2,i,j,k,iVar,iEl)+&
+                                                                    mesh % geometry % dsdx % interior % hostData(3,1,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(3,i,j,k,iVar,iEl)
+
+               compVector % interior % hostData(2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % hostData(1,2,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(1,i,j,k,iVar,iEl)+&
+                                                                    mesh % geometry % dsdx % interior % hostData(2,2,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(2,i,j,k,iVar,iEl)+&
+                                                                    mesh % geometry % dsdx % interior % hostData(3,2,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(3,i,j,k,iVar,iEl)
+
+               compVector % interior % hostData(3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % hostData(1,3,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(1,i,j,k,iVar,iEl)+&
+                                                                    mesh % geometry % dsdx % interior % hostData(2,3,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(2,i,j,k,iVar,iEl)+&
+                                                                    mesh % geometry % dsdx % interior % hostData(3,3,i,j,k,1,iEl)*&
+                                                                    physVector % interior % hostData(3,i,j,k,iVar,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+END SUBROUTINE ContravariantProjection_MappedVector3D
 
 ! ---------------------- Tensors ---------------------- !
 
