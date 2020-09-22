@@ -312,9 +312,9 @@ FUNCTION BoundaryInterp_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar1D) :: SELFStorage
   TYPE(Scalar1D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarBoundaryInterp_1D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -332,9 +332,9 @@ FUNCTION GridInterp_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar1D) :: SELFStorage
   TYPE(Scalar1D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGridInterp_1D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -352,9 +352,9 @@ FUNCTION Derivative_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar1D) :: SELFStorage
   TYPE(Scalar1D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % Derivative_1D( SELFStorage % interior % deviceData, &
                                                 SELFout % interior % deviceData, &
                                                 SELFStorage % nVar, &
@@ -447,9 +447,9 @@ FUNCTION BoundaryInterp_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar2D) :: SELFStorage
   TYPE(Scalar2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarBoundaryInterp_2D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -467,9 +467,9 @@ FUNCTION GridInterp_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar2D) :: SELFStorage
   TYPE(Scalar2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGridInterp_2D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -487,9 +487,9 @@ FUNCTION Gradient_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar2D) :: SELFStorage
   TYPE(Vector2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGradient_2D( SELFStorage % interior % deviceData, &
                                                     SELFout % interior % deviceData, &
                                                     SELFStorage % nVar, &
@@ -581,9 +581,9 @@ FUNCTION BoundaryInterp_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar3D) :: SELFStorage
   TYPE(Scalar3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarBoundaryInterp_3D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -601,9 +601,9 @@ FUNCTION GridInterp_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar3D) :: SELFStorage
   TYPE(Scalar3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGridInterp_3D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -621,9 +621,9 @@ FUNCTION Gradient_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Scalar3D) :: SELFStorage
   TYPE(Vector3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGradient_3D( SELFStorage % interior % deviceData, &
                                                     SELFout % interior % deviceData, &
                                                     SELFStorage % nVar, &
@@ -715,9 +715,9 @@ FUNCTION BoundaryInterp_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector2D) :: SELFStorage
   TYPE(Vector2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorBoundaryInterp_2D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -735,9 +735,9 @@ FUNCTION GridInterp_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector2D) :: SELFStorage
   TYPE(Vector2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGridInterp_2D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -755,9 +755,9 @@ FUNCTION Gradient_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector2D) :: SELFStorage
   TYPE(Tensor2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGradient_2D( SELFStorage % interior % deviceData, &
                                                     SELFout % interior % deviceData, &
                                                     SELFStorage % nVar, &
@@ -775,9 +775,9 @@ FUNCTION Divergence_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector2D) :: SELFStorage
   TYPE(Scalar2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorDivergence_2D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -795,9 +795,9 @@ FUNCTION Curl_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector2D) :: SELFStorage
   TYPE(Scalar2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorCurl_2D( SELFStorage % interior % deviceData, &
                                                 SELFout % interior % deviceData, &
                                                 SELFStorage % nVar, &
@@ -889,9 +889,9 @@ FUNCTION BoundaryInterp_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector3D) :: SELFStorage
   TYPE(Vector3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorBoundaryInterp_3D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -909,9 +909,9 @@ FUNCTION GridInterp_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector3D) :: SELFStorage
   TYPE(Vector3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGridInterp_3D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -929,9 +929,9 @@ FUNCTION Gradient_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector3D) :: SELFStorage
   TYPE(Tensor3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGradient_3D( SELFStorage % interior % deviceData, &
                                                     SELFout % interior % deviceData, &
                                                     SELFStorage % nVar, &
@@ -949,9 +949,9 @@ FUNCTION Divergence_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector3D) :: SELFStorage
   TYPE(Scalar3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorDivergence_3D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -969,9 +969,9 @@ FUNCTION Curl_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Vector3D) :: SELFStorage
   TYPE(Vector3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorCurl_3D( SELFStorage % interior % deviceData, &
                                                 SELFout % interior % deviceData, &
                                                 SELFStorage % nVar, &
@@ -1063,9 +1063,9 @@ FUNCTION BoundaryInterp_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor2D) :: SELFStorage
   TYPE(Tensor2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorBoundaryInterp_2D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -1083,9 +1083,9 @@ FUNCTION GridInterp_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor2D) :: SELFStorage
   TYPE(Tensor2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorGridInterp_2D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -1103,9 +1103,9 @@ FUNCTION Divergence_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor2D) :: SELFStorage
   TYPE(Vector2D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorDivergence_2D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -1222,9 +1222,9 @@ FUNCTION BoundaryInterp_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor3D) :: SELFStorage
   TYPE(Tensor3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorBoundaryInterp_3D( SELFStorage % interior % deviceData, &
                                                           SELFout % boundary % deviceData, &
                                                           SELFStorage % nVar, &
@@ -1242,9 +1242,9 @@ FUNCTION GridInterp_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor3D) :: SELFStorage
   TYPE(Tensor3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorGridInterp_3D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &
@@ -1262,9 +1262,9 @@ FUNCTION Divergence_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
   IMPLICIT NONE
   CLASS(Tensor3D) :: SELFStorage
   TYPE(Vector3D) :: SELFOut
-  LOGICAL, OPTIONAL :: gpuAccel
+  LOGICAL :: gpuAccel
 
-    IF( PRESENT(gpuAccel) )THEN
+    IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorDivergence_3D( SELFStorage % interior % deviceData, &
                                                       SELFout % interior % deviceData, &
                                                       SELFStorage % nVar, &

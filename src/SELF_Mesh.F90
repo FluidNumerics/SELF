@@ -377,20 +377,22 @@ SUBROUTINE CalculateContravariantBasis_Geometry2D( myGeom )
     ENDDO
 
     ! Interpolate the contravariant tensor to the boundaries
-    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( )
+    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
     DO iEl = 1, myGeom % nElem
       DO k = 1, 4
         DO i = 0, myGeom % J % N
-          IF( k == TOP .OR. k == EAST .OR. k == NORTH )THEN
+          IF( k == selfSide2D_East .OR. k == selfSide2D_North )THEN
             fac = SIGN(1.0_prec, myGeom % J % boundary % hostData(i,1,k,iEl))
           ELSE
             fac = -SIGN(1.0_prec, myGeom % J % boundary % hostData(i,1,k,iEl))
           ENDIF
 
           myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
+          ! TODO : Make dsdx % boundary a unit vector hostData(j,i) is vector i, component j
+
         ENDDO
       ENDDO
     ENDDO
@@ -401,14 +403,14 @@ SUBROUTINE CalculateMetricTerms_Geometry2D( myGeom )
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(inout) :: myGeom
 
-    myGeom % dxds = myGeom % x % Gradient( )
-    myGeom % dxds = myGeom % dxds % BoundaryInterp( )
+    myGeom % dxds = myGeom % x % Gradient( gpuAccel = .FALSE. )
+    myGeom % dxds = myGeom % dxds % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Calculate the Jacobian = determinant of the covariant matrix at each point
     myGeom % J = myGeom % dxds % Determinant()
-    myGeom % J = myGeom % J % BoundaryInterp( )
+    myGeom % J = myGeom % J % BoundaryInterp( gpuAccel = .FALSE. )
 
-    CALL myGeom % CalculateContravariantBasis()
+    CALL myGeom % CalculateContravariantBasis( )
 
 #ifdef GPU
     CALL myGeom % UpdateDevice()
@@ -649,21 +651,23 @@ SUBROUTINE CalculateContravariantBasis_Geometry3D( myGeom )
     ENDDO
 
     ! Interpolate the contravariant tensor to the boundaries
-    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( )
+    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
+
     DO iEl = 1, myGeom % nElem
       DO k = 1, 6
         DO j = 0, myGeom % J % N
           DO i = 0, myGeom % J % N
-            IF( k == TOP .OR. k == EAST .OR. k == NORTH )THEN
+            IF( k == selfSide3D_Top .OR. k == selfSide3D_East .OR. k == selfSide3D_North )THEN
               fac = SIGN(1.0_prec, myGeom % J % boundary % hostData(i,j,1,k,iEl))
             ELSE
               fac = -SIGN(1.0_prec, myGeom % J % boundary % hostData(i,j,1,k,iEl))
             ENDIF
 
             myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = fac*myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)
+            ! TODO : Make dsdx % boundary a unit vector hostData(j,i) is vector i, component j
           ENDDO
         ENDDO
       ENDDO
@@ -675,12 +679,12 @@ SUBROUTINE CalculateMetricTerms_Geometry3D( myGeom )
   IMPLICIT NONE
   CLASS(Geometry3D), INTENT(inout) :: myGeom
 
-    myGeom % dxds = myGeom % x % Gradient()
-    myGeom % dxds = myGeom % dxds % BoundaryInterp()
+    myGeom % dxds = myGeom % x % Gradient( gpuAccel = .FALSE. )
+    myGeom % dxds = myGeom % dxds % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    myGeom % J = myGeom % dxds % Determinant()
-    myGeom % J = myGeom % J % BoundaryInterp()
+    myGeom % J = myGeom % dxds % Determinant( )
+    myGeom % J = myGeom % J % BoundaryInterp( gpuAccel = .FALSE. )
 
     CALL myGeom % CalculateContravariantBasis()
 #ifdef GPU
