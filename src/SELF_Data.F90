@@ -60,7 +60,9 @@ IMPLICIT NONE
 #endif
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar2D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Scalar2D
-      PROCEDURE, PUBLIC :: Gradient => Gradient_Scalar2D
+
+      GENERIC, PUBLIC :: Gradient => Gradient_Scalar2D
+      PROCEDURE, PRIVATE :: Gradient_Scalar2D
 
   END TYPE Scalar2D
 
@@ -83,7 +85,9 @@ IMPLICIT NONE
 #endif
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar3D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Scalar3D
-      PROCEDURE, PUBLIC :: Gradient => Gradient_Scalar3D
+
+      GENERIC, PUBLIC :: Gradient => Gradient_Scalar3D
+      PROCEDURE, PRIVATE :: Gradient_Scalar3D
 
   END TYPE Scalar3D
 
@@ -108,9 +112,15 @@ IMPLICIT NONE
 #endif
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Vector2D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Vector2D
-      PROCEDURE, PUBLIC :: Gradient => Gradient_Vector2D
-      PROCEDURE, PUBLIC :: Divergence => Divergence_Vector2D
-      PROCEDURE, PUBLIC :: Curl => Curl_Vector2D
+
+      GENERIC, PUBLIC :: Gradient => Gradient_Vector2D
+      PROCEDURE, PRIVATE :: Gradient_Vector2D
+
+      GENERIC, PUBLIC :: Divergence => Divergence_Vector2D
+      PROCEDURE, PRIVATE :: Divergence_Vector2D
+
+      GENERIC, PUBLIC :: Curl => Curl_Vector2D
+      PROCEDURE, PRIVATE :: Curl_Vector2D
 
 
   END TYPE Vector2D
@@ -134,15 +144,21 @@ IMPLICIT NONE
 #endif
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Vector3D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Vector3D
-      PROCEDURE, PUBLIC :: Gradient => Gradient_Vector3D
-      PROCEDURE, PUBLIC :: Divergence => Divergence_Vector3D
-      PROCEDURE, PUBLIC :: Curl => Curl_Vector3D
+
+      GENERIC, PUBLIC :: Gradient => Gradient_Vector3D
+      PROCEDURE, PRIVATE :: Gradient_Vector3D
+
+      GENERIC, PUBLIC :: Divergence => Divergence_Vector3D
+      PROCEDURE, PRIVATE :: Divergence_Vector3D
+
+      GENERIC, PUBLIC :: Curl => Curl_Vector3D
+      PROCEDURE, PRIVATE :: Curl_Vector3D
 
 
   END TYPE Vector3D
-!
-!! ---------------------- Tensors ---------------------- !
-!
+
+! ---------------------- Tensors ---------------------- !
+
   TYPE, PUBLIC :: Tensor2D
 
     INTEGER :: N
@@ -160,12 +176,13 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Tensor2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Tensor2D
 #endif
-      PROCEDURE, PUBLIC :: Divergence => Divergence_Tensor2D
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor2D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Tensor2D 
 
       PROCEDURE, PUBLIC :: Determinant => Determinant_Tensor2D
 
+      GENERIC, PUBLIC :: Divergence => Divergence_Tensor2D
+      PROCEDURE, PRIVATE :: Divergence_Tensor2D
 
   END TYPE Tensor2D
 
@@ -186,11 +203,13 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Tensor3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Tensor3D
 #endif
-      PROCEDURE, PUBLIC :: Divergence => Divergence_Tensor3D
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Tensor3D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Tensor3D 
 
       PROCEDURE, PUBLIC :: Determinant => Determinant_Tensor3D
+
+      GENERIC, PUBLIC :: Divergence => Divergence_Tensor3D
+      PROCEDURE, PRIVATE :: Divergence_Tensor3D
 
   END TYPE Tensor3D
 
