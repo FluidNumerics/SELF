@@ -42,6 +42,9 @@ SELF_Data.o: SELF_Data.F90 SELF_Constants.o SELF_Lagrange.o
 SELF_Mesh.o: SELF_Mesh.F90 SELF_Constants.o SELF_Lagrange.o SELF_Data.o
 	${FC} ${FFLAGS} -c SELF_Mesh.F90 -o $@
 
+SELF_MappedData_HIP.o: SELF_MappedData_HIP.cpp SELF_Mesh.o SELF_Macros.h
+	${FC} ${GFLAGS} -c SELF_MappedData_HIP.cpp -o $@
+
 SELF_MappedData.o: SELF_MappedData.F90 SELF_Mesh.o SELF_Constants.o SELF_Lagrange.o SELF_Data.o
 	${FC} ${FFLAGS} -c SELF_MappedData.F90 -o $@
 
