@@ -223,23 +223,25 @@ IMPLICIT NONE
     MODULE PROCEDURE Equals_Tensor3D
   END INTERFACE
 
-!  INTERFACE OPERATOR (+)
-!    MODULE PROCEDURE Add_Scalar1D
-!    MODULE PROCEDURE Add_Scalar2D
-!    MODULE PROCEDURE Add_Scalar3D
-!    MODULE PROCEDURE Add_Vector2D
-!    MODULE PROCEDURE Add_Vector3D
-!    MODULE PROCEDURE Add_Tensor2D
-!  END INTERFACE
-!
-!  INTERFACE OPERATOR (-)
-!    MODULE PROCEDURE Subtract_Scalar1D
-!    MODULE PROCEDURE Subtract_Scalar2D
-!    MODULE PROCEDURE Subtract_Scalar3D
-!    MODULE PROCEDURE Subtract_Vector2D
-!    MODULE PROCEDURE Subtract_Vector3D
-!    MODULE PROCEDURE Subtract_Tensor2D
-!  END INTERFACE
+  INTERFACE OPERATOR (+)
+    MODULE PROCEDURE Add_Scalar1D
+    MODULE PROCEDURE Add_Scalar2D
+    MODULE PROCEDURE Add_Scalar3D
+    MODULE PROCEDURE Add_Vector2D
+    MODULE PROCEDURE Add_Vector3D
+    MODULE PROCEDURE Add_Tensor2D
+    MODULE PROCEDURE Add_Tensor3D
+  END INTERFACE
+
+  INTERFACE OPERATOR (-)
+    MODULE PROCEDURE Subtract_Scalar1D
+    MODULE PROCEDURE Subtract_Scalar2D
+    MODULE PROCEDURE Subtract_Scalar3D
+    MODULE PROCEDURE Subtract_Vector2D
+    MODULE PROCEDURE Subtract_Vector3D
+    MODULE PROCEDURE Subtract_Tensor2D
+    MODULE PROCEDURE Subtract_Tensor3D
+  END INTERFACE
 
 CONTAINS
 
@@ -368,15 +370,41 @@ FUNCTION Derivative_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION Derivative_Scalar1D
 
-SUBROUTINE Equals_Scalar1D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Scalar1D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Scalar1D), INTENT(out) :: SELFOut
-  TYPE(Scalar1D), INTENT(in) :: SELFStorage
+  TYPE(Scalar1D), INTENT(inout) :: SELFOut
+  TYPE(Scalar1D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Scalar1D
+
+FUNCTION Add_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Scalar1D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar1D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Scalar1D
+
+FUNCTION Subtract_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Scalar1D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar1D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Scalar1D
 
 ! -- Scalar2D -- !
 
@@ -503,15 +531,41 @@ FUNCTION Gradient_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION Gradient_Scalar2D
 
-SUBROUTINE Equals_Scalar2D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Scalar2D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Scalar2D), INTENT(out) :: SELFOut
-  TYPE(Scalar2D), INTENT(in) :: SELFStorage
+  TYPE(Scalar2D), INTENT(inout) :: SELFOut
+  TYPE(Scalar2D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Scalar2D
+
+FUNCTION Add_Scalar2D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Scalar2D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar2D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Scalar2D
+
+FUNCTION Subtract_Scalar2D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Scalar2D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar2D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Scalar2D
 
 ! -- Scalar3D -- !
 
@@ -637,15 +691,41 @@ FUNCTION Gradient_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION Gradient_Scalar3D
 
-SUBROUTINE Equals_Scalar3D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Scalar3D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Scalar3D), INTENT(out) :: SELFOut
-  TYPE(Scalar3D), INTENT(in) :: SELFStorage
+  TYPE(Scalar3D), INTENT(inout) :: SELFOut
+  TYPE(Scalar3D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Scalar3D
+
+FUNCTION Add_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Scalar3D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar3D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Scalar3D
+
+FUNCTION Subtract_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Scalar3D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar3D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Scalar3D
 
 ! -- Vector2D -- !
 
@@ -811,15 +891,41 @@ FUNCTION Curl_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION Curl_Vector2D
 
-SUBROUTINE Equals_Vector2D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Vector2D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Vector2D), INTENT(out) :: SELFOut
-  TYPE(Vector2D), INTENT(in) :: SELFStorage
+  TYPE(Vector2D), INTENT(inout) :: SELFOut
+  TYPE(Vector2D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Vector2D
+
+FUNCTION Add_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Vector2D), INTENT(in) :: SELFa, SELFb
+  TYPE(Vector2D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Vector2D
+
+FUNCTION Subtract_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Vector2D), INTENT(in) :: SELFa, SELFb
+  TYPE(Vector2D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Vector2D
 
 ! -- Vector3D -- !
 
@@ -985,15 +1091,41 @@ FUNCTION Curl_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION Curl_Vector3D
 
-SUBROUTINE Equals_Vector3D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Vector3D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Vector3D), INTENT(out) :: SELFOut
-  TYPE(Vector3D), INTENT(in) :: SELFStorage
+  TYPE(Vector3D), INTENT(inout) :: SELFOut
+  TYPE(Vector3D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Vector3D
+
+FUNCTION Add_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Vector3D), INTENT(in) :: SELFa, SELFb
+  TYPE(Vector3D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Vector3D
+
+FUNCTION Subtract_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Vector3D), INTENT(in) :: SELFa, SELFb
+  TYPE(Vector3D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Vector3D
 
 ! -- Tensor2D -- !
 
@@ -1144,15 +1276,41 @@ FUNCTION Determinant_Tensor2D( SELFStorage ) RESULT( SELFout )
     
 END FUNCTION Determinant_Tensor2D
 
-SUBROUTINE Equals_Tensor2D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Tensor2D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Tensor2D), INTENT(out) :: SELFOut
-  TYPE(Tensor2D), INTENT(in) :: SELFStorage
+  TYPE(Tensor2D), INTENT(inout) :: SELFOut
+  TYPE(Tensor2D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Tensor2D
+
+FUNCTION Add_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Tensor2D), INTENT(in) :: SELFa, SELFb
+  TYPE(Tensor2D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Tensor2D
+
+FUNCTION Subtract_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Tensor2D), INTENT(in) :: SELFa, SELFb
+  TYPE(Tensor2D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Tensor2D
 
 ! -- Tensor3D -- !
 
@@ -1316,14 +1474,40 @@ FUNCTION Determinant_Tensor3D( SELFStorage ) RESULT( SELFout )
     
 END FUNCTION Determinant_Tensor3D
 
-SUBROUTINE Equals_Tensor3D( SELFOut, SELFStorage )
+SUBROUTINE Equals_Tensor3D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Tensor3D), INTENT(out) :: SELFOut
-  TYPE(Tensor3D), INTENT(in) :: SELFStorage
+  TYPE(Tensor3D), INTENT(inout) :: SELFOut
+  TYPE(Tensor3D), INTENT(in) :: SELFin
 
-    SELFOut % interior % hostData = SELFStorage % interior % hostData
-    SELFOut % boundary % hostData = SELFStorage % boundary % hostData
+    SELFOut % interior % hostData = SELFin % interior % hostData
+    SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Tensor3D
+
+FUNCTION Add_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Tensor3D), INTENT(in) :: SELFa, SELFb
+  TYPE(Tensor3D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData+&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData+&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Add_Tensor3D
+
+FUNCTION Subtract_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
+  IMPLICIT NONE
+  TYPE(Tensor3D), INTENT(in) :: SELFa, SELFb
+  TYPE(Tensor3D) :: SELFOut
+
+    SELFOut % interior % hostData = SELFa % interior % hostData-&
+                                    SELFb % interior % hostData
+
+    SELFOut % boundary % hostData = SELFa % boundary % hostData-&
+                                    SELFb % boundary % hostData
+  
+END FUNCTION Subtract_Tensor3D
 
 END MODULE SELF_Data
