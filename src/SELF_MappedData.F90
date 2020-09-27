@@ -43,10 +43,9 @@ IMPLICIT NONE
 
     CONTAINS
 
-      GENERIC, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector2D
-      PROCEDURE, PRIVATE :: ContravariantProjection_MappedVector2D
-!      PROCEDURE, PUBLIC :: Divergence => Divergence_MappedVector2D
-!      PROCEDURE, PUBLIC :: Curl => Curl_MappedVector2D
+      GENERIC, PUBLIC :: Divergence => Divergence_MappedVector2D
+      PROCEDURE, PRIVATE :: Divergence_MappedVector2D
+      PROCEDURE, PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
 
   END TYPE MappedVector2D
 
@@ -54,26 +53,21 @@ IMPLICIT NONE
 
     CONTAINS
 
-      GENERIC, PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector3D
-      PROCEDURE, PRIVATE :: ContravariantProjection_MappedVector3D
-!      PROCEDURE, PUBLIC :: Divergence => Divergence_MappedVector3D
-!      PROCEDURE, PUBLIC :: Curl => Curl_MappedVector3D
+      GENERIC, PUBLIC :: Divergence => Divergence_MappedVector3D
+      PROCEDURE, PRIVATE :: Divergence_MappedVector3D
+      PROCEDURE, PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
 
   END TYPE MappedVector3D
 
   TYPE, EXTENDS(Tensor2D), PUBLIC :: MappedTensor2D
 
-    CONTAINS
-
-      PROCEDURE, PUBLIC :: CompDivergence => CompDivergence_MappedTensor2D
+!    CONTAINS
 
   END TYPE MappedTensor2D
 
   TYPE, EXTENDS(Tensor3D), PUBLIC :: MappedTensor3D
 
-    CONTAINS
-
-      PROCEDURE, PUBLIC :: CompDivergence => CompDivergence_MappedTensor3D
+!    CONTAINS
 
   END TYPE MappedTensor3D
 
@@ -118,7 +112,7 @@ CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
 
-  FUNCTION Gradient_MappedScalar2D( SELFStorage, workTensor, mesh, gpuAccel ) RESULT( SELFOut )
+  FUNCTION Gradient_MappedScalar2D( scalar, workTensor, mesh, gpuAccel ) RESULT( gradF )
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
@@ -128,53 +122,53 @@ CONTAINS
     ! 
     ! where the sum over i is implied.
     IMPLICIT NONE
-    CLASS(MappedScalar2D) :: SELFStorage
+    CLASS(MappedScalar2D) :: scalar
     TYPE(MappedTensor2D) :: workTensor
     TYPE(Mesh2D) :: mesh
-    TYPE(MappedVector2D) :: SELFOut
+    TYPE(Vector2D) :: gradF
     LOGICAL :: gpuAccel
   
-      CALL SELFStorage % ContravariantWeight( workTensor, mesh, gpuAccel ) 
-      SELFOut = workTensor % CompDivergence( gpuAccel ) 
+      workTensor = scalar % ContravariantWeight( mesh, gpuAccel ) 
+      gradF = workTensor % Divergence( gpuAccel ) 
   
   END FUNCTION Gradient_MappedScalar2D
   
-  SUBROUTINE ContravariantWeight_MappedScalar2D(SELFStorage, workTensor, mesh, gpuAccel)
+  FUNCTION ContravariantWeight_MappedScalar2D( scalar, mesh, gpuAccel ) RESULT( workTensor )
     IMPLICIT NONE
-    CLASS(MappedScalar2D), INTENT(in) :: SELFStorage
-    TYPE(MappedTensor2D), INTENT(inout) :: workTensor
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedScalar2D) :: scalar
+    TYPE(Mesh2D) :: mesh
+    LOGICAL :: gpuAccel
+    TYPE(MappedTensor2D) :: workTensor
     ! Local
     INTEGER :: i, j, iVar, iEl
   
       IF( gpuAccel )THEN
 
-        CALL ContravariantWeight_MappedScalar2D_gpu_wrapper( SELFStorage % interior % deviceData, &
+        CALL ContravariantWeight_MappedScalar2D_gpu_wrapper( scalar % interior % deviceData, &
                                                              workTensor % interior % deviceData, &
                                                              mesh % geometry % dsdx % interior % deviceData, &
-                                                             SELFStorage % N, &
-                                                             SELFStorage % nVar, &
-                                                             SELFStorage % nElem )
+                                                             scalar % N, &
+                                                             scalar % nVar, &
+                                                             scalar % nElem )
 
       ELSE
 
-        DO iEl = 1, SELFStorage % nElem
-          DO iVar = 1, SELFStorage % nVar
-            DO j = 0, SELFStorage % N
-              DO i = 0, SELFStorage % N
+        DO iEl = 1, scalar % nElem
+          DO iVar = 1, scalar % nVar
+            DO j = 0, scalar % N
+              DO i = 0, scalar % N
   
                  workTensor % interior % hostData(1,1,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                          hostData(1,1,i,j,1,iEl)*SELFStorage % interior % hostData(i,j,iVar,iEl) 
+                                                                          hostData(1,1,i,j,1,iEl)*scalar % interior % hostData(i,j,iVar,iEl) 
   
                  workTensor % interior % hostData(2,1,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % & 
-                                                                          hostData(1,2,i,j,1,iEl)*SELFStorage % interior % hostData(i,j,iVar,iEl) 
+                                                                          hostData(1,2,i,j,1,iEl)*scalar % interior % hostData(i,j,iVar,iEl) 
   
                  workTensor % interior % hostData(1,2,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                          hostData(2,1,i,j,1,iEl)*SELFStorage % interior % hostData(i,j,iVar,iEl) 
+                                                                          hostData(2,1,i,j,1,iEl)*scalar % interior % hostData(i,j,iVar,iEl) 
   
                  workTensor % interior % hostData(2,2,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                          hostData(2,2,i,j,1,iEl)*SELFStorage % interior % hostData(i,j,iVar,iEl) 
+                                                                          hostData(2,2,i,j,1,iEl)*scalar % interior % hostData(i,j,iVar,iEl) 
   
               ENDDO
             ENDDO
@@ -183,9 +177,9 @@ CONTAINS
 
       ENDIF
   
-  END SUBROUTINE ContravariantWeight_MappedScalar2D
+  END FUNCTION ContravariantWeight_MappedScalar2D
   
-  FUNCTION Gradient_MappedScalar3D( SELFStorage, workTensor, mesh, gpuAccel ) RESULT( SELFOut )
+  FUNCTION Gradient_MappedScalar3D( scalar, workTensor, mesh, gpuAccel ) RESULT( gradF )
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 3D function using the conservative form of the
@@ -195,71 +189,71 @@ CONTAINS
     ! 
     ! where the sum over i is implied.
     IMPLICIT NONE
-    CLASS(MappedScalar3D) :: SELFStorage
+    CLASS(MappedScalar3D) :: scalar
     TYPE(MappedTensor3D) :: workTensor
     TYPE(Mesh3D) :: mesh
-    TYPE(MappedVector3D) :: SELFOut
+    TYPE(Vector3D) :: gradF
     LOGICAL :: gpuAccel
   
-      CALL SELFStorage % ContravariantWeight( workTensor, mesh, gpuAccel ) 
-      SELFOut = workTensor % CompDivergence( gpuAccel ) 
+      workTensor = scalar % ContravariantWeight( mesh, gpuAccel ) 
+      gradF = workTensor % Divergence( gpuAccel ) 
   
   END FUNCTION Gradient_MappedScalar3D
   
-  SUBROUTINE ContravariantWeight_MappedScalar3D( SELFStorage, workTensor, mesh, gpuAccel )
+  FUNCTION ContravariantWeight_MappedScalar3D( scalar, mesh, gpuAccel ) RESULT( workTensor )
     IMPLICIT NONE
-    CLASS(MappedScalar3D), INTENT(in) :: SELFStorage
-    TYPE(MappedTensor3D), INTENT(inout) :: workTensor
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedScalar3D) :: scalar
+    TYPE(Mesh3D) :: mesh
+    LOGICAL :: gpuAccel
+    TYPE(MappedTensor3D) :: workTensor
     ! Local
     INTEGER :: i, j, k, iVar, iEl
   
       IF( gpuAccel )THEN
 
-        CALL ContravariantWeight_MappedScalar3D_gpu_wrapper( SELFStorage % interior % deviceData, &
+        CALL ContravariantWeight_MappedScalar3D_gpu_wrapper( scalar % interior % deviceData, &
                                                              workTensor % interior % deviceData, &
                                                              mesh % geometry % dsdx % interior % deviceData, &
-                                                             SELFStorage % N, &
-                                                             SELFStorage % nVar, &
-                                                             SELFStorage % nElem )
+                                                             scalar % N, &
+                                                             scalar % nVar, &
+                                                             scalar % nElem )
       ELSE
 
-        DO iEl = 1, SELFStorage % nElem
-          DO iVar = 1, SELFStorage % nVar
-            DO k = 0, SELFStorage % N
-              DO j = 0, SELFStorage % N
-                DO i = 0, SELFStorage % N
+        DO iEl = 1, scalar % nElem
+          DO iVar = 1, scalar % nVar
+            DO k = 0, scalar % N
+              DO j = 0, scalar % N
+                DO i = 0, scalar % N
     
                    ! Get the x-component of the Jacobian weighted contravariant basis vectors multipled by the scalar
                    workTensor % interior % hostData(1,1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(1,1,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(1,1,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    workTensor % interior % hostData(2,1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % & 
-                                                                            hostData(1,2,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(1,2,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    workTensor % interior % hostData(3,1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % & 
-                                                                            hostData(1,3,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(1,3,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    ! Get the y-component of the Jacobian weighted contravariant basis vectors multipled by the scalar
                    workTensor % interior % hostData(1,2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(2,1,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(2,1,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    workTensor % interior % hostData(2,2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(2,2,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(2,2,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    workTensor % interior % hostData(3,2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(2,3,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(2,3,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    ! Get the z-component of the Jacobian weighted contravariant basis vectors multipled by the scalar
                    workTensor % interior % hostData(1,3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(3,1,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(3,1,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    workTensor % interior % hostData(2,3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(3,2,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(3,2,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                    workTensor % interior % hostData(3,3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
-                                                                            hostData(3,3,i,j,k,iVar,iEl)*SELFStorage % interior % hostData(i,j,k,iVar,iEl) 
+                                                                            hostData(3,3,i,j,k,iVar,iEl)*scalar % interior % hostData(i,j,k,iVar,iEl) 
     
                 ENDDO
               ENDDO
@@ -269,19 +263,33 @@ CONTAINS
 
       ENDIF
   
-  END SUBROUTINE ContravariantWeight_MappedScalar3D
+  END FUNCTION ContravariantWeight_MappedScalar3D
   
   ! ---------------------- Vectors ---------------------- !
+  FUNCTION Divergence_MappedVector2D( physVector, compVector, mesh, gpuAccel ) RESULT( divVector )
+    ! Strong Form Operator
+    !
+    IMPLICIT NONE
+    CLASS(MappedVector2D) :: physVector
+    TYPE(MappedVector2D) :: compVector
+    TYPE(Mesh2D) :: mesh
+    TYPE(Scalar2D) :: divVector
+    LOGICAL :: gpuAccel
   
-  SUBROUTINE ContravariantProjection_MappedVector2D( physVector, compVector, mesh, gpuAccel )
+      compVector = physVector % ContravariantProjection( mesh, gpuAccel ) 
+      divVector = compVector % Divergence( gpuAccel ) 
+  
+  END FUNCTION Divergence_MappedVector2D
+  
+  FUNCTION ContravariantProjection_MappedVector2D( physVector, mesh, gpuAccel ) RESULT( compVector )
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
-    CLASS(MappedVector2D), INTENT(in) :: physVector
-    TYPE(MappedVector2D), INTENT(inout) :: compVector
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedVector2D) :: physVector
+    TYPE(Mesh2D) :: mesh
+    LOGICAL :: gpuAccel
+    TYPE(MappedVector2D) :: compVector
     ! Local
     INTEGER :: i, j, iVar, iEl
   
@@ -317,17 +325,32 @@ CONTAINS
         ENDDO
       ENDIF
   
-  END SUBROUTINE ContravariantProjection_MappedVector2D
+  END FUNCTION ContravariantProjection_MappedVector2D
+
+  FUNCTION Divergence_MappedVector3D( physVector, compVector, mesh, gpuAccel ) RESULT( divVector )
+    ! Strong Form Operator
+    !
+    IMPLICIT NONE
+    CLASS(MappedVector3D) :: physVector
+    TYPE(MappedVector3D) :: compVector
+    TYPE(Mesh3D) :: mesh
+    TYPE(Scalar3D) :: divVector
+    LOGICAL :: gpuAccel
   
-  SUBROUTINE ContravariantProjection_MappedVector3D( physVector, compVector, mesh, gpuAccel )
+      compVector = physVector % ContravariantProjection( mesh, gpuAccel ) 
+      divVector = compVector % Divergence( gpuAccel ) 
+  
+  END FUNCTION Divergence_MappedVector3D
+  
+  FUNCTION ContravariantProjection_MappedVector3D( physVector, mesh, gpuAccel ) RESULT( compVector )
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
-    CLASS(MappedVector3D), INTENT(in) :: physVector
-    TYPE(MappedVector3D), INTENT(inout) :: compVector
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedVector3D) :: physVector
+    TYPE(MappedVector3D) :: compVector
+    TYPE(Mesh3D) :: mesh
+    LOGICAL :: gpuAccel
     ! Local
     INTEGER :: i, j, k, iVar, iEl, iDir
   
@@ -377,48 +400,8 @@ CONTAINS
         ENDDO
       ENDIF
   
-  END SUBROUTINE ContravariantProjection_MappedVector3D
+  END FUNCTION ContravariantProjection_MappedVector3D
   
   ! ---------------------- Tensors ---------------------- !
-  
-  FUNCTION CompDivergence_MappedTensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
-    IMPLICIT NONE
-    CLASS(MappedTensor2D) :: SELFStorage
-    TYPE(MappedVector2D) :: SELFOut
-    LOGICAL :: gpuAccel
-  
-      IF( gpuAccel )THEN
-        CALL SELFStorage % interp % TensorDivergence_2D( SELFStorage % interior % deviceData, &
-                                                        SELFout % interior % deviceData, &
-                                                        SELFStorage % nVar, &
-                                                        SELFStorage % nElem )  
-      ELSE
-        CALL SELFStorage % interp % TensorDivergence_2D( SELFStorage % interior % hostData, &
-                                                        SELFout % interior % hostData, &
-                                                        SELFStorage % nVar, &
-                                                        SELFStorage % nElem )  
-      ENDIF
-  
-  END FUNCTION CompDivergence_MappedTensor2D
-  
-  FUNCTION CompDivergence_MappedTensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
-    IMPLICIT NONE
-    CLASS(MappedTensor3D) :: SELFStorage
-    TYPE(MappedVector3D) :: SELFOut
-    LOGICAL :: gpuAccel
-  
-      IF( gpuAccel )THEN
-        CALL SELFStorage % interp % TensorDivergence_3D( SELFStorage % interior % deviceData, &
-                                                        SELFout % interior % deviceData, &
-                                                        SELFStorage % nVar, &
-                                                        SELFStorage % nElem )  
-      ELSE
-        CALL SELFStorage % interp % TensorDivergence_3D( SELFStorage % interior % hostData, &
-                                                        SELFout % interior % hostData, &
-                                                        SELFStorage % nVar, &
-                                                        SELFStorage % nElem )  
-      ENDIF
-  
-  END FUNCTION CompDivergence_MappedTensor3D
   
 END MODULE SELF_MappedData

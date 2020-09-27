@@ -391,7 +391,6 @@ SUBROUTINE CalculateContravariantBasis_Geometry2D( myGeom )
           ENDIF
 
           myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
-          ! TODO : Make dsdx % boundary a unit vector hostData(j,i) is vector i, component j
 
         ENDDO
       ENDDO
@@ -667,7 +666,6 @@ SUBROUTINE CalculateContravariantBasis_Geometry3D( myGeom )
             ENDIF
 
             myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = fac*myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)
-            ! TODO : Make dsdx % boundary a unit vector hostData(j,i) is vector i, component j
           ENDDO
         ENDDO
       ENDDO
