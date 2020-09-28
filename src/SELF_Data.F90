@@ -38,6 +38,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar1D
       PROCEDURE, PUBLIC :: GridInterp => GridInterp_Scalar1D
       PROCEDURE, PUBLIC :: Derivative => Derivative_Scalar1D
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar1D
 
   END TYPE Scalar1D
 
@@ -64,6 +65,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: Gradient => Gradient_Scalar2D
       PROCEDURE, PRIVATE :: Gradient_Scalar2D
 
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar2D
+
   END TYPE Scalar2D
 
   TYPE, PUBLIC :: Scalar3D
@@ -88,6 +91,8 @@ IMPLICIT NONE
 
       GENERIC, PUBLIC :: Gradient => Gradient_Scalar3D
       PROCEDURE, PRIVATE :: Gradient_Scalar3D
+
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar3D
 
   END TYPE Scalar3D
 
@@ -122,6 +127,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: Curl => Curl_Vector2D
       PROCEDURE, PRIVATE :: Curl_Vector2D
 
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector2D
+
 
   END TYPE Vector2D
 
@@ -154,6 +161,7 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: Curl => Curl_Vector3D
       PROCEDURE, PRIVATE :: Curl_Vector3D
 
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector3D
 
   END TYPE Vector3D
 
@@ -184,6 +192,8 @@ IMPLICIT NONE
       GENERIC, PUBLIC :: Divergence => Divergence_Tensor2D
       PROCEDURE, PRIVATE :: Divergence_Tensor2D
 
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor2D
+
   END TYPE Tensor2D
 
   TYPE, PUBLIC :: Tensor3D
@@ -210,6 +220,8 @@ IMPLICIT NONE
 
       GENERIC, PUBLIC :: Divergence => Divergence_Tensor3D
       PROCEDURE, PRIVATE :: Divergence_Tensor3D
+
+      PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor3D
 
   END TYPE Tensor3D
 
@@ -242,6 +254,7 @@ IMPLICIT NONE
     MODULE PROCEDURE Subtract_Tensor2D
     MODULE PROCEDURE Subtract_Tensor3D
   END INTERFACE
+
 
 CONTAINS
 
@@ -369,6 +382,24 @@ FUNCTION Derivative_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
     ENDIF
 
 END FUNCTION Derivative_Scalar1D
+
+FUNCTION AbsMaxInterior_Scalar1D( scalar ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Scalar1D) :: scalar
+  REAL(prec) :: absMax(1:scalar % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i
+
+     absMax = 0.0_prec
+     DO iEl = 1, scalar % nElem
+       DO iVar = 1, scalar % nVar
+         DO i = 0, scalar % N
+           absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,iVar,iEl) ), absMax(iVar))
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Scalar1D
 
 SUBROUTINE Equals_Scalar1D( SELFOut, SELFin )
   IMPLICIT NONE
@@ -530,6 +561,26 @@ FUNCTION Gradient_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
     ENDIF
 
 END FUNCTION Gradient_Scalar2D
+
+FUNCTION AbsMaxInterior_Scalar2D( scalar ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Scalar2D) :: scalar
+  REAL(prec) :: absMax(1:scalar % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i, j
+
+     absMax = 0.0_prec
+     DO iEl = 1, scalar % nElem
+       DO iVar = 1, scalar % nVar
+         DO j = 0, scalar % N
+           DO i = 0, scalar % N
+             absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,iVar,iEl) ), absMax(iVar))
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Scalar2D
 
 SUBROUTINE Equals_Scalar2D( SELFOut, SELFin )
   IMPLICIT NONE
@@ -700,6 +751,28 @@ SUBROUTINE Equals_Scalar3D( SELFOut, SELFin )
     SELFOut % boundary % hostData = SELFin % boundary % hostData
   
 END SUBROUTINE Equals_Scalar3D
+
+FUNCTION AbsMaxInterior_Scalar3D( scalar ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Scalar3D) :: scalar
+  REAL(prec) :: absMax(1:scalar % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i, j, k
+
+     absMax = 0.0_prec
+     DO iEl = 1, scalar % nElem
+       DO iVar = 1, scalar % nVar
+         DO k = 0, scalar % N
+           DO j = 0, scalar % N
+             DO i = 0, scalar % N
+               absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,k,iVar,iEl) ), absMax(iVar))
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Scalar3D
 
 FUNCTION Add_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
@@ -901,6 +974,28 @@ SUBROUTINE Equals_Vector2D( SELFOut, SELFin )
   
 END SUBROUTINE Equals_Vector2D
 
+FUNCTION AbsMaxInterior_Vector2D( vector ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Vector2D) :: vector
+  REAL(prec) :: absMax(1:vector % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i, j, iDir
+
+     absMax = 0.0_prec
+     DO iEl = 1, vector % nElem
+       DO iVar = 1, vector % nVar
+         DO j = 0, vector % N
+           DO i = 0, vector % N
+             DO iDir = 1, 2
+               absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,iVar,iEl) ), absMax(iVar))
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Vector2D
+
 FUNCTION Add_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
   TYPE(Vector2D), INTENT(in) :: SELFa, SELFb
@@ -1091,6 +1186,30 @@ FUNCTION Curl_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
 
 END FUNCTION Curl_Vector3D
 
+FUNCTION AbsMaxInterior_Vector3D( vector ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Vector3D) :: vector
+  REAL(prec) :: absMax(1:vector % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i, j, k, iDir
+
+     absMax = 0.0_prec
+     DO iEl = 1, vector % nElem
+       DO iVar = 1, vector % nVar
+         DO k = 0, vector % N
+           DO j = 0, vector % N
+             DO i = 0, vector % N
+               DO iDir = 1, 3
+                 absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,k,iVar,iEl) ), absMax(iVar))
+               ENDDO
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Vector3D
+
 SUBROUTINE Equals_Vector3D( SELFOut, SELFin )
   IMPLICIT NONE
   TYPE(Vector3D), INTENT(inout) :: SELFOut
@@ -1275,6 +1394,30 @@ FUNCTION Determinant_Tensor2D( SELFStorage ) RESULT( SELFout )
     ENDDO
     
 END FUNCTION Determinant_Tensor2D
+
+FUNCTION AbsMaxInterior_Tensor2D( tensor ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Tensor2D) :: tensor
+  REAL(prec) :: absMax(1:tensor % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i, j, row, col
+
+     absMax = 0.0_prec
+     DO iEl = 1, tensor % nElem
+       DO iVar = 1, tensor % nVar
+         DO j = 0, tensor % N
+           DO i = 0, tensor % N
+             DO col = 1, 2
+               DO row = 1, 2
+                 absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,iVar,iEl) ), absMax(iVar))
+               ENDDO
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Tensor2D
 
 SUBROUTINE Equals_Tensor2D( SELFOut, SELFin )
   IMPLICIT NONE
@@ -1473,6 +1616,32 @@ FUNCTION Determinant_Tensor3D( SELFStorage ) RESULT( SELFout )
     ENDDO
     
 END FUNCTION Determinant_Tensor3D
+
+FUNCTION AbsMaxInterior_Tensor3D( tensor ) RESULT( absMax )
+  IMPLICIT NONE
+  CLASS(Tensor3D) :: tensor
+  REAL(prec) :: absMax(1:tensor % nVar)
+  ! Local
+  INTEGER :: iEl, iVar, i, j, k, row, col
+
+     absMax = 0.0_prec
+     DO iEl = 1, tensor % nElem
+       DO iVar = 1, tensor % nVar
+         DO k = 0, tensor % N
+           DO j = 0, tensor % N
+             DO i = 0, tensor % N
+               DO col = 1, 3
+                 DO row = 1, 3
+                   absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,k,iVar,iEl) ), absMax(iVar))
+                 ENDDO
+               ENDDO
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END FUNCTION AbsMaxInterior_Tensor3D
 
 SUBROUTINE Equals_Tensor3D( SELFOut, SELFin )
   IMPLICIT NONE
