@@ -87,7 +87,7 @@ CONTAINS
     INTEGER :: globalSideId, externalProcId
 
     msgCnt = 0
-    DO e1 = 1, mesh % nElements
+    DO e1 = 1, mesh % nElem
       s1 = 1
       DO sideId = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1)
         ! Secondary element ID for this face
@@ -98,12 +98,12 @@ CONTAINS
         ! owned by another rank
         IF( e2 < 0 )THEN 
           s2 = mesh % sideInfo % hostData(4,sideId)/10
-          globalSideId = ABS(mesh % sideInfo % hostdata(2,sideId)
+          globalSideId = ABS(mesh % sideInfo % hostdata(2,sideId))
 
-          !TODO : Calculate external MPI Rank we are exchanging with
           ! Assume that mesh has been pre-processed with HOPR and
           ! elements are distributed to ranks by simply dividing the list [1:nElements] 
           ! evenly and in order to all ranks
+          ! TODO: externalProcId = GetRank( e2, mesh % nElem, mpiHandler % nRanks ) 
 
           msgCnt = msgCnt + 1
           ! Receive data on this rank's workScalar

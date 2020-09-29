@@ -377,7 +377,7 @@ SUBROUTINE CalculateContravariantBasis_Geometry2D( myGeom )
     ENDDO
 
     ! Interpolate the contravariant tensor to the boundaries
-    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myGeom % dsdx % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
@@ -402,12 +402,12 @@ SUBROUTINE CalculateMetricTerms_Geometry2D( myGeom )
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(inout) :: myGeom
 
-    myGeom % dxds = myGeom % x % Gradient( gpuAccel = .FALSE. )
-    myGeom % dxds = myGeom % dxds % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myGeom % x % Gradient( myGeom % dxds, gpuAccel = .FALSE. )
+    CALL myGeom % dxds % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    myGeom % J = myGeom % dxds % Determinant()
-    myGeom % J = myGeom % J % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myGeom % dxds % Determinant( myGeom % J )
+    CALL myGeom % J % BoundaryInterp( gpuAccel = .FALSE. )
 
     CALL myGeom % CalculateContravariantBasis( )
 
@@ -650,7 +650,7 @@ SUBROUTINE CalculateContravariantBasis_Geometry3D( myGeom )
     ENDDO
 
     ! Interpolate the contravariant tensor to the boundaries
-    myGeom % dsdx = myGeom % dsdx % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myGeom % dsdx % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
@@ -677,12 +677,12 @@ SUBROUTINE CalculateMetricTerms_Geometry3D( myGeom )
   IMPLICIT NONE
   CLASS(Geometry3D), INTENT(inout) :: myGeom
 
-    myGeom % dxds = myGeom % x % Gradient( gpuAccel = .FALSE. )
-    myGeom % dxds = myGeom % dxds % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myGeom % x % Gradient( myGeom % dxds, gpuAccel = .FALSE. )
+    CALL myGeom % dxds % BoundaryInterp( gpuAccel = .FALSE. )
 
     ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    myGeom % J = myGeom % dxds % Determinant( )
-    myGeom % J = myGeom % J % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myGeom % dxds % Determinant( myGeom % J )
+    CALL myGeom % J % BoundaryInterp( gpuAccel = .FALSE. )
 
     CALL myGeom % CalculateContravariantBasis()
 #ifdef GPU

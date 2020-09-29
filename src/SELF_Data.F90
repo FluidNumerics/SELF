@@ -21,8 +21,11 @@ IMPLICIT NONE
   TYPE, PUBLIC :: Scalar1D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r3) :: interior
     TYPE(hfReal_r3) :: boundary
@@ -40,13 +43,23 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: Derivative => Derivative_Scalar1D
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar1D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Scalar1D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Scalar1D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Scalar1D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Scalar1D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Scalar1D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Scalar1D
+
   END TYPE Scalar1D
 
   TYPE, PUBLIC :: Scalar2D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r4) :: interior
     TYPE(hfReal_r4) :: boundary
@@ -67,13 +80,23 @@ IMPLICIT NONE
 
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar2D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Scalar2D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Scalar2D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Scalar2D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Scalar2D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Scalar2D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Scalar2D
+
   END TYPE Scalar2D
 
   TYPE, PUBLIC :: Scalar3D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
@@ -94,6 +117,13 @@ IMPLICIT NONE
 
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar3D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Scalar3D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Scalar3D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Scalar3D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Scalar3D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Scalar3D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Scalar3D
+
   END TYPE Scalar3D
 
 ! ---------------------- Vectors ---------------------- !
@@ -101,8 +131,11 @@ IMPLICIT NONE
   TYPE, PUBLIC :: Vector2D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
@@ -129,14 +162,24 @@ IMPLICIT NONE
 
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector2D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Vector2D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Vector2D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Vector2D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Vector2D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Vector2D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Vector2D
+
 
   END TYPE Vector2D
 
   TYPE, PUBLIC :: Vector3D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
@@ -163,6 +206,13 @@ IMPLICIT NONE
 
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Vector3D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Vector3D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Vector3D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Vector3D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Vector3D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Vector3D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Vector3D
+
   END TYPE Vector3D
 
 ! ---------------------- Tensors ---------------------- !
@@ -170,8 +220,11 @@ IMPLICIT NONE
   TYPE, PUBLIC :: Tensor2D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
@@ -194,13 +247,23 @@ IMPLICIT NONE
 
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor2D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Tensor2D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Tensor2D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Tensor2D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Tensor2D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Tensor2D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Tensor2D
+
   END TYPE Tensor2D
 
   TYPE, PUBLIC :: Tensor3D
 
     INTEGER :: N
+    INTEGER :: M
     INTEGER :: nVar
     INTEGER :: nElem
+    INTEGER :: controlType
+    INTEGER :: targetType
     TYPE(Lagrange) :: interp
     TYPE(hfReal_r7) :: interior
     TYPE(hfReal_r7) :: boundary
@@ -223,38 +286,14 @@ IMPLICIT NONE
 
       PROCEDURE, PUBLIC :: AbsMaxInterior => AbsMaxInterior_Tensor3D
 
+      GENERIC, PUBLIC :: ASSIGNMENT(=) => Equals_Tensor3D
+      GENERIC, PUBLIC :: OPERATOR(+) => Add_Tensor3D
+      GENERIC, PUBLIC :: OPERATOR(-) => Subtract_Tensor3D
+      PROCEDURE, PRIVATE, PASS( SELFOut ) :: Equals_Tensor3D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Add_Tensor3D
+      PROCEDURE, PRIVATE, PASS( SELFa ) :: Subtract_Tensor3D
+
   END TYPE Tensor3D
-
-  INTERFACE ASSIGNMENT (=)
-    MODULE PROCEDURE Equals_Scalar1D
-    MODULE PROCEDURE Equals_Scalar2D
-    MODULE PROCEDURE Equals_Scalar3D
-    MODULE PROCEDURE Equals_Vector2D
-    MODULE PROCEDURE Equals_Vector3D
-    MODULE PROCEDURE Equals_Tensor2D
-    MODULE PROCEDURE Equals_Tensor3D
-  END INTERFACE
-
-  INTERFACE OPERATOR (+)
-    MODULE PROCEDURE Add_Scalar1D
-    MODULE PROCEDURE Add_Scalar2D
-    MODULE PROCEDURE Add_Scalar3D
-    MODULE PROCEDURE Add_Vector2D
-    MODULE PROCEDURE Add_Vector3D
-    MODULE PROCEDURE Add_Tensor2D
-    MODULE PROCEDURE Add_Tensor3D
-  END INTERFACE
-
-  INTERFACE OPERATOR (-)
-    MODULE PROCEDURE Subtract_Scalar1D
-    MODULE PROCEDURE Subtract_Scalar2D
-    MODULE PROCEDURE Subtract_Scalar3D
-    MODULE PROCEDURE Subtract_Vector2D
-    MODULE PROCEDURE Subtract_Vector3D
-    MODULE PROCEDURE Subtract_Tensor2D
-    MODULE PROCEDURE Subtract_Tensor3D
-  END INTERFACE
-
 
 CONTAINS
 
@@ -271,8 +310,11 @@ SUBROUTINE Build_Scalar1D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build(N = N, &
                                      controlNodeType = quadratureType, &
@@ -323,31 +365,30 @@ SUBROUTINE UpdateDevice_Scalar1D( SELFStorage )
 END SUBROUTINE UpdateDevice_Scalar1D
 #endif
 
-FUNCTION BoundaryInterp_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Scalar1D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar1D) :: SELFStorage
-  TYPE(Scalar1D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar1D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarBoundaryInterp_1D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % ScalarBoundaryInterp_1D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Scalar1D
+END SUBROUTINE BoundaryInterp_Scalar1D
 
-FUNCTION GridInterp_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Scalar1D( SELFStorage, SELFout, gpuAccel  )
   IMPLICIT NONE
-  CLASS(Scalar1D) :: SELFStorage
-  TYPE(Scalar1D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar1D), INTENT(in) :: SELFStorage
+  TYPE(Scalar1D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGridInterp_1D( SELFStorage % interior % deviceData, &
@@ -361,13 +402,13 @@ FUNCTION GridInterp_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Scalar1D
+END SUBROUTINE GridInterp_Scalar1D
 
-FUNCTION Derivative_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Derivative_Scalar1D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar1D) :: SELFStorage
-  TYPE(Scalar1D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar1D), INTENT(in) :: SELFStorage
+  TYPE(Scalar1D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % Derivative_1D( SELFStorage % interior % deviceData, &
@@ -381,7 +422,7 @@ FUNCTION Derivative_Scalar1D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                 SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Derivative_Scalar1D
+END SUBROUTINE Derivative_Scalar1D
 
 FUNCTION AbsMaxInterior_Scalar1D( scalar ) RESULT( absMax )
   IMPLICIT NONE
@@ -403,7 +444,7 @@ END FUNCTION AbsMaxInterior_Scalar1D
 
 SUBROUTINE Equals_Scalar1D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Scalar1D), INTENT(inout) :: SELFOut
+  CLASS(Scalar1D), INTENT(inout) :: SELFOut
   TYPE(Scalar1D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -413,8 +454,15 @@ END SUBROUTINE Equals_Scalar1D
 
 FUNCTION Add_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Scalar1D), INTENT(in) :: SELFa, SELFb
-  TYPE(Scalar1D) :: SELFOut
+  CLASS(Scalar1D), INTENT(in) :: SELFa, SELFb
+  TYPE(Scalar1D):: SELFOut
+
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
 
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
@@ -426,9 +474,16 @@ END FUNCTION Add_Scalar1D
 
 FUNCTION Subtract_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Scalar1D), INTENT(in) :: SELFa, SELFb
+  CLASS(Scalar1D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar1D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -450,8 +505,11 @@ SUBROUTINE Build_Scalar2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build( N = N, &
                                       controlNodeType = quadratureType, &
@@ -502,31 +560,30 @@ SUBROUTINE UpdateDevice_Scalar2D( SELFStorage )
 END SUBROUTINE UpdateDevice_Scalar2D
 #endif
 
-FUNCTION BoundaryInterp_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Scalar2D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar2D) :: SELFStorage
-  TYPE(Scalar2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar2D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarBoundaryInterp_2D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % ScalarBoundaryInterp_2D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Scalar2D
+END SUBROUTINE BoundaryInterp_Scalar2D
 
-FUNCTION GridInterp_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Scalar2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar2D) :: SELFStorage
-  TYPE(Scalar2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar2D), INTENT(in) :: SELFStorage
+  TYPE(Scalar2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGridInterp_2D( SELFStorage % interior % deviceData, &
@@ -540,13 +597,13 @@ FUNCTION GridInterp_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Scalar2D
+END SUBROUTINE GridInterp_Scalar2D
 
-FUNCTION Gradient_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Gradient_Scalar2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar2D) :: SELFStorage
-  TYPE(Vector2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar2D), INTENT(in) :: SELFStorage
+  TYPE(Vector2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGradient_2D( SELFStorage % interior % deviceData, &
@@ -560,7 +617,7 @@ FUNCTION Gradient_Scalar2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                     SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Gradient_Scalar2D
+END SUBROUTINE Gradient_Scalar2D
 
 FUNCTION AbsMaxInterior_Scalar2D( scalar ) RESULT( absMax )
   IMPLICIT NONE
@@ -584,7 +641,7 @@ END FUNCTION AbsMaxInterior_Scalar2D
 
 SUBROUTINE Equals_Scalar2D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Scalar2D), INTENT(inout) :: SELFOut
+  CLASS(Scalar2D), INTENT(inout) :: SELFOut
   TYPE(Scalar2D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -594,9 +651,16 @@ END SUBROUTINE Equals_Scalar2D
 
 FUNCTION Add_Scalar2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Scalar2D), INTENT(in) :: SELFa, SELFb
+  CLASS(Scalar2D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar2D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
 
@@ -607,9 +671,16 @@ END FUNCTION Add_Scalar2D
 
 FUNCTION Subtract_Scalar2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Scalar2D), INTENT(in) :: SELFa, SELFb
+  CLASS(Scalar2D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar2D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -631,8 +702,11 @@ SUBROUTINE Build_Scalar3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build( N = N, &
                                       controlNodeType = quadratureType, &
@@ -682,31 +756,30 @@ SUBROUTINE UpdateDevice_Scalar3D( SELFStorage )
 END SUBROUTINE UpdateDevice_Scalar3D
 #endif
 
-FUNCTION BoundaryInterp_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Scalar3D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar3D) :: SELFStorage
-  TYPE(Scalar3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar3D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarBoundaryInterp_3D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % ScalarBoundaryInterp_3D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Scalar3D
+END SUBROUTINE BoundaryInterp_Scalar3D
 
-FUNCTION GridInterp_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Scalar3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar3D) :: SELFStorage
-  TYPE(Scalar3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar3D), INTENT(in) :: SELFStorage
+  TYPE(Scalar3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGridInterp_3D( SELFStorage % interior % deviceData, &
@@ -720,13 +793,13 @@ FUNCTION GridInterp_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Scalar3D
+END SUBROUTINE GridInterp_Scalar3D
 
-FUNCTION Gradient_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Gradient_Scalar3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Scalar3D) :: SELFStorage
-  TYPE(Vector3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Scalar3D), INTENT(in) :: SELFStorage
+  TYPE(Vector3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % ScalarGradient_3D( SELFStorage % interior % deviceData, &
@@ -740,11 +813,11 @@ FUNCTION Gradient_Scalar3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                     SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Gradient_Scalar3D
+END SUBROUTINE Gradient_Scalar3D
 
 SUBROUTINE Equals_Scalar3D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Scalar3D), INTENT(inout) :: SELFOut
+  CLASS(Scalar3D), INTENT(inout) :: SELFOut
   TYPE(Scalar3D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -776,9 +849,16 @@ END FUNCTION AbsMaxInterior_Scalar3D
 
 FUNCTION Add_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Scalar3D), INTENT(in) :: SELFa, SELFb
+  CLASS(Scalar3D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar3D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
 
@@ -789,9 +869,16 @@ END FUNCTION Add_Scalar3D
 
 FUNCTION Subtract_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Scalar3D), INTENT(in) :: SELFa, SELFb
+  CLASS(Scalar3D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar3D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -813,8 +900,11 @@ SUBROUTINE Build_Vector2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build( N = N, &
                                       controlNodeType = quadratureType, &
@@ -864,31 +954,30 @@ SUBROUTINE UpdateDevice_Vector2D( SELFStorage )
 END SUBROUTINE UpdateDevice_Vector2D
 #endif
 
-FUNCTION BoundaryInterp_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Vector2D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector2D) :: SELFStorage
-  TYPE(Vector2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector2D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorBoundaryInterp_2D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % VectorBoundaryInterp_2D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Vector2D
+END SUBROUTINE BoundaryInterp_Vector2D
 
-FUNCTION GridInterp_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Vector2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector2D) :: SELFStorage
-  TYPE(Vector2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector2D), INTENT(in) :: SELFStorage
+  TYPE(Vector2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGridInterp_2D( SELFStorage % interior % deviceData, &
@@ -902,13 +991,13 @@ FUNCTION GridInterp_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Vector2D
+END SUBROUTINE GridInterp_Vector2D
 
-FUNCTION Gradient_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Gradient_Vector2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector2D) :: SELFStorage
-  TYPE(Tensor2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector2D), INTENT(in) :: SELFStorage
+  TYPE(Tensor2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGradient_2D( SELFStorage % interior % deviceData, &
@@ -922,13 +1011,13 @@ FUNCTION Gradient_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                     SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Gradient_Vector2D
+END SUBROUTINE Gradient_Vector2D
 
-FUNCTION Divergence_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Divergence_Vector2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector2D) :: SELFStorage
-  TYPE(Scalar2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector2D), INTENT(in) :: SELFStorage
+  TYPE(Scalar2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorDivergence_2D( SELFStorage % interior % deviceData, &
@@ -942,13 +1031,13 @@ FUNCTION Divergence_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Divergence_Vector2D
+END SUBROUTINE Divergence_Vector2D
 
-FUNCTION Curl_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Curl_Vector2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector2D) :: SELFStorage
-  TYPE(Scalar2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector2D), INTENT(in) :: SELFStorage
+  TYPE(Scalar2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorCurl_2D( SELFStorage % interior % deviceData, &
@@ -962,11 +1051,11 @@ FUNCTION Curl_Vector2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                 SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Curl_Vector2D
+END SUBROUTINE Curl_Vector2D
 
 SUBROUTINE Equals_Vector2D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Vector2D), INTENT(inout) :: SELFOut
+  CLASS(Vector2D), INTENT(inout) :: SELFOut
   TYPE(Vector2D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -998,9 +1087,16 @@ END FUNCTION AbsMaxInterior_Vector2D
 
 FUNCTION Add_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Vector2D), INTENT(in) :: SELFa, SELFb
+  CLASS(Vector2D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector2D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
 
@@ -1011,7 +1107,7 @@ END FUNCTION Add_Vector2D
 
 FUNCTION Subtract_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Vector2D), INTENT(in) :: SELFa, SELFb
+  CLASS(Vector2D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector2D) :: SELFOut
 
     SELFOut % interior % hostData = SELFa % interior % hostData-&
@@ -1035,8 +1131,11 @@ SUBROUTINE Build_Vector3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build( N = N, &
                                       controlNodeType = quadratureType, &
@@ -1086,31 +1185,30 @@ SUBROUTINE UpdateDevice_Vector3D( SELFStorage )
 END SUBROUTINE UpdateDevice_Vector3D
 #endif
 
-FUNCTION BoundaryInterp_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Vector3D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector3D) :: SELFStorage
-  TYPE(Vector3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector3D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorBoundaryInterp_3D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % VectorBoundaryInterp_3D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Vector3D
+END SUBROUTINE BoundaryInterp_Vector3D
 
-FUNCTION GridInterp_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Vector3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector3D) :: SELFStorage
-  TYPE(Vector3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector3D), INTENT(in) :: SELFStorage
+  TYPE(Vector3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGridInterp_3D( SELFStorage % interior % deviceData, &
@@ -1124,13 +1222,13 @@ FUNCTION GridInterp_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Vector3D
+END SUBROUTINE GridInterp_Vector3D
 
-FUNCTION Gradient_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Gradient_Vector3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector3D) :: SELFStorage
-  TYPE(Tensor3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector3D), INTENT(in) :: SELFStorage
+  TYPE(Tensor3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorGradient_3D( SELFStorage % interior % deviceData, &
@@ -1144,13 +1242,13 @@ FUNCTION Gradient_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                     SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Gradient_Vector3D
+END SUBROUTINE Gradient_Vector3D
 
-FUNCTION Divergence_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Divergence_Vector3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector3D) :: SELFStorage
-  TYPE(Scalar3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector3D), INTENT(in) :: SELFStorage
+  TYPE(Scalar3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorDivergence_3D( SELFStorage % interior % deviceData, &
@@ -1164,13 +1262,13 @@ FUNCTION Divergence_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Divergence_Vector3D
+END SUBROUTINE Divergence_Vector3D
 
-FUNCTION Curl_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Curl_Vector3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Vector3D) :: SELFStorage
-  TYPE(Vector3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Vector3D), INTENT(in) :: SELFStorage
+  TYPE(Vector3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % VectorCurl_3D( SELFStorage % interior % deviceData, &
@@ -1184,7 +1282,7 @@ FUNCTION Curl_Vector3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                 SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Curl_Vector3D
+END SUBROUTINE Curl_Vector3D
 
 FUNCTION AbsMaxInterior_Vector3D( vector ) RESULT( absMax )
   IMPLICIT NONE
@@ -1212,7 +1310,7 @@ END FUNCTION AbsMaxInterior_Vector3D
 
 SUBROUTINE Equals_Vector3D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Vector3D), INTENT(inout) :: SELFOut
+  CLASS(Vector3D), INTENT(inout) :: SELFOut
   TYPE(Vector3D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -1222,9 +1320,16 @@ END SUBROUTINE Equals_Vector3D
 
 FUNCTION Add_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Vector3D), INTENT(in) :: SELFa, SELFb
+  CLASS(Vector3D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector3D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
 
@@ -1235,9 +1340,16 @@ END FUNCTION Add_Vector3D
 
 FUNCTION Subtract_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Vector3D), INTENT(in) :: SELFa, SELFb
+  CLASS(Vector3D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector3D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -1259,8 +1371,11 @@ SUBROUTINE Build_Tensor2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build( N = N, &
                                       controlNodeType = quadratureType, &
@@ -1310,31 +1425,30 @@ SUBROUTINE UpdateDevice_Tensor2D( SELFStorage )
 END SUBROUTINE UpdateDevice_Tensor2D
 #endif
 
-FUNCTION BoundaryInterp_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Tensor2D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Tensor2D) :: SELFStorage
-  TYPE(Tensor2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Tensor2D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorBoundaryInterp_2D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % TensorBoundaryInterp_2D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Tensor2D
+END SUBROUTINE BoundaryInterp_Tensor2D
 
-FUNCTION GridInterp_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Tensor2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Tensor2D) :: SELFStorage
-  TYPE(Tensor2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Tensor2D), INTENT(in) :: SELFStorage
+  TYPE(Tensor2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorGridInterp_2D( SELFStorage % interior % deviceData, &
@@ -1348,13 +1462,13 @@ FUNCTION GridInterp_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Tensor2D
+END SUBROUTINE GridInterp_Tensor2D
 
-FUNCTION Divergence_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Divergence_Tensor2D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Tensor2D) :: SELFStorage
-  TYPE(Vector2D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Tensor2D), INTENT(in) :: SELFStorage
+  TYPE(Vector2D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorDivergence_2D( SELFStorage % interior % deviceData, &
@@ -1368,12 +1482,12 @@ FUNCTION Divergence_Tensor2D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Divergence_Tensor2D
+END SUBROUTINE Divergence_Tensor2D
 
-FUNCTION Determinant_Tensor2D( SELFStorage ) RESULT( SELFout )
+SUBROUTINE Determinant_Tensor2D( SELFStorage, SELFout )
   IMPLICIT NONE
-  CLASS(Tensor2D) :: SELFStorage
-  TYPE(Scalar2D) :: SELFOut
+  CLASS(Tensor2D), INTENT(in) :: SELFStorage
+  TYPE(Scalar2D), INTENT(inout) :: SELFOut
   ! Local
   INTEGER :: iEl, iVar, i, j
 
@@ -1393,7 +1507,7 @@ FUNCTION Determinant_Tensor2D( SELFStorage ) RESULT( SELFout )
         ENDDO
     ENDDO
     
-END FUNCTION Determinant_Tensor2D
+END SUBROUTINE Determinant_Tensor2D
 
 FUNCTION AbsMaxInterior_Tensor2D( tensor ) RESULT( absMax )
   IMPLICIT NONE
@@ -1421,7 +1535,7 @@ END FUNCTION AbsMaxInterior_Tensor2D
 
 SUBROUTINE Equals_Tensor2D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Tensor2D), INTENT(inout) :: SELFOut
+  CLASS(Tensor2D), INTENT(inout) :: SELFOut
   TYPE(Tensor2D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -1431,9 +1545,16 @@ END SUBROUTINE Equals_Tensor2D
 
 FUNCTION Add_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Tensor2D), INTENT(in) :: SELFa, SELFb
+  CLASS(Tensor2D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor2D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
 
@@ -1444,9 +1565,16 @@ END FUNCTION Add_Tensor2D
 
 FUNCTION Subtract_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Tensor2D), INTENT(in) :: SELFa, SELFb
+  CLASS(Tensor2D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor2D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, & 
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -1468,8 +1596,11 @@ SUBROUTINE Build_Tensor3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
   INTEGER, INTENT(in) :: nElem
 
     SELFStorage % N = N
+    SELFStorage % M = M
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
 
     CALL SELFStorage % interp % Build( N = N, &
                                       controlNodeType = quadratureType, &
@@ -1519,31 +1650,30 @@ SUBROUTINE UpdateDevice_Tensor3D( SELFStorage )
 END SUBROUTINE UpdateDevice_Tensor3D
 #endif
 
-FUNCTION BoundaryInterp_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE BoundaryInterp_Tensor3D( SELFStorage, gpuAccel )
   IMPLICIT NONE
-  CLASS(Tensor3D) :: SELFStorage
-  TYPE(Tensor3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Tensor3D), INTENT(inout) :: SELFStorage
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorBoundaryInterp_3D( SELFStorage % interior % deviceData, &
-                                                          SELFout % boundary % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % TensorBoundaryInterp_3D( SELFStorage % interior % hostData, &
-                                                          SELFout % boundary % hostData, &
+                                                          SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION BoundaryInterp_Tensor3D
+END SUBROUTINE BoundaryInterp_Tensor3D
 
-FUNCTION GridInterp_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE GridInterp_Tensor3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Tensor3D) :: SELFStorage
-  TYPE(Tensor3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Tensor3D), INTENT(in) :: SELFStorage
+  TYPE(Tensor3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorGridInterp_3D( SELFStorage % interior % deviceData, &
@@ -1557,13 +1687,13 @@ FUNCTION GridInterp_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION GridInterp_Tensor3D
+END SUBROUTINE GridInterp_Tensor3D
 
-FUNCTION Divergence_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
+SUBROUTINE Divergence_Tensor3D( SELFStorage, SELFOut, gpuAccel )
   IMPLICIT NONE
-  CLASS(Tensor3D) :: SELFStorage
-  TYPE(Vector3D) :: SELFOut
-  LOGICAL :: gpuAccel
+  CLASS(Tensor3D), INTENT(in) :: SELFStorage
+  TYPE(Vector3D), INTENT(inout) :: SELFOut
+  LOGICAL, INTENT(in) :: gpuAccel
 
     IF( gpuAccel )THEN
       CALL SELFStorage % interp % TensorDivergence_3D( SELFStorage % interior % deviceData, &
@@ -1577,12 +1707,12 @@ FUNCTION Divergence_Tensor3D( SELFStorage, gpuAccel ) RESULT( SELFout )
                                                       SELFStorage % nElem )  
     ENDIF
 
-END FUNCTION Divergence_Tensor3D
+END SUBROUTINE Divergence_Tensor3D
 
-FUNCTION Determinant_Tensor3D( SELFStorage ) RESULT( SELFout )
+SUBROUTINE Determinant_Tensor3D( SELFStorage, SELFOut )
   IMPLICIT NONE
-  CLASS(Tensor3D) :: SELFStorage
-  TYPE(Scalar3D) :: SELFOut
+  CLASS(Tensor3D), INTENT(in) :: SELFStorage
+  TYPE(Scalar3D), INTENT(inout) :: SELFOut
   ! Local
   INTEGER :: iEl, iVar, i, j, k
 
@@ -1615,7 +1745,7 @@ FUNCTION Determinant_Tensor3D( SELFStorage ) RESULT( SELFout )
       ENDDO
     ENDDO
     
-END FUNCTION Determinant_Tensor3D
+END SUBROUTINE Determinant_Tensor3D
 
 FUNCTION AbsMaxInterior_Tensor3D( tensor ) RESULT( absMax )
   IMPLICIT NONE
@@ -1645,7 +1775,7 @@ END FUNCTION AbsMaxInterior_Tensor3D
 
 SUBROUTINE Equals_Tensor3D( SELFOut, SELFin )
   IMPLICIT NONE
-  TYPE(Tensor3D), INTENT(inout) :: SELFOut
+  CLASS(Tensor3D), INTENT(inout) :: SELFOut
   TYPE(Tensor3D), INTENT(in) :: SELFin
 
     SELFOut % interior % hostData = SELFin % interior % hostData
@@ -1655,9 +1785,16 @@ END SUBROUTINE Equals_Tensor3D
 
 FUNCTION Add_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Tensor3D), INTENT(in) :: SELFa, SELFb
+  CLASS(Tensor3D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor3D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData+&
                                     SELFb % interior % hostData
 
@@ -1668,9 +1805,16 @@ END FUNCTION Add_Tensor3D
 
 FUNCTION Subtract_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
-  TYPE(Tensor3D), INTENT(in) :: SELFa, SELFb
+  CLASS(Tensor3D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor3D) :: SELFOut
 
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
+                  
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 

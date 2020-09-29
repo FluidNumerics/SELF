@@ -1,0 +1,11 @@
+PROGRAM SELF_Tests_Main
+
+USE SELF_Tests
+
+
+IMPLICIT NONE
+
+
+  CALL Scalar1DTests( )
+
+END PROGRAM SELF_Tests_Main

@@ -112,7 +112,7 @@ CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
 
-  FUNCTION Gradient_MappedScalar2D( scalar, workTensor, mesh, gpuAccel ) RESULT( gradF )
+  SUBROUTINE Gradient_MappedScalar2D( scalar, workTensor, mesh, gradF, gpuAccel )
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
@@ -122,23 +122,23 @@ CONTAINS
     ! 
     ! where the sum over i is implied.
     IMPLICIT NONE
-    CLASS(MappedScalar2D) :: scalar
-    TYPE(MappedTensor2D) :: workTensor
-    TYPE(Mesh2D) :: mesh
-    TYPE(Vector2D) :: gradF
-    LOGICAL :: gpuAccel
+    CLASS(MappedScalar2D), INTENT(in) :: scalar
+    TYPE(MappedTensor2D), INTENT(inout) :: workTensor
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(Vector2D), INTENT(inout) :: gradF
+    LOGICAL, INTENT(in) :: gpuAccel
   
-      workTensor = scalar % ContravariantWeight( mesh, gpuAccel ) 
-      gradF = workTensor % Divergence( gpuAccel ) 
+      CALL scalar % ContravariantWeight( mesh, workTensor, gpuAccel ) 
+      CALL workTensor % Divergence( gradF, gpuAccel ) 
   
-  END FUNCTION Gradient_MappedScalar2D
+  END SUBROUTINE Gradient_MappedScalar2D
   
-  FUNCTION ContravariantWeight_MappedScalar2D( scalar, mesh, gpuAccel ) RESULT( workTensor )
+  SUBROUTINE ContravariantWeight_MappedScalar2D( scalar, mesh, workTensor, gpuAccel )
     IMPLICIT NONE
-    CLASS(MappedScalar2D) :: scalar
-    TYPE(Mesh2D) :: mesh
-    LOGICAL :: gpuAccel
-    TYPE(MappedTensor2D) :: workTensor
+    CLASS(MappedScalar2D), INTENT(in) :: scalar
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    LOGICAL, INTENT(in):: gpuAccel
+    TYPE(MappedTensor2D), INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i, j, iVar, iEl
   
@@ -177,9 +177,9 @@ CONTAINS
 
       ENDIF
   
-  END FUNCTION ContravariantWeight_MappedScalar2D
+  END SUBROUTINE ContravariantWeight_MappedScalar2D
   
-  FUNCTION Gradient_MappedScalar3D( scalar, workTensor, mesh, gpuAccel ) RESULT( gradF )
+  SUBROUTINE Gradient_MappedScalar3D( scalar, workTensor, mesh, gradF, gpuAccel )
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 3D function using the conservative form of the
@@ -189,23 +189,23 @@ CONTAINS
     ! 
     ! where the sum over i is implied.
     IMPLICIT NONE
-    CLASS(MappedScalar3D) :: scalar
-    TYPE(MappedTensor3D) :: workTensor
-    TYPE(Mesh3D) :: mesh
-    TYPE(Vector3D) :: gradF
-    LOGICAL :: gpuAccel
+    CLASS(MappedScalar3D), INTENT(in) :: scalar
+    TYPE(MappedTensor3D), INTENT(inout) :: workTensor
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(Vector3D), INTENT(inout) :: gradF
+    LOGICAL, INTENT(in) :: gpuAccel
   
-      workTensor = scalar % ContravariantWeight( mesh, gpuAccel ) 
-      gradF = workTensor % Divergence( gpuAccel ) 
+      CALL scalar % ContravariantWeight( mesh, workTensor, gpuAccel ) 
+      CALL workTensor % Divergence( gradF, gpuAccel ) 
   
-  END FUNCTION Gradient_MappedScalar3D
+  END SUBROUTINE Gradient_MappedScalar3D
   
-  FUNCTION ContravariantWeight_MappedScalar3D( scalar, mesh, gpuAccel ) RESULT( workTensor )
+  SUBROUTINE ContravariantWeight_MappedScalar3D( scalar, mesh, workTensor, gpuAccel )
     IMPLICIT NONE
-    CLASS(MappedScalar3D) :: scalar
-    TYPE(Mesh3D) :: mesh
-    LOGICAL :: gpuAccel
-    TYPE(MappedTensor3D) :: workTensor
+    CLASS(MappedScalar3D), INTENT(in) :: scalar
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    TYPE(MappedTensor3D), INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i, j, k, iVar, iEl
   
@@ -263,33 +263,33 @@ CONTAINS
 
       ENDIF
   
-  END FUNCTION ContravariantWeight_MappedScalar3D
+  END SUBROUTINE ContravariantWeight_MappedScalar3D
   
   ! ---------------------- Vectors ---------------------- !
-  FUNCTION Divergence_MappedVector2D( physVector, compVector, mesh, gpuAccel ) RESULT( divVector )
+  SUBROUTINE Divergence_MappedVector2D( physVector, compVector, mesh, divVector, gpuAccel )
     ! Strong Form Operator
     !
     IMPLICIT NONE
-    CLASS(MappedVector2D) :: physVector
-    TYPE(MappedVector2D) :: compVector
-    TYPE(Mesh2D) :: mesh
-    TYPE(Scalar2D) :: divVector
-    LOGICAL :: gpuAccel
+    CLASS(MappedVector2D), INTENT(in) :: physVector
+    TYPE(MappedVector2D), INTENT(inout) :: compVector
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(Scalar2D), INTENT(inout) :: divVector
+    LOGICAL, INTENT(in) :: gpuAccel
   
-      compVector = physVector % ContravariantProjection( mesh, gpuAccel ) 
-      divVector = compVector % Divergence( gpuAccel ) 
+      CALL physVector % ContravariantProjection( mesh, compVector, gpuAccel ) 
+      CALL compVector % Divergence( divVector, gpuAccel ) 
   
-  END FUNCTION Divergence_MappedVector2D
+  END SUBROUTINE Divergence_MappedVector2D
   
-  FUNCTION ContravariantProjection_MappedVector2D( physVector, mesh, gpuAccel ) RESULT( compVector )
+  SUBROUTINE ContravariantProjection_MappedVector2D( physVector, mesh, compVector, gpuAccel )
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
-    CLASS(MappedVector2D) :: physVector
-    TYPE(Mesh2D) :: mesh
-    LOGICAL :: gpuAccel
-    TYPE(MappedVector2D) :: compVector
+    CLASS(MappedVector2D), INTENT(in) :: physVector
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    TYPE(MappedVector2D), INTENT(inout) :: compVector
     ! Local
     INTEGER :: i, j, iVar, iEl
   
@@ -325,32 +325,32 @@ CONTAINS
         ENDDO
       ENDIF
   
-  END FUNCTION ContravariantProjection_MappedVector2D
+  END SUBROUTINE ContravariantProjection_MappedVector2D
 
-  FUNCTION Divergence_MappedVector3D( physVector, compVector, mesh, gpuAccel ) RESULT( divVector )
+  SUBROUTINE Divergence_MappedVector3D( physVector, compVector, mesh, divVector, gpuAccel )
     ! Strong Form Operator
     !
     IMPLICIT NONE
-    CLASS(MappedVector3D) :: physVector
-    TYPE(MappedVector3D) :: compVector
-    TYPE(Mesh3D) :: mesh
-    TYPE(Scalar3D) :: divVector
-    LOGICAL :: gpuAccel
+    CLASS(MappedVector3D), INTENT(in) :: physVector
+    TYPE(MappedVector3D), INTENT(inout) :: compVector
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(Scalar3D), INTENT(inout) :: divVector
+    LOGICAL, INTENT(in) :: gpuAccel
   
-      compVector = physVector % ContravariantProjection( mesh, gpuAccel ) 
-      divVector = compVector % Divergence( gpuAccel ) 
+      CALL physVector % ContravariantProjection( mesh, compVector, gpuAccel ) 
+      CALL compVector % Divergence( divVector, gpuAccel ) 
   
-  END FUNCTION Divergence_MappedVector3D
+  END SUBROUTINE Divergence_MappedVector3D
   
-  FUNCTION ContravariantProjection_MappedVector3D( physVector, mesh, gpuAccel ) RESULT( compVector )
+  SUBROUTINE ContravariantProjection_MappedVector3D( physVector, mesh, compVector, gpuAccel )
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
-    CLASS(MappedVector3D) :: physVector
-    TYPE(MappedVector3D) :: compVector
-    TYPE(Mesh3D) :: mesh
-    LOGICAL :: gpuAccel
+    CLASS(MappedVector3D), INTENT(in) :: physVector
+    TYPE(MappedVector3D), INTENT(inout) :: compVector
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i, j, k, iVar, iEl, iDir
   
@@ -400,7 +400,7 @@ CONTAINS
         ENDDO
       ENDIF
   
-  END FUNCTION ContravariantProjection_MappedVector3D
+  END SUBROUTINE ContravariantProjection_MappedVector3D
   
   ! ---------------------- Tensors ---------------------- !
   

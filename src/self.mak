@@ -3,11 +3,11 @@ GFLAGS=-v -g
 FFLAGS=-v -g -DGPU -ffree-line-length-none -O0 -I/opt/json-fortran/lib -I/opt/feqparse/include
 FLIBS=-L/opt/json-fortran/lib -ljsonfortran -L/opt/feqparse/lib -lfeqparse
 
-test: SELF_Constants.o SELF_SupportRoutines.o SELF_Quadrature.o SELF_Lagrange.o SELF_Lagrange_Tests.o Lagrange_Test.o SysConf.o
+test : SELF_Tests_Main.o SELF_Tests.o SELF_Constants.o SELF_Memory.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_HIP.o SysConf.o SELF_Data.o SELF_Mesh.o SELF_MappedData.o SELF_MappedData_HIP.o
 	${FC} ${FLIBS} ${FFLAGS} *.o -o $@
 
-#SELFPrecision.o: SELFPrecision.F90
-#	${FC} ${FFLAGS} -c SELFPrecision.F90 -o $@
+SELF_Tests_Main.o : SELF_Tests_Main.F90 SELF_Tests.o
+	${FC} ${FFLAGS} -c SELF_Tests_Main.F90 -o $@
 
 SELF_Constants.o: SELF_Constants.F90
 	${FC} ${FFLAGS} -c SELF_Constants.F90 -o $@
@@ -33,8 +33,11 @@ SELF_Lagrange_HIP.o : SELF_Lagrange_HIP.cpp SELF_Macros.h
 Lagrange_Test.o : Lagrange_Test.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_Tests.o SELF_Lagrange_HIP.o
 	${FC} ${FFLAGS} -c Lagrange_Test.F90 -o $@
 
-SELF_Lagrange_Tests.o : SELF_Lagrange_Tests.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_HIP.o SysConf.o
-	${FC} ${FFLAGS} -c SELF_Lagrange_Tests.F90 -o $@
+SELF_Tests.o : SELF_Tests.F90 SELF_Constants.o SELF_SupportRoutines.o SELF_Lagrange.o SELF_Lagrange_HIP.o SysConf.o SELF_Data.o SELF_Mesh.o SELF_MappedData.o
+	${FC} ${FFLAGS} -c SELF_Tests.F90 -o $@
+
+SELF_Tests_Main.o : SELF_Tests_Main.F90 SELF_Tests.o
+	${FC} ${FFLAGS} -c SELF_Tests_Main.F90 -o $@
 
 SELF_Data.o: SELF_Data.F90 SELF_Constants.o SELF_Lagrange.o
 	${FC} ${FFLAGS} -c SELF_Data.F90 -o $@
