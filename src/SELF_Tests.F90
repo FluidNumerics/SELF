@@ -23,59 +23,11 @@ USE ISO_C_BINDING
 USE hipfort
 
 IMPLICIT NONE
+  PRIVATE
 
+  PUBLIC :: Scalar1DTests
+  PUBLIC :: Scalar2DTests
 
-     ! GENERIC, PUBLIC :: Derivative_1D => Derivative_1D_cpu, Derivative_1D_gpu
-     PUBLIC :: ScalarDerivative_1D_Test
-     ! GENERIC, PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu, ScalarGridInterp_1D_gpu
-!     PUBLIC :: ScalarGridInterp_1D_Test
-!    ! GENERIC, PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu, ScalarBoundaryInterp_1D_gpu
-!     PUBLIC :: Scalar_BoundaryInterp_1D_Test
-!
-!
-!     ! GENERIC, PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu, ScalarGradient_2D_gpu
-!     PUBLIC :: ScalarGradient_2D_Test
-!     ! GENERIC, PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu, VectorGradient_2D_gpu
-!     PUBLIC :: Vector_Gradient_2D_Test
-!     ! GENERIC, PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu, VectorDivergence_2D_gpu
-!     PUBLIC :: Vector_Divergence_2D_Test
-!     ! GENERIC, PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu, VectorCurl_2D_gpu
-!     PUBLIC :: Vector_Curl_2D_Test
-!     ! GENERIC, PUBLIC :: ScalarGridInterp_2D => ScalarGridInterp_2D_cpu, ScalarGridInterp_2D_gpu
-!     PUBLIC :: ScalarGridInterp_2D_Test
-!     ! GENERIC, PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu, ScalarBoundaryInterp_2D_gpu
-!     PUBLIC :: Scalar_BoundaryInterp_2D_Test
-!     ! GENERIC, PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu, VectorGridInterp_2D_gpu
-!     PUBLIC :: Vector_GridInterp_2D_Test
-!     ! GENERIC, PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu, VectorBoundaryInterp_2D_gpu
-!     PUBLIC :: Vector_BoundaryInterp_2D_Test
-!     ! GENERIC, PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu, TensorGridInterp_2D_gpu
-!     PUBLIC :: Tensor_GridInterp_2D_Test
-!     ! GENERIC, PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu, TensorBoundaryInterp_2D_gpu
-!     PUBLIC :: Tensor_BoundaryInterp_2D_Test
-!
-!     ! GENERIC, PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu, ScalarGradient_3D_gpu
-!     PUBLIC :: Scalar_Gradient_3D_Test
-!     ! GENERIC, PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu, VectorGradient_3D_gpu
-!     PUBLIC :: Vector_Gradient_3D_Test
-!     ! GENERIC, PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu, VectorDivergence_3D_gpu
-!     PUBLIC :: Vector_Divergence_3D_Test
-!     ! GENERIC, PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu, VectorCurl_3D_gpu
-!     PUBLIC :: Vector_Curl_3D_Test
-!     ! GENERIC, PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu, ScalarGridInterp_3D_gpu
-!     PUBLIC :: Scalar_GridInterp_3D_Test
-!     ! GENERIC, PUBLIC :: ScalarBoundaryInterp_3D => ScalarBoundaryInterp_3D_cpu, ScalarBoundaryInterp_3D_gpu
-!     PUBLIC :: Scalar_BoundaryInterp_3D_Test
-!     ! GENERIC, PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu, VectorGridInterp_3D_gpu
-!     PUBLIC :: Vector_GridInterp_3D_Test
-!     ! GENERIC, PUBLIC :: VectorBoundaryInterp_3D => VectorBoundaryInterp_3D_cpu, VectorBoundaryInterp_3D_gpu
-!     PUBLIC :: Vector_BoundaryInterp_3D_Test
-!     ! GENERIC, PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu, TensorGridInterp_3D_gpu
-!     PUBLIC :: Tensor_GridInterp_3D_Test
-!     ! GENERIC, PUBLIC :: TensorBoundaryInterp_3D => TensorBoundaryInterp_3D_cpu, TensorBoundaryInterp_3D_gpu
-!     PUBLIC :: Tensor_BoundaryInterp_3D_Test
-
-     PRIVATE :: Report_JSON
 
 CONTAINS
 
@@ -196,11 +148,62 @@ SUBROUTINE Scalar1DTests( )
 
     DO pdeg = polyDeg(1), polyDeg(2)
       CALL ScalarDerivative_1D_Test( f, dfdx, pdeg, nPlotPoints, nFunctions, nElements, nRepeats )
+      CALL ScalarGridInterp_1D_Test( f, pdeg, nPlotPoints, nFunctions, nElements, nRepeats )
     ENDDO
 
     DEALLOCATE( f, dfdx, polyDeg )
 
 END SUBROUTINE Scalar1DTests
+
+SUBROUTINE Scalar2DTests( )
+  IMPLICIT NONE
+  ! Local
+  TYPE(EquationParser), ALLOCATABLE :: f(:), dfdx(:), dfdy(:)
+  TYPE(JSON_FILE) :: json
+  TYPE(JSON_VALUE), POINTER :: objPointer, testPointer
+  TYPE(JSON_CORE) :: jCore
+  INTEGER(JSON_IK) :: nFunctions, iTest
+  LOGICAL :: found
+  CHARACTER(50) :: funcName, funcValue, funcDx, funcDy
+  INTEGER, ALLOCATABLE :: polyDeg(:) 
+  INTEGER :: nPlotPoints, i, iEl, pdeg, nelements, nRepeats
+  
+    CALL json % Initialize()
+    CALL json % Load(filename = './tests.json')
+    CALL json % info('scalar_2d', n_children=nFunctions)
+    CALL json % get('scalar_2d', objPointer, found)
+    CALL json % get('polynomial_range', polyDeg, found)
+    CALL json % get('n_plot_points', nPlotPoints, found)
+    CALL json % get('element_dimensions', nElements, found)
+    CALL json % get('n_timing_repeats', nRepeats, found)
+    CALL json % get_core(jCore)
+  
+    ALLOCATE(f(1:nFunctions), dfdx(1:nFunctions), dfdy(1:nFunctions))
+  
+    DO iTest = 1, nFunctions
+      ! Point to the i-th scalar_1d function for testing
+      CALL jCore % get_child(objPointer, iTest, testPointer, found)
+      IF( found )THEN
+        ! Pull the function and derivative strings from the JSON
+        CALL Get_Char_Obj(jCore, testPointer, 'name', funcName)
+        CALL Get_Char_Obj(jCore, testPointer, 'function', funcValue)
+        CALL Get_Char_Obj(jCore, testPointer, 'dfdx', funcDx)
+        CALL Get_Char_Obj(jCore, testPointer, 'dfdy', funcDy)
+        ! Create the exact function equation parsers
+        f(iTest) = EquationParser(funcValue,(/'x','y'/))
+        dfdx(iTest) = EquationParser(funcDx,(/'x','y'/))
+        dfdy(iTest) = EquationParser(funcDy,(/'x','y'/))
+      ENDIF
+    ENDDO
+
+    DO pdeg = polyDeg(1), polyDeg(2)
+!      CALL ScalarDerivative_1D_Test( f, dfdx, dfdy, pdeg, nPlotPoints, nFunctions, nElements, nRepeats )
+      CALL ScalarGridInterp_2D_Test( f, pdeg, nPlotPoints, nFunctions, nElements, nRepeats )
+    ENDDO
+
+    DEALLOCATE( f, dfdx, dfdy, polyDeg )
+
+END SUBROUTINE Scalar2DTests
 
 SUBROUTINE FillScalarValues1D( scalar, f )
   IMPLICIT NONE
@@ -224,6 +227,45 @@ SUBROUTINE FillScalarValues1D( scalar, f )
      ENDDO
 
 END SUBROUTINE FillScalarValues1D
+
+SUBROUTINE FillScalarValues2D( scalar, f )
+  IMPLICIT NONE
+  TYPE(Scalar2D), INTENT(inout) :: scalar
+  TYPE(EquationParser), INTENT(in) :: f(1:scalar % nVar)
+  ! Local
+  INTEGER :: iEl, jEl, iVar, i, j, nXEl, nYEl, eid
+  REAL(prec) :: xL, yL, xR, yR, x, y, dx, dy
+
+     nXEl = INT(SQRT( REAL(scalar % nElem) ))
+     nYEl = nXEl
+     dx = 2.0_prec/REAL( nXEl, prec )
+     dx = 2.0_prec/REAL( nYEl, prec )
+     DO jEl = 1, nYEl
+       yL = -1.0_prec + REAL((jEl-1),prec)*dy
+       yR = yL + dy
+       DO iEl = 1, nXEl
+         xL = -1.0_prec + REAL((iEl-1),prec)*dx
+         xR = xL + dx
+
+         eid = iEl + (jEl-1)*nXel
+
+         DO iVar = 1, scalar % nVar
+
+           DO j = 0, scalar % N
+             y = 0.5_prec*( yR*(scalar % interp % controlPoints % hostData(j)+1.0_prec) - &
+                            yL*(scalar % interp % controlPoints % hostData(j)-1.0_prec) )
+             DO i = 0, scalar % N
+               x = 0.5_prec*( xR*(scalar % interp % controlPoints % hostData(i)+1.0_prec) - &
+                              xL*(scalar % interp % controlPoints % hostData(i)-1.0_prec) )
+
+               scalar % interior % hostData(i,j,iVar,eid) = f(iVar) % Evaluate( (/x, y/) )          
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDDO
+
+END SUBROUTINE FillScalarValues2D
 !
 SUBROUTINE ScalarDerivative_1D_Test( f, dfdx, N, M, nVar, nElem, nRepeats )
   IMPLICIT NONE
@@ -322,5 +364,195 @@ SUBROUTINE ScalarDerivative_1D_Test( f, dfdx, N, M, nVar, nElem, nRepeats )
      CALL dfdxError % Trash( )
 
 END SUBROUTINE ScalarDerivative_1D_Test
+
+SUBROUTINE ScalarGridInterp_1D_Test( f, N, M, nVar, nElem, nRepeats )
+  IMPLICIT NONE
+  INTEGER, INTENT(in) :: N
+  INTEGER, INTENT(in) :: M
+  INTEGER, INTENT(in) :: nVar
+  INTEGER, INTENT(in) :: nElem
+  INTEGER, INTENT(in) :: nRepeats
+  TYPE(EquationParser), INTENT(in)  :: f(1:nVar)
+  ! Local
+  CHARACTER(LEN=50), DIMENSION(1:nVar) :: functionNames
+  CHARACTER(LEN=50) :: cpuModel
+  CHARACTER(LEN=50) :: gpuModel
+  TYPE(Scalar1D) :: fScalar, fInterp, fActual , fError
+  REAL(prec) :: errors(1:nVar)
+  REAL(prec) :: t1, t2, runtime
+  INTEGER :: i, iVar
+
+     cpuModel = GetCPUModel_Linux()
+     gpuModel = 'None'
+
+     DO iVar = 1, nVar
+       functionNames(iVar) = f(iVar) % equation
+     ENDDO
+
+     CALL fScalar % Build( N, GAUSS, M, UNIFORM, nVar, nElem ) 
+     CALL fInterp % Build( M, UNIFORM, M, UNIFORM, nVar, nElem ) 
+     CALL fActual % Build( N, UNIFORM, M, UNIFORM, nVar, nElem ) 
+     CALL fError % Build( M, UNIFORM, M, UNIFORM, nVar, nElem ) 
+
+     CALL FillScalarValues1D( fScalar, f )
+#ifdef GPU
+     CALL fScalar % UpdateDevice( )
+#endif
+     CALL FillScalarValues1D( fActual, f )
+
+     CALL fScalar % GridInterp(fInterp, .FALSE.)
+
+     fError = fActual - fInterp
+     errors = fError % AbsMaxInterior( )
+
+     ! Estimate routine runtime
+     CALL CPU_TIME(t1)
+     DO i = 1, nRepeats
+       CALL fScalar % GridInterp(fInterp, .FALSE.)
+     ENDDO
+     CALL CPU_TIME(t2)
+     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+
+     CALL Report_JSON(fScalar % interp, &
+                      'GridInterp_Scalar1D', &
+                      cpuModel, &
+                      gpuModel, &
+                      functionNames, &
+                      runtime, &
+                      errors, &
+                      nVar, &
+                      nElem)
+
+
+#ifdef GPU
+     CALL fScalar % GridInterp(fInterp, .TRUE.)
+     CALL fInterp % UpdateHost( )
+
+     fError = fActual - fInterp
+     errors = fError % AbsMaxInterior( )
+
+     ! Estimate routine runtime
+     CALL CPU_TIME(t1)
+     DO i = 1, nRepeats
+       CALL fScalar % GridInterp(fInterp, .TRUE.)
+     ENDDO
+     CALL hipCheck(hipDeviceSynchronize()) 
+     CALL CPU_TIME(t2)
+     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+
+
+     CALL Report_JSON(fScalar % interp, &
+                      'GridInterp_Scalar1D+gpuAccel', &
+                      cpuModel, &
+                      gpuModel, &
+                      functionNames, &
+                      runtime, &
+                      errors, &
+                      nVar, &
+                      nElem)
+     
+#endif
+
+     CALL fScalar % Trash( )
+     CALL fInterp % Trash( )
+     CALL fActual % Trash( )
+     CALL fError % Trash( )
+
+END SUBROUTINE ScalarGridInterp_1D_Test
+
+SUBROUTINE ScalarGridInterp_2D_Test( f, N, M, nVar, nElem, nRepeats )
+  IMPLICIT NONE
+  INTEGER, INTENT(in) :: N
+  INTEGER, INTENT(in) :: M
+  INTEGER, INTENT(in) :: nVar
+  INTEGER, INTENT(in) :: nElem
+  INTEGER, INTENT(in) :: nRepeats
+  TYPE(EquationParser), INTENT(in)  :: f(1:nVar)
+  ! Local
+  CHARACTER(LEN=50), DIMENSION(1:nVar) :: functionNames
+  CHARACTER(LEN=50) :: cpuModel
+  CHARACTER(LEN=50) :: gpuModel
+  TYPE(Scalar2D) :: fScalar, fInterp, fActual , fError
+  REAL(prec) :: errors(1:nVar)
+  REAL(prec) :: t1, t2, runtime
+  INTEGER :: i, iVar
+
+     cpuModel = GetCPUModel_Linux()
+     gpuModel = 'None'
+
+     DO iVar = 1, nVar
+       functionNames(iVar) = f(iVar) % equation
+     ENDDO
+
+     CALL fScalar % Build( N, GAUSS, M, UNIFORM, nVar, nElem*nElem ) 
+     CALL fInterp % Build( M, UNIFORM, M, UNIFORM, nVar, nElem*nElem ) 
+     CALL fActual % Build( N, UNIFORM, M, UNIFORM, nVar, nElem*nElem ) 
+     CALL fError % Build( M, UNIFORM, M, UNIFORM, nVar, nElem*nElem ) 
+
+     CALL FillScalarValues2D( fScalar, f )
+#ifdef GPU
+     CALL fScalar % UpdateDevice( )
+#endif
+     CALL FillScalarValues2D( fActual, f )
+
+     CALL fScalar % GridInterp(fInterp, .FALSE.)
+
+     fError = fActual - fInterp
+     errors = fError % AbsMaxInterior( )
+
+     ! Estimate routine runtime
+     CALL CPU_TIME(t1)
+     DO i = 1, nRepeats
+       CALL fScalar % GridInterp(fInterp, .FALSE.)
+     ENDDO
+     CALL CPU_TIME(t2)
+     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+
+     CALL Report_JSON(fScalar % interp, &
+                      'GridInterp_Scalar2D', &
+                      cpuModel, &
+                      gpuModel, &
+                      functionNames, &
+                      runtime, &
+                      errors, &
+                      nVar, &
+                      nElem)
+
+
+#ifdef GPU
+     CALL fScalar % GridInterp(fInterp, .TRUE.)
+     CALL fInterp % UpdateHost( )
+
+     fError = fActual - fInterp
+     errors = fError % AbsMaxInterior( )
+
+     ! Estimate routine runtime
+     CALL CPU_TIME(t1)
+     DO i = 1, nRepeats
+       CALL fScalar % GridInterp(fInterp, .TRUE.)
+     ENDDO
+     CALL hipCheck(hipDeviceSynchronize()) 
+     CALL CPU_TIME(t2)
+     runtime = (t2-t1)*REAL(nRepeats,prec)/1000.0_prec
+
+
+     CALL Report_JSON(fScalar % interp, &
+                      'GridInterp_Scalar2D+gpuAccel', &
+                      cpuModel, &
+                      gpuModel, &
+                      functionNames, &
+                      runtime, &
+                      errors, &
+                      nVar, &
+                      nElem)
+     
+#endif
+
+     CALL fScalar % Trash( )
+     CALL fInterp % Trash( )
+     CALL fActual % Trash( )
+     CALL fError % Trash( )
+
+END SUBROUTINE ScalarGridInterp_2D_Test
 
 END MODULE SELF_Tests
