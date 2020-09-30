@@ -788,9 +788,9 @@ SUBROUTINE GridInterp_Scalar3D( SELFStorage, SELFOut, gpuAccel )
                                                       SELFStorage % nElem )  
     ELSE
       CALL SELFStorage % interp % ScalarGridInterp_3D( SELFStorage % interior % hostData, &
-                                                      SELFout % interior % hostData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem )  
+                                                       SELFout % interior % hostData, &
+                                                       SELFStorage % nVar, &
+                                                       SELFStorage % nElem )  
     ENDIF
 
 END SUBROUTINE GridInterp_Scalar3D

@@ -466,7 +466,7 @@ IMPLICIT NONE
       ! Target Points
       IF(targetNodeType == GAUSS .OR. targetNodeType == GAUSS_LOBATTO)THEN
 
-        CALL LegendreQuadrature(N, & 
+        CALL LegendreQuadrature(M, & 
                                 myPoly % targetPoints % hostData, &
                                 q, &
                                 targetNodeType )
@@ -865,7 +865,7 @@ IMPLICIT NONE
     REAL(prec), INTENT(out) :: fInterp(0:myPoly % M, 0:myPoly % M, 0:myPoly % M, 1:nVariables, 1:nElements)
     ! Local
     INTEGER :: iEl, iVar, i, j, k, ii, jj, kk
-    REAL(prec) :: fi, fij
+    REAL(prec) :: fi, fij, fijk
    
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
@@ -873,7 +873,7 @@ IMPLICIT NONE
             DO j = 0, myPoly % M
               DO i = 0, myPoly % M
                
-                fInterp(i,j,k,iVar,iEl) = 0.0_prec
+                fijk = 0.0_prec
                 DO kk = 0, myPoly % N
                   fij = 0.0_prec
                   DO jj = 0, myPoly % N
@@ -883,14 +883,16 @@ IMPLICIT NONE
                     ENDDO
                     fij = fij + fi*myPoly % iMatrix % hostData(jj,j)
                   ENDDO
-                  fInterp(i,j,k,iVar,iEl) = fInterp(i,j,k,iVar,iEl) + fij*myPoly % iMatrix % hostData(kk,k)
+                  fijk = fijk + fij*myPoly % iMatrix % hostData(kk,k)
                 ENDDO
+                fInterp(i,j,k,iVar,iEl) = fijk
 
               ENDDO
             ENDDO
           ENDDO
         ENDDO   
       ENDDO
+
 
   END SUBROUTINE ScalarGridInterp_3D_cpu
 !

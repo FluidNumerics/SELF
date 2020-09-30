@@ -6,8 +6,10 @@ USE SELF_Tests
 IMPLICIT NONE
 
 
-  CALL Scalar1DTests( )
+  CALL Scalar1D_Tests( )
 
-  CALL Scalar2DTests( )
+  CALL Scalar2D_Tests( )
+  
+  CALL Scalar3D_Tests( )
 
 END PROGRAM SELF_Tests_Main
