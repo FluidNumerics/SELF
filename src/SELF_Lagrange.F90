@@ -47,8 +47,8 @@ IMPLICIT NONE
   !> attribute : dMatrix(0:N,0:N) : TO DO
   !> attribute : bMatrix(0:N,1:2) : TO DO
 
-    INTEGER :: N     
-    INTEGER :: M 
+    INTEGER :: N
+    INTEGER :: M
     TYPE(hfReal_r1) :: controlPoints
     TYPE(hfReal_r1) :: targetPoints
     TYPE(hfReal_r1) :: bWeights

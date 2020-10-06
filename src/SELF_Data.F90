@@ -469,7 +469,7 @@ FUNCTION Add_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
 
     SELFOut % boundary % hostData = SELFa % boundary % hostData+&
                                     SELFb % boundary % hostData
-  
+
 END FUNCTION Add_Scalar1D
 
 FUNCTION Subtract_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
@@ -483,13 +483,13 @@ FUNCTION Subtract_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
                           SELFa % targetType, &
                           SELFa % nVar, &
                           SELFa % nElem ) 
-                  
+
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
     SELFOut % boundary % hostData = SELFa % boundary % hostData-&
                                     SELFb % boundary % hostData
-  
+
 END FUNCTION Subtract_Scalar1D
 
 ! -- Scalar2D -- !
@@ -878,7 +878,7 @@ FUNCTION Subtract_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
                           SELFa % targetType, &
                           SELFa % nVar, &
                           SELFa % nElem ) 
-                  
+
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -1109,6 +1109,13 @@ FUNCTION Subtract_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
   IMPLICIT NONE
   CLASS(Vector2D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector2D) :: SELFOut
+
+    CALL SELFOut % Build( SELFa % N, &
+                          SELFa % controlType, &
+                          SELFa % M, &
+                          SELFa % targetType, &
+                          SELFa % nVar, &
+                          SELFa % nElem ) 
 
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
@@ -1349,7 +1356,7 @@ FUNCTION Subtract_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
                           SELFa % targetType, &
                           SELFa % nVar, &
                           SELFa % nElem ) 
-                  
+
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -1574,7 +1581,7 @@ FUNCTION Subtract_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
                           SELFa % targetType, &
                           SELFa % nVar, &
                           SELFa % nElem ) 
-                  
+
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
@@ -1814,7 +1821,7 @@ FUNCTION Subtract_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
                           SELFa % targetType, &
                           SELFa % nVar, &
                           SELFa % nElem ) 
-                  
+
     SELFOut % interior % hostData = SELFa % interior % hostData-&
                                     SELFb % interior % hostData
 
