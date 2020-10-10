@@ -912,7 +912,7 @@ SUBROUTINE Build_Vector2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
                                       targetNodeType = targetNodeType )
 
     CALL SELFStorage % interior % Alloc(loBound = (/1, 0, 0, 1, 1/),&
-                                       upBound = (/2, N, N, nVar, nElem/))
+                                        upBound = (/2, N, N, nVar, nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound = (/1, 0, 1, 1, 1/),&
                                        upBound = (/2, N, nVar, 4, nElem/))

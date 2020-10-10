@@ -121,17 +121,17 @@ __global__ void VectorGridInterp_2D_gpu(real *iMatrix, real *f, real *fInterp, i
   real fij[2] = {0.0};
   real fi[2] = {0.0};
   for (int jj=0; jj<N+1; jj++) {
+    fi[0] = 0.0;
     fi[1] = 0.0;
-    fi[2] = 0.0;
     for (int ii=0; ii<N+1; ii++) {
-      fi[1] += f[VE_2D_INDEX(1,ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
-      fi[2] += f[VE_2D_INDEX(2,ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+      fi[0] += f[VE_2D_INDEX(1,ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+      fi[1] += f[VE_2D_INDEX(2,ii,jj,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
     }
+    fij[0] += fi[0]*iMatrix[jj+j*(N+1)];
     fij[1] += fi[1]*iMatrix[jj+j*(N+1)];
-    fij[2] += fi[2]*iMatrix[jj+j*(N+1)];
   }
-  fInterp[VE_2D_INDEX(1,i,j,iVar,iEl,M,nVar)] = fij[1];
-  fInterp[VE_2D_INDEX(2,i,j,iVar,iEl,M,nVar)] = fij[2];
+  fInterp[VE_2D_INDEX(1,i,j,iVar,iEl,M,nVar)] = fij[0];
+  fInterp[VE_2D_INDEX(2,i,j,iVar,iEl,M,nVar)] = fij[1];
 
 }
 
@@ -232,29 +232,29 @@ __global__ void VectorGridInterp_3D_gpu(real *iMatrix, real *f, real *fInterp, i
   real fij[3] = {0.0};
   real fi[3] = {0.0};
   for (int kk=0; kk<N+1; kk++) {
+    fij[0] = 0.0;
     fij[1] = 0.0;
     fij[2] = 0.0;
-    fij[3] = 0.0;
     for (int jj=0; jj<N+1; jj++) {
+      fi[0] = 0.0;
       fi[1] = 0.0;
       fi[2] = 0.0;
-      fi[3] = 0.0;
       for (int ii=0; ii<N+1; ii++) {
-        fi[1] += f[VE_3D_INDEX(1,ii,jj,kk,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
-        fi[2] += f[VE_3D_INDEX(2,ii,jj,kk,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
-        fi[3] += f[VE_3D_INDEX(3,ii,jj,kk,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+        fi[0] += f[VE_3D_INDEX(1,ii,jj,kk,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+        fi[1] += f[VE_3D_INDEX(2,ii,jj,kk,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
+        fi[2] += f[VE_3D_INDEX(3,ii,jj,kk,iVar,iEl,N,nVar)]*iMatrix[ii+i*(N+1)];
       }
+      fij[0] += fi[0]*iMatrix[jj+j*(N+1)];
       fij[1] += fi[1]*iMatrix[jj+j*(N+1)];
       fij[2] += fi[2]*iMatrix[jj+j*(N+1)];
-      fij[3] += fi[3]*iMatrix[jj+j*(N+1)];
     }
+    fijk[0] += fij[0]*iMatrix[kk+k*(N+1)];
     fijk[1] += fij[1]*iMatrix[kk+k*(N+1)];
     fijk[2] += fij[2]*iMatrix[kk+k*(N+1)];
-    fijk[3] += fij[3]*iMatrix[kk+k*(N+1)];
   }
-  fInterp[VE_3D_INDEX(1,i,j,k,iVar,iEl,M,nVar)] = fijk[1];
-  fInterp[VE_3D_INDEX(2,i,j,k,iVar,iEl,M,nVar)] = fijk[2];
-  fInterp[VE_3D_INDEX(3,i,j,k,iVar,iEl,M,nVar)] = fijk[3];
+  fInterp[VE_3D_INDEX(1,i,j,k,iVar,iEl,M,nVar)] = fijk[0];
+  fInterp[VE_3D_INDEX(2,i,j,k,iVar,iEl,M,nVar)] = fijk[1];
+  fInterp[VE_3D_INDEX(3,i,j,k,iVar,iEl,M,nVar)] = fijk[2];
 
 }
 

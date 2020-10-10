@@ -28,12 +28,11 @@ IMPLICIT NONE
   PUBLIC :: Scalar1D_Tests
   PUBLIC :: Scalar2D_Tests
   PUBLIC :: Scalar3D_Tests
+  PUBLIC :: Vector2D_Tests
 
 
 CONTAINS
 
-
- 
 SUBROUTINE Get_Char_Obj(jCore, testPointer, key, charValue)
   IMPLICIT NONE
   TYPE(JSON_CORE), INTENT(inout) :: jCore
@@ -111,5 +110,7 @@ END SUBROUTINE Report_JSON
 #include "test_routines/Scalar1D.F90"
 #include "test_routines/Scalar2D.F90"
 #include "test_routines/Scalar3D.F90"
+
+#include "test_routines/Vector2D.F90"
 
 END MODULE SELF_Tests
