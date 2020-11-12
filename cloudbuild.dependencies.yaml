@@ -1,0 +1,23 @@
+# cloudbuild.dependencies.yaml
+# 
+# Usage:
+#   gcloud builds submit . --config=cloudbuild.dependencies.yaml
+#
+timeout: 7200s
+
+steps:
+
+- id: Docker Build
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--file',
+         './dependencies/Dockerfile',
+         '.',
+         '-t',
+         'gcr.io/${PROJECT_ID}/self-dependencies:${_TAG}',
+         ]
+
+substitutions:
+  _TAG: 'dev'
+
+images: ['gcr.io/${PROJECT_ID}/self-dependencies:${_TAG}']
