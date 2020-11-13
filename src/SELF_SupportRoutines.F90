@@ -897,4 +897,65 @@ CONTAINS
 
  END FUNCTION FloorCURT
 
+ SUBROUTINE SELFTest_ParseCLI(Nc, Nt, qType, Ne, Nf)
+   IMPLICIT NONE
+   INTEGER, INTENT(out) :: Nc, Nt, qType, Ne, Nf
+   ! Local
+   INTEGER :: nArd, argId
+   CHARACTER(6) :: arg
+   LOGICAL :: c, t, q, e, f
+
+   nArg = command_argument_count()
+
+   IF( nArg > 0 )THEN
+     DO argId = 1, nArg
+       CALL get_command_argument(argId, arg)
+
+       SELECT CASE( TRIM(arg) )
+
+         CASE("-c") ! Number of Control Points
+           c = .TRUE.
+         CASE("-t") ! Number of Target Points
+           t = .TRUE.
+         CASE("-q") ! Quadrature type
+           q = .TRUE.
+         CASE("-e") ! Number of Elements
+           e = .TRUE.
+         CASE("-f") ! Number of functions/nVar
+           f = .TRUE.
+
+         CASE DEFAULT
+
+           IF(c)THEN
+             READ(arg,*) Nc
+             c = .FALSE. 
+           ENDIF
+
+           IF(t)THEN
+             READ(arg,*) Nt
+             t = .FALSE. 
+           ENDIF
+
+           IF(q)THEN
+             READ(arg,*) qType
+             q = .FALSE. 
+           ENDIF
+
+           IF(e)THEN
+             READ(arg,*) Ne
+             e = .FALSE. 
+           ENDIF
+
+           IF(f)THEN
+             READ(arg,*) Nf
+             f = .FALSE. 
+           ENDIF
+
+       END SELECT
+     ENDDO
+   ENDIF
+
+ END SUBROUTINE SELFTest_ParseCLI
+
+
 END MODULE SELF_SupportRoutines

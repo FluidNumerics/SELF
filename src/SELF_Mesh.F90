@@ -589,7 +589,6 @@ SUBROUTINE CalculateContravariantBasis_Geometry3D( myGeom )
   INTEGER :: iEl, i, j, k
   REAL(prec) :: fac
 
-
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
