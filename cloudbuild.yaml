@@ -9,24 +9,19 @@ timeout: 1800s
 
 steps:
 
-- id: SELF-Fluids Build
+- id: SELF Build
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
-         '--build-arg', 
-         'BUILD_FLAGS=${_BUILD_FLAGS}',
-         '--file',
-         './docker/build/${_BUILD_BASE}/Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self-fluids:${_TAG}',
+         'gcr.io/${PROJECT_ID}/self:${_TAG}',
          ]
 
-substitutions:
-  _BUILD_BASE: pgi
-  _BUILD_FLAGS: '--enable-diagnostics --enable-tecplot --enable-cuda'
-  _TAG: 'pgi-gpu'
 
-images: ['gcr.io/${PROJECT_ID}/self-fluids:${_TAG}']
+substitutions:
+  _TAG: 'dev'
+
+images: ['gcr.io/${PROJECT_ID}/self:${_TAG}']
 
   #artifacts:
   #  objects:
