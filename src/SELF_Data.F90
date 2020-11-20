@@ -32,8 +32,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Scalar1D
-      PROCEDURE, PUBLIC :: Trash => Trash_Scalar1D
+      PROCEDURE, PUBLIC :: Init => Init_Scalar1D
+      PROCEDURE, PUBLIC :: Free => Free_Scalar1D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Scalar1D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Scalar1D
@@ -66,8 +66,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Scalar2D
-      PROCEDURE, PUBLIC :: Trash => Trash_Scalar2D
+      PROCEDURE, PUBLIC :: Init => Init_Scalar2D
+      PROCEDURE, PUBLIC :: Free => Free_Scalar2D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Scalar2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Scalar2D
@@ -103,8 +103,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Scalar3D
-      PROCEDURE, PUBLIC :: Trash => Trash_Scalar3D
+      PROCEDURE, PUBLIC :: Init => Init_Scalar3D
+      PROCEDURE, PUBLIC :: Free => Free_Scalar3D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Scalar3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Scalar3D
@@ -142,8 +142,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Vector2D
-      PROCEDURE, PUBLIC :: Trash => Trash_Vector2D
+      PROCEDURE, PUBLIC :: Init => Init_Vector2D
+      PROCEDURE, PUBLIC :: Free => Free_Vector2D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Vector2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Vector2D
@@ -186,8 +186,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Vector3D
-      PROCEDURE, PUBLIC :: Trash => Trash_Vector3D
+      PROCEDURE, PUBLIC :: Init => Init_Vector3D
+      PROCEDURE, PUBLIC :: Free => Free_Vector3D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Vector3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Vector3D
@@ -231,8 +231,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Tensor2D
-      PROCEDURE, PUBLIC :: Trash => Trash_Tensor2D
+      PROCEDURE, PUBLIC :: Init => Init_Tensor2D
+      PROCEDURE, PUBLIC :: Free => Free_Tensor2D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Tensor2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Tensor2D
@@ -270,8 +270,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Tensor3D
-      PROCEDURE, PUBLIC :: Trash => Trash_Tensor3D
+      PROCEDURE, PUBLIC :: Init => Init_Tensor3D
+      PROCEDURE, PUBLIC :: Free => Free_Tensor3D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Tensor3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Tensor3D
@@ -299,7 +299,7 @@ CONTAINS
 
 ! -- Scalar1D -- !
 
-SUBROUTINE Build_Scalar1D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Scalar1D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Scalar1D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -316,7 +316,7 @@ SUBROUTINE Build_Scalar1D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build(N = N, &
+    CALL SELFStorage % interp % Init(N = N, &
                                      controlNodeType = quadratureType, &
                                      M = M, &
                                      targetNodeType = targetNodeType)
@@ -328,20 +328,20 @@ SUBROUTINE Build_Scalar1D( SELFStorage, N, quadratureType, M, targetNodeType, nV
                                        upBound = (/nVar, 2, nElem/))
 
 
-END SUBROUTINE Build_Scalar1D
+END SUBROUTINE Init_Scalar1D
 
-SUBROUTINE Trash_Scalar1D( SELFStorage ) 
+SUBROUTINE Free_Scalar1D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Scalar1D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Scalar1D
+END SUBROUTINE Free_Scalar1D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Scalar1D( SELFStorage )
@@ -457,7 +457,7 @@ FUNCTION Add_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Scalar1D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar1D):: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -477,7 +477,7 @@ FUNCTION Subtract_Scalar1D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Scalar1D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar1D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -494,7 +494,7 @@ END FUNCTION Subtract_Scalar1D
 
 ! -- Scalar2D -- !
 
-SUBROUTINE Build_Scalar2D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Scalar2D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Scalar2D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -511,7 +511,7 @@ SUBROUTINE Build_Scalar2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build( N = N, &
+    CALL SELFStorage % interp % Init( N = N, &
                                       controlNodeType = quadratureType, &
                                       M = M, &
                                       targetNodeType = targetNodeType )
@@ -523,20 +523,20 @@ SUBROUTINE Build_Scalar2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
                                        upBound = (/N, nVar, 4, nElem/))
 
 
-END SUBROUTINE Build_Scalar2D
+END SUBROUTINE Init_Scalar2D
 
-SUBROUTINE Trash_Scalar2D( SELFStorage ) 
+SUBROUTINE Free_Scalar2D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Scalar2D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Scalar2D
+END SUBROUTINE Free_Scalar2D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Scalar2D( SELFStorage )
@@ -654,7 +654,7 @@ FUNCTION Add_Scalar2D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Scalar2D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar2D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -674,7 +674,7 @@ FUNCTION Subtract_Scalar2D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Scalar2D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar2D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -691,7 +691,7 @@ END FUNCTION Subtract_Scalar2D
 
 ! -- Scalar3D -- !
 
-SUBROUTINE Build_Scalar3D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Scalar3D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Scalar3D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -708,7 +708,7 @@ SUBROUTINE Build_Scalar3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build( N = N, &
+    CALL SELFStorage % interp % Init( N = N, &
                                       controlNodeType = quadratureType, &
                                       M = M, &
                                       targetNodeType = targetNodeType )
@@ -719,20 +719,20 @@ SUBROUTINE Build_Scalar3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     CALL SELFStorage % boundary % Alloc(loBound = (/0, 0, 1, 1, 1/),&
                                        upBound = (/N, N, nVar, 6, nElem/))
 
-END SUBROUTINE Build_Scalar3D
+END SUBROUTINE Init_Scalar3D
 
-SUBROUTINE Trash_Scalar3D( SELFStorage ) 
+SUBROUTINE Free_Scalar3D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Scalar3D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Scalar3D
+END SUBROUTINE Free_Scalar3D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Scalar3D( SELFStorage )
@@ -852,7 +852,7 @@ FUNCTION Add_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Scalar3D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar3D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -872,7 +872,7 @@ FUNCTION Subtract_Scalar3D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Scalar3D), INTENT(in) :: SELFa, SELFb
   TYPE(Scalar3D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -889,7 +889,7 @@ END FUNCTION Subtract_Scalar3D
 
 ! -- Vector2D -- !
 
-SUBROUTINE Build_Vector2D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Vector2D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Vector2D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -906,7 +906,7 @@ SUBROUTINE Build_Vector2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build( N = N, &
+    CALL SELFStorage % interp % Init( N = N, &
                                       controlNodeType = quadratureType, &
                                       M = M, &
                                       targetNodeType = targetNodeType )
@@ -917,20 +917,20 @@ SUBROUTINE Build_Vector2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     CALL SELFStorage % boundary % Alloc(loBound = (/1, 0, 1, 1, 1/),&
                                        upBound = (/2, N, nVar, 4, nElem/))
 
-END SUBROUTINE Build_Vector2D
+END SUBROUTINE Init_Vector2D
 
-SUBROUTINE Trash_Vector2D( SELFStorage ) 
+SUBROUTINE Free_Vector2D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Vector2D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Vector2D
+END SUBROUTINE Free_Vector2D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Vector2D( SELFStorage )
@@ -1090,7 +1090,7 @@ FUNCTION Add_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Vector2D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector2D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1110,7 +1110,7 @@ FUNCTION Subtract_Vector2D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Vector2D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector2D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1127,7 +1127,7 @@ END FUNCTION Subtract_Vector2D
 
 ! -- Vector3D -- !
 
-SUBROUTINE Build_Vector3D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Vector3D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Vector3D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -1144,7 +1144,7 @@ SUBROUTINE Build_Vector3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build( N = N, &
+    CALL SELFStorage % interp % Init( N = N, &
                                       controlNodeType = quadratureType, &
                                       M = M, &
                                       targetNodeType = targetNodeType )
@@ -1155,20 +1155,20 @@ SUBROUTINE Build_Vector3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     CALL SELFStorage % boundary % Alloc(loBound = (/1, 0, 0, 1, 1, 1/),&
                                        upBound = (/3, N, N, nVar, 6, nElem/))
 
-END SUBROUTINE Build_Vector3D
+END SUBROUTINE Init_Vector3D
 
-SUBROUTINE Trash_Vector3D( SELFStorage ) 
+SUBROUTINE Free_Vector3D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Vector3D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Vector3D
+END SUBROUTINE Free_Vector3D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Vector3D( SELFStorage )
@@ -1330,7 +1330,7 @@ FUNCTION Add_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Vector3D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector3D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1350,7 +1350,7 @@ FUNCTION Subtract_Vector3D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Vector3D), INTENT(in) :: SELFa, SELFb
   TYPE(Vector3D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1367,7 +1367,7 @@ END FUNCTION Subtract_Vector3D
 
 ! -- Tensor2D -- !
 
-SUBROUTINE Build_Tensor2D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Tensor2D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Tensor2D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -1384,7 +1384,7 @@ SUBROUTINE Build_Tensor2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build( N = N, &
+    CALL SELFStorage % interp % Init( N = N, &
                                       controlNodeType = quadratureType, &
                                       M = M, &
                                       targetNodeType = targetNodeType )
@@ -1395,20 +1395,20 @@ SUBROUTINE Build_Tensor2D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     CALL SELFStorage % boundary % Alloc(loBound = (/1, 1, 0, 1, 1, 1/),&
                                        upBound = (/2, 2, N, nVar, 4, nElem/))
 
-END SUBROUTINE Build_Tensor2D
+END SUBROUTINE Init_Tensor2D
 
-SUBROUTINE Trash_Tensor2D( SELFStorage ) 
+SUBROUTINE Free_Tensor2D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Tensor2D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Tensor2D
+END SUBROUTINE Free_Tensor2D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Tensor2D( SELFStorage )
@@ -1555,7 +1555,7 @@ FUNCTION Add_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Tensor2D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor2D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1575,7 +1575,7 @@ FUNCTION Subtract_Tensor2D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Tensor2D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor2D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, & 
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1592,7 +1592,7 @@ END FUNCTION Subtract_Tensor2D
 
 ! -- Tensor3D -- !
 
-SUBROUTINE Build_Tensor3D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
+SUBROUTINE Init_Tensor3D( SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem ) 
   IMPLICIT NONE
   CLASS(Tensor3D), INTENT(out) :: SELFStorage
   INTEGER, INTENT(in) :: N
@@ -1609,7 +1609,7 @@ SUBROUTINE Build_Tensor3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     SELFStorage % controlType = quadratureType
     SELFStorage % targetType = targetNodeType
 
-    CALL SELFStorage % interp % Build( N = N, &
+    CALL SELFStorage % interp % Init( N = N, &
                                       controlNodeType = quadratureType, &
                                       M = M, &
                                       targetNodeType = targetNodeType )
@@ -1620,20 +1620,20 @@ SUBROUTINE Build_Tensor3D( SELFStorage, N, quadratureType, M, targetNodeType, nV
     CALL SELFStorage % boundary % Alloc(loBound = (/1, 1, 0, 0, 1, 1, 1/),&
                                        upBound = (/3, 3, N, N, nVar, 6, nElem/))
 
-END SUBROUTINE Build_Tensor3D
+END SUBROUTINE Init_Tensor3D
 
-SUBROUTINE Trash_Tensor3D( SELFStorage ) 
+SUBROUTINE Free_Tensor3D( SELFStorage ) 
   IMPLICIT NONE
   CLASS(Tensor3D), INTENT(inout) :: SELFStorage
 
     SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Trash()
+    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
 
-END SUBROUTINE Trash_Tensor3D
+END SUBROUTINE Free_Tensor3D
 
 #ifdef GPU
 SUBROUTINE UpdateHost_Tensor3D( SELFStorage )
@@ -1795,7 +1795,7 @@ FUNCTION Add_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Tensor3D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor3D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &
@@ -1815,7 +1815,7 @@ FUNCTION Subtract_Tensor3D( SELFa, SELFb ) RESULT( SELFOut )
   CLASS(Tensor3D), INTENT(in) :: SELFa, SELFb
   TYPE(Tensor3D) :: SELFOut
 
-    CALL SELFOut % Build( SELFa % N, &
+    CALL SELFOut % Init( SELFa % N, &
                           SELFa % controlType, &
                           SELFa % M, &
                           SELFa % targetType, &

@@ -90,8 +90,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Geometry2D
-      PROCEDURE, PUBLIC :: Trash => Trash_Geometry2D
+      PROCEDURE, PUBLIC :: Init => Init_Geometry2D
+      PROCEDURE, PUBLIC :: Free => Free_Geometry2D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Geometry2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Geometry2D
@@ -111,8 +111,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Geometry3D
-      PROCEDURE, PUBLIC :: Trash => Trash_Geometry3D
+      PROCEDURE, PUBLIC :: Init => Init_Geometry3D
+      PROCEDURE, PUBLIC :: Free => Free_Geometry3D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Geometry3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Geometry3D
@@ -142,8 +142,8 @@ IMPLICIT NONE
     CHARACTER(LEN=255), ALLOCATABLE :: BCNames(:)
 
     CONTAINS
-      PROCEDURE, PUBLIC :: Build => Build_Mesh2D
-      PROCEDURE, PUBLIC :: Trash => Trash_Mesh2D
+      PROCEDURE, PUBLIC :: Init => Init_Mesh2D
+      PROCEDURE, PUBLIC :: Free => Free_Mesh2D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Mesh2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
@@ -170,8 +170,8 @@ IMPLICIT NONE
     
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Build => Build_Mesh3D
-      PROCEDURE, PUBLIC :: Trash => Trash_Mesh3D
+      PROCEDURE, PUBLIC :: Init => Init_Mesh3D
+      PROCEDURE, PUBLIC :: Free => Free_Mesh3D
 #ifdef GPU
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Mesh3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
@@ -190,7 +190,7 @@ IMPLICIT NONE
 
 CONTAINS
 
-SUBROUTINE Build_Mesh2D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
+SUBROUTINE Init_Mesh2D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
   IMPLICIT NONE
   CLASS(Mesh2D), INTENT(out) :: myMesh
   INTEGER, INTENT(in) :: quadrature
@@ -210,7 +210,7 @@ SUBROUTINE Build_Mesh2D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSi
     myMesh % nUniqueNodes = nUniqueNodes
     myMesh % nBCs = nBCs
 
-    CALL myMesh % geometry % Build( quadrature, polyDegree, nPlotPoints, nElem )
+    CALL myMesh % geometry % Init( quadrature, polyDegree, nPlotPoints, nElem )
 
     CALL myMesh % elemInfo % Alloc(loBound = (/1, 1/),&
                                    upBound = (/6, nElem /) )
@@ -229,9 +229,9 @@ SUBROUTINE Build_Mesh2D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSi
 
     ALLOCATE( myMesh % BCNames(1:nBCs) )
 
-END SUBROUTINE Build_Mesh2D
+END SUBROUTINE Init_Mesh2D
 
-SUBROUTINE Trash_Mesh2D( myMesh )
+SUBROUTINE Free_Mesh2D( myMesh )
   IMPLICIT NONE
   CLASS(Mesh2D), INTENT(inout) :: myMesh
 
@@ -250,7 +250,7 @@ SUBROUTINE Trash_Mesh2D( myMesh )
 
     DEALLOCATE( myMesh % BCNames )
 
-END SUBROUTINE Trash_Mesh2D
+END SUBROUTINE Free_Mesh2D
 #ifdef GPU
 SUBROUTINE UpdateHost_Mesh2D( myMesh )
   IMPLICIT NONE
@@ -278,7 +278,7 @@ SUBROUTINE UpdateDevice_Mesh2D( myMesh )
 
 END SUBROUTINE UpdateDevice_Mesh2D
 #endif
-SUBROUTINE Build_Geometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
+SUBROUTINE Init_Geometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(out) :: myGeom
   INTEGER, INTENT(in) :: quadrature
@@ -289,46 +289,46 @@ SUBROUTINE Build_Geometry2D( myGeom, quadrature, polyDegree, nPlotPoints, nElem 
     myGeom % qType = quadrature
     myGeom % nElem = nElem
 
-    CALL myGeom % x %  Build( N = polyDegree, &
+    CALL myGeom % x %  Init( N = polyDegree, &
                               quadratureType = GAUSS, &
                               M = 2*polyDegree, &
                               targetNodeType = UNIFORM, &
                               nVar = 2, &
                               nElem = nElem ) 
 
-    CALL myGeom % dxds %  Build( N = polyDegree, &
+    CALL myGeom % dxds %  Init( N = polyDegree, &
                                  quadratureType = GAUSS, &
                                  M = 2*polyDegree, &
                                  targetNodeType = UNIFORM, &
                                  nVar = 2, &
                                  nElem = nElem ) 
 
-    CALL myGeom % dsdx %  Build( N = polyDegree, &
+    CALL myGeom % dsdx %  Init( N = polyDegree, &
                                  quadratureType = GAUSS, &
                                  M = 2*polyDegree, &
                                  targetNodeType = UNIFORM, &
                                  nVar = 2, &
                                  nElem = nElem ) 
 
-    CALL myGeom % J %  Build( N = polyDegree, &
+    CALL myGeom % J %  Init( N = polyDegree, &
                               quadratureType = GAUSS, &
                               M = 2*polyDegree, &
                               targetNodeType = UNIFORM, &
                               nVar = 2, &
                               nElem = nElem ) 
     
-END SUBROUTINE Build_Geometry2D
+END SUBROUTINE Init_Geometry2D
 
-SUBROUTINE Trash_Geometry2D( myGeom ) 
+SUBROUTINE Free_Geometry2D( myGeom ) 
   IMPLICIT NONE
   CLASS(Geometry2D), INTENT(inout) :: myGeom
 
-    CALL myGeom % x % Trash()
-    CALL myGeom % dxds % Trash()
-    CALL myGeom % dsdx % Trash()
-    CALL myGeom % J % Trash()
+    CALL myGeom % x % Free()
+    CALL myGeom % dxds % Free()
+    CALL myGeom % dsdx % Free()
+    CALL myGeom % J % Free()
   
-END SUBROUTINE Trash_Geometry2D 
+END SUBROUTINE Free_Geometry2D 
 #ifdef GPU
 SUBROUTINE UpdateHost_Geometry2D( myGeom )
   IMPLICIT NONE
@@ -418,7 +418,7 @@ SUBROUTINE CalculateMetricTerms_Geometry2D( myGeom )
 END SUBROUTINE CalculateMetricTerms_Geometry2D
 
 
-SUBROUTINE Build_Mesh3D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
+SUBROUTINE Init_Mesh3D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSides, nNodes, nUniqueSides, nUniqueNodes, nBCs )
   IMPLICIT NONE
   CLASS(Mesh3D), INTENT(out) :: myMesh
   INTEGER, INTENT(in) :: quadrature
@@ -438,7 +438,7 @@ SUBROUTINE Build_Mesh3D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSi
     myMesh % nUniqueNodes = nUniqueNodes
     myMesh % nBCs = nBCs
 
-    CALL myMesh % geometry % Build( quadrature, polyDegree, nPlotPoints, nElem )
+    CALL myMesh % geometry % Init( quadrature, polyDegree, nPlotPoints, nElem )
 
     CALL myMesh % elemInfo % Alloc(loBound = (/1, 1/),&
                                    upBound = (/6, nElem /) )
@@ -458,9 +458,9 @@ SUBROUTINE Build_Mesh3D( myMesh, quadrature, polyDegree, nPlotPoints, nElem, nSi
     ALLOCATE( myMesh % BCNames(1:nBCs) )
 
 
-END SUBROUTINE Build_Mesh3D
+END SUBROUTINE Init_Mesh3D
 
-SUBROUTINE Trash_Mesh3D( myMesh )
+SUBROUTINE Free_Mesh3D( myMesh )
   IMPLICIT NONE
   CLASS(Mesh3D), INTENT(inout) :: myMesh
 
@@ -479,7 +479,7 @@ SUBROUTINE Trash_Mesh3D( myMesh )
 
     DEALLOCATE( myMesh % BCNames )
 
-END SUBROUTINE Trash_Mesh3D
+END SUBROUTINE Free_Mesh3D
 #ifdef GPU
 SUBROUTINE UpdateHost_Mesh3D( myMesh )
   IMPLICIT NONE
@@ -507,7 +507,7 @@ SUBROUTINE UpdateDevice_Mesh3D( myMesh )
 
 END SUBROUTINE UpdateDevice_Mesh3D
 #endif
-SUBROUTINE Build_Geometry3D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
+SUBROUTINE Init_Geometry3D( myGeom, quadrature, polyDegree, nPlotPoints, nElem ) 
   IMPLICIT NONE
   CLASS(Geometry3D), INTENT(out) :: myGeom
   INTEGER, INTENT(in) :: quadrature
@@ -518,46 +518,46 @@ SUBROUTINE Build_Geometry3D( myGeom, quadrature, polyDegree, nPlotPoints, nElem 
     myGeom % qType = quadrature
     myGeom % nElem = nElem
 
-    CALL myGeom % x %  Build( N = polyDegree, &
+    CALL myGeom % x %  Init( N = polyDegree, &
                               quadratureType = GAUSS, &
                               M = 2*polyDegree, &
                               targetNodeType = UNIFORM, &
                               nVar = 2, &
                               nElem = nElem ) 
 
-    CALL myGeom % dxds %  Build( N = polyDegree, &
+    CALL myGeom % dxds %  Init( N = polyDegree, &
                                  quadratureType = GAUSS, &
                                  M = 2*polyDegree, &
                                  targetNodeType = UNIFORM, &
                                  nVar = 2, &
                                  nElem = nElem ) 
 
-    CALL myGeom % dsdx %  Build( N = polyDegree, &
+    CALL myGeom % dsdx %  Init( N = polyDegree, &
                                  quadratureType = GAUSS, &
                                  M = 2*polyDegree, &
                                  targetNodeType = UNIFORM, &
                                  nVar = 2, &
                                  nElem = nElem ) 
 
-    CALL myGeom % J %  Build( N = polyDegree, &
+    CALL myGeom % J %  Init( N = polyDegree, &
                               quadratureType = GAUSS, &
                               M = 2*polyDegree, &
                               targetNodeType = UNIFORM, &
                               nVar = 2, &
                               nElem = nElem ) 
     
-END SUBROUTINE Build_Geometry3D
+END SUBROUTINE Init_Geometry3D
 
-SUBROUTINE Trash_Geometry3D( myGeom ) 
+SUBROUTINE Free_Geometry3D( myGeom ) 
   IMPLICIT NONE
   CLASS(Geometry3D), INTENT(inout) :: myGeom
 
-    CALL myGeom % x % Trash()
-    CALL myGeom % dxds % Trash()
-    CALL myGeom % dsdx % Trash()
-    CALL myGeom % J % Trash()
+    CALL myGeom % x % Free()
+    CALL myGeom % dxds % Free()
+    CALL myGeom % dsdx % Free()
+    CALL myGeom % J % Free()
   
-END SUBROUTINE Trash_Geometry3D 
+END SUBROUTINE Free_Geometry3D 
 #ifdef GPU
 SUBROUTINE UpdateHost_Geometry3D( myGeom )
   IMPLICIT NONE

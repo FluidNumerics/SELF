@@ -18,8 +18,8 @@ IMPLICIT NONE
 
     CONTAINS
 
-      PROCEDURE :: Build => Build_MPILayer
-      PROCEDURE :: Trash => Trash_MPILayer
+      PROCEDURE :: Init => Init_MPILayer
+      PROCEDURE :: Free => Free_MPILayer
 
       GENERIC, PUBLIC :: MPI_Exchange => MPIExchange_MappedScalar2D
       PROCEDURE, PUBLIC :: MPIExchange_MappedScalar2D

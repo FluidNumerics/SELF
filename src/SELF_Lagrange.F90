@@ -35,7 +35,7 @@ IMPLICIT NONE
   TYPE, PUBLIC :: Lagrange
   !> A data structure for working with Lagrange Interpolating Polynomials in one, two, and three dimensions.
   !>
-  !> attribute : controlPoints(0:N) : The set of nodes in one dimension where data is known. To create higher dimension interpolation and differentiation operators, structured grids in two and three dimensions are created by tensor products of the controlPoints. This design decision implies that all Spectral Element Methods supported by the Lagrange class have the same polynomial degree in each computational/spatial dimension. In practice, the controlPoints are the Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss, Chebyshev-Gauss-Lobatto, or Chebyshev-Gauss-Radau quadrature points over the domain [-1,1] (computational space). The Build routine for this class restricts controlPoints to one of these quadrature types or uniform points on [-1,1].
+  !> attribute : controlPoints(0:N) : The set of nodes in one dimension where data is known. To create higher dimension interpolation and differentiation operators, structured grids in two and three dimensions are created by tensor products of the controlPoints. This design decision implies that all Spectral Element Methods supported by the Lagrange class have the same polynomial degree in each computational/spatial dimension. In practice, the controlPoints are the Legendre-Gauss, Legendre-Gauss-Lobatto, Legendre-Gauss-Radau, Chebyshev-Gauss, Chebyshev-Gauss-Lobatto, or Chebyshev-Gauss-Radau quadrature points over the domain [-1,1] (computational space). The Init routine for this class restricts controlPoints to one of these quadrature types or uniform points on [-1,1].
   !
   !> attribute : targetPoints(0:M) : The set of nodes in one dimension where data is to be interpolated to. To create higher dimension interpolation and differentiation operators, structured grids in two and three dimensions are created by tensor products of the targetPoints. In practice, the targetPoints are set to a uniformly distributed set of points between [-1,1] (computational space) to allow for interpolation from unevenly spaced quadrature points to a plotting grid.
   !
@@ -59,8 +59,8 @@ IMPLICIT NONE
 
     CONTAINS
       
-      PROCEDURE, PUBLIC :: Build => Build_Lagrange
-      PROCEDURE, PUBLIC :: Trash => Trash_Lagrange
+      PROCEDURE, PUBLIC :: Init => Init_Lagrange
+      PROCEDURE, PUBLIC :: Free => Free_Lagrange
 
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Lagrange
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Lagrange
@@ -381,12 +381,12 @@ IMPLICIT NONE
 
 ! ================================================================================================ !
 !
-! Build_Lagrange
+! Init_Lagrange
 !
 !   A manual constructor for the Lagrange class that allocates memory and fills in data 
 !   for the attributes of the Lagrange class.
 !  
-!   The Build subroutine allocates memory for the interpolation and target points, barycentric
+!   The Init subroutine allocates memory for the interpolation and target points, barycentric
 !   weights, interpolation matrix, and derivative matrix.
 !
 !   Usage :
@@ -395,7 +395,7 @@ IMPLICIT NONE
 !     INTEGER        :: N, M
 !     REAL(prec)     :: interpNodes(0:N), targetNodes(0:M+1) 
 !
-!     CALL interp % Build( N, M, interpNodes, targetNodes )
+!     CALL interp % Init( N, M, interpNodes, targetNodes )
 !
 !   Input/Output :
 !
@@ -417,7 +417,7 @@ IMPLICIT NONE
 !
 ! =============================================================================================== !
 
-  SUBROUTINE Build_Lagrange( myPoly, N, controlNodeType, M, targetNodeType )
+  SUBROUTINE Init_Lagrange( myPoly, N, controlNodeType, M, targetNodeType )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(out) :: myPoly
     INTEGER, INTENT(in)          :: N, M
@@ -487,17 +487,17 @@ IMPLICIT NONE
       CALL myPoly % UpdateDevice()
 #endif
  
- END SUBROUTINE Build_Lagrange
+ END SUBROUTINE Init_Lagrange
 
 ! ================================================================================================ !
 !
-! Trash_Lagrange
+! Free_Lagrange
 !
 !   A manual destructor for the Lagrange class that deallocates the memory held by its attributes. 
 !
 ! ================================================================================================ ! 
 
-  SUBROUTINE Trash_Lagrange( myPoly )
+  SUBROUTINE Free_Lagrange( myPoly )
     IMPLICIT NONE
     CLASS(Lagrange), INTENT(inout) :: myPoly
 
@@ -509,7 +509,7 @@ IMPLICIT NONE
       CALL myPoly % dMatrix % Free()
       CALL myPoly % bMatrix % Free()
 
-  END SUBROUTINE Trash_Lagrange
+  END SUBROUTINE Free_Lagrange
 
 #ifdef GPU
   SUBROUTINE UpdateDevice_Lagrange(myPoly)
