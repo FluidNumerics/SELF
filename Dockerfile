@@ -1,36 +1,33 @@
-FROM gcr.io/self-fluids/rocm:latest AS devel
+FROM gcr.io/self-fluids/self-dep:latest AS devel
+
+COPY . /tmp
 
 # FEQParse
-RUN git clone https://github.com/FluidNumerics/feq-parse.git /tmp/feq-parse &&\
-    mkdir -p /tmp/feq-parse/build && \
-    cd /tmp/feq-parse/build && \
-    cmake -DCMAKE_INSTALL_PREFIX=/apps/self /tmp/feq-parse && \
-    make && make install && \
-    rm -rf /tmp/feq-parse
+RUN mkdir -p /tmp/dependencies/feq-parse/build && \
+    cd /tmp/dependencies/feq-parse/build && \
+    cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/dependencies/feq-parse && \
+    make && make install
 
 # JSON-Fortran
-RUN git clone https://github.com/jacobwilliams/json-fortran.git /tmp/json-fortran &&\
-    mkdir -p /tmp/json-fortran/build && \
-    cd /tmp/json-fortran/build && \
-    cmake -DSKIP_DOC_GEN=True -DCMAKE_INSTALL_PREFIX=/apps/self /tmp/json-fortran && \
-    make && make install &&\
-    rm -rf /tmp/json-fortran
+RUN mkdir -p /tmp/dependencies/json-fortran/build && \
+    cd /tmp/dependencies/json-fortran/build && \
+    cmake -DSKIP_DOC_GEN=True -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/dependencies/json-fortran && \
+    make && make install
 
 ENV LD_LIBRARY_PATH=/apps/self/lib:$LD_LIBRARY_PATH \
     PATH=/apps/self/bin:$PATH
 
-RUN source /opt/rh/devtoolset-9/enable && \
-    mkdir -p /self-build/build && \
-    cd /self-build/build && \
-    FC="/opt/rocm/bin/hipfc" \
-    CC="/opt/rocm/bin/hipfc" \
-    CXX="/opt/rocm/bin/hipfc" \
+RUN mkdir -p /tmp/build && \
+    cd /tmp/build && \
+    FC="/usr/local/bin/hipfc" \
+    CC="/usr/local/bin/hipfc" \
+    CXX="/usr/local/bin/hipfc" \
     FFLAGS="-v -DGPU -ffree-line-length-none" \
     CXXFLAGS="-v" \
-    /usr/local/bin/cmake /self-build -DCMAKE_INSTALL_PREFIX=/usr/local/self &&\
+    cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp &&\
     make && make install
 
 
 FROM gcr.io/self-fluids/rocm:latest
 
-COPY --from=devel /apps/self
+COPY --from=devel /apps/self /apps/self
