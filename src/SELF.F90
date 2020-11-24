@@ -39,14 +39,180 @@ IMPLICIT NONE
                     def = "10", &
                     required = .FALSE. )
 
+    CALL cli % add( switch = "--gpu-accel", &
+                    switch_ab = "-gpu", &
+                    def = "false", &
+                    required = .FALSE. )
+
     CALL cli % add_group( group = "s1d_interp", &
                           description = "Scalar 1D Interpolation" )
+
+    CALL cli % add( switch = "--function", &
+                    switch_ab = "-f", &
+                    group = "s1d_interp", &
+                    help = "Function to interpolate from control points to target points", &
+                    def = "f=1.0", &
+                    required = .FALSE. )
 
     CALL cli % add_group( group = "s2d_interp", &
                           description = "Scalar 2D Interpolation" )
 
+    CALL cli % add( switch = "--function", &
+                    switch_ab = "-f", &
+                    group = "s2d_interp", &
+                    help = "Function to interpolate from control points to target points", &
+                    def = "f=1.0", &
+                    required = .FALSE. )
+
     CALL cli % add_group( group = "s3d_interp", &
                           description = "Scalar 3D Interpolation" )
+
+    CALL cli % add( switch = "--function", &
+                    switch_ab = "-f", &
+                    group = "s3d_interp", &
+                    help = "Function to interpolate from control points to target points", &
+                    def = "f=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add_group( group = "v2d_interp", &
+                          description = "Vector 2D Interpolation" )
+
+    CALL cli % add( switch = "--vector-x", &
+                    switch_ab = "-vx", &
+                    group = "v2d_interp", &
+                    help = "x-component of the vector function to interpolate from control points to target points", &
+                    def = "vx=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--vector-y", &
+                    switch_ab = "-vy", &
+                    group = "v2d_interp", &
+                    help = "y-component of the vector function to interpolate from control points to target points", &
+                    def = "vy=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add_group( group = "v3d_interp", &
+                          description = "Vector 3D Interpolation" )
+
+    CALL cli % add( switch = "--vector-x", &
+                    switch_ab = "-vx", &
+                    group = "v3d_interp", &
+                    help = "x-component of the vector function to interpolate from control points to target points", &
+                    def = "vx=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--vector-y", &
+                    switch_ab = "-vy", &
+                    group = "v3d_interp", &
+                    help = "y-component of the vector function to interpolate from control points to target points", &
+                    def = "vy=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--vector-z", &
+                    switch_ab = "-vz", &
+                    group = "v3d_interp", &
+                    help = "z-component of the vector function to interpolate from control points to target points", &
+                    def = "vz=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add_group( group = "t2d_interp", &
+                          description = "Tensor 2D Interpolation" )
+
+    CALL cli % add( switch = "--tensor-11", &
+                    switch_ab = "-t11", &
+                    group = "t2d_interp", &
+                    help = "Row 1 column 1 of the tensor function to interpolate from control points to target points", &
+                    def = "t11=1.0", &
+                    required = .FALSE. )
+            
+    CALL cli % add( switch = "--tensor-12", &
+                    switch_ab = "-t12", &
+                    group = "t2d_interp", &
+                    help = "Row 1 column 2 of the tensor function to interpolate from control points to target points", &
+                    def = "t12=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--tensor-21", &
+                    switch_ab = "-t21", &
+                    group = "t2d_interp", &
+                    help = "Row 2 column 1 of the tensor function to interpolate from control points to target points", &
+                    def = "t21=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--tensor-22", &
+                    switch_ab = "-t22", &
+                    group = "t2d_interp", &
+                    help = "Row 2 column 2 of the tensor function to interpolate from control points to target points", &
+                    def = "t22=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add_group( group = "t3d_interp", &
+                          description = "Tensor 3D Interpolation" )
+
+    CALL cli % add( switch = "--tensor-11", &
+                    switch_ab = "-t11", &
+                    group = "t3d_interp", &
+                    help = "Row 1 column 1 of the tensor function to interpolate from control points to target points", &
+                    def = "t11=1.0", &
+                    required = .FALSE. )
+            
+    CALL cli % add( switch = "--tensor-12", &
+                    switch_ab = "-t12", &
+                    group = "t3d_interp", &
+                    help = "Row 1 column 2 of the tensor function to interpolate from control points to target points", &
+                    def = "t12=1.0", &
+                    required = .FALSE. )
+            
+    CALL cli % add( switch = "--tensor-13", &
+                    switch_ab = "-t13", &
+                    group = "t3d_interp", &
+                    help = "Row 1 column 3 of the tensor function to interpolate from control points to target points", &
+                    def = "t13=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--tensor-21", &
+                    switch_ab = "-t21", &
+                    group = "t3d_interp", &
+                    help = "Row 2 column 1 of the tensor function to interpolate from control points to target points", &
+                    def = "t21=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--tensor-22", &
+                    switch_ab = "-t22", &
+                    group = "t3d_interp", &
+                    help = "Row 2 column 2 of the tensor function to interpolate from control points to target points", &
+                    def = "t22=1.0", &
+                    required = .FALSE. )
+            
+    CALL cli % add( switch = "--tensor-23", &
+                    switch_ab = "-t23", &
+                    group = "t3d_interp", &
+                    help = "Row 2 column 3 of the tensor function to interpolate from control points to target points", &
+                    def = "t23=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--tensor-31", &
+                    switch_ab = "-t31", &
+                    group = "t3d_interp", &
+                    help = "Row 3 column 1 of the tensor function to interpolate from control points to target points", &
+                    def = "t31=1.0", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--tensor-32", &
+                    switch_ab = "-t32", &
+                    group = "t3d_interp", &
+                    help = "Row 3 column 2 of the tensor function to interpolate from control points to target points", &
+                    def = "t32=1.0", &
+                    required = .FALSE. )
+            
+    CALL cli % add( switch = "--tensor-33", &
+                    switch_ab = "-t33", &
+                    group = "t3d_interp", &
+                    help = "Row 2 column 3 of the tensor function to interpolate from control points to target points", &
+                    def = "t33=1.0", &
+                    required = .FALSE. )
+
+
 
     CALL cli % parse()
     CALL cli % free()
