@@ -1,25 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 
-#set(CMAKE_Fortran_COMPILER_INIT ${SELF_COMPILER})
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+PROJECT(self Fortran C CXX)
 
-PROJECT(self Fortran C)
-#SET(CMAKE_BUILD_TYPE ${SELF_BUILD_TYPE})
 SET(VERSION 0.0.0)
-message("-- CMAKE_INSTALL_PREFIX:${CMAKE_INSTALL_PREFIX}")
 
-INCLUDE(FortranCInterface)
-#FortranCInterface_VERIFY()
-#IF(NOT FortranCInterface_VERIFIED_C)
-#	MESSAGE(FATAL_ERROR "Fortran compiler must support C Interface")
-#ENDIF(NOT FortranCInterface_VERIFIED_C)
-#	
-IF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
-    MESSAGE(FATAL_ERROR "Fortran compiler does not support F90")
-ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/src)
-#ADD_SUBDIRECTORY(${CMAKE_SOURCE_DIR}/test)
 
-message("-- SELF -------------  cmake DONE --------------------")
+
