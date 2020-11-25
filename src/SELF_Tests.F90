@@ -8,6 +8,7 @@ USE SELF_Lagrange
 USE SELF_Data
 USE SELF_Mesh
 USE SELF_MappedData
+USE FEQParse
 
 IMPLICIT NONE
 
@@ -84,5 +85,46 @@ SUBROUTINE BlockMesh1D_Test( cqType, tqType, nControlPoints, nTargetPoints, nEle
 
 
 END SUBROUTINE BlockMesh1D_Test
+
+SUBROUTINE ScalarInterp1D_Test( cqType, tqType, nControlPoints, nTargetPoints, nElem, nvar, functionChar, error )
+#undef __FUNC__
+#define __FUNC__ "ScalarInterp1D_Test"
+  IMPLICIT NONE
+  INTEGER, INTENT(in) :: cqType
+  INTEGER, INTENT(in) :: tqType
+  INTEGER, INTENT(in) :: nControlPoints
+  INTEGER, INTENT(in) :: nTargetPoints
+  INTEGER, INTENT(in) :: nElem
+  INTEGER, INTENT(in) :: nVar
+  CHARACTER(*), INTENT(in) :: functionChar
+  INTEGER, INTENT(out) :: error
+  ! Local
+  TYPE(Mesh1D) :: controlMesh, targetMesh
+  TYPE(EquationParser)  :: feq
+  TYPE(Scalar1D) :: f, fInterp, fActual, fError
+  REAL(prec) :: expect_dxds, dxds_error, expect_boundx, boundx_error
+  INTEGER :: iel, i
+
+    error = 0
+    INFO( 'Number of elements : '//Int2Str(nElem) )
+    INFO( 'Number of control points : '//Int2Str(nControlPoints) )
+    INFO( 'Number of target points : '//Int2Str(nTargetPoints) )
+    INFO( 'Number of variables : '//Int2Str(nvar) )
+
+    ! Create the mesh
+    CALL controlMesh % UniformBlockMesh( cqType, tqType, nControlPoints, nTargetPoints, nElem, 0.0_prec, 1.0_prec )
+    CALL targetMesh % UniformBlockMesh( tqType, tqType, nTargetPoints, nTargetPoints, nElem, 0.0_prec, 1.0_prec )
+
+    ! Create the scalar1d objects
+    CALL f % Build( nControlPoints, cqType, nTargetPoints, tqType, nvar, nElem ) 
+    CALL fInterp % Build( nTargetPoints, tqType, nTargetPoints, tqType, nvar, nElem ) 
+    CALL fActual % Build( nTargetPoints, tqType, nTargetPoints, tqType, nvar, nElem ) 
+    CALL fError % Build( nTargetPoints, tqType, nTargetPoints, tqType, nvar, nElem ) 
+
+    ! Create the equation parser object
+    f = EquationParser(functionChar,(/'x'/))
+
+    ! Load the control function
+    ! Load the target function
 
 END MODULE SELF_Tests
