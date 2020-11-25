@@ -7,7 +7,7 @@ IMPLICIT NONE
 
   TYPE(COMMAND_LINE_INTERFACE) :: cli
 
-    CALL cli % init( progname = "SELF", &
+    CALL cli % init( progname = "self", &
                      version = "v0.0.0", &
                      description = "Spectral Element Libraries in Fortran (SELF)", &
                      license = "ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
@@ -15,34 +15,58 @@ IMPLICIT NONE
 
     CALL cli % add( switch = "--control-points", &
                     switch_ab = "-c", &
+                    help = "The number of control points on computational grid."//NEW_LINE("A"),&
                     def = "2", &
                     required = .FALSE. )
 
     CALL cli % add( switch = "--target-points", &
                     switch_ab = "-t", &
+                    help = "The number of target points for grid interpolation methods."//NEW_LINE("A"),&
                     def = "7", &
                     required = .FALSE. )
 
-    CALL cli % add( switch = "--quadrature-type", &
-                    switch_ab = "-q", &
+    CALL cli % add( switch = "--control-quadrature", &
+                    switch_ab = "-cq", &
                     def = "gauss", &
-                    choices = "gauss, gauss-lobatto", &
+                    help = "The quadrature type for control points."//NEW_LINE("A"),&
+                    choices = "gauss, gauss-lobatto, uniform", &
+                    required = .FALSE. )
+
+    CALL cli % add( switch = "--target-quadrature", &
+                    switch_ab = "-tq", &
+                    def = "gauss", &
+                    help = "The quadrature type for target points."//NEW_LINE("A"),&
+                    choices = "gauss, gauss-lobatto, uniform", &
                     required = .FALSE. )
 
     CALL cli % add( switch = "--nvar", &
                     switch_ab = "-nv", &
+                    help = "The number of functions used to simulate increased workloads."//NEW_LINE("A"),&
                     def = "5", &
                     required = .FALSE. )
 
     CALL cli % add( switch = "--nelements", &
                     switch_ab = "-ne", &
+                    help = "The number of elements to use on the test mesh. "//&
+                           "In multi-dimensions, the number of elements in each direction."//NEW_LINE("A"),&
                     def = "10", &
                     required = .FALSE. )
 
     CALL cli % add( switch = "--gpu-accel", &
                     switch_ab = "-gpu", &
+                    help = "Boolean flag for enabling or disabling GPU acceleration in tests."//NEW_LINE("A"),&
                     def = "false", &
+                    choices = "true, false", &
                     required = .FALSE. )
+
+    CALL cli % add_group( group = "blockmesh_1d", &
+                          description = "Block Mesh generation in 1D" )
+
+    CALL cli % add_group( group = "blockmesh_2d", &
+                          description = "Block Mesh generation in 2D" )
+
+    CALL cli % add_group( group = "blockmesh_3d", &
+                          description = "Block Mesh generation in 3D" )
 
     CALL cli % add_group( group = "s1d_interp", &
                           description = "Scalar 1D Interpolation" )
@@ -124,7 +148,7 @@ IMPLICIT NONE
                     help = "Row 1 column 1 of the tensor function to interpolate from control points to target points", &
                     def = "t11=1.0", &
                     required = .FALSE. )
-            
+
     CALL cli % add( switch = "--tensor-12", &
                     switch_ab = "-t12", &
                     group = "t2d_interp", &
@@ -155,14 +179,14 @@ IMPLICIT NONE
                     help = "Row 1 column 1 of the tensor function to interpolate from control points to target points", &
                     def = "t11=1.0", &
                     required = .FALSE. )
-            
+
     CALL cli % add( switch = "--tensor-12", &
                     switch_ab = "-t12", &
                     group = "t3d_interp", &
                     help = "Row 1 column 2 of the tensor function to interpolate from control points to target points", &
                     def = "t12=1.0", &
                     required = .FALSE. )
-            
+
     CALL cli % add( switch = "--tensor-13", &
                     switch_ab = "-t13", &
                     group = "t3d_interp", &
@@ -183,7 +207,7 @@ IMPLICIT NONE
                     help = "Row 2 column 2 of the tensor function to interpolate from control points to target points", &
                     def = "t22=1.0", &
                     required = .FALSE. )
-            
+
     CALL cli % add( switch = "--tensor-23", &
                     switch_ab = "-t23", &
                     group = "t3d_interp", &
@@ -204,7 +228,7 @@ IMPLICIT NONE
                     help = "Row 3 column 2 of the tensor function to interpolate from control points to target points", &
                     def = "t32=1.0", &
                     required = .FALSE. )
-            
+
     CALL cli % add( switch = "--tensor-33", &
                     switch_ab = "-t33", &
                     group = "t3d_interp", &
@@ -212,8 +236,8 @@ IMPLICIT NONE
                     def = "t33=1.0", &
                     required = .FALSE. )
 
-
-
     CALL cli % parse()
+
     CALL cli % free()
+
 END PROGRAM SELF
