@@ -360,7 +360,7 @@ __global__ void ScalarBoundaryInterp_1D_gpu(real *bMatrix, real *f, real *fBound
   for (int ii=0; ii<N+1; ii++) {
     fb += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*bMatrix[ii+bid*(N+1)];
   }
-  fBound[SCB_1D_INDEX(iVar,bid+1,iEl,N,nVar)] = fb;
+  fBound[SCB_1D_INDEX(iVar,bid,iEl,N,nVar)] = fb;
 }
 
 extern "C"

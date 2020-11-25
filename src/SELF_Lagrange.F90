@@ -1650,14 +1650,11 @@ IMPLICIT NONE
       DO iEl = 1, nElements
         DO iVar = 1, nVariables
           fb(1:2) = 0.0_prec
-          
           DO ii = 0, myPoly % N
-            fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,1)*f(ii,iVar,iEl) ! East
-            fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,0)*f(ii,iVar,iEl) ! West
+            fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(ii,iVar,iEl) ! West
+            fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,iVar,iEl) ! East
           ENDDO
-
           fBound(iVar,1:2,iEl) = fb(1:2)
-          
         ENDDO
       ENDDO
 

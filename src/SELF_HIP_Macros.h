@@ -19,7 +19,7 @@
 
 #define INDEX(i,j,N) i+j*(N+1)
 #define SC_1D_INDEX(i,iVar,iel,N,nVar) i+(N+1)*(iVar + nVar*iel)
-#define SCB_1D_INDEX(iVar,iSide,iel,N,nVar) iVar + nVar*(iSide-1 + 2*iel)
+#define SCB_1D_INDEX(iVar,iSide,iel,N,nVar) iVar + nVar*(iSide + 2*iel)
 
 #define SC_2D_INDEX(i,j,iVar,iel,N,nVar) i+(N+1)*(j + (N+1)*(iVar + nVar*iel)) 
 #define VE_2D_INDEX(dir,i,j,iVar,iel,N,nVar) dir-1 + 2*(i + (N+1)*(j + (N+1)*(iVar + nVar*iel)))

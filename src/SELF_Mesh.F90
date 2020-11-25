@@ -3,6 +3,7 @@ MODULE SELF_Mesh
 USE SELF_Constants
 USE SELF_Lagrange
 USE SELF_Data
+USE SELF_SupportRoutines
 
 USE hipfort
 USE ISO_C_BINDING
@@ -162,6 +163,7 @@ IMPLICIT NONE
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Mesh1D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
 #endif
+      PROCEDURE, PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
   END TYPE Mesh1D
 
@@ -305,6 +307,55 @@ SUBROUTINE UpdateDevice_Mesh1D( myMesh )
 
 END SUBROUTINE UpdateDevice_Mesh1D
 #endif
+
+SUBROUTINE UniformBlockMesh_Mesh1D( myMesh, cqType, tqType, nControlPoints, nTargetPoints, nElem, x0, x1 )
+  IMPLICIT NONE
+  CLASS(Mesh1D), INTENT(out) :: myMesh
+  INTEGER, INTENT(in) :: cqType
+  INTEGER, INTENT(in) :: tqType
+  INTEGER, INTENT(in) :: nControlPoints
+  INTEGER, INTENT(in) :: nTargetPoints
+  INTEGER, INTENT(in) :: nElem
+  REAL(prec), INTENT(in) :: x0
+  REAL(prec), INTENT(in) :: x1
+  ! Local
+  INTEGER :: iel, nl, nr, i
+  REAL(prec) :: xl, xr, s
+
+    CALL myMesh % Init( cqType, tqType, nControlPoints, nTargetPoints, nElem, nElem+1, nElem+1, 2 )
+
+    ! Set the element boundaries
+    myMesh % nodeCoords % hostData = UniformPoints( x0, x1, nElem )
+
+    ! Set the element information
+    DO iel = 1, nElem
+      myMesh % eleminfo % hostData(1,iel) = 1 ! Element Type
+      myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
+      myMesh % eleminfo % hostData(3,iel) = iel ! Node Index Start
+      myMesh % eleminfo % hostData(4,iel) = iel+1 ! Node Index End
+    ENDDO
+
+    ! Set the element internal mesh locations
+    DO iel = 1, nElem
+      nl = myMesh % eleminfo % hostData(3,iel)
+      nr = myMesh % eleminfo % hostData(4,iel)
+      xl = myMesh % nodeCoords % hostData(nl)
+      xr = myMesh % nodeCoords % hostData(nr)
+      DO i = 0, nControlPoints
+        s = myMesh % geometry % x % interp % controlPoints % hostData(i)
+        myMesh % geometry % x % interior % hostData(i,1,iel) = 0.5_prec*( (s+1.0_prec)*xr - (s-1.0_prec)*xl ) ! Transfinite interpolation (Linear)
+      ENDDO
+    ENDDO
+
+    CALL myMesh % geometry % x % BoundaryInterp( gpuAccel = .FALSE. )
+    CALL myMesh % geometry % CalculateMetricTerms( )
+
+#ifdef GPU
+    CALL myMesh % UpdateDevice( )
+#endif
+
+END SUBROUTINE UniformBlockMesh_Mesh1D
+
 SUBROUTINE Init_Geometry1D( myGeom, cqType, tqType, nControlPoints, nTargetPoints, nElem )
   IMPLICIT NONE
   CLASS(Geometry1D), INTENT(out) :: myGeom

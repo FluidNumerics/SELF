@@ -1,11 +1,61 @@
 PROGRAM SELF
 
-
+USE SELF_SupportRoutines
+USE SELF_Tests
 USE FLAP
 
 IMPLICIT NONE
 
-  TYPE(COMMAND_LINE_INTERFACE) :: cli
+  TYPE(COMMAND_LINE_INTERFACE) :: self_cli
+  CHARACTER(20) :: cqTypeChar
+  CHARACTER(20) :: tqTypeChar
+  INTEGER :: cqType
+  INTEGER :: tqType
+  INTEGER :: nControlPoints
+  INTEGER :: nTargetPoints
+  INTEGER :: nElem
+  INTEGER :: error
+
+
+    CALL Parse_CLI(self_cli)
+
+    CALL self_cli % get( val = cqTypeChar, switch = '--control-quadrature' )
+    CALL self_cli % get( val = tqTypeChar, switch = '--target-quadrature' )
+    CALL self_cli % get( val = nControlPoints, switch = '--control-points' )
+    CALL self_cli % get( val = nTargetPoints, switch = '--target-points' )
+    CALL self_cli % get( val = nElem, switch = '--nelements' )
+
+    IF( TRIM(UpperCase(cqTypeChar)) == 'GAUSS' )THEN
+      cqType = GAUSS
+    ELSEIF( TRIM(UpperCase(cqTypeChar)) == 'GAUSS-LOBATTO' )THEN
+      cqType = GAUSS_LOBATTO
+    ELSE
+      PRINT*, 'Invalid Control Quadrature'
+      STOP 1
+    ENDIF
+
+    IF( TRIM(UpperCase(tqTypeChar)) == 'GAUSS' )THEN
+      tqType = GAUSS
+    ELSEIF( TRIM(UpperCase(tqTypeChar)) == 'GAUSS-LOBATTO' )THEN
+      tqType = GAUSS_LOBATTO
+    ELSE
+      PRINT*, 'Invalid Target Quadrature'
+      STOP 1
+    ENDIF
+
+    IF( self_cli % run_command( group = "blockmesh_1d" ) )THEN
+
+      CALL BlockMesh1D_Test( cqType, tqType, nControlPoints, nTargetPoints, nElem, error )
+
+    ENDIF
+
+    CALL self_cli % free()
+
+CONTAINS
+
+  SUBROUTINE Parse_CLI(cli)
+    IMPLICIT NONE
+    TYPE(COMMAND_LINE_INTERFACE), INTENT(out) :: cli
 
     CALL cli % init( progname = "self", &
                      version = "v0.0.0", &
@@ -238,6 +288,6 @@ IMPLICIT NONE
 
     CALL cli % parse()
 
-    CALL cli % free()
+  END SUBROUTINE Parse_CLI
 
 END PROGRAM SELF
