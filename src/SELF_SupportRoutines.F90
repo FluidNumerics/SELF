@@ -14,31 +14,28 @@
 
 MODULE SELF_SupportRoutines
 
-USE SELF_Constants
+  USE SELF_Constants
 
-IMPLICIT NONE
-
-
+  IMPLICIT NONE
 
 CONTAINS
 
+  FUNCTION Int2Str(aNumber) RESULT(aString)
+    IMPLICIT NONE
+    INTEGER :: aNumber
+    CHARACTER(12) :: aString
 
- FUNCTION Int2Str( aNumber ) RESULT( aString )
-   IMPLICIT NONE
-   INTEGER :: aNumber
-   CHARACTER(12) :: aString
+    WRITE (aString,'(I9)') aNumber
 
-     WRITE(aString, '(I9)') aNumber
+  END FUNCTION Int2Str
+  FUNCTION Float2Str(aNumber) RESULT(aString)
+    IMPLICIT NONE
+    REAL(prec) :: aNumber
+    CHARACTER(12) :: aString
 
- END FUNCTION Int2Str
- FUNCTION Float2Str( aNumber ) RESULT( aString )
-   IMPLICIT NONE
-   REAL(prec) :: aNumber
-   CHARACTER(12) :: aString
+    WRITE (aString,'(E12.4)') aNumber
 
-     WRITE(aString, '(E12.4)') aNumber
-
- END FUNCTION Float2Str
+  END FUNCTION Float2Str
 
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -69,27 +66,27 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
- FUNCTION AlmostEqual( a, b ) RESULT( AisB )
+  FUNCTION AlmostEqual(a,b) RESULT(AisB)
 
-   IMPLICIT NONE
-   REAL(prec) :: a, b
-   LOGICAL :: AisB
+    IMPLICIT NONE
+    REAL(prec) :: a,b
+    LOGICAL :: AisB
 
-      IF( a == 0.0_prec .OR. b == 0.0_prec )THEN
-         IF( ABS(a-b) <= EPSILON(1.0_prec) )THEN
-            AisB = .TRUE.
-         ELSE
-            AisB = .FALSE.
-         ENDIF
+    IF (a == 0.0_prec .OR. b == 0.0_prec) THEN
+      IF (ABS(a - b) <= EPSILON(1.0_prec)) THEN
+        AisB = .TRUE.
       ELSE
-         IF( (abs(a-b) <= EPSILON(1.0_prec)*abs(a)) .OR. (abs(a-b) <= EPSILON(1.0_prec)*abs(b)) )THEN
-            AisB = .TRUE.
-         ELSE
-            AisB = .FALSE.
-         ENDIF
-      ENDIF
+        AisB = .FALSE.
+      END IF
+    ELSE
+      IF ((abs(a - b) <= EPSILON(1.0_prec)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_prec)*abs(b))) THEN
+        AisB = .TRUE.
+      ELSE
+        AisB = .FALSE.
+      END IF
+    END IF
 
- END FUNCTION AlmostEqual
+  END FUNCTION AlmostEqual
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -118,34 +115,34 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- SUBROUTINE InsertionSort( inArray, outArray, N )
+  SUBROUTINE InsertionSort(inArray,outArray,N)
 
-   IMPLICIT NONE
-   INTEGER, INTENT(in)  :: N
-   INTEGER, INTENT(in)  :: inArray(1:N)
-   INTEGER, INTENT(out) :: outArray(1:N)
-   ! LOCAL
-   INTEGER :: i, j
-   INTEGER :: temp
+    IMPLICIT NONE
+    INTEGER,INTENT(in)  :: N
+    INTEGER,INTENT(in)  :: inArray(1:N)
+    INTEGER,INTENT(out) :: outArray(1:N)
+    ! LOCAL
+    INTEGER :: i,j
+    INTEGER :: temp
 
-      outArray = inArray
+    outArray = inArray
 
-      DO i = 2,  N
-         j = i
-         DO WHILE( j > 1 )
-            IF( outArray(j-1) > outArray(j) )THEN
-               !Swap outArray(j) outArray(j-1)
-               temp          = outArray(j)
-               outArray(j)   = outArray(j-1)
-               outArray(j-1) = temp
-               j = j-1
-            ELSE
-               EXIT
-            ENDIF
-         ENDDO
-      ENDDO
+    DO i = 2,N
+      j = i
+      DO WHILE (j > 1)
+        IF (outArray(j - 1) > outArray(j)) THEN
+          !Swap outArray(j) outArray(j-1)
+          temp = outArray(j)
+          outArray(j) = outArray(j - 1)
+          outArray(j - 1) = temp
+          j = j - 1
+        ELSE
+          EXIT
+        END IF
+      END DO
+    END DO
 
- END SUBROUTINE InsertionSort
+  END SUBROUTINE InsertionSort
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -175,24 +172,24 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- SUBROUTINE SortArray( myArray, low, high )
+  SUBROUTINE SortArray(myArray,low,high)
 
-   IMPLICIT NONE
-   INTEGER, INTENT(in)       :: low, high
-   REAL(prec), INTENT(inout) :: myArray(low:high)
-   ! LOCAL
-   INTEGER :: locOfMin
-   INTEGER :: ind
-   REAL(prec) :: temp
+    IMPLICIT NONE
+    INTEGER,INTENT(in)       :: low,high
+    REAL(prec),INTENT(inout) :: myArray(low:high)
+    ! LOCAL
+    INTEGER :: locOfMin
+    INTEGER :: ind
+    REAL(prec) :: temp
 
-      DO ind = low, high-1
-         locOfMin          = MINLOC( abs(myArray(ind:high)),1 ) + low - 1 + ind
-         temp              = myArray(ind)
-         myArray(ind)      = myArray(locOfMin)
-         myArray(locOfMin) = temp
-      ENDDO
+    DO ind = low,high - 1
+      locOfMin = MINLOC(abs(myArray(ind:high)),1) + low - 1 + ind
+      temp = myArray(ind)
+      myArray(ind) = myArray(locOfMin)
+      myArray(locOfMin) = temp
+    END DO
 
- END SUBROUTINE SortArray
+  END SUBROUTINE SortArray
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -232,22 +229,22 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- SUBROUTINE SortAndSum( myArray, low, high, arraysum)
+  SUBROUTINE SortAndSum(myArray,low,high,arraysum)
 
-   IMPLICIT NONE
-   INTEGER, INTENT(in)       :: low, high
-   REAL(prec), INTENT(inout) :: myArray(low:high)
-   REAL(prec), INTENT(out)   :: arraysum
-   ! LOCAL
-   INTEGER :: ind
+    IMPLICIT NONE
+    INTEGER,INTENT(in)       :: low,high
+    REAL(prec),INTENT(inout) :: myArray(low:high)
+    REAL(prec),INTENT(out)   :: arraysum
+    ! LOCAL
+    INTEGER :: ind
 
-      CALL SortArray( myArray, low, high )
-      arraysum = 0.0_prec
-      DO ind = low, high
-         arraysum = arraysum + myArray(ind)
-      ENDDO
+    CALL SortArray(myArray,low,high)
+    arraysum = 0.0_prec
+    DO ind = low,high
+      arraysum = arraysum + myArray(ind)
+    END DO
 
- END SUBROUTINE SortAndSum
+  END SUBROUTINE SortAndSum
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -276,23 +273,23 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
- SUBROUTINE ReverseArray( myArray, low, high )
+  SUBROUTINE ReverseArray(myArray,low,high)
 
-   IMPLICIT NONE
-   INTEGER, INTENT(in)       :: low, high
-   REAL(prec), INTENT(inout) :: myArray(low:high)
-   ! LOCAL
-   REAL(prec) :: temp(low:high)
-   INTEGER    :: i, j
+    IMPLICIT NONE
+    INTEGER,INTENT(in)       :: low,high
+    REAL(prec),INTENT(inout) :: myArray(low:high)
+    ! LOCAL
+    REAL(prec) :: temp(low:high)
+    INTEGER    :: i,j
 
-      temp = myArray
-      j = high
-      DO i = low,high
-         myArray(i) = temp(j)
-         j = j-1
-      ENDDO
+    temp = myArray
+    j = high
+    DO i = low,high
+      myArray(i) = temp(j)
+      j = j - 1
+    END DO
 
- END SUBROUTINE ReverseArray
+  END SUBROUTINE ReverseArray
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -324,19 +321,19 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- SUBROUTINE ForwardShift( myArray, N )
+  SUBROUTINE ForwardShift(myArray,N)
 
-   IMPLICIT NONE
-   INTEGER, INTENT(in)    :: N
-   INTEGER, INTENT(inout) :: myArray(1:N)
-   ! LOCAL
-   INTEGER :: temp(1:N)
+    IMPLICIT NONE
+    INTEGER,INTENT(in)    :: N
+    INTEGER,INTENT(inout) :: myArray(1:N)
+    ! LOCAL
+    INTEGER :: temp(1:N)
 
-      temp = myArray
-      myArray(1)   = temp(N)
-      myArray(2:N) = temp(1:N-1)
+    temp = myArray
+    myArray(1) = temp(N)
+    myArray(2:N) = temp(1:N - 1)
 
- END SUBROUTINE ForwardShift
+  END SUBROUTINE ForwardShift
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -375,28 +372,28 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
- FUNCTION CompareArray( arrayOne, arrayTwo, N ) RESULT( arraysMatch )
+  FUNCTION CompareArray(arrayOne,arrayTwo,N) RESULT(arraysMatch)
 
-   IMPLICIT NONE
-   INTEGER :: N
-   INTEGER :: arrayOne(1:N), arrayTwo(1:N)
-   LOGICAL :: arraysMatch
-   ! LOCAL
-   INTEGER :: i, theSumOfDiffs
+    IMPLICIT NONE
+    INTEGER :: N
+    INTEGER :: arrayOne(1:N),arrayTwo(1:N)
+    LOGICAL :: arraysMatch
+    ! LOCAL
+    INTEGER :: i,theSumOfDiffs
 
-      theSumOfDiffs = 0
+    theSumOfDiffs = 0
 
-      DO i = 1, N
-         theSumOfDiffs = theSumOfDiffs + arrayOne(i) - arrayTwo(i)
-      ENDDO
+    DO i = 1,N
+      theSumOfDiffs = theSumOfDiffs + arrayOne(i) - arrayTwo(i)
+    END DO
 
-      IF( theSumOfDiffs == 0 )THEN
-         arraysMatch = .TRUE.
-      ELSE
-         arraysMatch = .FALSE.
-      ENDIF
+    IF (theSumOfDiffs == 0) THEN
+      arraysMatch = .TRUE.
+    ELSE
+      arraysMatch = .FALSE.
+    END IF
 
- END FUNCTION CompareArray
+  END FUNCTION CompareArray
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -420,29 +417,29 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
- INTEGER FUNCTION NewUnit(thisunit)
+  INTEGER FUNCTION NewUnit(thisunit)
 
-   IMPLICIT NONE
-   INTEGER, INTENT(out), OPTIONAL :: thisunit
-   ! Local
-   INTEGER, PARAMETER :: unitMin=100, unitMax=1000
-   LOGICAL :: isopened
-   INTEGER :: iUnit
+    IMPLICIT NONE
+    INTEGER,INTENT(out),OPTIONAL :: thisunit
+    ! Local
+    INTEGER,PARAMETER :: unitMin = 100,unitMax = 1000
+    LOGICAL :: isopened
+    INTEGER :: iUnit
 
-     newunit=-1
+    newunit = -1
 
-     DO iUnit=unitMin, unitMax
-        ! Check to see IF this UNIT is opened
-        INQUIRE(UNIT=iUnit,opened=isopened)
-        IF( .not. isopened )THEN
-           newunit=iUnit
-           EXIT
-        ENDIF
-     ENDDO
+    DO iUnit = unitMin,unitMax
+      ! Check to see IF this UNIT is opened
+      INQUIRE (UNIT=iUnit,opened=isopened)
+      IF (.not. isopened) THEN
+        newunit = iUnit
+        EXIT
+      END IF
+    END DO
 
-     IF (PRESENT(thisunit)) thisunit = newunit
+    IF (PRESENT(thisunit)) thisunit = newunit
 
- END FUNCTION NewUnit
+  END FUNCTION NewUnit
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -473,25 +470,25 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
- FUNCTION UniformPoints( a, b, N ) RESULT( xU )
+  FUNCTION UniformPoints(a,b,N) RESULT(xU)
 
-   IMPLICIT NONE
-   REAL(prec) :: a, b
-   INTEGER    :: N
-   REAL(prec) :: xU(0:N)
-   ! LOCAL
-   REAL(prec)    :: dx
-   INTEGER :: i
+    IMPLICIT NONE
+    REAL(prec) :: a,b
+    INTEGER    :: N
+    REAL(prec) :: xU(0:N)
+    ! LOCAL
+    REAL(prec)    :: dx
+    INTEGER :: i
 
-      dx = (b-a)/REAL(N,prec)
+    dx = (b - a)/REAL(N,prec)
 
-      DO i = 0,N
+    DO i = 0,N
 
-         xU(i) = a + dx*REAL(i,prec)
+      xU(i) = a + dx*REAL(i,prec)
 
-      ENDDO
+    END DO
 
- END FUNCTION UniformPoints
+  END FUNCTION UniformPoints
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -521,28 +518,28 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- RECURSIVE FUNCTION Determinant( A, N ) RESULT( D )
+  RECURSIVE FUNCTION Determinant(A,N) RESULT(D)
 
-   IMPLICIT NONE
-   INTEGER    :: N
-   REAL(prec) :: A(1:N,1:N)
-   REAL(prec) :: D
-   ! LOCAL
-   REAL(prec) :: M(1:N-1,1:N-1)
-   INTEGER    :: j
+    IMPLICIT NONE
+    INTEGER    :: N
+    REAL(prec) :: A(1:N,1:N)
+    REAL(prec) :: D
+    ! LOCAL
+    REAL(prec) :: M(1:N - 1,1:N - 1)
+    INTEGER    :: j
 
-      IF(  N == 2 )THEN
-         D = A(1,1)*A(2,2) - A(1,2)*A(2,1)
-         RETURN
-      ELSE
-         D = 0.0_prec
-         DO j = 1, N
-            M = GetMinor( A, 1, j, N )
-            D = D + (-1.0_prec)**(j+1)*A(1,j)*Determinant( M, N-1 )
-         ENDDO
-      ENDIF
+    IF (N == 2) THEN
+      D = A(1,1)*A(2,2) - A(1,2)*A(2,1)
+      RETURN
+    ELSE
+      D = 0.0_prec
+      DO j = 1,N
+        M = GetMinor(A,1,j,N)
+        D = D + (-1.0_prec)**(j + 1)*A(1,j)*Determinant(M,N - 1)
+      END DO
+    END IF
 
- END FUNCTION Determinant
+  END FUNCTION Determinant
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -576,31 +573,31 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- FUNCTION GetMinor( A, i, j, N ) RESULT( M )
+  FUNCTION GetMinor(A,i,j,N) RESULT(M)
 
-   IMPLICIT NONE
-   INTEGER    :: i, j, N
-   REAL(prec) :: A(1:N,1:N)
-   REAL(prec) :: M(1:N-1,1:N-1)
-   ! LOCAL
-   INTEGER :: row, col
-   INTEGER :: thisRow, thisCol
+    IMPLICIT NONE
+    INTEGER    :: i,j,N
+    REAL(prec) :: A(1:N,1:N)
+    REAL(prec) :: M(1:N - 1,1:N - 1)
+    ! LOCAL
+    INTEGER :: row,col
+    INTEGER :: thisRow,thisCol
 
-      thisRow = 0
-      DO row = 1, N ! loop over the rows of A
-         IF( row /= i ) THEN
-            thisRow = thisRow + 1
-            thisCol = 0
-            DO col = 1, N ! loop over the columns of A
-               IF( col /= j ) THEN
-                  thisCol = thisCol + 1
-                  M(thisRow,thisCol) = A(row, col)
-               ENDIF
-            ENDDO ! col, loop over the columns of A
-         ENDIF
-      ENDDO ! row, loop over the rows of A
+    thisRow = 0
+    DO row = 1,N ! loop over the rows of A
+      IF (row /= i) THEN
+        thisRow = thisRow + 1
+        thisCol = 0
+        DO col = 1,N ! loop over the columns of A
+          IF (col /= j) THEN
+            thisCol = thisCol + 1
+            M(thisRow,thisCol) = A(row,col)
+          END IF
+        END DO ! col, loop over the columns of A
+      END IF
+    END DO ! row, loop over the rows of A
 
- END FUNCTION GetMinor
+  END FUNCTION GetMinor
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -626,22 +623,22 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- FUNCTION Invert_2x2( A ) RESULT( Ainv )
+  FUNCTION Invert_2x2(A) RESULT(Ainv)
 
-   IMPLICIT NONE
-   REAL(prec) :: A(1:2,1:2)
-   REAL(prec) :: Ainv(1:2,1:2)
-   ! LOCAL
-   REAL(prec) :: detA
+    IMPLICIT NONE
+    REAL(prec) :: A(1:2,1:2)
+    REAL(prec) :: Ainv(1:2,1:2)
+    ! LOCAL
+    REAL(prec) :: detA
 
-      detA = Determinant( A, 2 )
+    detA = Determinant(A,2)
 
-      Ainv(1,1) = A(2,2)/detA
-      Ainv(2,2) = A(1,1)/detA
-      Ainv(1,2) = -A(1,2)/detA
-      Ainv(2,1) = -A(2,1)/detA
+    Ainv(1,1) = A(2,2)/detA
+    Ainv(2,2) = A(1,1)/detA
+    Ainv(1,2) = -A(1,2)/detA
+    Ainv(2,1) = -A(2,1)/detA
 
- END FUNCTION Invert_2x2
+  END FUNCTION Invert_2x2
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
@@ -667,252 +664,256 @@ CONTAINS
 !!
 ! ================================================================================================ !
 !>@}
- FUNCTION Invert_3x3( A ) RESULT( Ainv )
- !
- ! =============================================================================================== !
-   IMPLICIT NONE
-   REAL(prec) :: A(1:3,1:3)
-   REAL(prec) :: Ainv(1:3,1:3)
-   ! LOCAL
-   REAL(prec) :: detA
-   REAL(prec) :: submat(1:2,1:2)
-   REAL(prec) :: detSubmat
+  FUNCTION Invert_3x3(A) RESULT(Ainv)
+    !
+    ! =============================================================================================== !
+    IMPLICIT NONE
+    REAL(prec) :: A(1:3,1:3)
+    REAL(prec) :: Ainv(1:3,1:3)
+    ! LOCAL
+    REAL(prec) :: detA
+    REAL(prec) :: submat(1:2,1:2)
+    REAL(prec) :: detSubmat
 
-      detA = Determinant( A, 3 )
+    detA = Determinant(A,3)
 
-      ! Row 1 column 1 of inverse (use submatrix neglecting row 1 and column 1 of A)
-      submat    =  A(2:3,2:3)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(1,1) = detSubmat/detA
+    ! Row 1 column 1 of inverse (use submatrix neglecting row 1 and column 1 of A)
+    submat = A(2:3,2:3)
+    detSubmat = Determinant(submat,2)
+    Ainv(1,1) = detSubmat/detA
 
-      ! Row 1 column 2 of inverse (use submatrix neglecting row 2 and column 1 of A)
-      submat    =  A(1:3:2,2:3)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(1,2) = -detSubmat/detA
+    ! Row 1 column 2 of inverse (use submatrix neglecting row 2 and column 1 of A)
+    submat = A(1:3:2,2:3)
+    detSubmat = Determinant(submat,2)
+    Ainv(1,2) = -detSubmat/detA
 
-      ! Row 1 column 3 of inverse (use submatrix neglecting row 3 and column 1 of A)
-      submat    =  A(1:2,2:3)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(1,3) = detSubmat/detA
+    ! Row 1 column 3 of inverse (use submatrix neglecting row 3 and column 1 of A)
+    submat = A(1:2,2:3)
+    detSubmat = Determinant(submat,2)
+    Ainv(1,3) = detSubmat/detA
 
-      ! Row 2 column 1 of inverse (use submatrix neglecting row 1 and column 2 of A)
-      submat    =  A(2:3,1:3:2)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(2,1) = -detSubmat/detA
+    ! Row 2 column 1 of inverse (use submatrix neglecting row 1 and column 2 of A)
+    submat = A(2:3,1:3:2)
+    detSubmat = Determinant(submat,2)
+    Ainv(2,1) = -detSubmat/detA
 
-      ! Row 2 column 2 of inverse (use submatrix neglecting row 2 and column 2 of A)
-      submat    =  A(1:3:2,1:3:2)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(2,2) = detSubmat/detA
+    ! Row 2 column 2 of inverse (use submatrix neglecting row 2 and column 2 of A)
+    submat = A(1:3:2,1:3:2)
+    detSubmat = Determinant(submat,2)
+    Ainv(2,2) = detSubmat/detA
 
-      ! Row 2 column 3 of inverse (use submatrix neglecting row 3 and column 2 of A)
-      submat    =  A(1:2,1:3:2)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(2,3) = -detSubmat/detA
+    ! Row 2 column 3 of inverse (use submatrix neglecting row 3 and column 2 of A)
+    submat = A(1:2,1:3:2)
+    detSubmat = Determinant(submat,2)
+    Ainv(2,3) = -detSubmat/detA
 
-      ! Row 3 column 1 of inverse (use submatrix neglecting row 1 and column 3 of A)
-      submat    =  A(2:3,1:2)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(3,1) = detSubmat/detA
+    ! Row 3 column 1 of inverse (use submatrix neglecting row 1 and column 3 of A)
+    submat = A(2:3,1:2)
+    detSubmat = Determinant(submat,2)
+    Ainv(3,1) = detSubmat/detA
 
-      ! Row 3 column 2 of inverse (use submatrix neglecting row 2 and column 3 of A)
-      submat    =  A(1:3:2,1:2)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(3,2) = -detSubmat/detA
+    ! Row 3 column 2 of inverse (use submatrix neglecting row 2 and column 3 of A)
+    submat = A(1:3:2,1:2)
+    detSubmat = Determinant(submat,2)
+    Ainv(3,2) = -detSubmat/detA
 
-      ! Row 3 column 3 of inverse (use submatrix neglecting row 3 and column 3 of A)
-      submat    =  A(1:2,1:2)
-      detSubmat = Determinant( submat, 2 )
-      Ainv(3,3) = detSubmat/detA
+    ! Row 3 column 3 of inverse (use submatrix neglecting row 3 and column 3 of A)
+    submat = A(1:2,1:2)
+    detSubmat = Determinant(submat,2)
+    Ainv(3,3) = detSubmat/detA
 
- END FUNCTION Invert_3x3
+  END FUNCTION Invert_3x3
 !
- FUNCTION InvertSpectralOpMatrix( A, N ) RESULT( Ainv )
- ! Inverts an (N+1)x(N+1) matrix using a polynomial representation of the
- ! inverse
-   IMPLICIT NONE
-   INTEGER :: N
-   REAL(prec) :: A(0:N,0:N)
-   REAL(prec) :: Ainv(0:N,0:N)
-   ! Local
-   INTEGER    :: row, col, j, iter
-   REAL(prec) :: I(0:N,0:N)
-   REAL(prec) :: Ainv_ij, maxChange
+  FUNCTION InvertSpectralOpMatrix(A,N) RESULT(Ainv)
+    ! Inverts an (N+1)x(N+1) matrix using a polynomial representation of the
+    ! inverse
+    IMPLICIT NONE
+    INTEGER :: N
+    REAL(prec) :: A(0:N,0:N)
+    REAL(prec) :: Ainv(0:N,0:N)
+    ! Local
+    INTEGER    :: row,col,j,iter
+    REAL(prec) :: I(0:N,0:N)
+    REAL(prec) :: Ainv_ij,maxChange
 
-      Ainv = 0.0_prec
-      I    = 0.0_prec
-      DO row = 0, N
-         Ainv(row,row) = 1.0_prec
-         I(row,row)    = 1.0_prec
-      ENDDO
+    Ainv = 0.0_prec
+    I = 0.0_prec
+    DO row = 0,N
+      Ainv(row,row) = 1.0_prec
+      I(row,row) = 1.0_prec
+    END DO
 
-      DO iter = 1, maxInverseIters
+    DO iter = 1,maxInverseIters
 
-         maxChange = 0.0_prec
-         DO col = 0, N
-            DO row = 0, N
+      maxChange = 0.0_prec
+      DO col = 0,N
+        DO row = 0,N
 
-               Ainv_ij = 0.0_prec
-               DO j = 0, N
-                  Ainv_ij = Ainv_ij + Ainv(j,col)*(I(row,j) - A(row,j))
-               ENDDO
-               maxChange = MAX( ABS(Ainv(row,col) - Ainv_ij), maxChange )
-               Ainv(row,col) = Ainv_ij
+          Ainv_ij = 0.0_prec
+          DO j = 0,N
+            Ainv_ij = Ainv_ij + Ainv(j,col)*(I(row,j) - A(row,j))
+          END DO
+          maxChange = MAX(ABS(Ainv(row,col) - Ainv_ij),maxChange)
+          Ainv(row,col) = Ainv_ij
 
-            ENDDO
-         ENDDO
+        END DO
+      END DO
 
-         IF( maxChange <= tolerance )THEN
-           PRINT*, ' InvertSpectralOpMatrix : Converged in ',iter,' iterations.'
-           EXIT
-         ENDIF
+      IF (maxChange <= tolerance) THEN
+        PRINT *, ' InvertSpectralOpMatrix : Converged in ',iter,' iterations.'
+        EXIT
+      END IF
 
-      ENDDO
+    END DO
 
-      IF( maxChange > tolerance )THEN
-         PRINT*, 'InvertSpectralOpMatrix : Did not converge.', maxChange
-      ENDIF
+    IF (maxChange > tolerance) THEN
+      PRINT *, 'InvertSpectralOpMatrix : Did not converge.',maxChange
+    END IF
 
- END FUNCTION InvertSpectralOpMatrix
+  END FUNCTION InvertSpectralOpMatrix
 !
- FUNCTION UpperCase( str ) RESULT( upper )
+  FUNCTION UpperCase(str) RESULT(upper)
 
     Implicit None
-    CHARACTER(*), INTENT(In) :: str
+    CHARACTER(*),INTENT(In) :: str
     CHARACTER(LEN(str))      :: Upper
 
-    INTEGER :: ic, i
+    INTEGER :: ic,i
 
-    CHARACTER(27), PARAMETER :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ '
-    CHARACTER(27), PARAMETER :: low = 'abcdefghijklmnopqrstuvwxyz '
+    CHARACTER(27),PARAMETER :: cap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ '
+    CHARACTER(27),PARAMETER :: low = 'abcdefghijklmnopqrstuvwxyz '
 
-    DO i = 1, LEN(str)
-        ic = INDEX(low, str(i:i))
-        IF (ic > 0)THEN
-         Upper(i:i) = cap(ic:ic)
-        ELSE
-         Upper(i:i) = str(i:i)
-        ENDIF
-    ENDDO
+    DO i = 1,LEN(str)
+      ic = INDEX(low,str(i:i))
+      IF (ic > 0) THEN
+        Upper(i:i) = cap(ic:ic)
+      ELSE
+        Upper(i:i) = str(i:i)
+      END IF
+    END DO
 
- END FUNCTION UpperCase
+  END FUNCTION UpperCase
 !
- FUNCTION TimeStamp( time, units ) RESULT( timeStampString )
-   IMPLICIT NONE
-   REAL(prec)    :: time
-   CHARACTER(1)  :: units
-   CHARACTER(13) :: timeStampString
-   ! Local
-   INTEGER      :: day, minute, hour, second, millisecond
-   CHARACTER(4) :: dayStamp
-   CHARACTER(2) :: hourStamp, minuteStamp, secondStamp
-   CHARACTER(3) :: milliSecondStamp
-   REAL(real64)     :: time_real64
+  FUNCTION TimeStamp(time,units) RESULT(timeStampString)
+    IMPLICIT NONE
+    REAL(prec)    :: time
+    CHARACTER(1)  :: units
+    CHARACTER(13) :: timeStampString
+    ! Local
+    INTEGER      :: day,minute,hour,second,millisecond
+    CHARACTER(4) :: dayStamp
+    CHARACTER(2) :: hourStamp,minuteStamp,secondStamp
+    CHARACTER(3) :: milliSecondStamp
+    REAL(real64)     :: time_real64
 
+    time_real64 = REAL(time,real64)
+    ! Units in "seconds"
+    IF (units(1:1) == 's') THEN
 
-      time_real64 = REAL( time, real64 )
-      ! Units in "seconds"
-      IF( units(1:1) == 's' ) THEN
+      ! Obtain the day
+      day = INT(time_real64/86400.0_real64)
+      hour = INT((time_real64 &
+                  - 86400.0_real64*day)/3600.0_real64)
+      minute = INT((time_real64 &
+                    - 3600.0_real64*hour &
+                    - 86400.0_real64*day)/60.0_real64)
+      second = INT((time_real64 &
+                    - 60.0_real64*minute &
+                    - 3600.0_real64*hour &
+                    - 86400.0_real64*day))
+      milliSecond = NINT(((time_real64 &
+                           - 60.0_real64*minute &
+                           - 3600.0_real64*hour &
+                           - 86400.0_real64*day) &
+                          - REAL(second,real64))*1000.0_real64)
 
-         ! Obtain the day
-         day    = INT( time_real64/86400.0_real64 )
-         hour   = INT( (time_real64-86400.0_real64*day)/3600.0_real64 )
-         minute = INT( (time_real64-3600.0_real64*hour-86400.0_real64*day)/60.0_real64 )
-         second = INT( (time_real64-60.0_real64*minute-3600.0_real64*hour-86400.0_real64*day) )
-         milliSecond = NINT( ((time_real64-60.0_real64*minute-3600.0_real64*hour-86400.0_real64*day)-REAL(second,real64))*1000.0_real64 )
-
-         WRITE( dayStamp,'(I4.4)' ) day
-         WRITE( hourStamp,'(I2.2)' ) hour
-         WRITE( minuteStamp,'(I2.2)' ) minute
-         WRITE( secondStamp,'(I2.2)' ) second
-         WRITE( milliSecondStamp,'(I3.3)' ) millisecond
-         timeStampString = dayStamp//hourStamp//minuteStamp//secondStamp//milliSecondStamp
+      WRITE (dayStamp,'(I4.4)') day
+      WRITE (hourStamp,'(I2.2)') hour
+      WRITE (minuteStamp,'(I2.2)') minute
+      WRITE (secondStamp,'(I2.2)') second
+      WRITE (milliSecondStamp,'(I3.3)') millisecond
+      timeStampString = dayStamp//hourStamp//minuteStamp//secondStamp//milliSecondStamp
 
       ! minutes
-      ELSEIF( units(1:1) == 'm' )THEN
+    ELSEIF (units(1:1) == 'm') THEN
 
       ! hours
-      ELSEIF( units(1:1) == 'h' )THEN
+    ELSEIF (units(1:1) == 'h') THEN
 
+    END IF
 
-      ENDIF
+  END FUNCTION TimeStamp
+  LOGICAL FUNCTION IsNaN(a)
+    IMPLICIT NONE
+    REAL(prec) ::  a
 
- END FUNCTION TimeStamp
- LOGICAL FUNCTION IsNaN( a )
-   IMPLICIT NONE
-   REAL(prec) ::  a
+    IF (a .ne. a) THEN
+      IsNaN = .TRUE.
+    ELSE
+      IsNaN = .FALSE.
+    END IF
+    RETURN
 
-     IF(a.ne.a)THEN
-       IsNaN = .TRUE.
-     ELSE
-       IsNaN = .FALSE.
-     ENDIF
-     RETURN
+  END FUNCTION IsNaN
+  LOGICAL FUNCTION IsInf(a)
+    IMPLICIT NONE
+    REAL(prec) :: a
 
- END FUNCTION IsNaN
- LOGICAL FUNCTION IsInf( a )
-   IMPLICIT NONE
-   REAL(prec) :: a
+    IF (a > HUGE(prec)) THEN
+      IsInf = .TRUE.
+    ELSE
+      IsInf = .FALSE.
+    END IF
+    RETURN
 
-     IF( a > HUGE(prec) )THEN
-       IsInf = .TRUE.
-     ELSE
-       IsInf = .FALSE.
-     ENDIF
-     RETURN
+  END FUNCTION IsInf
 
- END FUNCTION IsInf
+  FUNCTION FloorSQRT(x) RESULT(sqrtX)
+    INTEGER :: x,sqrtX
+    ! Local
+    INTEGER :: i,res
 
- FUNCTION FloorSQRT( x ) RESULT( sqrtX )
-   INTEGER :: x, sqrtX
-   ! Local
-   INTEGER :: i, res
+    IF (x == 0 .OR. x == 1) THEN
 
+      sqrtX = x
 
-     IF( x == 0 .OR. x == 1)THEN
+    ELSE
 
-       sqrtX = x
+      res = 1
+      i = 1
+      DO WHILE (res <= x)
+        i = i + 1
+        res = i*i
+      END DO
 
-     ELSE
+      sqrtX = i - 1
 
-       res = 1
-       i   = 1
-       DO WHILE( res <= x )
-         i = i + 1
-         res = i*i
-       ENDDO
+    END IF
 
-       sqrtX = i-1
+  END FUNCTION FloorSQRT
 
-     ENDIF
+  FUNCTION FloorCURT(x) RESULT(curtX)
+    INTEGER :: x,curtX
+    ! Local
+    INTEGER :: i,res
 
+    IF (x == 0 .OR. x == 1) THEN
 
- END FUNCTION FloorSQRT
+      curtX = x
 
- FUNCTION FloorCURT( x ) RESULT( curtX )
-   INTEGER :: x, curtX
-   ! Local
-   INTEGER :: i, res
+    ELSE
 
+      res = 1
+      i = 1
+      DO WHILE (res <= x)
+        i = i + 1
+        res = i*i*i
+      END DO
 
-     IF( x == 0 .OR. x == 1)THEN
+      curtX = i - 1
 
-       curtX = x
+    END IF
 
-     ELSE
-
-       res = 1
-       i   = 1
-       DO WHILE( res <= x )
-         i = i + 1
-         res = i*i*i
-       ENDDO
-
-       curtX = i-1
-
-     ENDIF
-
-
- END FUNCTION FloorCURT
+  END FUNCTION FloorCURT
 
 END MODULE SELF_SupportRoutines

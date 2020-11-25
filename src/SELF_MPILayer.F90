@@ -1,11 +1,10 @@
 MODULE SELF_MPILayer
 
-USE SELF_Data
-USE SELF_MappedData
-USE SELF_Mesh
+  USE SELF_Data
+  USE SELF_MappedData
+  USE SELF_Mesh
 
-
-IMPLICIT NONE 
+  IMPLICIT NONE
 
 !  TYPE MPILayer
 !
@@ -14,7 +13,7 @@ IMPLICIT NONE
 !    INTEGER :: mpiPrec
 !    INTEGER :: myRank
 !    INTEGER :: nProc
-!    INTEGER, ALLOCATABLE :: requestHandle(:), requestStats(:,:) 
+!    INTEGER, ALLOCATABLE :: requestHandle(:), requestStats(:,:)
 !
 !    CONTAINS
 !
@@ -32,7 +31,6 @@ IMPLICIT NONE
 
 CONTAINS
 
-
 !  FUNCTION Int2Str( aNumber ) RESULT( aString )
 !    IMPLICIT NONE
 !    INTEGER :: aNumber
@@ -42,37 +40,37 @@ CONTAINS
 !
 !  END FUNCTION Int2Str
 
-  SUBROUTINE SELF_CalculateRankDistributions( nObj, nRanks, objBounds )
+  SUBROUTINE SELF_CalculateRankDistributions(nObj,nRanks,objBounds)
 #undef __FUNC__
 #define __FUNC__ SELF_CalculateRankDistributions
     IMPLICIT NONE
-    INTEGER, INTENT(in) :: nObj
-    INTEGER, INTENT(in) :: nRanks
-    INTEGER, INTENT(out) :: objBounds(1:2,0:nRanks-1)
+    INTEGER,INTENT(in) :: nObj
+    INTEGER,INTENT(in) :: nRanks
+    INTEGER,INTENT(out) :: objBounds(1:2,0:nRanks - 1)
     ! Local
-    INTEGER :: rank, nObjPerRank, remainder, lastUpperBound
+    INTEGER :: rank,nObjPerRank,remainder,lastUpperBound
 
-      nObjPerRank = nObj/nRanks
-      remainder = nObj - nObjPerRank*nRanks
+    nObjPerRank = nObj/nRanks
+    remainder = nObj - nObjPerRank*nRanks
 
-      lastUpperBound = 0
-      DO rank = 0, nRanks - 1
+    lastUpperBound = 0
+    DO rank = 0,nRanks - 1
 
-        objBounds(1,rank) = 1 + lastUpperBound
-        IF( rank < remainder )THEN
-          objBounds(2,rank) = objBounds(1,rank) + nObjPerRank + 1
-        ELSE
-          objBounds(2,rank) = objBounds(1,rank) + nObjPerRank
-        ENDIF
-        lastUpperBound = objBounds(2,rank)
+      objBounds(1,rank) = 1 + lastUpperBound
+      IF (rank < remainder) THEN
+        objBounds(2,rank) = objBounds(1,rank) + nObjPerRank + 1
+      ELSE
+        objBounds(2,rank) = objBounds(1,rank) + nObjPerRank
+      END IF
+      lastUpperBound = objBounds(2,rank)
 
-     !   INFO( 'Rank '//TRIM(Int2Str(rank))//&
-     !         ' [lower,upper/total] = '//&
-     !         TRIM(Int2Str(objBounds(1,rank)))//','//&
-     !         TRIM(Int2Str(objBounds(2,rank)))//'/'//&
-     !         TRIM(Int2Str(nObj)) )
+      !   INFO( 'Rank '//TRIM(Int2Str(rank))//&
+      !         ' [lower,upper/total] = '//&
+      !         TRIM(Int2Str(objBounds(1,rank)))//','//&
+      !         TRIM(Int2Str(objBounds(2,rank)))//'/'//&
+      !         TRIM(Int2Str(nObj)) )
 
-      ENDDO
+    END DO
 
   END SUBROUTINE SELF_CalculateRankDistributions
 
@@ -91,19 +89,19 @@ CONTAINS
 !      s1 = 1
 !      DO sideId = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1)
 !        ! Secondary element ID for this face
-!        e2 = mesh % sideInfo % hostData(3,sideId) 
+!        e2 = mesh % sideInfo % hostData(3,sideId)
 !
 !        ! In SELF, we read in HOPR pre-processed mesh information. Upon reading in and
 !        ! performing data decomposition, we set e2 = -e2 if the neighboring element is
 !        ! owned by another rank
-!        IF( e2 < 0 )THEN 
+!        IF( e2 < 0 )THEN
 !          s2 = mesh % sideInfo % hostData(4,sideId)/10
 !          globalSideId = ABS(mesh % sideInfo % hostdata(2,sideId))
 !
 !          ! Assume that mesh has been pre-processed with HOPR and
-!          ! elements are distributed to ranks by simply dividing the list [1:nElements] 
+!          ! elements are distributed to ranks by simply dividing the list [1:nElements]
 !          ! evenly and in order to all ranks
-!          ! TODO: externalProcId = GetRank( e2, mesh % nElem, mpiHandler % nRanks ) 
+!          ! TODO: externalProcId = GetRank( e2, mesh % nElem, mpiHandler % nRanks )
 !
 !          msgCnt = msgCnt + 1
 !          ! Receive data on this rank's workScalar
@@ -113,7 +111,7 @@ CONTAINS
 !                          externalProcId, globalSideId,  &
 !                          mpiHandler % mpiComm, &
 !                          mpiHandler % requestHandle(msgCnt*2-1), iError )
-!  
+!
 !
 !          ! Send data from this rank's scalar
 !          CALL MPI_ISEND( workScalar % boundary % hostData(:,:,s1,e1), &
@@ -124,7 +122,7 @@ CONTAINS
 !                          mpiHandler % requestHandle(msgCnt*2), iError)
 !
 !        ENDIF
-!      
+!
 !      ENDDO
 !    ENDDO
 !

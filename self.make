@@ -1,11 +1,12 @@
 
 
-FC=/opt/hipfort/bin/hipfc
+FC=gfortran
 CXX=/opt/rocm/bin/hipcc
-FFLAGS=-DGPU -ffree-line-length-none
-FLIBS=-L/apps/flap/lib/ -lFLAP -lFACE -lPENF -L/opt/feqparse/lib -lfeqparse
-INC=-I/apps/flap/include/FLAP -I/apps/flap/include/PENF -I/apps/flap/include/FACE -I/opt/feqparse/include
+FFLAGS=-v -DGPU -ffree-line-length-none
+FLIBS=-L/apps/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
+INC=-I/opt/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
 CXXFLAGS=
+CXXLIBS=-L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
 PREFIX=/apps/self
 
 install: libSELF.a self
@@ -19,7 +20,7 @@ install: libSELF.a self
 	rm *.o
 
 self: SELF.o
-	${FC} ${FFLAGS} ${INC} -I./src/ *.o  ${FLIBS} -o $@
+	${CXX} ${INC} -I./src/ *.o  ${FLIBS} ${CXXLIBS} -o $@
 
 SELF.o: libSELF.a
 	${FC} -c ${FFLAGS} ${INC} -I./src/ ${FLIBS} src/SELF.F90 -o $@
