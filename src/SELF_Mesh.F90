@@ -68,6 +68,27 @@ MODULE SELF_Mesh
 !
 ! ========================================================================= !
 
+  ! Element Types - From Table 4.1 of https://www.hopr-project.org/externals/Meshformat.pdf
+  INTEGER,PARAMETER :: selfLineLinear = 1
+  INTEGER,PARAMETER :: selfLineNonlinear = 2
+  INTEGER,PARAMETER :: selfTriangleLinear = 3
+  INTEGER,PARAMETER :: selfQuadLinear = 4
+  INTEGER,PARAMETER :: selfQuadBilinear = 14
+  INTEGER,PARAMETER :: selfTriangleNonlinear = 23
+  INTEGER,PARAMETER :: selfQuadNonlinear = 24
+  INTEGER,PARAMETER :: selfTetrahedronLinear = 104
+  INTEGER,PARAMETER :: selfPyramidLinear = 105
+  INTEGER,PARAMETER :: selfPrismLinear = 106
+  INTEGER,PARAMETER :: selfHexahedronLinear = 108
+  INTEGER,PARAMETER :: selfPyramidBilinear = 115
+  INTEGER,PARAMETER :: selfPrismBilinear = 116
+  INTEGER,PARAMETER :: selfHexahedronBilinear = 118
+  INTEGER,PARAMETER :: selfTetrahedronNonlinear = 204
+  INTEGER,PARAMETER :: selfPyramidNonlinear = 205
+  INTEGER,PARAMETER :: selfPrismNonlinear = 206
+  INTEGER,PARAMETER :: selfHexahedronNonlinear = 208
+
+  !
   INTEGER,PARAMETER :: selfMinNodalValence2D = 4
   INTEGER,PARAMETER :: selfMinNodalValence3D = 8
   INTEGER,PARAMETER :: selfMaxNodalValence2D = 6
@@ -136,6 +157,7 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
 #endif
+    PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
 
   END TYPE Mesh2D
 
@@ -287,7 +309,7 @@ CONTAINS
     ! Set the element information
     nid = 1
     DO iel = 1,nElem
-      myMesh % eleminfo % hostData(1,iel) = 1 ! Element Type
+      myMesh % eleminfo % hostData(1,iel) = selfLineLinear ! Element Type
       myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
       myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
       DO i = 0, nGeo
@@ -389,6 +411,85 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Mesh2D
 #endif
+  SUBROUTINE UniformBlockMesh_Mesh2D(myMesh,nGeo,nElem,x)
+    IMPLICIT NONE
+    CLASS(Mesh2D),INTENT(out) :: myMesh
+    INTEGER,INTENT(in) :: nGeo
+    INTEGER,INTENT(in) :: nElem(1:2)
+    REAL(prec),INTENT(in) :: x(1:4)
+    ! Local
+    INTEGER :: iel,jel,nEl,elid
+    INTEGER :: nid,nNodes
+    INTEGER :: nSides
+    INTEGER :: i, j
+    REAL(prec) :: xU(1:nElem(1)+1)
+    REAL(prec) :: yU(1:nElem(2)+1)
+    TYPE(Vector2D) :: xLinear
+    TYPE(Vector2D) :: xGeo
+
+    nEl = nElem(1)*nElem(2)
+    nNodes = nel*(nGeo+1)
+    nSides = (nElem(1)+1)*nElem(2) + (nElem(2)+1)*nElem(1)
+    CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
+
+    ! Set the nodeCoords
+    xU = UniformPoints(x(1),x(2),1,nElem(1)+1)
+    yU = UniformPoints(x(3),x(4),1,nElem(2)+1)
+
+    ! Create a linear interpolant to interpolate to nGeo grid
+    CALL xLinear % Init(1,GAUSS_LOBATTO,&
+                        nGeo,GAUSS_LOBATTO,&
+                        1,nEl)
+
+    CALL xGeo % Init(nGeo,GAUSS_LOBATTO,&
+                     nGeo,GAUSS_LOBATTO,&
+                     1,nEl)
+    elid = 1
+    DO jel = 1,nElem(2)
+      DO iel = 1,nElem(1)
+        ! x component
+        xLinear % interior % hostData(1,0:1,0,1,elid) = xU(iel:iel+1)
+        xLinear % interior % hostData(1,0:1,1,1,elid) = xU(iel:iel+1)
+        ! y component
+        xLinear % interior % hostData(2,0,0:1,1,elid) = yU(jel:jel+1)
+        xLinear % interior % hostData(2,1,0:1,1,elid) = yU(jel:jel+1)
+        ! Incremenent the element ID
+        elid = elid + 1
+      ENDDO
+    ENDDO
+
+    CALL xLinear % GridInterp(xGeo,.FALSE.)
+
+    ! Set the element information
+    nid = 1
+    elid = 1
+    DO jel = 1,nElem(2)
+      DO iel = 1,nElem(1)
+        myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
+        myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
+        myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
+        DO j = 0, nGeo
+          DO i = 0, nGeo
+            myMesh % nodeCoords % hostData(1:2,nid) = xGeo % interior % hostData(1:2,i,j,1,elid)
+            nid = nid + 1
+          ENDDO
+        ENDDO
+        myMesh % eleminfo % hostData(4,iel) = nid-1 ! Node Index End
+      ENDDO
+    END DO
+
+
+    ! TO DO: Add Side information !
+
+#ifdef GPU
+    CALL myMesh % UpdateDevice()
+#endif
+
+    CALL xLinear % Free()
+    CALL xGeo % Free()
+
+  END SUBROUTINE UniformBlockMesh_Mesh2D
+
   SUBROUTINE Init_Mesh3D(myMesh,nGeo,nElem,nSides,nNodes,nBCs)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(out) :: myMesh
