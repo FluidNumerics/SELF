@@ -13,6 +13,7 @@ MODULE SELF_MappedData
 
   USE SELF_Data
   USE SELF_Mesh
+  USE SELF_Geometry
 
 !USE ISO_C_BINDING
 
@@ -114,7 +115,7 @@ CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
 
-  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,mesh,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,mesh,geometry,gradF,gpuAccel)
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
@@ -127,18 +128,20 @@ CONTAINS
     CLASS(MappedScalar2D),INTENT(in) :: scalar
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(Vector2D),INTENT(inout) :: gradF
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL scalar % ContravariantWeight(mesh,workTensor,gpuAccel)
+    CALL scalar % ContravariantWeight(mesh,geometry,workTensor,gpuAccel)
     CALL workTensor % Divergence(gradF,gpuAccel)
 
   END SUBROUTINE Gradient_MappedScalar2D
 
-  SUBROUTINE ContravariantWeight_MappedScalar2D(scalar,mesh,workTensor,gpuAccel)
+  SUBROUTINE ContravariantWeight_MappedScalar2D(scalar,mesh,geometry,workTensor,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedScalar2D),INTENT(in) :: scalar
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in):: gpuAccel
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     ! Local
@@ -148,7 +151,7 @@ CONTAINS
 
       CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
-                                                          mesh % geometry % dsdx % interior % deviceData, &
+                                                          geometry % dsdx % interior % deviceData, &
                                                           scalar % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
@@ -160,19 +163,19 @@ CONTAINS
           DO j = 0,scalar % N
             DO i = 0,scalar % N
 
-              workTensor % interior % hostData(1,1,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
+              workTensor % interior % hostData(1,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
                                                                    hostData(1,1,i,j,1,iEl)* &
                                                                    scalar % interior % hostData(i,j,iVar,iEl)
 
-              workTensor % interior % hostData(2,1,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
+              workTensor % interior % hostData(2,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
                                                                    hostData(1,2,i,j,1,iEl)* &
                                                                    scalar % interior % hostData(i,j,iVar,iEl)
 
-              workTensor % interior % hostData(1,2,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
+              workTensor % interior % hostData(1,2,i,j,iVar,iEl) = geometry % dsdx % interior % &
                                                                    hostData(2,1,i,j,1,iEl)* &
                                                                    scalar % interior % hostData(i,j,iVar,iEl)
 
-              workTensor % interior % hostData(2,2,i,j,iVar,iEl) = mesh % geometry % dsdx % interior % &
+              workTensor % interior % hostData(2,2,i,j,iVar,iEl) = geometry % dsdx % interior % &
                                                                    hostData(2,2,i,j,1,iEl)* &
                                                                    scalar % interior % hostData(i,j,iVar,iEl)
 
@@ -185,7 +188,7 @@ CONTAINS
 
   END SUBROUTINE ContravariantWeight_MappedScalar2D
 
-  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,mesh,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,mesh,geometry,gradF,gpuAccel)
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 3D function using the conservative form of the
@@ -198,18 +201,20 @@ CONTAINS
     CLASS(MappedScalar3D),INTENT(in) :: scalar
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(Vector3D),INTENT(inout) :: gradF
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL scalar % ContravariantWeight(mesh,workTensor,gpuAccel)
+    CALL scalar % ContravariantWeight(mesh,geometry,workTensor,gpuAccel)
     CALL workTensor % Divergence(gradF,gpuAccel)
 
   END SUBROUTINE Gradient_MappedScalar3D
 
-  SUBROUTINE ContravariantWeight_MappedScalar3D(scalar,mesh,workTensor,gpuAccel)
+  SUBROUTINE ContravariantWeight_MappedScalar3D(scalar,mesh,geometry,workTensor,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(in) :: scalar
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     ! Local
@@ -219,7 +224,7 @@ CONTAINS
 
       CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
-                                                          mesh % geometry % dsdx % interior % deviceData, &
+                                                          geometry % dsdx % interior % deviceData, &
                                                           scalar % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
@@ -233,43 +238,43 @@ CONTAINS
 
                 ! Get the x-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
-                workTensor % interior % hostData(1,1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(1,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(1,1,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
-                workTensor % interior % hostData(2,1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(2,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(1,2,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
-                workTensor % interior % hostData(3,1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(3,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(1,3,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 ! Get the y-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
-                workTensor % interior % hostData(1,2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(1,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(2,1,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
-                workTensor % interior % hostData(2,2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(2,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(2,2,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
-                workTensor % interior % hostData(3,2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(3,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(2,3,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 ! Get the z-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
-                workTensor % interior % hostData(1,3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(1,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(3,1,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
-                workTensor % interior % hostData(2,3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(2,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(3,2,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
-                workTensor % interior % hostData(3,3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % interior % &
+                workTensor % interior % hostData(3,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
                                                                        hostData(3,3,i,j,k,iVar,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
@@ -284,28 +289,30 @@ CONTAINS
   END SUBROUTINE ContravariantWeight_MappedScalar3D
 
   ! ---------------------- Vectors ---------------------- !
-  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,mesh,divVector,gpuAccel)
+  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,mesh,geometry,divVector,gpuAccel)
     ! Strong Form Operator
     !
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(in) :: physVector
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(Scalar2D),INTENT(inout) :: divVector
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL physVector % ContravariantProjection(mesh,compVector,gpuAccel)
+    CALL physVector % ContravariantProjection(mesh,geometry,compVector,gpuAccel)
     CALL compVector % Divergence(divVector,gpuAccel)
 
   END SUBROUTINE Divergence_MappedVector2D
 
-  SUBROUTINE ContravariantProjection_MappedVector2D(physVector,mesh,compVector,gpuAccel)
+  SUBROUTINE ContravariantProjection_MappedVector2D(physVector,mesh,geometry,compVector,gpuAccel)
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(in) :: physVector
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
@@ -315,7 +322,7 @@ CONTAINS
 
       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
-                                                              mesh % geometry % dsdx % interior % deviceData, &
+                                                              geometry % dsdx % interior % deviceData, &
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
@@ -330,15 +337,15 @@ CONTAINS
             DO i = 0,physVector % N
 
               compVector % interior % hostData(1,i,j,iVar,iEl) = &
-                mesh % geometry % dsdx % interior % hostData(1,1,i,j,1,iEl)* &
+                geometry % dsdx % interior % hostData(1,1,i,j,1,iEl)* &
                 physVector % interior % hostData(1,i,j,iVar,iEl) + &
-                mesh % geometry % dsdx % interior % hostData(2,1,i,j,1,iEl)* &
+                geometry % dsdx % interior % hostData(2,1,i,j,1,iEl)* &
                 physVector % interior % hostData(2,i,j,iVar,iEl)
 
               compVector % interior % hostData(2,i,j,iVar,iEl) = &
-                mesh % geometry % dsdx % interior % hostData(1,2,i,j,1,iEl)* &
+                geometry % dsdx % interior % hostData(1,2,i,j,1,iEl)* &
                 physVector % interior % hostData(1,i,j,iVar,iEl) + &
-                mesh % geometry % dsdx % interior % hostData(2,2,i,j,1,iEl)* &
+                geometry % dsdx % interior % hostData(2,2,i,j,1,iEl)* &
                 physVector % interior % hostData(2,i,j,iVar,iEl)
 
             END DO
@@ -349,22 +356,23 @@ CONTAINS
 
   END SUBROUTINE ContravariantProjection_MappedVector2D
 
-  SUBROUTINE Divergence_MappedVector3D(physVector,compVector,mesh,divVector,gpuAccel)
+  SUBROUTINE Divergence_MappedVector3D(physVector,compVector,mesh,geometry,divVector,gpuAccel)
     ! Strong Form Operator
     !
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(in) :: physVector
     TYPE(MappedVector3D),INTENT(inout) :: compVector
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(Scalar3D),INTENT(inout) :: divVector
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL physVector % ContravariantProjection(mesh,compVector,gpuAccel)
+    CALL physVector % ContravariantProjection(mesh,geometry,compVector,gpuAccel)
     CALL compVector % Divergence(divVector,gpuAccel)
 
   END SUBROUTINE Divergence_MappedVector3D
 
-  SUBROUTINE ContravariantProjection_MappedVector3D(physVector,mesh,compVector,gpuAccel)
+  SUBROUTINE ContravariantProjection_MappedVector3D(physVector,mesh,geometry,compVector,gpuAccel)
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
@@ -372,6 +380,7 @@ CONTAINS
     CLASS(MappedVector3D),INTENT(in) :: physVector
     TYPE(MappedVector3D),INTENT(inout) :: compVector
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iDir
@@ -380,7 +389,7 @@ CONTAINS
 
       CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
-                                                              mesh % geometry % dsdx % interior % deviceData, &
+                                                              geometry % dsdx % interior % deviceData, &
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
@@ -395,40 +404,40 @@ CONTAINS
             DO j = 0,physVector % N
               DO i = 0,physVector % N
 
-                compVector % interior % hostData(1,i,j,k,iVar,iEl) = mesh % geometry % dsdx % &
+                compVector % interior % hostData(1,i,j,k,iVar,iEl) = geometry % dsdx % &
                                                                      interior % hostData(1,1,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(1,i,j,k,iVar,iEl) + &
-                                                                     mesh % geometry % dsdx % &
+                                                                     geometry % dsdx % &
                                                                      interior % hostData(2,1,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(2,i,j,k,iVar,iEl) + &
-                                                                     mesh % geometry % dsdx % &
+                                                                     geometry % dsdx % &
                                                                      interior % hostData(3,1,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(3,i,j,k,iVar,iEl)
 
-                compVector % interior % hostData(2,i,j,k,iVar,iEl) = mesh % geometry % dsdx % &
+                compVector % interior % hostData(2,i,j,k,iVar,iEl) = geometry % dsdx % &
                                                                      interior % hostData(1,2,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(1,i,j,k,iVar,iEl) + &
-                                                                     mesh % geometry % dsdx % &
+                                                                     geometry % dsdx % &
                                                                      interior % hostData(2,2,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(2,i,j,k,iVar,iEl) + &
-                                                                     mesh % geometry % dsdx % &
+                                                                     geometry % dsdx % &
                                                                      interior % hostData(3,2,i,j,k,1,iEl)* &
                                                                      physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
-                compVector % interior % hostData(3,i,j,k,iVar,iEl) = mesh % geometry % dsdx % &
+                compVector % interior % hostData(3,i,j,k,iVar,iEl) = geometry % dsdx % &
                                                                      interior % hostData(1,3,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(1,i,j,k,iVar,iEl) + &
-                                                                     mesh % geometry % dsdx % &
+                                                                     geometry % dsdx % &
                                                                      interior % hostData(2,3,i,j,k,1,iEl)* &
                                                                      physVector % interior % &
                                                                      hostData(2,i,j,k,iVar,iEl) + &
-                                                                     mesh % geometry % dsdx % &
+                                                                     geometry % dsdx % &
                                                                      interior % hostData(3,3,i,j,k,1,iEl)* &
                                                                      physVector % interior % hostData(3,i,j,k,iVar,iEl)
 

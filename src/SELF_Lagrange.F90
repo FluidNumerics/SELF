@@ -483,7 +483,7 @@ CONTAINS
 
     ELSEIF (controlNodeType == UNIFORM) THEN
 
-      myPoly % controlPoints % hostData = UniformPoints(-1.0_prec,1.0_prec,N)
+      myPoly % controlPoints % hostData = UniformPoints(-1.0_prec,1.0_prec,0,N)
       myPoly % qWeights % hostData = 2.0_prec/REAL(N,prec)
 
     END IF
@@ -498,7 +498,7 @@ CONTAINS
 
     ELSEIF (targetNodeType == UNIFORM) THEN
 
-      myPoly % targetPoints % hostData = UniformPoints(-1.0_prec,1.0_prec,M)
+      myPoly % targetPoints % hostData = UniformPoints(-1.0_prec,1.0_prec,0,M)
 
     END IF
 

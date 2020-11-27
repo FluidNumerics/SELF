@@ -25,19 +25,22 @@ self: SELF.o
 SELF.o: libSELF.a
 	${FC} -c ${FFLAGS} ${INC} -I./src/ ${FLIBS} src/SELF.F90 -o $@
 
-libSELF.a: SELF_Constants.o SELF_Data.o SELF_Lagrange_HIP.o SELF_Lagrange.o SELF_MappedData_HIP.o SELF_MappedData.o SELF_Memory.o SELF_Mesh.o SELF_Quadrature.o SELF_SupportRoutines.o SELF_Tests.o
-	ar rcs $@ SELF_Constants.o SELF_Data.o SELF_Lagrange_HIP.o SELF_Lagrange.o SELF_MappedData_HIP.o SELF_MappedData.o SELF_Memory.o SELF_Mesh.o SELF_Quadrature.o SELF_SupportRoutines.o SELF_Tests.o
+libSELF.a: SELF_Constants.o SELF_Data.o SELF_Lagrange_HIP.o SELF_Lagrange.o SELF_Geometry.o SELF_MappedData_HIP.o SELF_MappedData.o SELF_Memory.o SELF_Mesh.o SELF_Quadrature.o SELF_SupportRoutines.o SELF_Tests.o
+	ar rcs $@ SELF_Constants.o SELF_Data.o SELF_Lagrange_HIP.o SELF_Lagrange.o SELF_Geometry.o SELF_MappedData_HIP.o SELF_MappedData.o SELF_Memory.o SELF_Mesh.o SELF_Quadrature.o SELF_SupportRoutines.o SELF_Tests.o
 
 SELF_Tests.o: SELF_Constants.o SELF_Data.o SELF_Lagrange_HIP.o SELF_Lagrange.o SELF_MappedData_HIP.o SELF_MappedData.o SELF_Memory.o SELF_Mesh.o SELF_Quadrature.o SELF_SupportRoutines.o
 	${FC} -c ${FFLAGS} ${INC} ${FLIBS} src/SELF_Tests.F90 -o $@
 
 #SELF_MPILayer.o: SELF_MPILayer.F90
 
-SELF_MappedData.o: SELF_Mesh.o SELF_Data.o
+SELF_MappedData.o: SELF_Mesh.o SELF_Data.o SELF_Geometry.o
 	${FC} -c ${FFLAGS} ${INC} ${FLIBS} src/SELF_MappedData.F90 -o $@
 
 SELF_MappedData_HIP.o:
 	${CXX} -c ${CXXFLAGS} src/SELF_MappedData_HIP.cpp -o $@
+
+SELF_Geometry.o: SELF_Data.o SELF_Lagrange.o SELF_Mesh.o
+	${FC} -c ${FFLAGS} ${INC} ${FLIBS} src/SELF_Geometry.F90 -o $@
 
 SELF_Mesh.o: SELF_Data.o SELF_Lagrange.o
 	${FC} -c ${FFLAGS} ${INC} ${FLIBS} src/SELF_Mesh.F90 -o $@

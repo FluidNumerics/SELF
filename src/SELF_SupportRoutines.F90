@@ -470,21 +470,21 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
-  FUNCTION UniformPoints(a,b,N) RESULT(xU)
+  FUNCTION UniformPoints(a,b,firstInd,lastInd) RESULT(xU)
 
     IMPLICIT NONE
     REAL(prec) :: a,b
-    INTEGER    :: N
-    REAL(prec) :: xU(0:N)
+    INTEGER    :: firstInd,lastInd
+    REAL(prec) :: xU(firstInd:lastInd)
     ! LOCAL
     REAL(prec)    :: dx
     INTEGER :: i
 
-    dx = (b - a)/REAL(N,prec)
+    dx = (b - a)/REAL((lastInd-firstInd),prec)
 
-    DO i = 0,N
+    DO i = firstInd, lastInd
 
-      xU(i) = a + dx*REAL(i,prec)
+      xU(i) = a + dx*REAL(i-firstInd,prec)
 
     END DO
 
