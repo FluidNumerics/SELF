@@ -46,6 +46,7 @@ MODULE SELF_Geometry
 
     PROCEDURE,PUBLIC :: Init => Init_SEMQuad
     PROCEDURE,PUBLIC :: Free => Free_SEMQuad
+    PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMQuad
 #ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_SEMQuad
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMQuad
@@ -68,6 +69,7 @@ MODULE SELF_Geometry
 
     PROCEDURE,PUBLIC :: Init => Init_SEMHex
     PROCEDURE,PUBLIC :: Free => Free_SEMHex
+    PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMHex
 #ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_SEMHex
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMHex
@@ -271,6 +273,57 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_SEMQuad
 #endif
+  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+  ! Assumes that 
+  !  * mesh is using Gauss-Lobatto quadrature 
+  !  * the degree is given by mesh % nGeo
+  !  * mesh only has quadrilateral elements
+  !
+    IMPLICIT NONE
+    CLASS(SEMQuad), INTENT(out) :: myGeom
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    ! Local
+    INTEGER :: iel,jel,elid
+    INTEGER :: i,j,nid
+    TYPE(Vector2D) :: xMesh
+
+    CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
+
+    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to 
+    ! cqDegree, cqType grid
+    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO,&
+                      cqDegree,cqType,&
+                      1,mesh % nElem)
+
+    ! Set the element internal mesh locations
+    nid = 1
+    DO iel = 1,mesh % nElem
+      DO j = 0,mesh % nGeo
+        DO i = 0,mesh % nGeo
+          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % nodeCoords % hostData(1:2,nid)
+          nid = nid + 1
+        ENDDO
+      ENDDO
+    END DO
+
+    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+
+    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % CalculateMetricTerms()
+
+#ifdef GPU
+    CALL myGeom % UpdateDevice()
+#endif
+
+    CALL xMesh % Free()
+
+  END SUBROUTINE GenerateFromMesh_SEMQuad
+
   SUBROUTINE CalculateContravariantBasis_SEMQuad(myGeom)
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
@@ -412,6 +465,58 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_SEMHex
 #endif
+  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+  ! Assumes that 
+  !  * mesh is using Gauss-Lobatto quadrature 
+  !  * the degree is given by mesh % nGeo
+  !  * mesh only has quadrilateral elements
+  !
+    IMPLICIT NONE
+    CLASS(SEMHex), INTENT(out) :: myGeom
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    ! Local
+    INTEGER :: iel,jel,kel,elid
+    INTEGER :: i,j,k,nid
+    TYPE(Vector3D) :: xMesh
+
+    CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
+
+    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to 
+    ! cqDegree, cqType grid
+    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO,&
+                      cqDegree,cqType,&
+                      1,mesh % nElem)
+
+    ! Set the element internal mesh locations
+    nid = 1
+    DO iel = 1,mesh % nElem
+      DO k = 0,mesh % nGeo
+        DO j = 0,mesh % nGeo
+          DO i = 0,mesh % nGeo
+            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % nodeCoords % hostData(1:3,nid)
+            nid = nid + 1
+          ENDDO
+        ENDDO
+      ENDDO
+    END DO
+
+    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+
+    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % CalculateMetricTerms()
+
+#ifdef GPU
+    CALL myGeom % UpdateDevice()
+#endif
+
+    CALL xMesh % Free()
+
+  END SUBROUTINE GenerateFromMesh_SEMHex
 
   SUBROUTINE CalculateContravariantBasis_SEMHex(myGeom)
     IMPLICIT NONE

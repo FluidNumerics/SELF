@@ -186,6 +186,7 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh3D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
 #endif
+    PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
 !      PROCEDURE, PUBLIC :: LoadHOPRMesh => LoadHOPRMesh_3D
 !
@@ -475,6 +476,7 @@ CONTAINS
           ENDDO
         ENDDO
         myMesh % eleminfo % hostData(4,iel) = nid-1 ! Node Index End
+        elid = elid + 1
       ENDDO
     END DO
 
@@ -573,5 +575,103 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Mesh3D
 #endif
+  SUBROUTINE UniformBlockMesh_Mesh3D(myMesh,nGeo,nElem,x)
+    IMPLICIT NONE
+    CLASS(Mesh3D),INTENT(out) :: myMesh
+    INTEGER,INTENT(in) :: nGeo
+    INTEGER,INTENT(in) :: nElem(1:3)
+    REAL(prec),INTENT(in) :: x(1:6)
+    ! Local
+    INTEGER :: iel,jel,kel,nEl,elid
+    INTEGER :: nid,nNodes
+    INTEGER :: nSides
+    INTEGER :: i,j,k
+    REAL(prec) :: xU(1:nElem(1)+1)
+    REAL(prec) :: yU(1:nElem(2)+1)
+    REAL(prec) :: zU(1:nElem(3)+1)
+    TYPE(Vector3D) :: xLinear
+    TYPE(Vector3D) :: xGeo
+
+    nEl = nElem(1)*nElem(2)*nElem(3)
+    nNodes = nel*(nGeo+1)
+    nSides = (nElem(1)+1)*nElem(2)*nElem(3) +&
+             (nElem(2)+1)*nElem(1)*nElem(3) +&
+             (nElem(3)+1)*nElem(1)*nElem(2)
+    CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
+
+    ! Set the nodeCoords
+    xU = UniformPoints(x(1),x(2),1,nElem(1)+1)
+    yU = UniformPoints(x(3),x(4),1,nElem(2)+1)
+    zU = UniformPoints(x(5),x(6),1,nElem(3)+1)
+
+    ! Create a linear interpolant to interpolate to nGeo grid
+    CALL xLinear % Init(1,GAUSS_LOBATTO,&
+                        nGeo,GAUSS_LOBATTO,&
+                        1,nEl)
+
+    CALL xGeo % Init(nGeo,GAUSS_LOBATTO,&
+                     nGeo,GAUSS_LOBATTO,&
+                     1,nEl)
+    elid = 1
+    DO kel = 1,nElem(3)
+      DO jel = 1,nElem(2)
+        DO iel = 1,nElem(1)
+          ! x component
+          xLinear % interior % hostData(1,0:1,0,0,1,elid) = xU(iel:iel+1)
+          xLinear % interior % hostData(1,0:1,1,0,1,elid) = xU(iel:iel+1)
+          xLinear % interior % hostData(1,0:1,0,1,1,elid) = xU(iel:iel+1)
+          xLinear % interior % hostData(1,0:1,1,1,1,elid) = xU(iel:iel+1)
+          ! y component
+          xLinear % interior % hostData(2,0,0:1,0,1,elid) = yU(jel:jel+1)
+          xLinear % interior % hostData(2,1,0:1,0,1,elid) = yU(jel:jel+1)
+          xLinear % interior % hostData(2,0,0:1,1,1,elid) = yU(jel:jel+1)
+          xLinear % interior % hostData(2,1,0:1,1,1,elid) = yU(jel:jel+1)
+          ! z component
+          xLinear % interior % hostData(2,0,0,0:1,1,elid) = zU(kel:kel+1)
+          xLinear % interior % hostData(2,1,0,0:1,1,elid) = zU(kel:kel+1)
+          xLinear % interior % hostData(2,0,1,0:1,1,elid) = zU(kel:kel+1)
+          xLinear % interior % hostData(2,1,1,0:1,1,elid) = zU(kel:kel+1)
+          ! Incremenent the element ID
+          elid = elid + 1
+        ENDDO
+      ENDDO
+    ENDDO
+
+    CALL xLinear % GridInterp(xGeo,.FALSE.)
+
+    ! Set the element information
+    nid = 1
+    elid = 1
+    DO kel = 1,nElem(3)
+      DO jel = 1,nElem(2)
+        DO iel = 1,nElem(1)
+          myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
+          myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
+          myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
+          DO k = 0, nGeo
+            DO j = 0, nGeo
+              DO i = 0, nGeo
+                myMesh % nodeCoords % hostData(1:3,nid) = xGeo % interior % hostData(1:3,i,j,k,1,elid)
+                nid = nid + 1
+              ENDDO
+            ENDDO
+          ENDDO
+          myMesh % eleminfo % hostData(4,iel) = nid-1 ! Node Index End
+          elid = elid + 1
+        ENDDO
+      ENDDO
+    ENDDO
+
+
+    ! TO DO: Add Side information !
+
+#ifdef GPU
+    CALL myMesh % UpdateDevice()
+#endif
+
+    CALL xLinear % Free()
+    CALL xGeo % Free()
+
+  END SUBROUTINE UniformBlockMesh_Mesh3D
 
 END MODULE SELF_Mesh

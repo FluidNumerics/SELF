@@ -46,6 +46,10 @@ PROGRAM SELF
 
     CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
 
+  ELSEIF (self_cli % run_command(group="blockmesh_2d")) THEN
+
+    CALL BlockMesh2D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+
   END IF
 
   CALL self_cli % free()
