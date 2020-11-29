@@ -23,5 +23,5 @@ RUN git clone  https://github.com/ROCmSoftwarePlatform/hipfort.git /tmp/hipfort 
 
 
 
-ENV PATH=${PATH}:/usr/local/hipfort/bin \
-    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hipfort/lib
+ENV PATH=${PATH}:/usr/local/hipfort/bin:/usr/local/cuda/bin \
+    LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hipfort/lib:/usr/local/cuda/lib64 \

@@ -81,7 +81,6 @@ MODULE SELF_Geometry
 
 CONTAINS
 
-
   SUBROUTINE Init_Geometry1D(myGeom,cqType,tqType,cqDegree,tqDegree,nElem)
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(out) :: myGeom
@@ -140,10 +139,10 @@ CONTAINS
 #endif
 
   SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
-  ! Generates the geometry for a 1-D mesh ( set of line segments )
-  ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
+    ! Generates the geometry for a 1-D mesh ( set of line segments )
+    ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
     IMPLICIT NONE
-    CLASS(Geometry1D), INTENT(out) :: myGeom
+    CLASS(Geometry1D),INTENT(out) :: myGeom
     TYPE(Mesh1D),INTENT(in) :: mesh
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -155,10 +154,10 @@ CONTAINS
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to 
+    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO,&
-                      cqDegree,cqType,&
+    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+                      cqDegree,cqType, &
                       1,mesh % nElem)
 
     ! Set the element internal mesh locations
@@ -167,7 +166,7 @@ CONTAINS
       DO i = 0,mesh % nGeo
         xMesh % interior % hostData(i,1,iel) = mesh % nodeCoords % hostData(nid)
         nid = nid + 1
-      ENDDO
+      END DO
     END DO
 
     ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
@@ -274,13 +273,13 @@ CONTAINS
   END SUBROUTINE UpdateDevice_SEMQuad
 #endif
   SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
-  ! Assumes that 
-  !  * mesh is using Gauss-Lobatto quadrature 
-  !  * the degree is given by mesh % nGeo
-  !  * mesh only has quadrilateral elements
-  !
+    ! Assumes that
+    !  * mesh is using Gauss-Lobatto quadrature
+    !  * the degree is given by mesh % nGeo
+    !  * mesh only has quadrilateral elements
+    !
     IMPLICIT NONE
-    CLASS(SEMQuad), INTENT(out) :: myGeom
+    CLASS(SEMQuad),INTENT(out) :: myGeom
     TYPE(Mesh2D),INTENT(in) :: mesh
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -293,10 +292,10 @@ CONTAINS
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to 
+    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO,&
-                      cqDegree,cqType,&
+    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+                      cqDegree,cqType, &
                       1,mesh % nElem)
 
     ! Set the element internal mesh locations
@@ -306,8 +305,8 @@ CONTAINS
         DO i = 0,mesh % nGeo
           xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % nodeCoords % hostData(1:2,nid)
           nid = nid + 1
-        ENDDO
-      ENDDO
+        END DO
+      END DO
     END DO
 
     ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
@@ -466,13 +465,13 @@ CONTAINS
   END SUBROUTINE UpdateDevice_SEMHex
 #endif
   SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
-  ! Assumes that 
-  !  * mesh is using Gauss-Lobatto quadrature 
-  !  * the degree is given by mesh % nGeo
-  !  * mesh only has quadrilateral elements
-  !
+    ! Assumes that
+    !  * mesh is using Gauss-Lobatto quadrature
+    !  * the degree is given by mesh % nGeo
+    !  * mesh only has quadrilateral elements
+    !
     IMPLICIT NONE
-    CLASS(SEMHex), INTENT(out) :: myGeom
+    CLASS(SEMHex),INTENT(out) :: myGeom
     TYPE(Mesh3D),INTENT(in) :: mesh
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -485,10 +484,10 @@ CONTAINS
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to 
+    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO,&
-                      cqDegree,cqType,&
+    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+                      cqDegree,cqType, &
                       1,mesh % nElem)
 
     ! Set the element internal mesh locations
@@ -499,9 +498,9 @@ CONTAINS
           DO i = 0,mesh % nGeo
             xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % nodeCoords % hostData(1:3,nid)
             nid = nid + 1
-          ENDDO
-        ENDDO
-      ENDDO
+          END DO
+        END DO
+      END DO
     END DO
 
     ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)

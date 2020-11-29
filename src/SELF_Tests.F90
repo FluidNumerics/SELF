@@ -29,6 +29,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(out) :: error
     ! Local
+    CHARACTER(240) :: msg
     TYPE(Mesh1D) :: mesh
     TYPE(Geometry1D) :: geometry
     REAL(prec) :: expect_dxds,dxds_error,expect_boundx,boundx_error
@@ -39,7 +40,7 @@ CONTAINS
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
 
-    CALL mesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
+    CALL mesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
 
     ! Create the geometry
     CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
@@ -69,21 +70,24 @@ CONTAINS
 
     CALL mesh % Free()
 
+    msg = "Max dx/ds error : "//Float2Str(dxds_error)
     IF (dxds_error > exactTolerance) THEN
       error = error + 1
-      ERROR("Max dx/ds error : "//Float2Str(dxds_error))
+      ERROR(TRIM(msg))
       ERROR("[FAIL] Metric Terms Test")
     ELSE
+      INFO(TRIM(msg))
       INFO("Max dx/ds error : "//Float2Str(dxds_error))
       INFO("[PASS] Metric Terms Test Pass")
     END IF
 
+    msg = "Max boundx error : "//Float2Str(boundx_error)
     IF (boundx_error > exactTolerance) THEN
       error = error + 1
-      ERROR("Max boundx error : "//Float2Str(boundx_error))
+      ERROR(TRIM(msg))
       ERROR("[FAIL] Boundary Interpolation Test")
     ELSE
-      INFO("Max boundx error : "//Float2Str(boundx_error))
+      INFO(TRIM(msg))
       INFO("[PASS] Boundary Interpolation Test")
     END IF
 
@@ -100,6 +104,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(out) :: error
     ! Local
+    CHARACTER(240) :: msg
     TYPE(Mesh2D) :: mesh
     TYPE(SEMQuad) :: geometry
     REAL(prec) :: expect_dxds(1:2,1:2),dxds_error(1:2,1:2)
@@ -112,9 +117,9 @@ CONTAINS
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
 
-    CALL mesh % UniformBlockMesh(cqDegree,&
-                                 (/nElem,nElem/),&
-                                 (/0.0_prec,1.0_prec,&
+    CALL mesh % UniformBlockMesh(cqDegree, &
+                                 (/nElem,nElem/), &
+                                 (/0.0_prec,1.0_prec, &
                                    0.0_prec,1.0_prec/))
 
     ! Create the geometry
@@ -135,33 +140,37 @@ CONTAINS
         DO i = 0,cqDegree
           DO col = 1,2
             DO row = 1,2
-              dxds_error(row,col) = MAX(dxds_error(row,col),&
-                      ABS(geometry % dxds % &
-                          interior % hostData(row,col,i,j,1,iel) -&
-                          expect_dxds(row,col)))
-            ENDDO
-          ENDDO
+              dxds_error(row,col) = MAX(dxds_error(row,col), &
+                                        ABS(geometry % dxds % &
+                                            interior % hostData(row,col,i,j,1,iel) - &
+                                            expect_dxds(row,col)))
+            END DO
+          END DO
           J_error = MAX(J_error,ABS(geometry % J % &
-                                    interior % hostData(i,j,1,iel) -&
-                                    expect_J)) 
-        ENDDO
-      ENDDO
-    ENDDO
+                                    interior % hostData(i,j,1,iel) - &
+                                    expect_J))
+        END DO
+      END DO
+    END DO
 
     CALL mesh % Free()
 
     DO col = 1,2
       DO row = 1,2
+        msg = "Max dx/ds error ("// &
+              TRIM(Int2Str(row))//","// &
+              TRIM(Int2Str(col))//") : "// &
+              Float2Str(dxds_error(row,col))
         IF (dxds_error(row,col) > exactTolerance) THEN
           error = error + 1
-          ERROR("Max dx/ds error ("//TRIM(Int2Str(row))//","//TRIM(Int2Str(col))//") : "//Float2Str(dxds_error(row,col)))
+          ERROR(TRIM(msg))
           ERROR("[FAIL] Covariant Tensor Test")
         ELSE
-          INFO("Max dx/ds error ("//TRIM(Int2Str(row))//","//TRIM(Int2Str(col))//") : "//Float2Str(dxds_error(row,col)))
+          INFO(TRIM(msg))
           INFO("[PASS] Covariant Tensor Test")
         END IF
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     IF (J_error > exactTolerance) THEN
       error = error + 1
@@ -173,6 +182,105 @@ CONTAINS
     END IF
 
   END SUBROUTINE BlockMesh2D_Test
+
+  SUBROUTINE BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,error)
+#undef __FUNC__
+#define __FUNC__ "BlockMesh3D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh3D) :: mesh
+    TYPE(SEMHex) :: geometry
+    REAL(prec) :: expect_dxds(1:3,1:3),dxds_error(1:3,1:3)
+    REAL(prec) :: expect_J,J_error
+    INTEGER :: iel,jel,kel,i,j,k
+    INTEGER :: row,col
+
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
+    INFO(TRIM(msg))
+    INFO('Control point degree : '//Int2Str(cqDegree))
+    INFO('Target point degree : '//Int2Str(tqDegree))
+
+    CALL mesh % UniformBlockMesh(cqDegree, &
+                                 (/nElem,nElem,nElem/), &
+                                 (/0.0_prec,1.0_prec, &
+                                   0.0_prec,1.0_prec, &
+                                   0.0_prec,1.0_prec/))
+
+    ! Create the geometry
+    CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Verify the mesh
+    expect_dxds(1,1) = (1.0_prec/REAL(nElem,prec))/2.0_prec
+    expect_dxds(1,2) = 0.0_prec
+    expect_dxds(1,3) = 0.0_prec
+    expect_dxds(2,1) = 0.0_prec
+    expect_dxds(2,2) = (1.0_prec/REAL(nElem,prec))/2.0_prec
+    expect_dxds(2,3) = 0.0_prec
+    expect_dxds(3,1) = 0.0_prec
+    expect_dxds(3,2) = 0.0_prec
+    expect_dxds(3,3) = (1.0_prec/REAL(nElem,prec))/2.0_prec
+
+    expect_J = expect_dxds(1,1)*expect_dxds(2,2)*expect_dxds(3,3)
+
+    ! Calculate error in metric terms
+    dxds_error = 0.0_prec
+    DO iel = 1,nElem
+      DO k = 0,cqDegree
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
+            DO col = 1,3
+              DO row = 1,3
+                dxds_error(row,col) = MAX(dxds_error(row,col), &
+                                          ABS(geometry % dxds % &
+                                              interior % hostData(row,col,i,j,k,1,iel) - &
+                                              expect_dxds(row,col)))
+              END DO
+            END DO
+            J_error = MAX(J_error,ABS(geometry % J % &
+                                      interior % hostData(i,j,k,1,iel) - &
+                                      expect_J))
+          END DO
+        END DO
+      END DO
+    END DO
+
+    CALL mesh % Free()
+
+    DO col = 1,3
+      DO row = 1,3
+        msg = "Max dx/ds error ("// &
+              TRIM(Int2Str(row))//","// &
+              TRIM(Int2Str(col))//") : "// &
+              Float2Str(dxds_error(row,col))
+        IF (dxds_error(row,col) > exactTolerance) THEN
+          error = error + 1
+          ERROR(TRIM(msg))
+          ERROR("[FAIL] Covariant Tensor Test")
+        ELSE
+          INFO(TRIM(msg))
+          INFO("[PASS] Covariant Tensor Test")
+        END IF
+      END DO
+    END DO
+
+    IF (J_error > exactTolerance) THEN
+      error = error + 1
+      ERROR("Max Jacobian error : "//Float2Str(J_error))
+      ERROR("[FAIL] Jacobian Test")
+    ELSE
+      INFO("Max Jacobian error : "//Float2Str(J_error))
+      INFO("[PASS] Jacobian Test")
+    END IF
+
+  END SUBROUTINE BlockMesh3D_Test
 
 !  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,nvar,functionChar,error)
 !#undef __FUNC__

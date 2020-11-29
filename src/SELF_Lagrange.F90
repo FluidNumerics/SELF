@@ -62,8 +62,10 @@ MODULE SELF_Lagrange
     PROCEDURE,PUBLIC :: Init => Init_Lagrange
     PROCEDURE,PUBLIC :: Free => Free_Lagrange
 
+#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Lagrange
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Lagrange
+#endif
 
     GENERIC,PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu
     PROCEDURE,PRIVATE :: ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu

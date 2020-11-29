@@ -15,6 +15,7 @@ PROGRAM SELF
   INTEGER :: nTargetPoints
   INTEGER :: nElem
   INTEGER :: error
+  INTEGER :: errorCount
 
   CALL Parse_CLI(self_cli)
 
@@ -42,22 +43,38 @@ PROGRAM SELF
     STOP 1
   END IF
 
+  errorCount = 0
   IF (self_cli % run_command(group="ci-test")) THEN
 
     CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    errorCount = errorCount + error
+
     CALL BlockMesh2D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    errorCount = errorCount + error
+
+    CALL BlockMesh3D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
 
     CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_2d")) THEN
 
     CALL BlockMesh2D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="blockmesh_3d")) THEN
+
+    CALL BlockMesh3D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    errorCount = errorCount + error
 
   END IF
 
   CALL self_cli % free()
+
+  STOP errorCount
 
 CONTAINS
 
@@ -68,7 +85,7 @@ CONTAINS
     CALL cli % init(progname="self", &
                     version="v0.0.0", &
                     description="Spectral Element Libraries in Fortran (SELF)", &
-                    license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
+                    license="Apache 2.0 License", &
                     authors="Joseph Schoonover (Fluid Numerics LLC)")
 
     CALL cli % add(switch="--control-points", &
@@ -116,6 +133,9 @@ CONTAINS
                    def="false", &
                    choices="true, false", &
                    required=.FALSE.)
+
+    CALL cli % add_group(group="ci-test", &
+                         description="Run all CI-Tests")
 
     CALL cli % add_group(group="blockmesh_1d", &
                          description="Block Mesh generation in 1D")

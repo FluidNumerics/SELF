@@ -44,5 +44,5 @@ RUN cd /tmp && \
 FROM gcr.io/self-fluids/self-dep:latest
 
 COPY --from=devel /apps/self /apps/self
-ENV LD_LIBRARY_PATH=/apps/self/lib:$LD_LIBRARY_PATH \
-    PATH=/apps/self/bin:$PATH
+ENV LD_LIBRARY_PATH=/apps/self/lib:$LD_LIBRARY_PATH:/usr/local/cuda/lib64 \
+    PATH=/apps/self/bin:$PATH:/usr/local/cuda/bin \

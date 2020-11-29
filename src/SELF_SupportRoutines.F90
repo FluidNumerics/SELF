@@ -480,11 +480,11 @@ CONTAINS
     REAL(prec)    :: dx
     INTEGER :: i
 
-    dx = (b - a)/REAL((lastInd-firstInd),prec)
+    dx = (b - a)/REAL((lastInd - firstInd),prec)
 
-    DO i = firstInd, lastInd
+    DO i = firstInd,lastInd
 
-      xU(i) = a + dx*REAL(i-firstInd,prec)
+      xU(i) = a + dx*REAL(i - firstInd,prec)
 
     END DO
 

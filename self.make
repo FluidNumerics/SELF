@@ -2,11 +2,11 @@
 
 FC=gfortran
 CXX=/opt/rocm/bin/hipcc
-FFLAGS=-v -DGPU -ffree-line-length-none
+FFLAGS=-O0 -g
 FLIBS=-L/apps/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
 INC=-I/opt/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
 CXXFLAGS=
-CXXLIBS=-L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
+CXXLIBS=-O0 -g -L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
 PREFIX=/apps/self
 
 install: libSELF.a self

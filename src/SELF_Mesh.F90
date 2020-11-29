@@ -115,7 +115,7 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: elemInfo
     TYPE(hfReal_r1) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
-   ! TYPE(hfInt_r1) :: cornerNodeIDs
+    ! TYPE(hfInt_r1) :: cornerNodeIDs
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -283,27 +283,27 @@ CONTAINS
     INTEGER :: iel
     INTEGER :: nid,nNodes
     INTEGER :: i
-    REAL(prec) :: xU(1:nElem+1)
+    REAL(prec) :: xU(1:nElem + 1)
     TYPE(Scalar1D) :: xLinear
     TYPE(Scalar1D) :: xGeo
 
-    nNodes = nElem*(nGeo+1)
+    nNodes = nElem*(nGeo + 1)
     CALL myMesh % Init(nGeo,nElem,nNodes,2)
 
     ! Set the nodeCoords
-    xU = UniformPoints(x(1),x(2),1,nElem+1)
+    xU = UniformPoints(x(1),x(2),1,nElem + 1)
 
     ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,GAUSS_LOBATTO,&
-                        nGeo,GAUSS_LOBATTO,&
+    CALL xLinear % Init(1,GAUSS_LOBATTO, &
+                        nGeo,GAUSS_LOBATTO, &
                         1,nElem)
 
-    CALL xGeo % Init(nGeo,GAUSS_LOBATTO,&
-                     nGeo,GAUSS_LOBATTO,&
+    CALL xGeo % Init(nGeo,GAUSS_LOBATTO, &
+                     nGeo,GAUSS_LOBATTO, &
                      1,nElem)
-    DO iel = 1, nElem
-      xLinear % interior % hostData(0:1,1,iel) = xU(iel:iel+1)
-    ENDDO
+    DO iel = 1,nElem
+      xLinear % interior % hostData(0:1,1,iel) = xU(iel:iel + 1)
+    END DO
 
     CALL xLinear % GridInterp(xGeo,.FALSE.)
 
@@ -313,11 +313,11 @@ CONTAINS
       myMesh % eleminfo % hostData(1,iel) = selfLineLinear ! Element Type
       myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
       myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
-      DO i = 0, nGeo
+      DO i = 0,nGeo
         myMesh % nodeCoords % hostData(nid) = xGeo % interior % hostData(i,1,iel)
         nid = nid + 1
-      ENDDO
-      myMesh % eleminfo % hostData(4,iel) = nid-1 ! Node Index End
+      END DO
+      myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
     END DO
 
 #ifdef GPU
@@ -343,7 +343,7 @@ CONTAINS
     myMesh % nNodes = nNodes
     myMesh % nSides = nSides
     myMesh % nCornerNodes = 0
-    myMesh % nUniqueNodes =0
+    myMesh % nUniqueNodes = 0
     myMesh % nUniqueSides = 0
     myMesh % nBCs = nBCs
 
@@ -422,42 +422,42 @@ CONTAINS
     INTEGER :: iel,jel,nEl,elid
     INTEGER :: nid,nNodes
     INTEGER :: nSides
-    INTEGER :: i, j
-    REAL(prec) :: xU(1:nElem(1)+1)
-    REAL(prec) :: yU(1:nElem(2)+1)
+    INTEGER :: i,j
+    REAL(prec) :: xU(1:nElem(1) + 1)
+    REAL(prec) :: yU(1:nElem(2) + 1)
     TYPE(Vector2D) :: xLinear
     TYPE(Vector2D) :: xGeo
 
     nEl = nElem(1)*nElem(2)
-    nNodes = nel*(nGeo+1)*(nGeo+1)
-    nSides = (nElem(1)+1)*nElem(2) + (nElem(2)+1)*nElem(1)
+    nNodes = nel*(nGeo + 1)*(nGeo + 1)
+    nSides = (nElem(1) + 1)*nElem(2) + (nElem(2) + 1)*nElem(1)
     CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
 
     ! Set the nodeCoords
-    xU = UniformPoints(x(1),x(2),1,nElem(1)+1)
-    yU = UniformPoints(x(3),x(4),1,nElem(2)+1)
+    xU = UniformPoints(x(1),x(2),1,nElem(1) + 1)
+    yU = UniformPoints(x(3),x(4),1,nElem(2) + 1)
 
     ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,GAUSS_LOBATTO,&
-                        nGeo,GAUSS_LOBATTO,&
+    CALL xLinear % Init(1,GAUSS_LOBATTO, &
+                        nGeo,GAUSS_LOBATTO, &
                         1,nEl)
 
-    CALL xGeo % Init(nGeo,GAUSS_LOBATTO,&
-                     nGeo,GAUSS_LOBATTO,&
+    CALL xGeo % Init(nGeo,GAUSS_LOBATTO, &
+                     nGeo,GAUSS_LOBATTO, &
                      1,nEl)
     elid = 1
     DO jel = 1,nElem(2)
       DO iel = 1,nElem(1)
         ! x component
-        xLinear % interior % hostData(1,0:1,0,1,elid) = xU(iel:iel+1)
-        xLinear % interior % hostData(1,0:1,1,1,elid) = xU(iel:iel+1)
+        xLinear % interior % hostData(1,0:1,0,1,elid) = xU(iel:iel + 1)
+        xLinear % interior % hostData(1,0:1,1,1,elid) = xU(iel:iel + 1)
         ! y component
-        xLinear % interior % hostData(2,0,0:1,1,elid) = yU(jel:jel+1)
-        xLinear % interior % hostData(2,1,0:1,1,elid) = yU(jel:jel+1)
+        xLinear % interior % hostData(2,0,0:1,1,elid) = yU(jel:jel + 1)
+        xLinear % interior % hostData(2,1,0:1,1,elid) = yU(jel:jel + 1)
         ! Incremenent the element ID
         elid = elid + 1
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     CALL xLinear % GridInterp(xGeo,.FALSE.)
 
@@ -469,17 +469,16 @@ CONTAINS
         myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
         myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
         myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
-        DO j = 0, nGeo
-          DO i = 0, nGeo
+        DO j = 0,nGeo
+          DO i = 0,nGeo
             myMesh % nodeCoords % hostData(1:2,nid) = xGeo % interior % hostData(1:2,i,j,1,elid)
             nid = nid + 1
-          ENDDO
-        ENDDO
-        myMesh % eleminfo % hostData(4,iel) = nid-1 ! Node Index End
+          END DO
+        END DO
+        myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
         elid = elid + 1
-      ENDDO
+      END DO
     END DO
-
 
     ! TO DO: Add Side information !
 
@@ -586,56 +585,56 @@ CONTAINS
     INTEGER :: nid,nNodes
     INTEGER :: nSides
     INTEGER :: i,j,k
-    REAL(prec) :: xU(1:nElem(1)+1)
-    REAL(prec) :: yU(1:nElem(2)+1)
-    REAL(prec) :: zU(1:nElem(3)+1)
+    REAL(prec) :: xU(1:nElem(1) + 1)
+    REAL(prec) :: yU(1:nElem(2) + 1)
+    REAL(prec) :: zU(1:nElem(3) + 1)
     TYPE(Vector3D) :: xLinear
     TYPE(Vector3D) :: xGeo
 
     nEl = nElem(1)*nElem(2)*nElem(3)
-    nNodes = nel*(nGeo+1)
-    nSides = (nElem(1)+1)*nElem(2)*nElem(3) +&
-             (nElem(2)+1)*nElem(1)*nElem(3) +&
-             (nElem(3)+1)*nElem(1)*nElem(2)
+    nNodes = nel*(nGeo + 1)*(nGeo + 1)*(nGeo + 1)
+    nSides = (nElem(1) + 1)*nElem(2)*nElem(3) + &
+             (nElem(2) + 1)*nElem(1)*nElem(3) + &
+             (nElem(3) + 1)*nElem(1)*nElem(2)
     CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
 
     ! Set the nodeCoords
-    xU = UniformPoints(x(1),x(2),1,nElem(1)+1)
-    yU = UniformPoints(x(3),x(4),1,nElem(2)+1)
-    zU = UniformPoints(x(5),x(6),1,nElem(3)+1)
+    xU = UniformPoints(x(1),x(2),1,nElem(1) + 1)
+    yU = UniformPoints(x(3),x(4),1,nElem(2) + 1)
+    zU = UniformPoints(x(5),x(6),1,nElem(3) + 1)
 
     ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,GAUSS_LOBATTO,&
-                        nGeo,GAUSS_LOBATTO,&
+    CALL xLinear % Init(1,GAUSS_LOBATTO, &
+                        nGeo,GAUSS_LOBATTO, &
                         1,nEl)
 
-    CALL xGeo % Init(nGeo,GAUSS_LOBATTO,&
-                     nGeo,GAUSS_LOBATTO,&
+    CALL xGeo % Init(nGeo,GAUSS_LOBATTO, &
+                     nGeo,GAUSS_LOBATTO, &
                      1,nEl)
     elid = 1
     DO kel = 1,nElem(3)
       DO jel = 1,nElem(2)
         DO iel = 1,nElem(1)
           ! x component
-          xLinear % interior % hostData(1,0:1,0,0,1,elid) = xU(iel:iel+1)
-          xLinear % interior % hostData(1,0:1,1,0,1,elid) = xU(iel:iel+1)
-          xLinear % interior % hostData(1,0:1,0,1,1,elid) = xU(iel:iel+1)
-          xLinear % interior % hostData(1,0:1,1,1,1,elid) = xU(iel:iel+1)
+          xLinear % interior % hostData(1,0:1,0,0,1,elid) = xU(iel:iel + 1)
+          xLinear % interior % hostData(1,0:1,1,0,1,elid) = xU(iel:iel + 1)
+          xLinear % interior % hostData(1,0:1,0,1,1,elid) = xU(iel:iel + 1)
+          xLinear % interior % hostData(1,0:1,1,1,1,elid) = xU(iel:iel + 1)
           ! y component
-          xLinear % interior % hostData(2,0,0:1,0,1,elid) = yU(jel:jel+1)
-          xLinear % interior % hostData(2,1,0:1,0,1,elid) = yU(jel:jel+1)
-          xLinear % interior % hostData(2,0,0:1,1,1,elid) = yU(jel:jel+1)
-          xLinear % interior % hostData(2,1,0:1,1,1,elid) = yU(jel:jel+1)
+          xLinear % interior % hostData(2,0,0:1,0,1,elid) = yU(jel:jel + 1)
+          xLinear % interior % hostData(2,1,0:1,0,1,elid) = yU(jel:jel + 1)
+          xLinear % interior % hostData(2,0,0:1,1,1,elid) = yU(jel:jel + 1)
+          xLinear % interior % hostData(2,1,0:1,1,1,elid) = yU(jel:jel + 1)
           ! z component
-          xLinear % interior % hostData(2,0,0,0:1,1,elid) = zU(kel:kel+1)
-          xLinear % interior % hostData(2,1,0,0:1,1,elid) = zU(kel:kel+1)
-          xLinear % interior % hostData(2,0,1,0:1,1,elid) = zU(kel:kel+1)
-          xLinear % interior % hostData(2,1,1,0:1,1,elid) = zU(kel:kel+1)
+          xLinear % interior % hostData(3,0,0,0:1,1,elid) = zU(kel:kel + 1)
+          xLinear % interior % hostData(3,1,0,0:1,1,elid) = zU(kel:kel + 1)
+          xLinear % interior % hostData(3,0,1,0:1,1,elid) = zU(kel:kel + 1)
+          xLinear % interior % hostData(3,1,1,0:1,1,elid) = zU(kel:kel + 1)
           ! Incremenent the element ID
           elid = elid + 1
-        ENDDO
-      ENDDO
-    ENDDO
+        END DO
+      END DO
+    END DO
 
     CALL xLinear % GridInterp(xGeo,.FALSE.)
 
@@ -648,20 +647,19 @@ CONTAINS
           myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
           myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
           myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
-          DO k = 0, nGeo
-            DO j = 0, nGeo
-              DO i = 0, nGeo
+          DO k = 0,nGeo
+            DO j = 0,nGeo
+              DO i = 0,nGeo
                 myMesh % nodeCoords % hostData(1:3,nid) = xGeo % interior % hostData(1:3,i,j,k,1,elid)
                 nid = nid + 1
-              ENDDO
-            ENDDO
-          ENDDO
-          myMesh % eleminfo % hostData(4,iel) = nid-1 ! Node Index End
+              END DO
+            END DO
+          END DO
+          myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
           elid = elid + 1
-        ENDDO
-      ENDDO
-    ENDDO
-
+        END DO
+      END DO
+    END DO
 
     ! TO DO: Add Side information !
 
