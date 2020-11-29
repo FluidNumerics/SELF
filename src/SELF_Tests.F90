@@ -135,15 +135,15 @@ CONTAINS
         DO i = 0,cqDegree
           DO col = 1,2
             DO row = 1,2
-              dxds_error(row,col) = MAX(dxds_error,&
+              dxds_error(row,col) = MAX(dxds_error(row,col),&
                       ABS(geometry % dxds % &
                           interior % hostData(row,col,i,j,1,iel) -&
                           expect_dxds(row,col)))
             ENDDO
           ENDDO
           J_error = MAX(J_error,ABS(geometry % J % &
-                                    interior % hostData(i,j,1,iel)-
-                                    expectJ)) 
+                                    interior % hostData(i,j,1,iel) -&
+                                    expect_J)) 
         ENDDO
       ENDDO
     ENDDO
@@ -154,12 +154,10 @@ CONTAINS
       DO row = 1,2
         IF (dxds_error(row,col) > exactTolerance) THEN
           error = error + 1
-          ERROR("Max dx/ds error ("//TRIM(Int2Str(row))//","//&
-                                     TRIM(Int2Str(col))//") : "//Float2Str(dxds_error))
+          ERROR("Max dx/ds error ("//TRIM(Int2Str(row))//","//TRIM(Int2Str(col))//") : "//Float2Str(dxds_error(row,col)))
           ERROR("[FAIL] Covariant Tensor Test")
         ELSE
-          INFO("Max dx/ds error ("//TRIM(Int2Str(row))//","//&
-                                     TRIM(Int2Str(col))//") : "//Float2Str(dxds_error))
+          INFO("Max dx/ds error ("//TRIM(Int2Str(row))//","//TRIM(Int2Str(col))//") : "//Float2Str(dxds_error(row,col)))
           INFO("[PASS] Covariant Tensor Test")
         END IF
       ENDDO

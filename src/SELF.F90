@@ -42,7 +42,12 @@ PROGRAM SELF
     STOP 1
   END IF
 
-  IF (self_cli % run_command(group="blockmesh_1d")) THEN
+  IF (self_cli % run_command(group="ci-test")) THEN
+
+    CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh2D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+
+  ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
 
     CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
 

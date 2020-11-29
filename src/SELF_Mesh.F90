@@ -429,7 +429,7 @@ CONTAINS
     TYPE(Vector2D) :: xGeo
 
     nEl = nElem(1)*nElem(2)
-    nNodes = nel*(nGeo+1)
+    nNodes = nel*(nGeo+1)*(nGeo+1)
     nSides = (nElem(1)+1)*nElem(2) + (nElem(2)+1)*nElem(1)
     CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
 
