@@ -1,5 +1,6 @@
 PROGRAM SELF
 
+  USE SELF_Constants
   USE SELF_SupportRoutines
   USE SELF_Tests
   USE FLAP
@@ -9,11 +10,14 @@ PROGRAM SELF
   TYPE(COMMAND_LINE_INTERFACE) :: self_cli
   CHARACTER(20) :: cqTypeChar
   CHARACTER(20) :: tqTypeChar
+  CHARACTER(240) :: functionChar
+  REAL(prec) :: errorTolerance
   INTEGER :: cqType
   INTEGER :: tqType
-  INTEGER :: nControlPoints
-  INTEGER :: nTargetPoints
+  INTEGER :: cqDegree
+  INTEGER :: tqDegree
   INTEGER :: nElem
+  INTEGER :: nVar
   INTEGER :: error
   INTEGER :: errorCount
 
@@ -21,9 +25,12 @@ PROGRAM SELF
 
   CALL self_cli % get(val=cqTypeChar,switch='--control-quadrature')
   CALL self_cli % get(val=tqTypeChar,switch='--target-quadrature')
-  CALL self_cli % get(val=nControlPoints,switch='--control-points')
-  CALL self_cli % get(val=nTargetPoints,switch='--target-points')
+  CALL self_cli % get(val=cqDegree,switch='--control-degree')
+  CALL self_cli % get(val=tqDegree,switch='--target-degree')
   CALL self_cli % get(val=nElem,switch='--nelements')
+  CALL self_cli % get(val=nVar,switch='--nvar')
+  CALL self_cli % get(val=functionChar,switch='--function')
+  CALL self_cli % get(val=errorTolerance,switch='--tolerance')
 
   IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
     cqType = GAUSS
@@ -46,28 +53,36 @@ PROGRAM SELF
   errorCount = 0
   IF (self_cli % run_command(group="ci-test")) THEN
 
-    CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
     errorCount = errorCount + error
 
-    CALL BlockMesh2D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
     errorCount = errorCount + error
 
-    CALL BlockMesh3D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
+    errorCount = errorCount + error
+
+    CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
 
-    CALL BlockMesh1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_2d")) THEN
 
-    CALL BlockMesh2D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_3d")) THEN
 
-    CALL BlockMesh3D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,error)
+    CALL BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="s1d_interp")) THEN
+
+    CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
   END IF
@@ -88,15 +103,15 @@ CONTAINS
                     license="Apache 2.0 License", &
                     authors="Joseph Schoonover (Fluid Numerics LLC)")
 
-    CALL cli % add(switch="--control-points", &
+    CALL cli % add(switch="--control-degree", &
                    switch_ab="-c", &
-                   help="The number of control points on computational grid."//NEW_LINE("A"), &
+                   help="The polynomial degree of the control points."//NEW_LINE("A"), &
                    def="2", &
                    required=.FALSE.)
 
-    CALL cli % add(switch="--target-points", &
+    CALL cli % add(switch="--target-degree", &
                    switch_ab="-t", &
-                   help="The number of target points for grid interpolation methods."//NEW_LINE("A"), &
+                   help="The polynomial degree for the target points for interpolation."//NEW_LINE("A"), &
                    def="7", &
                    required=.FALSE.)
 
@@ -134,6 +149,90 @@ CONTAINS
                    choices="true, false", &
                    required=.FALSE.)
 
+    CALL cli % add(switch="--tolerance", &
+                   switch_ab="-tol", &
+                   help="Tolerance to use for determining if a test passes."//NEW_LINE("A"), &
+                   def="1.0E-5", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--function", &
+                   switch_ab="-f", &
+                   help="Function to interpolate from control points to target points", &
+                   def="f=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--vector-x", &
+                   switch_ab="-vx", &
+                   help="x-component of the vector function to interpolate from control points to target points", &
+                   def="vx=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--vector-y", &
+                   switch_ab="-vy", &
+                   help="y-component of the vector function to interpolate from control points to target points", &
+                   def="vy=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--vector-z", &
+                   switch_ab="-vz", &
+                   help="z-component of the vector function to interpolate from control points to target points", &
+                   def="vz=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-11", &
+                   switch_ab="-t11", &
+                   help="Row 1 column 1 of the tensor function to interpolate from control points to target points", &
+                   def="t11=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-12", &
+                   switch_ab="-t12", &
+                   help="Row 1 column 2 of the tensor function to interpolate from control points to target points", &
+                   def="t12=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-13", &
+                   switch_ab="-t13", &
+                   help="Row 1 column 3 of the tensor function to interpolate from control points to target points", &
+                   def="t13=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-21", &
+                   switch_ab="-t21", &
+                   help="Row 2 column 1 of the tensor function to interpolate from control points to target points", &
+                   def="t21=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-22", &
+                   switch_ab="-t22", &
+                   help="Row 2 column 2 of the tensor function to interpolate from control points to target points", &
+                   def="t22=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-23", &
+                   switch_ab="-t23", &
+                   help="Row 2 column 3 of the tensor function to interpolate from control points to target points", &
+                   def="t23=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-31", &
+                   switch_ab="-t31", &
+                   help="Row 3 column 1 of the tensor function to interpolate from control points to target points", &
+                   def="t31=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-32", &
+                   switch_ab="-t32", &
+                   help="Row 3 column 2 of the tensor function to interpolate from control points to target points", &
+                   def="t32=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--tensor-33", &
+                   switch_ab="-t33", &
+                   help="Row 2 column 3 of the tensor function to interpolate from control points to target points", &
+                   def="t33=1.0", &
+                   required=.FALSE.)
+
     CALL cli % add_group(group="ci-test", &
                          description="Run all CI-Tests")
 
@@ -149,170 +248,25 @@ CONTAINS
     CALL cli % add_group(group="s1d_interp", &
                          description="Scalar 1D Interpolation")
 
-    CALL cli % add(switch="--function", &
-                   switch_ab="-f", &
-                   group="s1d_interp", &
-                   help="Function to interpolate from control points to target points", &
-                   def="f=1.0", &
-                   required=.FALSE.)
 
     CALL cli % add_group(group="s2d_interp", &
                          description="Scalar 2D Interpolation")
 
-    CALL cli % add(switch="--function", &
-                   switch_ab="-f", &
-                   group="s2d_interp", &
-                   help="Function to interpolate from control points to target points", &
-                   def="f=1.0", &
-                   required=.FALSE.)
-
     CALL cli % add_group(group="s3d_interp", &
                          description="Scalar 3D Interpolation")
-
-    CALL cli % add(switch="--function", &
-                   switch_ab="-f", &
-                   group="s3d_interp", &
-                   help="Function to interpolate from control points to target points", &
-                   def="f=1.0", &
-                   required=.FALSE.)
 
     CALL cli % add_group(group="v2d_interp", &
                          description="Vector 2D Interpolation")
 
-    CALL cli % add(switch="--vector-x", &
-                   switch_ab="-vx", &
-                   group="v2d_interp", &
-                   help="x-component of the vector function to interpolate from control points to target points", &
-                   def="vx=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--vector-y", &
-                   switch_ab="-vy", &
-                   group="v2d_interp", &
-                   help="y-component of the vector function to interpolate from control points to target points", &
-                   def="vy=1.0", &
-                   required=.FALSE.)
-
     CALL cli % add_group(group="v3d_interp", &
                          description="Vector 3D Interpolation")
-
-    CALL cli % add(switch="--vector-x", &
-                   switch_ab="-vx", &
-                   group="v3d_interp", &
-                   help="x-component of the vector function to interpolate from control points to target points", &
-                   def="vx=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--vector-y", &
-                   switch_ab="-vy", &
-                   group="v3d_interp", &
-                   help="y-component of the vector function to interpolate from control points to target points", &
-                   def="vy=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--vector-z", &
-                   switch_ab="-vz", &
-                   group="v3d_interp", &
-                   help="z-component of the vector function to interpolate from control points to target points", &
-                   def="vz=1.0", &
-                   required=.FALSE.)
 
     CALL cli % add_group(group="t2d_interp", &
                          description="Tensor 2D Interpolation")
 
-    CALL cli % add(switch="--tensor-11", &
-                   switch_ab="-t11", &
-                   group="t2d_interp", &
-                   help="Row 1 column 1 of the tensor function to interpolate from control points to target points", &
-                   def="t11=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-12", &
-                   switch_ab="-t12", &
-                   group="t2d_interp", &
-                   help="Row 1 column 2 of the tensor function to interpolate from control points to target points", &
-                   def="t12=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-21", &
-                   switch_ab="-t21", &
-                   group="t2d_interp", &
-                   help="Row 2 column 1 of the tensor function to interpolate from control points to target points", &
-                   def="t21=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-22", &
-                   switch_ab="-t22", &
-                   group="t2d_interp", &
-                   help="Row 2 column 2 of the tensor function to interpolate from control points to target points", &
-                   def="t22=1.0", &
-                   required=.FALSE.)
-
     CALL cli % add_group(group="t3d_interp", &
                          description="Tensor 3D Interpolation")
 
-    CALL cli % add(switch="--tensor-11", &
-                   switch_ab="-t11", &
-                   group="t3d_interp", &
-                   help="Row 1 column 1 of the tensor function to interpolate from control points to target points", &
-                   def="t11=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-12", &
-                   switch_ab="-t12", &
-                   group="t3d_interp", &
-                   help="Row 1 column 2 of the tensor function to interpolate from control points to target points", &
-                   def="t12=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-13", &
-                   switch_ab="-t13", &
-                   group="t3d_interp", &
-                   help="Row 1 column 3 of the tensor function to interpolate from control points to target points", &
-                   def="t13=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-21", &
-                   switch_ab="-t21", &
-                   group="t3d_interp", &
-                   help="Row 2 column 1 of the tensor function to interpolate from control points to target points", &
-                   def="t21=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-22", &
-                   switch_ab="-t22", &
-                   group="t3d_interp", &
-                   help="Row 2 column 2 of the tensor function to interpolate from control points to target points", &
-                   def="t22=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-23", &
-                   switch_ab="-t23", &
-                   group="t3d_interp", &
-                   help="Row 2 column 3 of the tensor function to interpolate from control points to target points", &
-                   def="t23=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-31", &
-                   switch_ab="-t31", &
-                   group="t3d_interp", &
-                   help="Row 3 column 1 of the tensor function to interpolate from control points to target points", &
-                   def="t31=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-32", &
-                   switch_ab="-t32", &
-                   group="t3d_interp", &
-                   help="Row 3 column 2 of the tensor function to interpolate from control points to target points", &
-                   def="t32=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tensor-33", &
-                   switch_ab="-t33", &
-                   group="t3d_interp", &
-                   help="Row 2 column 3 of the tensor function to interpolate from control points to target points", &
-                   def="t33=1.0", &
-                   required=.FALSE.)
 
     CALL cli % parse()
 

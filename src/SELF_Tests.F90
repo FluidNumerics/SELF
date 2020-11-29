@@ -14,11 +14,9 @@ MODULE SELF_Tests
 
 #include "SELF_Macros.h"
 
-  REAL(prec),PRIVATE,PARAMETER :: exactTolerance = 10.0_prec**(-5)
-
 CONTAINS
 
-  SUBROUTINE BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,error)
+  SUBROUTINE BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "BlockMesh1D_Test"
     IMPLICIT NONE
@@ -27,6 +25,7 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
+    REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -39,6 +38,7 @@ CONTAINS
     INFO('Number of elements : '//Int2Str(nElem))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
+    INFO('Error tolerance : '//Float2Str(tolerance))
 
     CALL mesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
 
@@ -69,9 +69,10 @@ CONTAINS
     END DO
 
     CALL mesh % Free()
+    CALL geometry % Free()
 
     msg = "Max dx/ds error : "//Float2Str(dxds_error)
-    IF (dxds_error > exactTolerance) THEN
+    IF (dxds_error > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
       ERROR("[FAIL] Metric Terms Test")
@@ -82,7 +83,7 @@ CONTAINS
     END IF
 
     msg = "Max boundx error : "//Float2Str(boundx_error)
-    IF (boundx_error > exactTolerance) THEN
+    IF (boundx_error > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
       ERROR("[FAIL] Boundary Interpolation Test")
@@ -93,7 +94,7 @@ CONTAINS
 
   END SUBROUTINE BlockMesh1D_Test
 
-  SUBROUTINE BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,error)
+  SUBROUTINE BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "BlockMesh2D_Test"
     IMPLICIT NONE
@@ -102,6 +103,7 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
+    REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -116,6 +118,7 @@ CONTAINS
     INFO('Number of elements : '//Int2Str(nElem*nElem))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
+    INFO('Error tolerance : '//Float2Str(tolerance))
 
     CALL mesh % UniformBlockMesh(cqDegree, &
                                  (/nElem,nElem/), &
@@ -154,6 +157,7 @@ CONTAINS
     END DO
 
     CALL mesh % Free()
+    CALL geometry % Free()
 
     DO col = 1,2
       DO row = 1,2
@@ -161,7 +165,7 @@ CONTAINS
               TRIM(Int2Str(row))//","// &
               TRIM(Int2Str(col))//") : "// &
               Float2Str(dxds_error(row,col))
-        IF (dxds_error(row,col) > exactTolerance) THEN
+        IF (dxds_error(row,col) > tolerance) THEN
           error = error + 1
           ERROR(TRIM(msg))
           ERROR("[FAIL] Covariant Tensor Test")
@@ -172,7 +176,7 @@ CONTAINS
       END DO
     END DO
 
-    IF (J_error > exactTolerance) THEN
+    IF (J_error > tolerance) THEN
       error = error + 1
       ERROR("Max Jacobian error : "//Float2Str(J_error))
       ERROR("[FAIL] Jacobian Test")
@@ -183,7 +187,7 @@ CONTAINS
 
   END SUBROUTINE BlockMesh2D_Test
 
-  SUBROUTINE BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,error)
+  SUBROUTINE BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "BlockMesh3D_Test"
     IMPLICIT NONE
@@ -192,6 +196,7 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
+    REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -207,6 +212,7 @@ CONTAINS
     INFO(TRIM(msg))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
+    INFO('Error tolerance : '//Float2Str(tolerance))
 
     CALL mesh % UniformBlockMesh(cqDegree, &
                                  (/nElem,nElem,nElem/), &
@@ -253,6 +259,7 @@ CONTAINS
     END DO
 
     CALL mesh % Free()
+    CALL geometry % Free()
 
     DO col = 1,3
       DO row = 1,3
@@ -260,7 +267,7 @@ CONTAINS
               TRIM(Int2Str(row))//","// &
               TRIM(Int2Str(col))//") : "// &
               Float2Str(dxds_error(row,col))
-        IF (dxds_error(row,col) > exactTolerance) THEN
+        IF (dxds_error(row,col) > tolerance) THEN
           error = error + 1
           ERROR(TRIM(msg))
           ERROR("[FAIL] Covariant Tensor Test")
@@ -271,7 +278,7 @@ CONTAINS
       END DO
     END DO
 
-    IF (J_error > exactTolerance) THEN
+    IF (J_error > tolerance) THEN
       error = error + 1
       ERROR("Max Jacobian error : "//Float2Str(J_error))
       ERROR("[FAIL] Jacobian Test")
@@ -282,46 +289,103 @@ CONTAINS
 
   END SUBROUTINE BlockMesh3D_Test
 
-!  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,nControlPoints,nTargetPoints,nElem,nvar,functionChar,error)
-!#undef __FUNC__
-!#define __FUNC__ "ScalarInterp1D_Test"
-!    IMPLICIT NONE
-!    INTEGER,INTENT(in) :: cqType
-!    INTEGER,INTENT(in) :: tqType
-!    INTEGER,INTENT(in) :: nControlPoints
-!    INTEGER,INTENT(in) :: nTargetPoints
-!    INTEGER,INTENT(in) :: nElem
-!    INTEGER,INTENT(in) :: nVar
-!    CHARACTER(*),INTENT(in) :: functionChar
-!    INTEGER,INTENT(out) :: error
-!    ! Local
-!    TYPE(Mesh1D) :: controlMesh,targetMesh
-!    TYPE(EquationParser)  :: feq
-!    TYPE(Scalar1D) :: f,fInterp,fActual,fError
-!    REAL(prec) :: expect_dxds,dxds_error,expect_boundx,boundx_error
-!    INTEGER :: iel,i
-!
-!    error = 0
-!    INFO('Number of elements : '//Int2Str(nElem))
-!    INFO('Number of control points : '//Int2Str(nControlPoints))
-!    INFO('Number of target points : '//Int2Str(nTargetPoints))
-!    INFO('Number of variables : '//Int2Str(nvar))
-!
-!    ! Create the mesh
-!    CALL controlMesh % UniformBlockMesh(cqType,tqType,nControlPoints,nTargetPoints,nElem,(/0.0_prec,1.0_prec/))
-!    CALL targetMesh % UniformBlockMesh(tqType,tqType,nTargetPoints,nTargetPoints,nElem,(/0.0_prec,1.0_prec/))
-!
-!    ! Create the scalar1d objects
-!    CALL f % Init(nControlPoints,cqType,nTargetPoints,tqType,nvar,nElem)
-!    CALL fInterp % Init(nTargetPoints,tqType,nTargetPoints,tqType,nvar,nElem)
-!    CALL fActual % Init(nTargetPoints,tqType,nTargetPoints,tqType,nvar,nElem)
-!    CALL fError % Init(nTargetPoints,tqType,nTargetPoints,tqType,nvar,nElem)
-!
-!    ! Create the equation parser object
-!    feq = EquationParser(functionChar, (/'x'/))
-!
-!    ! Load the control function
-!    ! Load the target function
-!  END SUBROUTINE ScalarInterp1D_Test
+  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "ScalarInterp1D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(*),INTENT(in) :: functionChar
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh1D) :: controlMesh,targetMesh
+    TYPE(Geometry1D) :: controlGeometry,targetGeometry
+    TYPE(EquationParser)  :: feq
+    TYPE(Scalar1D) :: f,fInterp,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar)
+    INTEGER :: iel,i,ivar
+
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nElem)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    INFO('Error tolerance : '//Float2Str(tolerance))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the target mesh and geometry
+    CALL targetMesh % UniformBlockMesh(tqDegree,nElem, (/0.0_prec,1.0_prec/))
+    CALL targetGeometry % GenerateFromMesh(targetMesh,tqType,tqType,tqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
+    CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nElem)
+    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nElem)
+    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nElem)
+
+    ! Create the equation parser object
+    feq = EquationParser(functionChar, (/'x'/))
+
+    ! Load the control function
+     DO iel = 1, controlGeometry % nElem
+       DO ivar = 1, nvar
+         DO i = 0, cqDegree
+           f % interior % hostData(i,ivar,iel) = &
+             feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
+         ENDDO
+       ENDDO
+     ENDDO
+
+    ! Load the target function
+     DO iel = 1, targetGeometry % nElem
+       DO ivar = 1, nvar
+         DO i = 0, tqDegree
+           fActual % interior % hostData(i,ivar,iel) = &
+             feq % Evaluate( (/targetGeometry % x % interior % hostData(i,1,iel)/) )
+         ENDDO
+       ENDDO
+     ENDDO
+
+    ! Run the grid interpolation
+    CALL f % GridInterp(fInterp,.FALSE.)
+    fError = fActual - fInterp
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxInterior( )
+
+    msg = "Max GridInterp_1D Error : "//Float2Str(maxErrors(1))
+    IF (maxErrors(1) > tolerance) THEN
+      error = error + 1
+      ERROR(TRIM(msg))
+      ERROR("[FAIL] GridInterp_1D Test")
+    ELSE
+      INFO(TRIM(msg))
+      INFO("[PASS] GridInterp_1D Test")
+    END IF
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL targetMesh % Free()
+    CALL targetGeometry % Free()
+    CALL f % Free()
+    CALL fInterp % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE ScalarInterp1D_Test
 
 END MODULE SELF_Tests
