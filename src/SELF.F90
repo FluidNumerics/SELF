@@ -11,6 +11,7 @@ PROGRAM SELF
   CHARACTER(20) :: cqTypeChar
   CHARACTER(20) :: tqTypeChar
   CHARACTER(240) :: functionChar
+  CHARACTER(240) :: vx,vy,vz
   REAL(prec) :: errorTolerance
   INTEGER :: cqType
   INTEGER :: tqType
@@ -30,6 +31,9 @@ PROGRAM SELF
   CALL self_cli % get(val=nElem,switch='--nelements')
   CALL self_cli % get(val=nVar,switch='--nvar')
   CALL self_cli % get(val=functionChar,switch='--function')
+  CALL self_cli % get(val=vx,switch='--vector-x')
+  CALL self_cli % get(val=vy,switch='--vector-y')
+  CALL self_cli % get(val=vz,switch='--vector-z')
   CALL self_cli % get(val=errorTolerance,switch='--tolerance')
 
   IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
@@ -71,6 +75,12 @@ PROGRAM SELF
     CALL ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
+    CALL VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,errorTolerance,error)
+    errorCount = errorCount + error
+
+    CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,vz,errorTolerance,error)
+    errorCount = errorCount + error
+
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
 
     CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
@@ -99,6 +109,16 @@ PROGRAM SELF
   ELSEIF (self_cli % run_command(group="s3d_interp")) THEN
 
     CALL ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="v2d_interp")) THEN
+
+    CALL VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,errorTolerance,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="v3d_interp")) THEN
+
+    CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,vz,errorTolerance,error)
     errorCount = errorCount + error
 
   END IF
@@ -275,7 +295,6 @@ CONTAINS
 
     CALL cli % add_group(group="s1d_interp", &
                          description="Scalar 1D Interpolation")
-
 
     CALL cli % add_group(group="s2d_interp", &
                          description="Scalar 2D Interpolation")
