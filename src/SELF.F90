@@ -12,6 +12,7 @@ PROGRAM SELF
   CHARACTER(20) :: tqTypeChar
   CHARACTER(240) :: functionChar
   CHARACTER(240) :: vx,vy,vz
+  CHARACTER(240) :: tensorChar(1:3,1:3)
   REAL(prec) :: errorTolerance
   INTEGER :: cqType
   INTEGER :: tqType
@@ -34,6 +35,15 @@ PROGRAM SELF
   CALL self_cli % get(val=vx,switch='--vector-x')
   CALL self_cli % get(val=vy,switch='--vector-y')
   CALL self_cli % get(val=vz,switch='--vector-z')
+  CALL self_cli % get(val=tensorChar(1,1),switch='--tensor-11')
+  CALL self_cli % get(val=tensorChar(1,2),switch='--tensor-12')
+  CALL self_cli % get(val=tensorChar(1,3),switch='--tensor-13')
+  CALL self_cli % get(val=tensorChar(2,1),switch='--tensor-21')
+  CALL self_cli % get(val=tensorChar(2,2),switch='--tensor-22')
+  CALL self_cli % get(val=tensorChar(2,3),switch='--tensor-23')
+  CALL self_cli % get(val=tensorChar(3,1),switch='--tensor-31')
+  CALL self_cli % get(val=tensorChar(3,2),switch='--tensor-32')
+  CALL self_cli % get(val=tensorChar(3,3),switch='--tensor-33')
   CALL self_cli % get(val=errorTolerance,switch='--tolerance')
 
   IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
@@ -81,6 +91,12 @@ PROGRAM SELF
     CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,vz,errorTolerance,error)
     errorCount = errorCount + error
 
+    CALL TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar(1:2,1:2),errorTolerance,error)
+    errorCount = errorCount + error
+
+    CALL TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar,errorTolerance,error)
+    errorCount = errorCount + error
+
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
 
     CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
@@ -116,9 +132,19 @@ PROGRAM SELF
     CALL VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,errorTolerance,error)
     errorCount = errorCount + error
 
+  ELSEIF (self_cli % run_command(group="t2d_interp")) THEN
+
+    CALL TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar(1:2,1:2),errorTolerance,error)
+    errorCount = errorCount + error
+
   ELSEIF (self_cli % run_command(group="v3d_interp")) THEN
 
     CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vx,vy,vz,errorTolerance,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="t3d_interp")) THEN
+
+    CALL TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar,errorTolerance,error)
     errorCount = errorCount + error
 
   END IF
