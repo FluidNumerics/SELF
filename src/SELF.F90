@@ -79,6 +79,9 @@ PROGRAM SELF
     CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
+    CALL ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
+    errorCount = errorCount + error
+
     CALL ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
@@ -115,6 +118,11 @@ PROGRAM SELF
   ELSEIF (self_cli % run_command(group="s1d_interp")) THEN
 
     CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="s1d_binterp")) THEN
+
+    CALL ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="s2d_interp")) THEN
@@ -320,25 +328,73 @@ CONTAINS
                          description="Block Mesh generation in 3D")
 
     CALL cli % add_group(group="s1d_interp", &
-                         description="Scalar 1D Interpolation")
+                         description="Scalar 1D Grid Interpolation")
 
     CALL cli % add_group(group="s2d_interp", &
-                         description="Scalar 2D Interpolation")
+                         description="Scalar 2D Grid Interpolation")
 
     CALL cli % add_group(group="s3d_interp", &
-                         description="Scalar 3D Interpolation")
+                         description="Scalar 3D Grid Interpolation")
 
     CALL cli % add_group(group="v2d_interp", &
-                         description="Vector 2D Interpolation")
+                         description="Vector 2D Grid Interpolation")
 
     CALL cli % add_group(group="v3d_interp", &
-                         description="Vector 3D Interpolation")
+                         description="Vector 3D Grid Interpolation")
 
     CALL cli % add_group(group="t2d_interp", &
-                         description="Tensor 2D Interpolation")
+                         description="Tensor 2D Grid Interpolation")
 
     CALL cli % add_group(group="t3d_interp", &
-                         description="Tensor 3D Interpolation")
+                         description="Tensor 3D Grid Interpolation")
+
+    CALL cli % add_group(group="s1d_binterp", &
+                         description="Scalar 1D Boundary interpolation")
+
+    CALL cli % add_group(group="s2d_binterp", &
+                         description="Scalar 2D Boundary interpolation")
+
+    CALL cli % add_group(group="s3d_binterp", &
+                         description="Scalar 3D Boundary interpolation")
+
+    CALL cli % add_group(group="v2d_binterp", &
+                         description="Vector 2D Boundary interpolation")
+
+    CALL cli % add_group(group="v3d_binterp", &
+                         description="Vector 3D Boundary interpolation")
+
+    CALL cli % add_group(group="t2d_binterp", &
+                         description="Tensor 2D Boundary interpolation")
+
+    CALL cli % add_group(group="t3d_binterp", &
+                         description="Tensor 3D Boundary interpolation")
+
+    CALL cli % add_group(group="s1d_derivative", &
+                         description="Scalar 1D Derivative")
+
+    CALL cli % add_group(group="s2d_gradient", &
+                         description="Scalar 2D Gradient")
+
+    CALL cli % add_group(group="s3d_gradient", &
+                         description="Scalar 3D Gradient")
+
+    CALL cli % add_group(group="v2d_gradient", &
+                         description="Vector 2D Gradient")
+
+    CALL cli % add_group(group="v2d_divergence", &
+                         description="Vector 2D Divergence")
+
+    CALL cli % add_group(group="v2d_curl", &
+                         description="Vector 2D Curl")
+
+    CALL cli % add_group(group="v3d_gradient", &
+                         description="Vector 3D Gradient")
+
+    CALL cli % add_group(group="v3d_divergence", &
+                         description="Vector 3D Divergence")
+
+    CALL cli % add_group(group="v3d_curl", &
+                         description="Vector 3D Curl")
 
 
     CALL cli % parse()

@@ -93,3 +93,14 @@
                     --target-quadrature "gauss" \
                     --gpu-accel "false" \
                     t3d_interp
+
+/apps/self/bin/self --tolerance "1.0E-6" \
+                    --function "f=1.0" \
+                    --nvar 5 \
+                    --nelements 10 \
+                    --control-degree 2 \
+                    --control-quadrature "gauss" \
+                    --target-degree 7 \
+                    --target-quadrature "gauss" \
+                    --gpu-accel "false" \
+                    s1d_binterp
