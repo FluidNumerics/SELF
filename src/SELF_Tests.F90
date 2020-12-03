@@ -441,22 +441,12 @@ CONTAINS
            f % interior % hostData(i,ivar,iel) = &
              feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
          ENDDO
-       ENDDO
-     ENDDO
-
-     DO iel = 1, controlGeometry % nElem
-       DO ivar = 1, nvar
-         DO i = 0, cqDegree
-           fActual % interior % hostData(i,ivar,iel) = &
-             feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
-         ENDDO
          ! Right Boundary
          fActual % boundary % hostData(ivar,1,iel) = &
              feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
          ! Right boundary
          fActual % boundary % hostData(ivar,2,iel) = &
              feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
-
        ENDDO
      ENDDO
 
@@ -601,6 +591,103 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp2D_Test
 
+  SUBROUTINE ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "ScalarBoundaryInterp2D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(*),INTENT(in) :: functionChar
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh2D) :: controlMesh
+    TYPE(SEMQuad) :: controlGeometry
+    TYPE(EquationParser)  :: feq
+    TYPE(Scalar2D) :: f,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar,1:4)
+    INTEGER :: nel,iel,jel
+    INTEGER :: i,j,ivar,iside
+
+    nel = nElem*nElem
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nEl)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+
+    ! Create the equation parser object
+    feq = EquationParser(functionChar, (/'x','y'/))
+
+    ! Load the control function
+    DO iel = 1, nel
+      DO ivar = 1, nvar
+        DO j = 0, cqDegree
+          DO i = 0, cqDegree
+             f % interior % hostData(i,j,ivar,iel) = &
+               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+          ENDDO
+          DO iside = 1,4
+            fActual % boundary % hostData(j,ivar,iside,iel) = &
+               feq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % BoundaryInterp(.FALSE.)
+    fError = fActual - f
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxBoundary( )
+
+    DO iside = 1,4
+      msg = "Max ScalarBoundaryInterp_2D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      IF (maxErrors(1,iSide) > tolerance) THEN
+        error = error + 1
+        ERROR(TRIM(msg))
+        msg = "[FAIL] ScalarBoundaryInterp_2D Test"
+        ERROR(TRIM(msg))
+      ELSE
+        INFO(TRIM(msg))
+        msg = "[PASS] ScalarBoundaryInterp_2D Test"
+        INFO(TRIM(msg))
+      END IF
+    ENDDO
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE ScalarBoundaryInterp2D_Test
+
   SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp2D_Test"
@@ -716,6 +803,108 @@ CONTAINS
     CALL fError % Free()
 
   END SUBROUTINE VectorInterp2D_Test
+
+  SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "VectorBoundaryInterp2D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(*),INTENT(in) :: vx,vy
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh2D) :: controlMesh
+    TYPE(SEMQuad) :: controlGeometry
+    TYPE(EquationParser)  :: vxeq,vyeq
+    TYPE(Vector2D) :: f,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar,1:4)
+    INTEGER :: nel,iel,jel
+    INTEGER :: i,j,ivar,iside
+
+    nel = nElem*nElem
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nEl)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+
+    ! Create the equation parser object
+    vxeq = EquationParser(vx, (/'x','y'/))
+    vyeq = EquationParser(vy, (/'x','y'/))
+
+    ! Load the control function
+    DO iel = 1, nel
+      DO ivar = 1, nvar
+        DO j = 0, cqDegree
+          DO i = 0, cqDegree
+             f % interior % hostData(1,i,j,ivar,iel) = &
+               vxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+             f % interior % hostData(2,i,j,ivar,iel) = &
+               vyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+          ENDDO
+          DO iside = 1,4
+           fActual % boundary % hostData(1,j,ivar,iside,iel) = &
+             vxeq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+           fActual % boundary % hostData(2,j,ivar,iside,iel) = &
+             vyeq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % BoundaryInterp(.FALSE.)
+    fError = fActual - f
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxBoundary( )
+
+    DO iside = 1,4
+      msg = "Max VectorBoundaryInterp_2D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      IF (maxErrors(1,iSide) > tolerance) THEN
+        error = error + 1
+        ERROR(TRIM(msg))
+        msg = "[FAIL] VectorBoundaryInterp_2D Test"
+        ERROR(TRIM(msg))
+      ELSE
+        INFO(TRIM(msg))
+        msg = "[PASS] VectorBoundaryInterp_2D Test"
+        INFO(TRIM(msg))
+      END IF
+    ENDDO
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE VectorBoundaryInterp2D_Test
 
   SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
 #undef __FUNC__
@@ -841,6 +1030,116 @@ CONTAINS
 
   END SUBROUTINE TensorInterp2D_Test
 
+  SUBROUTINE TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "TensorBoundaryInterp2D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh2D) :: controlMesh
+    TYPE(SEMQuad) :: controlGeometry
+    TYPE(EquationParser)  :: tensorEq(1:2,1:2)
+    TYPE(Tensor2D) :: f,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar,1:4)
+    INTEGER :: nel,iel,jel
+    INTEGER :: i,j,ivar,iside
+    INTEGER :: row,col
+
+    nel = nElem*nElem
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nEl)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+
+    ! Create the equation parser object
+    DO col = 1,2
+      DO row = 1,2
+        tensorEq(row,col) = EquationParser(TRIM(tensorChar(row,col)), (/'x','y'/))
+      ENDDO
+    ENDDO
+
+    ! Load the control function
+    DO iel = 1, nel
+      DO ivar = 1, nvar
+        DO j = 0, cqDegree
+          DO i = 0, cqDegree
+            DO col = 1,2
+              DO row = 1,2
+                f % interior % hostData(row,col,i,j,ivar,iel) = &
+                  tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+              ENDDO
+            ENDDO
+          ENDDO
+          DO iside = 1,4
+            DO col = 1,2
+              DO row = 1,2
+               fActual % boundary % hostData(row,col,j,ivar,iside,iel) = &
+                 tensorEq(row,col) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % BoundaryInterp(.FALSE.)
+    fError = fActual - f
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxBoundary( )
+
+    DO iside = 1,4
+      msg = "Max TensorBoundaryInterp_2D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      IF (maxErrors(1,iSide) > tolerance) THEN
+        error = error + 1
+        ERROR(TRIM(msg))
+        msg = "[FAIL] TensorBoundaryInterp_2D Test"
+        ERROR(TRIM(msg))
+      ELSE
+        INFO(TRIM(msg))
+        msg = "[PASS] TensorBoundaryInterp_2D Test"
+        INFO(TRIM(msg))
+      END IF
+    ENDDO
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE TensorBoundaryInterp2D_Test
+
   SUBROUTINE ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp3D_Test"
@@ -957,6 +1256,106 @@ CONTAINS
     CALL fError % Free()
 
   END SUBROUTINE ScalarInterp3D_Test
+
+  SUBROUTINE ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "ScalarBoundaryInterp3D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(*),INTENT(in) :: functionChar
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh3D) :: controlMesh,targetMesh
+    TYPE(SEMHex) :: controlGeometry,targetGeometry
+    TYPE(EquationParser)  :: feq
+    TYPE(Scalar3D) :: f,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar,1:6)
+    INTEGER :: nel,iel
+    INTEGER :: i,j,k,ivar,iside
+
+    nel = nElem*nElem*nElem
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nEl)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+
+    ! Create the equation parser object
+    feq = EquationParser(functionChar, (/'x','y','z'/))
+
+    ! Load the control function
+    DO iel = 1, nel
+      DO ivar = 1, nvar
+        DO k = 0, cqDegree
+          DO j = 0, cqDegree
+            DO i = 0, cqDegree
+               f % interior % hostData(i,j,k,ivar,iel) = &
+                 feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+            ENDDO
+            DO iside = 1,6
+             fActual % boundary % hostData(j,k,ivar,iside,iel) = &
+               feq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % BoundaryInterp(.FALSE.)
+    fError = fActual - f
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxBoundary( )
+
+    DO iside = 1,6
+      msg = "Max ScalarBoundaryInterp_3D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      IF (maxErrors(1,iSide) > tolerance) THEN
+        error = error + 1
+        ERROR(TRIM(msg))
+        msg = "[FAIL] ScalarBoundaryInterp_3D Test"
+        ERROR(TRIM(msg))
+      ELSE
+        INFO(TRIM(msg))
+        msg = "[PASS] ScalarBoundaryInterp_3D Test"
+        INFO(TRIM(msg))
+      END IF
+    ENDDO
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE ScalarBoundaryInterp3D_Test
 
   SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,vz,tolerance,error)
 #undef __FUNC__
@@ -1084,6 +1483,116 @@ CONTAINS
     CALL fError % Free()
 
   END SUBROUTINE VectorInterp3D_Test
+
+  SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,vz,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "VectorBoundaryInterp3D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(*),INTENT(in) :: vx,vy,vz
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh3D) :: controlMesh
+    TYPE(SEMHex) :: controlGeometry
+    TYPE(EquationParser)  :: vxeq,vyeq,vzeq
+    TYPE(Vector3D) :: f,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar,1:6)
+    INTEGER :: nel,iel
+    INTEGER :: i,j,k,ivar,iside
+
+    nel = nElem*nElem*nElem
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nEl)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+
+    ! Create the equation parser object
+    vxeq = EquationParser(vx, (/'x','y','z'/))
+    vyeq = EquationParser(vy, (/'x','y','z'/))
+    vzeq = EquationParser(vz, (/'x','y','z'/))
+
+    ! Load the control function
+    DO iel = 1, nel
+      DO ivar = 1, nvar
+        DO k = 0, cqDegree
+          DO j = 0, cqDegree
+            DO i = 0, cqDegree
+              f % interior % hostData(1,i,j,k,ivar,iel) = &
+                vxeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              f % interior % hostData(2,i,j,k,ivar,iel) = &
+                vyeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              f % interior % hostData(3,i,j,k,ivar,iel) = &
+                vzeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+            ENDDO
+            DO iside = 1,6
+              fActual % boundary % hostData(1,j,k,ivar,iside,iel) = &
+                vxeq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+              fActual % boundary % hostData(2,j,k,ivar,iside,iel) = &
+                vyeq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+              fActual % boundary % hostData(3,j,k,ivar,iside,iel) = &
+                vzeq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % BoundaryInterp(.FALSE.)
+    fError = fActual - f
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxBoundary( )
+
+    DO iside = 1,6
+      msg = "Max VectorBoundaryInterp_3D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      IF (maxErrors(1,iSide) > tolerance) THEN
+        error = error + 1
+        ERROR(TRIM(msg))
+        msg = "[FAIL] VectorBoundaryInterp_3D Test"
+        ERROR(TRIM(msg))
+      ELSE
+        INFO(TRIM(msg))
+        msg = "[PASS] VectorBoundaryInterp_3D Test"
+        INFO(TRIM(msg))
+      END IF
+    ENDDO
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE VectorBoundaryInterp3D_Test
 
   SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
 #undef __FUNC__
@@ -1214,5 +1723,118 @@ CONTAINS
     CALL fError % Free()
 
   END SUBROUTINE TensorInterp3D_Test
+
+  SUBROUTINE TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "TensorBoundaryInterp3D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh3D) :: controlMesh
+    TYPE(SEMHex) :: controlGeometry
+    TYPE(EquationParser)  :: tensorEq(1:3,1:3)
+    TYPE(Tensor3D) :: f,fInterp,fActual,fError
+    REAL(prec) :: maxErrors(1:nvar,1:6)
+    INTEGER :: nel,iel
+    INTEGER :: i,j,k,ivar,iside
+    INTEGER :: row,col
+
+    nel = nElem*nElem*nElem
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nEl)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
+
+    ! Create the equation parser object
+    DO col = 1,3
+      DO row = 1,3
+        tensorEq(row,col) = EquationParser(TRIM(tensorChar(row,col)), (/'x','y','z'/))
+      ENDDO
+    ENDDO
+
+    ! Load the control function
+    DO iel = 1, nel
+      DO ivar = 1, nvar
+        DO k = 0, cqDegree
+          DO j = 0, cqDegree
+            DO i = 0, cqDegree
+              DO col = 1,3
+                DO row = 1,3
+                  f % interior % hostData(row,col,i,j,k,ivar,iel) = &
+                    tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+                ENDDO
+              ENDDO
+            ENDDO
+            DO iside = 1,6
+              DO col = 1,3
+                DO row = 1,3
+                  fActual % boundary % hostData(row,col,j,k,ivar,iside,iel) = &
+                    tensorEq(row,col) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % BoundaryInterp(.FALSE.)
+    fError = fActual - f
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = fError % AbsMaxBoundary( )
+
+    DO iside = 1,6
+      msg = "Max TensorBoundaryInterp_3D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      IF (maxErrors(1,iSide) > tolerance) THEN
+        error = error + 1
+        ERROR(TRIM(msg))
+        msg = "[FAIL] TensorBoundaryInterp_3D Test"
+        ERROR(TRIM(msg))
+      ELSE
+        INFO(TRIM(msg))
+        msg = "[PASS] TensorBoundaryInterp_3D Test"
+        INFO(TRIM(msg))
+      END IF
+    ENDDO
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL fActual % Free()
+    CALL fError % Free()
+
+  END SUBROUTINE TensorBoundaryInterp3D_Test
 
 END MODULE SELF_Tests
