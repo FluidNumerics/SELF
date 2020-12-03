@@ -170,7 +170,7 @@ CONTAINS
     CALL cli % init(progname="self", &
                     version="v0.0.0", &
                     description="Spectral Element Libraries in Fortran (SELF)", &
-                    license="Apache 2.0 License", &
+                    license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
                     authors="Joseph Schoonover (Fluid Numerics LLC)")
 
     CALL cli % add(switch="--control-degree", &
