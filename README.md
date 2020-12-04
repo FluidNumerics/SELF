@@ -1,6 +1,8 @@
 # Spectral Element Libraries in Fortran (SELF)
 Copyright 2020 Fluid Numerics LLC
 
+SELF is licensed for use under the [Anti-Capitalist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
+
 ## About
 SELF is an object-oriented Fortran library that support the implementation of Spectral Element Methods for solving partial differential equations.
 
