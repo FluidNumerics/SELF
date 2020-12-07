@@ -11,6 +11,7 @@ PROGRAM SELF
   CHARACTER(20) :: cqTypeChar
   CHARACTER(20) :: tqTypeChar
   CHARACTER(240) :: functionChar
+  CHARACTER(240) :: derivativeChar
   CHARACTER(240) :: vx,vy,vz
   CHARACTER(240) :: tensorChar(1:3,1:3)
   REAL(prec) :: errorTolerance
@@ -32,6 +33,7 @@ PROGRAM SELF
   CALL self_cli % get(val=nElem,switch='--nelements')
   CALL self_cli % get(val=nVar,switch='--nvar')
   CALL self_cli % get(val=functionChar,switch='--function')
+  CALL self_cli % get(val=derivativeChar,switch='--derivative')
   CALL self_cli % get(val=vx,switch='--vector-x')
   CALL self_cli % get(val=vy,switch='--vector-y')
   CALL self_cli % get(val=vz,switch='--vector-z')
@@ -116,6 +118,9 @@ PROGRAM SELF
     errorCount = errorCount + error
 
     CALL TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar,errorTolerance,error)
+    errorCount = errorCount + error
+
+    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
@@ -203,6 +208,11 @@ PROGRAM SELF
     CALL TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar,errorTolerance,error)
     errorCount = errorCount + error
 
+  ELSEIF (self_cli % run_command(group="s1d_derivative")) THEN
+
+    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
+    errorCount = errorCount + error
+
   END IF
 
   CALL self_cli % free()
@@ -277,6 +287,12 @@ CONTAINS
                    switch_ab="-f", &
                    help="Function to interpolate from control points to target points"//NEW_LINE("A"), &
                    def="f=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--derivative", &
+                   switch_ab="-df", &
+                   help="Derivative of the test function; used for estimating errors."//NEW_LINE("A"), &
+                   def="df=0.0", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--vector-x", &

@@ -175,6 +175,8 @@ CONTAINS
                                            scalar % nElem)
     END IF
 
+    CALL df % JacobianWeight(geometry,gpuAccel)
+
   END SUBROUTINE Derivative_MappedScalar1D
 
   SUBROUTINE JacobianWeight_MappedScalar1D(scalar,geometry,gpuAccel)

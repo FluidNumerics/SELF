@@ -480,6 +480,94 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp1D_Test
 
+  SUBROUTINE ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,dfChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "ScalarDerivative1D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(*),INTENT(in) :: fChar
+    CHARACTER(*),INTENT(in) :: dfChar
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh1D) :: controlMesh
+    TYPE(Geometry1D) :: controlGeometry
+    TYPE(EquationParser)  :: feq,dfeq
+    TYPE(MappedScalar1D) :: f,dfInterp,dfActual,dfError
+    REAL(prec) :: maxErrors(1:nvar)
+    INTEGER :: iel,i,ivar
+
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nElem)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
+    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
+    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
+    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
+
+    ! Create the equation parser object
+    feq = EquationParser(fChar, (/'x'/))
+    dfeq = EquationParser(dfChar, (/'x'/))
+
+    ! Load the control function
+     DO iel = 1, controlGeometry % nElem
+       DO ivar = 1, nvar
+         DO i = 0, cqDegree
+           f % interior % hostData(i,ivar,iel) = &
+             feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
+           dfActual % interior % hostData(i,ivar,iel) = &
+             dfeq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
+         ENDDO
+       ENDDO
+     ENDDO
+
+    ! Run the grid interpolation
+    CALL f % Derivative(controlGeometry,dfInterp,.FALSE.)
+    dfError = dfActual - dfInterp
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = dfError % AbsMaxInterior( )
+
+    msg = "Max ScalarDerivative_1D Error : "//Float2Str(maxErrors(1))
+    IF (maxErrors(1) > tolerance) THEN
+      error = error + 1
+      ERROR(TRIM(msg))
+      ERROR("[FAIL] ScalarDerivative_1D Test")
+    ELSE
+      INFO(TRIM(msg))
+      INFO("[PASS] ScalarDerivative_1D Test")
+    END IF
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL dfInterp % Free()
+    CALL dfActual % Free()
+    CALL dfError % Free()
+
+  END SUBROUTINE ScalarDerivative1D_Test
+
   SUBROUTINE ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp2D_Test"
