@@ -39,7 +39,11 @@ MODULE SELF_Data
 #endif
     PROCEDURE,PUBLIC :: BoundaryInterp => BoundaryInterp_Scalar1D
     PROCEDURE,PUBLIC :: GridInterp => GridInterp_Scalar1D
-    PROCEDURE,PUBLIC :: Derivative => Derivative_Scalar1D
+
+    GENERIC,PUBLIC :: Derivative => Derivative_Scalar1D
+    PROCEDURE,PRIVATE :: Derivative_Scalar1D
+
+
     PROCEDURE,PUBLIC :: AbsMaxInterior => AbsMaxInterior_Scalar1D
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar1D
 

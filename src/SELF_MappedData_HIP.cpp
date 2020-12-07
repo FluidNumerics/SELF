@@ -57,6 +57,24 @@ extern "C"
 
 */
 
+// JacobianWeight_MappedScalar1D_gpu
+__global__ void JacobianWeight_MappedScalar1D_gpu(real *scalar, real *dxds, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+
+    scalar[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = scalar[SC_1D_INDEX(i,iVar,iEl,N,nVar)]/
+                                             dxds[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+}
+
+extern "C"
+{
+  void JacobianWeight_MappedScalar1D_gpu_wrapper(real **scalar, real **dxds, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((JacobianWeight_MappedScalar1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *scalar, *dxds, N, nVar);
+  }
+}
 // ContravariantWeight_MappedScalar2D_gpu
 __global__ void ContravariantWeight_MappedScalar2D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
 

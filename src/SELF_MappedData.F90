@@ -19,6 +19,15 @@ MODULE SELF_MappedData
 
   IMPLICIT NONE
 
+  TYPE,EXTENDS(Scalar1D),PUBLIC :: MappedScalar1D
+
+    CONTAINS
+      GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
+      PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
+      PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar1D
+
+  END TYPE MappedScalar1D
+
   TYPE,EXTENDS(Scalar2D),PUBLIC :: MappedScalar2D
 
   CONTAINS
@@ -44,7 +53,11 @@ MODULE SELF_MappedData
   CONTAINS
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
+!    GENERIC,PUBLIC :: Curl => Curl_MappedVector2D
+!    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
     PROCEDURE,PRIVATE :: Divergence_MappedVector2D
+!    PROCEDURE,PRIVATE :: Curl_MappedVector2D
+!    PROCEDURE,PRIVATE :: Gradient_MappedVector2D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
 
   END TYPE MappedVector2D
@@ -54,7 +67,11 @@ MODULE SELF_MappedData
   CONTAINS
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
+!    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
+!    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: Divergence_MappedVector3D
+!    PROCEDURE,PRIVATE :: Curl_MappedVector3D
+!    PROCEDURE,PRIVATE :: Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
 
   END TYPE MappedVector3D
@@ -62,14 +79,30 @@ MODULE SELF_MappedData
   TYPE,EXTENDS(Tensor2D),PUBLIC :: MappedTensor2D
 
 !    CONTAINS
+!
+!    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor2D
+!    PROCEDURE,PRIVATE :: Divergence_MappedTensor2D
 
   END TYPE MappedTensor2D
 
   TYPE,EXTENDS(Tensor3D),PUBLIC :: MappedTensor3D
 
 !    CONTAINS
+!
+!    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor3D
+!    PROCEDURE,PRIVATE :: Divergence_MappedTensor3D
 
   END TYPE MappedTensor3D
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,dxds
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper
+  END INTERFACE
 
   INTERFACE
     SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
@@ -115,8 +148,69 @@ CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
 
-  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,mesh,geometry,gradF,gpuAccel)
+  SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,gpuAccel)
     ! Strong Form Operator
+    !
+    ! Calculates the gradient of a scalar 1D function using the conservative form of the
+    ! mapped gradient operator
+    !
+    ! df/dx =  d\xi/dx( df/d\xi )
+    !
+    ! where the sum over i is implied.
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(in) :: scalar
+    TYPE(Geometry1D),INTENT(in) :: geometry
+    TYPE(MappedScalar1D),INTENT(inout) :: dF
+    LOGICAL,INTENT(in) :: gpuAccel
+
+    IF (gpuAccel) THEN
+      CALL scalar % interp % Derivative_1D(scalar % interior % deviceData, &
+                                           df % interior % deviceData, &
+                                           scalar % nVar, &
+                                           scalar % nElem)
+    ELSE
+      CALL scalar % interp % Derivative_1D(scalar % interior % hostData, &
+                                           df % interior % hostData, &
+                                           scalar % nVar, &
+                                           scalar % nElem)
+    END IF
+
+  END SUBROUTINE Derivative_MappedScalar1D
+
+  SUBROUTINE JacobianWeight_MappedScalar1D(scalar,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(inout) :: scalar
+    TYPE(Geometry1D),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl, iVar, i
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedScalar1D_gpu_wrapper(scalar % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     scalar % N, &
+                                                     scalar % nVar, &
+                                                     scalar % nElem)
+
+    ELSE
+
+      DO iEl = 1,scalar % nElem
+        DO iVar = 1,scalar % nVar
+          DO i = 0,scalar % N
+            scalar % interior % hostData(i,iVar,iEl) = scalar % interior % hostData(i,iVar,iEl)/&
+                                                       geometry % dxds % interior % hostData(i,iVar,iEl)
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedScalar1D
+
+  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,mesh,geometry,gradF,gpuAccel)
+    ! Strong Form Operator - (Conservative Form)
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
     ! mapped gradient operator
@@ -133,7 +227,17 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL scalar % ContravariantWeight(mesh,geometry,workTensor,gpuAccel)
-    CALL workTensor % Divergence(gradF,gpuAccel)
+    IF (gpuAccel) THEN
+      CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
+                                                     gradF % interior % deviceData, &
+                                                     workTensor % nVar, &
+                                                     workTensor % nElem)
+    ELSE
+      CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
+                                                     gradF % interior % hostData, &
+                                                     workTensor % nVar, &
+                                                     workTensor % nElem)
+    END IF
 
   END SUBROUTINE Gradient_MappedScalar2D
 
@@ -206,7 +310,17 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL scalar % ContravariantWeight(mesh,geometry,workTensor,gpuAccel)
-    CALL workTensor % Divergence(gradF,gpuAccel)
+    IF (gpuAccel) THEN
+      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+                                                     gradF % interior % deviceData, &
+                                                     workTensor % nVar, &
+                                                     workTensor % nElem)
+    ELSE
+      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
+                                                     gradF % interior % hostData, &
+                                                     workTensor % nVar, &
+                                                     workTensor % nElem)
+    END IF
 
   END SUBROUTINE Gradient_MappedScalar3D
 
