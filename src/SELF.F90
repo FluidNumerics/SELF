@@ -54,7 +54,7 @@ PROGRAM SELF
     cqType = GAUSS_LOBATTO
   ELSE
     PRINT *, 'Invalid Control Quadrature'
-    STOP 1
+    STOP -1
   END IF
 
   IF (TRIM(UpperCase(tqTypeChar)) == 'GAUSS') THEN
@@ -63,7 +63,7 @@ PROGRAM SELF
     tqType = GAUSS_LOBATTO
   ELSE
     PRINT *, 'Invalid Target Quadrature'
-    STOP 1
+    STOP -1
   END IF
 
   errorCount = 0
@@ -121,6 +121,9 @@ PROGRAM SELF
     errorCount = errorCount + error
 
     CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
+    errorCount = errorCount + error
+
+    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vx,vy,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
@@ -213,11 +216,18 @@ PROGRAM SELF
     CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
     errorCount = errorCount + error
 
+  ELSEIF (self_cli % run_command(group="s2d_gradient")) THEN
+
+    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vx,vy,errorTolerance,error)
+    errorCount = errorCount + error
+
   END IF
 
   CALL self_cli % free()
 
-  STOP errorCount
+  IF( errorCount > 0 )THEN
+    STOP errorCount
+  ENDIF
 
 CONTAINS
 
