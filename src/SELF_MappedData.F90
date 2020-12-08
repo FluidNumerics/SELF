@@ -292,7 +292,7 @@ CONTAINS
 
   END SUBROUTINE ContravariantWeight_MappedScalar2D
 
-  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,mesh,geometry,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,gpuAccel)
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 3D function using the conservative form of the
@@ -304,12 +304,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(in) :: scalar
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
-    TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(SEMHex),INTENT(in) :: geometry
-    TYPE(Vector3D),INTENT(inout) :: gradF
+    TYPE(MappedVector3D),INTENT(inout) :: gradF
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL scalar % ContravariantWeight(mesh,geometry,workTensor,gpuAccel)
+    CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
     IF (gpuAccel) THEN
       CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
                                                      gradF % interior % deviceData, &
@@ -324,10 +323,9 @@ CONTAINS
 
   END SUBROUTINE Gradient_MappedScalar3D
 
-  SUBROUTINE ContravariantWeight_MappedScalar3D(scalar,mesh,geometry,workTensor,gpuAccel)
+  SUBROUTINE ContravariantWeight_MappedScalar3D(scalar,geometry,workTensor,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(in) :: scalar
-    TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
