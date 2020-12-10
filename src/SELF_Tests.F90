@@ -777,7 +777,7 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp2D_Test
 
-  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,gxChar,gyChar,tolerance,error)
+  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,gradientChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D_Test"
     IMPLICIT NONE
@@ -788,8 +788,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
-    CHARACTER(*),INTENT(in) :: gxChar
-    CHARACTER(*),INTENT(in) :: gyChar
+    CHARACTER(240),INTENT(in) :: gradientChar(1:2)
     REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
@@ -831,8 +830,8 @@ CONTAINS
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x','y'/))
-    gxeq = EquationParser(gxChar, (/'x','y'/))
-    gyeq = EquationParser(gyChar, (/'x','y'/))
+    gxeq = EquationParser(gradientChar(1), (/'x','y'/))
+    gyeq = EquationParser(gradientChar(2), (/'x','y'/))
 
     ! Load the control function
      DO iel = 1, controlGeometry % nElem
@@ -880,7 +879,7 @@ CONTAINS
 
   END SUBROUTINE ScalarGradient2D_Test
 
-  SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,tolerance,error)
+  SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp2D_Test"
     IMPLICIT NONE
@@ -890,18 +889,18 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
-    CHARACTER(*),INTENT(in) :: vx,vy
+    CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh,targetMesh
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
-    TYPE(EquationParser)  :: vxeq,vyeq
+    TYPE(EquationParser)  :: vEq(1:2)
     TYPE(Vector2D) :: f,fInterp,fActual,fError
     REAL(prec) :: maxErrors(1:nvar)
     INTEGER :: nel,iel,jel
-    INTEGER :: i,j,ivar
+    INTEGER :: i,j,ivar,idir
 
     nel = nElem*nElem
     error = 0
@@ -936,18 +935,19 @@ CONTAINS
     CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
-    vxeq = EquationParser(vx, (/'x','y'/))
-    vyeq = EquationParser(vy, (/'x','y'/))
+    DO idir = 1,2
+      vEq(idir) = EquationParser(vectorChar(idir), (/'x','y'/))
+    ENDDO
 
     ! Load the control function
     DO iel = 1, nel
       DO ivar = 1, nvar
         DO j = 0, cqDegree
           DO i = 0, cqDegree
-             f % interior % hostData(1,i,j,ivar,iel) = &
-               vxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-             f % interior % hostData(2,i,j,ivar,iel) = &
-               vyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            DO idir=1,2
+              f % interior % hostData(idir,i,j,ivar,iel) = &
+                vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            ENDDO
           ENDDO
         ENDDO
       ENDDO
@@ -958,10 +958,10 @@ CONTAINS
       DO ivar = 1, nvar
         DO j = 0, tqDegree
           DO i = 0, tqDegree
-           fActual % interior % hostData(1,i,j,ivar,iel) = &
-             vxeq % Evaluate( targetGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-           fActual % interior % hostData(2,i,j,ivar,iel) = &
-             vyeq % Evaluate( targetGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            DO idir = 1,2
+              fActual % interior % hostData(idir,i,j,ivar,iel) = &
+                vEq(idir) % Evaluate( targetGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            ENDDO
           ENDDO
         ENDDO
       ENDDO
@@ -996,7 +996,7 @@ CONTAINS
 
   END SUBROUTINE VectorInterp2D_Test
 
-  SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,tolerance,error)
+  SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -1006,18 +1006,18 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
-    CHARACTER(*),INTENT(in) :: vx,vy
+    CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
     TYPE(SEMQuad) :: controlGeometry
-    TYPE(EquationParser)  :: vxeq,vyeq
+    TYPE(EquationParser)  :: vEq(1:2)
     TYPE(Vector2D) :: f,fActual,fError
     REAL(prec) :: maxErrors(1:nvar,1:4)
     INTEGER :: nel,iel,jel
-    INTEGER :: i,j,ivar,iside
+    INTEGER :: i,j,ivar,iside,idir
 
     nel = nElem*nElem
     error = 0
@@ -1045,24 +1045,25 @@ CONTAINS
     CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
-    vxeq = EquationParser(vx, (/'x','y'/))
-    vyeq = EquationParser(vy, (/'x','y'/))
+    DO idir = 1,2
+      vEq(idir) = EquationParser(vectorChar(idir), (/'x','y'/))
+    ENDDO
 
     ! Load the control function
     DO iel = 1, nel
       DO ivar = 1, nvar
         DO j = 0, cqDegree
           DO i = 0, cqDegree
-             f % interior % hostData(1,i,j,ivar,iel) = &
-               vxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-             f % interior % hostData(2,i,j,ivar,iel) = &
-               vyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            DO idir = 1,2
+              f % interior % hostData(idir,i,j,ivar,iel) = &
+                vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            ENDDO
           ENDDO
           DO iside = 1,4
-           fActual % boundary % hostData(1,j,ivar,iside,iel) = &
-             vxeq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
-           fActual % boundary % hostData(2,j,ivar,iside,iel) = &
-             vyeq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+            DO idir = 1,2
+              fActual % boundary % hostData(idir,j,ivar,iside,iel) = &
+                vEq(idir) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+            ENDDO
           ENDDO
         ENDDO
       ENDDO
@@ -1097,6 +1098,112 @@ CONTAINS
     CALL fError % Free()
 
   END SUBROUTINE VectorBoundaryInterp2D_Test
+
+!  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+!#undef __FUNC__
+!#define __FUNC__ "VectorGradient2D_Test"
+!    IMPLICIT NONE
+!    INTEGER,INTENT(in) :: cqType
+!    INTEGER,INTENT(in) :: tqType
+!    INTEGER,INTENT(in) :: cqDegree
+!    INTEGER,INTENT(in) :: tqDegree
+!    INTEGER,INTENT(in) :: nElem
+!    INTEGER,INTENT(in) :: nVar
+!    CHARACTER(*),INTENT(in) :: vxChar
+!    CHARACTER(*),INTENT(in) :: vyChar
+!    CHARACTER(*),INTENT(in) :: vxxChar
+!    CHARACTER(*),INTENT(in) :: vxyChar
+!    CHARACTER(*),INTENT(in) :: vyxChar
+!    CHARACTER(*),INTENT(in) :: vyyChar
+!    REAL(prec),INTENT(in) :: tolerance
+!    INTEGER,INTENT(out) :: error
+!    ! Local
+!    CHARACTER(240) :: msg
+!    TYPE(Mesh2D) :: controlMesh
+!    TYPE(SEMQuad) :: controlGeometry
+!    TYPE(EquationParser)  :: feq,gxeq,gyeq
+!    TYPE(MappedVector2D) :: f
+!    TYPE(MappedTensor2D) :: workTensor
+!    TYPE(MappedTensor2D) :: dfInterp,dfActual,dfError
+!    REAL(prec) :: maxErrors(1:nvar)
+!    INTEGER :: iel,i,j,ivar
+!
+!    error = 0
+!    msg = 'Number of elements : '//Int2Str(nElem*nElem)
+!    INFO(TRIM(msg))
+!    msg = 'Number of control points : '//Int2Str(cqDegree)
+!    INFO(TRIM(msg))
+!    msg = 'Number of target points : '//Int2Str(tqDegree)
+!    INFO(TRIM(msg))
+!    msg = 'Number of variables : '//Int2Str(nvar)
+!    INFO(TRIM(msg))
+!    msg = 'Error tolerance : '//Float2Str(tolerance)
+!    INFO(TRIM(msg))
+!
+!    ! Create the control mesh and geometry
+!    CALL controlMesh % UniformBlockMesh(cqDegree, &
+!                                        (/nElem,nElem/), &
+!                                        (/0.0_prec,1.0_prec, &
+!                                          0.0_prec,1.0_prec/))
+!    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+!
+!    ! Create the scalar1d objects
+!    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+!    CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+!    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+!    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+!    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+!
+!    ! Create the equation parser object
+!    feq = EquationParser(fChar, (/'x','y'/))
+!    gxeq = EquationParser(gxChar, (/'x','y'/))
+!    gyeq = EquationParser(gyChar, (/'x','y'/))
+!
+!    ! Load the control function
+!     DO iel = 1, controlGeometry % nElem
+!       DO ivar = 1, nvar
+!         DO j = 0, cqDegree
+!           DO i = 0, cqDegree
+!             f % interior % hostData(i,j,ivar,iel) = &
+!               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+!
+!             dfActual % interior % hostData(1,i,j,ivar,iel) = &
+!               gxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+!
+!             dfActual % interior % hostData(2,i,j,ivar,iel) = &
+!               gyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+!           ENDDO
+!         ENDDO
+!       ENDDO
+!     ENDDO
+!
+!    ! Run the grid interpolation
+!    CALL f % Gradient(workTensor,controlGeometry,dfInterp,.FALSE.)
+!    dfError = dfActual - dfInterp
+!
+!    ! Calculate Absolute Maximum Error
+!    maxErrors = dfError % AbsMaxInterior( )
+!
+!    msg = "Max ScalarGradient_2D Error : "//Float2Str(maxErrors(1))
+!    IF (maxErrors(1) > tolerance) THEN
+!      error = error + 1
+!      ERROR(TRIM(msg))
+!      ERROR("[FAIL] ScalarGradient_2D Test")
+!    ELSE
+!      INFO(TRIM(msg))
+!      INFO("[PASS] ScalarGradient_2D Test")
+!    END IF
+!
+!    ! Clean up
+!    CALL controlMesh % Free()
+!    CALL controlGeometry % Free()
+!    CALL f % Free()
+!    CALL workTensor % Free()
+!    CALL dfInterp % Free()
+!    CALL dfActual % Free()
+!    CALL dfError % Free()
+!
+!  END SUBROUTINE VectorGradient2D_Test
 
   SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
 #undef __FUNC__
@@ -1549,9 +1656,9 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp3D_Test
 
-  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,gxChar,gyChar,gzChar,tolerance,error)
+  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,gradientChar,tolerance,error)
 #undef __FUNC__
-#define __FUNC__ "ScalarGradient2D_Test"
+#define __FUNC__ "ScalarGradient3D_Test"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1560,9 +1667,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
-    CHARACTER(*),INTENT(in) :: gxChar
-    CHARACTER(*),INTENT(in) :: gyChar
-    CHARACTER(*),INTENT(in) :: gzChar
+    CHARACTER(240),INTENT(in) :: gradientChar(1:3)
     REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
@@ -1605,9 +1710,9 @@ CONTAINS
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x','y','z'/))
-    gxeq = EquationParser(gxChar, (/'x','y','z'/))
-    gyeq = EquationParser(gyChar, (/'x','y','z'/))
-    gzeq = EquationParser(gzChar, (/'x','y','z'/))
+    gxeq = EquationParser(gradientChar(1), (/'x','y','z'/))
+    gyeq = EquationParser(gradientChar(2), (/'x','y','z'/))
+    gzeq = EquationParser(gradientChar(3), (/'x','y','z'/))
 
     ! Load the control function
      DO iel = 1, controlGeometry % nElem
@@ -1660,7 +1765,7 @@ CONTAINS
 
   END SUBROUTINE ScalarGradient3D_Test
 
-  SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,vz,tolerance,error)
+  SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp3D_Test"
     IMPLICIT NONE
@@ -1670,18 +1775,18 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
-    CHARACTER(*),INTENT(in) :: vx,vy,vz
+    CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh,targetMesh
     TYPE(SEMHex) :: controlGeometry,targetGeometry
-    TYPE(EquationParser)  :: vxeq,vyeq,vzeq
+    TYPE(EquationParser)  :: vEq(1:3)
     TYPE(Vector3D) :: f,fInterp,fActual,fError
     REAL(prec) :: maxErrors(1:nvar)
     INTEGER :: nel,iel
-    INTEGER :: i,j,k,ivar
+    INTEGER :: i,j,k,ivar,idir
 
     nel = nElem*nElem*nElem
     error = 0
@@ -1718,9 +1823,9 @@ CONTAINS
     CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
-    vxeq = EquationParser(vx, (/'x','y','z'/))
-    vyeq = EquationParser(vy, (/'x','y','z'/))
-    vzeq = EquationParser(vz, (/'x','y','z'/))
+    DO idir = 1,3
+      vEq(idir) = EquationParser(vectorChar(idir), (/'x','y','z'/))
+    ENDDO
 
     ! Load the control function
     DO iel = 1, nel
@@ -1728,12 +1833,10 @@ CONTAINS
         DO k = 0, cqDegree
           DO j = 0, cqDegree
             DO i = 0, cqDegree
-               f % interior % hostData(1,i,j,k,ivar,iel) = &
-                 vxeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-               f % interior % hostData(2,i,j,k,ivar,iel) = &
-                 vyeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-               f % interior % hostData(3,i,j,k,ivar,iel) = &
-                 vzeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              DO idir = 1,3
+                f % interior % hostData(idir,i,j,k,ivar,iel) = &
+                  vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              ENDDO
             ENDDO
           ENDDO
         ENDDO
@@ -1746,12 +1849,10 @@ CONTAINS
         DO k = 0, tqDegree
           DO j = 0, tqDegree
             DO i = 0, tqDegree
-             fActual % interior % hostData(1,i,j,k,ivar,iel) = &
-               vxeq % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-             fActual % interior % hostData(2,i,j,k,ivar,iel) = &
-               vyeq % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-             fActual % interior % hostData(3,i,j,k,ivar,iel) = &
-               vzeq % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              DO idir = 1,3
+                fActual % interior % hostData(idir,i,j,k,ivar,iel) = &
+                  vEq(idir) % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              ENDDO
             ENDDO
           ENDDO
         ENDDO
@@ -1787,7 +1888,7 @@ CONTAINS
 
   END SUBROUTINE VectorInterp3D_Test
 
-  SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vx,vy,vz,tolerance,error)
+  SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -1797,18 +1898,18 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
-    CHARACTER(*),INTENT(in) :: vx,vy,vz
+    CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     REAL(prec),INTENT(in) :: tolerance
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh
     TYPE(SEMHex) :: controlGeometry
-    TYPE(EquationParser)  :: vxeq,vyeq,vzeq
+    TYPE(EquationParser)  :: vEq(1:3)
     TYPE(Vector3D) :: f,fActual,fError
     REAL(prec) :: maxErrors(1:nvar,1:6)
     INTEGER :: nel,iel
-    INTEGER :: i,j,k,ivar,iside
+    INTEGER :: i,j,k,ivar,iside,idir
 
     nel = nElem*nElem*nElem
     error = 0
@@ -1837,9 +1938,9 @@ CONTAINS
     CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
-    vxeq = EquationParser(vx, (/'x','y','z'/))
-    vyeq = EquationParser(vy, (/'x','y','z'/))
-    vzeq = EquationParser(vz, (/'x','y','z'/))
+    DO idir = 1,3
+      vEq(idir) = EquationParser(vectorChar(idir), (/'x','y','z'/))
+    ENDDO
 
     ! Load the control function
     DO iel = 1, nel
@@ -1847,20 +1948,16 @@ CONTAINS
         DO k = 0, cqDegree
           DO j = 0, cqDegree
             DO i = 0, cqDegree
-              f % interior % hostData(1,i,j,k,ivar,iel) = &
-                vxeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              f % interior % hostData(2,i,j,k,ivar,iel) = &
-                vyeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              f % interior % hostData(3,i,j,k,ivar,iel) = &
-                vzeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              DO idir = 1,3
+                f % interior % hostData(idir,i,j,k,ivar,iel) = &
+                  vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              ENDDO
             ENDDO
             DO iside = 1,6
-              fActual % boundary % hostData(1,j,k,ivar,iside,iel) = &
-                vxeq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
-              fActual % boundary % hostData(2,j,k,ivar,iside,iel) = &
-                vyeq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
-              fActual % boundary % hostData(3,j,k,ivar,iside,iel) = &
-                vzeq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+              DO idir = 1,3
+                fActual % boundary % hostData(idir,j,k,ivar,iside,iel) = &
+                  vEq(idir) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+              ENDDO
             ENDDO
           ENDDO
         ENDDO
