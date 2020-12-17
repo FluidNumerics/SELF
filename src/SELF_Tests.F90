@@ -1099,111 +1099,126 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp2D_Test
 
-!  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tensorChar,tolerance,error)
-!#undef __FUNC__
-!#define __FUNC__ "VectorGradient2D_Test"
-!    IMPLICIT NONE
-!    INTEGER,INTENT(in) :: cqType
-!    INTEGER,INTENT(in) :: tqType
-!    INTEGER,INTENT(in) :: cqDegree
-!    INTEGER,INTENT(in) :: tqDegree
-!    INTEGER,INTENT(in) :: nElem
-!    INTEGER,INTENT(in) :: nVar
-!    CHARACTER(*),INTENT(in) :: vxChar
-!    CHARACTER(*),INTENT(in) :: vyChar
-!    CHARACTER(*),INTENT(in) :: vxxChar
-!    CHARACTER(*),INTENT(in) :: vxyChar
-!    CHARACTER(*),INTENT(in) :: vyxChar
-!    CHARACTER(*),INTENT(in) :: vyyChar
-!    REAL(prec),INTENT(in) :: tolerance
-!    INTEGER,INTENT(out) :: error
-!    ! Local
-!    CHARACTER(240) :: msg
-!    TYPE(Mesh2D) :: controlMesh
-!    TYPE(SEMQuad) :: controlGeometry
-!    TYPE(EquationParser)  :: feq,gxeq,gyeq
-!    TYPE(MappedVector2D) :: f
-!    TYPE(MappedTensor2D) :: workTensor
-!    TYPE(MappedTensor2D) :: dfInterp,dfActual,dfError
-!    REAL(prec) :: maxErrors(1:nvar)
-!    INTEGER :: iel,i,j,ivar
-!
-!    error = 0
-!    msg = 'Number of elements : '//Int2Str(nElem*nElem)
-!    INFO(TRIM(msg))
-!    msg = 'Number of control points : '//Int2Str(cqDegree)
-!    INFO(TRIM(msg))
-!    msg = 'Number of target points : '//Int2Str(tqDegree)
-!    INFO(TRIM(msg))
-!    msg = 'Number of variables : '//Int2Str(nvar)
-!    INFO(TRIM(msg))
-!    msg = 'Error tolerance : '//Float2Str(tolerance)
-!    INFO(TRIM(msg))
-!
-!    ! Create the control mesh and geometry
-!    CALL controlMesh % UniformBlockMesh(cqDegree, &
-!                                        (/nElem,nElem/), &
-!                                        (/0.0_prec,1.0_prec, &
-!                                          0.0_prec,1.0_prec/))
-!    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
-!
-!    ! Create the scalar1d objects
-!    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-!    CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-!    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-!    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-!    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-!
-!    ! Create the equation parser object
-!    feq = EquationParser(fChar, (/'x','y'/))
-!    gxeq = EquationParser(gxChar, (/'x','y'/))
-!    gyeq = EquationParser(gyChar, (/'x','y'/))
-!
-!    ! Load the control function
-!     DO iel = 1, controlGeometry % nElem
-!       DO ivar = 1, nvar
-!         DO j = 0, cqDegree
-!           DO i = 0, cqDegree
-!             f % interior % hostData(i,j,ivar,iel) = &
-!               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-!
-!             dfActual % interior % hostData(1,i,j,ivar,iel) = &
-!               gxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-!
-!             dfActual % interior % hostData(2,i,j,ivar,iel) = &
-!               gyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-!           ENDDO
-!         ENDDO
-!       ENDDO
-!     ENDDO
-!
-!    ! Run the grid interpolation
-!    CALL f % Gradient(workTensor,controlGeometry,dfInterp,.FALSE.)
-!    dfError = dfActual - dfInterp
-!
-!    ! Calculate Absolute Maximum Error
-!    maxErrors = dfError % AbsMaxInterior( )
-!
-!    msg = "Max ScalarGradient_2D Error : "//Float2Str(maxErrors(1))
-!    IF (maxErrors(1) > tolerance) THEN
-!      error = error + 1
-!      ERROR(TRIM(msg))
-!      ERROR("[FAIL] ScalarGradient_2D Test")
-!    ELSE
-!      INFO(TRIM(msg))
-!      INFO("[PASS] ScalarGradient_2D Test")
-!    END IF
-!
-!    ! Clean up
-!    CALL controlMesh % Free()
-!    CALL controlGeometry % Free()
-!    CALL f % Free()
-!    CALL workTensor % Free()
-!    CALL dfInterp % Free()
-!    CALL dfActual % Free()
-!    CALL dfError % Free()
-!
-!  END SUBROUTINE VectorGradient2D_Test
+  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "VectorGradient2D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(240),INTENT(in) :: vectorChar(1:2)
+    CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh2D) :: controlMesh
+    TYPE(SEMQuad) :: controlGeometry
+    TYPE(EquationParser)  :: feq(1:2),dfeqChar(1:2,1:2)
+    TYPE(MappedVector2D) :: f
+    TYPE(MappedScalar2D) :: workScalar
+    TYPE(MappedVector2D) :: workVector
+    TYPE(MappedTensor2D) :: workTensor
+    TYPE(MappedTensor2D) :: dfInterp,dfActual,dfError
+    REAL(prec) :: maxErrors(1:nvar)
+    INTEGER :: iel,i,j,ivar,row,col
+
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nElem*nElem)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+
+    ! Create work objects
+    CALL workScalar % Init(cqDegree,cqType,tqDegree,tqType,2*nvar,controlGeometry % nElem)
+    CALL workVector % Init(cqDegree,cqType,tqDegree,tqType,2*nvar,controlGeometry % nElem)
+    CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,2*nvar,controlGeometry % nElem)
+
+    ! Create the equation parser object
+    DO row = 1, 2
+      feq(row) = EquationParser(vectorChar(row), (/'x','y'/))
+    ENDDO
+
+    DO col = 1,2
+      DO row = 1,2
+        dfeqChar(row,col) = EquationParser(tensorChar(row,col), (/'x','y'/))
+      ENDDO
+    ENDDO
+
+    ! Load the control function
+    DO iel = 1, controlGeometry % nElem
+      DO ivar = 1, nvar
+        DO j = 0, cqDegree
+          DO i = 0, cqDegree
+
+            DO row = 1,2
+              f % interior % hostData(row,i,j,ivar,iel) = &
+                feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            ENDDO
+
+            DO col = 1,2
+              DO row = 1,2
+                dfActual % interior % hostData(row,col,i,j,ivar,iel) = &
+                  dfeqChar(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+              ENDDO
+            ENDDO
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,.FALSE.)
+    dfError = dfActual - dfInterp
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = dfError % AbsMaxInterior( )
+
+    msg = "Max VectorGradient_2D Error : "//Float2Str(maxErrors(1))
+    IF (maxErrors(1) > tolerance) THEN
+      error = error + 1
+      ERROR(TRIM(msg))
+      ERROR("[FAIL] VectorGradient_2D Test")
+    ELSE
+      INFO(TRIM(msg))
+      INFO("[PASS] VectorGradient_2D Test")
+    END IF
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL workScalar % Free()
+    CALL workVector % Free()
+    CALL workTensor % Free()
+    CALL dfInterp % Free()
+    CALL dfActual % Free()
+    CALL dfError % Free()
+
+  END SUBROUTINE VectorGradient2D_Test
 
   SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
 #undef __FUNC__
