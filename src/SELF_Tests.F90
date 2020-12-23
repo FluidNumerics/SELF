@@ -2009,6 +2009,130 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp3D_Test
 
+  SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+#undef __FUNC__
+#define __FUNC__ "VectorGradient3D_Test"
+    IMPLICIT NONE
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nElem
+    INTEGER,INTENT(in) :: nVar
+    CHARACTER(240),INTENT(in) :: vectorChar(1:3)
+    CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
+    REAL(prec),INTENT(in) :: tolerance
+    INTEGER,INTENT(out) :: error
+    ! Local
+    CHARACTER(240) :: msg
+    TYPE(Mesh3D) :: controlMesh
+    TYPE(SEMHex) :: controlGeometry
+    TYPE(EquationParser)  :: feq(1:3),dfeqChar(1:3,1:3)
+    TYPE(MappedVector3D) :: f
+    TYPE(MappedScalar3D) :: workScalar
+    TYPE(MappedVector3D) :: workVector
+    TYPE(MappedTensor3D) :: workTensor
+    TYPE(MappedTensor3D) :: dfInterp,dfActual,dfError
+    REAL(prec) :: maxErrors(1:nvar)
+    INTEGER :: iel,i,j,k,ivar,row,col
+
+    error = 0
+    msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
+    INFO(TRIM(msg))
+    msg = 'Number of control points : '//Int2Str(cqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of target points : '//Int2Str(tqDegree)
+    INFO(TRIM(msg))
+    msg = 'Number of variables : '//Int2Str(nvar)
+    INFO(TRIM(msg))
+    msg = 'Error tolerance : '//Float2Str(tolerance)
+    INFO(TRIM(msg))
+
+    ! Create the control mesh and geometry
+    CALL controlMesh % UniformBlockMesh(cqDegree, &
+                                        (/nElem,nElem,nElem/), &
+                                        (/0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec, &
+                                          0.0_prec,1.0_prec/))
+    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
+
+    ! Create the scalar1d objects
+    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+
+    ! Create work objects
+    CALL workScalar % Init(cqDegree,cqType,tqDegree,tqType,3*nvar,controlGeometry % nElem)
+    CALL workVector % Init(cqDegree,cqType,tqDegree,tqType,3*nvar,controlGeometry % nElem)
+    CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,3*nvar,controlGeometry % nElem)
+
+    ! Create the equation parser object
+    DO row = 1,3
+      feq(row) = EquationParser(vectorChar(row), (/'x','y','z'/))
+    ENDDO
+
+    DO col = 1,3
+      DO row = 1,3
+        dfeqChar(row,col) = EquationParser(tensorChar(row,col), (/'x','y','z'/))
+      ENDDO
+    ENDDO
+
+    ! Load the control function
+    DO iel = 1, controlGeometry % nElem
+      DO ivar = 1, nvar
+        DO k = 0, cqDegree
+          DO j = 0, cqDegree
+            DO i = 0, cqDegree
+
+              DO row = 1,3
+                f % interior % hostData(row,i,j,k,ivar,iel) = &
+                  feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              ENDDO
+
+              DO col = 1,3
+                DO row = 1,3
+                  dfActual % interior % hostData(row,col,i,j,k,ivar,iel) = &
+                    dfeqChar(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+                ENDDO
+              ENDDO
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Run the grid interpolation
+    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,.FALSE.)
+    dfError = dfActual - dfInterp
+
+    ! Calculate Absolute Maximum Error
+    maxErrors = dfError % AbsMaxInterior( )
+
+    msg = "Max VectorGradient_3D Error : "//Float2Str(maxErrors(1))
+    IF (maxErrors(1) > tolerance) THEN
+      error = error + 1
+      ERROR(TRIM(msg))
+      ERROR("[FAIL] VectorGradient_3D Test")
+    ELSE
+      INFO(TRIM(msg))
+      INFO("[PASS] VectorGradient_3D Test")
+    END IF
+
+    ! Clean up
+    CALL controlMesh % Free()
+    CALL controlGeometry % Free()
+    CALL f % Free()
+    CALL workScalar % Free()
+    CALL workVector % Free()
+    CALL workTensor % Free()
+    CALL dfInterp % Free()
+    CALL dfActual % Free()
+    CALL dfError % Free()
+
+  END SUBROUTINE VectorGradient3D_Test
+
   SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp3D_Test"

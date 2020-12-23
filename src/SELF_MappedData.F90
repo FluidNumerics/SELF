@@ -70,11 +70,13 @@ MODULE SELF_MappedData
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
 !    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
-!    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
+    GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: Divergence_MappedVector3D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector3D
-!    PROCEDURE,PRIVATE :: Gradient_MappedVector3D
+    PROCEDURE,PRIVATE :: Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
+    PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector3D
+    PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector3D
 
   END TYPE MappedVector3D
 
@@ -577,6 +579,102 @@ CONTAINS
     CALL compVector % Divergence(divVector,gpuAccel)
 
   END SUBROUTINE Divergence_MappedVector3D
+
+  SUBROUTINE Gradient_MappedVector3D(vector,workScalar,workVector,workTensor,geometry,gradF,gpuAccel)
+    ! Strong Form Operator - (Conservative Form)
+    !
+    ! Calculates the gradient of a scalar 3D function using the conservative form of the
+    ! mapped gradient operator
+    !
+    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
+    !
+    ! where the sum over i is implied.
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(in) :: vector
+    TYPE(MappedScalar3D),INTENT(inout) :: workScalar ! (scalar) nvar = 3*nvar
+    TYPE(MappedVector3D),INTENT(inout) :: workVector ! (scalar) nvar = 3*nvar
+    TYPE(MappedTensor3D),INTENT(inout) :: workTensor ! (tensor) nvar = 3*nvar
+    TYPE(SEMHex),INTENT(in) :: geometry
+    TYPE(MappedTensor3D),INTENT(inout) :: gradF
+    LOGICAL,INTENT(in) :: gpuAccel
+
+    CALL vector % MapToScalar(workScalar,gpuAccel)
+
+    CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+                                                     workVector % interior % deviceData, &
+                                                     workTensor % nVar, &
+                                                     workTensor % nElem)
+    ELSE
+      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
+                                                     workVector % interior % hostData, &
+                                                     workTensor % nVar, &
+                                                     workTensor % nElem)
+    END IF
+
+    CALL workVector % MapToTensor(gradF,gpuAccel)
+
+  END SUBROUTINE Gradient_MappedVector3D
+
+  SUBROUTINE MapToScalar_MappedVector3D(vector,scalar,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(in) :: vector
+    TYPE(MappedScalar3D),INTENT(inout) :: scalar
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: row,i,j,k,ivar,jvar,iel
+
+    IF (gpuAccel) THEN
+      PRINT*, 'GPU Acceleration of MapToScalar_MappedVector3D not supported yet!'
+    ELSE
+      DO iel = 1,vector % nelem
+        DO ivar = 1,vector % nvar
+          DO k = 0,vector % N
+            DO j = 0,vector % N
+              DO i = 0,vector % N
+                DO row = 1,3
+                  jvar = row + 3*(ivar-1)
+                  scalar % interior % hostData(i,j,k,jvar,iel) = vector % interior % hostData(row,i,j,k,ivar,iel)
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDIF
+  END SUBROUTINE MapToScalar_MappedVector3D
+
+  SUBROUTINE MapToTensor_MappedVector3D(vector,tensor,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(in) :: vector
+    TYPE(MappedTensor3D),INTENT(inout) :: tensor
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: row,col,i,j,k,ivar,jvar,iel
+
+    IF (gpuAccel) THEN
+      PRINT*, 'GPU Acceleration of MapToTensor_MappedVector3D not supported yet!'
+    ELSE
+      DO iel = 1,tensor % nelem
+        DO ivar = 1,tensor % nvar
+          DO k = 0,tensor % N
+            DO j = 0,tensor % N
+              DO i = 0,tensor % N
+                DO col = 1,3
+                  DO row = 1,3
+                    jvar = row + 3*(ivar-1)
+                    tensor % interior % hostData(row,col,i,j,k,ivar,iel) = vector % interior % hostData(col,i,j,k,jvar,iel)
+                  ENDDO
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDIF
+  END SUBROUTINE MapToTensor_MappedVector3D
 
   SUBROUTINE ContravariantProjection_MappedVector3D(physVector,mesh,geometry,compVector,gpuAccel)
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
