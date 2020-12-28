@@ -45,6 +45,7 @@ MODULE SELF_Lagrange
     !
     !> attribute : iMatrix(0:N,0:M) :
     !> attribute : dMatrix(0:N,0:N) : TO DO
+    !> attribute : dgMatrix(0:N,0:N) : TO DO
     !> attribute : bMatrix(0:N,1:2) : TO DO
 
     INTEGER :: N
@@ -55,6 +56,7 @@ MODULE SELF_Lagrange
     TYPE(hfReal_r1) :: qWeights
     TYPE(hfReal_r2) :: iMatrix
     TYPE(hfReal_r2) :: dMatrix
+    TYPE(hfReal_r2) :: dgMatrix
     TYPE(hfReal_r2) :: bMatrix
 
   CONTAINS
@@ -111,6 +113,9 @@ MODULE SELF_Lagrange
 
     GENERIC,PUBLIC :: Derivative_1D => Derivative_1D_cpu,Derivative_1D_gpu
     PROCEDURE,PRIVATE :: Derivative_1D_cpu,Derivative_1D_gpu
+
+    GENERIC,PUBLIC :: DGDerivative_1D => DGDerivative_1D_cpu,DGDerivative_1D_gpu
+    PROCEDURE,PRIVATE :: DGDerivative_1D_cpu,DGDerivative_1D_gpu
 
     GENERIC,PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
     PROCEDURE,PRIVATE :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
@@ -305,6 +310,16 @@ MODULE SELF_Lagrange
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE DGDerivative_1D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="DGDerivative_1D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE DGDerivative_1D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE ScalarGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
       bind(c,name="ScalarGradient_2D_gpu_wrapper")
       USE iso_c_binding
@@ -473,6 +488,9 @@ CONTAINS
     CALL myPoly % dMatrix % Alloc(loBound=(/0,0/), &
                                   upBound=(/N,N/))
 
+    CALL myPoly % dgMatrix % Alloc(loBound=(/0,0/), &
+                                   upBound=(/N,N/))
+
     CALL myPoly % bMatrix % Alloc(loBound=(/0,0/), &
                                   upBound=(/N,1/))
 
@@ -534,6 +552,7 @@ CONTAINS
     CALL myPoly % qWeights % Free()
     CALL myPoly % iMatrix % Free()
     CALL myPoly % dMatrix % Free()
+    CALL myPoly % dgMatrix % Free()
     CALL myPoly % bMatrix % Free()
 
   END SUBROUTINE Free_Lagrange
@@ -549,6 +568,7 @@ CONTAINS
     CALL myPoly % qWeights % UpdateDevice()
     CALL myPoly % iMatrix % UpdateDevice()
     CALL myPoly % dMatrix % UpdateDevice()
+    CALL myPoly % dgMatrix % UpdateDevice()
     CALL myPoly % bMatrix % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Lagrange
@@ -563,6 +583,7 @@ CONTAINS
     CALL myPoly % qWeights % UpdateHost()
     CALL myPoly % iMatrix % UpdateHost()
     CALL myPoly % dMatrix % UpdateHost()
+    CALL myPoly % dgMatrix % UpdateHost()
     CALL myPoly % bMatrix % UpdateHost()
 
   END SUBROUTINE UpdateHost_Lagrange
@@ -1118,6 +1139,55 @@ CONTAINS
                                    nVariables,nElements)
 
   END SUBROUTINE Derivative_1D_gpu
+
+  SUBROUTINE DGDerivative_1D_cpu(myPoly,f,bf,df,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bf(1:2,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: df(0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER :: i,ii,iVar,iEl
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO i = 0,myPoly % N
+
+          ! Interior Derivative Matrix Application
+          df(i,iVar,iEl) = 0.0_prec
+          DO ii = 0,myPoly % N
+            df(i,iVar,iEl) = df(i,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(ii,iVar,iEl)
+          END DO
+
+          ! Boundary Contribution
+          df(i,iVar,iEl) = df(i,iVar,iEl) - (bf(1,iVar,iEl)*myPoly % bMatrix % hostData(i,1) - &
+                                             bf(2,iVar,iEl)*myPoly % bMatrix % hostData(i,2))/&
+                                             myPoly % qWeights % hostData(i)
+
+        END DO
+
+      END DO
+    END DO
+
+  END SUBROUTINE DGDerivative_1D_cpu
+
+  SUBROUTINE DGDerivative_1D_gpu(myPoly,f_dev,bf_dev,df_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in) :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)  :: f_dev
+    TYPE(c_ptr),INTENT(in)  :: bf_dev
+    TYPE(c_ptr),INTENT(out) :: df_dev
+
+    CALL DGDerivative_1D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+                                     myPoly % bMatrix % deviceData, &
+                                     myPoly % qWeights % deviceData, &
+                                     f_dev,bf_dev,df_dev, &
+                                     myPoly % N, &
+                                     nVariables,nElements)
+
+  END SUBROUTINE DGDerivative_1D_gpu
 !
 !! ================================================================================================ !
 !!
@@ -2119,6 +2189,7 @@ CONTAINS
     ! Local
     INTEGER    :: row,col
     REAL(prec) :: dmat(0:myPoly % N,0:myPoly % N)
+    REAL(prec) :: dgmat(0:myPoly % N,0:myPoly % N)
 
     DO row = 0,myPoly % N
 
@@ -2141,7 +2212,16 @@ CONTAINS
 
     END DO
 
+    DO row = 0,myPoly % N
+      DO col = 0,myPoly % N
+        dgmat(row,col) = -dmat(col,row)*&
+                          myPoly % qWeights % hostData(col)/&
+                          myPoly % qWeights % hostData(row)
+      ENDDO
+    ENDDO
+
     myPoly % dMatrix % hostData = TRANSPOSE(dmat)
+    myPoly % dgMatrix % hostData = TRANSPOSE(dgmat)
 
   END SUBROUTINE CalculateDerivativeMatrix
 

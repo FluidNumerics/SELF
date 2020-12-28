@@ -304,6 +304,9 @@ MODULE SELF_Data
 
   END TYPE Tensor3D
 
+  INTEGER, PARAMETER :: selfStrongForm = 0
+  INTEGER, PARAMETER :: selfWeakForm = 1
+
 CONTAINS
 
 ! -- Scalar1D -- !
@@ -412,23 +415,44 @@ CONTAINS
 
   END SUBROUTINE GridInterp_Scalar1D
 
-  SUBROUTINE Derivative_Scalar1D(SELFStorage,SELFOut,gpuAccel)
+  SUBROUTINE Derivative_Scalar1D(SELFStorage,SELFOut,dForm,gpuAccel)
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(in) :: SELFStorage
     TYPE(Scalar1D),INTENT(inout) :: SELFOut
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % deviceData, &
-                                                SELFout % interior % deviceData, &
-                                                SELFStorage % nVar, &
-                                                SELFStorage % nElem)
-    ELSE
-      CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % hostData, &
-                                                SELFout % interior % hostData, &
-                                                SELFStorage % nVar, &
-                                                SELFStorage % nElem)
-    END IF
+    IF (dForm == selfWeakForm)THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % DGDerivative_1D(SELFStorage % interior % deviceData, &
+                                                    SELFStorage % boundary % deviceData, &
+                                                    SELFout % interior % deviceData, &
+                                                    SELFStorage % nVar, &
+                                                    SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % DGDerivative_1D(SELFStorage % interior % hostData, &
+                                                    SELFStorage % boundary % hostData, &
+                                                    SELFout % interior % hostData, &
+                                                    SELFStorage % nVar, &
+                                                    SELFStorage % nElem)
+      ENDIF
+
+    ELSEIF (dForm == selfStrongForm)THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % deviceData, &
+                                                  SELFout % interior % deviceData, &
+                                                  SELFStorage % nVar, &
+                                                  SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % hostData, &
+                                                  SELFout % interior % hostData, &
+                                                  SELFStorage % nVar, &
+                                                  SELFStorage % nElem)
+      ENDIF
+
+    ENDIF
 
   END SUBROUTINE Derivative_Scalar1D
 

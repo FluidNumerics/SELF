@@ -588,6 +588,34 @@ extern "C"
   } 
 }
 
+// DGDerivative_1D //
+__global__ void DGDerivative_1D_gpu(real *dMatrix, real *bMatrix, real *qWeight, real *f, real *bf, real *df, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+
+  real fm = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    fm += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
+  }
+
+  fm += (-bMatrix[i]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)] +
+          bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,2,iEl,N,nVar)])/qWeight[i];
+
+  df[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = fm;
+
+}
+
+extern "C"
+{
+  void DGDerivative_1D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeight, real **f, real **bf, real **df, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((DGDerivative_1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0,
+                        *dMatrix, *bMatrix, *qWeight, *f, *bf, *df, N, nVar);
+  }
+}
+
 // ScalarGradient_2D //
 __global__ void ScalarGradient_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
