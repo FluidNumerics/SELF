@@ -785,7 +785,7 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp2D_Test
 
-  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,gradientChar,tolerance,error)
+  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,fChar,gradientChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D_Test"
     IMPLICIT NONE
@@ -793,6 +793,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
@@ -808,7 +809,7 @@ CONTAINS
     TYPE(MappedTensor2D) :: workTensor
     TYPE(MappedVector2D) :: dfInterp,dfActual,dfError
     REAL(prec) :: maxErrors(1:nvar)
-    INTEGER :: iel,i,j,ivar
+    INTEGER :: iel,i,j,ivar,iside
 
     error = 0
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
@@ -842,25 +843,29 @@ CONTAINS
     gyeq = EquationParser(gradientChar(2), (/'x','y'/))
 
     ! Load the control function
-     DO iel = 1, controlGeometry % nElem
-       DO ivar = 1, nvar
-         DO j = 0, cqDegree
-           DO i = 0, cqDegree
-             f % interior % hostData(i,j,ivar,iel) = &
-               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+    DO iel = 1, controlGeometry % nElem
+      DO ivar = 1, nvar
+        DO j = 0, cqDegree
+          DO i = 0, cqDegree
+            f % interior % hostData(i,j,ivar,iel) = &
+              feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
 
-             dfActual % interior % hostData(1,i,j,ivar,iel) = &
-               gxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            dfActual % interior % hostData(1,i,j,ivar,iel) = &
+              gxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
 
-             dfActual % interior % hostData(2,i,j,ivar,iel) = &
-               gyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-           ENDDO
-         ENDDO
-       ENDDO
-     ENDDO
+            dfActual % interior % hostData(2,i,j,ivar,iel) = &
+              gyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+          ENDDO
+          DO iside = 1,4
+            f % boundary % hostData(j,ivar,iside,iel) = &
+               feq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
 
     ! Run the grid interpolation
-    CALL f % Gradient(workTensor,controlGeometry,dfInterp,.FALSE.)
+    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error

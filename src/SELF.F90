@@ -134,7 +134,7 @@ PROGRAM SELF
     CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
     errorCount = errorCount + error
 
-    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vectorChar(1:2),errorTolerance,error)
+    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,functionChar,vectorChar(1:2),errorTolerance,error)
     errorCount = errorCount + error
 
     CALL ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vectorChar,errorTolerance,error)
@@ -238,7 +238,7 @@ PROGRAM SELF
 
   ELSEIF (self_cli % run_command(group="s2d_gradient")) THEN
 
-    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vectorChar(1:2),errorTolerance,error)
+    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,functionChar,vectorChar(1:2),errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="s3d_gradient")) THEN

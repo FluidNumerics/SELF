@@ -240,7 +240,7 @@ CONTAINS
 
   END SUBROUTINE JacobianWeight_MappedScalar1D
 
-  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,geometry,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator - (Conservative Form)
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
@@ -254,20 +254,41 @@ CONTAINS
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(MappedVector2D),INTENT(inout) :: gradF
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
-    IF (gpuAccel) THEN
-      CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
-                                                     gradF % interior % deviceData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
-    ELSE
-      CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
-                                                     gradF % interior % hostData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
-    END IF
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         gradF % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
+                                                         workTensor % boundary % hostData, &
+                                                         gradF % interior % hostData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      END IF
+
+    ELSEIF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
+                                                       gradF % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
+                                                       gradF % interior % hostData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      END IF
+
+    ENDIF
 
   END SUBROUTINE Gradient_MappedScalar2D
 
