@@ -1145,7 +1145,7 @@ CONTAINS
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
     REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bf(1:2,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bf(1:nVariables,1:2,1:nElements)
     REAL(prec),INTENT(out) :: df(0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER :: i,ii,iVar,iEl
@@ -1161,8 +1161,8 @@ CONTAINS
           END DO
 
           ! Boundary Contribution
-          df(i,iVar,iEl) = df(i,iVar,iEl) - (bf(1,iVar,iEl)*myPoly % bMatrix % hostData(i,1) - &
-                                             bf(2,iVar,iEl)*myPoly % bMatrix % hostData(i,2))/&
+          df(i,iVar,iEl) = df(i,iVar,iEl) + (bf(iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) - &
+                                             bf(iVar,1,iEl)*myPoly % bMatrix % hostData(i,0))/&
                                              myPoly % qWeights % hostData(i)
 
         END DO

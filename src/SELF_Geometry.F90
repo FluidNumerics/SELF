@@ -187,7 +187,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
-    CALL myGeom % x % Derivative(myGeom % dxds,selfStrongForm,gpuAccel=.FALSE.)
+    CALL myGeom % x % Derivative(myGeom % dxds,gpuAccel=.FALSE.)
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
 
 #ifdef GPU

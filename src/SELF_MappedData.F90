@@ -148,11 +148,15 @@ MODULE SELF_MappedData
     END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
   END INTERFACE
 
+  INTEGER, PARAMETER :: selfStrongForm = 0
+  INTEGER, PARAMETER :: selfWeakDGForm = 1
+  INTEGER, PARAMETER :: selfWeakCGForm = 2
+
 CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
 
-  SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,gpuAccel)
+  SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,dForm,gpuAccel)
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 1D function using the conservative form of the
@@ -165,19 +169,40 @@ CONTAINS
     CLASS(MappedScalar1D),INTENT(in) :: scalar
     TYPE(Geometry1D),INTENT(in) :: geometry
     TYPE(MappedScalar1D),INTENT(inout) :: dF
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL scalar % interp % Derivative_1D(scalar % interior % deviceData, &
-                                           df % interior % deviceData, &
-                                           scalar % nVar, &
-                                           scalar % nElem)
-    ELSE
-      CALL scalar % interp % Derivative_1D(scalar % interior % hostData, &
-                                           df % interior % hostData, &
-                                           scalar % nVar, &
-                                           scalar % nElem)
-    END IF
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL scalar % interp % DGDerivative_1D(scalar % interior % deviceData, &
+                                               scalar % boundary % deviceData, &
+                                               df % interior % deviceData, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
+      ELSE
+        CALL scalar % interp % DGDerivative_1D(scalar % interior % hostData, &
+                                               scalar % boundary % hostData, &
+                                               df % interior % hostData, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
+      END IF
+
+    ELSEIF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL scalar % interp % Derivative_1D(scalar % interior % deviceData, &
+                                             df % interior % deviceData, &
+                                             scalar % nVar, &
+                                             scalar % nElem)
+      ELSE
+        CALL scalar % interp % Derivative_1D(scalar % interior % hostData, &
+                                             df % interior % hostData, &
+                                             scalar % nVar, &
+                                             scalar % nElem)
+      END IF
+
+    ENDIF
 
     CALL df % JacobianWeight(geometry,gpuAccel)
 

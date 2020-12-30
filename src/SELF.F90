@@ -14,7 +14,9 @@ PROGRAM SELF
   CHARACTER(240) :: derivativeChar
   CHARACTER(240) :: vectorChar(1:3)
   CHARACTER(240) :: tensorChar(1:3,1:3)
+  CHARACTER(10) :: dFormChar
   REAL(prec) :: errorTolerance
+  INTEGER :: dForm
   INTEGER :: cqType
   INTEGER :: tqType
   INTEGER :: cqDegree
@@ -33,6 +35,7 @@ PROGRAM SELF
   CALL self_cli % get(val=nElem,switch='--nelements')
   CALL self_cli % get(val=nVar,switch='--nvar')
   CALL self_cli % get(val=functionChar,switch='--function')
+  CALL self_cli % get(val=dFormChar,switch='--derivative-type')
   CALL self_cli % get(val=derivativeChar,switch='--derivative')
   CALL self_cli % get(val=vectorChar(1),switch='--vector-x')
   CALL self_cli % get(val=vectorChar(2),switch='--vector-y')
@@ -65,6 +68,14 @@ PROGRAM SELF
     PRINT *, 'Invalid Target Quadrature'
     STOP -1
   END IF
+
+  IF (TRIM(UpperCase(dFormChar)) == 'STRONG') THEN
+    dForm = selfStrongForm
+  ELSEIF (TRIM(UpperCase(dFormChar)) == 'DG') THEN
+    dForm = selfWeakDGForm
+  ELSEIF (TRIM(UpperCase(dFormChar)) == 'CG') THEN
+    dForm = selfWeakCGForm
+  ENDIF
 
   errorCount = 0
   IF (self_cli % run_command(group="ci-test")) THEN
@@ -120,7 +131,7 @@ PROGRAM SELF
     CALL TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,tensorChar,errorTolerance,error)
     errorCount = errorCount + error
 
-    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
+    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
     errorCount = errorCount + error
 
     CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vectorChar(1:2),errorTolerance,error)
@@ -222,7 +233,7 @@ PROGRAM SELF
 
   ELSEIF (self_cli % run_command(group="s1d_derivative")) THEN
 
-    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
+    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,functionChar,derivativeChar,errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="s2d_gradient")) THEN
@@ -315,6 +326,13 @@ CONTAINS
                    switch_ab="-tol", &
                    help="Tolerance to use for determining if a test passes."//NEW_LINE("A"), &
                    def="1.0E-5", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--derivative-type", &
+                   switch_ab="-dtype", &
+                   help="Flag to choose the type of derivative operator (weak/strong)."//NEW_LINE("A"), &
+                   def="strong", &
+                   choices="strong,dg", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--function", &
