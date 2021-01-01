@@ -225,7 +225,7 @@
                     --derivative-type "strong" \
                     s2d_gradient
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "1.5E-6" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -271,7 +271,7 @@
                     --derivative-type "strong" \
                     v2d_gradient
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "1.5E-6" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --tensor-11 "vxx=0.0" \

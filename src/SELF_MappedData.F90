@@ -318,7 +318,7 @@ CONTAINS
     LOGICAL,INTENT(in):: gpuAccel
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     ! Local
-    INTEGER :: i,j,iVar,iEl
+    INTEGER :: i,j,iVar,iEl,iside
 
     IF (gpuAccel) THEN
 
@@ -353,6 +353,26 @@ CONTAINS
                                                                    scalar % interior % hostData(i,j,iVar,iEl)
 
             END DO
+
+            DO iside = 1,4
+              workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                   hostData(1,1,j,1,iside,iEl)* &
+                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+
+              workTensor % boundary % hostData(2,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                   hostData(1,2,j,1,iside,iEl)* &
+                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+
+              workTensor % boundary % hostData(1,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                   hostData(2,1,j,1,iside,iEl)* &
+                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+
+              workTensor % boundary % hostData(2,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                   hostData(2,2,j,1,iside,iEl)* &
+                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+
+            ENDDO
+
           END DO
         END DO
       END DO
@@ -433,10 +453,11 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     ! Local
-    INTEGER :: i,j,k,iVar,iEl
+    INTEGER :: i,j,k,iVar,iEl,iside
 
     IF (gpuAccel) THEN
 
+      ! TO DO : Add weighting of boundary terms
       CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
@@ -454,46 +475,91 @@ CONTAINS
                 ! Get the x-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % interior % hostData(1,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(1,1,i,j,k,iVar,iEl)* &
+                                                                       hostData(1,1,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 workTensor % interior % hostData(2,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(1,2,i,j,k,iVar,iEl)* &
+                                                                       hostData(1,2,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 workTensor % interior % hostData(3,1,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(1,3,i,j,k,iVar,iEl)* &
+                                                                       hostData(1,3,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 ! Get the y-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % interior % hostData(1,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(2,1,i,j,k,iVar,iEl)* &
+                                                                       hostData(2,1,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 workTensor % interior % hostData(2,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(2,2,i,j,k,iVar,iEl)* &
+                                                                       hostData(2,2,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 workTensor % interior % hostData(3,2,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(2,3,i,j,k,iVar,iEl)* &
+                                                                       hostData(2,3,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 ! Get the z-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % interior % hostData(1,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(3,1,i,j,k,iVar,iEl)* &
+                                                                       hostData(3,1,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 workTensor % interior % hostData(2,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(3,2,i,j,k,iVar,iEl)* &
+                                                                       hostData(3,2,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
                 workTensor % interior % hostData(3,3,i,j,k,iVar,iEl) = geometry % dsdx % interior % &
-                                                                       hostData(3,3,i,j,k,iVar,iEl)* &
+                                                                       hostData(3,3,i,j,k,1,iEl)* &
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
               END DO
+              DO iside = 1,6
+                ! Get the x-component of the Jacobian weighted
+                ! contravariant basis vectors multipled by the scalar
+                workTensor % boundary % hostData(1,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(1,1,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                workTensor % boundary % hostData(2,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(1,2,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                workTensor % boundary % hostData(3,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(1,3,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                ! Get the y-component of the Jacobian weighted
+                ! contravariant basis vectors multipled by the scalar
+                workTensor % boundary % hostData(1,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(2,1,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                workTensor % boundary % hostData(2,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(2,2,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                workTensor % boundary % hostData(3,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(2,3,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                ! Get the z-component of the Jacobian weighted
+                ! contravariant basis vectors multipled by the scalar
+                workTensor % boundary % hostData(1,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(3,1,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                workTensor % boundary % hostData(2,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(3,2,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+                workTensor % boundary % hostData(3,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
+                                                                       hostData(3,3,j,k,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+
+
+              ENDDO
             END DO
           END DO
         END DO

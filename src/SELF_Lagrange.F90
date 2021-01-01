@@ -1365,11 +1365,11 @@ CONTAINS
             END DO
 
             ! Boundary Contribution
-            gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + (bf(j,iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) - &
+            gradF(1,i,j,iVar,iEl) = gradF(1,i,j,iVar,iEl) + (bf(j,iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
                                                              bf(j,iVar,4,iEl)*myPoly % bMatrix % hostData(i,0))/&
                                                             myPoly % qWeights % hostData(i)
 
-            gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + (bf(i,iVar,3,iEl)*myPoly % bMatrix % hostData(j,1) - &
+            gradF(2,i,j,iVar,iEl) = gradF(2,i,j,iVar,iEl) + (bf(i,iVar,3,iEl)*myPoly % bMatrix % hostData(j,1) + &
                                                              bf(i,iVar,1,iEl)*myPoly % bMatrix % hostData(j,0))/&
                                                             myPoly % qWeights % hostData(j)
 
@@ -1484,19 +1484,19 @@ CONTAINS
               gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
               gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
-            gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) -&
+            gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) +&
                                                                  myPoly % bMatrix % hostData(i,0)*bf(1,j,iVar,4,iEl))/&
                                                                 myPoly % qWeights % hostData(i)
 
-            gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) -&
+            gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) +&
                                                                  myPoly % bMatrix % hostData(i,0)*bf(2,j,iVar,4,iEl))/&
                                                                 myPoly % qWeights % hostData(i)
 
-            gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) -&
+            gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) +&
                                                                  myPoly % bMatrix % hostData(j,0)*bf(1,i,iVar,1,iEl))/&
                                                                 myPoly % qWeights % hostData(j)
 
-            gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) -&
+            gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) +&
                                                                  myPoly % bMatrix % hostData(j,0)*bf(2,i,iVar,1,iEl))/&
                                                                 myPoly % qWeights % hostData(j)
 
@@ -1568,6 +1568,7 @@ CONTAINS
   END SUBROUTINE VectorDivergence_2D_gpu
 
   SUBROUTINE VectorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+  ! Assumes bF is the vector component in the direction normal to the boundary
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
@@ -1588,10 +1589,10 @@ CONTAINS
                                                     myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
-            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,iVar,2,iEl) - &
+            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,iVar,2,iEl) + &
                                                    myPoly % bMatrix % hostData(i,0)*bF(1,j,iVar,4,iEl))/&
                                                   myPoly % qWeights % hostData(i) +&
-                                                  (myPoly % bMatrix % hostData(j,1)*bF(2,i,iVar,3,iEl) - &
+                                                  (myPoly % bMatrix % hostData(j,1)*bF(2,i,iVar,3,iEl) + &
                                                    myPoly % bMatrix % hostData(j,0)*bF(2,i,iVar,1,iEl))/&
                                                   myPoly % qWeights % hostData(j)
 
@@ -1728,23 +1729,23 @@ CONTAINS
             dF(1,i,j,iVar,iEl) = 0.0_prec
             dF(2,i,j,iVar,iEl) = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
-                                                        myPoly % dMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
-              dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
-                                                        myPoly % dMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
+              dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,iVar,iEl) + &
+                                                        myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,iVar,iEl)
+              dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,iVar,iEl) + &
+                                                        myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
             END DO
 
-            dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,3,iEl) -&
+            dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,3,iEl) +&
                                                        myPoly % bMatrix % hostData(i,0)*bf(1,1,j,iVar,1,iEl))/&
                                                       myPoly % qWeights % hostData(i)+&
-                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,2,iEl) -&
+                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,2,iEl) +&
                                                        myPoly % bMatrix % hostData(j,0)*bf(2,1,i,iVar,4,iEl))/&
                                                       myPoly % qWeights % hostData(j)
 
-            dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,3,iEl) -&
+            dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,3,iEl) +&
                                                        myPoly % bMatrix % hostData(i,0)*bf(1,2,j,iVar,1,iEl))/&
                                                       myPoly % qWeights % hostData(i)+&
-                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,2,iEl) -&
+                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,2,iEl) +&
                                                        myPoly % bMatrix % hostData(j,0)*bf(2,2,i,iVar,4,iEl))/&
                                                       myPoly % qWeights % hostData(j)
           END DO
@@ -1951,6 +1952,7 @@ CONTAINS
   END SUBROUTINE VectorDivergence_3D_gpu
 
   SUBROUTINE VectorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+  ! Assumes bF is the vector component in the direction normal to the element boundaries
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
@@ -1973,13 +1975,13 @@ CONTAINS
                                                           myPoly % dgMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
 
-              dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,k,iVar,3,iEl) - & ! east
+              dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,k,iVar,3,iEl) + & ! east
                                                          myPoly % bMatrix % hostData(i,0)*bF(1,j,k,iVar,5,iEl))/&  ! west
                                                         myPoly % qWeights % hostData(i) +&
-                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,i,k,iVar,4,iEl) - & ! north
+                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,i,k,iVar,4,iEl) + & ! north
                                                          myPoly % bMatrix % hostData(j,0)*bF(2,i,k,iVar,2,iEl))/&  ! south
                                                         myPoly % qWeights % hostData(j) +&
-                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,i,j,iVar,6,iEl) - & ! top
+                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,i,j,iVar,6,iEl) + & ! top
                                                          myPoly % bMatrix % hostData(k,0)*bF(3,i,j,iVar,1,iEl))/&  ! bottom
                                                         myPoly % qWeights % hostData(k)
 
