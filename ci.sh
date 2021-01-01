@@ -288,7 +288,7 @@
                     --derivative-type "dg" \
                     v2d_gradient
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "2.78E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --function "divV=0.0" \
@@ -302,7 +302,7 @@
                     --derivative-type "strong" \
                     v2d_divergence
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "2.75E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --function "divV=0.0" \
@@ -337,3 +337,33 @@
                     --target-quadrature "gauss" \
                     --gpu-accel "false" \
                     v3d_gradient
+
+/apps/self/bin/self --tolerance "1.0E-3" \
+                    --vector-x "vx=1.0" \
+                    --vector-y "vy=1.0" \
+                    --vector-z "vz=1.0" \
+                    --function "divV=0.0" \
+                    --nvar 5 \
+                    --nelements 10 \
+                    --control-degree 2 \
+                    --control-quadrature "gauss" \
+                    --target-degree 7 \
+                    --target-quadrature "gauss" \
+                    --gpu-accel "false" \
+                    --derivative-type "strong" \
+                    v3d_divergence
+
+/apps/self/bin/self --tolerance "1.2E-3" \
+                    --vector-x "vx=1.0" \
+                    --vector-y "vy=1.0" \
+                    --vector-z "vz=1.0" \
+                    --function "divV=0.0" \
+                    --nvar 5 \
+                    --nelements 10 \
+                    --control-degree 2 \
+                    --control-quadrature "gauss" \
+                    --target-degree 7 \
+                    --target-quadrature "gauss" \
+                    --gpu-accel "false" \
+                    --derivative-type "dg" \
+                    v3d_divergence

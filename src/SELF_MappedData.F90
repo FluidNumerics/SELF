@@ -21,10 +21,10 @@ MODULE SELF_MappedData
 
   TYPE,EXTENDS(Scalar1D),PUBLIC :: MappedScalar1D
 
-    CONTAINS
-      GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
-      PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
-      PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar1D
+  CONTAINS
+    GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
+    PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar1D
 
   END TYPE MappedScalar1D
 
@@ -35,6 +35,7 @@ MODULE SELF_MappedData
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar2D
 
   END TYPE MappedScalar2D
 
@@ -45,6 +46,7 @@ MODULE SELF_MappedData
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar3D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar3D
 
   END TYPE MappedScalar3D
 
@@ -107,6 +109,26 @@ MODULE SELF_MappedData
       TYPE(c_ptr) :: scalar,dxds
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper(scalar,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper(scalar,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -339,6 +361,40 @@ CONTAINS
 
   END SUBROUTINE ContravariantWeight_MappedScalar2D
 
+  SUBROUTINE JacobianWeight_MappedScalar2D(scalar,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl,iVar,i,j
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     scalar % N, &
+                                                     scalar % nVar, &
+                                                     scalar % nElem)
+
+    ELSE
+
+      DO iEl = 1,scalar % nElem
+        DO iVar = 1,scalar % nVar
+          DO j = 0,scalar % N
+            DO i = 0,scalar % N
+              scalar % interior % hostData(i,j,iVar,iEl) = scalar % interior % hostData(i,j,iVar,iEl)/&
+                                                           geometry % J % interior % hostData(i,j,iVar,iEl)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedScalar2D
+
   SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,gpuAccel)
     ! Strong Form Operator
     !
@@ -447,6 +503,42 @@ CONTAINS
 
   END SUBROUTINE ContravariantWeight_MappedScalar3D
 
+  SUBROUTINE JacobianWeight_MappedScalar3D(scalar,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
+    TYPE(SEMHex),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl,iVar,i,j,k
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     scalar % N, &
+                                                     scalar % nVar, &
+                                                     scalar % nElem)
+
+    ELSE
+
+      DO iEl = 1,scalar % nElem
+        DO iVar = 1,scalar % nVar
+          DO k = 0,scalar % N
+            DO j = 0,scalar % N
+              DO i = 0,scalar % N
+                scalar % interior % hostData(i,j,k,iVar,iEl) = scalar % interior % hostData(i,j,k,iVar,iEl)/&
+                                                               geometry % J % interior % hostData(i,j,k,iVar,iEl)
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedScalar3D
+
   ! ---------------------- Vectors ---------------------- !
   SUBROUTINE Divergence_MappedVector2D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     ! Strong Form Operator
@@ -465,34 +557,36 @@ CONTAINS
     IF (dForm == selfWeakDGForm) THEN
 
       IF (gpuAccel) THEN
-        CALL compVector % interp % VectorDivergence_2D(compVector % interior % hostData, &
-                                                       divVector % interior % hostData, &
-                                                       compVector % nvar, &
-                                                       compVector % nelem)
-      ELSE
-        CALL compVector % interp % VectorDivergence_2D(compVector % interior % deviceData, &
-                                                       divVector % interior % deviceData, &
-                                                       compVector % nvar, &
-                                                       compVector % nelem)
-      ENDIF
-
-    ELSE IF (dForm == selfStrongForm) THEN
-
-      IF (gpuAccel) THEN
-        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % hostData, &
-                                                         compVector % boundary % hostData, &
-                                                         divVector % interior % hostData, &
-                                                         compVector % nvar, &
-                                                         compVector % nelem)
-      ELSE
         CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % deviceData, &
                                                          compVector % boundary % deviceData, &
                                                          divVector % interior % deviceData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
+      ELSE
+        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % hostData, &
+                                                         compVector % boundary % hostData, &
+                                                         divVector % interior % hostData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ENDIF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDivergence_2D(compVector % interior % deviceData, &
+                                                       divVector % interior % deviceData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ELSE
+        CALL compVector % interp % VectorDivergence_2D(compVector % interior % hostData, &
+                                                       divVector % interior % hostData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
       ENDIF
 
     END IF
+
+    CALL divVector % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Divergence_MappedVector2D
 
@@ -681,19 +775,50 @@ CONTAINS
 
   END SUBROUTINE ContravariantProjection_MappedVector2D
 
-  SUBROUTINE Divergence_MappedVector3D(physVector,compVector,mesh,geometry,divVector,gpuAccel)
-    ! Strong Form Operator
+  SUBROUTINE Divergence_MappedVector3D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     !
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(in) :: physVector
     TYPE(MappedVector3D),INTENT(inout) :: compVector
-    TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(SEMHex),INTENT(in) :: geometry
-    TYPE(Scalar3D),INTENT(inout) :: divVector
+    TYPE(MappedScalar3D),INTENT(inout) :: divVector
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL physVector % ContravariantProjection(mesh,geometry,compVector,gpuAccel)
-    CALL compVector % Divergence(divVector,gpuAccel)
+    CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % deviceData, &
+                                                         compVector % boundary % deviceData, &
+                                                         divVector % interior % deviceData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ELSE
+        CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % hostData, &
+                                                         compVector % boundary % hostData, &
+                                                         divVector % interior % hostData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ENDIF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDivergence_3D(compVector % interior % deviceData, &
+                                                       divVector % interior % deviceData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ELSE
+        CALL compVector % interp % VectorDivergence_3D(compVector % interior % hostData, &
+                                                       divVector % interior % hostData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ENDIF
+
+    END IF
+
+    CALL divVector % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Divergence_MappedVector3D
 
@@ -793,21 +918,21 @@ CONTAINS
     ENDIF
   END SUBROUTINE MapToTensor_MappedVector3D
 
-  SUBROUTINE ContravariantProjection_MappedVector3D(physVector,mesh,geometry,compVector,gpuAccel)
+  SUBROUTINE ContravariantProjection_MappedVector3D(physVector,geometry,compVector,gpuAccel)
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(in) :: physVector
     TYPE(MappedVector3D),INTENT(inout) :: compVector
-    TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: i,j,k,iVar,iEl,iDir
+    INTEGER :: i,j,k,iVar,iEl,iDir,iside
 
     IF (gpuAccel) THEN
 
+      ! TO DO : Add projection for boundary terms
       CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
@@ -863,6 +988,45 @@ CONTAINS
                                                                      physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
               END DO
+
+              DO iside = 1,6
+                compVector % boundary % hostData(1,j,k,iVar,iside,iEl) = geometry % dsdx % &
+                                                                     boundary % hostData(1,1,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(1,j,k,iVar,iside,iEl) + &
+                                                                     geometry % dsdx % &
+                                                                     boundary % hostData(2,1,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(2,j,k,iVar,iside,iEl) + &
+                                                                     geometry % dsdx % &
+                                                                     boundary % hostData(3,1,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(3,j,k,iVar,iside,iEl)
+
+                compVector % boundary % hostData(2,j,k,iVar,iside,iEl) = geometry % dsdx % &
+                                                                     boundary % hostData(1,2,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(1,j,k,iVar,iside,iEl) + &
+                                                                     geometry % dsdx % &
+                                                                     boundary % hostData(2,2,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(2,j,k,iVar,iside,iEl) + &
+                                                                     geometry % dsdx % &
+                                                                     boundary % hostData(3,2,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+
+                compVector % boundary % hostData(3,j,k,iVar,iside,iEl) = geometry % dsdx % &
+                                                                     boundary % hostData(1,3,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(1,j,k,iVar,iside,iEl) + &
+                                                                     geometry % dsdx % &
+                                                                     boundary % hostData(2,3,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % &
+                                                                     hostData(2,j,k,iVar,iside,iEl) + &
+                                                                     geometry % dsdx % &
+                                                                     boundary % hostData(3,3,j,k,1,iside,iEl)* &
+                                                                     physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+              ENDDO
             END DO
           END DO
         END DO

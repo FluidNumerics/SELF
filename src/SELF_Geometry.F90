@@ -351,21 +351,21 @@ CONTAINS
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-    DO iEl = 1,myGeom % nElem
-      DO k = 1,4
-        DO i = 0,myGeom % J % N
-          IF (k == selfSide2D_East .OR. k == selfSide2D_North) THEN
-            fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
-          ELSE
-            fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
-          END IF
+    !DO iEl = 1,myGeom % nElem
+    !  DO k = 1,4
+    !    DO i = 0,myGeom % J % N
+    !      IF (k == selfSide2D_East .OR. k == selfSide2D_North) THEN
+    !        fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
+    !      ELSE
+    !        fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
+    !      END IF
 
-          myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = &
-            fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
+    !      myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = &
+    !        fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
 
-        END DO
-      END DO
-    END DO
+    !    END DO
+    !  END DO
+    !END DO
 
   END SUBROUTINE CalculateContravariantBasis_SEMQuad
 
@@ -532,53 +532,56 @@ CONTAINS
         DO j = 0,myGeom % dxds % N
           DO i = 0,myGeom % dxds % N
 
+            ! Ja1
             myGeom % dsdx % interior % hostData(1,1,i,j,k,1,iEl) = &
               myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl) - &
               myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)
 
-            myGeom % dsdx % interior % hostData(1,2,i,j,k,1,iEl) = &
-              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl) - &
-              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(2,1,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)
 
-            myGeom % dsdx % interior % hostData(1,3,i,j,k,1,iEl) = &
+            myGeom % dsdx % interior % hostData(3,1,i,j,k,1,iEl) = &
               myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl) - &
               myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)
 
-            myGeom % dsdx % interior % hostData(2,1,i,j,k,1,iEl) = &
+            ! Ja2
+            myGeom % dsdx % interior % hostData(1,2,i,j,k,1,iEl) = &
               myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl) - &
               myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)
 
             myGeom % dsdx % interior % hostData(2,2,i,j,k,1,iEl) = &
-              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl) - &
-              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)
+              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)
 
-            myGeom % dsdx % interior % hostData(2,3,i,j,k,1,iEl) = &
+            myGeom % dsdx % interior % hostData(3,2,i,j,k,1,iEl) = &
               myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl) - &
               myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)
 
-            myGeom % dsdx % interior % hostData(3,1,i,j,k,1,iEl) = &
+            ! Ja3
+            myGeom % dsdx % interior % hostData(1,3,i,j,k,1,iEl) = &
               myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl) - &
               myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
               myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)
 
-            myGeom % dsdx % interior % hostData(3,2,i,j,k,1,iEl) = &
-              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl) - &
-              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
-              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(2,3,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)
 
             myGeom % dsdx % interior % hostData(3,3,i,j,k,1,iEl) = &
               myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
@@ -597,22 +600,22 @@ CONTAINS
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
 
-    DO iEl = 1,myGeom % nElem
-      DO k = 1,6
-        DO j = 0,myGeom % J % N
-          DO i = 0,myGeom % J % N
-            IF (k == selfSide3D_Top .OR. k == selfSide3D_East .OR. k == selfSide3D_North) THEN
-              fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
-            ELSE
-              fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
-            END IF
-
-            myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = &
-              fac*myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)
-          END DO
-        END DO
-      END DO
-    END DO
+!    DO iEl = 1,myGeom % nElem
+!      DO k = 1,6
+!        DO j = 0,myGeom % J % N
+!          DO i = 0,myGeom % J % N
+!            IF (k == selfSide3D_Top .OR. k == selfSide3D_East .OR. k == selfSide3D_North) THEN
+!              fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
+!            ELSE
+!              fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
+!            END IF
+!
+!            myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = &
+!              fac*myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)
+!          END DO
+!        END DO
+!      END DO
+!    END DO
 
   END SUBROUTINE CalculateContravariantBasis_SEMHex
 

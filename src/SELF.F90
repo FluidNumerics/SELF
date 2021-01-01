@@ -151,6 +151,10 @@ PROGRAM SELF
     CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vectorChar,tensorChar,errorTolerance,error)
     errorCount = errorCount + error
 
+    CALL VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+                                vectorChar,functionChar,errorTolerance,error)
+    errorCount = errorCount + error
+
   ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
 
     CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
@@ -267,6 +271,12 @@ PROGRAM SELF
   ELSEIF (self_cli % run_command(group="v3d_gradient")) THEN
 
     CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vectorChar,tensorChar,errorTolerance,error)
+    errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="v3d_divergence")) THEN
+
+    CALL VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+                                vectorChar,functionChar,errorTolerance,error)
     errorCount = errorCount + error
 
   END IF

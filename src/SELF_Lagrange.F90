@@ -153,6 +153,9 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
     PROCEDURE,PRIVATE :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
 
+    GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
+    PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
+
     GENERIC,PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu,VectorCurl_3D_gpu
     PROCEDURE,PRIVATE :: VectorCurl_3D_cpu,VectorCurl_3D_gpu
 
@@ -449,6 +452,16 @@ MODULE SELF_Lagrange
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDivergence_3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE VectorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="VectorDGDivergence_3D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE VectorDGDivergence_3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -1936,6 +1949,65 @@ CONTAINS
                                          nVariables,nElements)
 
   END SUBROUTINE VectorDivergence_3D_gpu
+
+  SUBROUTINE VectorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bf(1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,k,ii,iVar,iEl
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO k = 0,myPoly % N
+          DO j = 0,myPoly % N
+            DO i = 0,myPoly % N
+
+              dF(i,j,k,iVar,iEl) = 0.0_prec
+              DO ii = 0,myPoly % N
+                dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl) + &
+                                                          myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl) + &
+                                                          myPoly % dgMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
+              END DO
+
+              dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,k,iVar,3,iEl) - & ! east
+                                                         myPoly % bMatrix % hostData(i,0)*bF(1,j,k,iVar,5,iEl))/&  ! west
+                                                        myPoly % qWeights % hostData(i) +&
+                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,i,k,iVar,4,iEl) - & ! north
+                                                         myPoly % bMatrix % hostData(j,0)*bF(2,i,k,iVar,2,iEl))/&  ! south
+                                                        myPoly % qWeights % hostData(j) +&
+                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,i,j,iVar,6,iEl) - & ! top
+                                                         myPoly % bMatrix % hostData(k,0)*bF(3,i,j,iVar,1,iEl))/&  ! bottom
+                                                        myPoly % qWeights % hostData(k)
+
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE VectorDGDivergence_3D_cpu
+
+  SUBROUTINE VectorDGDivergence_3D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: bF_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+
+    CALL VectorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+                                           myPoly % bMatrix % deviceData, &
+                                           myPoly % qWeights % deviceData, &
+                                           f_dev,bF_dev,dF_dev,myPoly % N, &
+                                           nVariables,nElements)
+
+  END SUBROUTINE VectorDGDivergence_3D_gpu
 
   SUBROUTINE VectorCurl_3D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
