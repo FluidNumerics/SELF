@@ -53,11 +53,12 @@ MODULE SELF_MappedData
   CONTAINS
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
-!    GENERIC,PUBLIC :: Curl => Curl_MappedVector2D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
+!    GENERIC,PUBLIC :: Curl => Curl_MappedVector2D
+
     PROCEDURE,PRIVATE :: Divergence_MappedVector2D
-!    PROCEDURE,PRIVATE :: Curl_MappedVector2D
     PROCEDURE,PRIVATE :: Gradient_MappedVector2D
+!    PROCEDURE,PRIVATE :: Curl_MappedVector2D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector2D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector2D
@@ -447,7 +448,7 @@ CONTAINS
   END SUBROUTINE ContravariantWeight_MappedScalar3D
 
   ! ---------------------- Vectors ---------------------- !
-  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,mesh,geometry,divVector,dForm,gpuAccel)
+  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     ! Strong Form Operator
     !
     ! DG Weak Form Operator
@@ -455,14 +456,43 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(in) :: physVector
     TYPE(MappedVector2D),INTENT(inout) :: compVector
-    TYPE(Mesh2D),INTENT(in) :: mesh
     TYPE(SEMQuad),INTENT(in) :: geometry
-    TYPE(Scalar2D),INTENT(inout) :: divVector
+    TYPE(MappedScalar2D),INTENT(inout) :: divVector
     INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL physVector % ContravariantProjection(mesh,geometry,compVector,gpuAccel)
-    CALL compVector % Divergence(divVector,dForm,gpuAccel)
+    CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDivergence_2D(compVector % interior % hostData, &
+                                                       divVector % interior % hostData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ELSE
+        CALL compVector % interp % VectorDivergence_2D(compVector % interior % deviceData, &
+                                                       divVector % interior % deviceData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ENDIF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % hostData, &
+                                                         compVector % boundary % hostData, &
+                                                         divVector % interior % hostData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ELSE
+        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % deviceData, &
+                                                         compVector % boundary % deviceData, &
+                                                         divVector % interior % deviceData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ENDIF
+
+    END IF
 
   END SUBROUTINE Divergence_MappedVector2D
 
@@ -585,13 +615,12 @@ CONTAINS
     ENDIF
   END SUBROUTINE MapToTensor_MappedVector2D
 
-  SUBROUTINE ContravariantProjection_MappedVector2D(physVector,mesh,geometry,compVector,gpuAccel)
+  SUBROUTINE ContravariantProjection_MappedVector2D(physVector,geometry,compVector,gpuAccel)
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(in) :: physVector
-    TYPE(Mesh2D),INTENT(in) :: mesh
     TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedVector2D),INTENT(inout) :: compVector

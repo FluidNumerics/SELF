@@ -144,6 +144,10 @@ PROGRAM SELF
                                vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,error)
     errorCount = errorCount + error
 
+    CALL VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+                                vectorChar(1:2),functionChar,errorTolerance,error)
+    errorCount = errorCount + error
+
     CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vectorChar,tensorChar,errorTolerance,error)
     errorCount = errorCount + error
 
@@ -252,6 +256,13 @@ PROGRAM SELF
     CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
                                 vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,error)
     errorCount = errorCount + error
+
+  ELSEIF (self_cli % run_command(group="v2d_divergence")) THEN
+
+    CALL VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+                                vectorChar(1:2),functionChar,errorTolerance,error)
+    errorCount = errorCount + error
+
 
   ELSEIF (self_cli % run_command(group="v3d_gradient")) THEN
 
