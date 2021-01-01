@@ -211,7 +211,7 @@
                     --derivative-type "dg" \
                     s1d_derivative
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "2.0E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -225,7 +225,7 @@
                     --derivative-type "strong" \
                     s2d_gradient
 
-/apps/self/bin/self --tolerance "1.5E-6" \
+/apps/self/bin/self --tolerance "5.8E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -239,7 +239,7 @@
                     --derivative-type "dg" \
                     s2d_gradient
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "4.4E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -254,7 +254,7 @@
                     s3d_gradient
 
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "1.9E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --tensor-11 "vxx=0.0" \
@@ -271,7 +271,7 @@
                     --derivative-type "strong" \
                     v2d_gradient
 
-/apps/self/bin/self --tolerance "1.5E-6" \
+/apps/self/bin/self --tolerance "5.8E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --tensor-11 "vxx=0.0" \
@@ -316,7 +316,7 @@
                     --derivative-type "dg" \
                     v2d_divergence
 
-/apps/self/bin/self --tolerance "1.0E-6" \
+/apps/self/bin/self --tolerance "4.5E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \

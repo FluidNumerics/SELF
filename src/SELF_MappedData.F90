@@ -62,6 +62,7 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: Gradient_MappedVector2D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector2D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedVector2D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector2D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector2D
 
@@ -78,6 +79,7 @@ MODULE SELF_MappedData
 !    PROCEDURE,PRIVATE :: Curl_MappedVector3D
     PROCEDURE,PRIVATE :: Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedVector3D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector3D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector3D
 
@@ -85,19 +87,21 @@ MODULE SELF_MappedData
 
   TYPE,EXTENDS(Tensor2D),PUBLIC :: MappedTensor2D
 
-!    CONTAINS
+  CONTAINS
 !
 !    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor2D
 !    PROCEDURE,PRIVATE :: Divergence_MappedTensor2D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor2D
 
   END TYPE MappedTensor2D
 
   TYPE,EXTENDS(Tensor3D),PUBLIC :: MappedTensor3D
 
-!    CONTAINS
+  CONTAINS
 !
 !    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor3D
 !    PROCEDURE,PRIVATE :: Divergence_MappedTensor3D
+    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor3D
 
   END TYPE MappedTensor3D
 
@@ -162,6 +166,16 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: vector,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
       bind(c,name="ContravariantProjection_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -170,6 +184,37 @@ MODULE SELF_MappedData
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
   END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: vector,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedTensor2D_gpu_wrapper(tensor,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedTensor2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedTensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper(tensor,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedTensor3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper
+  END INTERFACE
+
 
 CONTAINS
 
@@ -309,6 +354,8 @@ CONTAINS
 
     ENDIF
 
+    CALL gradF % JacobianWeight(geometry,gpuAccel)
+
   END SUBROUTINE Gradient_MappedScalar2D
 
   SUBROUTINE ContravariantWeight_MappedScalar2D(scalar,geometry,workTensor,gpuAccel)
@@ -322,6 +369,7 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      ! TO DO : Add contravariant weight on boundary terms
       CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
@@ -443,6 +491,7 @@ CONTAINS
                                                      workTensor % nVar, &
                                                      workTensor % nElem)
     END IF
+    CALL gradF % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Gradient_MappedScalar3D
 
@@ -713,6 +762,8 @@ CONTAINS
 
     CALL workVector % MapToTensor(gradF,gpuAccel)
 
+    CALL gradF % JacobianWeight(geometry,gpuAccel)
+
   END SUBROUTINE Gradient_MappedVector2D
 
   SUBROUTINE MapToScalar_MappedVector2D(vector,scalar,gpuAccel)
@@ -745,6 +796,7 @@ CONTAINS
         ENDDO
       ENDDO
     ENDIF
+
   END SUBROUTINE MapToScalar_MappedVector2D
 
   SUBROUTINE MapToTensor_MappedVector2D(vector,tensor,gpuAccel)
@@ -769,6 +821,7 @@ CONTAINS
                 ENDDO
               ENDDO
             ENDDO
+            ! TO DO : Map boundary terms
           ENDDO
         ENDDO
       ENDDO
@@ -840,6 +893,42 @@ CONTAINS
     END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector2D
+
+  SUBROUTINE JacobianWeight_MappedVector2D(vector,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedVector2D),INTENT(inout) :: vector
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl,iVar,i,j
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     vector % N, &
+                                                     vector % nVar, &
+                                                     vector % nElem)
+
+    ELSE
+
+      DO iEl = 1,vector % nElem
+        DO iVar = 1,vector % nVar
+          DO j = 0,vector % N
+            DO i = 0,vector % N
+              vector % interior % hostData(1,i,j,iVar,iEl) = vector % interior % hostData(1,i,j,iVar,iEl)/&
+                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+              vector % interior % hostData(2,i,j,iVar,iEl) = vector % interior % hostData(2,i,j,iVar,iEl)/&
+                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedVector2D
 
   SUBROUTINE Divergence_MappedVector3D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     !
@@ -923,6 +1012,7 @@ CONTAINS
     END IF
 
     CALL workVector % MapToTensor(gradF,gpuAccel)
+    CALL gradF % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Gradient_MappedVector3D
 
@@ -947,6 +1037,7 @@ CONTAINS
                   scalar % interior % hostData(i,j,k,jvar,iel) = vector % interior % hostData(row,i,j,k,ivar,iel)
                 ENDDO
               ENDDO
+              ! TO DO : Map boundary terms
             ENDDO
           ENDDO
         ENDDO
@@ -977,6 +1068,7 @@ CONTAINS
                   ENDDO
                 ENDDO
               ENDDO
+              ! TO DO : Map boundary terms
             ENDDO
           ENDDO
         ENDDO
@@ -1101,6 +1193,138 @@ CONTAINS
 
   END SUBROUTINE ContravariantProjection_MappedVector3D
 
+  SUBROUTINE JacobianWeight_MappedVector3D(vector,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(inout) :: vector
+    TYPE(SEMHex),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl,iVar,i,j,k
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     vector % N, &
+                                                     vector % nVar, &
+                                                     vector % nElem)
+
+    ELSE
+
+      DO iEl = 1,vector % nElem
+        DO iVar = 1,vector % nVar
+          DO k = 0,vector % N
+            DO j = 0,vector % N
+              DO i = 0,vector % N
+                vector % interior % hostData(1,i,j,k,iVar,iEl) = vector % interior % hostData(1,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                vector % interior % hostData(2,i,j,k,iVar,iEl) = vector % interior % hostData(2,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                vector % interior % hostData(3,i,j,k,iVar,iEl) = vector % interior % hostData(3,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedVector3D
+
   ! ---------------------- Tensors ---------------------- !
+
+  SUBROUTINE JacobianWeight_MappedTensor2D(tensor,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedTensor2D),INTENT(inout) :: tensor
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl,iVar,i,j
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     tensor % N, &
+                                                     tensor % nVar, &
+                                                     tensor % nElem)
+
+    ELSE
+
+      DO iEl = 1,tensor % nElem
+        DO iVar = 1,tensor % nVar
+          DO j = 0,tensor % N
+            DO i = 0,tensor % N
+              tensor % interior % hostData(1,1,i,j,iVar,iEl) = tensor % interior % hostData(1,1,i,j,iVar,iEl)/&
+                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+              tensor % interior % hostData(2,1,i,j,iVar,iEl) = tensor % interior % hostData(2,1,i,j,iVar,iEl)/&
+                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+              tensor % interior % hostData(1,2,i,j,iVar,iEl) = tensor % interior % hostData(1,2,i,j,iVar,iEl)/&
+                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+              tensor % interior % hostData(2,2,i,j,iVar,iEl) = tensor % interior % hostData(2,2,i,j,iVar,iEl)/&
+                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedTensor2D
+
+  SUBROUTINE JacobianWeight_MappedTensor3D(tensor,geometry,gpuAccel)
+  ! Applies the inverse jacobian
+    IMPLICIT NONE
+    CLASS(MappedTensor3D),INTENT(inout) :: tensor
+    TYPE(SEMHex),INTENT(in) :: geometry
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iEl,iVar,i,j,k
+
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     tensor % N, &
+                                                     tensor % nVar, &
+                                                     tensor % nElem)
+
+    ELSE
+
+      DO iEl = 1,tensor % nElem
+        DO iVar = 1,tensor % nVar
+          DO k = 0,tensor % N
+            DO j = 0,tensor % N
+              DO i = 0,tensor % N
+                tensor % interior % hostData(1,1,i,j,k,iVar,iEl) = tensor % interior % hostData(1,1,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(2,1,i,j,k,iVar,iEl) = tensor % interior % hostData(2,1,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(3,1,i,j,k,iVar,iEl) = tensor % interior % hostData(3,1,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(1,2,i,j,k,iVar,iEl) = tensor % interior % hostData(1,2,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(2,2,i,j,k,iVar,iEl) = tensor % interior % hostData(2,2,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(3,2,i,j,k,iVar,iEl) = tensor % interior % hostData(3,2,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(1,3,i,j,k,iVar,iEl) = tensor % interior % hostData(1,3,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(2,3,i,j,k,iVar,iEl) = tensor % interior % hostData(2,3,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                tensor % interior % hostData(3,3,i,j,k,iVar,iEl) = tensor % interior % hostData(3,3,i,j,k,iVar,iEl)/&
+                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE JacobianWeight_MappedTensor3D
 
 END MODULE SELF_MappedData
