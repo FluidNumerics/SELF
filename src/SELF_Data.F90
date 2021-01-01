@@ -304,6 +304,9 @@ MODULE SELF_Data
 
   END TYPE Tensor3D
 
+  INTEGER, PARAMETER :: selfStrongForm = 0
+  INTEGER, PARAMETER :: selfWeakDGForm = 1
+  INTEGER, PARAMETER :: selfWeakCGForm = 2
 
 CONTAINS
 
@@ -1081,22 +1084,43 @@ CONTAINS
 
   END SUBROUTINE Gradient_Vector2D
 
-  SUBROUTINE Divergence_Vector2D(SELFStorage,SELFOut,gpuAccel)
+  SUBROUTINE Divergence_Vector2D(SELFStorage,SELFOut,dForm,gpuAccel)
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(in) :: SELFStorage
     TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
-      CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % hostData, &
-                                                      SELFout % interior % hostData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
+                                                          SELFStorage % boundary % deviceData, &
+                                                          SELFout % interior % deviceData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % hostData, &
+                                                          SELFStorage % boundary % hostData, &
+                                                          SELFout % interior % hostData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % deviceData, &
+                                                        SELFout % interior % deviceData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % hostData, &
+                                                        SELFout % interior % hostData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      END IF
+
     END IF
 
   END SUBROUTINE Divergence_Vector2D

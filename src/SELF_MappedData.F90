@@ -148,10 +148,6 @@ MODULE SELF_MappedData
     END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
   END INTERFACE
 
-  INTEGER, PARAMETER :: selfStrongForm = 0
-  INTEGER, PARAMETER :: selfWeakDGForm = 1
-  INTEGER, PARAMETER :: selfWeakCGForm = 2
-
 CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
@@ -451,8 +447,10 @@ CONTAINS
   END SUBROUTINE ContravariantWeight_MappedScalar3D
 
   ! ---------------------- Vectors ---------------------- !
-  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,mesh,geometry,divVector,gpuAccel)
+  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,mesh,geometry,divVector,dForm,gpuAccel)
     ! Strong Form Operator
+    !
+    ! DG Weak Form Operator
     !
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(in) :: physVector
@@ -460,14 +458,15 @@ CONTAINS
     TYPE(Mesh2D),INTENT(in) :: mesh
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(Scalar2D),INTENT(inout) :: divVector
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL physVector % ContravariantProjection(mesh,geometry,compVector,gpuAccel)
-    CALL compVector % Divergence(divVector,gpuAccel)
+    CALL compVector % Divergence(divVector,dForm,gpuAccel)
 
   END SUBROUTINE Divergence_MappedVector2D
 
-  SUBROUTINE Gradient_MappedVector2D(vector,workScalar,workVector,workTensor,geometry,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedVector2D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator - (Conservative Form)
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
@@ -483,22 +482,43 @@ CONTAINS
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor ! (tensor) nvar = 2*nvar
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(MappedTensor2D),INTENT(inout) :: gradF
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL vector % MapToScalar(workScalar,gpuAccel)
 
     CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
 
-    IF (gpuAccel) THEN
-      CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
-                                                     workVector % interior % deviceData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
-    ELSE
-      CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
-                                                     workVector % interior % hostData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         workVector % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
+                                                         workTensor % boundary % hostData, &
+                                                         workVector % interior % hostData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
+                                                       workVector % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
+                                                       workVector % interior % hostData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      END IF
+
     END IF
 
     CALL workVector % MapToTensor(gradF,gpuAccel)
@@ -511,7 +531,7 @@ CONTAINS
     TYPE(MappedScalar2D),INTENT(inout) :: scalar
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: row,i,j,ivar,jvar,iel
+    INTEGER :: row,i,j,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
       PRINT*, 'GPU Acceleration of MapToScalar_MappedVector2D not supported yet!'
@@ -523,6 +543,12 @@ CONTAINS
               DO row = 1,2
                 jvar = row + 2*(ivar-1)
                 scalar % interior % hostData(i,j,jvar,iel) = vector % interior % hostData(row,i,j,ivar,iel)
+              ENDDO
+            ENDDO
+            DO iside = 1,4
+              DO row = 1,2
+                jvar = row + 2*(ivar-1)
+                scalar % boundary % hostData(j,jvar,iside,iel) = vector % boundary % hostData(row,j,ivar,iside,iel)
               ENDDO
             ENDDO
           ENDDO
@@ -570,10 +596,11 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
-    INTEGER :: i,j,iVar,iEl
+    INTEGER :: i,j,ivar,iel,iside
 
     IF (gpuAccel) THEN
 
+      ! TO DO : Add boundary projection routine for GPU
       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
@@ -585,24 +612,39 @@ CONTAINS
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
       ! to project onto computational space
-      DO iEl = 1,physVector % nElem
-        DO iVar = 1,physVector % nVar
+      DO iel = 1,physVector % nElem
+        DO ivar = 1,physVector % nVar
           DO j = 0,physVector % N
             DO i = 0,physVector % N
 
-              compVector % interior % hostData(1,i,j,iVar,iEl) = &
-                geometry % dsdx % interior % hostData(1,1,i,j,1,iEl)* &
-                physVector % interior % hostData(1,i,j,iVar,iEl) + &
-                geometry % dsdx % interior % hostData(2,1,i,j,1,iEl)* &
-                physVector % interior % hostData(2,i,j,iVar,iEl)
+              compVector % interior % hostData(1,i,j,ivar,iel) = &
+                geometry % dsdx % interior % hostData(1,1,i,j,1,iel)* &
+                physVector % interior % hostData(1,i,j,ivar,iel) + &
+                geometry % dsdx % interior % hostData(2,1,i,j,1,iel)* &
+                physVector % interior % hostData(2,i,j,ivar,iel)
 
-              compVector % interior % hostData(2,i,j,iVar,iEl) = &
-                geometry % dsdx % interior % hostData(1,2,i,j,1,iEl)* &
-                physVector % interior % hostData(1,i,j,iVar,iEl) + &
-                geometry % dsdx % interior % hostData(2,2,i,j,1,iEl)* &
-                physVector % interior % hostData(2,i,j,iVar,iEl)
+              compVector % interior % hostData(2,i,j,ivar,iel) = &
+                geometry % dsdx % interior % hostData(1,2,i,j,1,iel)* &
+                physVector % interior % hostData(1,i,j,ivar,iel) + &
+                geometry % dsdx % interior % hostData(2,2,i,j,1,iel)* &
+                physVector % interior % hostData(2,i,j,ivar,iel)
 
             END DO
+
+            DO iside = 1,4
+              compVector % boundary % hostData(1,j,ivar,iside,iel) = &
+                geometry % dsdx % boundary % hostData(1,1,j,1,iside,iel)* &
+                physVector % boundary % hostData(1,j,ivar,iside,iel) + &
+                geometry % dsdx % boundary % hostData(2,1,j,1,iside,iel)* &
+                physVector % boundary % hostData(2,j,ivar,iside,iel)
+
+              compVector % boundary % hostData(2,j,ivar,iside,iel) = &
+                geometry % dsdx % boundary % hostData(1,2,j,1,iside,iel)* &
+                physVector % boundary % hostData(1,j,ivar,iside,iel) + &
+                geometry % dsdx % boundary % hostData(2,2,j,1,iside,iel)* &
+                physVector % boundary % hostData(2,j,ivar,iside,iel)
+            ENDDO
+
           END DO
         END DO
       END DO

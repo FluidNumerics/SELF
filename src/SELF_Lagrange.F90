@@ -126,8 +126,14 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
     PROCEDURE,PRIVATE :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
 
+    GENERIC,PUBLIC :: VectorDGGradient_2D => VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
+    PROCEDURE,PRIVATE :: VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
+
     GENERIC,PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
+
+    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+    PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
 
     GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
     PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
@@ -356,6 +362,16 @@ MODULE SELF_Lagrange
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE VectorDGGradient_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="VectorDGGradient_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE VectorDGGradient_2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE VectorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
       bind(c,name="VectorDivergence_2D_gpu_wrapper")
       USE iso_c_binding
@@ -363,6 +379,16 @@ MODULE SELF_Lagrange
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDivergence_2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE VectorDGDivergence_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="VectorDGDivergence_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -1413,6 +1439,79 @@ CONTAINS
 
   END SUBROUTINE VectorGradient_2D_gpu
 
+  SUBROUTINE VectorDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
+    !
+    ! Input : Vector(1:2,...)
+    ! Output : Tensor(1:2,1:2,....)
+    !          > Tensor(1,1) = d/ds1( Vector(1,...) )
+    !          > Tensor(2,1) = d/ds1( Vector(2,...) )
+    !          > Tensor(1,2) = d/ds2( Vector(1,...) )
+    !          > Tensor(2,2) = d/ds2( Vector(2,...) )
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bf(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
+    REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
+
+            gradF(1,1,i,j,iVar,iEl) = 0.0_prec
+            gradF(2,1,i,j,iVar,iEl) = 0.0_prec
+            gradF(1,2,i,j,iVar,iEl) = 0.0_prec
+            gradF(2,2,i,j,iVar,iEl) = 0.0_prec
+            DO ii = 0,myPoly % N
+              gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+              gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+              gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+              gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
+            END DO
+            gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,j,iVar,2,iEl) -&
+                                                                 myPoly % bMatrix % hostData(i,0)*bf(1,j,iVar,4,iEl))/&
+                                                                myPoly % qWeights % hostData(i)
+
+            gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(2,j,iVar,2,iEl) -&
+                                                                 myPoly % bMatrix % hostData(i,0)*bf(2,j,iVar,4,iEl))/&
+                                                                myPoly % qWeights % hostData(i)
+
+            gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(1,i,iVar,3,iEl) -&
+                                                                 myPoly % bMatrix % hostData(j,0)*bf(1,i,iVar,1,iEl))/&
+                                                                myPoly % qWeights % hostData(j)
+
+            gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(j,1)*bf(2,i,iVar,3,iEl) -&
+                                                                 myPoly % bMatrix % hostData(j,0)*bf(2,i,iVar,1,iEl))/&
+                                                                myPoly % qWeights % hostData(j)
+
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE VectorDGGradient_2D_cpu
+
+  SUBROUTINE VectorDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: bf_dev
+    TYPE(c_ptr),INTENT(out)    :: gradF_dev
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+
+    CALL VectorDGGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+                                       myPoly % bMatrix % deviceData, &
+                                       myPoly % qWeights % deviceData, &
+                                       f_dev,bf_dev,gradF_dev,myPoly % N, &
+                                       nVariables,nElements)
+
+  END SUBROUTINE VectorDGGradient_2D_gpu
+
   SUBROUTINE VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1454,6 +1553,60 @@ CONTAINS
                                          nVariables,nElements)
 
   END SUBROUTINE VectorDivergence_2D_gpu
+
+  SUBROUTINE VectorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bF(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
+
+            dF(i,j,iVar,iEl) = 0.0_prec
+            DO ii = 0,myPoly % N
+              dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
+                                                    myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
+            END DO
+
+            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,iVar,2,iEl) - &
+                                                   myPoly % bMatrix % hostData(i,0)*bF(1,j,iVar,4,iEl))/&
+                                                  myPoly % qWeights % hostData(i) +&
+                                                  (myPoly % bMatrix % hostData(j,1)*bF(2,i,iVar,3,iEl) - &
+                                                   myPoly % bMatrix % hostData(j,0)*bF(2,i,iVar,1,iEl))/&
+                                                  myPoly % qWeights % hostData(j)
+
+
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE VectorDGDivergence_2D_cpu
+
+  SUBROUTINE VectorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: bF_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+
+    CALL VectorDGDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+                                           myPoly % bMatrix % deviceData, &
+                                           myPoly % qWeights % deviceData, &
+                                           f_dev,bF_dev,dF_dev,myPoly % N, &
+                                           nVariables,nElements)
+
+  END SUBROUTINE VectorDGDivergence_2D_gpu
 
   SUBROUTINE VectorCurl_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE

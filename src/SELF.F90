@@ -140,7 +140,8 @@ PROGRAM SELF
     CALL ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,functionChar,vectorChar,errorTolerance,error)
     errorCount = errorCount + error
 
-    CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,error)
+    CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+                               vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,error)
     errorCount = errorCount + error
 
     CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vectorChar,tensorChar,errorTolerance,error)
@@ -248,7 +249,8 @@ PROGRAM SELF
 
   ELSEIF (self_cli % run_command(group="v2d_gradient")) THEN
 
-    CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,error)
+    CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+                                vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,error)
     errorCount = errorCount + error
 
   ELSEIF (self_cli % run_command(group="v3d_gradient")) THEN

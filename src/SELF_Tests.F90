@@ -75,20 +75,20 @@ CONTAINS
     IF (dxds_error > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL]")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS]")
+      INFO("Status : [PASS]")
     END IF
 
     msg = "Numerical Error (xBound) : "//Float2Str(boundx_error)
     IF (boundx_error > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL]")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS]")
+      INFO("Status : [PASS]")
     END IF
 
   END SUBROUTINE BlockMesh1D_Test
@@ -167,10 +167,10 @@ CONTAINS
         IF (dxds_error(row,col) > tolerance) THEN
           error = error + 1
           ERROR(TRIM(msg))
-          ERROR("[FAIL]")
+          ERROR("Status : [FAIL]")
         ELSE
           INFO(TRIM(msg))
-          INFO("[PASS]")
+          INFO("Status : [PASS]")
         END IF
       END DO
     END DO
@@ -179,10 +179,10 @@ CONTAINS
     IF (J_error > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL]")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS]")
+      INFO("Status : [PASS]")
     END IF
 
   END SUBROUTINE BlockMesh2D_Test
@@ -271,10 +271,10 @@ CONTAINS
         IF (dxds_error(row,col) > tolerance) THEN
           error = error + 1
           ERROR(TRIM(msg))
-          ERROR("[FAIL]")
+          ERROR("Status : [FAIL]")
         ELSE
           INFO(TRIM(msg))
-          INFO("[PASS]")
+          INFO("Status : [PASS]")
         END IF
       END DO
     END DO
@@ -283,10 +283,10 @@ CONTAINS
     IF (J_error > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL]")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS]")
+      INFO("Status : [PASS]")
     END IF
 
   END SUBROUTINE BlockMesh3D_Test
@@ -372,10 +372,10 @@ CONTAINS
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL]")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS]")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -464,11 +464,11 @@ CONTAINS
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL]"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS]"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
@@ -557,14 +557,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = dfError % AbsMaxInterior( )
 
-    msg = "Max ScalarDerivative_1D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL]")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS]")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -666,14 +666,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = fError % AbsMaxInterior( )
 
-    msg = "Max ScalarGridInterp_2D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] ScalarGridInterp_2D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] ScalarGridInterp_2D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -763,15 +763,15 @@ CONTAINS
     maxErrors = fError % AbsMaxBoundary( )
 
     DO iside = 1,4
-      msg = "Max ScalarBoundaryInterp_2D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL] ScalarBoundaryInterp_2D Test"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS] ScalarBoundaryInterp_2D Test"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
@@ -871,14 +871,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = dfError % AbsMaxInterior( )
 
-    msg = "Max ScalarGradient_2D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] ScalarGradient_2D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] ScalarGradient_2D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -987,14 +987,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = fError % AbsMaxInterior( )
 
-    msg = "Max VectorGridInterp_2D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] VectorGridInterp_2D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] VectorGridInterp_2D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -1090,15 +1090,15 @@ CONTAINS
     maxErrors = fError % AbsMaxBoundary( )
 
     DO iside = 1,4
-      msg = "Max VectorBoundaryInterp_2D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL] VectorBoundaryInterp_2D Test"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS] VectorBoundaryInterp_2D Test"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
@@ -1112,7 +1112,7 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp2D_Test
 
-  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,vectorChar,tensorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient2D_Test"
     IMPLICIT NONE
@@ -1120,6 +1120,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
@@ -1137,7 +1138,7 @@ CONTAINS
     TYPE(MappedTensor2D) :: workTensor
     TYPE(MappedTensor2D) :: dfInterp,dfActual,dfError
     REAL(prec) :: maxErrors(1:nvar)
-    INTEGER :: iel,i,j,ivar,row,col
+    INTEGER :: iel,i,j,ivar,row,col,iside
 
     error = 0
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
@@ -1199,25 +1200,33 @@ CONTAINS
             ENDDO
 
           ENDDO
+
+          DO iside = 1,4
+            DO row = 1,2
+              f % boundary % hostData(row,j,ivar,iside,iel) = &
+                fEq(row) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+            ENDDO
+          ENDDO
+
         ENDDO
       ENDDO
     ENDDO
 
     ! Run the grid interpolation
-    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,.FALSE.)
+    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
     maxErrors = dfError % AbsMaxInterior( )
 
-    msg = "Max VectorGradient_2D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] VectorGradient_2D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] VectorGradient_2D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -1335,14 +1344,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = fError % AbsMaxInterior( )
 
-    msg = "Max TensorGridInterp_2D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] TensorGridInterp_2D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] TensorGridInterp_2D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -1445,15 +1454,15 @@ CONTAINS
     maxErrors = fError % AbsMaxBoundary( )
 
     DO iside = 1,4
-      msg = "Max TensorBoundaryInterp_2D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL] TensorBoundaryInterp_2D Test"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS] TensorBoundaryInterp_2D Test"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
@@ -1562,14 +1571,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = fError % AbsMaxInterior( )
 
-    msg = "Max GridInterp_3D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] GridInterp_3D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] GridInterp_3D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -1662,15 +1671,15 @@ CONTAINS
     maxErrors = fError % AbsMaxBoundary( )
 
     DO iside = 1,6
-      msg = "Max ScalarBoundaryInterp_3D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL] ScalarBoundaryInterp_3D Test"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS] ScalarBoundaryInterp_3D Test"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
@@ -1772,14 +1781,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = dfError % AbsMaxInterior( )
 
-    msg = "Max ScalarGradient_3D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] ScalarGradient_3D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] ScalarGradient_3D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -1894,14 +1903,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = fError % AbsMaxInterior( )
 
-    msg = "Max GridInterp_3D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] VectorGridInterp_3D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] VectorGridInterp_3D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -2000,15 +2009,15 @@ CONTAINS
     maxErrors = fError % AbsMaxBoundary( )
 
     DO iside = 1,6
-      msg = "Max VectorBoundaryInterp_3D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL] VectorBoundaryInterp_3D Test"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS] VectorBoundaryInterp_3D Test"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
@@ -2123,14 +2132,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = dfError % AbsMaxInterior( )
 
-    msg = "Max VectorGradient_3D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] VectorGradient_3D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] VectorGradient_3D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -2254,14 +2263,14 @@ CONTAINS
     ! Calculate Absolute Maximum Error
     maxErrors = fError % AbsMaxInterior( )
 
-    msg = "Max TensorGridInterp_3D Error : "//Float2Str(maxErrors(1))
+    msg = "Numerical Error : "//Float2Str(maxErrors(1))
     IF (maxErrors(1) > tolerance) THEN
       error = error + 1
       ERROR(TRIM(msg))
-      ERROR("[FAIL] TensorGridInterp_3D Test")
+      ERROR("Status : [FAIL]")
     ELSE
       INFO(TRIM(msg))
-      INFO("[PASS] TensorGridInterp_3D Test")
+      INFO("Status : [PASS]")
     END IF
 
     ! Clean up
@@ -2367,15 +2376,15 @@ CONTAINS
     maxErrors = fError % AbsMaxBoundary( )
 
     DO iside = 1,6
-      msg = "Max TensorBoundaryInterp_3D Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
+      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
       IF (maxErrors(1,iSide) > tolerance) THEN
         error = error + 1
         ERROR(TRIM(msg))
-        msg = "[FAIL] TensorBoundaryInterp_3D Test"
+        msg = "Status : [FAIL]"
         ERROR(TRIM(msg))
       ELSE
         INFO(TRIM(msg))
-        msg = "[PASS] TensorBoundaryInterp_3D Test"
+        msg = "Status : [PASS]"
         INFO(TRIM(msg))
       END IF
     ENDDO
