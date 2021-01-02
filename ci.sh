@@ -251,6 +251,22 @@
                     --target-degree 7 \
                     --target-quadrature "gauss" \
                     --gpu-accel "false" \
+                    --derivative-type "strong" \
+                    s3d_gradient
+
+/apps/self/bin/self --tolerance "7.9E-4" \
+                    --function "f=1.0" \
+                    --vector-x "gx=0.0" \
+                    --vector-y "gy=0.0" \
+                    --vector-z "gz=0.0" \
+                    --nvar 5 \
+                    --nelements 10 \
+                    --control-degree 2 \
+                    --control-quadrature "gauss" \
+                    --target-degree 7 \
+                    --target-quadrature "gauss" \
+                    --gpu-accel "false" \
+                    --derivative-type "dg" \
                     s3d_gradient
 
 
@@ -336,6 +352,30 @@
                     --target-degree 7 \
                     --target-quadrature "gauss" \
                     --gpu-accel "false" \
+                    --derivative-type "strong" \
+                    v3d_gradient
+
+/apps/self/bin/self --tolerance "7.9E-4" \
+                    --vector-x "vx=1.0" \
+                    --vector-y "vy=1.0" \
+                    --vector-z "vz=1.0" \
+                    --tensor-11 "vxx=0.0" \
+                    --tensor-12 "vxy=0.0" \
+                    --tensor-13 "vxz=0.0" \
+                    --tensor-21 "vyx=0.0" \
+                    --tensor-22 "vyy=0.0" \
+                    --tensor-23 "vyz=0.0" \
+                    --tensor-31 "vzx=0.0" \
+                    --tensor-32 "vzy=0.0" \
+                    --tensor-33 "vzz=0.0" \
+                    --nvar 5 \
+                    --nelements 10 \
+                    --control-degree 2 \
+                    --control-quadrature "gauss" \
+                    --target-degree 7 \
+                    --target-quadrature "gauss" \
+                    --gpu-accel "false" \
+                    --derivative-type "dg" \
                     v3d_gradient
 
 /apps/self/bin/self --tolerance "1.0E-3" \

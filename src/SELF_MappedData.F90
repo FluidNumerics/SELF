@@ -401,8 +401,15 @@ CONTAINS
                                                                    scalar % interior % hostData(i,j,iVar,iEl)
 
             END DO
+          END DO
+        END DO
+      END DO
 
-            DO iside = 1,4
+      ! Boundary Terms
+      DO iEl = 1,scalar % nElem
+        DO iside = 1,4
+          DO iVar = 1,scalar % nVar
+            DO j = 0,scalar % N
               workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                    hostData(1,1,j,1,iside,iEl)* &
                                                                    scalar % boundary % hostData(j,iVar,iside,iEl)
@@ -420,10 +427,9 @@ CONTAINS
                                                                    scalar % boundary % hostData(j,iVar,iside,iEl)
 
             ENDDO
-
-          END DO
-        END DO
-      END DO
+          ENDDO
+        ENDDO
+      ENDDO
 
     END IF
 
@@ -463,7 +469,7 @@ CONTAINS
 
   END SUBROUTINE JacobianWeight_MappedScalar2D
 
-  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator
     !
     ! Calculates the gradient of a scalar 3D function using the conservative form of the
@@ -477,19 +483,40 @@ CONTAINS
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(MappedVector3D),INTENT(inout) :: gradF
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
-    IF (gpuAccel) THEN
-      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
-                                                     gradF % interior % deviceData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
-    ELSE
-      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
-                                                     gradF % interior % hostData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         gradF % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
+                                                         workTensor % boundary % hostData, &
+                                                         gradF % interior % hostData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+                                                       gradF % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
+                                                       gradF % interior % hostData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      END IF
+
     END IF
     CALL gradF % JacobianWeight(geometry,gpuAccel)
 
@@ -564,7 +591,17 @@ CONTAINS
                                                                        scalar % interior % hostData(i,j,k,iVar,iEl)
 
               END DO
-              DO iside = 1,6
+            END DO
+          END DO
+        END DO
+      END DO
+
+      ! Boundary Term
+      DO iEl = 1,scalar % nElem
+        DO iside = 1,6
+          DO iVar = 1,scalar % nVar
+            DO k = 0,scalar % N
+              DO j = 0,scalar % N
                 ! Get the x-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
@@ -609,10 +646,10 @@ CONTAINS
 
 
               ENDDO
-            END DO
-          END DO
-        END DO
-      END DO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
 
     END IF
 
@@ -786,7 +823,15 @@ CONTAINS
                 scalar % interior % hostData(i,j,jvar,iel) = vector % interior % hostData(row,i,j,ivar,iel)
               ENDDO
             ENDDO
-            DO iside = 1,4
+          ENDDO
+        ENDDO
+      ENDDO
+
+      ! Boundary Terms
+      DO iel = 1,vector % nelem
+        DO iside = 1,4
+          DO ivar = 1,vector % nvar
+            DO j = 0,vector % N
               DO row = 1,2
                 jvar = row + 2*(ivar-1)
                 scalar % boundary % hostData(j,jvar,iside,iel) = vector % boundary % hostData(row,j,ivar,iside,iel)
@@ -795,6 +840,7 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+
     ENDIF
 
   END SUBROUTINE MapToScalar_MappedVector2D
@@ -805,7 +851,7 @@ CONTAINS
     TYPE(MappedTensor2D),INTENT(inout) :: tensor
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: row,col,i,j,ivar,jvar,iel
+    INTEGER :: row,col,i,j,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
       PRINT*, 'GPU Acceleration of MapToTensor_MappedVector2D not supported yet!'
@@ -821,10 +867,26 @@ CONTAINS
                 ENDDO
               ENDDO
             ENDDO
-            ! TO DO : Map boundary terms
           ENDDO
         ENDDO
       ENDDO
+
+      ! Boundary Terms
+      DO iel = 1,tensor % nelem
+        DO iside = 1,4
+          DO ivar = 1,tensor % nvar
+            DO j = 0,tensor % N
+              DO col = 1,2
+                DO row = 1,2
+                  jvar = row + 2*(ivar-1)
+                  tensor % boundary % hostData(row,col,j,ivar,iside,iel) = vector % interior % hostData(col,j,jvar,iside,iel)
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
     ENDIF
   END SUBROUTINE MapToTensor_MappedVector2D
 
@@ -872,8 +934,15 @@ CONTAINS
                 physVector % interior % hostData(2,i,j,ivar,iel)
 
             END DO
+          END DO
+        END DO
+      END DO
 
-            DO iside = 1,4
+      ! Boundary Terms
+      DO iel = 1,physVector % nElem
+        DO iside = 1,4
+          DO ivar = 1,physVector % nVar
+            DO j = 0,physVector % N
               compVector % boundary % hostData(1,j,ivar,iside,iel) = &
                 geometry % dsdx % boundary % hostData(1,1,j,1,iside,iel)* &
                 physVector % boundary % hostData(1,j,ivar,iside,iel) + &
@@ -886,10 +955,10 @@ CONTAINS
                 geometry % dsdx % boundary % hostData(2,2,j,1,iside,iel)* &
                 physVector % boundary % hostData(2,j,ivar,iside,iel)
             ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
 
-          END DO
-        END DO
-      END DO
     END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector2D
@@ -977,7 +1046,7 @@ CONTAINS
 
   END SUBROUTINE Divergence_MappedVector3D
 
-  SUBROUTINE Gradient_MappedVector3D(vector,workScalar,workVector,workTensor,geometry,gradF,gpuAccel)
+  SUBROUTINE Gradient_MappedVector3D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator - (Conservative Form)
     !
     ! Calculates the gradient of a scalar 3D function using the conservative form of the
@@ -993,22 +1062,43 @@ CONTAINS
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor ! (tensor) nvar = 3*nvar
     TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(MappedTensor3D),INTENT(inout) :: gradF
+    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL vector % MapToScalar(workScalar,gpuAccel)
 
     CALL workScalar % ContravariantWeight(geometry,workTensor,gpuAccel)
 
-    IF (gpuAccel) THEN
-      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
-                                                     workVector % interior % deviceData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
-    ELSE
-      CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
-                                                     workVector % interior % hostData, &
-                                                     workTensor % nVar, &
-                                                     workTensor % nElem)
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         workVector % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
+                                                         workTensor % boundary % hostData, &
+                                                         workVector % interior % hostData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+                                                       workVector % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
+        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
+                                                       workVector % interior % hostData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      END IF
+
     END IF
 
     CALL workVector % MapToTensor(gradF,gpuAccel)
@@ -1022,7 +1112,7 @@ CONTAINS
     TYPE(MappedScalar3D),INTENT(inout) :: scalar
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: row,i,j,k,ivar,jvar,iel
+    INTEGER :: row,i,j,k,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
       PRINT*, 'GPU Acceleration of MapToScalar_MappedVector3D not supported yet!'
@@ -1037,11 +1127,27 @@ CONTAINS
                   scalar % interior % hostData(i,j,k,jvar,iel) = vector % interior % hostData(row,i,j,k,ivar,iel)
                 ENDDO
               ENDDO
-              ! TO DO : Map boundary terms
             ENDDO
           ENDDO
         ENDDO
       ENDDO
+
+      ! Boundary Terms
+      DO iel = 1,vector % nelem
+        DO iside = 1,6
+          DO ivar = 1,vector % nvar
+            DO k = 0,vector % N
+              DO j = 0,vector % N
+                DO row = 1,3
+                  jvar = row + 3*(ivar-1)
+                  scalar % boundary % hostData(j,k,jvar,iside,iel) = vector % boundary % hostData(row,j,k,ivar,iside,iel)
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
     ENDIF
   END SUBROUTINE MapToScalar_MappedVector3D
 
@@ -1051,7 +1157,7 @@ CONTAINS
     TYPE(MappedTensor3D),INTENT(inout) :: tensor
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: row,col,i,j,k,ivar,jvar,iel
+    INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
       PRINT*, 'GPU Acceleration of MapToTensor_MappedVector3D not supported yet!'
@@ -1068,11 +1174,29 @@ CONTAINS
                   ENDDO
                 ENDDO
               ENDDO
-              ! TO DO : Map boundary terms
             ENDDO
           ENDDO
         ENDDO
       ENDDO
+
+      ! Boundary Terms
+      DO iel = 1,tensor % nelem
+        DO iside = 1,6
+          DO ivar = 1,tensor % nvar
+            DO k = 0,tensor % N
+              DO j = 0,tensor % N
+                DO col = 1,3
+                  DO row = 1,3
+                    jvar = row + 3*(ivar-1)
+                    tensor % boundary % hostData(row,col,j,k,ivar,iside,iel) = vector % interior % hostData(col,j,k,jvar,iside,iel)
+                  ENDDO
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
     ENDIF
   END SUBROUTINE MapToTensor_MappedVector3D
 
@@ -1146,8 +1270,17 @@ CONTAINS
                                                                      physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
               END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-              DO iside = 1,6
+      ! Boundary Terms
+      DO iEl = 1,physVector % nElem
+        DO iside = 1,6
+          DO iVar = 1,physVector % nVar
+            DO k = 0,physVector % N
+              DO j = 0,physVector % N
                 compVector % boundary % hostData(1,j,k,iVar,iside,iEl) = geometry % dsdx % &
                                                                      boundary % hostData(1,1,j,k,1,iside,iEl)* &
                                                                      physVector % boundary % &
@@ -1185,10 +1318,10 @@ CONTAINS
                                                                      boundary % hostData(3,3,j,k,1,iside,iEl)* &
                                                                      physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
               ENDDO
-            END DO
-          END DO
-        END DO
-      END DO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
     END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector3D

@@ -162,6 +162,9 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: TensorDivergence_3D => TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
     PROCEDURE,PRIVATE :: TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
 
+    GENERIC,PUBLIC :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+    PROCEDURE,PRIVATE :: TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+
     PROCEDURE,PRIVATE :: CalculateBarycentricWeights
     PROCEDURE,PRIVATE :: CalculateInterpolationMatrix
     PROCEDURE,PRIVATE :: CalculateDerivativeMatrix
@@ -482,6 +485,16 @@ MODULE SELF_Lagrange
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE TensorDivergence_3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE TensorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="TensorDGDivergence_3D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE TensorDGDivergence_3D_gpu_wrapper
   END INTERFACE
 
 CONTAINS
@@ -2119,6 +2132,99 @@ CONTAINS
                                          nVariables,nElements)
 
   END SUBROUTINE TensorDivergence_3D_gpu
+
+  SUBROUTINE TensorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+    ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bF(1:3,1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
+    REAL(prec),INTENT(out) :: dF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,k,ii,iVar,iEl
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO k = 0,myPoly % N
+          DO j = 0,myPoly % N
+            DO i = 0,myPoly % N
+
+              dF(1,i,j,k,iVar,iEl) = 0.0_prec
+              dF(2,i,j,k,iVar,iEl) = 0.0_prec
+              dF(3,i,j,k,iVar,iEl) = 0.0_prec
+              DO ii = 0,myPoly % N
+                dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,i)*f(1,1,ii,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,j)*f(2,1,i,ii,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,k)*f(3,1,i,j,ii,iVar,iEl)
+
+                dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,i)*f(1,2,ii,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,k)*f(3,2,i,j,ii,iVar,iEl)
+
+                dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,i)*f(1,3,ii,j,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,j)*f(2,3,i,ii,k,iVar,iEl) + &
+                                       myPoly % dgMatrix % hostData(ii,k)*f(3,3,i,j,ii,iVar,iEl)
+              END DO
+
+              dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,1,j,k,iVar,3,iEl) + & ! east
+                                                         myPoly % bMatrix % hostData(i,0)*bF(1,1,j,k,iVar,5,iEl))/&  ! west
+                                                        myPoly % qWeights % hostData(i) +&
+                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,1,i,k,iVar,4,iEl) + & ! north
+                                                         myPoly % bMatrix % hostData(j,0)*bF(2,1,i,k,iVar,2,iEl))/&  ! south
+                                                        myPoly % qWeights % hostData(j) +&
+                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,1,i,j,iVar,6,iEl) + & ! top
+                                                         myPoly % bMatrix % hostData(k,0)*bF(3,1,i,j,iVar,1,iEl))/&  ! bottom
+                                                        myPoly % qWeights % hostData(k)
+
+              dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,2,j,k,iVar,3,iEl) + & ! east
+                                                         myPoly % bMatrix % hostData(i,0)*bF(1,2,j,k,iVar,5,iEl))/&  ! west
+                                                        myPoly % qWeights % hostData(i) +&
+                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,2,i,k,iVar,4,iEl) + & ! north
+                                                         myPoly % bMatrix % hostData(j,0)*bF(2,2,i,k,iVar,2,iEl))/&  ! south
+                                                        myPoly % qWeights % hostData(j) +&
+                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,2,i,j,iVar,6,iEl) + & ! top
+                                                         myPoly % bMatrix % hostData(k,0)*bF(3,2,i,j,iVar,1,iEl))/&  ! bottom
+                                                        myPoly % qWeights % hostData(k)
+
+              dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,3,j,k,iVar,3,iEl) + & ! east
+                                                         myPoly % bMatrix % hostData(i,0)*bF(1,3,j,k,iVar,5,iEl))/&  ! west
+                                                        myPoly % qWeights % hostData(i) +&
+                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,3,i,k,iVar,4,iEl) + & ! north
+                                                         myPoly % bMatrix % hostData(j,0)*bF(2,3,i,k,iVar,2,iEl))/&  ! south
+                                                        myPoly % qWeights % hostData(j) +&
+                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,3,i,j,iVar,6,iEl) + & ! top
+                                                         myPoly % bMatrix % hostData(k,0)*bF(3,3,i,j,iVar,1,iEl))/&  ! bottom
+                                                        myPoly % qWeights % hostData(k)
+
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE TensorDGDivergence_3D_cpu
+
+  SUBROUTINE TensorDGDivergence_3D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: bF_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+
+    CALL TensorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+                                           myPoly % bMatrix % deviceData, &
+                                           myPoly % qWeights % deviceData, &
+                                           f_dev,bF_dev,dF_dev,myPoly % N, &
+                                           nVariables,nElements)
+
+  END SUBROUTINE TensorDGDivergence_3D_gpu
 
   ! /////////////////////////////// !
   ! Boundary Interpolation Routines !

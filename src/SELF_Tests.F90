@@ -1810,7 +1810,7 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp3D_Test
 
-  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,fChar,gradientChar,tolerance,error)
+  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,fChar,gradientChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient3D_Test"
     IMPLICIT NONE
@@ -1818,6 +1818,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
@@ -1833,7 +1834,7 @@ CONTAINS
     TYPE(MappedTensor3D) :: workTensor
     TYPE(MappedVector3D) :: dfInterp,dfActual,dfError
     REAL(prec) :: maxErrors(1:nvar)
-    INTEGER :: iel,i,j,k,ivar
+    INTEGER :: iel,i,j,k,ivar,iside
 
     error = 0
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
@@ -1869,30 +1870,34 @@ CONTAINS
     gzeq = EquationParser(gradientChar(3), (/'x','y','z'/))
 
     ! Load the control function
-     DO iel = 1, controlGeometry % nElem
-       DO ivar = 1, nvar
-         DO k = 0, cqDegree
-           DO j = 0, cqDegree
-             DO i = 0, cqDegree
-               f % interior % hostData(i,j,k,ivar,iel) = &
-                 feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+    DO iel = 1, controlGeometry % nElem
+      DO ivar = 1, nvar
+        DO k = 0, cqDegree
+          DO j = 0, cqDegree
+            DO i = 0, cqDegree
+              f % interior % hostData(i,j,k,ivar,iel) = &
+                feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
 
-               dfActual % interior % hostData(1,i,j,k,ivar,iel) = &
-                 gxeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              dfActual % interior % hostData(1,i,j,k,ivar,iel) = &
+                gxeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
 
-               dfActual % interior % hostData(2,i,j,k,ivar,iel) = &
-                 gyeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+              dfActual % interior % hostData(2,i,j,k,ivar,iel) = &
+                gyeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
 
-               dfActual % interior % hostData(3,i,j,k,ivar,iel) = &
-                 gzeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-             ENDDO
-           ENDDO
-         ENDDO
-       ENDDO
-     ENDDO
+              dfActual % interior % hostData(3,i,j,k,ivar,iel) = &
+                gzeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+            ENDDO
+            DO iside = 1,6
+             f % boundary % hostData(j,k,ivar,iside,iel) = &
+               feq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
 
     ! Run the grid interpolation
-    CALL f % Gradient(workTensor,controlGeometry,dfInterp,.FALSE.)
+    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -2148,7 +2153,7 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp3D_Test
 
-  SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+  SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,vectorChar,tensorChar,tolerance,error)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient3D_Test"
     IMPLICIT NONE
@@ -2156,6 +2161,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
@@ -2173,7 +2179,7 @@ CONTAINS
     TYPE(MappedTensor3D) :: workTensor
     TYPE(MappedTensor3D) :: dfInterp,dfActual,dfError
     REAL(prec) :: maxErrors(1:nvar)
-    INTEGER :: iel,i,j,k,ivar,row,col
+    INTEGER :: iel,i,j,k,ivar,row,col,iside
 
     error = 0
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
@@ -2237,13 +2243,19 @@ CONTAINS
               ENDDO
 
             ENDDO
+            DO iside = 1,6
+              DO row = 1,3
+                f % boundary % hostData(row,j,k,ivar,iside,iel) = &
+                  feq(row) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+              ENDDO
+            ENDDO
           ENDDO
         ENDDO
       ENDDO
     ENDDO
 
     ! Run the grid interpolation
-    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,.FALSE.)
+    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
