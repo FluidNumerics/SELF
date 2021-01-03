@@ -291,7 +291,7 @@ CONTAINS
 
   END SUBROUTINE BlockMesh3D_Test
 
-  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp1D_Test"
     IMPLICIT NONE
@@ -303,6 +303,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -361,8 +362,17 @@ CONTAINS
        ENDDO
      ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -390,7 +400,8 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp1D_Test
 
-  SUBROUTINE ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+  SUBROUTINE ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         functionChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp1D_Test"
     IMPLICIT NONE
@@ -402,6 +413,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -452,8 +464,17 @@ CONTAINS
        ENDDO
      ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
@@ -482,7 +503,8 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp1D_Test
 
-  SUBROUTINE ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,fChar,dfChar,tolerance,error)
+  SUBROUTINE ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                     fChar,dfChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarDerivative1D_Test"
     IMPLICIT NONE
@@ -496,6 +518,7 @@ CONTAINS
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(*),INTENT(in) :: dfChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -550,8 +573,17 @@ CONTAINS
        ENDDO
      ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Derivative(controlGeometry,dfInterp,dForm,.FALSE.)
+    CALL f % Derivative(controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -577,7 +609,8 @@ CONTAINS
 
   END SUBROUTINE ScalarDerivative1D_Test
 
-  SUBROUTINE ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+  SUBROUTINE ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                 functionChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp2D_Test"
     IMPLICIT NONE
@@ -589,6 +622,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -659,8 +693,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -688,7 +731,8 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp2D_Test
 
-  SUBROUTINE ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+  SUBROUTINE ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         functionChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -700,6 +744,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -755,8 +800,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
@@ -785,7 +839,8 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp2D_Test
 
-  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,fChar,gradientChar,tolerance,error)
+  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                   fChar,gradientChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D_Test"
     IMPLICIT NONE
@@ -799,6 +854,7 @@ CONTAINS
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:2)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -864,8 +920,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
+    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -892,7 +957,8 @@ CONTAINS
 
   END SUBROUTINE ScalarGradient2D_Test
 
-  SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
+  SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                 vectorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp2D_Test"
     IMPLICIT NONE
@@ -904,6 +970,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -980,8 +1047,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -1009,7 +1085,8 @@ CONTAINS
 
   END SUBROUTINE VectorInterp2D_Test
 
-  SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
+  SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         vectorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -1021,6 +1098,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1083,7 +1161,16 @@ CONTAINS
     ENDDO
 
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
@@ -1112,7 +1199,8 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp2D_Test
 
-  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                   vectorChar,tensorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient2D_Test"
     IMPLICIT NONE
@@ -1126,6 +1214,7 @@ CONTAINS
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1212,8 +1301,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
+    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -1242,7 +1340,8 @@ CONTAINS
 
   END SUBROUTINE VectorGradient2D_Test
 
-  SUBROUTINE VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,vectorChar,scalarChar,tolerance,error)
+  SUBROUTINE VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                     vectorChar,scalarChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence2D_Test"
     IMPLICIT NONE
@@ -1256,6 +1355,7 @@ CONTAINS
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     CHARACTER(240),INTENT(in) :: scalarChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1330,9 +1430,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,.FALSE.)
-!      physVector,       compVector,geometry,       divVector,dForm,gpuAccel)
+    CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost( )
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -1359,7 +1467,8 @@ CONTAINS
 
   END SUBROUTINE VectorDivergence2D_Test
 
-  SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
+  SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                 tensorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp2D_Test"
     IMPLICIT NONE
@@ -1371,6 +1480,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1454,8 +1564,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -1483,7 +1602,8 @@ CONTAINS
 
   END SUBROUTINE TensorInterp2D_Test
 
-  SUBROUTINE TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
+  SUBROUTINE TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         tensorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "TensorBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -1495,6 +1615,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1563,8 +1684,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
@@ -1593,7 +1723,8 @@ CONTAINS
 
   END SUBROUTINE TensorBoundaryInterp2D_Test
 
-  SUBROUTINE ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+  SUBROUTINE ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                 functionChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp3D_Test"
     IMPLICIT NONE
@@ -1605,6 +1736,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1681,8 +1813,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -1710,7 +1851,8 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp3D_Test
 
-  SUBROUTINE ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,error)
+  SUBROUTINE ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         functionChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -1722,6 +1864,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1780,8 +1923,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
@@ -1810,7 +1962,8 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp3D_Test
 
-  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,fChar,gradientChar,tolerance,error)
+  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                   fChar,gradientChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient3D_Test"
     IMPLICIT NONE
@@ -1824,6 +1977,7 @@ CONTAINS
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:3)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -1896,8 +2050,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
+    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -1924,7 +2087,8 @@ CONTAINS
 
   END SUBROUTINE ScalarGradient3D_Test
 
-  SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
+  SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                 vectorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp3D_Test"
     IMPLICIT NONE
@@ -1936,6 +2100,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -2018,8 +2183,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -2047,7 +2221,8 @@ CONTAINS
 
   END SUBROUTINE VectorInterp3D_Test
 
-  SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,vectorChar,tolerance,error)
+  SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         vectorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -2059,6 +2234,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -2123,8 +2299,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
@@ -2153,7 +2338,8 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp3D_Test
 
-  SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,vectorChar,tensorChar,tolerance,error)
+  SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                   vectorChar,tensorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient3D_Test"
     IMPLICIT NONE
@@ -2167,6 +2353,7 @@ CONTAINS
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -2254,8 +2441,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,.FALSE.)
+    CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -2284,7 +2480,8 @@ CONTAINS
 
   END SUBROUTINE VectorGradient3D_Test
 
-  SUBROUTINE VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,vectorChar,scalarChar,tolerance,error)
+  SUBROUTINE VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+                                     vectorChar,scalarChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence3D_Test"
     IMPLICIT NONE
@@ -2298,6 +2495,7 @@ CONTAINS
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: scalarChar
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -2375,8 +2573,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,.FALSE.)
+    CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
+
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -2403,7 +2610,8 @@ CONTAINS
 
   END SUBROUTINE VectorDivergence3D_Test
 
-  SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
+  SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                 tensorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp3D_Test"
     IMPLICIT NONE
@@ -2415,6 +2623,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -2504,8 +2713,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % GridInterp(fInterp,.FALSE.)
+    CALL f % GridInterp(fInterp,gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
+
     fError = fActual - fInterp
 
     ! Calculate Absolute Maximum Error
@@ -2533,7 +2751,8 @@ CONTAINS
 
   END SUBROUTINE TensorInterp3D_Test
 
-  SUBROUTINE TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,tensorChar,tolerance,error)
+  SUBROUTINE TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+                                         tensorChar,tolerance,gpuAccel,error)
 #undef __FUNC__
 #define __FUNC__ "TensorBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -2545,6 +2764,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
     REAL(prec),INTENT(in) :: tolerance
+    LOGICAL,INTENT(in) :: gpuAccel
     INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
@@ -2616,8 +2836,17 @@ CONTAINS
       ENDDO
     ENDDO
 
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
+
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(.FALSE.)
+    CALL f % BoundaryInterp(gpuAccel)
+
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
+
     fError = fActual - f
 
     ! Calculate Absolute Maximum Error
