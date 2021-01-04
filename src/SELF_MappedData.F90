@@ -56,11 +56,11 @@ MODULE SELF_MappedData
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
-!    GENERIC,PUBLIC :: Curl => Curl_MappedVector2D
+    GENERIC,PUBLIC :: Curl => Curl_MappedVector2D
 
     PROCEDURE,PRIVATE :: Divergence_MappedVector2D
     PROCEDURE,PRIVATE :: Gradient_MappedVector2D
-!    PROCEDURE,PRIVATE :: Curl_MappedVector2D
+    PROCEDURE,PRIVATE :: Curl_MappedVector2D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
     PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedVector2D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector2D
@@ -73,10 +73,10 @@ MODULE SELF_MappedData
   CONTAINS
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
-!    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
+    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: Divergence_MappedVector3D
-!    PROCEDURE,PRIVATE :: Curl_MappedVector3D
+    PROCEDURE,PRIVATE :: Curl_MappedVector3D
     PROCEDURE,PRIVATE :: Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
     PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedVector3D
@@ -213,6 +213,26 @@ MODULE SELF_MappedData
       TYPE(c_ptr) :: tensor,jacobian
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateCurl_MappedTensor2D_gpu_wrapper(dfdx,curlF,N,nVar,nEl) &
+      bind(c,name="CalculateCurl_MappedTensor2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dfdx,curlF
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE CalculateCurl_MappedTensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateCurl_MappedTensor3D_gpu_wrapper(dfdx,curlF,N,nVar,nEl) &
+      bind(c,name="CalculateCurl_MappedTensor3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dfdx,curlF
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE CalculateCurl_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
 
@@ -743,9 +763,7 @@ CONTAINS
   END SUBROUTINE Divergence_MappedVector2D
 
   SUBROUTINE Gradient_MappedVector2D(vector,workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
-    ! Strong Form Operator - (Conservative Form)
-    !
-    ! Calculates the gradient of a scalar 2D function using the conservative form of the
+    ! Calculates the gradient of a vector 2D function using the conservative form of the
     ! mapped gradient operator
     !
     ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
@@ -802,6 +820,45 @@ CONTAINS
     CALL gradF % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Gradient_MappedVector2D
+
+  SUBROUTINE Curl_MappedVector2D(vector,workScalar,workVector,workTensor,geometry,gradF,curlF,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector2D),INTENT(in) :: vector
+    TYPE(MappedScalar2D),INTENT(inout) :: workScalar ! (scalar) nvar = 2*nvar
+    TYPE(MappedVector2D),INTENT(inout) :: workVector ! (vector) nvar = 2*nvar
+    TYPE(MappedTensor2D),INTENT(inout) :: workTensor ! (tensor) nvar = 2*nvar
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    TYPE(MappedTensor2D),INTENT(inout) :: gradF
+    TYPE(MappedScalar2D),INTENT(inout) :: curlF
+    INTEGER,INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: i,j,ivar,iel
+
+    CALL vector % Gradient(workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+
+      CALL CalculateCurl_MappedTensor2D_gpu_wrapper(gradF % interior % deviceData, &
+                                                    curlF % interior % deviceData, &
+                                                    gradF % N, gradF % nVar, gradF % nElem)
+
+    ELSE
+
+      DO iel = 1,vector % nelem
+        DO ivar = 1,vector % nvar
+          DO j = 0,vector % N
+            DO i = 0,vector % N
+              curlF % interior % hostData(i,j,ivar,iel) = workTensor % interior % hostData(2,1,i,j,ivar,iel) -&
+                                                          workTensor % interior % hostData(1,2,i,j,ivar,iel)
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
+  END SUBROUTINE Curl_MappedVector2D
 
   SUBROUTINE MapToScalar_MappedVector2D(vector,scalar,gpuAccel)
     IMPLICIT NONE
@@ -1105,6 +1162,53 @@ CONTAINS
     CALL gradF % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Gradient_MappedVector3D
+
+  SUBROUTINE Curl_MappedVector3D(vector,workScalar,workVector,workTensor,geometry,gradF,curlF,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(in) :: vector
+    TYPE(MappedScalar3D),INTENT(inout) :: workScalar ! (scalar) nvar = 3*nvar
+    TYPE(MappedVector3D),INTENT(inout) :: workVector ! (vector) nvar = 3*nvar
+    TYPE(MappedTensor3D),INTENT(inout) :: workTensor ! (tensor) nvar = 3*nvar
+    TYPE(SEMHex),INTENT(in) :: geometry
+    TYPE(MappedTensor3D),INTENT(inout) :: gradF
+    TYPE(MappedVector3D),INTENT(inout) :: curlF
+    INTEGER,INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: i,j,k,ivar,iel
+
+    CALL vector % Gradient(workScalar,workVector,workTensor,geometry,gradF,dForm,gpuAccel)
+
+    IF (gpuAccel) THEN
+
+      CALL CalculateCurl_MappedTensor3D_gpu_wrapper(gradF % interior % deviceData, &
+                                                    curlF % interior % deviceData, &
+                                                    gradF % N, gradF % nVar, gradF % nElem)
+
+    ELSE
+
+      DO iel = 1,vector % nelem
+        DO ivar = 1,vector % nvar
+          DO k = 0,vector % N
+            DO j = 0,vector % N
+              DO i = 0,vector % N
+                curlF % interior % hostData(1,i,j,k,ivar,iel) = workTensor % interior % hostData(3,2,i,j,k,ivar,iel) -&
+                                                                workTensor % interior % hostData(2,3,i,j,k,ivar,iel)
+
+                curlF % interior % hostData(2,i,j,k,ivar,iel) = workTensor % interior % hostData(1,3,i,j,k,ivar,iel) -&
+                                                                workTensor % interior % hostData(3,1,i,j,k,ivar,iel)
+
+                curlF % interior % hostData(3,i,j,k,ivar,iel) = workTensor % interior % hostData(2,1,i,j,k,ivar,iel) -&
+                                                                workTensor % interior % hostData(1,2,i,j,k,ivar,iel)
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+
+    END IF
+
+  END SUBROUTINE Curl_MappedVector3D
 
   SUBROUTINE MapToScalar_MappedVector3D(vector,scalar,gpuAccel)
     IMPLICIT NONE
