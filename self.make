@@ -1,5 +1,4 @@
 
-
 FC=gfortran
 CXX=/opt/hipfort/bin/hipfc
 FFLAGS=-O0 -g -pg
