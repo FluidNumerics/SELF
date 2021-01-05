@@ -384,3 +384,50 @@ extern "C"
     hipLaunchKernelGGL((JacobianWeight_MappedTensor3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *tensor, *jacobian, N, nVar);
   }
 }
+
+// CalculateCurl_MappedTensor2D_gpu
+__global__ void CalculateCurl_MappedTensor2D_gpu(real *dfdx, real *curlf, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+    curlf[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfdx[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)]-
+                                              dfdx[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)];
+}
+
+extern "C"
+{
+  void CalculateCurl_MappedTensor2D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((JacobianWeight_MappedTensor2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dfdx, *curlf, N, nVar);
+  }
+}
+
+// CalculateCurl_MappedTensor3D_gpu
+__global__ void CalculateCurl_MappedTensor3D_gpu(real *dfdx, real *curlf, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+    curlf[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)]-
+                                                  dfdx[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)];
+
+    curlf[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)]-
+                                                  dfdx[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)];
+
+    curlf[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)]-
+                                                  dfdx[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)];
+}
+
+extern "C"
+{
+  void CalculateCurl_MappedTensor3D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((JacobianWeight_MappedTensor3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dfdx, *curlf, N, nVar);
+  }
+}
