@@ -1,20 +1,17 @@
 
 steps:
-
-        - id: 'Build Docker Container'
+        - id: 'Build Docker Container Image'
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
                  '.',
                  '-t',
-                 'gcr.io/${PROJECT_ID}/self:latest'
-                ]
+                 'gcr.io/${PROJECT_ID}/self:latest']
 
-        - id: 'Run ci.sh'
-          name: 'gcr.io/cloud-builders/docker'
+        - id: 'Run CI Tests'
+          name: 'gcr.io/cloud-builder/docker'
           args: ['run',
                  'gcr.io/${PROJECT_ID}/self:latest',
-                 '/bin/sh',
-                 '/apps/self/bin/ci.sh'
-                ]
+                 '/bin/bash', 
+                 '/apps/self/bin/ci.sh']
 
 images: ['gcr.io/${PROJECT_ID}/self:latest']

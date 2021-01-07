@@ -1,11 +1,11 @@
 
 FC=gfortran
-CXX=/opt/hipfort/bin/hipfc
+CXX=/opt/rocm/bin/hipcc
 FFLAGS=-O0 -g -pg
 FLIBS=-L/apps/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
-INC=-I/usr/local/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
+INC=-I/opt/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
 CXXFLAGS=
-CXXLIBS=-O0 -g -pg -L/usr/local/cuda/lib64 -lcudart -L/usr/local/hipfort/lib -lhipfort-nvptx -lgfortran
+CXXLIBS=-O0 -g -pg -L/usr/local/cuda/lib64 -lcudart -L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
 PREFIX=/apps/self
 
 install: libSELF.a self
