@@ -22,7 +22,7 @@ RUN git clone https://github.com/jacobwilliams/json-fortran.git /tmp/extern/json
 RUN git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/extern/FLAP && \
     mkdir -p /tmp/extern/FLAP/build && \
     cd /tmp/extern/FLAP/build && \
-    cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/extern/FLAP && \
+    FFLAGS=-cpp cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/extern/FLAP && \
     make && make install
 
 ENV HIP_PLATFORM=nvcc \
