@@ -1,47 +1,20 @@
-timeout: 1800s
 
 steps:
+        - id: 'Build SELF'
+          name: 'gcr.io/cloud-builders/docker'
+          args: ['build',
+                 '.',
+                 '-t',
+                 'gcr.io/self-fluids/self:dev'
+          ]
 
-- id: SELF Build
-  name: 'gcr.io/cloud-builders/docker'
-  args: ['build',
-         '.',
-         '-t',
-         'gcr.io/${PROJECT_ID}/self:${_IMAGE_TAG}'
-         ]
+        - id: 'Test SELF'
+          name: 'gcr.io/cloud-builders/docker'
+          args: ['run',
+                 'gcr.io/self-fluids/self:dev',
+                 '/bin/bash',
+                 '/apps/self/bin/ci.sh'
+                ]
 
-- id: SELF Testing
-  name: 'gcr.io/cloud-builders/docker'
-  args: ['run',
-         'gcr.io/${PROJECT_ID}/self:${_IMAGE_TAG}',
-         '/bin/bash','/apps/self/bin/ci.sh'
-         ]
-         
-#- id: Testing on Cluster
-#  name: 'gcr.io/cloud-builders/gcloud'
-#  entrypoint: '/bin/sh'
-#  args: 
-#  - '-c'
-#  - | 
-#      ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
-#      gcloud compute ssh self-ci-controller --zone=${_ZONE} \
-#                                            --ssh-key-file=/tmp/sshkey \
-#                                            --command="sudo -i mkdir /tmp/${BUILD_ID}"
-#
-#      gcloud compute scp -r ci/scripts self-ci-controller:/tmp/${BUILD_ID}/ \
-#                                            --zone=${_ZONE} \
-#                                            --ssh-key-file=/tmp/sshkey
-#
-#      gcloud compute ssh self-ci-controller --zone=${_ZONE} \
-#                                            --ssh-key-file=/tmp/sshkey \
-#                                            --command="sudo -i bash /tmp/${BUILD_ID}/scripts/ci.sh ${BUILD_ID}"
-#
-#      if [ "$?" -eq "0" ]; then                                                        
-#          echo 'CI Test : PASS'
-#      else
-#          echo 'CI Test : FAIL'
-#
-substitutions:
-  _IMAGE_TAG: 'dev'
-
-images: ['gcr.io/${PROJECT_ID}/self:${_IMAGE_TAG}']
+images: ['gcr.io/self-fluids/self:dev']
+timeout: 1800s
