@@ -2,7 +2,7 @@
 
 FC=gfortran
 CXX=/opt/rocm/bin/hipcc
-FFLAGS=-O0 -g -pg -DGPU
+FFLAGS=-O0 -g -pg
 FLIBS=-L/apps/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
 INC=-I/opt/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
 CXXFLAGS=
