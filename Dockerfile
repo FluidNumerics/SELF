@@ -31,15 +31,6 @@ ENV HIP_PLATFORM=nvcc \
 RUN cd /tmp && \
     make install -f /tmp/self.make
 
-#RUN mkdir -p /tmp/build && \
-#    cd /tmp/build && \
-#    FC="/opt/hipfort/bin/hipfc" \
-#    CXX="/opt/rocm/bin/hipcc" \
-#    CXXFLAGS="" \
-#    FFLAGS="-DGPU -ffree-line-length-none -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE" \
-#    cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp &&\
-#    make VERBOSE=1 && make install
-
 
 FROM gcr.io/self-fluids/self-dep:latest
 

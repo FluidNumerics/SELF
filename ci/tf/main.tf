@@ -6,27 +6,13 @@ terraform {
 }
 
 // Configure the Google Cloud provider
-provider "google" {
- version = "3.9"
-}
-
-resource "google_cloudbuild_trigger" "dev-builds" {
-  name = "self-dev"
-  github {
-    owner = "FluidNumerics"
-    name = "SELF"
-    push {
-      branch = "develop"
-    }
-  }
-  substitutions {
-    _IMAGE_TAG = "dev"
-  }
-  filename = "cloudbuild.yaml"
+provider "google-beta" {
 }
 
 resource "google_cloudbuild_trigger" "main-builds" {
+  provider = google-beta
   name = "self-main"
+  description = "Builds the latest version of SELF from the main branch"
   github {
     owner = "FluidNumerics"
     name = "SELF"
@@ -34,7 +20,7 @@ resource "google_cloudbuild_trigger" "main-builds" {
       branch = "main"
     }
   }
-  substitutions {
+  substitutions = {
     _IMAGE_TAG = "latest"
   }
   filename = "cloudbuild.yaml"

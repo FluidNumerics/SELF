@@ -17,7 +17,7 @@ RUN apt-get update &&\
 RUN git clone  https://github.com/ROCmSoftwarePlatform/hipfort.git /tmp/hipfort &&\
     mkdir -p /tmp/hipfort/build &&\
     cd /tmp/hipfort/build &&\
-    cmake -DCMAKE_INSTALL_PREFIX=/usr/local /tmp/hipfort &&\
+    cmake -DCMAKE_INSTALL_PREFIX=/opt/hipfort /tmp/hipfort &&\
     make &&\
     make install
 

@@ -1,8 +1,7 @@
 
 
 FC=gfortran
-#CXX=/opt/rocm/bin/hipcc
-CXX=/opt/hipfort/bin/hipfc
+CXX=/opt/rocm/bin/hipcc
 FFLAGS=-O0 -g -pg -DGPU
 FLIBS=-L/apps/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
 INC=-I/opt/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
@@ -16,6 +15,7 @@ install: libSELF.a self
 	mkdir -p ${PREFIX}/include
 	mv libSELF.a ${PREFIX}/lib/
 	mv *.mod ${PREFIX}/include/
+	cp ci.sh ${PREFIX}/bin
 	cp src/*.h ${PREFIX}/include/
 	mv self ${PREFIX}/bin/
 	rm *.o
