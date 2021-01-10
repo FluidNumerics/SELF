@@ -1,0 +1,26 @@
+
+steps:
+
+        - id: Build SELF
+          name: 'gcr.io/cloud-builders/docker'
+          args: ['build',
+                 '.',
+                 '-f',
+                 './build/Docker/Dockerfile',
+                 '-t',
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
+          ]
+
+        - id: Test SELF (Serial CPU)
+          name: 'gcr.io/cloud-builders/docker'
+          args: ['run',
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
+                 '/bin/bash','/opt/self/bin/ci.sh'
+          ]
+
+images: ['gcr.io/self-fluids/self:dev']
+ 
+timeout: 1800s
+
+substitutions:
+        _IMAGE_TAG: 'dev'

@@ -1,39 +1,5 @@
 
 steps:
-
-        - id: Build SELF (Docker)
-          name: 'gcr.io/cloud-builders/docker'
-          args: ['build',
-                 '.',
-                 '-f',
-                 './build/Docker/Dockerfile',
-                 '-t',
-                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
-          ]
-
-        - id: Test SELF (Serial CPU - Docker)
-          name: 'gcr.io/cloud-builders/docker'
-          args: ['run',
-                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
-                 '/bin/bash','/opt/self/bin/ci.sh'
-          ]
-
-        - id: Build SELF (Singularity)
-          name: 'gcr.io/self-fluids/singularity'
-          args: ['build',
-                 'self.sif',
-                 './build/singularity/self.srf'
-          ]
-          waitFor: ['-']
-
-        - id: Test SELF (Serial CPU - Singularity)
-          name: 'gcr.io/self-fluids/singularity'
-          args: ['run',
-                 'self.sif',
-                 '/bin/bash','/opt/self/bin/ci.sh'
-          ]
-          waitFor: ['Build SELF (Singularity)']
-
         - id: Build SELF (VM Image)
           name: 'hashicorp/packer'
           args: ["build",
