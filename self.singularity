@@ -1,0 +1,69 @@
+Bootstrap: docker
+From: gcr.io/self-fluids/self-dep:latest
+
+%runscript
+    exec echo "The runscript is the containers default runtime command!"
+
+%help
+    Spectral Element Libraries in Fortran (SELF)
+    Copyright 2020, Fluid Numerics LLC
+    All Rights Reserved.
+    Anti-Capitalist Software License (v2)
+
+    SELF is installed under /apps/self
+
+    Libraries available under /apps/self/lib
+    To link builds with SELF in this container, use
+
+      -L/apps/self/lib -lself -I/apps/self/include
+
+    FEQParse and FLAP are also available. To use these additional libraries, use
+
+      -L/apps/self/lib -lFLAP -lFACE -lPENF -lfeqparse -lself -I/apps/self/include
+
+    To run the unit tests for SELF, use the `ci.sh` script
+
+      /apps/self/bin/ci.sh
+
+    This will execute the `self` binary, which calls subroutines that test each routine
+    available in the SELF library.
+
+    Currently, only serial CPU tests are available.
+
+%setup
+  cp -r /workspace/* ${SINGULARITY_ROOTFS}/tmp/
+
+%labels
+
+   AUTHOR joe@fluidnumerics.com
+
+%environment
+  PATH=${PATH}:/usr/local/hipfort/bin:/usr/local/cuda/bin
+  LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/hipfort/lib:/usr/local/cuda/lib64
+
+%post
+
+  mkdir -p /tmp/extern
+
+  git clone https://github.com/FluidNumerics/feq-parse.git /tmp/extern/feq-parse && \
+  mkdir -p /tmp/extern/feq-parse/build && \
+  cd /tmp/extern/feq-parse/build && \
+  cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/extern/feq-parse && \
+  make && make install
+
+  git clone https://github.com/jacobwilliams/json-fortran.git /tmp/extern/json-fortran && \
+  mkdir -p /tmp/extern/json-fortran/build && \
+  cd /tmp/extern/json-fortran/build && \
+  cmake -DSKIP_DOC_GEN=True -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/extern/json-fortran && \
+  make && make install
+
+  git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/extern/FLAP && \
+  mkdir -p /tmp/extern/FLAP/build && \
+  cd /tmp/extern/FLAP/build && \
+  FFLAGS=-cpp cmake -DCMAKE_INSTALL_PREFIX="/apps/self" /tmp/extern/FLAP && \
+  make && make install
+
+  export HIP_PLATFORM=nvcc
+  export HIP_COMPILER=/usr/local/cuda/bin/nvcc
+
+  cd /tmp && make install -f /tmp/self.make

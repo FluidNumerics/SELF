@@ -1,20 +1,81 @@
 
 steps:
-        - id: 'Build SELF'
+
+        - id: Build SELF (Docker)
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
                  '.',
                  '-t',
-                 'gcr.io/self-fluids/self:dev'
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
           ]
 
-        - id: 'Test SELF'
+        - id: Test SELF (Serial CPU - Docker)
           name: 'gcr.io/cloud-builders/docker'
           args: ['run',
-                 'gcr.io/self-fluids/self:dev',
-                 '/bin/bash',
-                 '/apps/self/bin/ci.sh'
-                ]
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
+                 '/bin/bash','/apps/self/bin/ci.sh'
+          ]
 
+        - id: Build SELF (Singularity)
+          name: 'gcr.io/self-fluids/singularity'
+          args: ['build',
+                 'self.sif',
+                 'self.singularity'
+          ]
+          waitFor: ['-']
+
+        - id: Build SELF (VM Image)
+          name: 'hashicorp/packer'
+          args: ["build",
+                "-force",
+                "-var","project_id=${PROJECT_ID}",
+                "-var","zone=${_ZONE}",
+                "-var","image_name=self",
+                "-var","version=${_IMAGE_TAG}",
+                "-var","subnet=${_SUBNETWORK}",
+                "-var","source_image=${_SOURCE_VM_IMAGE}",
+                "-var","source_image_project_id=${_SOURCE_VM_IMAGE_PROJECT}",
+                './packer/packer.json']
+          waitFor: ["-"]
+
+#        - id: Test SELF (GPU - VM Image)
+#          name: 'gcr.io/cloud-builders/gcloud'
+#          entrypoint: '/bin/sh'
+#          args: 
+#          - '-c'
+#          - | 
+#              ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
+#        
+#              gcloud compute ssh ci-controller --zone=${_ZONE} \
+#                                               --ssh-key-file=/tmp/sshkey \
+#                                               --command="sudo -i mkdir -p /home/ci/${BUILD_ID}"
+# 
+#              gcloud compute scp self.sif ci-controller:/home/ci/${BUILD_ID}/ \
+#                                                    --zone=${_ZONE} \
+#                                                    --ssh-key-file=/tmp/sshkey
+#
+#              gcloud compute ssh ci-controller --zone=${_ZONE} \
+#                                               --ssh-key-file=/tmp/sshkey \
+#                                               --command="sudo -i bash /apps/share/fluid-ci.sh ${BUILD_ID}"
+#        
+#              if [ "$?" -eq "0" ]; then                                                        
+#                  echo 'CI Test : PASS'
+#              else
+#                  echo 'CI Test : FAIL'
+#
+#          waitFor: ["Build SELF (Singularity)"]
+        
 images: ['gcr.io/self-fluids/self:dev']
-timeout: 1800s
+artifacts:
+  objects:
+    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
+    paths: ['self.sif']
+ 
+timeout: 7200s
+
+substitutions:
+        _IMAGE_TAG: 'dev'
+        _SOURCE_VM_IMAGE_PROJECT: 'fluid-cluster-ops'
+        _SOURCE_VM_IMAGE: 'fluid-slurm-gcp-compute-centos'
+        _ZONE: 'us-central1-f'
+        _SUBNETWORK: 'default'
