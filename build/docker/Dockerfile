@@ -29,7 +29,7 @@ ENV HIP_PLATFORM=nvcc \
     HIP_COMPILER=/usr/local/cuda/bin/nvcc
 
 RUN cd /tmp && \
-    make install -f /tmp/self.make
+    make install -f /tmp/build/self.make
 
 
 FROM gcr.io/self-fluids/self-dep:latest

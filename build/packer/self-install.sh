@@ -33,7 +33,7 @@ cd /tmp/hipfort_src/build
 make
 make install
 cd /tmp/
-#rm -rf /tmp/hipfort_src
+rm -rf /tmp/hipfort_src
 
 mkdir -p /tmp/extern
 
@@ -61,6 +61,6 @@ make && make install
 export HIP_PLATFORM=nvcc
 export HIP_COMPILER=/usr/local/cuda/bin/nvcc
 
-cd /tmp && make install -f /tmp/packer/self.make
+cd /tmp && make install -f /tmp/build/packer/self.make
 
 rm -rf /tmp/extern

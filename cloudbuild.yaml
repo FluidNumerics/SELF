@@ -5,6 +5,8 @@ steps:
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
                  '.',
+                 '-f',
+                 './build/Docker/Dockerfile',
                  '-t',
                  'gcr.io/self-fluids/self:${_IMAGE_TAG}'
           ]
@@ -20,7 +22,7 @@ steps:
           name: 'gcr.io/self-fluids/singularity'
           args: ['build',
                  'self.sif',
-                 'self.singularity'
+                 './build/singularity/self.srf'
           ]
           waitFor: ['-']
 
@@ -35,7 +37,7 @@ steps:
                 "-var","subnet=${_SUBNETWORK}",
                 "-var","source_image=${_SOURCE_VM_IMAGE}",
                 "-var","source_image_project_id=${_SOURCE_VM_IMAGE_PROJECT}",
-                './packer/packer.json']
+                './build/packer/packer.json']
           waitFor: ["-"]
 
 #        - id: Test SELF (GPU - VM Image)
