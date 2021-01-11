@@ -15,7 +15,7 @@ install: libSELF.a self
 	mkdir -p ${PREFIX}/include
 	mv libSELF.a ${PREFIX}/lib/
 	mv *.mod ${PREFIX}/include/
-	sed -i 's/INSTALL_ROOT=.*/INSTALL_ROOT=${PREFIX}/g' test/ci.sh 
+	sed -i 's/INSTALL_ROOT=.*/INSTALL_ROOT=\/opt\/self/g' test/ci.sh 
 	cp -r test/ ${PREFIX}/
 	cp src/*.h ${PREFIX}/include/
 	mv self ${PREFIX}/bin/
