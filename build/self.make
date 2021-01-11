@@ -13,10 +13,11 @@ install: libSELF.a self
 	mkdir -p ${PREFIX}/bin
 	mkdir -p ${PREFIX}/lib
 	mkdir -p ${PREFIX}/include
+	mkdir -p ${PREFIX}/test
 	mv libSELF.a ${PREFIX}/lib/
 	mv *.mod ${PREFIX}/include/
 	sed -i 's/INSTALL_ROOT=.*/INSTALL_ROOT=\/opt\/self/g' test/ci.sh 
-	cp -r test ${PREFIX}/
+	cp test/ci.sh ${PREFIX}/test/
 	cp src/*.h ${PREFIX}/include/
 	mv self ${PREFIX}/bin/
 	rm *.o
