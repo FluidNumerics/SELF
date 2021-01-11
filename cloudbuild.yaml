@@ -15,7 +15,7 @@ steps:
           name: 'gcr.io/cloud-builders/docker'
           args: ['run',
                  'gcr.io/self-fluids/self:${_IMAGE_TAG}',
-                 '/bin/bash','/opt/self/bin/ci.sh'
+                 '/bin/bash','/opt/self/test/ci.sh'
           ]
 
         - id: Build SELF (Singularity)
@@ -30,7 +30,7 @@ steps:
           name: 'gcr.io/self-fluids/singularity'
           args: ['run',
                  'self.sif',
-                 '/bin/bash','/opt/self/bin/ci.sh'
+                 '/bin/bash','/opt/self/test/ci.sh'
           ]
           waitFor: ['Build SELF (Singularity)']
 
