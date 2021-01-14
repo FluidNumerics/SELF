@@ -2,9 +2,9 @@
 
 FC=gfortran
 CXX=/opt/rocm/bin/hipcc
-FFLAGS=-O0 -g -pg
-FLIBS=-L/apps/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
-INC=-I/opt/hipfort/include/nvptx -I/apps/self/include/FLAP -I/apps/self/include/PENF -I/apps/self/include/FACE -I/apps/self/include
+FFLAGS=-O0 -g -pg -DGPU
+FLIBS=-L/opt/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
+INC=-I/opt/hipfort/include/nvptx -I/opt/self/include/FLAP -I/opt/self/include/PENF -I/opt/self/include/FACE -I/opt/self/include
 CXXFLAGS=
 CXXLIBS=-O0 -g -pg -L/usr/local/cuda/lib64 -lcudart -L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
 PREFIX=/opt/self
@@ -13,11 +13,14 @@ install: libSELF.a self
 	mkdir -p ${PREFIX}/bin
 	mkdir -p ${PREFIX}/lib
 	mkdir -p ${PREFIX}/include
-	mkdir -p ${PREFIX}/test
 	mv libSELF.a ${PREFIX}/lib/
 	mv *.mod ${PREFIX}/include/
 	sed -i 's/INSTALL_ROOT=.*/INSTALL_ROOT=\/opt\/self/g' test/ci.sh 
-	cp test/ci.sh ${PREFIX}/test/
+	sed -i 's/INSTALL_ROOT=.*/INSTALL_ROOT=\/opt\/self/g' test/ci.gpu.sh 
+	cp test/ci.sh ${PREFIX}/bin/
+	chmod 755 ${PREFIX}/bin/ci.sh
+	cp test/ci.gpu.sh ${PREFIX}/bin/
+	chmod 755 ${PREFIX}/bin/ci.gpu.sh
 	cp src/*.h ${PREFIX}/include/
 	mv self ${PREFIX}/bin/
 	rm *.o

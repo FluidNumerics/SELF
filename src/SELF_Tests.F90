@@ -362,16 +362,16 @@ CONTAINS
        ENDDO
      ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -464,16 +464,16 @@ CONTAINS
        ENDDO
      ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
@@ -573,16 +573,16 @@ CONTAINS
        ENDDO
      ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Derivative(controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -693,16 +693,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -800,16 +800,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
@@ -920,16 +920,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -1047,16 +1047,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -1161,15 +1161,15 @@ CONTAINS
     ENDDO
 
     ! Run the grid interpolation
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
@@ -1301,16 +1301,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -1430,16 +1430,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost( )
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost( )
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -1564,16 +1564,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -1684,16 +1684,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
@@ -1813,16 +1813,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -1923,16 +1923,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
@@ -2050,16 +2050,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -2183,16 +2183,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -2299,16 +2299,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
@@ -2441,16 +2441,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -2573,16 +2573,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL dfInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL dfInterp % UpdateHost()
+    END IF
 
     dfError = dfActual - dfInterp
 
@@ -2713,16 +2713,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL fInterp % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL fInterp % UpdateHost()
+    END IF
 
     fError = fActual - fInterp
 
@@ -2836,16 +2836,16 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateDevice()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateDevice()
+    END IF
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-!    IF (gpuAccel) THEN
-!      CALL f % UpdateHost()
-!    END IF
+    IF (gpuAccel) THEN
+      CALL f % UpdateHost()
+    END IF
 
     fError = fActual - f
 
