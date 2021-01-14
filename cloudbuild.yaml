@@ -1,74 +1,40 @@
 
 steps:
-
-        #        - id: Build SELF (Docker)
-        #          name: 'gcr.io/cloud-builders/docker'
-        #          args: ['build',
-        #                 '.',
-        #                 '-f',
-        #                 './build/docker/Dockerfile',
-        #                 '-t',
-        #                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
-        #          ]
-        #
-        #        - id: Test SELF (Serial CPU - Docker)
-        #          name: 'gcr.io/cloud-builders/docker'
-        #          args: ['run',
-        #                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
-        #                 'ci.sh'
-        #          ]
-
-        - id: Build SELF (Singularity)
+        - id: 'Build Singularity Image'
           name: 'gcr.io/self-fluids/singularity'
           args: ['build',
                  'self.sif',
-                 './build/singularity/self.srf'
-          ]
-          waitFor: ['-']
+                 './build/singularity/self.srf']
 
-        - id: Test SELF (On Fluid-Slurm-GCP)
+        - id: 'Test Singularity Image (GPU)'
           name: 'gcr.io/cloud-builders/gcloud'
           entrypoint: '/bin/sh'
           args: 
-          - '-c'
-          - | 
-              ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
-        
-              gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                                               --ssh-key-file=/tmp/sshkey \
-                                               --command="mkdir -p ${BUILD_ID}"
- 
-              gcloud compute scp self.sif ${_CONTROLLER}:${BUILD_ID}/ \
-                                                    --zone=${_ZONE} \
-                                                    --ssh-key-file=/tmp/sshkey
+            - '-c'
+            - |
+                    ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
 
-              gcloud compute scp test.sh ${_CONTROLLER}:${BUILD_ID}/ \
-                                                    --zone=${_ZONE} \
-                                                    --ssh-key-file=/tmp/sshkey
+                    gcloud compute ssh ci-controller --zone=us-west1-b \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="mkdir ${BUILD_ID}"
 
-              gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                --ssh-key-file=/tmp/sshkey \
-                --command="cd ${BUILD_ID}/ && srun -n1 --account=ci-runners --partition=n1-standard-8-1xp100 --gres=gpu:1 test.sh --artifact singularity --image self.sif --gpu yes"
-        
-              if [ "$?" -eq "0" ]; then                                                        
-                  echo 'CI Test : PASS'
-              else
-                  echo 'CI Test : FAIL'
+                    gcloud compute scp self.sif ci-controller:${BUILD_ID}/ \
+                         --zone=us-west1-b \
+                        --ssh-key-file=/tmp/sshkey
 
-          waitFor: ["Build SELF (Singularity)"]
-        
-          #images: ['gcr.io/self-fluids/self:dev']
-          #artifacts:
-          #  objects:
-          #    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
-          #    paths: ['self.sif']
+                    gcloud compute scp test.sh ci-controller:${BUILD_ID}/ \
+                         --zone=us-west1-b \
+                        --ssh-key-file=/tmp/sshkey
+
+                    gcloud compute ssh ci-controller --zone=us-west1-b \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="cd ${BUILD_ID} && srun --account=ci-runners --partition=n1-standard-8-1xp100 --gres=gpu:1 -n1 ./test.sh --artifact singularity --image self.sif --gpu yes"
+          
+
+                        #images: ['gcr.io/self-fluids/self:dev']
  
 timeout: 7200s
 
-substitutions:
-        _IMAGE_TAG: 'dev'
-        _SOURCE_VM_IMAGE_PROJECT: 'fluid-cluster-ops'
-        _SOURCE_VM_IMAGE: 'fluid-slurm-gcp-compute-centos'
-        _ZONE: 'us-west1-b'
-        _SUBNETWORK: 'default'
-        _CONTROLLER: 'cicb-controller'
+#substitutions:
+#        _IMAGE_TAG: 'dev'
+#        _ZONE: 'us-west1-b'
