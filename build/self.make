@@ -8,7 +8,8 @@ CXXLIBS=-L/usr/local/cuda/lib64 -lcudart -L/opt/hipfort/lib -lhipfort-nvptx -lgf
 PREFIX=/opt/self
 
 ifeq ($(BUILD_TYPE),debug)
-  FFLAGS=-O0 -g -pg -ftest-coverage -fprofile-arcs
+  FFLAGS=-O0 -g -pg
+# -ftest-coverage -fprofile-arcs
   CXXFLAGS=-O0 -g 
 else ifeq ($(BUILD_TYPE),benchmark)
   FFLAGS=-O3 -pg
