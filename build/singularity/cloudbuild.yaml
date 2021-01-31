@@ -1,24 +1,55 @@
 
 steps:
-        - id: Build SELF
-          name: 'gcr.io/self-fluids/singularity'
+        - id: 'Build Singularity Image'
+          name: 'quay.io/singularity/singularity:v3.7.1'
+          env:
+            - 'GPU=${_GPU}'
+            - 'HIP_PLATFORM=${_HIP_PLATFORM}'
+            - 'HIP_COMPILER=${_HIP_COMPILER}'
           args: ['build',
                  'self.sif',
-                 './build/singularity/self.srf'
-          ]
+                 './build/singularity/self.srf']
 
-        - id: Test SELF (Serial CPU)
-          name: 'gcr.io/self-fluids/singularity'
-          args: ['run',
-                 'self.sif',
-                 '/bin/bash','/opt/self/bin/ci.sh'
-          ]
+        - id: 'Test Singularity Image (GPU)'
+          name: 'gcr.io/cloud-builders/gcloud'
+          entrypoint: '/bin/sh'
+          args: 
+            - '-c'
+            - |
+                    ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
+
+                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="mkdir ${BUILD_ID}"
+
+                    gcloud compute scp self.sif ${_CONTROLLER}:${BUILD_ID}/ \
+                         --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey
+
+                    gcloud compute scp test.sh ${_CONTROLLER}:${BUILD_ID}/ \
+                         --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey
+
+                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="cd ${BUILD_ID} && srun --account=ci-runners --partition=n1-standard-8-1xp100 --gres=gpu:1 -n1 ./test.sh --artifact singularity --image self.sif --gpu yes"
+          
+                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="rm -rf ${BUILD_ID}"
+
+ 
 artifacts:
   objects:
     location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
     paths: ['self.sif']
- 
+
 timeout: 7200s
 
 substitutions:
         _IMAGE_TAG: 'dev'
+        _ZONE: 'us-west1-b'
+        _CONTROLLER: 'self-controller'
+        _GPU: 'yes'
+        _HIP_PLATFORM: 'nvcc'
+        _HIP_COMPILER: '/usr/local/cuda/bin/nvcc'

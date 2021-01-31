@@ -1,12 +1,32 @@
 
 steps:
+
+        - id: Build SELF (Docker Image)
+          name: 'gcr.io/cloud-builders/docker'
+          args: ['build',
+                 '--build-arg','GPU=${_GPU}',
+                 '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
+                 '--build-arg','HIP_COMPILER=${_HIP_COMPILER}',
+                 '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
+                 '.',
+                 '-f',
+                 './build/docker/Dockerfile',
+                 '-t',
+                 'gcr.io/self-fluids/self-${_FLAVOR}:${_IMAGE_TAG}'
+          ]
+
         - id: 'Build Singularity Image'
-          name: 'gcr.io/self-fluids/singularity'
+          name: 'quay.io/singularity/singularity:v3.7.1'
+          env:
+            - 'GPU=${_GPU}'
+            - 'HIP_PLATFORM=${_HIP_PLATFORM}'
+            - 'HIP_COMPILER=${_HIP_COMPILER}'
+            - 'BUILD_TYPE=${_BUILD_TYPE}'
           args: ['build',
                  'self.sif',
                  './build/singularity/self.srf']
 
-        - id: 'Test Singularity Image (GPU)'
+        - id: 'Test Singularity Image'
           name: 'gcr.io/cloud-builders/gcloud'
           entrypoint: '/bin/sh'
           args: 
@@ -28,21 +48,26 @@ steps:
 
                     gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
                         --ssh-key-file=/tmp/sshkey \
-                        --command="cd ${BUILD_ID} && srun --account=ci-runners --partition=n1-standard-8-1xp100 --gres=gpu:1 -n1 ./test.sh --artifact singularity --image self.sif --gpu yes"
+                        --command="cd ${BUILD_ID} && srun --account=ci-runners ${_SRUN_FLAGS}  ./test.sh --artifact singularity --image self.sif --gpu yes"
           
                     gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
                         --ssh-key-file=/tmp/sshkey \
                         --command="rm -rf ${BUILD_ID}"
 
+images: ['gcr.io/self-fluids/self-${_FLAVOR}:${_IMAGE_TAG}']
  
 artifacts:
   objects:
-    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
+    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}/${_FLAVOR}'
     paths: ['self.sif']
 
 timeout: 7200s
 
 substitutions:
         _IMAGE_TAG: 'dev'
-        _ZONE: 'us-west1-b'
-        _CONTROLLER: 'self-controller'
+        _GPU: 'yes'
+        _HIP_PLATFORM: 'nvcc'
+        _HIP_COMPILER: '/usr/local/cuda/bin/nvcc'
+        _FLAVOR: 'nvcc'
+        _SRUN_FLAGS: '--partition=n1-standard-8-1xp100 --gres=gpu:1 -n1'
+        _BUILD_TYPE: 'debug'

@@ -1,4 +1,8 @@
 FROM gcr.io/self-fluids/self-dep:latest AS devel
+ARG HIP_PLATFORM=nvcc
+ARG HIP_COMPILER=/usr/local/cuda/bin/nvcc
+ARG GPU=yes
+ARG BUILD_TYPE=debug
 
 COPY . /tmp
 
@@ -25,8 +29,10 @@ RUN git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/exter
     FFLAGS=-cpp cmake -DCMAKE_INSTALL_PREFIX="/opt/self" /tmp/extern/FLAP && \
     make && make install
 
-ENV HIP_PLATFORM=nvcc \
-    HIP_COMPILER=/usr/local/cuda/bin/nvcc
+ENV HIP_PLATFORM=${HIP_PLATFORM} \
+    HIP_COMPILER=${HIP_COMPILER} \
+    GPU=${GPU} \
+    BUILD_TYPE=${BUILD_TYPE}
 
 RUN cd /tmp && \
     make install -f /tmp/build/self.make

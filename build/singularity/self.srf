@@ -25,10 +25,13 @@ From: gcr.io/self-fluids/self-dep:latest
 
       /apps/self/bin/ci.sh
 
+    If this is a GPU accelerated build, use the `ci.gpu.sh` script
+
+      /apps/self/bin/ci.gpu.sh
+
     This will execute the `self` binary, which calls subroutines that test each routine
     available in the SELF library.
 
-    Currently, only serial CPU tests are available.
 
 %setup
   cp -r /workspace/* ${SINGULARITY_ROOTFS}/tmp/
@@ -62,8 +65,5 @@ From: gcr.io/self-fluids/self-dep:latest
   cd /tmp/extern/FLAP/build && \
   FFLAGS=-cpp cmake -DCMAKE_INSTALL_PREFIX="/opt/self" /tmp/extern/FLAP && \
   make && make install
-
-  export HIP_PLATFORM=nvcc
-  export HIP_COMPILER=/usr/local/cuda/bin/nvcc
 
   cd /tmp && make install -f /tmp/build/self.make

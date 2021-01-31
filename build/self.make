@@ -2,12 +2,28 @@
 
 FC=gfortran
 CXX=/opt/rocm/bin/hipcc
-FFLAGS=-O0 -g -pg -DGPU
-FLIBS=-L/opt/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
 INC=-I/opt/hipfort/include/nvptx -I/opt/self/include/FLAP -I/opt/self/include/PENF -I/opt/self/include/FACE -I/opt/self/include
-CXXFLAGS=
-CXXLIBS=-O0 -g -pg -L/usr/local/cuda/lib64 -lcudart -L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
+FLIBS=-L/opt/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
+CXXLIBS=-L/usr/local/cuda/lib64 -lcudart -L/opt/hipfort/lib -lhipfort-nvptx -lgfortran
 PREFIX=/opt/self
+
+ifeq ($(BUILD_TYPE),debug)
+  FFLAGS=-O0 -g -pg -ftest-coverage -fprofile-arcs
+  CXXFLAGS=-O0 -g 
+else ifeq ($(BUILD_TYPE),benchmark)
+  FFLAGS=-O3 -pg
+  CXXFLAGS=-O3 -pg
+else ifeq ($(BUILD_TYPE),release)
+  FFLAGS=-O3
+  CXXFLAGS=-O3 
+else
+  FFLAGS=-O2 -g
+  CXXFLAGS=-O2 -g
+endif
+
+ifeq ($(GPU),yes)
+    FFLAGS+= -DGPU
+endif
 
 install: libSELF.a self
 	mkdir -p ${PREFIX}/bin
