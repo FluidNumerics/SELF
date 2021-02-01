@@ -4,7 +4,7 @@ steps:
         # Add a step for formatting requirements
         #
 
-        - id: Build SELF (Docker Image, GPU Accelerated)
+        - id: Build Docker Image (GPU Accelerated)
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
                  '--build-arg','GPU=yes',
@@ -19,7 +19,7 @@ steps:
           ]
           waitFor: ["-"]
 
-        - id: Build SELF (Docker Image, Serial x86)
+        - id: Build Docker Image (Serial x86)
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
                  '--build-arg','GPU=no',
@@ -36,27 +36,17 @@ steps:
 
         - id: 'Build Singularity Image (GPU Accelerated)'
           name: 'quay.io/singularity/singularity:v3.7.1'
-          env:
-            - 'GPU=$yes'
-            - 'HIP_PLATFORM=${_HIP_PLATFORM}'
-            - 'HIP_COMPILER=${_HIP_COMPILER}'
-            - 'BUILD_TYPE=${_BUILD_TYPE}'
           args: ['build',
                  'self_${HIP_PLATFORM}.sif',
-                 './build/singularity/self.srf']
-          waitFor: ["-"]
+                 'docker-daemon://gcr.io/self-fluids/self_${_HIP_PLATFORM}:${_IMAGE_TAG}']
+          waitFor: ["Build Docker Image (GPU Accelerated)"]
 
         - id: 'Build Singularity Image (Serial x86)'
           name: 'quay.io/singularity/singularity:v3.7.1'
-          env:
-            - 'GPU=${_GPU}'
-            - 'HIP_PLATFORM=${_HIP_PLATFORM}'
-            - 'HIP_COMPILER=${_HIP_COMPILER}'
-            - 'BUILD_TYPE=${_BUILD_TYPE}'
           args: ['build',
                  'self_serial-x86.sif',
-                 './build/singularity/self.srf']
-          waitFor: ["-"]
+                 'docker-daemon://gcr.io/self-fluids/self_${_HIP_PLATFORM}:${_IMAGE_TAG}']
+          waitFor: ["Build Docker Image (Serial x86)"]
 
         - id: 'Test Singularity Image (GPU Accelerated)'
           name: 'gcr.io/cloud-builders/gcloud'
