@@ -5,7 +5,7 @@ MODULE SELF_Mesh
   USE SELF_Data
   USE SELF_SupportRoutines
 
-  USE hipfort
+!  USE hipfort
   USE ISO_C_BINDING
 
   IMPLICIT NONE

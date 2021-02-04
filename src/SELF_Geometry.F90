@@ -6,9 +6,6 @@ MODULE SELF_Geometry
   USE SELF_SupportRoutines
   USE SELF_Mesh
 
-  USE hipfort
-  USE ISO_C_BINDING
-
   IMPLICIT NONE
 
 #include "SELF_Macros.h"

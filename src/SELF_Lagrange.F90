@@ -13,9 +13,6 @@ MODULE SELF_Lagrange
   USE SELF_SupportRoutines
   USE SELF_Quadrature
 
-  USE hipfort
-  USE ISO_C_BINDING
-
   IMPLICIT NONE
 
 !INCLUDE 'SELF_Macros.h'
@@ -69,101 +66,101 @@ MODULE SELF_Lagrange
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Lagrange
 #endif
 
-    GENERIC,PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu
-    PROCEDURE,PRIVATE :: ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu
+    GENERIC,PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu
+    PROCEDURE,PRIVATE :: ScalarGridInterp_1D_cpu
 
-    GENERIC,PUBLIC :: ScalarGridInterp_2D => ScalarGridInterp_2D_cpu,ScalarGridInterp_2D_gpu
-    PROCEDURE,PRIVATE :: ScalarGridInterp_2D_cpu,ScalarGridInterp_2D_gpu
+    GENERIC,PUBLIC :: ScalarGridInterp_2D => ScalarGridInterp_2D_cpu
+    PROCEDURE,PRIVATE :: ScalarGridInterp_2D_cpu
 
-    GENERIC,PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
-    PROCEDURE,PRIVATE :: VectorGridInterp_2D_cpu,VectorGridInterp_2D_gpu
+    GENERIC,PUBLIC :: VectorGridInterp_2D => VectorGridInterp_2D_cpu
+    PROCEDURE,PRIVATE :: VectorGridInterp_2D_cpu
 
-    GENERIC,PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu,TensorGridInterp_2D_gpu
-    PROCEDURE,PRIVATE :: TensorGridInterp_2D_cpu,TensorGridInterp_2D_gpu
+    GENERIC,PUBLIC :: TensorGridInterp_2D => TensorGridInterp_2D_cpu
+    PROCEDURE,PRIVATE :: TensorGridInterp_2D_cpu
 
-    GENERIC,PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
-    PROCEDURE,PRIVATE :: ScalarGridInterp_3D_cpu,ScalarGridInterp_3D_gpu
+    GENERIC,PUBLIC :: ScalarGridInterp_3D => ScalarGridInterp_3D_cpu
+    PROCEDURE,PRIVATE :: ScalarGridInterp_3D_cpu
 
-    GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
-    PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu,VectorGridInterp_3D_gpu
+    GENERIC,PUBLIC :: VectorGridInterp_3D => VectorGridInterp_3D_cpu
+    PROCEDURE,PRIVATE :: VectorGridInterp_3D_cpu
 
-    GENERIC,PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu,TensorGridInterp_3D_gpu
-    PROCEDURE,PRIVATE :: TensorGridInterp_3D_cpu,TensorGridInterp_3D_gpu
+    GENERIC,PUBLIC :: TensorGridInterp_3D => TensorGridInterp_3D_cpu
+    PROCEDURE,PRIVATE :: TensorGridInterp_3D_cpu
 
-    GENERIC,PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
-    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_1D_cpu,ScalarBoundaryInterp_1D_gpu
+    GENERIC,PUBLIC :: ScalarBoundaryInterp_1D => ScalarBoundaryInterp_1D_cpu
+    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_1D_cpu
 
-    GENERIC,PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
-    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_2D_cpu,ScalarBoundaryInterp_2D_gpu
+    GENERIC,PUBLIC :: ScalarBoundaryInterp_2D => ScalarBoundaryInterp_2D_cpu
+    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_2D_cpu
 
-    GENERIC,PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
-    PROCEDURE,PRIVATE :: VectorBoundaryInterp_2D_cpu,VectorBoundaryInterp_2D_gpu
+    GENERIC,PUBLIC :: VectorBoundaryInterp_2D => VectorBoundaryInterp_2D_cpu
+    PROCEDURE,PRIVATE :: VectorBoundaryInterp_2D_cpu
 
-    GENERIC,PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
-    PROCEDURE,PRIVATE :: TensorBoundaryInterp_2D_cpu,TensorBoundaryInterp_2D_gpu
+    GENERIC,PUBLIC :: TensorBoundaryInterp_2D => TensorBoundaryInterp_2D_cpu
+    PROCEDURE,PRIVATE :: TensorBoundaryInterp_2D_cpu
 
-    GENERIC,PUBLIC :: ScalarBoundaryInterp_3D => ScalarBoundaryInterp_3D_cpu,ScalarBoundaryInterp_3D_gpu
-    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_3D_cpu,ScalarBoundaryInterp_3D_gpu
+    GENERIC,PUBLIC :: ScalarBoundaryInterp_3D => ScalarBoundaryInterp_3D_cpu
+    PROCEDURE,PRIVATE :: ScalarBoundaryInterp_3D_cpu
 
-    GENERIC,PUBLIC :: VectorBoundaryInterp_3D => VectorBoundaryInterp_3D_cpu,VectorBoundaryInterp_3D_gpu
-    PROCEDURE,PRIVATE :: VectorBoundaryInterp_3D_cpu,VectorBoundaryInterp_3D_gpu
+    GENERIC,PUBLIC :: VectorBoundaryInterp_3D => VectorBoundaryInterp_3D_cpu
+    PROCEDURE,PRIVATE :: VectorBoundaryInterp_3D_cpu
 
-    GENERIC,PUBLIC :: TensorBoundaryInterp_3D => TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
-    PROCEDURE,PRIVATE :: TensorBoundaryInterp_3D_cpu,TensorBoundaryInterp_3D_gpu
+    GENERIC,PUBLIC :: TensorBoundaryInterp_3D => TensorBoundaryInterp_3D_cpu
+    PROCEDURE,PRIVATE :: TensorBoundaryInterp_3D_cpu
 
-    GENERIC,PUBLIC :: Derivative_1D => Derivative_1D_cpu,Derivative_1D_gpu
-    PROCEDURE,PRIVATE :: Derivative_1D_cpu,Derivative_1D_gpu
+    GENERIC,PUBLIC :: Derivative_1D => Derivative_1D_cpu
+    PROCEDURE,PRIVATE :: Derivative_1D_cpu
 
-    GENERIC,PUBLIC :: DGDerivative_1D => DGDerivative_1D_cpu,DGDerivative_1D_gpu
-    PROCEDURE,PRIVATE :: DGDerivative_1D_cpu,DGDerivative_1D_gpu
+    GENERIC,PUBLIC :: DGDerivative_1D => DGDerivative_1D_cpu
+    PROCEDURE,PRIVATE :: DGDerivative_1D_cpu
 
-    GENERIC,PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
-    PROCEDURE,PRIVATE :: ScalarGradient_2D_cpu,ScalarGradient_2D_gpu
+    GENERIC,PUBLIC :: ScalarGradient_2D => ScalarGradient_2D_cpu
+    PROCEDURE,PRIVATE :: ScalarGradient_2D_cpu
 
-    GENERIC,PUBLIC :: ScalarDGGradient_2D => ScalarDGGradient_2D_cpu,ScalarDGGradient_2D_gpu
-    PROCEDURE,PRIVATE :: ScalarDGGradient_2D_cpu,ScalarDGGradient_2D_gpu
+    GENERIC,PUBLIC :: ScalarDGGradient_2D => ScalarDGGradient_2D_cpu
+    PROCEDURE,PRIVATE :: ScalarDGGradient_2D_cpu
 
-    GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu,VectorGradient_2D_gpu
-    PROCEDURE,PRIVATE :: VectorGradient_2D_cpu,VectorGradient_2D_gpu
+    GENERIC,PUBLIC :: VectorGradient_2D => VectorGradient_2D_cpu
+    PROCEDURE,PRIVATE :: VectorGradient_2D_cpu
 
-    GENERIC,PUBLIC :: VectorDGGradient_2D => VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
-    PROCEDURE,PRIVATE :: VectorDGGradient_2D_cpu,VectorDGGradient_2D_gpu
+    GENERIC,PUBLIC :: VectorDGGradient_2D => VectorDGGradient_2D_cpu
+    PROCEDURE,PRIVATE :: VectorDGGradient_2D_cpu
 
-    GENERIC,PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
+    GENERIC,PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu
+    PROCEDURE,PRIVATE :: VectorDivergence_2D_cpu
 
-    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu
+    PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu
 
-    GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
-    PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
+    GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu
+    PROCEDURE,PRIVATE :: VectorCurl_2D_cpu
 
-    GENERIC,PUBLIC :: TensorDivergence_2D => TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: TensorDivergence_2D_cpu,TensorDivergence_2D_gpu
+    GENERIC,PUBLIC :: TensorDivergence_2D => TensorDivergence_2D_cpu
+    PROCEDURE,PRIVATE :: TensorDivergence_2D_cpu
 
-    GENERIC,PUBLIC :: TensorDGDivergence_2D => TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: TensorDGDivergence_2D_cpu,TensorDGDivergence_2D_gpu
+    GENERIC,PUBLIC :: TensorDGDivergence_2D => TensorDGDivergence_2D_cpu
+    PROCEDURE,PRIVATE :: TensorDGDivergence_2D_cpu
 
-    GENERIC,PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
-    PROCEDURE,PRIVATE :: ScalarGradient_3D_cpu,ScalarGradient_3D_gpu
+    GENERIC,PUBLIC :: ScalarGradient_3D => ScalarGradient_3D_cpu
+    PROCEDURE,PRIVATE :: ScalarGradient_3D_cpu
 
-    GENERIC,PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu,VectorGradient_3D_gpu
-    PROCEDURE,PRIVATE :: VectorGradient_3D_cpu,VectorGradient_3D_gpu
+    GENERIC,PUBLIC :: VectorGradient_3D => VectorGradient_3D_cpu
+    PROCEDURE,PRIVATE :: VectorGradient_3D_cpu
 
-    GENERIC,PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: VectorDivergence_3D_cpu,VectorDivergence_3D_gpu
+    GENERIC,PUBLIC :: VectorDivergence_3D => VectorDivergence_3D_cpu
+    PROCEDURE,PRIVATE :: VectorDivergence_3D_cpu
 
-    GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu,VectorDGDivergence_3D_gpu
+    GENERIC,PUBLIC :: VectorDGDivergence_3D => VectorDGDivergence_3D_cpu
+    PROCEDURE,PRIVATE :: VectorDGDivergence_3D_cpu
 
-    GENERIC,PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu,VectorCurl_3D_gpu
-    PROCEDURE,PRIVATE :: VectorCurl_3D_cpu,VectorCurl_3D_gpu
+    GENERIC,PUBLIC :: VectorCurl_3D => VectorCurl_3D_cpu
+    PROCEDURE,PRIVATE :: VectorCurl_3D_cpu
 
-    GENERIC,PUBLIC :: TensorDivergence_3D => TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: TensorDivergence_3D_cpu,TensorDivergence_3D_gpu
+    GENERIC,PUBLIC :: TensorDivergence_3D => TensorDivergence_3D_cpu
+    PROCEDURE,PRIVATE :: TensorDivergence_3D_cpu
 
-    GENERIC,PUBLIC :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
-    PROCEDURE,PRIVATE :: TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
+    GENERIC,PUBLIC :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu
+    PROCEDURE,PRIVATE :: TensorDGDivergence_3D_cpu
 
     PROCEDURE,PRIVATE :: CalculateBarycentricWeights
     PROCEDURE,PRIVATE :: CalculateInterpolationMatrix
@@ -171,331 +168,6 @@ MODULE SELF_Lagrange
     PROCEDURE,PRIVATE :: CalculateLagrangePolynomials
 
   END TYPE Lagrange
-
-  INTERFACE
-    SUBROUTINE ScalarGridInterp_1D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="ScalarGridInterp_1D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE ScalarGridInterp_1D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="ScalarGridInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE ScalarGridInterp_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="VectorGridInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE VectorGridInterp_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorGridInterp_2D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="TensorGridInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE TensorGridInterp_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="ScalarGridInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE ScalarGridInterp_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="VectorGridInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE VectorGridInterp_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorGridInterp_3D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
-      bind(c,name="TensorGridInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
-    END SUBROUTINE TensorGridInterp_3D_gpu_wrapper
-  END INTERFACE
-
-  ! /////////////// !
-  ! Boundary Interpolation Routines
-
-  INTERFACE
-    SUBROUTINE ScalarBoundaryInterp_1D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="ScalarBoundaryInterp_1D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarBoundaryInterp_1D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="ScalarBoundaryInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="VectorBoundaryInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="TensorBoundaryInterp_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="ScalarBoundaryInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="VectorBoundaryInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper(bMatrix_dev,f_dev,fBound_dev,N,nVar,nEl) &
-      bind(c,name="TensorBoundaryInterp_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper
-  END INTERFACE
-
-  ! /////////////// !
-
-  INTERFACE
-    SUBROUTINE Derivative_1D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="Derivative_1D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE Derivative_1D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE DGDerivative_1D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="DGDerivative_1D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE DGDerivative_1D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="ScalarGradient_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarGradient_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarDGGradient_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="ScalarDGGradient_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarDGGradient_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorGradient_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorGradient_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorGradient_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorDGGradient_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorDGGradient_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorDGGradient_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorDivergence_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorDGDivergence_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorDGDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorCurl_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorCurl_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorCurl_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDivergence_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorDGDivergence_2D_gpu_wrapper(dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDGDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDGDivergence_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE ScalarGradient_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="ScalarGradient_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE ScalarGradient_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorGradient_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorGradient_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorGradient_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorDivergence_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorDivergence_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorDivergence_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorDGDivergence_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorDGDivergence_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE VectorCurl_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorCurl_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorCurl_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorDivergence_3D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDivergence_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDivergence_3D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE TensorDGDivergence_3D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="TensorDGDivergence_3D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
-    END SUBROUTINE TensorDGDivergence_3D_gpu_wrapper
-  END INTERFACE
 
 CONTAINS
 
@@ -733,20 +405,6 @@ CONTAINS
 
   END SUBROUTINE ScalarGridInterp_1D_cpu
 
-  SUBROUTINE ScalarGridInterp_1D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE ScalarGridInterp_1D_gpu
-!
 ! ================================================================================================ !
 !
 ! ScalarGridInterp_2D
@@ -823,20 +481,6 @@ CONTAINS
 
   END SUBROUTINE ScalarGridInterp_2D_cpu
 !
-  SUBROUTINE ScalarGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE ScalarGridInterp_2D_gpu
-
   SUBROUTINE VectorGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -873,20 +517,6 @@ CONTAINS
 
   END SUBROUTINE VectorGridInterp_2D_cpu
 !
-  SUBROUTINE VectorGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE VectorGridInterp_2D_gpu
-
   SUBROUTINE TensorGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -922,20 +552,6 @@ CONTAINS
 
   END SUBROUTINE TensorGridInterp_2D_cpu
 !
-  SUBROUTINE TensorGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE TensorGridInterp_2D_gpu
-
 ! ================================================================================================ !
 !
 ! GridInterpolate_3D
@@ -1018,20 +634,6 @@ CONTAINS
 
   END SUBROUTINE ScalarGridInterp_3D_cpu
 !
-  SUBROUTINE ScalarGridInterp_3D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL ScalarGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE ScalarGridInterp_3D_gpu
-
   SUBROUTINE VectorGridInterp_3D_cpu(myPoly,f,fInterp,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1068,20 +670,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorGridInterp_3D_cpu
-!
-  SUBROUTINE VectorGridInterp_3D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE VectorGridInterp_3D_gpu
 !
   SUBROUTINE TensorGridInterp_3D_cpu(myPoly,f,fInterp,nVariables,nElements)
     IMPLICIT NONE
@@ -1121,20 +709,6 @@ CONTAINS
 
   END SUBROUTINE TensorGridInterp_3D_cpu
 !
-  SUBROUTINE TensorGridInterp_3D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: fInterp_dev
-
-    CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
-                                         f_dev,fInterp_dev, &
-                                         myPoly % N,myPoly % M, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE TensorGridInterp_3D_gpu
-
 ! ================================================================================================ !
 !
 ! Derivative_1D
@@ -1204,20 +778,6 @@ CONTAINS
 
   END SUBROUTINE Derivative_1D_cpu
 
-  SUBROUTINE Derivative_1D_gpu(myPoly,f_dev,df_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(out) :: df_dev
-
-    CALL Derivative_1D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                   f_dev,df_dev, &
-                                   myPoly % N, &
-                                   nVariables,nElements)
-
-  END SUBROUTINE Derivative_1D_gpu
-
   SUBROUTINE DGDerivative_1D_cpu(myPoly,f,bf,df,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1250,23 +810,6 @@ CONTAINS
 
   END SUBROUTINE DGDerivative_1D_cpu
 
-  SUBROUTINE DGDerivative_1D_gpu(myPoly,f_dev,bf_dev,df_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f_dev
-    TYPE(c_ptr),INTENT(in)  :: bf_dev
-    TYPE(c_ptr),INTENT(out) :: df_dev
-
-    CALL DGDerivative_1D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                     myPoly % bMatrix % deviceData, &
-                                     myPoly % qWeights % deviceData, &
-                                     f_dev,bf_dev,df_dev, &
-                                     myPoly % N, &
-                                     nVariables,nElements)
-
-  END SUBROUTINE DGDerivative_1D_gpu
-!
 !! ================================================================================================ !
 !!
 !! CalculateGradient_2D
@@ -1339,21 +882,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE ScalarGradient_2D_cpu
-
-  SUBROUTINE ScalarGradient_2D_gpu(myPoly,f_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                       f_dev,gradF_dev,myPoly % N, &
-                                       nVariables,nElements)
-
-  END SUBROUTINE ScalarGradient_2D_gpu
 !
   SUBROUTINE ScalarDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
     IMPLICIT NONE
@@ -1393,24 +921,6 @@ CONTAINS
 
   END SUBROUTINE ScalarDGGradient_2D_cpu
 
-  SUBROUTINE ScalarDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bf_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL ScalarDGGradient_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                         myPoly % bMatrix % deviceData, &
-                                         myPoly % qWeights % deviceData, &
-                                         f_dev,bf_dev,gradF_dev,myPoly % N, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE ScalarDGGradient_2D_gpu
-
   SUBROUTINE VectorGradient_2D_cpu(myPoly,f,gradF,nVariables,nElements)
     !
     ! Input : Vector(1:2,...)
@@ -1449,21 +959,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorGradient_2D_cpu
-
-  SUBROUTINE VectorGradient_2D_gpu(myPoly,f_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                       f_dev,gradF_dev,myPoly % N, &
-                                       nVariables,nElements)
-
-  END SUBROUTINE VectorGradient_2D_gpu
 
   SUBROUTINE VectorDGGradient_2D_cpu(myPoly,f,bf,gradF,nVariables,nElements)
     !
@@ -1520,24 +1015,6 @@ CONTAINS
 
   END SUBROUTINE VectorDGGradient_2D_cpu
 
-  SUBROUTINE VectorDGGradient_2D_gpu(myPoly,f_dev,bf_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bf_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorDGGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                       myPoly % bMatrix % deviceData, &
-                                       myPoly % qWeights % deviceData, &
-                                       f_dev,bf_dev,gradF_dev,myPoly % N, &
-                                       nVariables,nElements)
-
-  END SUBROUTINE VectorDGGradient_2D_gpu
-
   SUBROUTINE VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1564,21 +1041,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorDivergence_2D_cpu
-
-  SUBROUTINE VectorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         f_dev,dF_dev,myPoly % N, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE VectorDivergence_2D_gpu
 
   SUBROUTINE VectorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
   ! Assumes bF is the vector component in the direction normal to the boundary
@@ -1617,24 +1079,6 @@ CONTAINS
 
   END SUBROUTINE VectorDGDivergence_2D_cpu
 
-  SUBROUTINE VectorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bF_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorDGDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,bF_dev,dF_dev,myPoly % N, &
-                                           nVariables,nElements)
-
-  END SUBROUTINE VectorDGDivergence_2D_gpu
-
   SUBROUTINE VectorCurl_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1661,21 +1105,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorCurl_2D_cpu
-
-  SUBROUTINE VectorCurl_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                   f_dev,dF_dev,myPoly % N, &
-                                   nVariables,nElements)
-
-  END SUBROUTINE VectorCurl_2D_gpu
 
   SUBROUTINE TensorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
     ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
@@ -1707,21 +1136,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE TensorDivergence_2D_cpu
-
-  SUBROUTINE TensorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL TensorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         f_dev,dF_dev,myPoly % N, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE TensorDivergence_2D_gpu
 
   SUBROUTINE TensorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
     ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
@@ -1768,24 +1182,6 @@ CONTAINS
 
   END SUBROUTINE TensorDGDivergence_2D_cpu
 
-  SUBROUTINE TensorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bf_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,bF_dev,dF_dev,myPoly % N, &
-                                           nVariables,nElements)
-
-  END SUBROUTINE TensorDGDivergence_2D_gpu
-
   SUBROUTINE ScalarGradient_3D_cpu(myPoly,f,gradF,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1817,21 +1213,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE ScalarGradient_3D_cpu
-
-  SUBROUTINE ScalarGradient_3D_gpu(myPoly,f_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                       f_dev,gradF_dev,myPoly % N, &
-                                       nVariables,nElements)
-
-  END SUBROUTINE ScalarGradient_3D_gpu
 !
   SUBROUTINE VectorGradient_3D_cpu(myPoly,f,gradF,nVariables,nElements)
     !
@@ -1904,21 +1285,6 @@ CONTAINS
 
   END SUBROUTINE VectorGradient_3D_cpu
 
-  SUBROUTINE VectorGradient_3D_gpu(myPoly,f_dev,gradF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                       f_dev,gradF_dev,myPoly % N, &
-                                       nVariables,nElements)
-
-  END SUBROUTINE VectorGradient_3D_gpu
-
   SUBROUTINE VectorDivergence_3D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -1948,21 +1314,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorDivergence_3D_cpu
-
-  SUBROUTINE VectorDivergence_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         f_dev,dF_dev,myPoly % N, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE VectorDivergence_3D_gpu
 
   SUBROUTINE VectorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
   ! Assumes bF is the vector component in the direction normal to the element boundaries
@@ -2006,24 +1357,6 @@ CONTAINS
 
   END SUBROUTINE VectorDGDivergence_3D_cpu
 
-  SUBROUTINE VectorDGDivergence_3D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bF_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,bF_dev,dF_dev,myPoly % N, &
-                                           nVariables,nElements)
-
-  END SUBROUTINE VectorDGDivergence_3D_gpu
-
   SUBROUTINE VectorCurl_3D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -2058,21 +1391,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorCurl_3D_cpu
-
-  SUBROUTINE VectorCurl_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                   f_dev,dF_dev,myPoly % N, &
-                                   nVariables,nElements)
-
-  END SUBROUTINE VectorCurl_3D_gpu
 
   SUBROUTINE TensorDivergence_3D_cpu(myPoly,f,dF,nVariables,nElements)
     ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
@@ -2117,21 +1435,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE TensorDivergence_3D_cpu
-
-  SUBROUTINE TensorDivergence_3D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL TensorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
-                                         f_dev,dF_dev,myPoly % N, &
-                                         nVariables,nElements)
-
-  END SUBROUTINE TensorDivergence_3D_gpu
 
   SUBROUTINE TensorDGDivergence_3D_cpu(myPoly,f,bF,dF,nVariables,nElements)
     ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix
@@ -2208,24 +1511,6 @@ CONTAINS
 
   END SUBROUTINE TensorDGDivergence_3D_cpu
 
-  SUBROUTINE TensorDGDivergence_3D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: bF_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
-    CALL TensorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,bF_dev,dF_dev,myPoly % N, &
-                                           nVariables,nElements)
-
-  END SUBROUTINE TensorDGDivergence_3D_gpu
-
   ! /////////////////////////////// !
   ! Boundary Interpolation Routines !
 
@@ -2251,18 +1536,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE ScalarBoundaryInterp_1D_cpu
-
-  SUBROUTINE ScalarBoundaryInterp_1D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL ScalarBoundaryInterp_1D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE ScalarBoundaryInterp_1D_gpu
 
   SUBROUTINE ScalarBoundaryInterp_2D_cpu(myPoly,f,fBound,nVariables,nElements)
     IMPLICIT NONE
@@ -2294,18 +1567,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE ScalarBoundaryInterp_2D_cpu
-
-  SUBROUTINE ScalarBoundaryInterp_2D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL ScalarBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE ScalarBoundaryInterp_2D_gpu
 
   SUBROUTINE VectorBoundaryInterp_2D_cpu(myPoly,f,fBound,nVariables,nElements)
     IMPLICIT NONE
@@ -2340,18 +1601,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorBoundaryInterp_2D_cpu
-
-  SUBROUTINE VectorBoundaryInterp_2D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL VectorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE VectorBoundaryInterp_2D_gpu
 
   SUBROUTINE TensorBoundaryInterp_2D_cpu(myPoly,f,fBound,nVariables,nElements)
     IMPLICIT NONE
@@ -2391,18 +1640,6 @@ CONTAINS
 
   END SUBROUTINE TensorBoundaryInterp_2D_cpu
 
-  SUBROUTINE TensorBoundaryInterp_2D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL TensorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE TensorBoundaryInterp_2D_gpu
-
   SUBROUTINE ScalarBoundaryInterp_3D_cpu(myPoly,f,fBound,nVariables,nElements)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
@@ -2437,18 +1674,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE ScalarBoundaryInterp_3D_cpu
-
-  SUBROUTINE ScalarBoundaryInterp_3D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL ScalarBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE ScalarBoundaryInterp_3D_gpu
 
   SUBROUTINE VectorBoundaryInterp_3D_cpu(myPoly,f,fBound,nVariables,nElements)
     IMPLICIT NONE
@@ -2487,18 +1712,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE VectorBoundaryInterp_3D_cpu
-
-  SUBROUTINE VectorBoundaryInterp_3D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL VectorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE VectorBoundaryInterp_3D_gpu
 
   SUBROUTINE TensorBoundaryInterp_3D_cpu(myPoly,f,fBound,nVariables,nElements)
     IMPLICIT NONE
@@ -2542,17 +1755,6 @@ CONTAINS
 
   END SUBROUTINE TensorBoundaryInterp_3D_cpu
 
-  SUBROUTINE TensorBoundaryInterp_3D_gpu(myPoly,f,fBound,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)  :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)  :: f
-    TYPE(c_ptr),INTENT(out)  :: fBound
-
-    CALL TensorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
-                                             f,fBound,myPoly % N,nVariables,nElements)
-
-  END SUBROUTINE TensorBoundaryInterp_3D_gpu
 ! ================================================================================================ !
 !
 ! CalculateBarycentricWeights (PRIVATE)
