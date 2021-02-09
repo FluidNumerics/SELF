@@ -786,10 +786,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-3" \
 cp -r ../lib/* /tmp/
 cp -r ../src/* /tmp/
 
-cd /tmp/
-pwd
-for f in /tmp/*.F90
-do
-  gcov --json-format $f
-  gunzip $f.json.gz
-done
+#cd /tmp/
+#pwd
+#for f in /tmp/*.F90
+#do
+#  gcov --json-format $f
+#  gunzip $f.json.gz
+#done
