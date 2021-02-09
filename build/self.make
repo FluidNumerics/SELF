@@ -7,11 +7,11 @@ PREFIX=/opt/self
 ifeq ($(BUILD_TYPE),debug)
   FFLAGS=-O0 -g -pg --coverage
 else ifeq ($(BUILD_TYPE),benchmark)
-  FFLAGS=-O3 -pg
+  FFLAGS=-O3 -pg --coverage
 else ifeq ($(BUILD_TYPE),release)
-  FFLAGS=-O3
+  FFLAGS=-O3 -pg --coverage
 else
-  FFLAGS=-O2 -g
+  FFLAGS=-O2 -g --coverage
 endif
 
 ifeq ($(GPU),yes)
