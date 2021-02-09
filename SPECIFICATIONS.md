@@ -48,6 +48,4 @@ SELF users will require methods for calculating divergence, gradient, and curl i
 
 We assume that end users will have access to mesh generation and pre-processor tools (e.g. Gmsh, HOPR) to specify unstructured meshes when building their applications that incorporate SELF.
 
-For portable GPU acceleration, SELF depends on AMD's Heterogeneous-Computing Interface for Portability (HIP).
-
 To leverage multi-core and multi-GPU platforms, SELF depends on a modern implementation of MPI.
