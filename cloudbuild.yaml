@@ -4,125 +4,55 @@ steps:
         # Add a step for formatting requirements
         #
 
-        - id: Build Docker Image (GPU Accelerated)
+        - id: Build Docker Image
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
-                 '--build-arg','GPU=yes',
-                 '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
-                 '--build-arg','HIP_COMPILER=${_HIP_COMPILER}',
                  '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
                  '.',
-                 '-f',
-                 './build/docker/Dockerfile',
                  '-t',
-                 'gcr.io/self-fluids/self_${_HIP_PLATFORM}:${_IMAGE_TAG}'
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
           ]
-          waitFor: ["-"]
 
-        - id: Build Docker Image (Serial x86)
+        - id: Test (Serial)
           name: 'gcr.io/cloud-builders/docker'
-          args: ['build',
-                 '--build-arg','GPU=no',
-                 '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
-                 '--build-arg','HIP_COMPILER=${_HIP_COMPILER}',
-                 '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
-                 '.',
-                 '-f',
-                 './build/docker/Dockerfile',
-                 '-t',
-                 'gcr.io/self-fluids/self_serial-x86:${_IMAGE_TAG}'
+          args: ['run',
+                 '--mount','type=bind,source=/workspace,target=/tmp',
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
+                 '/opt/self/bin/ci.sh'
           ]
-          waitFor: ["-"]
 
-        - id: 'Build Singularity Image (GPU Accelerated)'
-          name: 'quay.io/singularity/singularity:v3.7.1'
-          args: ['build',
-                 'self_${HIP_PLATFORM}.sif',
-                 'docker-daemon://gcr.io/self-fluids/self_${_HIP_PLATFORM}:${_IMAGE_TAG}']
-          waitFor: ["Build Docker Image (GPU Accelerated)"]
+          #        - id: Create summary coverage reports
+          #          name: 'gcr.io/self-fluids/fcov'
+          #          args: ['run',
+          #                 '--mount','type=bind,source=/workspace,target=/tmp',
+          #                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
+          #                 '/opt/self/bin/ci.sh'
+          #          ]
 
-        - id: 'Build Singularity Image (Serial x86)'
-          name: 'quay.io/singularity/singularity:v3.7.1'
-          args: ['build',
-                 'self_serial-x86.sif',
-                 'docker-daemon://gcr.io/self-fluids/self_${_HIP_PLATFORM}:${_IMAGE_TAG}']
-          waitFor: ["Build Docker Image (Serial x86)"]
+          #        - id: Push coverage reports
+          #          name: 'gcr.io/self-fluids/gcov'
+          #          entrypoint: '/bin/bash'
+          #          args: 
+          #            - '-c'
+          #            - |
+          #                bash <(curl -s https://codecov.io/bash) -t "$$CODECOV_SECRET" -v
+          #          env:
+          #            - 'VCS_COMMIT_ID=$COMMIT_SHA'
+          #            - 'VCS_BRANCH_NAME=$BRANCH_NAME'
+          #            - 'CI_BUILD_ID=$BUILD_ID'
+          #          secretEnv: 
+          #            - 'CODECOV_SECRET'
 
-        - id: 'Test Singularity Image (GPU Accelerated)'
-          name: 'gcr.io/cloud-builders/gcloud'
-          entrypoint: '/bin/sh'
-          args: 
-            - '-c'
-            - |
-                    ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
+          #availableSecrets:
+          #  secretManager:
+          #    - versionName: projects/163522599797/secrets/codecov-token/versions/1
+          #      env: 'CODECOV_SECRET'
 
-                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey \
-                        --command="mkdir ${BUILD_ID}"
+images: ['gcr.io/self-fluids/self:${_IMAGE_TAG}']
 
-                    gcloud compute scp self_${_HIP_PLATFORM}.sif ${_CONTROLLER}:${BUILD_ID}/ \
-                         --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey
-
-                    gcloud compute scp test.sh ${_CONTROLLER}:${BUILD_ID}/ \
-                         --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey
-
-                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey \
-                        --command="cd ${BUILD_ID} && srun --account=ci-runners --partition=n1-standard-8-1xp100 --gres=gpu:1 -n1 ./test.sh --artifact singularity --image self_${_HIP_PLATFORM}.sif --gpu yes"
-          
-                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey \
-                        --command="rm -rf ${BUILD_ID}"
-          waitFor: ["Build Singularity Image (GPU Accelerated)"]
-
-        - id: 'Test Singularity Image (Serial x86)'
-          name: 'gcr.io/cloud-builders/gcloud'
-          entrypoint: '/bin/sh'
-          args: 
-            - '-c'
-            - |
-                    ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
-
-                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey \
-                        --command="mkdir ${BUILD_ID}"
-
-                    gcloud compute scp self_serial-x86.sif ${_CONTROLLER}:${BUILD_ID}/ \
-                         --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey
-
-                    gcloud compute scp test.sh ${_CONTROLLER}:${BUILD_ID}/ \
-                         --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey
-
-                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey \
-                        --command="cd ${BUILD_ID} && srun --account=ci-runners --partition=n1-standard-4 -n1 ./test.sh --artifact singularity --image self_serial-x86.sif --gpu yes"
-          
-                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-                        --ssh-key-file=/tmp/sshkey \
-                        --command="rm -rf ${BUILD_ID}"
-
-          waitFor: ["Build Singularity Image (Serial x86)"]
-
-
-images: ['gcr.io/self-fluids/self_${_HIP_PLATFORM}:${_IMAGE_TAG}','gcr.io/self-fluids/self_serial-x86:${_IMAGE_TAG}']
- 
-artifacts:
-  objects:
-    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
-    paths: ['self_${_HIP_PLATFORM}.sif','self_serial-x86.sif']
 
 timeout: 7200s
 
 substitutions:
         _IMAGE_TAG: 'dev'
-        _HIP_PLATFORM: 'nvcc'
-        _HIP_COMPILER: '/usr/local/cuda/bin/nvcc'
         _BUILD_TYPE: 'debug'
-
-options:
-  machineType: 'E2_HIGHCPU_8'
-  diskSizeGb: 100

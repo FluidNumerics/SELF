@@ -5,8 +5,7 @@ FLIBS=-L/opt/self/lib/ -lFLAP -lFACE -lPENF -lfeqparse
 PREFIX=/opt/self
 
 ifeq ($(BUILD_TYPE),debug)
-  FFLAGS=-O0 -g -pg
-# -ftest-coverage -fprofile-arcs
+  FFLAGS=-O0 -g -pg --coverage
 else ifeq ($(BUILD_TYPE),benchmark)
   FFLAGS=-O3 -pg
 else ifeq ($(BUILD_TYPE),release)
@@ -29,14 +28,18 @@ install: libSELF.a self
 	sed -i 's/INSTALL_ROOT=.*/INSTALL_ROOT=\/opt\/self/g' test/ci.gpu.sh 
 	cp test/ci.sh ${PREFIX}/bin/
 	chmod 755 ${PREFIX}/bin/ci.sh
-	cp test/ci.gpu.sh ${PREFIX}/bin/
-	chmod 755 ${PREFIX}/bin/ci.gpu.sh
 	cp src/*.h ${PREFIX}/include/
+	cp -r src ${PREFIX}/src/
 	mv self ${PREFIX}/bin/
-	rm *.o
+	mv *.o *.gcno ${PREFIX}/lib
+	mkdir ${PREFIX}/test
+	ln -s ${PREFIX}/bin/* ${PREFIX}/test/
+	ln -s ${PREFIX}/lib/* ${PREFIX}/test/
+	ln -s ${PREFIX}/src/* ${PREFIX}/test/
+	
 
 self: SELF.o
-	${FC} ${INC} -I./src/ *.o  ${FLIBS} -o $@
+	${FC} ${FFLAGS} ${INC} -I./src/ *.o  ${FLIBS} -o $@
 
 SELF.o: libSELF.a
 	${FC} -c ${FFLAGS} ${INC} -I./src/ ${FLIBS} src/SELF.F90 -o $@

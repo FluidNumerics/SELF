@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.2)
 
-SET(FLAP_LIB "-L/apps/flap/lib -lFLAP -lPENF -lFACE" CACHE STRING "Linker flags for FLAP and dependencies")
+SET(FLAP_LIB "-L/opt/flap/lib -lFLAP -lPENF -lFACE" CACHE STRING "Linker flags for FLAP and dependencies")
+SET(FEQPARSE_LIB "-L/opt/feq-parse/lib -lfeqparse" CACHE STRING "Linker flags for feq-parse and dependencies")
 
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 PROJECT(self Fortran C CXX)

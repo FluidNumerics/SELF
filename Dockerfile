@@ -16,13 +16,6 @@ RUN git clone https://github.com/FluidNumerics/feq-parse.git /tmp/extern/feq-par
     cmake -DCMAKE_INSTALL_PREFIX="/opt/self" /tmp/extern/feq-parse && \
     make && make install
 
-# JSON-Fortran
-RUN git clone https://github.com/jacobwilliams/json-fortran.git /tmp/extern/json-fortran && \
-    mkdir -p /tmp/extern/json-fortran/build && \
-    cd /tmp/extern/json-fortran/build && \
-    cmake -DSKIP_DOC_GEN=True -DCMAKE_INSTALL_PREFIX="/opt/self" /tmp/extern/json-fortran && \
-    make && make install
-
 # FLAP
 RUN git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/extern/FLAP && \
     mkdir -p /tmp/extern/FLAP/build && \
@@ -49,7 +42,7 @@ COPY --from=devel /opt/self /opt/self
 
 # Install gcc, gfortran, cmake, git
 RUN apt update -y && \
-    apt install -y gcc gfortran cmake git
+    apt install -y gcc gfortran
 
 ENV LD_LIBRARY_PATH=/opt/self/lib:$LD_LIBRARY_PATH \
     PATH=/opt/self/bin:$PATH
