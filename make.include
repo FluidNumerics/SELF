@@ -28,6 +28,7 @@ SELF_BINS = self
 SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .o, $(SELF_F90_SRCS)))
 SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .o, $(SELF_DEV_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
+SELF_BINARIES
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR)
 
 # Compiler options
@@ -39,16 +40,20 @@ include $(SELF_DIR)/make.dependencies
 # Recipes
 
 ifeq ($(BUILD),dev)
-self: $(SELF_LIB_OBJS) $(SELF_TEST_OBJS)
-	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_FLIBS) -o $@
+self: $(SELF_BINDIR)/self
+	cp $(SELF_DIR)/ci.sh $(SELF_BINDIR)
 else
 self: $(SELF_LIB_OBJS)
 endif
 
 self_clean:
 	rm -f $(SELF_OBJDIR)*
+	rm -f $(SELF_BINDIR)*
 	rm -f $(SELF_LIBDIR)*.a
 	rm -f $(SELF_MODDIR)*.mod
+
+$(SELF_BINDIR)self: $(SELF_LIB_OBJS) $(SELF_TEST_OBJS)
+	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_FLIBS) -o $@
 
 $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
 	rm -f $@
