@@ -26,6 +26,7 @@ RUN git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/exter
 RUN cd /tmp && \
     BUILD=${BUILD_TYPE} \
     SELF_PREFIX=/opt/self \
+    FC=gfortran \
     make
 
 FROM debian:bullseye
