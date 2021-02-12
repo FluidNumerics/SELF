@@ -39,8 +39,8 @@ include $(SELF_DIR)/make.dependencies
 # Recipes
 
 ifeq ($(BUILD),dev)
-self: $(SELF_LIB_OBJS)
-	$(FC) $(SELF_FLAGS) $(SELF_OBJDIR)*.o $(SELF_FLIBS) -o $@
+self: $(SELF_LIB_OBJS) $(SELF_TEST_OBJS)
+	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_FLIBS) -o $@
 else
 self: $(SELF_LIB_OBJS)
 endif
