@@ -1,0 +1,67 @@
+
+BUILD ?= dev
+SELF_DIR ?= ./
+
+SELF_INCDIR = $(SELF_DIR)/include/
+SELF_LIBDIR = $(SELF_DIR)/lib/
+SELF_OBJDIR = $(SELF_DIR)/obj/
+SELF_BINDIR = $(SELF_DIR)/bin/
+
+vpath %.F90 %.cpp $(SELF_DIR)/src
+
+
+SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_Memory \
+                SELF_Quadrature SELF_Lagrange SELF_Data \
+                SELF_Mesh SELF_Geometry SELF_MappedData
+
+SELF_DEV_SRCS = SELF_Tests SELF
+
+
+SELF_CPP_SRCS = SELF_Lagrange_HIP SELF_MappedData_HIP
+
+SELF_LIBS = self
+SELF_BINS = self
+            
+#src/SELF_HIP_Macros.h
+#src/SELF_Macros.h
+
+SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .o, $(SELF_F90_SRCS)))
+SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .o, $(SELF_DEV_SRCS)))
+SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
+SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR)
+
+# Compiler options
+include $(SELF_DIR)/make.compiler
+
+# Dependencies options
+include $(SELF_DIR)/make.dependencies
+
+# Recipes
+
+ifeq ($(BUILD),dev)
+self: $(SELF_LIB_OBJS)
+	$(FC) $(SELF_FLAGS) $(SELF_OBJDIR)*.o $(SELF_FLIBS) -o $@
+else
+self: $(SELF_LIB_OBJS)
+endif
+
+self_clean:
+	rm -f $(SELF_OBJDIR)*
+	rm -f $(SELF_LIBDIR)*.a
+	rm -f $(SELF_MODDIR)*.mod
+
+$(SELF_LIBDIR)libself.a: $(SELF_OBJS)
+	rm -f $@
+	$(AR) -cq $@ $^
+
+$(SELF_OBJDIR)%.o: %.F90
+	$(FC) $(SELF_FFLAGS) -c $< -o $@
+
+
+# Dependency on build tree existence
+$(SELF_OBJS): | $(SELF_BUILDDIRS)
+
+$(SELF_BUILDDIRS):
+	mkdir $@
+
+.PHONY: self self_clean
