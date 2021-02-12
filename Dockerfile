@@ -1,5 +1,5 @@
 FROM debian:bullseye AS devel
-ARG BUILD_TYPE=dev
+ARG BUILD_TYPE=release
 
 COPY . /tmp
 
