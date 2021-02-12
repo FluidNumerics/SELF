@@ -1281,13 +1281,13 @@ CONTAINS
           DO j = 0,tensor % N
             DO i = 0,tensor % N
               tensor % interior % hostData(1,1,i,j,iVar,iEl) = tensor % interior % hostData(1,1,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                             geometry % J % interior % hostData(i,j,1,iEl)
               tensor % interior % hostData(2,1,i,j,iVar,iEl) = tensor % interior % hostData(2,1,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                             geometry % J % interior % hostData(i,j,1,iEl)
               tensor % interior % hostData(1,2,i,j,iVar,iEl) = tensor % interior % hostData(1,2,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                             geometry % J % interior % hostData(i,j,1,iEl)
               tensor % interior % hostData(2,2,i,j,iVar,iEl) = tensor % interior % hostData(2,2,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                             geometry % J % interior % hostData(i,j,1,iEl)
             ENDDO
           ENDDO
         ENDDO
@@ -1322,23 +1322,23 @@ CONTAINS
             DO j = 0,tensor % N
               DO i = 0,tensor % N
                 tensor % interior % hostData(1,1,i,j,k,iVar,iEl) = tensor % interior % hostData(1,1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(2,1,i,j,k,iVar,iEl) = tensor % interior % hostData(2,1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(3,1,i,j,k,iVar,iEl) = tensor % interior % hostData(3,1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(1,2,i,j,k,iVar,iEl) = tensor % interior % hostData(1,2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(2,2,i,j,k,iVar,iEl) = tensor % interior % hostData(2,2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(3,2,i,j,k,iVar,iEl) = tensor % interior % hostData(3,2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(1,3,i,j,k,iVar,iEl) = tensor % interior % hostData(1,3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(2,3,i,j,k,iVar,iEl) = tensor % interior % hostData(2,3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(3,3,i,j,k,iVar,iEl) = tensor % interior % hostData(3,3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
               ENDDO
             ENDDO
           ENDDO
