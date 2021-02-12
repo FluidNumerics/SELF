@@ -184,7 +184,7 @@ CONTAINS
         DO iVar = 1,scalar % nVar
           DO i = 0,scalar % N
             scalar % interior % hostData(i,iVar,iEl) = scalar % interior % hostData(i,iVar,iEl)/&
-                                                       geometry % dxds % interior % hostData(i,iVar,iEl)
+                                                       geometry % dxds % interior % hostData(i,1,iEl)
           ENDDO
         ENDDO
       ENDDO
@@ -348,7 +348,7 @@ CONTAINS
           DO j = 0,scalar % N
             DO i = 0,scalar % N
               scalar % interior % hostData(i,j,iVar,iEl) = scalar % interior % hostData(i,j,iVar,iEl)/&
-                                                           geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                           geometry % J % interior % hostData(i,j,1,iEl)
             ENDDO
           ENDDO
         ENDDO
@@ -569,7 +569,7 @@ CONTAINS
             DO j = 0,scalar % N
               DO i = 0,scalar % N
                 scalar % interior % hostData(i,j,k,iVar,iEl) = scalar % interior % hostData(i,j,k,iVar,iEl)/&
-                                                               geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                               geometry % J % interior % hostData(i,j,k,1,iEl)
               ENDDO
             ENDDO
           ENDDO
@@ -768,7 +768,7 @@ CONTAINS
               DO col = 1,2
                 DO row = 1,2
                   jvar = row + 2*(ivar-1)
-                  tensor % boundary % hostData(row,col,j,ivar,iside,iel) = vector % interior % hostData(col,j,jvar,iside,iel)
+                  tensor % boundary % hostData(row,col,j,ivar,iside,iel) = vector % boundary % hostData(col,j,jvar,iside,iel)
                 ENDDO
               ENDDO
             ENDDO
@@ -876,9 +876,9 @@ CONTAINS
           DO j = 0,vector % N
             DO i = 0,vector % N
               vector % interior % hostData(1,i,j,iVar,iEl) = vector % interior % hostData(1,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                             geometry % J % interior % hostData(i,j,1,iEl)
               vector % interior % hostData(2,i,j,iVar,iEl) = vector % interior % hostData(2,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,iVar,iEl)
+                                                             geometry % J % interior % hostData(i,j,1,iEl)
             ENDDO
           ENDDO
         ENDDO
@@ -1077,7 +1077,7 @@ CONTAINS
                 DO col = 1,3
                   DO row = 1,3
                     jvar = row + 3*(ivar-1)
-                    tensor % boundary % hostData(row,col,j,k,ivar,iside,iel) = vector % interior % hostData(col,j,k,jvar,iside,iel)
+                    tensor % boundary % hostData(row,col,j,k,ivar,iside,iel) = vector % boundary % hostData(col,j,k,jvar,iside,iel)
                   ENDDO
                 ENDDO
               ENDDO
@@ -1240,11 +1240,11 @@ CONTAINS
             DO j = 0,vector % N
               DO i = 0,vector % N
                 vector % interior % hostData(1,i,j,k,iVar,iEl) = vector % interior % hostData(1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 vector % interior % hostData(2,i,j,k,iVar,iEl) = vector % interior % hostData(2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
                 vector % interior % hostData(3,i,j,k,iVar,iEl) = vector % interior % hostData(3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,iVar,iEl)
+                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
               ENDDO
             ENDDO
           ENDDO
