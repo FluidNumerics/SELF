@@ -17,6 +17,7 @@ steps:
           name: 'gcr.io/cloud-builders/docker'
           args: ['run',
                  '--mount','type=bind,source=/workspace,target=/tmp',
+                 '-e', 'INSTALL_ROOT=/opt/self',
                  'gcr.io/self-fluids/self:${_IMAGE_TAG}',
                  '/opt/self/bin/ci.sh'
           ]

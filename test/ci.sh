@@ -1,10 +1,5 @@
 #!/bin/bash
 
-INSTALL_ROOT=/apps/self
-
-
-cd ${INSTALL_ROOT}/test
-
 ${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_1d
 ${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_2d
 ${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_3d
@@ -783,8 +778,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-3" \
 # Exponential Error Decay
 
 # Create coverage reports
-cp -r ../lib/* /tmp/
-cp -r ../src/* /tmp/
+#cp -r ../lib/* /tmp/
+#cp -r ../src/* /tmp/
 
 #cd /tmp/
 #pwd
