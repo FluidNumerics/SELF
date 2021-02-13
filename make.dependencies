@@ -1,21 +1,17 @@
 
 
-BUILD ?= dev
+# feq-parse Dependencies
+SELF_FEQPARSE_LIBS ?= -L/opt/feqparse/lib -lfeqparse
+SELF_FEQPARSE_INC ?= -I/opt/feqparse/include
 
-ifeq ($(BUILD), dev)
-  # feq-parse Dependencies
-  SELF_FEQPARSE_LIBS ?= -L/opt/feqparse/lib -lfeqparse
-  SELF_FEQPARSE_INC ?= -I/opt/feqparse/include
-  
-  SELF_FLIBS += $(SELF_FEQPARSE_LIBS)
-  SELF_FFLAGS += $(SELF_FEQPARSE_INC)
-  
-  # FLAP Dependencies
-  SELF_FLAP_LIBS ?= -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF
-  SELF_FLAP_INC ?= -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/FLAP/include/FACE
+SELF_FLIBS += $(SELF_FEQPARSE_LIBS)
+SELF_FFLAGS += $(SELF_FEQPARSE_INC)
 
-  SELF_FLIBS += $(SELF_FLAP_LIBS)
-  SELF_FFLAGS += $(SELF_FLAP_INC)
-endif
+# FLAP Dependencies
+SELF_FLAP_LIBS ?= -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF
+SELF_FLAP_INC ?= -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/FLAP/include/FACE
+
+SELF_FLIBS += $(SELF_FLAP_LIBS)
+SELF_FFLAGS += $(SELF_FLAP_INC)
 
 
