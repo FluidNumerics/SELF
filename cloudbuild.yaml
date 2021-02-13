@@ -1,17 +1,58 @@
 
 steps:
-        - id: 'Build Docker Container Image'
+        # Add a step for formatting requirements
+        #
+
+        - id: Build Docker Image
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
+                 '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
                  '.',
                  '-t',
-                 'gcr.io/${PROJECT_ID}/self:latest']
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
+          ]
 
-        - id: 'Run CI Tests'
-          name: 'gcr.io/cloud-builder/docker'
+        - id: Test (Serial)
+          name: 'gcr.io/cloud-builders/docker'
           args: ['run',
-                 'gcr.io/${PROJECT_ID}/self:latest',
-                 '/bin/bash', 
-                 '/apps/self/bin/ci.sh']
+                 '--mount','type=bind,source=/workspace,target=/tmp',
+                 '-e', 'INSTALL_ROOT=/opt/self',
+                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
+                 '/opt/self/bin/ci.sh'
+          ]
 
-images: ['gcr.io/${PROJECT_ID}/self:latest']
+          #        - id: Create summary coverage reports
+          #          name: 'gcr.io/self-fluids/fcov'
+          #          args: ['run',
+          #                 '--mount','type=bind,source=/workspace,target=/tmp',
+          #                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
+          #                 '/opt/self/bin/ci.sh'
+          #          ]
+
+          #        - id: Push coverage reports
+          #          name: 'gcr.io/self-fluids/gcov'
+          #          entrypoint: '/bin/bash'
+          #          args: 
+          #            - '-c'
+          #            - |
+          #                bash <(curl -s https://codecov.io/bash) -t "$$CODECOV_SECRET" -v
+          #          env:
+          #            - 'VCS_COMMIT_ID=$COMMIT_SHA'
+          #            - 'VCS_BRANCH_NAME=$BRANCH_NAME'
+          #            - 'CI_BUILD_ID=$BUILD_ID'
+          #          secretEnv: 
+          #            - 'CODECOV_SECRET'
+
+          #availableSecrets:
+          #  secretManager:
+          #    - versionName: projects/163522599797/secrets/codecov-token/versions/1
+          #      env: 'CODECOV_SECRET'
+
+images: ['gcr.io/self-fluids/self:${_IMAGE_TAG}']
+
+
+timeout: 7200s
+
+substitutions:
+        _IMAGE_TAG: 'dev'
+        _BUILD_TYPE: 'dev'

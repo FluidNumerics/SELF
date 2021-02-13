@@ -11,7 +11,7 @@ MODULE SELF_Data
   USE SELF_Constants
   USE SELF_Lagrange
 
-  USE hipfort
+!  USE hipfort
   USE ISO_C_BINDING
 
   IMPLICIT NONE
@@ -382,17 +382,17 @@ CONTAINS
     CLASS(Scalar1D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarBoundaryInterp_1D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarBoundaryInterp_1D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarBoundaryInterp_1D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Scalar1D
 
@@ -402,17 +402,17 @@ CONTAINS
     TYPE(Scalar1D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarGridInterp_1D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarGridInterp_1D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarGridInterp_1D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Scalar1D
 
@@ -422,17 +422,17 @@ CONTAINS
     TYPE(Scalar1D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % deviceData, &
-                                                SELFout % interior % deviceData, &
-                                                SELFStorage % nVar, &
-                                                SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % deviceData, &
+!                                                SELFout % interior % deviceData, &
+!                                                SELFStorage % nVar, &
+!                                                SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % Derivative_1D(SELFStorage % interior % hostData, &
                                                 SELFout % interior % hostData, &
                                                 SELFStorage % nVar, &
                                                 SELFStorage % nElem)
-    ENDIF
+!    ENDIF
 
   END SUBROUTINE Derivative_Scalar1D
 
@@ -594,17 +594,17 @@ CONTAINS
     CLASS(Scalar2D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarBoundaryInterp_2D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarBoundaryInterp_2D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarBoundaryInterp_2D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Scalar2D
 
@@ -614,17 +614,17 @@ CONTAINS
     TYPE(Scalar2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarGridInterp_2D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarGridInterp_2D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarGridInterp_2D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Scalar2D
 
@@ -634,17 +634,17 @@ CONTAINS
     TYPE(Vector2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarGradient_2D(SELFStorage % interior % deviceData, &
-                                                    SELFout % interior % deviceData, &
-                                                    SELFStorage % nVar, &
-                                                    SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarGradient_2D(SELFStorage % interior % deviceData, &
+!                                                    SELFout % interior % deviceData, &
+!                                                    SELFStorage % nVar, &
+!                                                    SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarGradient_2D(SELFStorage % interior % hostData, &
                                                     SELFout % interior % hostData, &
                                                     SELFStorage % nVar, &
                                                     SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Gradient_Scalar2D
 
@@ -810,17 +810,17 @@ CONTAINS
     CLASS(Scalar3D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarBoundaryInterp_3D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarBoundaryInterp_3D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarBoundaryInterp_3D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Scalar3D
 
@@ -830,17 +830,17 @@ CONTAINS
     TYPE(Scalar3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarGridInterp_3D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarGridInterp_3D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarGridInterp_3D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Scalar3D
 
@@ -850,17 +850,17 @@ CONTAINS
     TYPE(Vector3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % ScalarGradient_3D(SELFStorage % interior % deviceData, &
-                                                    SELFout % interior % deviceData, &
-                                                    SELFStorage % nVar, &
-                                                    SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % ScalarGradient_3D(SELFStorage % interior % deviceData, &
+!                                                    SELFout % interior % deviceData, &
+!                                                    SELFStorage % nVar, &
+!                                                    SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % ScalarGradient_3D(SELFStorage % interior % hostData, &
                                                     SELFout % interior % hostData, &
                                                     SELFStorage % nVar, &
                                                     SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Gradient_Scalar3D
 
@@ -1030,17 +1030,17 @@ CONTAINS
     CLASS(Vector2D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorBoundaryInterp_2D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorBoundaryInterp_2D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorBoundaryInterp_2D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Vector2D
 
@@ -1050,17 +1050,17 @@ CONTAINS
     TYPE(Vector2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorGridInterp_2D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorGridInterp_2D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorGridInterp_2D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Vector2D
 
@@ -1070,17 +1070,17 @@ CONTAINS
     TYPE(Tensor2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorGradient_2D(SELFStorage % interior % deviceData, &
-                                                    SELFout % interior % deviceData, &
-                                                    SELFStorage % nVar, &
-                                                    SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorGradient_2D(SELFStorage % interior % deviceData, &
+!                                                    SELFout % interior % deviceData, &
+!                                                    SELFStorage % nVar, &
+!                                                    SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorGradient_2D(SELFStorage % interior % hostData, &
                                                     SELFout % interior % hostData, &
                                                     SELFStorage % nVar, &
                                                     SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Gradient_Vector2D
 
@@ -1093,33 +1093,33 @@ CONTAINS
 
     IF (dForm == selfWeakDGForm) THEN
 
-      IF (gpuAccel) THEN
-        CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFout % interior % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-      ELSE
+!      IF (gpuAccel) THEN
+!        CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFout % interior % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!      ELSE
         CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFout % interior % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-      END IF
+!      END IF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
-      IF (gpuAccel) THEN
-        CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % deviceData, &
-                                                        SELFout % interior % deviceData, &
-                                                        SELFStorage % nVar, &
-                                                        SELFStorage % nElem)
-      ELSE
+!      IF (gpuAccel) THEN
+!        CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % deviceData, &
+!                                                        SELFout % interior % deviceData, &
+!                                                        SELFStorage % nVar, &
+!                                                        SELFStorage % nElem)
+!      ELSE
         CALL SELFStorage % interp % VectorDivergence_2D(SELFStorage % interior % hostData, &
                                                         SELFout % interior % hostData, &
                                                         SELFStorage % nVar, &
                                                         SELFStorage % nElem)
-      END IF
+!      END IF
 
     END IF
 
@@ -1131,17 +1131,17 @@ CONTAINS
     TYPE(Scalar2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorCurl_2D(SELFStorage % interior % deviceData, &
-                                                SELFout % interior % deviceData, &
-                                                SELFStorage % nVar, &
-                                                SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorCurl_2D(SELFStorage % interior % deviceData, &
+!                                                SELFout % interior % deviceData, &
+!                                                SELFStorage % nVar, &
+!                                                SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorCurl_2D(SELFStorage % interior % hostData, &
                                                 SELFout % interior % hostData, &
                                                 SELFStorage % nVar, &
                                                 SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Curl_Vector2D
 
@@ -1311,17 +1311,17 @@ CONTAINS
     CLASS(Vector3D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorBoundaryInterp_3D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorBoundaryInterp_3D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorBoundaryInterp_3D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Vector3D
 
@@ -1331,17 +1331,17 @@ CONTAINS
     TYPE(Vector3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorGridInterp_3D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorGridInterp_3D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorGridInterp_3D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Vector3D
 
@@ -1351,17 +1351,17 @@ CONTAINS
     TYPE(Tensor3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorGradient_3D(SELFStorage % interior % deviceData, &
-                                                    SELFout % interior % deviceData, &
-                                                    SELFStorage % nVar, &
-                                                    SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorGradient_3D(SELFStorage % interior % deviceData, &
+!                                                    SELFout % interior % deviceData, &
+!                                                    SELFStorage % nVar, &
+!                                                    SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorGradient_3D(SELFStorage % interior % hostData, &
                                                     SELFout % interior % hostData, &
                                                     SELFStorage % nVar, &
                                                     SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Gradient_Vector3D
 
@@ -1371,17 +1371,17 @@ CONTAINS
     TYPE(Scalar3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorDivergence_3D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorDivergence_3D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorDivergence_3D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Divergence_Vector3D
 
@@ -1391,17 +1391,17 @@ CONTAINS
     TYPE(Vector3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % VectorCurl_3D(SELFStorage % interior % deviceData, &
-                                                SELFout % interior % deviceData, &
-                                                SELFStorage % nVar, &
-                                                SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % VectorCurl_3D(SELFStorage % interior % deviceData, &
+!                                                SELFout % interior % deviceData, &
+!                                                SELFStorage % nVar, &
+!                                                SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % VectorCurl_3D(SELFStorage % interior % hostData, &
                                                 SELFout % interior % hostData, &
                                                 SELFStorage % nVar, &
                                                 SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Curl_Vector3D
 
@@ -1575,17 +1575,17 @@ CONTAINS
     CLASS(Tensor2D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % TensorBoundaryInterp_2D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % TensorBoundaryInterp_2D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % TensorBoundaryInterp_2D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Tensor2D
 
@@ -1595,17 +1595,17 @@ CONTAINS
     TYPE(Tensor2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % TensorGridInterp_2D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % TensorGridInterp_2D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % TensorGridInterp_2D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Tensor2D
 
@@ -1615,17 +1615,17 @@ CONTAINS
     TYPE(Vector2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % TensorDivergence_2D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % TensorDivergence_2D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % TensorDivergence_2D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Divergence_Tensor2D
 
@@ -1823,17 +1823,17 @@ CONTAINS
     CLASS(Tensor3D),INTENT(inout) :: SELFStorage
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % TensorBoundaryInterp_3D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
-                                                          SELFStorage % nVar, &
-                                                          SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % TensorBoundaryInterp_3D(SELFStorage % interior % deviceData, &
+!                                                          SELFStorage % boundary % deviceData, &
+!                                                          SELFStorage % nVar, &
+!                                                          SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % TensorBoundaryInterp_3D(SELFStorage % interior % hostData, &
                                                           SELFStorage % boundary % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE BoundaryInterp_Tensor3D
 
@@ -1843,17 +1843,17 @@ CONTAINS
     TYPE(Tensor3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % TensorGridInterp_3D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % TensorGridInterp_3D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % TensorGridInterp_3D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE GridInterp_Tensor3D
 
@@ -1863,17 +1863,17 @@ CONTAINS
     TYPE(Vector3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
 
-    IF (gpuAccel) THEN
-      CALL SELFStorage % interp % TensorDivergence_3D(SELFStorage % interior % deviceData, &
-                                                      SELFout % interior % deviceData, &
-                                                      SELFStorage % nVar, &
-                                                      SELFStorage % nElem)
-    ELSE
+!    IF (gpuAccel) THEN
+!      CALL SELFStorage % interp % TensorDivergence_3D(SELFStorage % interior % deviceData, &
+!                                                      SELFout % interior % deviceData, &
+!                                                      SELFStorage % nVar, &
+!                                                      SELFStorage % nElem)
+!    ELSE
       CALL SELFStorage % interp % TensorDivergence_3D(SELFStorage % interior % hostData, &
                                                       SELFout % interior % hostData, &
                                                       SELFStorage % nVar, &
                                                       SELFStorage % nElem)
-    END IF
+!    END IF
 
   END SUBROUTINE Divergence_Tensor3D
 

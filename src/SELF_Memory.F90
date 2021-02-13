@@ -2,8 +2,8 @@ MODULE SELF_Memory
 
   USE SELF_Constants
 
-  USE hipfort
-  USE hipfort_check
+!  USE hipfort
+!  USE hipfort_check
   USE ISO_FORTRAN_ENV
   USE ISO_C_BINDING
 

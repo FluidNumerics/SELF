@@ -1,0 +1,33 @@
+# Compiler
+
+
+FC ?= gfortran
+HIPFORT_COMPILER ?= gfortran
+HIPFORT_GPU ?= gfx900 
+ROCM_DIR ?= /opt/rocm
+CUDA_PATH ?= /usr/local/cuda
+BUILD ?= dev
+
+ifeq ($(FC)-$(HIPFORT_COMPILER), hipfc-gfortran)
+  FC = hipfc -hipfort-compiler $(HIPFORT_COMPILER) -rocm-dir $(ROCM_DIR) --offload-arch $(HIPFORT_GPU)
+  CXX = hipfc -hipfort-compiler $(HIPFORT_COMPILER) -rocm-dir $(ROCM_DIR) --offload-arch $(HIPFORT_GPU)
+  AR = gcc-ar
+else ifeq ($(FC), gfortran)
+  FC = gfortran
+  AR = gcc-ar
+else
+  $(error unrecognized compiler $(FC).)
+endif
+
+
+ifeq ($(FC)-$(BUILD), gfortran-dev)
+  SELF_FFLAGS += -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
+else ifeq ($(FC)-$(BUILD), gfortran-release)
+  SELF_FFLAGS += -O3
+else ifeq ($(FC)-$(HIPFORT_COMPILER)-$(BUILD), hipfc-gfortran-dev)
+  SELF_FFLAGS += -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
+else ifeq ($(FC)-$(HIPFORT_COMPILER)-$(BUILD), hipfc-gfortran-release)
+  SELF_FFLAGS += -O3
+else
+  $(error unrecognized build target $(BUILD).)
+endif

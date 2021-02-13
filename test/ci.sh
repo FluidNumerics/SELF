@@ -1,11 +1,12 @@
+#!/bin/bash
 
-/apps/self/bin/self --tolerance "1.0E-5" blockmesh_1d
-/apps/self/bin/self --tolerance "1.0E-5" blockmesh_2d
-/apps/self/bin/self --tolerance "1.0E-5" blockmesh_3d
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_1d
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_2d
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_3d
 
 ## 1-D (Scalar) Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --nvar 5 \
                     --nelements 10 \
@@ -17,7 +18,7 @@
                     s1d_interp
 
 # Exactness (Linear function)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=x" \
                     --nvar 5 \
                     --nelements 10 \
@@ -29,7 +30,7 @@
                     s1d_interp
 
 # Exponential error decay
-/apps/self/bin/self --tolerance "4.2E-1" \
+${INSTALL_ROOT}/bin/self --tolerance "4.2E-1" \
                     --function "f=sin(6.0*pi*x)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -40,7 +41,7 @@
                     --gpu-accel "false" \
                     s1d_interp
 
-/apps/self/bin/self --tolerance "4.2E-2" \
+${INSTALL_ROOT}/bin/self --tolerance "4.2E-2" \
                     --function "f=sin(6.0*pi*x)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -51,7 +52,7 @@
                     --gpu-accel "false" \
                     s1d_interp
 
-/apps/self/bin/self --tolerance "4.2E-3" \
+${INSTALL_ROOT}/bin/self --tolerance "4.2E-3" \
                     --function "f=sin(6.0*pi*x)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -62,7 +63,7 @@
                     --gpu-accel "false" \
                     s1d_interp
 
-/apps/self/bin/self --tolerance "4.2E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "4.2E-4" \
                     --function "f=sin(6.0*pi*x)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -73,7 +74,7 @@
                     --gpu-accel "false" \
                     s1d_interp
 
-/apps/self/bin/self --tolerance "4.2E-5" \
+${INSTALL_ROOT}/bin/self --tolerance "4.2E-5" \
                     --function "f=sin(6.0*pi*x)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -84,7 +85,7 @@
                     --gpu-accel "false" \
                     s1d_interp
 
-/apps/self/bin/self --tolerance "4.2E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "4.2E-6" \
                     --function "f=sin(6.0*pi*x)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -97,7 +98,7 @@
 
 ## 2-D (Scalar) Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --nvar 5 \
                     --nelements 10 \
@@ -109,7 +110,7 @@
                     s2d_interp
 
 # Exactness linear
-/apps/self/bin/self --tolerance "6.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.0E-6" \
                     --function "f=x*y" \
                     --nvar 5 \
                     --nelements 10 \
@@ -121,7 +122,7 @@
                     s2d_interp
 
 # Exponential Error Decay
-/apps/self/bin/self --tolerance "6.8E-2" \
+${INSTALL_ROOT}/bin/self --tolerance "6.8E-2" \
                     --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -132,7 +133,7 @@
                     --gpu-accel "false" \
                     s2d_interp
 
-/apps/self/bin/self --tolerance "8.0E-3" \
+${INSTALL_ROOT}/bin/self --tolerance "8.0E-3" \
                     --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -143,7 +144,7 @@
                     --gpu-accel "false" \
                     s2d_interp
 
-/apps/self/bin/self --tolerance "6.8E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "6.8E-4" \
                     --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -154,7 +155,7 @@
                     --gpu-accel "false" \
                     s2d_interp
 
-/apps/self/bin/self --tolerance "6.8E-5" \
+${INSTALL_ROOT}/bin/self --tolerance "6.8E-5" \
                     --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -165,7 +166,7 @@
                     --gpu-accel "false" \
                     s2d_interp
 
-/apps/self/bin/self --tolerance "6.8E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.8E-6" \
                     --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -176,7 +177,7 @@
                     --gpu-accel "false" \
                     s2d_interp
 
-/apps/self/bin/self --tolerance "0.0E0" \
+${INSTALL_ROOT}/bin/self --tolerance "0.0E0" \
                     --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -190,7 +191,7 @@
 ## 3-D (Scalar) Interpolation
 
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --nvar 5 \
                     --nelements 10 \
@@ -202,7 +203,7 @@
                     s3d_interp
 
 # Exactness (Linear)
-/apps/self/bin/self --tolerance "1.1E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.1E-6" \
                     --function "f=x*y*z" \
                     --nvar 5 \
                     --nelements 10 \
@@ -214,7 +215,7 @@
                     s3d_interp
 
 # Exponential Error Decay
-/apps/self/bin/self --tolerance "8.6E-2" \
+${INSTALL_ROOT}/bin/self --tolerance "8.6E-2" \
                     --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -225,7 +226,7 @@
                     --gpu-accel "false" \
                     s3d_interp
 
-/apps/self/bin/self --tolerance "2.1E-2" \
+${INSTALL_ROOT}/bin/self --tolerance "2.1E-2" \
                     --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -236,7 +237,7 @@
                     --gpu-accel "false" \
                     s3d_interp
 
-/apps/self/bin/self --tolerance "5.7E-3" \
+${INSTALL_ROOT}/bin/self --tolerance "5.7E-3" \
                     --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -247,7 +248,7 @@
                     --gpu-accel "false" \
                     s3d_interp
 
-/apps/self/bin/self --tolerance "1.6E-3" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-3" \
                     --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -258,7 +259,7 @@
                     --gpu-accel "false" \
                     s3d_interp
 
-/apps/self/bin/self --tolerance "2.0E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "2.0E-4" \
                     --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -269,7 +270,7 @@
                     --gpu-accel "false" \
                     s3d_interp
 
-/apps/self/bin/self --tolerance "0.0E0" \
+${INSTALL_ROOT}/bin/self --tolerance "0.0E0" \
                     --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
                     --nvar 5 \
                     --nelements 10 \
@@ -283,7 +284,7 @@
 ## 2-D (Vector) Interpolation
 
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --nvar 5 \
@@ -300,7 +301,7 @@
 
 ## 3-D (Vector) Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \
@@ -318,7 +319,7 @@
 
 ## 2-D (Tensor) Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --tensor-11 "t11=1.0" \
                     --tensor-12 "t12=1.0" \
                     --tensor-21 "t21=1.0" \
@@ -337,7 +338,7 @@
 
 ## 3-D (Tensor) Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --tensor-11 "t11=1.0" \
                     --tensor-12 "t12=1.0" \
                     --tensor-13 "t13=1.0" \
@@ -360,7 +361,7 @@
 
 ## 1-D (Scalar) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --nvar 5 \
                     --nelements 10 \
@@ -376,7 +377,7 @@
 
 ## 2-D (Scalar) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --nvar 5 \
                     --nelements 10 \
@@ -392,7 +393,7 @@
 
 ## 3-D (Scalar) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --nvar 5 \
                     --nelements 10 \
@@ -408,7 +409,7 @@
 
 ## 2-D (Vector) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --nvar 5 \
@@ -425,7 +426,7 @@
 
 ## 3-D (Vector) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \
@@ -443,7 +444,7 @@
 
 ## 2-D (Tensor) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --tensor-11 "t11=1.0" \
                     --tensor-12 "t12=1.0" \
                     --tensor-21 "t21=1.0" \
@@ -462,7 +463,7 @@
 
 ## 3-D (Tensor) Boundary Interpolation
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --tensor-11 "t11=1.0" \
                     --tensor-12 "t12=1.0" \
                     --tensor-13 "t13=1.0" \
@@ -486,7 +487,7 @@
 
 ## 1-D (Scalar) Derivative (Strong Form)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
                     --function "f=1.0" \
                     --derivative "df=0.0" \
                     --nvar 5 \
@@ -504,7 +505,7 @@
 
 ## 1-D (Scalar) Derivative (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "9.6E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.6E-6" \
                     --function "f=1.0" \
                     --derivative "df=0.0" \
                     --nvar 5 \
@@ -522,7 +523,7 @@
 
 ## 2-D (Scalar) Gradient (Strong Form)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "2.0E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "2.0E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -541,7 +542,7 @@
 
 ## 2-D (Scalar) Gradient (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "5.8E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "5.8E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -560,7 +561,7 @@
 
 ## 3-D (Scalar) Gradient (Strong)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "4.4E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "4.4E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -580,7 +581,7 @@
 
 ## 3-D (Scalar) Gradient (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "7.9E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "7.9E-4" \
                     --function "f=1.0" \
                     --vector-x "gx=0.0" \
                     --vector-y "gy=0.0" \
@@ -600,7 +601,7 @@
 
 ## 2-D (Vector) Gradient (Strong Form)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.9E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "1.9E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --tensor-11 "vxx=0.0" \
@@ -622,7 +623,7 @@
 
 ## 2-D (Vector) Gradient (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "5.8E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "5.8E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --tensor-11 "vxx=0.0" \
@@ -644,7 +645,7 @@
 
 ## 2-D (Vector) Divergence (Strong Form)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "2.78E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "2.78E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --function "divV=0.0" \
@@ -663,7 +664,7 @@
 
 ## 2-D (Vector) Divergence (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "2.75E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "2.75E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --function "divV=0.0" \
@@ -682,7 +683,7 @@
 
 ## 3-D (Vector) Gradient (Strong Form)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "4.5E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "4.5E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \
@@ -710,7 +711,7 @@
 
 ## 3-D (Vector) Gradient (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "7.9E-4" \
+${INSTALL_ROOT}/bin/self --tolerance "7.9E-4" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \
@@ -738,7 +739,7 @@
 
 ## 3-D (Vector) Divergence (Strong)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.0E-3" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-3" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \
@@ -758,7 +759,7 @@
 
 ## 3-D (Vector) Divergence (DG)
 # Exactness (Constant)
-/apps/self/bin/self --tolerance "1.2E-3" \
+${INSTALL_ROOT}/bin/self --tolerance "1.2E-3" \
                     --vector-x "vx=1.0" \
                     --vector-y "vy=1.0" \
                     --vector-z "vz=1.0" \
@@ -776,3 +777,14 @@
 # Exactness (Linear)
 # Exponential Error Decay
 
+# Create coverage reports
+#cp -r ../lib/* /tmp/
+#cp -r ../src/* /tmp/
+
+#cd /tmp/
+#pwd
+#for f in /tmp/*.F90
+#do
+#  gcov --json-format $f
+#  gunzip $f.json.gz
+#done
