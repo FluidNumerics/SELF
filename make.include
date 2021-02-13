@@ -37,13 +37,9 @@ include $(SELF_DIR)/make.dependencies
 
 # Recipes
 
-ifeq ($(BUILD),dev)
 self: $(SELF_BINDIR)self
 	chmod 755 $(SELF_DIR)/test/ci.sh
 	cp $(SELF_DIR)/test/ci.sh $(SELF_BINDIR)
-else
-self: $(SELF_LIB_OBJS)
-endif
 
 self_clean:
 	rm -f $(SELF_OBJDIR)*
