@@ -13,17 +13,17 @@ def load_config():
 
 def expand_scalar(function, derivative="", gradient=[]):
 
-    cmd_flags = '--function "{}"\\\n'.format(function)
+    cmd_flags = '--function "{}" \\\n'.format(function)
 
     if derivative:
-      cmd_flags += '--derivative "{}"\\\n'.format(derivative)
+      cmd_flags += '--derivative "{}" \\\n'.format(derivative)
 
     if gradient:
       if len(gradient) == 2:
-        cmd_flags += '--vector-x "{}"\\\n--vector-y "{}"\\\n'.format(gradient[0],gradient[1])
+        cmd_flags += '--vector-x "{}" \\\n--vector-y "{}" \\\n'.format(gradient[0],gradient[1])
 
       elif len(gradient) == 3:
-        cmd_flags += '--vector-x "{}"\\\n--vector-y "{}"\\\n--vector-z "{}"\\\n'.format(gradient[0],gradient[1],gradient[2])
+        cmd_flags += '--vector-x "{}" \\\n--vector-y "{}" \\\n--vector-z "{}" \\\n'.format(gradient[0],gradient[1],gradient[2])
 
     return cmd_flags
 
@@ -32,21 +32,21 @@ def expand_scalar(function, derivative="", gradient=[]):
 def expand_vector(function, divergence="", gradient=[]):
 
     if len(function) == 2:
-      cmd_flags = '--vector-x "{}"\\\n--vector-y "{}"\\\n'.format(function[0],function[1])
+      cmd_flags = '--vector-x "{}" \\\n--vector-y "{}" \\\n'.format(function[0],function[1])
 
     elif len(function) == 3:
-      cmd_flags = '--vector-x "{}"\\\n--vector-y "{}"\\\n--vector-z "{}"\\\n'.format(function[0],function[1],function[2])
+      cmd_flags = '--vector-x "{}" \\\n--vector-y "{}" \\\n--vector-z "{}" \\\n'.format(function[0],function[1],function[2])
 
     if divergence:
-      cmd_flags += '--function "{}"\\\n'.format(divergence)
+      cmd_flags += '--function "{}" \\\n'.format(divergence)
 
     if gradient:
       if len(gradient) == 2:
-        cmd_flags += '--tensor-11 "{}"\\\n--tensor-12 "{}"\\\n--tensor-21 "{}"\\\n --tensor-22 "{}"\\\n'.format(gradient[0][0],gradient[1][0],
+        cmd_flags += '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-21 "{}" \\\n --tensor-22 "{}" \\\n'.format(gradient[0][0],gradient[1][0],
                                                                  gradient[0][1],gradient[1][1])
 
       elif len(gradient) == 3:
-        cmd_flags += '--tensor-11 "{}"\\\n--tensor-12 "{}"\\\n--tensor-13 "{}"\\\n--tensor-21 "{}"\\\n--tensor-22 "{}"\\\n--tensor-23 "{}"\\\n--tensor-31 "{}"\\\n--tensor-32 "{}"\\\n--tensor-33 "{}"\\\n '.format(gradient[0][0],gradient[1][0],gradient[2][0],
+        cmd_flags += '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-13 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n--tensor-23 "{}" \\\n--tensor-31 "{}" \\\n--tensor-32 "{}" \\\n--tensor-33 "{}" \\\n '.format(gradient[0][0],gradient[1][0],gradient[2][0],
                                           gradient[0][1],gradient[1][1],gradient[2][1],
                                           gradient[0][2],gradient[1][2],gradient[2][2],)
 
@@ -58,19 +58,19 @@ def expand_tensor(function, divergence=[]):
 
 
     if len(function) == 2:
-      cmd_flags = '--tensor-11 "{}"\\\n--tensor-12 "{}"\\\n--tensor-21 "{}"\\\n--tensor-22 "{}"\\\n '.format(function[0][0],function[1][0],
+      cmd_flags = '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n '.format(function[0][0],function[1][0],
                                                                function[0][1],function[1][1])
 
     elif len(function) == 3:
-      cmd_flags = '--tensor-11 "{}"\\\n--tensor-12 "{}"\\\n--tensor-13 "{}"\\\n--tensor-21 "{}"\\\n--tensor-22 "{}"\\\n--tensor-23 "{}"\\\n--tensor-31 "{}"\\\n--tensor-32 "{}"\\\n--tensor-33 "{}"\\\n'.format(function[0][0],function[1][0],function[2][0],
+      cmd_flags = '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-13 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n--tensor-23 "{}" \\\n--tensor-31 "{}" \\\n--tensor-32 "{}" \\\n--tensor-33 "{}" \\\n'.format(function[0][0],function[1][0],function[2][0],
                                         function[0][1],function[1][1],function[2][1],
                                         function[0][2],function[1][2],function[2][2],)
 
     if len(divergence) == 2:
-      cmd_flags += '--vector-x "{}"\\\n--vector-y "{}"\\\n'.format(divergence[0],divergence[1])
+      cmd_flags += '--vector-x "{}" \\\n--vector-y "{}" \\\n'.format(divergence[0],divergence[1])
 
     elif len(divergence) == 3:
-      cmd_flags += '--vector-x "{}"\\\n--vector-y "{}"\\\n--vector-z "{}"\\\n'.format(divergence[0],divergence[1],divergence[2])
+      cmd_flags += '--vector-x "{}" \\\n--vector-y "{}" \\\n--vector-z "{}" \\\n'.format(divergence[0],divergence[1],divergence[2])
 
     return cmd_flags
 
