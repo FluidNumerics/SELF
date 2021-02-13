@@ -1,0 +1,558 @@
+{
+  "control_quadratures": ["gauss"],
+  "target_quadratures": ["gauss"],
+  "control_range": [2,7],
+  "target_range": [7,7],
+  "gpu_accel": ["false"],
+  "elements_range": [10,10],
+  "var_range": [5,5],
+  "tests":[
+    {
+      "command": "s1d_interp",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=x",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "s2d_interp",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=x*y",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)*sin(6.0*pi*y)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "s3d_interp",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=x*y*z",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "v2d_interp",
+      "fsets": [
+        {
+          "vector2d_function": ["vx=1.0","vy=1.0"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector2d_function": ["vx=x","vy=y"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector2d_function": ["vx=y","vy=-x"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector2d_function": ["vx=-y*exp(-(x^2+y^2))","vy=x*exp(-(x^2+y^2))"],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "v3d_interp",
+      "fsets": [
+        {
+          "vector3d_function": ["vx=1.0","vy=1.0","vz=1.0"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector3d_function": ["vx=-y","vy=x","vz=z"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector3d_function": ["vx=-y*exp(-(x^2+y^2))","vy=x*exp(-(x^2+y^2))","vz=exp(-z^2)"],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "t2d_interp",
+      "fsets": [
+        {
+          "tensor2d_function": [["t11=1.0","t12=1.0"],
+	                        ["t21=1.0","t22=1.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor2d_function": [["t11=x","t12=x*y"],
+	                        ["t21=y*x","t22=y"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor2d_function": [["t11=sin(6.0*pi*x)*sin(6.0*pi*y)","t12=sin(6.0*pi*x)*cos(6.0*pi*y)"],
+	                        ["t21=cos(6.0*pi*x)*sin(6.0*pi*y)","t22=cos(6.0*pi*x)*cos(6.0*pi*y)"]],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "v3d_interp",
+      "fsets": [
+        {
+          "tensor3d_function": [["t11=1.0","t12=1.0","t13=1.0"],
+	                        ["t21=1.0","t22=1.0","t23=1.0"],
+	                        ["t31=1.0","t32=1.0","t33=1.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor3d_function": [["t11=x","t12=x*y","t13=x*z"],
+	                        ["t21=y*x","t22=y","t23=y*z"],
+	                        ["t31=z*x","t32=z*y","t33=z"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor3d_function": [["t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)","t12=sin(6.0*pi*x)*cos(6.0*pi*y)","t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"],
+	                        ["t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)","t22=cos(6.0*pi*x)*cos(6.0*pi*y)","t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"],
+	                        ["t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)","t32=cos(6.0*pi*x)*cos(6.0*pi*y)","t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"]],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "s1d_binterp",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=x",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "s2d_binterp",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=x*y",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)*sin(6.0*pi*y)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "s3d_binterp",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=x*y*z",
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "v2d_binterp",
+      "fsets": [
+        {
+          "vector2d_function": ["vx=1.0","vy=1.0"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector2d_function": ["vx=x","vy=y"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector2d_function": ["vx=y","vy=-x"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector2d_function": ["vx=-y*exp(-(x^2+y^2))","vy=x*exp(-(x^2+y^2))"],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "v3d_binterp",
+      "fsets": [
+        {
+          "vector3d_function": ["vx=1.0","vy=1.0","vz=1.0"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector3d_function": ["vx=-y","vy=x","vz=z"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "vector3d_function": ["vx=-y*exp(-(x^2+y^2))","vy=x*exp(-(x^2+y^2))","vz=exp(-z^2)"],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "t2d_binterp",
+      "fsets": [
+        {
+          "tensor2d_function": [["t11=1.0","t12=1.0"],
+	                        ["t21=1.0","t22=1.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor2d_function": [["t11=x","t12=x*y"],
+	                        ["t21=y*x","t22=y"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor2d_function": [["t11=sin(6.0*pi*x)*sin(6.0*pi*y)","t12=sin(6.0*pi*x)*cos(6.0*pi*y)"],
+	                        ["t21=cos(6.0*pi*x)*sin(6.0*pi*y)","t22=cos(6.0*pi*x)*cos(6.0*pi*y)"]],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "v3d_binterp",
+      "fsets": [
+        {
+          "tensor3d_function": [["t11=1.0","t12=1.0","t13=1.0"],
+	                        ["t21=1.0","t22=1.0","t23=1.0"],
+	                        ["t31=1.0","t32=1.0","t33=1.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor3d_function": [["t11=x","t12=x*y","t13=x*z"],
+	                        ["t21=y*x","t22=y","t23=y*z"],
+	                        ["t31=z*x","t32=z*y","t33=z"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6"	
+        },
+        {
+          "tensor3d_function": [["t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)","t12=sin(6.0*pi*x)*cos(6.0*pi*y)","t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"],
+	                        ["t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)","t22=cos(6.0*pi*x)*cos(6.0*pi*y)","t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"],
+	                        ["t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)","t32=cos(6.0*pi*x)*cos(6.0*pi*y)","t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"]],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2"	
+        }
+      ]
+    },
+    {
+      "command": "s1d_derivative",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+	  "derivative": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+          "scalar_function": "f=x",
+	  "derivative": "df=1.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)",
+	  "derivative": "df=6.0*pi*cos(6.0*pi*x)",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    },
+    {
+      "command": "s2d_gradient",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+	  "gradient": ["fx=0.0","fy=0.0"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+          "scalar_function": "f=x*y",
+	  "gradient": ["fx=y","fy=x"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)*sin(6.0*pi*y)",
+	  "gradient": ["fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)","fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    },
+    {
+      "command": "s3d_gradient",
+      "fsets": [
+        {
+          "scalar_function": "f=1.0",
+	  "gradient": ["fx=0.0","fy=0.0","fz=0.0"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+          "scalar_function": "f=x*y*z",
+	  "gradient": ["fx=y*z","fy=x*z","fz=x*y"],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+          "scalar_function": "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)",
+	  "gradient": ["fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)",
+		       "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)",
+		       "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    },
+    {
+      "command": "v2d_divergence",
+      "fsets": [
+        {
+	  "vector2d_function": ["fx=1.0","fy=1.0"],
+	  "divergence": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=x","fy=y"],
+	  "divergence": "df=2.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=y","fy=-x"],
+	  "divergence": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=y*exp(-(x^2+y^2))","fy=-x*exp(-(x^2+y^2))"],
+	  "divergence": "df=0.0",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=exp(-(x^2+y^2))","fy=exp(-(x^2+y^2))"],
+	  "divergence": "df=-2.0*(x+y)*exp(-(x^2+y^2))",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    },
+    {
+      "command": "v3d_divergence",
+      "fsets": [
+        {
+	  "vector3d_function": ["fx=1.0","fy=1.0","fz=1.0"],
+	  "divergence": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=x","fy=y","fz=z"],
+	  "divergence": "df=3.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=y","fy=-x","fz=x*y"],
+	  "divergence": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=y*exp(-(x^2+y^2+z^2))","fy=-x*exp(-(x^2+y^2+z^2))","fz=exp(-(x^2+y^2))"],
+	  "divergence": "df=0.0",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=exp(-(x^2+y^2+z^2))","fy=exp(-(x^2+y^2+z^2))","fz=exp(-(x^2+y^2+z^2))"],
+	  "divergence": "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))",
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    },
+    {
+      "command": "v2d_gradient",
+      "fsets": [
+        {
+	  "vector2d_function": ["fx=1.0","fy=1.0"],
+	  "gradient": [["dfxx=0.0","dfxy=0.0"],
+		       ["dfyx=0.0","dfyy=0.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=x","fy=y"],
+	  "gradient": [["dfxx=1.0","dfxy=0.0"],
+		       ["dfyx=0.0","dfyy=1.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=y","fy=-x"],
+	  "gradient": [["dfxx=0.0","dfxy=1.0"],
+		       ["dfyx=-1.0","dfyy=0.0"]],
+	  "divergence": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector2d_function": ["fx=exp(-(x^2+y^2))","fy=exp(-(x^2+y^2))"],
+	  "gradient": [["dfxx=-2.0*x*exp(-(x^2+y^2))","dfxy=-2.0*y*exp(-(x^2+y^2))"],
+		       ["dfyx=-2.0*x*exp(-(x^2+y^2))","dfyy=-2.0*y*exp(-(x^2+y^2))"]],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    },
+    {
+      "command": "v3d_gradient",
+      "fsets": [
+        {
+	  "vector3d_function": ["fx=1.0","fy=1.0","fz=1.0"],
+	  "gradient": [["dfxx=0.0","dfxy=0.0","dfxz=0.0"],
+		       ["dfyx=0.0","dfyy=0.0","dfyz=0.0"],
+		       ["dfzx=0.0","dfzy=0.0","dfzz=0.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=x","fy=y","fz=z"],
+	  "gradient": [["dfxx=1.0","dfxy=0.0","dfxz=0.0"],
+		       ["dfyx=0.0","dfyy=1.0","dfxz=0.0"],
+		       ["dfzx=0.0","dfzy=0.0","dfzz=1.0"]],
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=y","fy=-x"],
+	  "gradient": [["dfxx=0.0","dfxy=1.0"],
+		       ["dfyx=-1.0","dfyy=0.0"]],
+	  "divergence": "df=0.0",
+          "error_type": "exact",
+          "tolerance": "1.0E-6",
+	  "derivative_types": ["strong","dg"]
+        },
+        {
+	  "vector3d_function": ["fx=exp(-(x^2+y^2+z^2))","fy=exp(-(x^2+y^2+z^2))"],
+	  "gradient": [["dfxx=-2.0*x*exp(-(x^2+y^2+z^2))","dfxy=-2.0*y*exp(-(x^2+y^2+z^2))","dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"],
+		       ["dfyx=-2.0*x*exp(-(x^2+y^2+z^2))","dfyy=-2.0*y*exp(-(x^2+y^2+z^2))","dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"],
+		       ["dfzx=-2.0*x*exp(-(x^2+y^2+z^2))","dfzy=-2.0*y*exp(-(x^2+y^2+z^2))","dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"]],
+          "error_type": "exponential",
+          "tolerance": "1.0E-2",	
+	  "derivative_types": ["strong","dg"]
+        }
+      ]
+    }
+  ]
+}

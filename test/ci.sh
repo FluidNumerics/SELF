@@ -1,790 +1,7335 @@
 #!/bin/bash
 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_1d
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_2d
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-5" blockmesh_3d
-
-## 1-D (Scalar) Interpolation
-# Exactness (Constant)
 ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-# Exactness (Linear function)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=x" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-# Exponential error decay
-${INSTALL_ROOT}/bin/self --tolerance "4.2E-1" \
-                    --function "f=sin(6.0*pi*x)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "4.2E-2" \
-                    --function "f=sin(6.0*pi*x)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 3 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "4.2E-3" \
-                    --function "f=sin(6.0*pi*x)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 4 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "4.2E-4" \
-                    --function "f=sin(6.0*pi*x)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 5 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "4.2E-5" \
-                    --function "f=sin(6.0*pi*x)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 6 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "4.2E-6" \
-                    --function "f=sin(6.0*pi*x)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 7 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_interp
-
-## 2-D (Scalar) Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-# Exactness linear
-${INSTALL_ROOT}/bin/self --tolerance "6.0E-6" \
-                    --function "f=x*y" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-# Exponential Error Decay
-${INSTALL_ROOT}/bin/self --tolerance "6.8E-2" \
-                    --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "8.0E-3" \
-                    --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 3 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "6.8E-4" \
-                    --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 4 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "6.8E-5" \
-                    --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 5 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "6.8E-6" \
-                    --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 6 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "0.0E0" \
-                    --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 7 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_interp
-
-## 3-D (Scalar) Interpolation
-
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-# Exactness (Linear)
-${INSTALL_ROOT}/bin/self --tolerance "1.1E-6" \
-                    --function "f=x*y*z" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-# Exponential Error Decay
-${INSTALL_ROOT}/bin/self --tolerance "8.6E-2" \
-                    --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "2.1E-2" \
-                    --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 3 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "5.7E-3" \
-                    --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 4 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "1.6E-3" \
-                    --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 5 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "2.0E-4" \
-                    --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 6 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-${INSTALL_ROOT}/bin/self --tolerance "0.0E0" \
-                    --function "f=sin(6.0*pi*x)sin(6.0*pi*y)sin(6.0*pi*z)" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 7 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_interp
-
-## 2-D (Vector) Interpolation
-
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    v2d_interp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Vector) Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --vector-z "vz=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    v3d_interp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Tensor) Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --tensor-11 "t11=1.0" \
-                    --tensor-12 "t12=1.0" \
-                    --tensor-21 "t21=1.0" \
-                    --tensor-22 "t22=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    t2d_interp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Tensor) Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --tensor-11 "t11=1.0" \
-                    --tensor-12 "t12=1.0" \
-                    --tensor-13 "t13=1.0" \
-                    --tensor-21 "t21=1.0" \
-                    --tensor-22 "t22=1.0" \
-                    --tensor-23 "t23=1.0" \
-                    --tensor-31 "t31=1.0" \
-                    --tensor-32 "t32=1.0" \
-                    --tensor-33 "t33=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    t3d_interp
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 1-D (Scalar) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s1d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Scalar) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s2d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Scalar) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    s3d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Vector) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    v2d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Vector) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --vector-z "vz=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    v3d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Tensor) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --tensor-11 "t11=1.0" \
-                    --tensor-12 "t12=1.0" \
-                    --tensor-21 "t21=1.0" \
-                    --tensor-22 "t22=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    t2d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Tensor) Boundary Interpolation
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --tensor-11 "t11=1.0" \
-                    --tensor-12 "t12=1.0" \
-                    --tensor-13 "t13=1.0" \
-                    --tensor-21 "t21=1.0" \
-                    --tensor-22 "t22=1.0" \
-                    --tensor-23 "t23=1.0" \
-                    --tensor-31 "t31=1.0" \
-                    --tensor-32 "t32=1.0" \
-                    --tensor-33 "t33=1.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    t3d_binterp
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 1-D (Scalar) Derivative (Strong Form)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
-                    --function "f=1.0" \
-                    --derivative "df=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    s1d_derivative
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 1-D (Scalar) Derivative (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "9.6E-6" \
-                    --function "f=1.0" \
-                    --derivative "df=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    s1d_derivative
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Scalar) Gradient (Strong Form)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "2.0E-4" \
-                    --function "f=1.0" \
-                    --vector-x "gx=0.0" \
-                    --vector-y "gy=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    s2d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Scalar) Gradient (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "5.8E-4" \
-                    --function "f=1.0" \
-                    --vector-x "gx=0.0" \
-                    --vector-y "gy=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    s2d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Scalar) Gradient (Strong)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "4.4E-4" \
-                    --function "f=1.0" \
-                    --vector-x "gx=0.0" \
-                    --vector-y "gy=0.0" \
-                    --vector-z "gz=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    s3d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Scalar) Gradient (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "7.9E-4" \
-                    --function "f=1.0" \
-                    --vector-x "gx=0.0" \
-                    --vector-y "gy=0.0" \
-                    --vector-z "gz=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    s3d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Vector) Gradient (Strong Form)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.9E-4" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --tensor-11 "vxx=0.0" \
-                    --tensor-12 "vxy=0.0" \
-                    --tensor-21 "vyx=0.0" \
-                    --tensor-22 "vyy=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    v2d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Vector) Gradient (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "5.8E-4" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --tensor-11 "vxx=0.0" \
-                    --tensor-12 "vxy=0.0" \
-                    --tensor-21 "vyx=0.0" \
-                    --tensor-22 "vyy=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    v2d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Vector) Divergence (Strong Form)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "2.78E-4" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --function "divV=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    v2d_divergence
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 2-D (Vector) Divergence (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "2.75E-4" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --function "divV=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    v2d_divergence
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Vector) Gradient (Strong Form)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "4.5E-4" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --vector-z "vz=1.0" \
-                    --tensor-11 "vxx=0.0" \
-                    --tensor-12 "vxy=0.0" \
-                    --tensor-13 "vxz=0.0" \
-                    --tensor-21 "vyx=0.0" \
-                    --tensor-22 "vyy=0.0" \
-                    --tensor-23 "vyz=0.0" \
-                    --tensor-31 "vzx=0.0" \
-                    --tensor-32 "vzy=0.0" \
-                    --tensor-33 "vzz=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    v3d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Vector) Gradient (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "7.9E-4" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --vector-z "vz=1.0" \
-                    --tensor-11 "vxx=0.0" \
-                    --tensor-12 "vxy=0.0" \
-                    --tensor-13 "vxz=0.0" \
-                    --tensor-21 "vyx=0.0" \
-                    --tensor-22 "vyy=0.0" \
-                    --tensor-23 "vyz=0.0" \
-                    --tensor-31 "vzx=0.0" \
-                    --tensor-32 "vzy=0.0" \
-                    --tensor-33 "vzz=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    v3d_gradient
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Vector) Divergence (Strong)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-3" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --vector-z "vz=1.0" \
-                    --function "divV=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "strong" \
-                    v3d_divergence
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-## 3-D (Vector) Divergence (DG)
-# Exactness (Constant)
-${INSTALL_ROOT}/bin/self --tolerance "1.2E-3" \
-                    --vector-x "vx=1.0" \
-                    --vector-y "vy=1.0" \
-                    --vector-z "vz=1.0" \
-                    --function "divV=0.0" \
-                    --nvar 5 \
-                    --nelements 10 \
-                    --control-degree 2 \
-                    --control-quadrature "gauss" \
-                    --target-degree 7 \
-                    --target-quadrature "gauss" \
-                    --gpu-accel "false" \
-                    --derivative-type "dg" \
-                    v3d_divergence
-
-# Exactness (Linear)
-# Exponential Error Decay
-
-# Create coverage reports
-#cp -r ../lib/* /tmp/
-#cp -r ../src/* /tmp/
-
-#cd /tmp/
-#pwd
-#for f in /tmp/*.F90
-#do
-#  gcov --json-format $f
-#  gunzip $f.json.gz
-#done
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=x"\
+--vector-y "vy=y"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=y"\
+--vector-y "vy=-x"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=1.0"\
+--vector-y "vy=1.0"\
+--vector-z "vz=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y"\
+--vector-y "vy=x"\
+--vector-z "vz=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "vx=-y*exp(-(x^2+y^2))"\
+--vector-y "vy=x*exp(-(x^2+y^2))"\
+--vector-z "vz=exp(-z^2)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+ t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=1.0"\
+--tensor-12 "t21=1.0"\
+--tensor-13 "t31=1.0"\
+--tensor-21 "t12=1.0"\
+--tensor-22 "t22=1.0"\
+--tensor-23 "t32=1.0"\
+--tensor-31 "t13=1.0"\
+--tensor-32 "t23=1.0"\
+--tensor-33 "t33=1.0"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=x"\
+--tensor-12 "t21=y*x"\
+--tensor-13 "t31=z*x"\
+--tensor-21 "t12=x*y"\
+--tensor-22 "t22=y"\
+--tensor-23 "t32=z*y"\
+--tensor-31 "t13=x*z"\
+--tensor-32 "t23=y*z"\
+--tensor-33 "t33=z"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)"\
+--tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+--tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
+v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--derivative "df=0.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x"\
+--derivative "df=1.0"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)"\
+--derivative "df=6.0*pi*cos(6.0*pi*x)"\
+s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y"\
+--vector-x "fx=y"\
+--vector-y "fy=x"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
+s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=1.0"\
+--vector-x "fx=0.0"\
+--vector-y "fy=0.0"\
+--vector-z "fz=0.0"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=x*y*z"\
+--vector-x "fx=y*z"\
+--vector-y "fy=x*z"\
+--vector-z "fz=x*y"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
+--vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
+s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--function "df=2.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
+v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--function "df=3.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--vector-z "fz=x*y"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y*exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2))"\
+--function "df=0.0"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--vector-z "fz=exp(-(x^2+y^2+z^2))"\
+--function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
+v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-21 "dfxy=0.0"\
+ --tensor-22 "dfyy=1.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2))"\
+--vector-y "fy=exp(-(x^2+y^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
+ --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
+v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=1.0"\
+--vector-y "fy=1.0"\
+--vector-z "fz=1.0"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=0.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfyz=0.0"\
+--tensor-33 "dfzz=0.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=x"\
+--vector-y "fy=y"\
+--vector-z "fz=z"\
+--tensor-11 "dfxx=1.0"\
+--tensor-12 "dfyx=0.0"\
+--tensor-13 "dfzx=0.0"\
+--tensor-21 "dfxy=0.0"\
+--tensor-22 "dfyy=1.0"\
+--tensor-23 "dfzy=0.0"\
+--tensor-31 "dfxz=0.0"\
+--tensor-32 "dfxz=0.0"\
+--tensor-33 "dfzz=1.0"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=y"\
+--vector-y "fy=-x"\
+--tensor-11 "dfxx=0.0"\
+--tensor-12 "dfyx=-1.0"\
+--tensor-21 "dfxy=1.0"\
+ --tensor-22 "dfyy=0.0"\
+v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "strong" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+--control-quadrature "gauss" \
+--control-degree 6 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+--control-quadrature "gauss" \
+--control-degree 7 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))"\
+--vector-y "fy=exp(-(x^2+y^2+z^2))"\
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-13 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))"\
+--tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-23 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))"\
+--tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
+ v3d_gradient/n
