@@ -189,7 +189,7 @@ def main():
                     fcmd = expand_function(fset)
                     cmd += fcmd
                     cmd += test['command']
-                    cmds +=cmd + '/n'
+                    cmds +=cmd + '\n\n'
 
               else:
                 for cdeg in range(crange[0],crange[1]+1):
@@ -206,7 +206,7 @@ def main():
                   fcmd = expand_function(fset)
                   cmd += fcmd
                   cmd += test['command']
-                  cmds +=cmd + '/n'
+                  cmds +=cmd + '\n\n'
 
 
     # Write to file

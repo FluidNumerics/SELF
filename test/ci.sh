@@ -9,7 +9,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -18,7 +20,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -27,7 +31,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -36,7 +42,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -45,7 +53,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -54,7 +64,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -63,7 +75,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -72,7 +86,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -81,7 +97,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -90,7 +108,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -99,7 +119,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -108,7 +130,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -117,7 +141,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -126,7 +152,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -135,7 +163,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -144,7 +174,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -153,7 +185,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -162,7 +196,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -171,7 +207,9 @@ s1d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -180,7 +218,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -189,7 +229,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -198,7 +240,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -207,7 +251,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -216,7 +262,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -225,7 +273,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -234,7 +284,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -243,7 +295,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -252,7 +306,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -261,7 +317,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -270,7 +328,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -279,7 +339,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -288,7 +350,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -297,7 +361,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -306,7 +372,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -315,7 +383,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -324,7 +394,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -333,7 +405,9 @@ s2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -342,7 +416,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -351,7 +427,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -360,7 +438,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -369,7 +449,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -378,7 +460,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -387,7 +471,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -396,7 +482,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -405,7 +493,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -414,7 +504,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -423,7 +515,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -432,7 +526,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -441,7 +537,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -450,7 +548,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -459,7 +559,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -468,7 +570,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -477,7 +581,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -486,7 +592,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -496,7 +604,9 @@ s3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -506,7 +616,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -516,7 +628,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -526,7 +640,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -536,7 +652,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -546,7 +664,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -556,7 +676,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -566,7 +688,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -576,7 +700,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -586,7 +712,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -596,7 +724,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -606,7 +736,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -616,7 +748,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -626,7 +760,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -636,7 +772,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -646,7 +784,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -656,7 +796,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -666,7 +808,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -676,7 +820,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -686,7 +832,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -696,7 +844,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -706,7 +856,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -716,7 +868,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -726,7 +880,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -737,7 +893,9 @@ v2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -748,7 +906,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -759,7 +919,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -770,7 +932,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -781,7 +945,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -792,7 +958,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -803,7 +971,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -814,7 +984,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -825,7 +997,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -836,7 +1010,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -847,7 +1023,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -858,7 +1036,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -869,7 +1049,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -880,7 +1062,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -891,7 +1075,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -902,7 +1088,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -913,7 +1101,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -924,7 +1114,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -936,7 +1128,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -948,7 +1142,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -960,7 +1156,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -972,7 +1170,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -984,7 +1184,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -996,7 +1198,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1008,7 +1212,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1020,7 +1226,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1032,7 +1240,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1044,7 +1254,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1056,7 +1268,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1068,7 +1282,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1080,7 +1296,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1092,7 +1310,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1104,7 +1324,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1116,7 +1338,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1128,7 +1352,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1140,7 +1366,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1157,7 +1385,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1174,7 +1404,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1191,7 +1423,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1208,7 +1442,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1225,7 +1461,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1242,7 +1480,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1259,7 +1499,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1276,7 +1518,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1293,7 +1537,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1310,7 +1556,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1327,7 +1575,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1344,7 +1594,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1361,7 +1613,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1378,7 +1632,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1395,7 +1651,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1412,7 +1670,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1429,7 +1689,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1446,7 +1708,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_interp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1455,7 +1719,9 @@ v3d_interp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1464,7 +1730,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1473,7 +1741,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1482,7 +1752,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1491,7 +1763,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1500,7 +1774,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1509,7 +1785,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1518,7 +1796,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1527,7 +1807,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1536,7 +1818,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1545,7 +1829,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1554,7 +1840,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1563,7 +1851,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1572,7 +1862,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1581,7 +1873,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1590,7 +1884,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1599,7 +1895,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1608,7 +1906,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
-s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1617,7 +1917,9 @@ s1d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1626,7 +1928,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1635,7 +1939,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1644,7 +1950,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1653,7 +1961,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1662,7 +1972,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1671,7 +1983,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1680,7 +1994,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1689,7 +2005,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1698,7 +2016,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1707,7 +2027,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1716,7 +2038,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1725,7 +2049,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1734,7 +2060,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1743,7 +2071,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1752,7 +2082,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1761,7 +2093,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1770,7 +2104,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
-s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1779,7 +2115,9 @@ s2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1788,7 +2126,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1797,7 +2137,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1806,7 +2148,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1815,7 +2159,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1824,7 +2170,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=1.0"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1833,7 +2181,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1842,7 +2192,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1851,7 +2203,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1860,7 +2214,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1869,7 +2225,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1878,7 +2236,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=x*y*z"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1887,7 +2247,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1896,7 +2258,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1905,7 +2269,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1914,7 +2280,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1923,7 +2291,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1932,7 +2302,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --nvar 5 \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
-s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1942,7 +2314,9 @@ s3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1952,7 +2326,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1962,7 +2338,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1972,7 +2350,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1982,7 +2362,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1992,7 +2374,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2002,7 +2386,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2012,7 +2398,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2022,7 +2410,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2032,7 +2422,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2042,7 +2434,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2052,7 +2446,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=x"\
 --vector-y "vy=y"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2062,7 +2458,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2072,7 +2470,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2082,7 +2482,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2092,7 +2494,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2102,7 +2506,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2112,7 +2518,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --vector-x "vx=y"\
 --vector-y "vy=-x"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2122,7 +2530,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2132,7 +2542,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2142,7 +2554,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2152,7 +2566,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2162,7 +2578,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2172,7 +2590,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
-v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2183,7 +2603,9 @@ v2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2194,7 +2616,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2205,7 +2629,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2216,7 +2642,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2227,7 +2655,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2238,7 +2668,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=1.0"\
 --vector-y "vy=1.0"\
 --vector-z "vz=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2249,7 +2681,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2260,7 +2694,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2271,7 +2707,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2282,7 +2720,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2293,7 +2733,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2304,7 +2746,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "vx=-y"\
 --vector-y "vy=x"\
 --vector-z "vz=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2315,7 +2759,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2326,7 +2772,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2337,7 +2785,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2348,7 +2798,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2359,7 +2811,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2370,7 +2824,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "vx=-y*exp(-(x^2+y^2))"\
 --vector-y "vy=x*exp(-(x^2+y^2))"\
 --vector-z "vz=exp(-z^2)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2382,7 +2838,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2394,7 +2852,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2406,7 +2866,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2418,7 +2880,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2430,7 +2894,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2442,7 +2908,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=1.0"\
 --tensor-21 "t12=1.0"\
 --tensor-22 "t22=1.0"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2454,7 +2922,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2466,7 +2936,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2478,7 +2950,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2490,7 +2964,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2502,7 +2978,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2514,7 +2992,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=y*x"\
 --tensor-21 "t12=x*y"\
 --tensor-22 "t22=y"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2526,7 +3006,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2538,7 +3020,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2550,7 +3034,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2562,7 +3048,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2574,7 +3062,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2586,7 +3076,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)"\
 --tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)"\
- t2d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ t2d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2603,7 +3095,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2620,7 +3114,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2637,7 +3133,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2654,7 +3152,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2671,7 +3171,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2688,7 +3190,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=1.0"\
 --tensor-32 "t23=1.0"\
 --tensor-33 "t33=1.0"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2705,7 +3209,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2722,7 +3228,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2739,7 +3247,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2756,7 +3266,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2773,7 +3285,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2790,7 +3304,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "t13=x*z"\
 --tensor-32 "t23=y*z"\
 --tensor-33 "t33=z"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2807,7 +3323,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2824,7 +3342,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2841,7 +3361,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2858,7 +3380,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2875,7 +3399,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2892,7 +3418,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
 --tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)"\
-v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_binterp
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2903,7 +3431,9 @@ v3d_binterp/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2914,7 +3444,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2925,7 +3457,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -2936,7 +3470,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -2947,7 +3483,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -2958,7 +3496,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -2969,7 +3509,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -2980,7 +3522,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -2991,7 +3535,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3002,7 +3548,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3013,7 +3561,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3024,7 +3574,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=1.0"\
 --derivative "df=0.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3035,7 +3587,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3046,7 +3600,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3057,7 +3613,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3068,7 +3626,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3079,7 +3639,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3090,7 +3652,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3101,7 +3665,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3112,7 +3678,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3123,7 +3691,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3134,7 +3704,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3145,7 +3717,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3156,7 +3730,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --gpu-accel "false" \
 --function "f=x"\
 --derivative "df=1.0"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3167,7 +3743,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3178,7 +3756,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3189,7 +3769,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3200,7 +3782,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3211,7 +3795,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3222,7 +3808,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3233,7 +3821,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3244,7 +3834,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3255,7 +3847,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3266,7 +3860,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3277,7 +3873,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3288,7 +3886,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --gpu-accel "false" \
 --function "f=sin(6.0*pi*x)"\
 --derivative "df=6.0*pi*cos(6.0*pi*x)"\
-s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s1d_derivative
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3300,7 +3900,9 @@ s1d_derivative/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3312,7 +3914,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3324,7 +3928,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3336,7 +3942,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3348,7 +3956,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3360,7 +3970,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3372,7 +3984,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3384,7 +3998,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3396,7 +4012,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3408,7 +4026,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3420,7 +4040,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3432,7 +4054,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=1.0"\
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3444,7 +4068,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3456,7 +4082,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3468,7 +4096,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3480,7 +4110,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3492,7 +4124,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3504,7 +4138,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3516,7 +4152,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3528,7 +4166,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3540,7 +4180,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3552,7 +4194,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3564,7 +4208,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3576,7 +4222,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --function "f=x*y"\
 --vector-x "fx=y"\
 --vector-y "fy=x"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3588,7 +4236,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3600,7 +4250,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3612,7 +4264,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3624,7 +4278,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3636,7 +4292,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3648,7 +4306,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3660,7 +4320,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3672,7 +4334,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3684,7 +4348,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3696,7 +4362,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3708,7 +4376,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3720,7 +4390,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --function "f=sin(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)"\
-s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3733,7 +4405,9 @@ s2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3746,7 +4420,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3759,7 +4435,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3772,7 +4450,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3785,7 +4465,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3798,7 +4480,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3811,7 +4495,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3824,7 +4510,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3837,7 +4525,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3850,7 +4540,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3863,7 +4555,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3876,7 +4570,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=0.0"\
 --vector-y "fy=0.0"\
 --vector-z "fz=0.0"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3889,7 +4585,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3902,7 +4600,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3915,7 +4615,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3928,7 +4630,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3941,7 +4645,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3954,7 +4660,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3967,7 +4675,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3980,7 +4690,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3993,7 +4705,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4006,7 +4720,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4019,7 +4735,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4032,7 +4750,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y*z"\
 --vector-y "fy=x*z"\
 --vector-z "fz=x*y"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4045,7 +4765,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4058,7 +4780,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4071,7 +4795,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4084,7 +4810,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4097,7 +4825,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4110,7 +4840,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4123,7 +4855,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4136,7 +4870,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4149,7 +4885,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4162,7 +4900,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4175,7 +4915,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4188,7 +4930,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)"\
 --vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)"\
-s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+s3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4200,7 +4944,9 @@ s3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4212,7 +4958,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4224,7 +4972,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4236,7 +4986,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4248,7 +5000,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4260,7 +5014,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4272,7 +5028,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4284,7 +5042,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4296,7 +5056,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4308,7 +5070,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4320,7 +5084,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4332,7 +5098,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=1.0"\
 --vector-y "fy=1.0"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4344,7 +5112,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4356,7 +5126,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4368,7 +5140,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4380,7 +5154,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4392,7 +5168,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4404,7 +5182,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4416,7 +5196,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4428,7 +5210,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4440,7 +5224,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4452,7 +5238,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4464,7 +5252,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4476,7 +5266,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=x"\
 --vector-y "fy=y"\
 --function "df=2.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4488,7 +5280,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4500,7 +5294,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4512,7 +5308,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4524,7 +5322,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4536,7 +5336,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4548,7 +5350,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4560,7 +5364,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4572,7 +5378,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4584,7 +5392,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4596,7 +5406,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4608,7 +5420,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4620,7 +5434,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-x "fx=y"\
 --vector-y "fy=-x"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4632,7 +5448,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4644,7 +5462,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4656,7 +5476,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4668,7 +5490,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4680,7 +5504,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4692,7 +5518,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4704,7 +5532,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4716,7 +5546,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4728,7 +5560,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4740,7 +5574,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4752,7 +5588,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4764,7 +5602,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "fx=y*exp(-(x^2+y^2))"\
 --vector-y "fy=-x*exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4776,7 +5616,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4788,7 +5630,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4800,7 +5644,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4812,7 +5658,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4824,7 +5672,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4836,7 +5686,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4848,7 +5700,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4860,7 +5714,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4872,7 +5728,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4884,7 +5742,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4896,7 +5756,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4908,7 +5770,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-x "fx=exp(-(x^2+y^2))"\
 --vector-y "fy=exp(-(x^2+y^2))"\
 --function "df=-2.0*(x+y)*exp(-(x^2+y^2))"\
-v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4921,7 +5785,9 @@ v2d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4934,7 +5800,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4947,7 +5815,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4960,7 +5830,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4973,7 +5845,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4986,7 +5860,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4999,7 +5875,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5012,7 +5890,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5025,7 +5905,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5038,7 +5920,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5051,7 +5935,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5064,7 +5950,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=1.0"\
 --vector-z "fz=1.0"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5077,7 +5965,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5090,7 +5980,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5103,7 +5995,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5116,7 +6010,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5129,7 +6025,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5142,7 +6040,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5155,7 +6055,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5168,7 +6070,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5181,7 +6085,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5194,7 +6100,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5207,7 +6115,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5220,7 +6130,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=y"\
 --vector-z "fz=z"\
 --function "df=3.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5233,7 +6145,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5246,7 +6160,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5259,7 +6175,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5272,7 +6190,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5285,7 +6205,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5298,7 +6220,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5311,7 +6235,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5324,7 +6250,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5337,7 +6265,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5350,7 +6280,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5363,7 +6295,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5376,7 +6310,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --vector-y "fy=-x"\
 --vector-z "fz=x*y"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5389,7 +6325,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5402,7 +6340,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5415,7 +6355,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5428,7 +6370,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5441,7 +6385,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5454,7 +6400,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5467,7 +6415,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5480,7 +6430,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5493,7 +6445,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5506,7 +6460,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5519,7 +6475,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5532,7 +6490,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2))"\
 --function "df=0.0"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5545,7 +6505,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5558,7 +6520,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5571,7 +6535,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5584,7 +6550,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5597,7 +6565,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5610,7 +6580,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5623,7 +6595,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5636,7 +6610,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5649,7 +6625,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5662,7 +6640,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5675,7 +6655,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5688,7 +6670,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))"\
 --vector-z "fz=exp(-(x^2+y^2+z^2))"\
 --function "df=-2.0*(x+y+z)*exp(-(x^2+y^2+z^2))"\
-v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_divergence
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5703,7 +6687,9 @@ v3d_divergence/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5718,7 +6704,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5733,7 +6721,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5748,7 +6738,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5763,7 +6755,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5778,7 +6772,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5793,7 +6789,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5808,7 +6806,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5823,7 +6823,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5838,7 +6840,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5853,7 +6857,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5868,7 +6874,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5883,7 +6891,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5898,7 +6908,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -5913,7 +6925,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -5928,7 +6942,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -5943,7 +6959,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -5958,7 +6976,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -5973,7 +6993,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -5988,7 +7010,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6003,7 +7027,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6018,7 +7044,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6033,7 +7061,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6048,7 +7078,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=0.0"\
 --tensor-21 "dfxy=0.0"\
  --tensor-22 "dfyy=1.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6063,7 +7095,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6078,7 +7112,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6093,7 +7129,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6108,7 +7146,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6123,7 +7163,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6138,7 +7180,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6153,7 +7197,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6168,7 +7214,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6183,7 +7231,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6198,7 +7248,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6213,7 +7265,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6228,7 +7282,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6243,7 +7299,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6258,7 +7316,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6273,7 +7333,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6288,7 +7350,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6303,7 +7367,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6318,7 +7384,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6333,7 +7401,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6348,7 +7418,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6363,7 +7435,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6378,7 +7452,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6393,7 +7469,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6408,7 +7486,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --tensor-12 "dfyx=-2.0*x*exp(-(x^2+y^2))"\
 --tensor-21 "dfxy=-2.0*y*exp(-(x^2+y^2))"\
  --tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2))"\
-v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v2d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6429,7 +7509,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6450,7 +7532,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6471,7 +7555,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6492,7 +7578,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6513,7 +7601,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6534,7 +7624,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6555,7 +7647,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6576,7 +7670,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6597,7 +7693,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6618,7 +7716,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6639,7 +7739,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6660,7 +7762,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfyz=0.0"\
 --tensor-33 "dfzz=0.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6681,7 +7785,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6702,7 +7808,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6723,7 +7831,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6744,7 +7854,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6765,7 +7877,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6786,7 +7900,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6807,7 +7923,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6828,7 +7946,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6849,7 +7969,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6870,7 +7992,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6891,7 +8015,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -6912,7 +8038,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-31 "dfxz=0.0"\
 --tensor-32 "dfxz=0.0"\
 --tensor-33 "dfzz=1.0"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -6927,7 +8055,9 @@ v2d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -6942,7 +8072,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -6957,7 +8089,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -6972,7 +8106,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -6987,7 +8123,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -7002,7 +8140,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -7017,7 +8157,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -7032,7 +8174,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -7047,7 +8191,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -7062,7 +8208,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -7077,7 +8225,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -7092,7 +8242,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --tensor-12 "dfyx=-1.0"\
 --tensor-21 "dfxy=1.0"\
  --tensor-22 "dfyy=0.0"\
-v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -7112,7 +8264,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -7132,7 +8286,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -7152,7 +8308,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -7172,7 +8330,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -7192,7 +8352,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -7212,7 +8374,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -7232,7 +8396,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.001" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.001" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -7252,7 +8418,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "0.0001" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -7272,7 +8440,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1e-05" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -7292,7 +8462,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000002e-06" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -7312,7 +8484,9 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
+ v3d_gradient
+
+${INSTALL_ROOT}/bin/self --tolerance "1.0000000000000001e-07" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -7332,4 +8506,6 @@ v3d_gradient/n${INSTALL_ROOT}/bin/self --tolerance "0.01" \
 --tensor-31 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-32 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))"\
 --tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))"\
- v3d_gradient/n
+ v3d_gradient
+
+
