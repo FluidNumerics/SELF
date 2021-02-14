@@ -1,5 +1,6 @@
 #!/bin/bash
 
+trap 'err=1' ERR
 ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
@@ -8509,3 +8510,5 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
  v3d_gradient
 
 
+
+test $err = 0

@@ -155,7 +155,10 @@ def main():
 
     ci_sh = """#!/bin/bash
 
+trap 'err=1' ERR
 {CMDS}
+
+test $err = 0
 """
 
 
