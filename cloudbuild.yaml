@@ -9,46 +9,52 @@ steps:
                  '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
                  '.',
                  '-t',
-                 'gcr.io/self-fluids/self:${_IMAGE_TAG}'
+                 'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}'
           ]
 
-        - id: Test (Serial)
-          name: 'gcr.io/cloud-builders/docker'
-          args: ['run',
-                 '--mount','type=bind,source=/workspace,target=/tmp',
-                 '-e', 'INSTALL_ROOT=/opt/self',
-                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
-                 '/opt/self/bin/ci.sh'
-          ]
+        - id: 'Build Singularity Image'
+          name: 'quay.io/singularity/singularity:v3.7.1'
+          args: ['build',
+                 'self_${_PLATFORM}.sif',
+                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
+          waitFor: ["Build Docker Image"]
 
-          #        - id: Create summary coverage reports
-          #          name: 'gcr.io/self-fluids/fcov'
-          #          args: ['run',
-          #                 '--mount','type=bind,source=/workspace,target=/tmp',
-          #                 'gcr.io/self-fluids/self:${_IMAGE_TAG}',
-          #                 '/opt/self/bin/ci.sh'
-          #          ]
+        - id: 'Run tests'
+          name: 'gcr.io/cloud-builders/gcloud'
+          entrypoint: '/bin/sh'
+          args: 
+            - '-c'
+            - |
+                    ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
+                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="mkdir ${BUILD_ID}"
 
-          #        - id: Push coverage reports
-          #          name: 'gcr.io/self-fluids/gcov'
-          #          entrypoint: '/bin/bash'
-          #          args: 
-          #            - '-c'
-          #            - |
-          #                bash <(curl -s https://codecov.io/bash) -t "$$CODECOV_SECRET" -v
-          #          env:
-          #            - 'VCS_COMMIT_ID=$COMMIT_SHA'
-          #            - 'VCS_BRANCH_NAME=$BRANCH_NAME'
-          #            - 'CI_BUILD_ID=$BUILD_ID'
-          #          secretEnv: 
-          #            - 'CODECOV_SECRET'
+                    gcloud compute scp self_${_PLATFORM}.sif ${_CONTROLLER}:${BUILD_ID}/ \
+                         --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey
 
-          #availableSecrets:
-          #  secretManager:
-          #    - versionName: projects/163522599797/secrets/codecov-token/versions/1
-          #      env: 'CODECOV_SECRET'
+                    gcloud compute scp test/test-wrapper.sh ${_CONTROLLER}:${BUILD_ID}/ \
+                         --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey
+
+                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="cd ${BUILD_ID} && srun --account=ci-runners ${_SRUN_FLAGS} ./test-wrapper.sh --artifact singularity --image self_${_PLATFORM}.sif --gpu no"
+          
+                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
+                        --ssh-key-file=/tmp/sshkey \
+                        --command="rm -rf ${BUILD_ID}"
+
+          waitFor: ["Build Singularity Image"]
+
 
 images: ['gcr.io/self-fluids/self:${_IMAGE_TAG}']
+
+artifacts:
+  objects:
+    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
+    paths: ['self_${_PLATFORM}.sif']
 
 
 timeout: 7200s
@@ -56,3 +62,5 @@ timeout: 7200s
 substitutions:
         _IMAGE_TAG: 'dev'
         _BUILD_TYPE: 'dev'
+        _SRUN_FLAGS: '--partition=n1-standard-4 -n1'
+        _PLATFORM: 'serial-x86'
