@@ -464,7 +464,7 @@ CONTAINS
              feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
          ! Right boundary
          fActual % boundary % hostData(ivar,2,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
+             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,2,iel)/) )
        ENDDO
      ENDDO
 
