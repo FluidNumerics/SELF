@@ -31,10 +31,12 @@ RUN cd /tmp && \
 
 FROM debian:bullseye
 COPY --from=devel /opt /opt
+LABEL maintainer="joe@fluidnumerics.com"
 
 # Install gcc, gfortran
 RUN apt update -y && \
     apt install -y gcc gfortran
 
 ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
-    PATH=/opt/self/bin:$PATH
+    PATH=/opt/self/bin:$PATH \
+    INSTALL_ROOT=/opt/self
