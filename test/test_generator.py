@@ -42,13 +42,13 @@ def expand_vector(function, divergence="", gradient=[]):
 
     if gradient:
       if len(gradient) == 2:
-        cmd_flags += '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-21 "{}" \\\n --tensor-22 "{}" \\\n'.format(gradient[0][0],gradient[1][0],
-                                                                 gradient[0][1],gradient[1][1])
+        cmd_flags += '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-21 "{}" \\\n --tensor-22 "{}" \\\n'.format(gradient[0][0],gradient[0][1],
+                                                                 gradient[1][0],gradient[1][1])
 
       elif len(gradient) == 3:
-        cmd_flags += '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-13 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n--tensor-23 "{}" \\\n--tensor-31 "{}" \\\n--tensor-32 "{}" \\\n--tensor-33 "{}" \\\n '.format(gradient[0][0],gradient[1][0],gradient[2][0],
-                                          gradient[0][1],gradient[1][1],gradient[2][1],
-                                          gradient[0][2],gradient[1][2],gradient[2][2],)
+        cmd_flags += '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-13 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n--tensor-23 "{}" \\\n--tensor-31 "{}" \\\n--tensor-32 "{}" \\\n--tensor-33 "{}" \\\n '.format(gradient[0][0],gradient[0][1],gradient[0][2],
+                                          gradient[1][0],gradient[1][1],gradient[1][2],
+                                          gradient[2][0],gradient[2][1],gradient[2][2],)
 
     return cmd_flags
 
@@ -58,13 +58,13 @@ def expand_tensor(function, divergence=[]):
 
 
     if len(function) == 2:
-      cmd_flags = '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n '.format(function[0][0],function[1][0],
-                                                               function[0][1],function[1][1])
+      cmd_flags = '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n '.format(function[0][0],function[0][1],
+                                                               function[1][0],function[1][1])
 
     elif len(function) == 3:
-      cmd_flags = '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-13 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n--tensor-23 "{}" \\\n--tensor-31 "{}" \\\n--tensor-32 "{}" \\\n--tensor-33 "{}" \\\n'.format(function[0][0],function[1][0],function[2][0],
-                                        function[0][1],function[1][1],function[2][1],
-                                        function[0][2],function[1][2],function[2][2],)
+      cmd_flags = '--tensor-11 "{}" \\\n--tensor-12 "{}" \\\n--tensor-13 "{}" \\\n--tensor-21 "{}" \\\n--tensor-22 "{}" \\\n--tensor-23 "{}" \\\n--tensor-31 "{}" \\\n--tensor-32 "{}" \\\n--tensor-33 "{}" \\\n'.format(function[0][0],function[0][1],function[0][2],
+                                        function[1][0],function[1][1],function[1][2],
+                                        function[2][0],function[2][1],function[2][2],)
 
     if len(divergence) == 2:
       cmd_flags += '--vector-x "{}" \\\n--vector-y "{}" \\\n'.format(divergence[0],divergence[1])
