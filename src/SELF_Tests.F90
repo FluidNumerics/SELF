@@ -538,6 +538,14 @@ CONTAINS
     INTEGER :: iel,i,ivar
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
     msg = 'Number of elements : '//Int2Str(nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -888,6 +896,15 @@ CONTAINS
     INTEGER :: iel,i,j,ivar,iside
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
+    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1262,6 +1279,15 @@ CONTAINS
     INTEGER :: iel,i,j,ivar,row,col,iside
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
+    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1405,6 +1431,15 @@ CONTAINS
     INTEGER :: iel,i,j,ivar,row,col,iside
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
+    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -2047,6 +2082,15 @@ CONTAINS
     INTEGER :: iel,i,j,k,ivar,iside
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
+    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -2437,6 +2481,15 @@ CONTAINS
     INTEGER :: iel,i,j,k,ivar,row,col,iside
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
+    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -2581,6 +2634,15 @@ CONTAINS
     INTEGER :: iel,i,j,k,ivar,idir,iside
 
     error = 0
+    IF (dForm == selfStrongForm ) THEN
+      msg = 'Formulation Type : Strong Form'
+    ELSEIF (dForm == selfWeakDGForm ) THEN
+      msg = 'Formulation Type : Weak DG Form'
+    ELSEIF (dForm == selfWeakCGForm ) THEN
+      msg = 'Formulation Type : Weak CG Form'
+    ENDIF
+    INFO(TRIM(msg))
+    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)

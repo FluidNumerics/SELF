@@ -155,7 +155,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_interp
 
 let COUNTER++ 
@@ -167,7 +167,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_interp
 
 let COUNTER++ 
@@ -179,7 +179,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_interp
 
 let COUNTER++ 
@@ -191,7 +191,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_interp
 
 let COUNTER++ 
@@ -203,7 +203,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_interp
 
 let COUNTER++ 
@@ -215,7 +215,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_interp
 
 let COUNTER++ 
@@ -371,7 +371,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
 
 let COUNTER++ 
@@ -383,7 +383,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
 
 let COUNTER++ 
@@ -395,7 +395,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
 
 let COUNTER++ 
@@ -407,7 +407,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
 
 let COUNTER++ 
@@ -419,7 +419,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
 
 let COUNTER++ 
@@ -431,7 +431,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
 
 let COUNTER++ 
@@ -587,7 +587,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
 
 let COUNTER++ 
@@ -599,7 +599,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
 
 let COUNTER++ 
@@ -611,7 +611,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
 
 let COUNTER++ 
@@ -623,7 +623,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
 
 let COUNTER++ 
@@ -635,7 +635,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
 
 let COUNTER++ 
@@ -647,7 +647,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
 
 let COUNTER++ 
@@ -1403,10 +1403,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_interp
 
 let COUNTER++ 
@@ -1418,10 +1418,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_interp
 
 let COUNTER++ 
@@ -1433,10 +1433,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_interp
 
 let COUNTER++ 
@@ -1448,10 +1448,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_interp
 
 let COUNTER++ 
@@ -1463,10 +1463,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_interp
 
 let COUNTER++ 
@@ -1478,10 +1478,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_interp
 
 let COUNTER++ 
@@ -1733,15 +1733,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_interp
 
 let COUNTER++ 
@@ -1753,15 +1753,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_interp
 
 let COUNTER++ 
@@ -1773,15 +1773,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_interp
 
 let COUNTER++ 
@@ -1793,15 +1793,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_interp
 
 let COUNTER++ 
@@ -1813,15 +1813,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_interp
 
 let COUNTER++ 
@@ -1833,15 +1833,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_interp
 
 let COUNTER++ 
@@ -1997,7 +1997,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_binterp
 
 let COUNTER++ 
@@ -2009,7 +2009,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_binterp
 
 let COUNTER++ 
@@ -2021,7 +2021,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_binterp
 
 let COUNTER++ 
@@ -2033,7 +2033,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_binterp
 
 let COUNTER++ 
@@ -2045,7 +2045,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_binterp
 
 let COUNTER++ 
@@ -2057,7 +2057,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
 s1d_binterp
 
 let COUNTER++ 
@@ -2213,7 +2213,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
 
 let COUNTER++ 
@@ -2225,7 +2225,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
 
 let COUNTER++ 
@@ -2237,7 +2237,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
 
 let COUNTER++ 
@@ -2249,7 +2249,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
 
 let COUNTER++ 
@@ -2261,7 +2261,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
 
 let COUNTER++ 
@@ -2273,7 +2273,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
 
 let COUNTER++ 
@@ -2429,7 +2429,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
 
 let COUNTER++ 
@@ -2441,7 +2441,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
 
 let COUNTER++ 
@@ -2453,7 +2453,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
 
 let COUNTER++ 
@@ -2465,7 +2465,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
 
 let COUNTER++ 
@@ -2477,7 +2477,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
 
 let COUNTER++ 
@@ -2489,7 +2489,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
 
 let COUNTER++ 
@@ -3245,10 +3245,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_binterp
 
 let COUNTER++ 
@@ -3260,10 +3260,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_binterp
 
 let COUNTER++ 
@@ -3275,10 +3275,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_binterp
 
 let COUNTER++ 
@@ -3290,10 +3290,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_binterp
 
 let COUNTER++ 
@@ -3305,10 +3305,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_binterp
 
 let COUNTER++ 
@@ -3320,10 +3320,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
  t2d_binterp
 
 let COUNTER++ 
@@ -3575,15 +3575,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_binterp
 
 let COUNTER++ 
@@ -3595,15 +3595,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_binterp
 
 let COUNTER++ 
@@ -3615,15 +3615,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_binterp
 
 let COUNTER++ 
@@ -3635,15 +3635,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_binterp
 
 let COUNTER++ 
@@ -3655,15 +3655,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_binterp
 
 let COUNTER++ 
@@ -3675,15 +3675,15 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---tensor-11 "t11=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-12 "t21=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-13 "t31=cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---tensor-21 "t12=sin(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-22 "t22=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-23 "t32=cos(6.0*pi*x)*cos(6.0*pi*y)" \
---tensor-31 "t13=sin(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-32 "t23=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
---tensor-33 "t33=cos(6.0*pi*x)*cos(6.0*pi*y)*cos(6.0*pi*z)" \
+--tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-12 "t21=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-13 "t31=cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--tensor-21 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-22 "t22=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-23 "t32=cos(2.0*pi*x)*cos(2.0*pi*y)" \
+--tensor-31 "t13=sin(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-32 "t23=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
+--tensor-33 "t33=cos(2.0*pi*x)*cos(2.0*pi*y)*cos(2.0*pi*z)" \
 v3d_binterp
 
 let COUNTER++ 
@@ -4032,8 +4032,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4046,8 +4046,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4060,8 +4060,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4074,8 +4074,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4088,8 +4088,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4102,8 +4102,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4116,8 +4116,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4130,8 +4130,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4144,8 +4144,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4158,8 +4158,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4172,8 +4172,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4186,8 +4186,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)" \
---derivative "df=6.0*pi*cos(6.0*pi*x)" \
+--function "f=sin(2.0*pi*x)" \
+--derivative "df=2.0*pi*cos(2.0*pi*x)" \
 s1d_derivative
 
 let COUNTER++ 
@@ -4560,9 +4560,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4575,9 +4575,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4590,9 +4590,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4605,9 +4605,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4620,9 +4620,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4635,9 +4635,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4650,9 +4650,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4665,9 +4665,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4680,9 +4680,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4695,9 +4695,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4710,9 +4710,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -4725,9 +4725,9 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)" \
 s2d_gradient
 
 let COUNTER++ 
@@ -5124,10 +5124,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5140,10 +5140,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5156,10 +5156,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5172,10 +5172,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5188,10 +5188,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5204,10 +5204,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5220,10 +5220,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5236,10 +5236,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5252,10 +5252,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5268,10 +5268,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5284,10 +5284,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
@@ -5300,10 +5300,10 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
---function "f=sin(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-x "fx=6.0*pi*cos(6.0*pi*x)*sin(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-y "fy=6.0*pi*sin(6.0*pi*x)*cos(6.0*pi*y)*sin(6.0*pi*z)" \
---vector-z "fy=6.0*pi*sin(6.0*pi*x)*sin(6.0*pi*y)*cos(6.0*pi*z)" \
+--function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-y "fy=2.0*pi*sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)" \
+--vector-z "fy=2.0*pi*sin(2.0*pi*x)*sin(2.0*pi*y)*cos(2.0*pi*z)" \
 s3d_gradient
 
 let COUNTER++ 
