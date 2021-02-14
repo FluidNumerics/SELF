@@ -154,11 +154,18 @@ def main():
     config = load_config()
 
     ci_sh = """#!/bin/bash
+COUNTER=0
+trap '(( $? && ++errcount))' DEBUG
 
-trap 'err=1' ERR
 {CMDS}
 
-test $err = 0
+echo "============================="
+echo "        Test Summary         "
+echo "============================="
+echo " "
+echo " Total Tests : $COUNTER "
+echo " Fail : $errcount "
+test $errcount = 0
 """
 
 
@@ -179,7 +186,8 @@ test $err = 0
                 for dt in fset['derivative_types']:
                   for cdeg in range(crange[0],crange[1]+1):
                     tol = expand_tolerance(fset['tolerance'],crange[0],cdeg,fset['error_type'])
-                    cmd = "${INSTALL_ROOT}/bin/self "
+                    cmd = "let COUNTER++ \n"
+                    cmd += "${INSTALL_ROOT}/bin/self "
                     cmd +='--tolerance "{}" \\\n'.format(str(tol))
                     cmd +='--control-quadrature "{}" \\\n'.format(cq)
                     cmd +='--control-degree {} \\\n'.format(cdeg)
@@ -197,7 +205,8 @@ test $err = 0
               else:
                 for cdeg in range(crange[0],crange[1]+1):
                   tol = expand_tolerance(fset['tolerance'],crange[0],cdeg,fset['error_type'])
-                  cmd = "${INSTALL_ROOT}/bin/self "
+                  cmd = "let COUNTER++ \n"
+                  cmd += "${INSTALL_ROOT}/bin/self "
                   cmd +='--tolerance "{}" \\\n'.format(str(tol))
                   cmd +='--control-quadrature "{}" \\\n'.format(cq)
                   cmd +='--control-degree {} \\\n'.format(cdeg)
