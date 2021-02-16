@@ -8,6 +8,7 @@
 
 MODULE SELF_Lagrange
 
+  USE ISO_FORTRAN_ENV
   USE SELF_Constants
   USE SELF_Memory
   USE SELF_SupportRoutines
@@ -1162,18 +1163,18 @@ CONTAINS
                                                         myPoly % dgMatrix % hostData(ii,j)*f(2,2,i,ii,iVar,iEl)
             END DO
 
-            dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,3,iEl) +&
-                                                       myPoly % bMatrix % hostData(i,0)*bf(1,1,j,iVar,1,iEl))/&
+            dF(1,i,j,iVar,iEl) = dF(1,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,1,j,iVar,2,iEl) +&
+                                                       myPoly % bMatrix % hostData(i,0)*bf(1,1,j,iVar,4,iEl))/&
                                                       myPoly % qWeights % hostData(i)+&
-                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,2,iEl) +&
-                                                       myPoly % bMatrix % hostData(j,0)*bf(2,1,i,iVar,4,iEl))/&
+                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,1,i,iVar,3,iEl) +&
+                                                       myPoly % bMatrix % hostData(j,0)*bf(2,1,i,iVar,1,iEl))/&
                                                       myPoly % qWeights % hostData(j)
 
-            dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,3,iEl) +&
-                                                       myPoly % bMatrix % hostData(i,0)*bf(1,2,j,iVar,1,iEl))/&
+            dF(2,i,j,iVar,iEl) = dF(2,i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bf(1,2,j,iVar,2,iEl) +&
+                                                       myPoly % bMatrix % hostData(i,0)*bf(1,2,j,iVar,4,iEl))/&
                                                       myPoly % qWeights % hostData(i)+&
-                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,2,iEl) +&
-                                                       myPoly % bMatrix % hostData(j,0)*bf(2,2,i,iVar,4,iEl))/&
+                                                      (myPoly % bMatrix % hostData(j,1)*bf(2,2,i,iVar,3,iEl) +&
+                                                       myPoly % bMatrix % hostData(j,0)*bf(2,2,i,iVar,1,iEl))/&
                                                       myPoly % qWeights % hostData(j)
           END DO
         END DO
@@ -1771,25 +1772,27 @@ CONTAINS
     CLASS(Lagrange),INTENT(inout) :: myPoly
     ! Local
     INTEGER :: i,j
+    REAL(real64) :: bWeights(0:myPoly%N)
+    REAL(real64) :: controlPoints(0:myPoly%N)
 
     DO i = 0,myPoly % N
-      myPoly % bWeights % hostData(i) = 1.0_prec
+      bWeights(i) = 1.0_real64
+      controlPoints(i) = REAL(myPoly % controlPoints % hostData(i),real64)
     END DO
 
     ! Computes the product w_k = w_k*(s_k - s_j), k /= j
     DO j = 1,myPoly % N
       DO i = 0,j - 1
 
-        myPoly % bWeights % hostData(i) = myPoly % bWeights % hostData(i)* &
-                                          (myPoly % controlPoints % hostData(i) - myPoly % controlPoints % hostData(j))
-        myPoly % bWeights % hostData(j) = myPoly % bWeights % hostData(j)* &
-                                          (myPoly % controlPoints % hostData(j) - myPoly % controlPoints % hostData(i))
+        bWeights(i) = bWeights(i)*(controlPoints(i) - controlPoints(j))
+        bWeights(j) = bWeights(j)*(controlPoints(j) - controlPoints(i))
 
       END DO
     END DO
 
     DO j = 0,myPoly % N
-      myPoly % bWeights % hostData(j) = 1.0_prec/myPoly % bWeights % hostData(j)
+      bWeights(j) = 1.0_prec/bWeights(j)
+      myPoly % bWeights % hostData(j) = REAL(bWeights(j),prec)
     END DO
 
   END SUBROUTINE CalculateBarycentricWeights
@@ -1808,10 +1811,21 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
     ! Local
-    REAL(prec) :: temp1,temp2
     INTEGER    :: row,col
     LOGICAL    :: rowHasMatch
-    REAL(prec) :: iMatrix(0:myPoly % M,0:myPoly % N)
+    REAL(real64) :: temp1,temp2
+    REAL(real64) :: iMatrix(0:myPoly % M,0:myPoly % N)
+    REAL(real64) :: bWeights(0:myPoly%N)
+    REAL(real64) :: controlPoints(0:myPoly%N)
+    REAL(real64) :: targetPoints(0:myPoly%M)
+
+    DO col = 0,myPoly % N
+      controlPoints(col) = REAL(myPoly % controlPoints % hostData(col),real64)
+      bWeights(col) = REAL(myPoly % bWeights % hostData(col),real64)
+    END DO
+    DO row = 0,myPoly % M
+      targetPoints(row) = REAL(myPoly % targetPoints % hostData(row),real64)
+    END DO
 
     DO row = 0,myPoly % M
 
@@ -1819,23 +1833,23 @@ CONTAINS
 
       DO col = 0,myPoly % N
 
-        iMatrix(row,col) = 0.0_prec
+        iMatrix(row,col) = 0.0_real64
 
-        IF (AlmostEqual(myPoly % targetPoints % hostData(row),myPoly % controlPoints % hostData(col))) THEN
+        IF (AlmostEqual(targetPoints(row),controlPoints(col))) THEN
           rowHasMatch = .TRUE.
-          iMatrix(row,col) = 1.0_prec
+          iMatrix(row,col) = 1.0_real64
         END IF
 
       END DO
 
       IF (.NOT. (rowHasMatch)) THEN
 
-        temp1 = 0.0_prec
+        temp1 = 0.0_real64
 
         DO col = 0,myPoly % N
-          temp2 = myPoly % bWeights % hostData(col)/ &
-                  (myPoly % targetPoints % hostData(row) - &
-                   myPoly % controlPoints % hostData(col))
+          temp2 = bWeights(col)/ &
+                  (targetPoints(row) - &
+                   controlPoints(col))
           iMatrix(row,col) = temp2
           temp1 = temp1 + temp2
         END DO
@@ -1848,7 +1862,11 @@ CONTAINS
 
     END DO
 
-    myPoly % iMatrix % hostData = TRANSPOSE(iMatrix)
+    DO row = 0,myPoly % M
+      DO col = 0,myPoly % N
+        myPoly % iMatrix % hostData(col,row) = REAL(iMatrix(row,col),prec)
+      ENDDO
+    ENDDO
 
   END SUBROUTINE CalculateInterpolationMatrix
 
@@ -1867,9 +1885,18 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
     ! Local
-    INTEGER    :: row,col
-    REAL(prec) :: dmat(0:myPoly % N,0:myPoly % N)
-    REAL(prec) :: dgmat(0:myPoly % N,0:myPoly % N)
+    INTEGER      :: row,col
+    REAL(real64) :: dmat(0:myPoly % N,0:myPoly % N)
+    REAL(real64) :: dgmat(0:myPoly % N,0:myPoly % N)
+    REAL(real64) :: bWeights(0:myPoly%N)
+    REAL(real64) :: qWeights(0:myPoly%N)
+    REAL(real64) :: controlPoints(0:myPoly%N)
+
+    DO row = 0,myPoly % N
+      bWeights(row) = REAL(myPoly % bWeights % hostData(row), real64)
+      qWeights(row) = REAL(myPoly % qWeights % hostData(row), real64)
+      controlPoints(row) = REAL(myPoly % controlPoints % hostData(row),real64)
+    END DO
 
     DO row = 0,myPoly % N
 
@@ -1879,10 +1906,10 @@ CONTAINS
 
         IF (.NOT. (col == row)) THEN
 
-          dmat(row,col) = myPoly % bWeights % hostData(col)/ &
-                          (myPoly % bWeights % hostData(row)* &
-                           (myPoly % controlPoints % hostData(row) - &
-                            myPoly % controlPoints % hostData(col)))
+          dmat(row,col) = bWeights(col)/ &
+                          (bWeights(row)* &
+                           (controlPoints(row) - &
+                            controlPoints(col)))
 
           dmat(row,row) = dmat(row,row) - dmat(row,col)
 
@@ -1895,13 +1922,17 @@ CONTAINS
     DO row = 0,myPoly % N
       DO col = 0,myPoly % N
         dgmat(row,col) = -dmat(col,row)*&
-                          myPoly % qWeights % hostData(col)/&
-                          myPoly % qWeights % hostData(row)
+                          qWeights(col)/&
+                          qWeights(row)
       ENDDO
     ENDDO
 
-    myPoly % dMatrix % hostData = TRANSPOSE(dmat)
-    myPoly % dgMatrix % hostData = TRANSPOSE(dgmat)
+    DO row = 0,myPoly % N
+      DO col = 0,myPoly % N
+        myPoly % dMatrix % hostData(row,col) = REAL(dmat(col,row),prec)
+        myPoly % dgMatrix % hostData(row,col) = REAL(dgmat(col,row),prec)
+      ENDDO
+    ENDDO
 
   END SUBROUTINE CalculateDerivativeMatrix
 
@@ -1921,18 +1952,28 @@ CONTAINS
     REAL(prec)      :: sE
     REAL(prec)      :: lAtS(0:myPoly % N)
     ! Local
-    REAL(prec) :: temp1,temp2
     INTEGER    :: j
     LOGICAL    :: xMatchesNode
+    REAL(real64) :: temp1,temp2
+    REAL(real64) :: sELocal
+    REAL(real64) :: controlPoints(0:myPoly%N)
+    REAL(real64) :: bWeights(0:myPoly%N)
+    REAL(real64) :: lS(0:myPoly%N)
+
+    sELocal = REAL(sE,real64)
+    DO j = 0,myPoly % N
+      controlPoints(j) = REAL(myPoly % controlPoints % hostData(j),real64)
+      bWeights(j) = REAL(myPoly % bWeights % hostData(j),real64)
+    END DO
 
     xMatchesNode = .FALSE.
 
     DO j = 0,myPoly % N
 
-      lAtS(j) = 0.0_prec
+      lS(j) = 0.0_real64
 
-      IF (AlmostEqual(sE,myPoly % controlPoints % hostData(j))) THEN
-        lAtS(j) = 1.0_prec
+      IF (AlmostEqual(sELocal,controlPoints(j))) THEN
+        lS(j) = 1.0_real64
         xMatchesNode = .TRUE.
       END IF
 
@@ -1942,15 +1983,19 @@ CONTAINS
       RETURN
     END IF
 
-    temp1 = 0.0_prec
+    temp1 = 0.0_real64
 
     DO j = 0,myPoly % N
-      temp2 = myPoly % bWeights % hostData(j)/(sE - myPoly % controlPoints % hostData(j))
-      lAtS(j) = temp2
+      temp2 = bWeights(j)/(sE - controlPoints(j))
+      lS(j) = temp2
       temp1 = temp1 + temp2
     END DO
 
-    lAtS = lAtS/temp1
+    lS = lS/temp1
+
+    DO j = 0,myPoly % N
+      lAtS(j) = REAL(lS(j),prec)
+    ENDDO
 
   END FUNCTION CalculateLagrangePolynomials
 

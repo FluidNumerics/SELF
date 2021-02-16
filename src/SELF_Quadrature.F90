@@ -14,6 +14,7 @@
 
 MODULE SELF_Quadrature
 
+  USE ISO_FORTRAN_ENV
   USE SELF_Constants
 
   IMPLICIT NONE
@@ -35,7 +36,7 @@ CONTAINS
 !   Usage :
 !
 !     INTEGER    :: N, quadType
-!     REAL(prec) :: nodes(0:N), weights(0:N)
+!     REAL(real64) :: nodes(0:N), weights(0:N)
 !
 !       CALL LegendreQuadrature( N, quadType, nodes, weights )
 !
@@ -61,16 +62,26 @@ CONTAINS
     REAL(prec),INTENT(out) :: nodes(0:N)
     REAL(prec),INTENT(out) :: weights(0:N)
     INTEGER,INTENT(in)     :: QuadType
+    ! Local
+    REAL(real64) :: nodesLocal(0:N)
+    REAL(real64) :: weightsLocal(0:N)
+    INTEGER :: i
+
 
     IF (QuadType == GAUSS_LOBATTO) THEN
 
-      CALL LegendreGaussLobatto(N,nodes,weights)
+      CALL LegendreGaussLobatto(N,nodesLocal,weightsLocal)
 
     ELSEIF (QuadType == GAUSS) THEN
 
-      CALL LegendreGauss(N,nodes,weights)
+      CALL LegendreGauss(N,nodesLocal,weightsLocal)
 
     END IF
+
+    DO i = 0, N
+      nodes(i) = REAL(nodesLocal(i),prec)
+      weights(i) = REAL(weightsLocal(i),prec)
+    ENDDO
 
   END SUBROUTINE LegendreQuadrature
 
@@ -85,7 +96,7 @@ CONTAINS
 !   Usage :
 !
 !     INTEGER    :: N, quadType
-!     REAL(prec) :: nodes(0:N), weights(0:N)
+!     REAL(real64) :: nodes(0:N), weights(0:N)
 !
 !       CALL ChebyshevQuadrature( N, quadType, nodes, weights )
 !
@@ -108,19 +119,28 @@ CONTAINS
   SUBROUTINE ChebyshevQuadrature(N,quadType,nodes,weights)
     IMPLICIT NONE
     INTEGER,INTENT(in)     :: N
-    REAL(prec),INTENT(out) :: nodes(0:N)
-    REAL(prec),INTENT(out) :: weights(0:N)
+    REAL(real64),INTENT(out) :: nodes(0:N)
+    REAL(real64),INTENT(out) :: weights(0:N)
     INTEGER,INTENT(in)     :: QuadType
+    ! Local
+    REAL(real64) :: nodesLocal(0:N)
+    REAL(real64) :: weightsLocal(0:N)
+    INTEGER :: i
 
     IF (QuadType == GAUSS_LOBATTO) then
 
-      CALL ChebyshevGaussLobatto(N,nodes,weights)
+      CALL ChebyshevGaussLobatto(N,nodesLocal,weightsLocal)
 
     ELSEIF (QuadType == GAUSS) then
 
-      CALL ChebyshevGauss(N,nodes,weights)
+      CALL ChebyshevGauss(N,nodesLocal,weightsLocal)
 
     END IF
+
+    DO i = 0, N
+      nodes(i) = REAL(nodesLocal(i),prec)
+      weights(i) = REAL(weightsLocal(i),prec)
+    ENDDO
 
   END SUBROUTINE ChebyshevQuadrature
 
@@ -133,15 +153,15 @@ CONTAINS
   SUBROUTINE ChebyshevGauss(N,nodes,weights)
     IMPLICIT NONE
     INTEGER       :: N
-    REAL(prec)    :: nodes(0:N)
-    REAL(prec)    :: weights(0:N)
+    REAL(real64)    :: nodes(0:N)
+    REAL(real64)    :: weights(0:N)
     ! Local
     INTEGER    :: j
 
     DO j = 0,N
 
-      weights(j) = pi/(REAL(N,prec) + 1.0_prec)
-      nodes(j) = -cos(0.5_prec*(2.0_prec*REAL(j,prec) + 1.0_prec)*weights(j))
+      weights(j) = pi/(REAL(N,real64) + 1.0_real64)
+      nodes(j) = -cos(0.5_real64*(2.0_real64*REAL(j,real64) + 1.0_real64)*weights(j))
 
     END DO
 
@@ -156,20 +176,20 @@ CONTAINS
   SUBROUTINE ChebyshevGaussLobatto(N,nodes,weights)
     IMPLICIT NONE
     INTEGER       :: N
-    REAL(prec)    :: nodes(0:N)
-    REAL(prec)    :: weights(0:N)
+    REAL(real64)    :: nodes(0:N)
+    REAL(real64)    :: weights(0:N)
     ! LOCAL
     INTEGER    :: j
 
     DO j = 0,N
 
-      weights(j) = pi/REAL(N,prec)
-      nodes(j) = -cos(REAL(j,prec)*weights(j))
+      weights(j) = pi/REAL(N,real64)
+      nodes(j) = -cos(REAL(j,real64)*weights(j))
 
     END DO
 
-    weights(0) = weights(0)*0.5_prec
-    weights(N) = weights(N)*0.5_prec
+    weights(0) = weights(0)*0.5_real64
+    weights(N) = weights(N)*0.5_real64
 
   END SUBROUTINE ChebyshevGaussLobatto
 
@@ -182,8 +202,8 @@ CONTAINS
   SUBROUTINE LegendreGauss(N,nodes,weights)
     IMPLICIT NONE
     INTEGER    :: N
-    REAL(prec) :: nodes(0:N)
-    REAL(prec) :: weights(0:N)
+    REAL(real64) :: nodes(0:N)
+    REAL(real64) :: weights(0:N)
     ! Local
     REAL(real64) :: nodes_local(0:N)
     REAL(real64) :: weights_local(0:N)
@@ -236,8 +256,8 @@ CONTAINS
     END IF
 
     DO j = 0,N
-      nodes(j) = REAL(nodes_local(j),prec)
-      weights(j) = REAL(weights_local(j),prec)
+      nodes(j) = REAL(nodes_local(j),real64)
+      weights(j) = REAL(weights_local(j),real64)
     END DO
 
   END SUBROUTINE LegendreGauss
@@ -251,8 +271,8 @@ CONTAINS
   SUBROUTINE LegendreGaussLobatto(N,nodes,weights)
     IMPLICIT NONE
     INTEGER    :: N
-    REAL(prec) :: nodes(0:N)
-    REAL(prec) :: weights(0:N)
+    REAL(real64) :: nodes(0:N)
+    REAL(real64) :: weights(0:N)
     ! Local
     REAL(real64) :: nodes_local(0:N)
     REAL(real64) :: weights_local(0:N)
@@ -308,8 +328,8 @@ CONTAINS
     END IF
 
     DO j = 0,N
-      nodes(j) = REAL(nodes_local(j),prec)
-      weights(j) = REAL(weights_local(j),prec)
+      nodes(j) = REAL(nodes_local(j),real64)
+      weights(j) = REAL(weights_local(j),real64)
     END DO
 
   END SUBROUTINE LegendreGaussLobatto

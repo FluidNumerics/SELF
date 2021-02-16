@@ -580,12 +580,12 @@ CONTAINS
            dfActual % interior % hostData(i,ivar,iel) = &
              dfeq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
          ENDDO
-         ! Right Boundary
+         ! Left Boundary
          f % boundary % hostData(ivar,1,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,2,iel)/) )
+             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
          ! Right boundary
          f % boundary % hostData(ivar,2,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
+             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,2,iel)/) )
        ENDDO
      ENDDO
 

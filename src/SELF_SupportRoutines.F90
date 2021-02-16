@@ -14,6 +14,7 @@
 
 MODULE SELF_SupportRoutines
 
+  USE ISO_FORTRAN_ENV
   USE SELF_Constants
 
   IMPLICIT NONE
@@ -69,17 +70,17 @@ CONTAINS
   FUNCTION AlmostEqual(a,b) RESULT(AisB)
 
     IMPLICIT NONE
-    REAL(prec) :: a,b
+    REAL(real64) :: a,b
     LOGICAL :: AisB
 
-    IF (a == 0.0_prec .OR. b == 0.0_prec) THEN
-      IF (ABS(a - b) <= EPSILON(1.0_prec)) THEN
+    IF (a == 0.0_real64 .OR. b == 0.0_real64) THEN
+      IF (ABS(a - b) <= EPSILON(1.0_real64)) THEN
         AisB = .TRUE.
       ELSE
         AisB = .FALSE.
       END IF
     ELSE
-      IF ((abs(a - b) <= EPSILON(1.0_prec)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_prec)*abs(b))) THEN
+      IF ((abs(a - b) <= EPSILON(1.0_real64)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_real64)*abs(b))) THEN
         AisB = .TRUE.
       ELSE
         AisB = .FALSE.
