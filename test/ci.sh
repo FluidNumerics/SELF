@@ -1605,7 +1605,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_interp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1625,7 +1625,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_interp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1645,7 +1645,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_interp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1665,7 +1665,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_interp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1685,7 +1685,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_interp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1705,7 +1705,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_interp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -1917,7 +1917,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -1929,7 +1929,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -1941,7 +1941,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -1953,7 +1953,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -1965,7 +1965,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -1977,7 +1977,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3567,7 +3567,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 t3d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.05" \
+${INSTALL_ROOT}/bin/self --tolerance "0.3" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3587,7 +3587,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 t3d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
+${INSTALL_ROOT}/bin/self --tolerance "0.03" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3607,7 +3607,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 t3d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
+${INSTALL_ROOT}/bin/self --tolerance "0.003" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3627,7 +3627,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 t3d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
+${INSTALL_ROOT}/bin/self --tolerance "0.0003" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3647,7 +3647,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 t3d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
+${INSTALL_ROOT}/bin/self --tolerance "3e-05" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3667,7 +3667,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 t3d_binterp
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
+${INSTALL_ROOT}/bin/self --tolerance "3e-06" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \

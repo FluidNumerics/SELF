@@ -1121,42 +1121,29 @@ CONTAINS
             DO j = 0,physVector % N
               DO i = 0,physVector % N
 
-                compVector % interior % hostData(1,i,j,k,iVar,iEl) = geometry % dsdx % &
-                                                                     interior % hostData(1,1,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(1,i,j,k,iVar,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     interior % hostData(2,1,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(2,i,j,k,iVar,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     interior % hostData(3,1,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(3,i,j,k,iVar,iEl)
+                compVector % interior % hostData(1,i,j,k,iVar,iEl) = &
+                        geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
+                        geometry % dsdx % interior % hostData(2,1,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
+                        geometry % dsdx % interior % hostData(3,1,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
-                compVector % interior % hostData(2,i,j,k,iVar,iEl) = geometry % dsdx % &
-                                                                     interior % hostData(1,2,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(1,i,j,k,iVar,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     interior % hostData(2,2,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(2,i,j,k,iVar,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     interior % hostData(3,2,i,j,k,1,iEl)* &
-                                                                     physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                compVector % interior % hostData(2,i,j,k,iVar,iEl) = &
+                        geometry % dsdx % interior % hostData(1,2,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
+                        geometry % dsdx % interior % hostData(2,2,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
+                        geometry % dsdx % interior % hostData(3,2,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
-                compVector % interior % hostData(3,i,j,k,iVar,iEl) = geometry % dsdx % &
-                                                                     interior % hostData(1,3,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(1,i,j,k,iVar,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     interior % hostData(2,3,i,j,k,1,iEl)* &
-                                                                     physVector % interior % &
-                                                                     hostData(2,i,j,k,iVar,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     interior % hostData(3,3,i,j,k,1,iEl)* &
-                                                                     physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                compVector % interior % hostData(3,i,j,k,iVar,iEl) = &
+                        geometry % dsdx % interior % hostData(1,3,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
+                        geometry % dsdx % interior % hostData(2,3,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
+                        geometry % dsdx % interior % hostData(3,3,i,j,k,1,iEl)* &
+                        physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
               END DO
             END DO
@@ -1170,47 +1157,35 @@ CONTAINS
           DO iVar = 1,physVector % nVar
             DO k = 0,physVector % N
               DO j = 0,physVector % N
-                compVector % boundary % hostData(1,j,k,iVar,iside,iEl) = geometry % dsdx % &
-                                                                     boundary % hostData(1,1,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(1,j,k,iVar,iside,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     boundary % hostData(2,1,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(2,j,k,iVar,iside,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     boundary % hostData(3,1,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(3,j,k,iVar,iside,iEl)
+                compVector % boundary % hostData(1,j,k,iVar,iside,iEl) = &
+                        geometry % dsdx % boundary % hostData(1,1,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                        geometry % dsdx % boundary % hostData(2,1,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                        geometry % dsdx % boundary % hostData(3,1,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
 
-                compVector % boundary % hostData(2,j,k,iVar,iside,iEl) = geometry % dsdx % &
-                                                                     boundary % hostData(1,2,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(1,j,k,iVar,iside,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     boundary % hostData(2,2,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(2,j,k,iVar,iside,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     boundary % hostData(3,2,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+                compVector % boundary % hostData(2,j,k,iVar,iside,iEl) = &
+                        geometry % dsdx % boundary % hostData(1,2,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                        geometry % dsdx % boundary % hostData(2,2,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                        geometry % dsdx % boundary % hostData(3,2,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
 
-                compVector % boundary % hostData(3,j,k,iVar,iside,iEl) = geometry % dsdx % &
-                                                                     boundary % hostData(1,3,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(1,j,k,iVar,iside,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     boundary % hostData(2,3,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % &
-                                                                     hostData(2,j,k,iVar,iside,iEl) + &
-                                                                     geometry % dsdx % &
-                                                                     boundary % hostData(3,3,j,k,1,iside,iEl)* &
-                                                                     physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+                compVector % boundary % hostData(3,j,k,iVar,iside,iEl) = &
+                        geometry % dsdx % boundary % hostData(1,3,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                        geometry % dsdx % boundary % hostData(2,3,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                        geometry % dsdx % boundary % hostData(3,3,j,k,1,iside,iEl)* &
+                        physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
               ENDDO
             ENDDO
           ENDDO
         ENDDO
       ENDDO
+      
 !    END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector3D

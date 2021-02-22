@@ -2642,7 +2642,6 @@ CONTAINS
       msg = 'Formulation Type : Weak CG Form'
     ENDIF
     INFO(TRIM(msg))
-    msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)

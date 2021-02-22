@@ -1475,34 +1475,34 @@ CONTAINS
               END DO
 
               dF(1,i,j,k,iVar,iEl) = dF(1,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,1,j,k,iVar,3,iEl) + & ! east
-                                                         myPoly % bMatrix % hostData(i,0)*bF(1,1,j,k,iVar,5,iEl))/&  ! west
-                                                        myPoly % qWeights % hostData(i) +&
-                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,1,i,k,iVar,4,iEl) + & ! north
-                                                         myPoly % bMatrix % hostData(j,0)*bF(2,1,i,k,iVar,2,iEl))/&  ! south
-                                                        myPoly % qWeights % hostData(j) +&
-                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,1,i,j,iVar,6,iEl) + & ! top
-                                                         myPoly % bMatrix % hostData(k,0)*bF(3,1,i,j,iVar,1,iEl))/&  ! bottom
-                                                        myPoly % qWeights % hostData(k)
+                                                             myPoly % bMatrix % hostData(i,0)*bF(1,1,j,k,iVar,5,iEl))/&  ! west
+                                                            myPoly % qWeights % hostData(i) +&
+                                                            (myPoly % bMatrix % hostData(j,1)*bF(2,1,i,k,iVar,4,iEl) + & ! north
+                                                             myPoly % bMatrix % hostData(j,0)*bF(2,1,i,k,iVar,2,iEl))/&  ! south
+                                                            myPoly % qWeights % hostData(j) +&
+                                                            (myPoly % bMatrix % hostData(k,1)*bF(3,1,i,j,iVar,6,iEl) + & ! top
+                                                             myPoly % bMatrix % hostData(k,0)*bF(3,1,i,j,iVar,1,iEl))/&  ! bottom
+                                                            myPoly % qWeights % hostData(k)
 
               dF(2,i,j,k,iVar,iEl) = dF(2,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,2,j,k,iVar,3,iEl) + & ! east
-                                                         myPoly % bMatrix % hostData(i,0)*bF(1,2,j,k,iVar,5,iEl))/&  ! west
-                                                        myPoly % qWeights % hostData(i) +&
-                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,2,i,k,iVar,4,iEl) + & ! north
-                                                         myPoly % bMatrix % hostData(j,0)*bF(2,2,i,k,iVar,2,iEl))/&  ! south
-                                                        myPoly % qWeights % hostData(j) +&
-                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,2,i,j,iVar,6,iEl) + & ! top
-                                                         myPoly % bMatrix % hostData(k,0)*bF(3,2,i,j,iVar,1,iEl))/&  ! bottom
-                                                        myPoly % qWeights % hostData(k)
+                                                             myPoly % bMatrix % hostData(i,0)*bF(1,2,j,k,iVar,5,iEl))/&  ! west
+                                                            myPoly % qWeights % hostData(i) +&
+                                                            (myPoly % bMatrix % hostData(j,1)*bF(2,2,i,k,iVar,4,iEl) + & ! north
+                                                             myPoly % bMatrix % hostData(j,0)*bF(2,2,i,k,iVar,2,iEl))/&  ! south
+                                                            myPoly % qWeights % hostData(j) +&
+                                                            (myPoly % bMatrix % hostData(k,1)*bF(3,2,i,j,iVar,6,iEl) + & ! top
+                                                             myPoly % bMatrix % hostData(k,0)*bF(3,2,i,j,iVar,1,iEl))/&  ! bottom
+                                                            myPoly % qWeights % hostData(k)
 
               dF(3,i,j,k,iVar,iEl) = dF(3,i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,3,j,k,iVar,3,iEl) + & ! east
-                                                         myPoly % bMatrix % hostData(i,0)*bF(1,3,j,k,iVar,5,iEl))/&  ! west
-                                                        myPoly % qWeights % hostData(i) +&
-                                                        (myPoly % bMatrix % hostData(j,1)*bF(2,3,i,k,iVar,4,iEl) + & ! north
-                                                         myPoly % bMatrix % hostData(j,0)*bF(2,3,i,k,iVar,2,iEl))/&  ! south
-                                                        myPoly % qWeights % hostData(j) +&
-                                                        (myPoly % bMatrix % hostData(k,1)*bF(3,3,i,j,iVar,6,iEl) + & ! top
-                                                         myPoly % bMatrix % hostData(k,0)*bF(3,3,i,j,iVar,1,iEl))/&  ! bottom
-                                                        myPoly % qWeights % hostData(k)
+                                                             myPoly % bMatrix % hostData(i,0)*bF(1,3,j,k,iVar,5,iEl))/&  ! west
+                                                            myPoly % qWeights % hostData(i) +&
+                                                            (myPoly % bMatrix % hostData(j,1)*bF(2,3,i,k,iVar,4,iEl) + & ! north
+                                                             myPoly % bMatrix % hostData(j,0)*bF(2,3,i,k,iVar,2,iEl))/&  ! south
+                                                            myPoly % qWeights % hostData(j) +&
+                                                            (myPoly % bMatrix % hostData(k,1)*bF(3,3,i,j,iVar,6,iEl) + & ! top
+                                                             myPoly % bMatrix % hostData(k,0)*bF(3,3,i,j,iVar,1,iEl))/&  ! bottom
+                                                            myPoly % qWeights % hostData(k)
 
             END DO
           END DO
@@ -1659,11 +1659,11 @@ CONTAINS
             fb(1:6) = 0.0_prec
 
             DO ii = 0,myPoly % N
-              fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,j,iVar,iEl) ! South
-              fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,j,iVar,iEl) ! East
-              fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,j,iVar,iEl) ! North
-              fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,j,iVar,iEl) ! West
-              fb(5) = fb(5) + myPoly % bMatrix % hostData(ii,0)*f(i,j,ii,iVar,iEl) ! Bottom
+              fb(1) = fb(1) + myPoly % bMatrix % hostData(ii,0)*f(i,j,ii,iVar,iEl) ! Bottom
+              fb(2) = fb(2) + myPoly % bMatrix % hostData(ii,0)*f(i,ii,j,iVar,iEl) ! South
+              fb(3) = fb(3) + myPoly % bMatrix % hostData(ii,1)*f(ii,i,j,iVar,iEl) ! East
+              fb(4) = fb(4) + myPoly % bMatrix % hostData(ii,1)*f(i,ii,j,iVar,iEl) ! North
+              fb(5) = fb(5) + myPoly % bMatrix % hostData(ii,0)*f(ii,i,j,iVar,iEl) ! West
               fb(6) = fb(6) + myPoly % bMatrix % hostData(ii,1)*f(i,j,ii,iVar,iEl) ! Top
             END DO
 
@@ -1694,11 +1694,11 @@ CONTAINS
             fb(1:3,1:6) = 0.0_prec
             DO ii = 0,myPoly % N
               DO idir = 1,3
-                fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,j,iVar,iEl) ! South
-                fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,j,iVar,iEl) ! East
-                fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,j,iVar,iEl) ! North
-                fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,j,iVar,iEl) ! West
-                fb(idir,5) = fb(idir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,j,ii,iVar,iEl) ! Bottom
+                fb(idir,1) = fb(idir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,j,ii,iVar,iEl) ! Bottom
+                fb(idir,2) = fb(idir,2) + myPoly % bMatrix % hostData(ii,0)*f(idir,i,ii,j,iVar,iEl) ! South
+                fb(idir,3) = fb(idir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,ii,i,j,iVar,iEl) ! East
+                fb(idir,4) = fb(idir,4) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,ii,j,iVar,iEl) ! North
+                fb(idir,5) = fb(idir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,ii,i,j,iVar,iEl) ! West
                 fb(idir,6) = fb(idir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,i,j,ii,iVar,iEl) ! Top
               END DO
             END DO
@@ -1733,11 +1733,11 @@ CONTAINS
             DO ii = 0,myPoly % N
               DO jdir = 1,3
                 DO idir = 1,3
-                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,j,iVar,iEl) ! South
-                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,j,iVar,iEl) ! East
-                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,j,iVar,iEl) ! North
-                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,j,iVar,iEl) ! West
-                  fb(idir,jdir,5) = fb(idir,jdir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,j,ii,iVar,iEl) ! Bottom
+                  fb(idir,jdir,1) = fb(idir,jdir,1) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,j,ii,iVar,iEl) ! Bottom
+                  fb(idir,jdir,2) = fb(idir,jdir,2) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,i,ii,j,iVar,iEl) ! South
+                  fb(idir,jdir,3) = fb(idir,jdir,3) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,ii,i,j,iVar,iEl) ! East
+                  fb(idir,jdir,4) = fb(idir,jdir,4) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,ii,j,iVar,iEl) ! North
+                  fb(idir,jdir,5) = fb(idir,jdir,5) + myPoly % bMatrix % hostData(ii,0)*f(idir,jdir,ii,i,j,iVar,iEl) ! West
                   fb(idir,jdir,6) = fb(idir,jdir,6) + myPoly % bMatrix % hostData(ii,1)*f(idir,jdir,i,j,ii,iVar,iEl) ! Top
                 END DO
               END DO
