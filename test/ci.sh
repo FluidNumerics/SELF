@@ -11,7 +11,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_interp
@@ -23,7 +23,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_interp
@@ -35,7 +35,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_interp
@@ -47,7 +47,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_interp
@@ -59,7 +59,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_interp
@@ -71,7 +71,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_interp
@@ -83,7 +83,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_interp
@@ -95,7 +95,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_interp
@@ -107,7 +107,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_interp
@@ -119,7 +119,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_interp
@@ -131,7 +131,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_interp
@@ -143,7 +143,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_interp
@@ -155,7 +155,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_interp
@@ -167,7 +167,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_interp
@@ -179,7 +179,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_interp
@@ -191,7 +191,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_interp
@@ -203,7 +203,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_interp
@@ -215,7 +215,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_interp
@@ -227,7 +227,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_interp
@@ -239,7 +239,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_interp
@@ -251,7 +251,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_interp
@@ -263,7 +263,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_interp
@@ -275,7 +275,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_interp
@@ -287,7 +287,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_interp
@@ -299,7 +299,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_interp
@@ -311,7 +311,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_interp
@@ -323,7 +323,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_interp
@@ -335,7 +335,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_interp
@@ -347,7 +347,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_interp
@@ -359,7 +359,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_interp
@@ -371,7 +371,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
@@ -383,7 +383,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
@@ -395,7 +395,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
@@ -407,7 +407,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
@@ -419,7 +419,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
@@ -431,7 +431,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_interp
@@ -443,7 +443,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_interp
@@ -455,7 +455,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_interp
@@ -467,7 +467,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_interp
@@ -479,7 +479,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_interp
@@ -491,7 +491,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_interp
@@ -503,7 +503,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_interp
@@ -515,7 +515,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_interp
@@ -527,7 +527,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_interp
@@ -539,7 +539,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_interp
@@ -551,7 +551,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_interp
@@ -563,7 +563,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_interp
@@ -575,7 +575,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_interp
@@ -587,7 +587,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
@@ -599,7 +599,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
@@ -611,7 +611,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
@@ -623,7 +623,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
@@ -635,7 +635,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
@@ -647,7 +647,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_interp
@@ -659,7 +659,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -672,7 +672,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -685,7 +685,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -698,7 +698,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -711,7 +711,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -724,7 +724,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -737,7 +737,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -750,7 +750,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -763,7 +763,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -776,7 +776,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -789,7 +789,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -802,7 +802,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -815,7 +815,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -828,7 +828,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -841,7 +841,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -854,7 +854,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -867,7 +867,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -880,7 +880,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -893,7 +893,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -906,7 +906,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -919,7 +919,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -932,7 +932,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -945,7 +945,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -958,7 +958,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -971,7 +971,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -985,7 +985,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -999,7 +999,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -1013,7 +1013,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -1027,7 +1027,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -1041,7 +1041,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -1055,7 +1055,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -1069,7 +1069,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -1083,7 +1083,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -1097,7 +1097,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -1111,7 +1111,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -1125,7 +1125,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.5E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -1139,7 +1139,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -1153,7 +1153,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -1167,7 +1167,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -1181,7 +1181,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -1195,7 +1195,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -1209,7 +1209,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -1223,7 +1223,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1238,7 +1238,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1253,7 +1253,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1268,7 +1268,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1283,7 +1283,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1298,7 +1298,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1313,7 +1313,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1328,7 +1328,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1343,7 +1343,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1358,7 +1358,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1373,7 +1373,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1388,7 +1388,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1403,7 +1403,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1418,7 +1418,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1433,7 +1433,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1448,7 +1448,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1463,7 +1463,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1478,7 +1478,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1493,7 +1493,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1513,7 +1513,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1533,7 +1533,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1553,7 +1553,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1573,7 +1573,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1593,7 +1593,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -1613,7 +1613,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1633,7 +1633,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1653,7 +1653,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1673,7 +1673,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1693,7 +1693,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1713,7 +1713,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -1733,7 +1733,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1753,7 +1753,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1773,7 +1773,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1793,7 +1793,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1813,7 +1813,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1833,7 +1833,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -1853,7 +1853,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_binterp
@@ -1865,7 +1865,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_binterp
@@ -1877,7 +1877,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_binterp
@@ -1889,7 +1889,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_binterp
@@ -1901,7 +1901,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_binterp
@@ -1913,7 +1913,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s1d_binterp
@@ -1925,7 +1925,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_binterp
@@ -1937,7 +1937,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_binterp
@@ -1949,7 +1949,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_binterp
@@ -1961,7 +1961,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_binterp
@@ -1973,7 +1973,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_binterp
@@ -1985,7 +1985,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "9.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 s1d_binterp
@@ -1997,7 +1997,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_binterp
@@ -2009,7 +2009,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_binterp
@@ -2021,7 +2021,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_binterp
@@ -2033,7 +2033,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_binterp
@@ -2045,7 +2045,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_binterp
@@ -2057,7 +2057,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 s1d_binterp
@@ -2069,7 +2069,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_binterp
@@ -2081,7 +2081,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_binterp
@@ -2093,7 +2093,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_binterp
@@ -2105,7 +2105,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_binterp
@@ -2117,7 +2117,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_binterp
@@ -2129,7 +2129,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s2d_binterp
@@ -2141,7 +2141,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_binterp
@@ -2153,7 +2153,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_binterp
@@ -2165,7 +2165,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_binterp
@@ -2177,7 +2177,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_binterp
@@ -2189,7 +2189,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_binterp
@@ -2201,7 +2201,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 s2d_binterp
@@ -2213,7 +2213,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.16" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
@@ -2225,7 +2225,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.016" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
@@ -2237,7 +2237,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0016" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
@@ -2249,7 +2249,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.00016" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
@@ -2261,7 +2261,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6000000000000003e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
@@ -2273,7 +2273,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.6000000000000001e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 s2d_binterp
@@ -2285,7 +2285,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_binterp
@@ -2297,7 +2297,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_binterp
@@ -2309,7 +2309,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_binterp
@@ -2321,7 +2321,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_binterp
@@ -2333,7 +2333,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_binterp
@@ -2345,7 +2345,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 s3d_binterp
@@ -2357,7 +2357,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_binterp
@@ -2369,7 +2369,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_binterp
@@ -2381,7 +2381,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_binterp
@@ -2393,7 +2393,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_binterp
@@ -2405,7 +2405,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_binterp
@@ -2417,7 +2417,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 s3d_binterp
@@ -2429,7 +2429,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.25" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
@@ -2441,7 +2441,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.025" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
@@ -2453,7 +2453,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0025" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
@@ -2465,7 +2465,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.00025" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
@@ -2477,7 +2477,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
@@ -2489,7 +2489,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "2.5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 s3d_binterp
@@ -2501,7 +2501,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2514,7 +2514,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2527,7 +2527,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2540,7 +2540,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2553,7 +2553,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2566,7 +2566,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2579,7 +2579,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -2592,7 +2592,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -2605,7 +2605,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -2618,7 +2618,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -2631,7 +2631,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -2644,7 +2644,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=x" \
 --vector-y "vy=y" \
@@ -2657,7 +2657,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -2670,7 +2670,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -2683,7 +2683,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -2696,7 +2696,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -2709,7 +2709,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -2722,7 +2722,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=y" \
 --vector-y "vy=-x" \
@@ -2735,7 +2735,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2748,7 +2748,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2761,7 +2761,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2774,7 +2774,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2787,7 +2787,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2800,7 +2800,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2813,7 +2813,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2827,7 +2827,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2841,7 +2841,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2855,7 +2855,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2869,7 +2869,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2883,7 +2883,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=1.0" \
 --vector-y "vy=1.0" \
@@ -2897,7 +2897,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -2911,7 +2911,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -2925,7 +2925,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -2939,7 +2939,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -2953,7 +2953,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -2967,7 +2967,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y" \
 --vector-y "vy=x" \
@@ -2981,7 +2981,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -2995,7 +2995,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -3009,7 +3009,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -3023,7 +3023,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -3037,7 +3037,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -3051,7 +3051,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "vx=-y*exp(-(x^2+y^2))" \
 --vector-y "vy=x*exp(-(x^2+y^2))" \
@@ -3065,7 +3065,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3080,7 +3080,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3095,7 +3095,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3110,7 +3110,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3125,7 +3125,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3140,7 +3140,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3155,7 +3155,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3170,7 +3170,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3185,7 +3185,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3200,7 +3200,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3215,7 +3215,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3230,7 +3230,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3245,7 +3245,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.19" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3260,7 +3260,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.019000000000000003" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3275,7 +3275,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0019" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3290,7 +3290,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.00019" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3305,7 +3305,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.9e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3320,7 +3320,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.9000000000000002e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3335,7 +3335,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3355,7 +3355,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3375,7 +3375,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3395,7 +3395,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3415,7 +3415,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3435,7 +3435,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=1.0" \
 --tensor-12 "t12=1.0" \
@@ -3455,7 +3455,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3475,7 +3475,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3495,7 +3495,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3515,7 +3515,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3535,7 +3535,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3555,7 +3555,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=x" \
 --tensor-12 "t12=x*y" \
@@ -3575,7 +3575,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.3" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3595,7 +3595,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.03" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3615,7 +3615,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.003" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3635,7 +3635,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0003" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3655,7 +3655,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "3e-05" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3675,7 +3675,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "3e-06" \
 --target-quadrature "gauss" \
 --target-degree 7 \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --tensor-11 "t11=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --tensor-12 "t12=sin(2.0*pi*x)*cos(2.0*pi*y)" \
@@ -3696,7 +3696,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3710,7 +3710,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3724,7 +3724,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3738,7 +3738,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3752,7 +3752,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3766,7 +3766,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3780,7 +3780,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3794,7 +3794,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3808,7 +3808,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3822,7 +3822,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3836,7 +3836,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3850,7 +3850,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --derivative "df=0.0" \
@@ -3864,7 +3864,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3878,7 +3878,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3892,7 +3892,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3906,7 +3906,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3920,7 +3920,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3934,7 +3934,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3948,7 +3948,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3962,7 +3962,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3976,7 +3976,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -3990,7 +3990,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -4004,7 +4004,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -4018,7 +4018,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x" \
 --derivative "df=1.0" \
@@ -4032,7 +4032,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.8" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4046,7 +4046,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.08000000000000002" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4060,7 +4060,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.008" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4074,7 +4074,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0008" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4088,7 +4088,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4102,7 +4102,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4116,7 +4116,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.8" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4130,7 +4130,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.08000000000000002" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4144,7 +4144,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.008" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4158,7 +4158,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0008" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4172,7 +4172,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4186,7 +4186,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)" \
 --derivative "df=2.0*pi*cos(2.0*pi*x)" \
@@ -4200,7 +4200,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4215,7 +4215,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4230,7 +4230,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4245,7 +4245,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4260,7 +4260,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4275,7 +4275,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4290,7 +4290,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4305,7 +4305,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4320,7 +4320,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4335,7 +4335,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4350,7 +4350,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4365,7 +4365,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4380,7 +4380,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4395,7 +4395,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4410,7 +4410,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4425,7 +4425,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4440,7 +4440,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4455,7 +4455,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4470,7 +4470,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4485,7 +4485,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4500,7 +4500,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4515,7 +4515,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4530,7 +4530,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4545,7 +4545,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.2E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y" \
 --vector-x "fx=y" \
@@ -4560,7 +4560,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4575,7 +4575,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4590,7 +4590,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4605,7 +4605,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4620,7 +4620,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4635,7 +4635,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4650,7 +4650,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4665,7 +4665,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4680,7 +4680,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4695,7 +4695,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4710,7 +4710,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4725,7 +4725,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)" \
@@ -4740,7 +4740,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4756,7 +4756,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4772,7 +4772,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4788,7 +4788,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4804,7 +4804,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4820,7 +4820,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4836,7 +4836,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4852,7 +4852,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4868,7 +4868,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4884,7 +4884,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4900,7 +4900,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4916,7 +4916,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=1.0" \
 --vector-x "fx=0.0" \
@@ -4932,7 +4932,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -4948,7 +4948,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -4964,7 +4964,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -4980,7 +4980,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -4996,7 +4996,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5012,7 +5012,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5028,7 +5028,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5044,7 +5044,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5060,7 +5060,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5076,7 +5076,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5092,7 +5092,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5108,7 +5108,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=x*y*z" \
 --vector-x "fx=y*z" \
@@ -5124,7 +5124,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5140,7 +5140,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5156,7 +5156,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5172,7 +5172,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5188,7 +5188,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5204,7 +5204,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5220,7 +5220,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5236,7 +5236,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5252,7 +5252,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5268,7 +5268,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5284,7 +5284,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5300,7 +5300,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --function "f=sin(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
 --vector-x "fx=2.0*pi*cos(2.0*pi*x)*sin(2.0*pi*y)*sin(2.0*pi*z)" \
@@ -5316,7 +5316,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5331,7 +5331,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5346,7 +5346,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5361,7 +5361,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5376,7 +5376,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5391,7 +5391,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5406,7 +5406,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5421,7 +5421,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5436,7 +5436,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5451,7 +5451,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5466,7 +5466,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5481,7 +5481,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -5496,7 +5496,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5511,7 +5511,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5526,7 +5526,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5541,7 +5541,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5556,7 +5556,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5571,7 +5571,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5586,7 +5586,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5601,7 +5601,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5616,7 +5616,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5631,7 +5631,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5646,7 +5646,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5661,7 +5661,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -5676,7 +5676,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5691,7 +5691,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5706,7 +5706,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5721,7 +5721,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5736,7 +5736,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5751,7 +5751,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5766,7 +5766,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5781,7 +5781,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5796,7 +5796,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5811,7 +5811,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5826,7 +5826,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5841,7 +5841,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -5856,7 +5856,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5871,7 +5871,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5886,7 +5886,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5901,7 +5901,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5916,7 +5916,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5931,7 +5931,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5946,7 +5946,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5961,7 +5961,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5976,7 +5976,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -5991,7 +5991,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -6006,7 +6006,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -6021,7 +6021,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2))" \
@@ -6036,7 +6036,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6051,7 +6051,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6066,7 +6066,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6081,7 +6081,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6096,7 +6096,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6111,7 +6111,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6126,7 +6126,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6141,7 +6141,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6156,7 +6156,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6171,7 +6171,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6186,7 +6186,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6201,7 +6201,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -6216,7 +6216,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6232,7 +6232,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6248,7 +6248,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6264,7 +6264,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6280,7 +6280,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6296,7 +6296,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6312,7 +6312,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6328,7 +6328,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6344,7 +6344,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6360,7 +6360,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6376,7 +6376,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6392,7 +6392,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -6408,7 +6408,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6424,7 +6424,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6440,7 +6440,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6456,7 +6456,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6472,7 +6472,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6488,7 +6488,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6504,7 +6504,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6520,7 +6520,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6536,7 +6536,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6552,7 +6552,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6568,7 +6568,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6584,7 +6584,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -6600,7 +6600,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6616,7 +6616,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6632,7 +6632,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6648,7 +6648,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6664,7 +6664,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6680,7 +6680,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6696,7 +6696,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6712,7 +6712,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6728,7 +6728,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6744,7 +6744,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6760,7 +6760,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6776,7 +6776,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -6792,7 +6792,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.08" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6808,7 +6808,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.008" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6824,7 +6824,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0008" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6840,7 +6840,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6856,7 +6856,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6872,7 +6872,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6888,7 +6888,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.08" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6904,7 +6904,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.008" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6920,7 +6920,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0008" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6936,7 +6936,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6952,7 +6952,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6968,7 +6968,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y*exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=-x*exp(-(x^2+y^2+z^2))" \
@@ -6984,7 +6984,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7000,7 +7000,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7016,7 +7016,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7032,7 +7032,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7048,7 +7048,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7064,7 +7064,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7080,7 +7080,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7096,7 +7096,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7112,7 +7112,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7128,7 +7128,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7144,7 +7144,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7160,7 +7160,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -7176,7 +7176,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7194,7 +7194,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7212,7 +7212,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7230,7 +7230,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7248,7 +7248,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7266,7 +7266,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7284,7 +7284,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7302,7 +7302,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7320,7 +7320,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7338,7 +7338,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7356,7 +7356,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7374,7 +7374,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -7392,7 +7392,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7410,7 +7410,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7428,7 +7428,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7446,7 +7446,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7464,7 +7464,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7482,7 +7482,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7500,7 +7500,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7518,7 +7518,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7536,7 +7536,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7554,7 +7554,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7572,7 +7572,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7590,7 +7590,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -7608,7 +7608,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7626,7 +7626,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7644,7 +7644,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7662,7 +7662,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7680,7 +7680,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7698,7 +7698,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7716,7 +7716,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7734,7 +7734,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7752,7 +7752,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7770,7 +7770,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7788,7 +7788,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7806,7 +7806,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "6.0E-2" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=y" \
 --vector-y "fy=-x" \
@@ -7824,7 +7824,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7842,7 +7842,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7860,7 +7860,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7878,7 +7878,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7896,7 +7896,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7914,7 +7914,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7932,7 +7932,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7950,7 +7950,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7968,7 +7968,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -7986,7 +7986,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -8004,7 +8004,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -8022,7 +8022,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2))" \
 --vector-y "fy=exp(-(x^2+y^2))" \
@@ -8040,7 +8040,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8064,7 +8064,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8088,7 +8088,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8112,7 +8112,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8136,7 +8136,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8160,7 +8160,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8184,7 +8184,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8208,7 +8208,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8232,7 +8232,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8256,7 +8256,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8280,7 +8280,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8304,7 +8304,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=1.0" \
 --vector-y "fy=1.0" \
@@ -8328,7 +8328,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8352,7 +8352,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8376,7 +8376,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8400,7 +8400,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8424,7 +8424,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8448,7 +8448,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8472,7 +8472,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8496,7 +8496,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8520,7 +8520,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8544,7 +8544,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8568,7 +8568,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8592,7 +8592,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=x" \
 --vector-y "fy=y" \
@@ -8616,7 +8616,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8640,7 +8640,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8664,7 +8664,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8688,7 +8688,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8712,7 +8712,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8736,7 +8736,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "strong" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8760,7 +8760,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.0" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8784,7 +8784,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8808,7 +8808,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8832,7 +8832,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8856,7 +8856,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
@@ -8880,7 +8880,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --target-degree 7 \
 --derivative-type "dg" \
 --nelements 10 \
---nvar 5 \
+--nvar 1 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
