@@ -11,3 +11,44 @@ The SELF API is designed based on the assumption that SEM developers and researc
 See the [Specifications](./SPECIFICATIONS.md) for more details.
 
 Currently SELF is being developed from a refactoring of SELF-Fluids.
+
+## Getting started
+### Dependencies
+Before installing SELF, make sure your system has the following dependencies installed : 
+* Fortran compiler (e.g. gfortran)
+* [HIP](https://github.com/ROCm-Developer-Tools/HIP) (For GPU Accelerated Builds)
+* [HIPFort](https://github.com/ROCmSoftwarePlatform/hipfort) (For GPU Accelerated Builds)
+* [FLAP](https://github.com/szaghi/FLAP)
+* [feqparse](https://github.com/FluidNumerics/feqparse)
+
+
+### Building SELF
+
+**Serial CPU Builds**
+```
+BUILD=release \
+FC=gfortran \
+make
+```
+The SELF make system assumes that `feqparse` and `FLAP` are installed under `/opt/feqparse` and `/opt/FLAP` respectively. If these dependencies are installed elseswhere you can use the following environment variables specify the linker and includes flags.
+```
+     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/feqparse/lib -lfeqparse)
+     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/feqparse/include)
+     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF) 
+     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/self/include/FACE)
+```
+By default, self will install under `/opt/self`. To change the install path, use the `SELF_PREFIX` environment variable.
+
+Upon installation, you will have
+* `${SELF_PREFIX}/lib/libself.a` : Static library for linking into other application
+* `${SELF_PREFIX}/include/*.mod` : Fortran module files required for building other applications that depend on SELF
+* `${SELF_PREFIX}/bin/self` : A test program that can be used to test each SELF routine
+* `${SELF_PREFIX}/bin/ci.sh` : A shell script to run all of the CI tests for SELF
+
+## Maintainers
+* [Joseph Schoonover, Fluid Numerics LLC](https://fluidnumerics.com/people/joe-schoonover)
+
+Want to become a maintainer ? Reach out to support@fluidnumerics.com
+If you'd like to contribute, see [CONTRIBUTING.md] to get started.
+If you need help, [open an issue](https://github.com/FluidNumerics/SELF/issues/new)
+
