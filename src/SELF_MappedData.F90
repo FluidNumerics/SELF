@@ -947,7 +947,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(in) :: vector
     TYPE(MappedScalar3D),INTENT(inout) :: workScalar ! (scalar) nvar = 3*nvar
-    TYPE(MappedVector3D),INTENT(inout) :: workVector ! (scalar) nvar = 3*nvar
+    TYPE(MappedVector3D),INTENT(inout) :: workVector ! (vector) nvar = 3*nvar
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor ! (tensor) nvar = 3*nvar
     TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(MappedTensor3D),INTENT(inout) :: gradF
@@ -991,6 +991,7 @@ CONTAINS
     END IF
 
     CALL workVector % MapToTensor(gradF,gpuAccel)
+
     CALL gradF % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Gradient_MappedVector3D

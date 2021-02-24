@@ -157,7 +157,11 @@ def main():
 COUNTER=0
 trap '(( $? && ++errcount))' DEBUG
 
+set -x
+
 {CMDS}
+
+set +x
 
 echo "============================="
 echo "        Test Summary         "
@@ -165,7 +169,7 @@ echo "============================="
 echo " "
 echo " Total Tests : $COUNTER "
 echo " Fail : $errcount "
-test $errcount = 0
+#test $errcount = 0
 """
 
 

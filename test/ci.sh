@@ -2,6 +2,8 @@
 COUNTER=0
 trap '(( $? && ++errcount))' DEBUG
 
+set -x
+
 let COUNTER++ 
 ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 --control-quadrature "gauss" \
@@ -3855,7 +3857,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "7.0E-5" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3869,7 +3871,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3883,7 +3885,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3897,7 +3899,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3911,7 +3913,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -3925,7 +3927,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -3939,7 +3941,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -3953,7 +3955,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -3967,7 +3969,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -3981,7 +3983,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -3995,7 +3997,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4009,7 +4011,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "6.5E-5" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4023,7 +4025,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.05" \
+${INSTALL_ROOT}/bin/self --tolerance "0.8" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4037,7 +4039,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
+${INSTALL_ROOT}/bin/self --tolerance "0.08000000000000002" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4051,7 +4053,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
+${INSTALL_ROOT}/bin/self --tolerance "0.008" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4065,7 +4067,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
+${INSTALL_ROOT}/bin/self --tolerance "0.0008" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4079,7 +4081,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
+${INSTALL_ROOT}/bin/self --tolerance "8e-05" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4093,7 +4095,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
+${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-06" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -4107,7 +4109,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.05" \
+${INSTALL_ROOT}/bin/self --tolerance "0.8" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -4121,7 +4123,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
+${INSTALL_ROOT}/bin/self --tolerance "0.08000000000000002" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -4135,7 +4137,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
+${INSTALL_ROOT}/bin/self --tolerance "0.008" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -4149,7 +4151,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
+${INSTALL_ROOT}/bin/self --tolerance "0.0008" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -4163,7 +4165,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
+${INSTALL_ROOT}/bin/self --tolerance "8e-05" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -4177,7 +4179,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 s1d_derivative
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
+${INSTALL_ROOT}/bin/self --tolerance "8.000000000000001e-06" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -8031,7 +8033,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 v2d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -8055,7 +8057,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -8079,7 +8081,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -8103,7 +8105,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -8127,7 +8129,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -8151,7 +8153,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -8175,7 +8177,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -8199,7 +8201,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -8223,7 +8225,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -8247,7 +8249,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -8271,7 +8273,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -8295,7 +8297,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -8319,7 +8321,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -8343,7 +8345,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -8367,7 +8369,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -8391,7 +8393,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -8415,7 +8417,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -8439,7 +8441,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -8463,7 +8465,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -8487,7 +8489,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -8511,7 +8513,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 4 \
 --target-quadrature "gauss" \
@@ -8535,7 +8537,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 5 \
 --target-quadrature "gauss" \
@@ -8559,7 +8561,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -8583,7 +8585,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
+${INSTALL_ROOT}/bin/self --tolerance "1.0E-1" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -8607,223 +8609,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 2 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 3 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 4 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 5 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 6 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 7 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 2 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "dg" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 3 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "dg" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 4 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "dg" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 5 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "dg" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 6 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "dg" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "1.0E-6" \
---control-quadrature "gauss" \
---control-degree 7 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "dg" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=y" \
---vector-y "fy=-x" \
---tensor-11 "dfxx=0.0" \
---tensor-12 "dfxy=1.0" \
---tensor-21 "dfyx=-1.0" \
- --tensor-22 "dfyy=0.0" \
-v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.05" \
+${INSTALL_ROOT}/bin/self --tolerance "5.0" \
 --control-quadrature "gauss" \
 --control-degree 2 \
 --target-quadrature "gauss" \
@@ -8834,6 +8620,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -8846,7 +8633,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
+${INSTALL_ROOT}/bin/self --tolerance "0.5" \
 --control-quadrature "gauss" \
 --control-degree 3 \
 --target-quadrature "gauss" \
@@ -8857,98 +8644,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
---tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
- v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
---control-quadrature "gauss" \
---control-degree 4 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=exp(-(x^2+y^2+z^2))" \
---vector-y "fy=exp(-(x^2+y^2+z^2))" \
---tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
- v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
---control-quadrature "gauss" \
---control-degree 5 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=exp(-(x^2+y^2+z^2))" \
---vector-y "fy=exp(-(x^2+y^2+z^2))" \
---tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
- v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
---control-quadrature "gauss" \
---control-degree 6 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=exp(-(x^2+y^2+z^2))" \
---vector-y "fy=exp(-(x^2+y^2+z^2))" \
---tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
---tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
---tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
---tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
- v3d_gradient
-
-let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
---control-quadrature "gauss" \
---control-degree 7 \
---target-quadrature "gauss" \
---target-degree 7 \
---derivative-type "strong" \
---nelements 10 \
---nvar 5 \
---gpu-accel "false" \
---vector-x "fx=exp(-(x^2+y^2+z^2))" \
---vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -8963,15 +8659,16 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 let COUNTER++ 
 ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
 --control-quadrature "gauss" \
---control-degree 2 \
+--control-degree 4 \
 --target-quadrature "gauss" \
 --target-degree 7 \
---derivative-type "dg" \
+--derivative-type "strong" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -8984,17 +8681,18 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.05" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
+${INSTALL_ROOT}/bin/self --tolerance "0.005" \
 --control-quadrature "gauss" \
---control-degree 3 \
+--control-degree 5 \
 --target-quadrature "gauss" \
 --target-degree 7 \
---derivative-type "dg" \
+--derivative-type "strong" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -9009,15 +8707,16 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.005000000000000001" \
 let COUNTER++ 
 ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --control-quadrature "gauss" \
---control-degree 4 \
+--control-degree 6 \
 --target-quadrature "gauss" \
 --target-degree 7 \
---derivative-type "dg" \
+--derivative-type "strong" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -9032,15 +8731,16 @@ ${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 let COUNTER++ 
 ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --control-quadrature "gauss" \
---control-degree 5 \
+--control-degree 7 \
 --target-quadrature "gauss" \
 --target-degree 7 \
---derivative-type "dg" \
+--derivative-type "strong" \
 --nelements 10 \
 --nvar 5 \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -9053,7 +8753,103 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
+${INSTALL_ROOT}/bin/self --tolerance "5.0" \
+--control-quadrature "gauss" \
+--control-degree 2 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))" \
+--vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+ v3d_gradient
+
+let COUNTER++ 
+${INSTALL_ROOT}/bin/self --tolerance "0.5" \
+--control-quadrature "gauss" \
+--control-degree 3 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))" \
+--vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+ v3d_gradient
+
+let COUNTER++ 
+${INSTALL_ROOT}/bin/self --tolerance "0.05" \
+--control-quadrature "gauss" \
+--control-degree 4 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))" \
+--vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+ v3d_gradient
+
+let COUNTER++ 
+${INSTALL_ROOT}/bin/self --tolerance "0.005" \
+--control-quadrature "gauss" \
+--control-degree 5 \
+--target-quadrature "gauss" \
+--target-degree 7 \
+--derivative-type "dg" \
+--nelements 10 \
+--nvar 5 \
+--gpu-accel "false" \
+--vector-x "fx=exp(-(x^2+y^2+z^2))" \
+--vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
+--tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-21 "dfyx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-22 "dfyy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-23 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+--tensor-31 "dfzx=-2.0*x*exp(-(x^2+y^2+z^2))" \
+--tensor-32 "dfzy=-2.0*y*exp(-(x^2+y^2+z^2))" \
+--tensor-33 "dfzz=-2.0*z*exp(-(x^2+y^2+z^2))" \
+ v3d_gradient
+
+let COUNTER++ 
+${INSTALL_ROOT}/bin/self --tolerance "0.0005" \
 --control-quadrature "gauss" \
 --control-degree 6 \
 --target-quadrature "gauss" \
@@ -9064,6 +8860,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -9076,7 +8873,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5e-06" \
  v3d_gradient
 
 let COUNTER++ 
-${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
+${INSTALL_ROOT}/bin/self --tolerance "5e-05" \
 --control-quadrature "gauss" \
 --control-degree 7 \
 --target-quadrature "gauss" \
@@ -9087,6 +8884,7 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
 --gpu-accel "false" \
 --vector-x "fx=exp(-(x^2+y^2+z^2))" \
 --vector-y "fy=exp(-(x^2+y^2+z^2))" \
+--vector-z "fz=exp(-(x^2+y^2+z^2))" \
 --tensor-11 "dfxx=-2.0*x*exp(-(x^2+y^2+z^2))" \
 --tensor-12 "dfxy=-2.0*y*exp(-(x^2+y^2+z^2))" \
 --tensor-13 "dfxz=-2.0*z*exp(-(x^2+y^2+z^2))" \
@@ -9099,6 +8897,8 @@ ${INSTALL_ROOT}/bin/self --tolerance "5.000000000000001e-07" \
  v3d_gradient
 
 
+
+set +x
 
 echo "============================="
 echo "        Test Summary         "
@@ -9106,4 +8906,4 @@ echo "============================="
 echo " "
 echo " Total Tests : $COUNTER "
 echo " Fail : $errcount "
-test $errcount = 0
+#test $errcount = 0

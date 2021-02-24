@@ -2578,6 +2578,7 @@ CONTAINS
 #endif
 
     dfError = dfActual - dfInterp
+    !PRINT*, dfError % interior % hostData
 
     ! Calculate Absolute Maximum Error
     maxErrors = dfError % AbsMaxInterior( )
