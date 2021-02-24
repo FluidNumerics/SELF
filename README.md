@@ -49,6 +49,8 @@ Upon installation, you will have
 * [Joseph Schoonover, Fluid Numerics LLC](https://fluidnumerics.com/people/joe-schoonover)
 
 Want to become a maintainer ? Reach out to support@fluidnumerics.com
-If you'd like to contribute, see [CONTRIBUTING.md] to get started.
+
+If you'd like to contribute, see [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
+
 If you need help, [open an issue](https://github.com/FluidNumerics/SELF/issues/new)
 
