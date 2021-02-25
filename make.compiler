@@ -21,13 +21,13 @@ endif
 
 
 ifeq ($(FC)-$(BUILD), gfortran-dev)
-  SELF_FFLAGS += -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
+  SELF_FFLAGS += -cpp -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
 else ifeq ($(FC)-$(BUILD), gfortran-release)
-  SELF_FFLAGS += -O3
+  SELF_FFLAGS += -cpp -O3
 else ifeq ($(FC)-$(HIPFORT_COMPILER)-$(BUILD), hipfc-gfortran-dev)
-  SELF_FFLAGS += -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
+  SELF_FFLAGS += -cpp -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
 else ifeq ($(FC)-$(HIPFORT_COMPILER)-$(BUILD), hipfc-gfortran-release)
-  SELF_FFLAGS += -O3
+  SELF_FFLAGS += -cpp -O3
 else
   $(error unrecognized build target $(BUILD).)
 endif

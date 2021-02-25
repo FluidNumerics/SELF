@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+    
+    <meta name="author" content="Joe Schoonover" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_MPILayer &ndash; Fortran Program</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../program/self.html">Program</a></li>
+      
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../program/self.html">Program</a></li>
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>SELF_MPILayer 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.3% of total for modules and submodules.">27 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/SELF_MPILayer.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/self_mpilayer.f90.html'>SELF_MPILayer.f90</a></li>
+    
+  
+     <li class="active">SELF_MPILayer</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_mpilayer.html#proc-self_calculaterankdistributions">SELF_CalculateRankDistributions</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href='../module/self_data.html'>SELF_Data</a></li>
+    
+    <li><a href='../module/self_mappeddata.html'>SELF_MappedData</a></li>
+    
+    <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: module~~self_mpilayer~~UsesGraph Pages: 1 -->
+<svg id="moduleself_mpilayerUsesGraph" width="641pt" height="189pt"
+ viewBox="0.00 0.00 641.00 189.35" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_mpilayer~~UsesGraph" class="graph" transform="scale(.5569 .5569) rotate(0) translate(4 336)">
+<title>module~~self_mpilayer~~UsesGraph</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-336 1147,-336 1147,4 -4,4"/>
+<!-- module~self_mpilayer -->
+<g id="module~~self_mpilayer~~UsesGraph_node1" class="node">
+<title>module~self_mpilayer</title>
+<polygon fill="none" stroke="#000000" points="1143,-225 1052,-225 1052,-201 1143,-201 1143,-225"/>
+<text text-anchor="middle" x="1097.5" y="-210.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">SELF_MPILayer</text>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_mpilayer~~UsesGraph_node2" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node2"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="628,-186 559,-186 559,-162 628,-162 628,-186"/>
+<text text-anchor="middle" x="593.5" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_mpilayer&#45;&gt;module~self_data -->
+<g id="module~~self_mpilayer~~UsesGraph_edge2" class="edge">
+<title>module~self_mpilayer&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M1051.7275,-210.0099C996.61,-206.3394 901.2393,-199.7649 819.5,-193"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M819.5,-193C781.0716,-188.4403 773.4113,-176.7015 735,-172 703.6782,-168.1663 695.5524,-171.5525 664,-172 655.731,-172.1173 646.9181,-172.3119 638.4238,-172.5348"/>
+<polygon fill="#000000" stroke="#000000" points="638.1773,-169.0402 628.2787,-172.8176 638.3724,-176.0375 638.1773,-169.0402"/>
+</g>
+<!-- module~self_mappeddata -->
+<g id="module~~self_mpilayer~~UsesGraph_node3" class="node">
+<title>module~self_mappeddata</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node3"><a xlink:href=".././module/self_mappeddata.html" xlink:title="SELF_MappedData">
+<polygon fill="#337ab7" stroke="#337ab7" points="1016,-245 904,-245 904,-221 1016,-221 1016,-245"/>
+<text text-anchor="middle" x="960" y="-230.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_MappedData</text>
+</a>
+</g>
+</g>
+<!-- module~self_mpilayer&#45;&gt;module~self_mappeddata -->
+<g id="module~~self_mpilayer~~UsesGraph_edge1" class="edge">
+<title>module~self_mpilayer&#45;&gt;module~self_mappeddata</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M1051.7145,-219.6597C1043.5165,-220.8521 1034.8263,-222.1162 1026.19,-223.3724"/>
+<polygon fill="#000000" stroke="#000000" points="1025.5014,-219.9356 1016.1093,-224.8386 1026.509,-226.8627 1025.5014,-219.9356"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_mpilayer~~UsesGraph_node4" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node4"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="735,-205 664,-205 664,-181 735,-181 735,-205"/>
+<text text-anchor="middle" x="699.5" y="-190.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mpilayer&#45;&gt;module~self_mesh -->
+<g id="module~~self_mpilayer~~UsesGraph_edge3" class="edge">
+<title>module~self_mpilayer&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M819.5,-193C795.0341,-190.9751 767.6661,-190.8144 745.2516,-191.2306"/>
+<polygon fill="#000000" stroke="#000000" points="744.9227,-187.7372 735.006,-191.4667 745.084,-194.7353 744.9227,-187.7372"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_mpilayer~~UsesGraph_node5" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node5"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_C_BINDING" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="220,-24 136,-24 136,0 220,0 220,-24"/>
+<text text-anchor="middle" x="178" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_mpilayer~~UsesGraph_edge4" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M558.9277,-164.0682C535.1756,-156.8026 503.1528,-146.1264 476,-134"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_node6" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node6"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-226 130,-226 130,-202 226,-202 226,-226"/>
+<text text-anchor="middle" x="178" y="-211.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge6" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M558.6891,-185.8163C547.4162,-189.2516 534.7814,-192.6952 523,-195 437.3258,-211.7607 414.7982,-213.902 327.5,-214"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_mpilayer~~UsesGraph_node9" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node9"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="523,-186 429,-186 429,-162 523,-162 523,-186"/>
+<text text-anchor="middle" x="476" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mpilayer~~UsesGraph_edge5" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M558.8816,-174C550.9021,-174 542.2038,-174 533.5405,-174"/>
+<polygon fill="#000000" stroke="#000000" points="533.4319,-170.5001 523.4319,-174 533.4319,-177.5001 533.4319,-170.5001"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_data -->
+<g id="module~~self_mpilayer~~UsesGraph_edge7" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M819.5,-233C750.1121,-227.2573 730.1161,-235.8247 664,-214 648.1928,-208.7821 631.9414,-199.846 619.0313,-191.7419"/>
+<polygon fill="#000000" stroke="#000000" points="620.5677,-188.5663 610.2753,-186.0529 616.7539,-194.4362 620.5677,-188.5663"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_mesh -->
+<g id="module~~self_mpilayer~~UsesGraph_edge9" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M903.8502,-235.117C878.1052,-235.5444 847.2125,-235.2936 819.5,-233"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M819.5,-233C789.3007,-230.5006 756.7925,-219.0741 733.2387,-209.0704"/>
+<polygon fill="#000000" stroke="#000000" points="734.6067,-205.8486 724.0424,-205.0436 731.7989,-212.2608 734.6067,-205.8486"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge8" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M945.3565,-245.1857C927.9768,-259.0355 897.6084,-281.3542 868,-294 797.4,-324.1534 776.2697,-332 699.5,-332 699.5,-332 699.5,-332 593.5,-332 474.0775,-332 441.2555,-330.3512 327.5,-294"/>
+</g>
+<!-- module~self_geometry -->
+<g id="module~~self_mpilayer~~UsesGraph_node8" class="node">
+<title>module~self_geometry</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node8"><a xlink:href=".././module/self_geometry.html" xlink:title="SELF_Geometry">
+<polygon fill="#337ab7" stroke="#337ab7" points="868,-285 771,-285 771,-261 868,-261 868,-285"/>
+<text text-anchor="middle" x="819.5" y="-270.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Geometry</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_geometry -->
+<g id="module~~self_mpilayer~~UsesGraph_edge10" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_geometry</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M917.8454,-245.0013C903.3906,-249.1165 887.0358,-253.7727 871.8717,-258.0899"/>
+<polygon fill="#000000" stroke="#000000" points="870.7699,-254.7644 862.1105,-260.8689 872.6867,-261.4969 870.7699,-254.7644"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mpilayer~~UsesGraph_edge11" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M942.8076,-220.8469C924.8909,-208.6882 895.6248,-190.2236 868,-179 766.2358,-137.6547 737.0457,-133.2069 628,-120 597.5558,-116.3128 588.0068,-110.0475 559,-120 539.8274,-126.5783 539.9197,-136.838 523,-148 518.5413,-150.9414 513.7248,-153.8682 508.9339,-156.6397"/>
+<polygon fill="#000000" stroke="#000000" points="506.8573,-153.7917 499.853,-161.741 510.2857,-159.8947 506.8573,-153.7917"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_data -->
+<g id="module~~self_mpilayer~~UsesGraph_edge12" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M663.9087,-186.6204C655.6087,-185.1327 646.6679,-183.5301 638.0348,-181.9826"/>
+<polygon fill="#000000" stroke="#000000" points="638.559,-178.5209 628.0983,-180.2016 637.3239,-185.4111 638.559,-178.5209"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_mpilayer~~UsesGraph_edge13" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M685.2903,-180.8868C666.0229,-165.5087 629.8283,-140.223 593.5,-134"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M593.5,-134C542.0275,-125.1829 523.6831,-155.2952 476,-134"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M476,-134C425.1113,-111.2731 442.2148,-66.1549 393,-40 342.427,-13.1234 276.0241,-8.3035 230.4714,-8.816"/>
+<polygon fill="#000000" stroke="#000000" points="230.1499,-5.3218 220.2234,-9.0249 230.2927,-12.3203 230.1499,-5.3218"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge14" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M675.2344,-205.0707C634.7679,-223.9249 550.5761,-257.7515 476,-253"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M476,-253C407.7712,-254.1279 395.7309,-213.0047 327.5,-214"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_mpilayer~~UsesGraph_node7" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node7"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="393,-266 262,-266 262,-242 393,-242 393,-266"/>
+<text text-anchor="middle" x="327.5" y="-251.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mpilayer~~UsesGraph_edge15" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M476,-253C452.4664,-251.5006 426.7928,-251.2003 403.5126,-251.4336"/>
+<polygon fill="#000000" stroke="#000000" points="403.3014,-247.936 393.3493,-251.5701 403.3954,-254.9354 403.3014,-247.936"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mpilayer~~UsesGraph_edge16" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M593.5,-134C577.4708,-131.2542 539.4969,-145.6514 511.0278,-157.931"/>
+<polygon fill="#000000" stroke="#000000" points="509.5345,-154.7641 501.7828,-161.9864 512.3465,-161.1744 509.5345,-154.7641"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_mpilayer~~UsesGraph_node13" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node13"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_FORTRAN_ENV" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-206 0,-206 0,-182 94,-182 94,-206"/>
+<text text-anchor="middle" x="47" y="-191.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mpilayer~~UsesGraph_edge17" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M129.9643,-206.6663C121.5667,-205.3842 112.756,-204.0391 104.1414,-202.7239"/>
+<polygon fill="#000000" stroke="#000000" points="104.5689,-199.2487 94.1552,-201.1993 103.5124,-206.1685 104.5689,-199.2487"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge19" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M282.6451,-241.9987C267.0467,-237.8252 249.3689,-233.0954 233.042,-228.727"/>
+<polygon fill="#000000" stroke="#000000" points="233.6463,-225.2656 223.0814,-226.0619 231.837,-232.0277 233.6463,-225.2656"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mpilayer~~UsesGraph_edge18" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M261.9135,-253.6145C222.9396,-251.9334 172.9033,-247.2146 130,-235 110.9267,-229.5698 90.9574,-219.8492 75.3869,-211.2356"/>
+<polygon fill="#000000" stroke="#000000" points="76.7294,-207.9723 66.3079,-206.0638 73.2645,-214.0547 76.7294,-207.9723"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_data -->
+<g id="module~~self_mpilayer~~UsesGraph_edge20" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M786.1431,-285.0532C762.0685,-292.2351 728.7827,-299.0541 699.5,-294"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M699.5,-294C649.324,-285.3397 616.6826,-227.6348 602.1721,-195.505"/>
+<polygon fill="#000000" stroke="#000000" points="605.2747,-193.8611 598.0987,-186.0665 598.8477,-196.6348 605.2747,-193.8611"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_mesh -->
+<g id="module~~self_mpilayer~~UsesGraph_edge23" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M794.9013,-260.7593C787.1113,-256.6339 778.5633,-251.8422 771,-247 753.967,-236.0951 735.7928,-222.3383 722.03,-211.4391"/>
+<polygon fill="#000000" stroke="#000000" points="724.0739,-208.592 714.0805,-205.0732 719.6984,-214.056 724.0739,-208.592"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge21" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M476,-294C410.1478,-289.5854 390.3681,-314.0899 327.5,-294"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M327.5,-294C298.6272,-284.7735 289.2245,-288.3263 262,-275 238.9793,-263.7315 215.6133,-246.1584 199.3897,-232.7626"/>
+<polygon fill="#000000" stroke="#000000" points="201.4984,-229.9625 191.5965,-226.1938 196.987,-235.3149 201.4984,-229.9625"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mpilayer~~UsesGraph_edge22" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M593.5,-294C542.7261,-281.7865 528.1053,-297.493 476,-294"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M476,-294C438.4225,-291.4809 397.1711,-279.594 367.7028,-269.4273"/>
+<polygon fill="#000000" stroke="#000000" points="368.778,-266.0952 358.1832,-266.0615 366.4445,-272.6948 368.778,-266.0952"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_lagrange -->
+<g id="module~~self_mpilayer~~UsesGraph_edge24" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M699.5,-294C653.0753,-285.9872 639.3046,-305.0181 593.5,-294"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M593.5,-294C567.0863,-287.6463 516.8672,-226.9584 491.4954,-194.4049"/>
+<polygon fill="#000000" stroke="#000000" points="494.2051,-192.1872 485.3236,-186.4106 488.6642,-196.465 494.2051,-192.1872"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_mpilayer~~UsesGraph_edge28" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M447.1616,-161.723C440.6305,-157.9987 434.1205,-153.4252 429,-148 403.6211,-121.1109 421.2128,-96.8988 393,-73 369.8716,-53.4081 355.3038,-66.0712 327.5,-54"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M327.5,-54C296.3089,-40.4581 259.5627,-30.0649 230.3067,-23.0049"/>
+<polygon fill="#000000" stroke="#000000" points="230.8282,-19.5321 220.2922,-20.647 229.2239,-26.3458 230.8282,-19.5321"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge31" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M448.4054,-186.0904C419.0281,-197.8473 370.8877,-213.9513 327.5,-214"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M327.5,-214C297.4659,-214.0337 264.0378,-214.0369 236.4205,-214.0304"/>
+<polygon fill="#000000" stroke="#000000" points="236.1407,-210.5304 226.1397,-214.0274 236.1386,-217.5304 236.1407,-210.5304"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_mpilayer~~UsesGraph_edge32" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M459.4292,-186.1956C443.0876,-197.8764 417.1257,-215.5215 393,-228 386.0468,-231.5964 378.4775,-235.0193 371.0346,-238.1307"/>
+<polygon fill="#000000" stroke="#000000" points="369.6878,-234.8999 361.7303,-241.8948 372.3131,-241.389 369.6878,-234.8999"/>
+</g>
+<!-- module~self_memory -->
+<g id="module~~self_mpilayer~~UsesGraph_node10" class="node">
+<title>module~self_memory</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node10"><a xlink:href=".././module/self_memory.html" xlink:title="SELF_Memory">
+<polygon fill="#337ab7" stroke="#337ab7" points="371,-106 284,-106 284,-82 371,-82 371,-106"/>
+<text text-anchor="middle" x="327.5" y="-91.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Memory</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_memory -->
+<g id="module~~self_mpilayer~~UsesGraph_edge25" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_memory</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M452.147,-161.741C444.5972,-157.6146 436.3168,-152.8269 429,-148 412.0803,-136.838 410.596,-130.0621 393,-120 386.6475,-116.3674 379.6878,-113.0129 372.7515,-110.0049"/>
+<polygon fill="#000000" stroke="#000000" points="373.9451,-106.7111 363.3666,-106.1243 371.2703,-113.1799 373.9451,-106.7111"/>
+</g>
+<!-- hipfort_check -->
+<g id="module~~self_mpilayer~~UsesGraph_node11" class="node">
+<title>hipfort_check</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="220.5,-66 135.5,-66 135.5,-42 220.5,-42 220.5,-66"/>
+<text text-anchor="middle" x="178" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">hipfort_check</text>
+</g>
+<!-- module~self_lagrange&#45;&gt;hipfort_check -->
+<g id="module~~self_mpilayer~~UsesGraph_edge27" class="edge">
+<title>module~self_lagrange&#45;&gt;hipfort_check</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M327.5,-54C297.3649,-40.9166 260.4816,-40.7711 230.8903,-43.9679"/>
+<polygon fill="#000000" stroke="#000000" points="230.2452,-40.521 220.7506,-45.2224 231.1047,-47.468 230.2452,-40.521"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_mpilayer~~UsesGraph_node12" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_mpilayer~~UsesGraph_node12"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="380,-186 275,-186 275,-162 380,-162 380,-186"/>
+<text text-anchor="middle" x="327.5" y="-171.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_quadrature -->
+<g id="module~~self_mpilayer~~UsesGraph_edge26" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M428.6054,-174C416.4155,-174 403.1096,-174 390.2727,-174"/>
+<polygon fill="#000000" stroke="#000000" points="390.1087,-170.5001 380.1086,-174 390.1086,-177.5001 390.1087,-170.5001"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mpilayer~~UsesGraph_edge29" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M327.5,-134C258.8639,-129.528 246.087,-164.2491 178,-174"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M178,-174C153.7971,-177.4662 127.1132,-181.5012 104.1792,-185.0354"/>
+<polygon fill="#000000" stroke="#000000" points="103.6122,-181.5814 94.2643,-186.5681 104.6816,-188.4992 103.6122,-181.5814"/>
+</g>
+<!-- hipfort -->
+<g id="module~~self_mpilayer~~UsesGraph_node14" class="node">
+<title>hipfort</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-146 151,-146 151,-122 205,-122 205,-146"/>
+<text text-anchor="middle" x="178" y="-131.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">hipfort</text>
+</g>
+<!-- module~self_lagrange&#45;&gt;hipfort -->
+<g id="module~~self_mpilayer~~UsesGraph_edge30" class="edge">
+<title>module~self_lagrange&#45;&gt;hipfort</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M445.3191,-161.9034C415.7062,-151.1525 369.3305,-136.7255 327.5,-134"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M327.5,-134C289.2723,-131.5093 245.4294,-131.8906 215.1536,-132.6602"/>
+<polygon fill="#000000" stroke="#000000" points="214.9395,-129.1647 205.0419,-132.9445 215.1364,-136.162 214.9395,-129.1647"/>
+</g>
+<!-- module~self_memory&#45;&gt;iso_c_binding -->
+<g id="module~~self_mpilayer~~UsesGraph_edge34" class="edge">
+<title>module~self_memory&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M289.8693,-81.9883C280.406,-78.1924 270.524,-73.519 262,-68 243.2682,-55.8718 244.5196,-45.4499 226,-33 223.8533,-31.5569 221.5913,-30.1752 219.2659,-28.8592"/>
+<polygon fill="#000000" stroke="#000000" points="220.5844,-25.6008 210.0939,-24.1175 217.3697,-31.819 220.5844,-25.6008"/>
+</g>
+<!-- module~self_memory&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge37" class="edge">
+<title>module~self_memory&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M284.4533,-106.025C276.3864,-109.6194 268.4679,-114.2014 262,-120 236.538,-142.827 250.065,-163.7047 226,-188 222.8382,-191.192 219.2015,-194.0934 215.374,-196.7024"/>
+<polygon fill="#000000" stroke="#000000" points="213.5055,-193.7424 206.8009,-201.946 217.158,-199.714 213.5055,-193.7424"/>
+</g>
+<!-- module~self_memory&#45;&gt;hipfort_check -->
+<g id="module~~self_mpilayer~~UsesGraph_edge33" class="edge">
+<title>module~self_memory&#45;&gt;hipfort_check</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.8565,-82.3228C267.214,-77.87 248.0676,-72.7472 230.6733,-68.0932"/>
+<polygon fill="#000000" stroke="#000000" points="231.2313,-64.6194 220.6664,-65.4158 229.4219,-71.3816 231.2313,-64.6194"/>
+</g>
+<!-- module~self_memory&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mpilayer~~UsesGraph_edge35" class="edge">
+<title>module~self_memory&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.7439,-90.1115C242.2231,-88.2438 179.0546,-90.2315 130,-113 101.0174,-126.4522 76.0724,-154.353 61.2965,-173.6195"/>
+<polygon fill="#000000" stroke="#000000" points="58.3896,-171.6636 55.2452,-181.7811 64.0126,-175.8327 58.3896,-171.6636"/>
+</g>
+<!-- module~self_memory&#45;&gt;hipfort -->
+<g id="module~~self_mpilayer~~UsesGraph_edge36" class="edge">
+<title>module~self_memory&#45;&gt;hipfort</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M283.8565,-105.6772C261.9331,-111.543 235.6647,-118.5713 214.7802,-124.1591"/>
+<polygon fill="#000000" stroke="#000000" points="213.7585,-120.8093 205.003,-126.7751 215.5678,-127.5715 213.7585,-120.8093"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_mpilayer~~UsesGraph_edge39" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M282.6451,-186.0013C267.0467,-190.1748 249.3689,-194.9046 233.042,-199.273"/>
+<polygon fill="#000000" stroke="#000000" points="231.837,-195.9723 223.0814,-201.9381 233.6463,-202.7344 231.837,-195.9723"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_mpilayer~~UsesGraph_edge38" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M274.6582,-170.3608C245.9301,-169.2948 209.859,-169.4374 178,-174"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_mpilayerUsesGraph = svgPanZoom('#moduleself_mpilayerUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="517pt" height="32pt"
+ viewBox="0.00 0.00 517.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 513,-28 513,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234.5,-24 163.5,-24 163.5,0 234.5,0 234.5,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="311,-24 253,-24 253,0 311,0 311,-24"/>
+<text text-anchor="middle" x="282" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="387,-24 329,-24 329,0 387,0 387,-24"/>
+<text text-anchor="middle" x="358" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="#000000" points="509,-24 405,-24 405,0 509,0 509,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+    
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_mpilayer.html#proc-self_calculaterankdistributions">SELF_CalculateRankDistributions</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+    
+    <section>
+    <h2>Subroutines</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-self_calculaterankdistributions"></span><h3>
+public subroutine <a href='../proc/self_calculaterankdistributions.html'>SELF_CalculateRankDistributions</a>(nObj, nRanks, objBounds)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nObj</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nRanks</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>objBounds</strong>(1:2,0:nRanks-1)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    </section>    
+    <br>
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2021 
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+    
+    <meta name="author" content="Joe Schoonover" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_SupportRoutines &ndash; Fortran Program</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../program/self.html">Program</a></li>
+      
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../program/self.html">Program</a></li>
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>SELF_SupportRoutines 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 4.7% of total for modules and submodules.">364 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/SELF_SupportRoutines.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/self_supportroutines.f90.html'>SELF_SupportRoutines.f90</a></li>
+    
+  
+     <li class="active">SELF_SupportRoutines</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-int2str">Int2Str</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-float2str">Float2Str</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-almostequal">AlmostEqual</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-comparearray">CompareArray</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-newunit">NewUnit</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-uniformpoints">UniformPoints</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-determinant">Determinant</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-getminor">GetMinor</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-invert_2x2">Invert_2x2</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-invert_3x3">Invert_3x3</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-invertspectralopmatrix">InvertSpectralOpMatrix</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-uppercase">UpperCase</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-timestamp">TimeStamp</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-isnan">IsNaN</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-isinf">IsInf</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-floorsqrt">FloorSQRT</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-floorcurt">FloorCURT</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-insertionsort">InsertionSort</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-sortarray">SortArray</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-sortandsum">SortAndSum</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-reversearray">ReverseArray</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-forwardshift">ForwardShift</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>\file SELF_SupportRoutines.f90
+ Contains the \ref SELF_SupportRoutines module
+ \defgroup SELF_SupportRoutines SELF_SupportRoutines
+ This module defines a set of general purpose routines.</p>
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href="http://fortranwiki.org/fortran/show/ISO_FORTRAN_ENV">iso_fortran_env</a></li>
+    
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: module~~self_supportroutines~~UsesGraph Pages: 1 -->
+<svg id="moduleself_supportroutinesUsesGraph" width="401pt" height="52pt"
+ viewBox="0.00 0.00 401.00 52.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_supportroutines~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 48)">
+<title>module~~self_supportroutines~~UsesGraph</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-48 397,-48 397,4 -4,4"/>
+<!-- module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsesGraph_node1" class="node">
+<title>module~self_supportroutines</title>
+<polygon fill="none" stroke="#000000" points="393,-44 262,-44 262,-20 393,-20 393,-44"/>
+<text text-anchor="middle" x="327.5" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">SELF_SupportRoutines</text>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_supportroutines~~UsesGraph_node2" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_supportroutines~~UsesGraph_node2"><a xlink:href="http://fortranwiki.org/fortran/show/ISO_FORTRAN_ENV" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-44 0,-44 0,-20 94,-20 94,-44"/>
+<text text-anchor="middle" x="47" y="-29.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_supportroutines~~UsesGraph_edge1" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M261.9806,-32.7402C250.0106,-32.8485 237.6306,-32.9427 226,-33 183.3339,-33.2102 172.6659,-33.257 130,-33 121.804,-32.9506 113.1531,-32.8738 104.6538,-32.7842"/>
+<polygon fill="#000000" stroke="#000000" points="104.4411,-29.2817 94.4026,-32.6696 104.3628,-36.2813 104.4411,-29.2817"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_supportroutines~~UsesGraph_node3" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_supportroutines~~UsesGraph_node3"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-24 130,-24 130,0 226,0 226,-24"/>
+<text text-anchor="middle" x="178" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_supportroutines~~UsesGraph_edge2" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M261.9271,-23.2277C253.4491,-22.0935 244.8112,-20.938 236.4586,-19.8205"/>
+<polygon fill="#000000" stroke="#000000" points="236.8174,-16.3374 226.4416,-18.4805 235.8891,-23.2756 236.8174,-16.3374"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_supportroutines~~UsesGraph_edge3" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M129.9643,-19.3337C121.5667,-20.6158 112.756,-21.9609 104.1414,-23.2761"/>
+<polygon fill="#000000" stroke="#000000" points="103.5124,-19.8315 94.1552,-24.8007 104.5689,-26.7513 103.5124,-19.8315"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="517pt" height="32pt"
+ viewBox="0.00 0.00 517.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 513,-28 513,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234.5,-24 163.5,-24 163.5,0 234.5,0 234.5,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="311,-24 253,-24 253,0 311,0 311,-24"/>
+<text text-anchor="middle" x="282" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="387,-24 329,-24 329,0 387,0 387,-24"/>
+<text text-anchor="middle" x="358" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="#000000" points="509,-24 405,-24 405,0 509,0 509,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  
+  
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: module~~self_supportroutines~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_supportroutinesUsedByGraph" width="641pt" height="139pt"
+ viewBox="0.00 0.00 641.00 138.90" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_supportroutines~~UsedByGraph" class="graph" transform="scale(.6547 .6547) rotate(0) translate(4 208.1452)">
+<title>module~~self_supportroutines~~UsedByGraph</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-208.1452 975,-208.1452 975,4 -4,4"/>
+<!-- module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsedByGraph_node1" class="node">
+<title>module~self_supportroutines</title>
+<polygon fill="none" stroke="#000000" points="131,-62 0,-62 0,-38 131,-38 131,-62"/>
+<text text-anchor="middle" x="65.5" y="-47.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">SELF_SupportRoutines</text>
+</g>
+<!-- program~self -->
+<g id="module~~self_supportroutines~~UsedByGraph_node2" class="node">
+<title>program~self</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node2"><a xlink:href=".././program/self.html" xlink:title="SELF">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="971,-179 917,-179 917,-155 971,-155 971,-179"/>
+<text text-anchor="middle" x="944" y="-164.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF</text>
+</a>
+</g>
+</g>
+<!-- program~self&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge1" class="edge">
+<title>program~self&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M916.8984,-173.7864C871.7927,-184.468 778.331,-204 698,-204 698,-204 698,-204 437.5,-204 336.7412,-204 306.3386,-206.3229 214,-166"/>
+</g>
+<!-- module~self_tests -->
+<g id="module~~self_supportroutines~~UsedByGraph_node6" class="node">
+<title>module~self_tests</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node6"><a xlink:href=".././module/self_tests.html" xlink:title="SELF_Tests">
+<polygon fill="#337ab7" stroke="#337ab7" points="870.5,-142 800.5,-142 800.5,-118 870.5,-118 870.5,-142"/>
+<text text-anchor="middle" x="835.5" y="-127.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Tests</text>
+</a>
+</g>
+</g>
+<!-- program~self&#45;&gt;module~self_tests -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge16" class="edge">
+<title>program~self&#45;&gt;module~self_tests</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M916.9008,-157.7588C905.9057,-154.0093 892.9058,-149.5762 880.56,-145.3661"/>
+<polygon fill="#000000" stroke="#000000" points="881.4444,-141.9698 870.8499,-142.0548 879.185,-148.5952 881.4444,-141.9698"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_supportroutines~~UsedByGraph_node3" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node3"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="473,-62 402,-62 402,-38 473,-38 473,-62"/>
+<text text-anchor="middle" x="437.5" y="-47.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge2" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M401.6207,-50.5078C381.0599,-50.5025 354.7904,-49.9947 331.5,-48"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M331.5,-48C276.8149,-43.3164 268.8128,-7.1801 214,-10"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_supportroutines~~UsedByGraph_node5" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node5"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="261,-62 167,-62 167,-38 261,-38 261,-62"/>
+<text text-anchor="middle" x="214" y="-47.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_lagrange -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge13" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M331.5,-48C311.9428,-46.325 290.49,-46.1915 271.3285,-46.6773"/>
+<polygon fill="#000000" stroke="#000000" points="271.1288,-43.1818 261.2436,-46.994 271.3486,-50.1783 271.1288,-43.1818"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_supportroutines~~UsedByGraph_node7" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node7"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="366,-100 297,-100 297,-76 366,-76 366,-100"/>
+<text text-anchor="middle" x="331.5" y="-85.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_data -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge19" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M403.9609,-62.0234C394.6809,-65.3502 384.4765,-69.0084 374.7289,-72.5028"/>
+<polygon fill="#000000" stroke="#000000" points="373.417,-69.255 365.1847,-75.9244 375.7792,-75.8444 373.417,-69.255"/>
+</g>
+<!-- module~self_geometry -->
+<g id="module~~self_supportroutines~~UsedByGraph_node4" class="node">
+<title>module~self_geometry</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node4"><a xlink:href=".././module/self_geometry.html" xlink:title="SELF_Geometry">
+<polygon fill="#337ab7" stroke="#337ab7" points="606,-24 509,-24 509,0 606,0 606,-24"/>
+<text text-anchor="middle" x="557.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_Geometry</text>
+</a>
+</g>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge3" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M508.7313,-7.1409C486.8148,-5.9928 460.7137,-6.0643 437.5,-10"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M437.5,-10C391.0517,-17.8749 378.4438,-6.0333 331.5,-10"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M331.5,-10C279.4632,-14.397 266.1533,-7.3169 214,-10"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M214,-10C176.0286,-11.9535 134.3516,-24.1106 104.8408,-34.5153"/>
+<polygon fill="#000000" stroke="#000000" points="103.5347,-31.2657 95.3221,-37.9593 105.9163,-37.8481 103.5347,-31.2657"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_mesh -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge6" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M519.5313,-24.0234C507.9441,-27.6927 495.084,-31.7651 483.0487,-35.5763"/>
+<polygon fill="#000000" stroke="#000000" points="481.6558,-32.3459 473.1791,-38.7016 483.7691,-39.0193 481.6558,-32.3459"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_lagrange -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge14" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M331.5,-10C302.0023,-12.4925 270.3272,-23.8285 247.3058,-33.7989"/>
+<polygon fill="#000000" stroke="#000000" points="245.7018,-30.6821 238.0009,-37.9586 248.5586,-37.0726 245.7018,-30.6821"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_data -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge20" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M437.5,-10C398.7597,-16.5681 396.2074,-36.871 366,-62 362.9099,-64.5706 359.6016,-67.2044 356.3018,-69.7623"/>
+<polygon fill="#000000" stroke="#000000" points="354.0898,-67.0473 348.2463,-75.885 358.3256,-72.6203 354.0898,-67.0473"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge4" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M166.6054,-50C158.4912,-50 149.8825,-50 141.2468,-50"/>
+<polygon fill="#000000" stroke="#000000" points="141.1248,-46.5001 131.1248,-50 141.1248,-53.5001 141.1248,-46.5001"/>
+</g>
+<!-- module~self_tests&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge5" class="edge">
+<title>module~self_tests&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M331.5,-166C280.4814,-154.8526 261.8581,-186.8989 214,-166"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M214,-166C160.7901,-142.764 109.984,-95.9919 83.8235,-69.4862"/>
+<polygon fill="#000000" stroke="#000000" points="86.2955,-67.0078 76.8183,-62.2714 81.2734,-71.8841 86.2955,-67.0078"/>
+</g>
+<!-- module~self_tests&#45;&gt;module~self_mesh -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge9" class="edge">
+<title>module~self_tests&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M800.3719,-131.8518C772.5359,-132.873 732.6917,-133.3432 698,-130"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M698,-130C671.8388,-127.4789 664.4173,-124.7197 642,-111 622.9664,-99.3511 624.2212,-88.8826 606,-76 586.3621,-62.1158 581.3137,-55.3657 557.5,-52"/>
+</g>
+<!-- module~self_tests&#45;&gt;module~self_lagrange -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge15" class="edge">
+<title>module~self_tests&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M698,-130C616.541,-122.1499 411.1951,-184.5982 331.5,-166"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M331.5,-166C280.7075,-154.902 242.9075,-101.3038 225.1851,-70.9971"/>
+<polygon fill="#000000" stroke="#000000" points="228.1059,-69.0509 220.1456,-62.0591 222.0083,-72.489 228.1059,-69.0509"/>
+</g>
+<!-- module~self_tests&#45;&gt;module~self_data -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge21" class="edge">
+<title>module~self_tests&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M698,-130C633.3736,-123.7721 622.4252,-90.2705 557.5,-90"/>
+</g>
+<!-- module~self_mappeddata -->
+<g id="module~~self_supportroutines~~UsedByGraph_node9" class="node">
+<title>module~self_mappeddata</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node9"><a xlink:href=".././module/self_mappeddata.html" xlink:title="SELF_MappedData">
+<polygon fill="#337ab7" stroke="#337ab7" points="754,-102 642,-102 642,-78 754,-78 754,-102"/>
+<text text-anchor="middle" x="698" y="-87.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_MappedData</text>
+</a>
+</g>
+</g>
+<!-- module~self_tests&#45;&gt;module~self_mappeddata -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge23" class="edge">
+<title>module~self_tests&#45;&gt;module~self_mappeddata</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M800.4472,-119.8028C784.8833,-115.2751 766.2584,-109.857 749.1831,-104.8896"/>
+<polygon fill="#000000" stroke="#000000" points="749.923,-101.4598 739.3434,-102.0272 747.9676,-108.1812 749.923,-101.4598"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge11" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M296.8816,-76.8043C285.6697,-73.1783 273.0386,-69.0933 261.0797,-65.2258"/>
+<polygon fill="#000000" stroke="#000000" points="261.8301,-61.79 251.2383,-62.043 259.676,-68.4504 261.8301,-61.79"/>
+</g>
+<!-- module~self_mpilayer -->
+<g id="module~~self_supportroutines~~UsedByGraph_node8" class="node">
+<title>module~self_mpilayer</title>
+<g id="a_module~~self_supportroutines~~UsedByGraph_node8"><a xlink:href=".././module/self_mpilayer.html" xlink:title="SELF_MPILayer">
+<polygon fill="#337ab7" stroke="#337ab7" points="881,-81 790,-81 790,-57 881,-57 881,-81"/>
+<text text-anchor="middle" x="835.5" y="-66.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">SELF_MPILayer</text>
+</a>
+</g>
+</g>
+<!-- module~self_mpilayer&#45;&gt;module~self_mesh -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge7" class="edge">
+<title>module~self_mpilayer&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M789.8841,-59.3721C763.2204,-54.5795 728.8454,-49.8295 698,-50"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M698,-50C635.5502,-50.3452 619.3362,-60.7396 557.5,-52"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M557.5,-52C533.1886,-48.564 505.8329,-47.8674 483.3866,-48.1164"/>
+<polygon fill="#000000" stroke="#000000" points="483.0593,-44.6216 473.1231,-48.2987 483.1837,-51.6205 483.0593,-44.6216"/>
+</g>
+<!-- module~self_mpilayer&#45;&gt;module~self_data -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge17" class="edge">
+<title>module~self_mpilayer&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M698,-50C633.0752,-50.3589 622.4258,-90 557.5,-90"/>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M557.5,-90C494.7064,-90 422.1026,-89.2184 376.4932,-88.6324"/>
+<polygon fill="#000000" stroke="#000000" points="376.3888,-85.1309 366.3437,-88.4995 376.297,-92.1303 376.3888,-85.1309"/>
+</g>
+<!-- module~self_mpilayer&#45;&gt;module~self_mappeddata -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge22" class="edge">
+<title>module~self_mpilayer&#45;&gt;module~self_mappeddata</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M789.7145,-75.9927C781.5165,-77.2448 772.8263,-78.572 764.19,-79.891"/>
+<polygon fill="#000000" stroke="#000000" points="763.4663,-76.4608 754.1093,-81.4306 764.5232,-83.3806 763.4663,-76.4608"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_mesh -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge8" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M662.9925,-77.9339C634.8688,-68.8763 594.1545,-57.1805 557.5,-52"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_geometry -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge10" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_geometry</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M669.2622,-77.9309C660.3429,-73.8496 650.6006,-69.0402 642,-64 624.972,-54.0212 622.7346,-48.4635 606,-38 601.1396,-34.961 595.8934,-31.9183 590.7091,-29.0406"/>
+<polygon fill="#000000" stroke="#000000" points="592.0012,-25.76 581.5411,-24.0753 588.6675,-31.9153 592.0012,-25.76"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_lagrange -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge12" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M653.3688,-102.0344C577.8973,-120.2264 421.1597,-148.6326 297,-109 272.475,-101.1714 248.9955,-83.1593 233.3074,-69.0817"/>
+<polygon fill="#000000" stroke="#000000" points="235.558,-66.3953 225.8494,-62.1535 230.7938,-71.5239 235.558,-66.3953"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_data -->
+<g id="module~~self_supportroutines~~UsedByGraph_edge18" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M641.9377,-90C616.2103,-90 585.3073,-90 557.5,-90"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_supportroutinesUsedByGraph = svgPanZoom('#moduleself_supportroutinesUsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="517pt" height="32pt"
+ viewBox="0.00 0.00 517.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-28 513,-28 513,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234.5,-24 163.5,-24 163.5,0 234.5,0 234.5,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="311,-24 253,-24 253,0 311,0 311,-24"/>
+<text text-anchor="middle" x="282" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="387,-24 329,-24 329,0 387,0 387,-24"/>
+<text text-anchor="middle" x="358" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#ffffff">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="#000000" points="509,-24 405,-24 405,0 509,0 509,-24"/>
+<text text-anchor="middle" x="457" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="#000000">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses.
+    </p>
+    </div></div></div></div>
+  </li>
+  
+      </ul>
+    </div>
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-int2str">Int2Str</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-float2str">Float2Str</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-almostequal">AlmostEqual</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-comparearray">CompareArray</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-newunit">NewUnit</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-uniformpoints">UniformPoints</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-determinant">Determinant</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-getminor">GetMinor</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-invert_2x2">Invert_2x2</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-invert_3x3">Invert_3x3</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-invertspectralopmatrix">InvertSpectralOpMatrix</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-uppercase">UpperCase</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-timestamp">TimeStamp</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-isnan">IsNaN</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-isinf">IsInf</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-floorsqrt">FloorSQRT</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-floorcurt">FloorCURT</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-insertionsort">InsertionSort</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-sortarray">SortArray</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-sortandsum">SortAndSum</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-reversearray">ReverseArray</a>
+      
+      <a class="list-group-item" href="../module/self_supportroutines.html#proc-forwardshift">ForwardShift</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+     
+    <section>
+    <h2>Functions</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-int2str"></span><h3>
+public function <a href='../proc/int2str.html'>Int2Str</a>(aNumber) result(aString)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>aNumber</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>character(len=12)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-float2str"></span><h3>
+public function <a href='../proc/float2str.html'>Float2Str</a>(aNumber) result(aString)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>aNumber</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>character(len=12)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-almostequal"></span><h3>
+public function <a href='../proc/almostequal.html'>AlmostEqual</a>(a, b) result(AisB)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn AlmostEqual
+ Compares two floating point numbers and determines if they are equal (to machine precision).</p><a href="../proc/almostequal.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=real64)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=real64)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>b</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>logical
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-comparearray"></span><h3>
+public function <a href='../proc/comparearray.html'>CompareArray</a>(arrayOne, arrayTwo, N) result(arraysMatch)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn CompareArray
+ Compares to INTEGER arrays and determines if they are identical.</p><a href="../proc/comparearray.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>arrayOne</strong>(1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>arrayTwo</strong>(1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>logical
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-newunit"></span><h3>
+public function <a href='../proc/newunit.html'>NewUnit</a>(thisunit)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn NewUnit
+ Returns a file unit identifier that is currently not in use.</p><a href="../proc/newunit.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(out),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>thisunit</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-uniformpoints"></span><h3>
+public function <a href='../proc/uniformpoints.html'>UniformPoints</a>(a, b, firstInd, lastInd) result(xU)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn UniformPoints
+ Generates a REAL(prec) array of N points evenly spaced between two points.</p><a href="../proc/uniformpoints.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>b</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>firstInd</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>lastInd</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=prec)
+  (firstInd:lastInd)</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-determinant"></span><h3>
+public recursive function <a href='../proc/determinant.html'>Determinant</a>(A, N) result(D)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn Determinant
+ A recursive function that calculates the determinant of an \f$ N\times N \f$ matrix.</p><a href="../proc/determinant.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>A</strong>(1:N,1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=prec)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-getminor"></span><h3>
+public function <a href='../proc/getminor.html'>GetMinor</a>(A, i, j, N) result(M)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn GetMinor
+ Returns the submatrix obtained by removing a given row and column of the input matrix.</p><a href="../proc/getminor.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>A</strong>(1:N,1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>i</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>j</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=prec)
+  (1:N-1,1:N-1)</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-invert_2x2"></span><h3>
+public function <a href='../proc/invert_2x2.html'>Invert_2x2</a>(A) result(Ainv)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn Invert_2x2
+  Computes the inverse of a 2x2 matrix using Kramer's rule.</p><a href="../proc/invert_2x2.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>A</strong>(1:2,1:2)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=prec)
+  (1:2,1:2)</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-invert_3x3"></span><h3>
+public function <a href='../proc/invert_3x3.html'>Invert_3x3</a>(A) result(Ainv)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn Invert_3x3
+  Computes the inverse of a 3x3 matrix using Kramer's rule.</p><a href="../proc/invert_3x3.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>A</strong>(1:3,1:3)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=prec)
+  (1:3,1:3)</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-invertspectralopmatrix"></span><h3>
+public function <a href='../proc/invertspectralopmatrix.html'>InvertSpectralOpMatrix</a>(A, N) result(Ainv)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>A</strong>(0:N,0:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>real(kind=prec)
+  (0:N,0:N)</small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-uppercase"></span><h3>
+public function <a href='../proc/uppercase.html'>UpperCase</a>(str) result(Upper)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character(len=*),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>str</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>character(len=LEN(str))
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-timestamp"></span><h3>
+public function <a href='../proc/timestamp.html'>TimeStamp</a>(time, units) result(timeStampString)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>time</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character(len=1)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>units</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>character(len=13)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-isnan"></span><h3>
+public function <a href='../proc/isnan.html'>IsNaN</a>(a)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>logical
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-isinf"></span><h3>
+public function <a href='../proc/isinf.html'>IsInf</a>(a)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>a</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>logical
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-floorsqrt"></span><h3>
+public function <a href='../proc/floorsqrt.html'>FloorSQRT</a>(x) result(sqrtX)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-floorcurt"></span><h3>
+public function <a href='../proc/floorcurt.html'>FloorCURT</a>(x) result(curtX)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>x</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>integer
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    </section>
+    <br>
+    
+
+    
+    <section>
+    <h2>Subroutines</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-insertionsort"></span><h3>
+public subroutine <a href='../proc/insertionsort.html'>InsertionSort</a>(inArray, outArray, N)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn InsertionSort
+ Sorts an array of integers from smallest to largest using the insertion-sort algorithm.</p><a href="../proc/insertionsort.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>inArray</strong>(1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>outArray</strong>(1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sortarray"></span><h3>
+public subroutine <a href='../proc/sortarray.html'>SortArray</a>(myArray, low, high)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn SortArray
+ Sorts a REAL(prec) array from smallest absolute value to largest absolute value.</p><a href="../proc/sortarray.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myArray</strong>(low:high)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>low</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>high</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sortandsum"></span><h3>
+public subroutine <a href='../proc/sortandsum.html'>SortAndSum</a>(myArray, low, high, arraysum)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn SortAndSum
+ Computes the sum of an array by first sorting the array from smallest absolute value to largest
+ absolute value.</p><a href="../proc/sortandsum.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myArray</strong>(low:high)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>low</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>high</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>arraysum</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-reversearray"></span><h3>
+public subroutine <a href='../proc/reversearray.html'>ReverseArray</a>(myArray, low, high)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn ReverseArray
+ Reverses the order of a REAL(prec) array.</p><a href="../proc/reversearray.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myArray</strong>(low:high)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>low</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>high</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-forwardshift"></span><h3>
+public subroutine <a href='../proc/forwardshift.html'>ForwardShift</a>(myArray, N)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_SupportRoutines
+ @{
+ \fn ForwardShift
+ Shift an array integers by one index forward, moving the last index to the first.</p><a href="../proc/forwardshift.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myArray</strong>(1:N)</td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    </section>    
+    <br>
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2021 
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

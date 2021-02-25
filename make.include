@@ -7,7 +7,7 @@ SELF_LIBDIR = $(SELF_DIR)/lib/
 SELF_OBJDIR = $(SELF_DIR)/obj/
 SELF_BINDIR = $(SELF_DIR)/bin/
 
-vpath %.F90 %.cpp $(SELF_DIR)/src
+vpath %.f90 %.cpp $(SELF_DIR)/src
 
 
 SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_Memory \
@@ -54,7 +54,7 @@ $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
 	rm -f $@
 	$(AR) -cq $@ $^
 
-$(SELF_OBJDIR)%.o: %.F90
+$(SELF_OBJDIR)%.o: %.f90
 	$(FC) $(SELF_FFLAGS) -c $< -o $@
 
 
