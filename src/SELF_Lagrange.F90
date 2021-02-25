@@ -88,10 +88,8 @@ MODULE SELF_Lagrange
     PROCEDURE,PUBLIC :: Init => Init_Lagrange
     PROCEDURE,PUBLIC :: Free => Free_Lagrange
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Lagrange
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Lagrange
-#endif
 
     GENERIC,PUBLIC :: ScalarGridInterp_1D => ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu
     PROCEDURE,PRIVATE :: ScalarGridInterp_1D_cpu,ScalarGridInterp_1D_gpu
@@ -633,9 +631,7 @@ CONTAINS
     myPoly % bMatrix % hostData(0:N,0) = myPoly % CalculateLagrangePolynomials(-1.0_prec)
     myPoly % bMatrix % hostData(0:N,1) = myPoly % CalculateLagrangePolynomials(1.0_prec)
 
-#ifdef GPU
     CALL myPoly % UpdateDevice()
-#endif
 
   END SUBROUTINE Init_Lagrange
 
@@ -662,11 +658,11 @@ CONTAINS
 
   END SUBROUTINE Free_Lagrange
 
-#ifdef GPU
   SUBROUTINE UpdateDevice_Lagrange(myPoly)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
 
+#ifdef GPU
     CALL myPoly % controlPoints % UpdateDevice()
     CALL myPoly % targetPoints % UpdateDevice()
     CALL myPoly % bWeights % UpdateDevice()
@@ -675,6 +671,7 @@ CONTAINS
     CALL myPoly % dMatrix % UpdateDevice()
     CALL myPoly % dgMatrix % UpdateDevice()
     CALL myPoly % bMatrix % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Lagrange
 
@@ -682,6 +679,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
 
+#ifdef GPU
     CALL myPoly % controlPoints % UpdateHost()
     CALL myPoly % targetPoints % UpdateHost()
     CALL myPoly % bWeights % UpdateHost()
@@ -690,9 +688,9 @@ CONTAINS
     CALL myPoly % dMatrix % UpdateHost()
     CALL myPoly % dgMatrix % UpdateHost()
     CALL myPoly % bMatrix % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Lagrange
-#endif
 
 ! ================================================================================================ !
 !

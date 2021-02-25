@@ -22,10 +22,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r1
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r1
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r1
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r1
-#endif
 
   END TYPE hfReal_r1
 
@@ -39,10 +37,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r2
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r2
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r2
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r2
-#endif
 
   END TYPE hfReal_r2
 
@@ -56,10 +52,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r3
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r3
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r3
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r3
-#endif
 
   END TYPE hfReal_r3
 
@@ -73,10 +67,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r4
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r4
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r4
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r4
-#endif
 
   END TYPE hfReal_r4
 
@@ -90,10 +82,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r5
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r5
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r5
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r5
-#endif
 
   END TYPE hfReal_r5
 
@@ -107,10 +97,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r6
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r6
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r6
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r6
-#endif
 
   END TYPE hfReal_r6
 
@@ -124,10 +112,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfReal_r7
     PROCEDURE,PUBLIC :: Free => Free_hfReal_r7
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfReal_r7
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfReal_r7
-#endif
 
   END TYPE hfReal_r7
 
@@ -141,10 +127,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r1
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r1
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r1
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r1
-#endif
 
   END TYPE hfInt32_r1
 
@@ -158,10 +142,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r2
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r2
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r2
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r2
-#endif
 
   END TYPE hfInt32_r2
 
@@ -175,10 +157,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r3
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r3
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r3
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r3
-#endif
 
   END TYPE hfInt32_r3
 
@@ -192,10 +172,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r4
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r4
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r4
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r4
-#endif
 
   END TYPE hfInt32_r4
 
@@ -209,10 +187,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r5
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r5
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r5
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r5
-#endif
 
   END TYPE hfInt32_r5
 
@@ -226,10 +202,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r6
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r6
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r6
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r6
-#endif
 
   END TYPE hfInt32_r6
 
@@ -243,10 +217,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt32_r7
     PROCEDURE,PUBLIC :: Free => Free_hfInt32_r7
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt32_r7
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt32_r7
-#endif
 
   END TYPE hfInt32_r7
 
@@ -260,10 +232,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r1
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r1
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r1
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r1
-#endif
 
   END TYPE hfInt64_r1
 
@@ -277,10 +247,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r2
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r2
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r2
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r2
-#endif
 
   END TYPE hfInt64_r2
 
@@ -294,10 +262,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r3
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r3
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r3
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r3
-#endif
 
   END TYPE hfInt64_r3
 
@@ -311,10 +277,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r4
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r4
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r4
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r4
-#endif
 
   END TYPE hfInt64_r4
 
@@ -328,10 +292,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r5
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r5
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r5
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r5
-#endif
 
   END TYPE hfInt64_r5
 
@@ -345,10 +307,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r6
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r6
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r6
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r6
-#endif
 
   END TYPE hfInt64_r6
 
@@ -362,10 +322,8 @@ MODULE SELF_Memory
     PROCEDURE,PUBLIC :: Alloc => Alloc_hfInt64_r7
     PROCEDURE,PUBLIC :: Free => Free_hfInt64_r7
 
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_hfInt64_r7
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_hfInt64_r7
-#endif
 
   END TYPE hfInt64_r7
 
@@ -959,15 +917,16 @@ CONTAINS
 
   END SUBROUTINE Free_hfInt64_r7
 
-#ifdef GPU
   SUBROUTINE UpdateHost_hfReal_r1(this)
     IMPLICIT NONE
     CLASS(hfReal_r1),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r1
 
@@ -975,10 +934,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r2),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r2
 
@@ -986,10 +947,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r3),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r3
 
@@ -997,10 +960,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r4),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r4
 
@@ -1008,10 +973,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r5),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r5
 
@@ -1019,10 +986,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r6),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r6
 
@@ -1030,10 +999,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r7),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfReal_r7
 
@@ -1041,10 +1012,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r1),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r1
 
@@ -1052,10 +1025,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r2),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r2
 
@@ -1063,10 +1038,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r3),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r3
 
@@ -1074,10 +1051,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r4),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r4
 
@@ -1085,10 +1064,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r5),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r5
 
@@ -1096,10 +1077,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r6),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r6
 
@@ -1107,10 +1090,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r7),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt32_r7
 
@@ -1118,10 +1103,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r1),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r1
 
@@ -1129,10 +1116,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r2),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r2
 
@@ -1140,10 +1129,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r3),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r3
 
@@ -1151,10 +1142,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r4),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r4
 
@@ -1162,10 +1155,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r5),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r5
 
@@ -1173,10 +1168,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r6),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r6
 
@@ -1184,10 +1181,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r7),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
                             this % deviceData, &
                             SIZEOF(this % hostData), &
                             hipMemcpyDeviceToHost))
+#endif
 
   END SUBROUTINE UpdateHost_hfInt64_r7
 
@@ -1195,10 +1194,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r1),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r1
 
@@ -1206,10 +1207,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r2),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r2
 
@@ -1217,10 +1220,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r3),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r3
 
@@ -1228,10 +1233,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r4),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r4
 
@@ -1239,10 +1246,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r5),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r5
 
@@ -1250,10 +1259,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r6),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r6
 
@@ -1261,10 +1272,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r7),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfReal_r7
 
@@ -1272,10 +1285,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r1),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r1
 
@@ -1283,10 +1298,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r2),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r2
 
@@ -1294,10 +1311,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r3),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r3
 
@@ -1305,10 +1324,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r4),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r4
 
@@ -1316,10 +1337,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r5),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r5
 
@@ -1327,10 +1350,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r6),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r6
 
@@ -1338,10 +1363,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r7),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt32_r7
 
@@ -1349,10 +1376,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r1),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r1
 
@@ -1360,10 +1389,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r2),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r2
 
@@ -1371,10 +1402,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r3),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r3
 
@@ -1382,10 +1415,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r4),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r4
 
@@ -1393,10 +1428,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r5),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r5
 
@@ -1404,10 +1441,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r6),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r6
 
@@ -1415,12 +1454,13 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r7),INTENT(inout) :: this
 
+#ifdef GPU
     CALL hipCheck(hipMemcpy(this % deviceData, &
                             c_loc(this % hostData), &
                             SIZEOF(this % hostData), &
                             hipMemcpyHostToDevice))
+#endif
 
   END SUBROUTINE UpdateDevice_hfInt64_r7
-#endif
 
 END MODULE SELF_Memory
