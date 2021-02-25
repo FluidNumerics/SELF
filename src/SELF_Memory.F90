@@ -2,14 +2,18 @@ MODULE SELF_Memory
 
   USE SELF_Constants
 
-!  USE hipfort
-!  USE hipfort_check
+#ifdef GPU
+  USE hipfort
+  USE hipfort_check
+#endif
+
   USE ISO_FORTRAN_ENV
   USE ISO_C_BINDING
 
   IMPLICIT NONE
 
   TYPE hfReal_r1
+  !! Data type for storing one-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:)
     TYPE(c_ptr) :: deviceData
 
@@ -26,6 +30,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r1
 
   TYPE hfReal_r2
+  !! Data type for storing two-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -42,6 +47,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r2
 
   TYPE hfReal_r3
+  !! Data type for storing three-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -58,6 +64,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r3
 
   TYPE hfReal_r4
+  !! Data type for storing four-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -74,6 +81,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r4
 
   TYPE hfReal_r5
+  !! Data type for storing five-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -90,6 +98,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r5
 
   TYPE hfReal_r6
+  !! Data type for storing one-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:,:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -106,6 +115,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r6
 
   TYPE hfReal_r7
+  !! Data type for storing seven-dimensional real arrays on the host and the device
     REAL(prec),POINTER :: hostData(:,:,:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -122,6 +132,7 @@ MODULE SELF_Memory
   END TYPE hfReal_r7
 
   TYPE hfInt32_r1
+  !! Data type for storing one-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:)
     TYPE(c_ptr) :: deviceData
 
@@ -138,6 +149,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r1
 
   TYPE hfInt32_r2
+  !! Data type for storing two-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -154,6 +166,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r2
 
   TYPE hfInt32_r3
+  !! Data type for storing three-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -170,6 +183,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r3
 
   TYPE hfInt32_r4
+  !! Data type for storing four-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -186,6 +200,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r4
 
   TYPE hfInt32_r5
+  !! Data type for storing five-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -202,6 +217,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r5
 
   TYPE hfInt32_r6
+  !! Data type for storing six-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:,:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -218,6 +234,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r6
 
   TYPE hfInt32_r7
+  !! Data type for storing seven-dimensional int32 arrays on the host and the device
     INTEGER(int32),POINTER :: hostData(:,:,:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -234,6 +251,7 @@ MODULE SELF_Memory
   END TYPE hfInt32_r7
 
   TYPE hfInt64_r1
+  !! Data type for storing one-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:)
     TYPE(c_ptr) :: deviceData
 
@@ -250,6 +268,7 @@ MODULE SELF_Memory
   END TYPE hfInt64_r1
 
   TYPE hfInt64_r2
+  !! Data type for storing two-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -266,6 +285,7 @@ MODULE SELF_Memory
   END TYPE hfInt64_r2
 
   TYPE hfInt64_r3
+  !! Data type for storing three-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -282,6 +302,7 @@ MODULE SELF_Memory
   END TYPE hfInt64_r3
 
   TYPE hfInt64_r4
+  !! Data type for storing four-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -298,6 +319,7 @@ MODULE SELF_Memory
   END TYPE hfInt64_r4
 
   TYPE hfInt64_r5
+  !! Data type for storing five-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -314,6 +336,7 @@ MODULE SELF_Memory
   END TYPE hfInt64_r5
 
   TYPE hfInt64_r6
+  !! Data type for storing six-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:,:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
@@ -330,6 +353,7 @@ MODULE SELF_Memory
   END TYPE hfInt64_r6
 
   TYPE hfInt64_r7
+  !! Data type for storing seven-dimensional int64 arrays on the host and the device
     INTEGER(int64),POINTER :: hostData(:,:,:,:,:,:,:)
     TYPE(c_ptr) :: deviceData
 
