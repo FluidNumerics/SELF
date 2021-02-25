@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>Divergence_MappedVector3D &ndash; Fortran Program</title>
+    <title>Divergence_MappedVector3D &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/divergence_mappedvector3d.html#src">Divergence_MappedVector3D</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-physvector~3"></span>class(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+  <td><span class="anchor" id="variable-physvector~4"></span>class(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -241,7 +247,7 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-compvector~3"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+  <td><span class="anchor" id="variable-compvector~4"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -256,7 +262,7 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-geometry~13"></span>type(SEMHex),</td>
+  <td><span class="anchor" id="variable-geometry~7"></span>type(SEMHex),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -286,7 +292,7 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-dform~13"></span>integer,</td>
+  <td><span class="anchor" id="variable-dform~10"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -301,7 +307,7 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-gpuaccel~36"></span>logical,</td>
+  <td><span class="anchor" id="variable-gpuaccel~28"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -345,7 +351,13 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/divergence_mappedvector3d.html#src">Divergence_MappedVector3D</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -369,6 +381,59 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Divergence_MappedVector3D</span><span class="p">(</span><span class="n">physVector</span><span class="p">,</span><span class="n">compVector</span><span class="p">,</span><span class="n">geometry</span><span class="p">,</span><span class="n">divVector</span><span class="p">,</span><span class="n">dForm</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
+    <span class="c">!</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    CLASS</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">physVector</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">MappedVector3D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">compVector</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">SEMHex</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">geometry</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">MappedScalar3D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">divVector</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dForm</span>
+    <span class="kt">LOGICAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">gpuAccel</span>
+
+    <span class="k">CALL </span><span class="n">physVector</span> <span class="p">%</span> <span class="n">ContravariantProjection</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span><span class="n">compVector</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
+    <span class="k">IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfWeakDGForm</span><span class="p">)</span> <span class="k">THEN</span>
+
+<span class="c">!      IF (gpuAccel) THEN</span>
+<span class="c">!        CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % deviceData, &amp;</span>
+<span class="c">!                                                         compVector % boundary % deviceData, &amp;</span>
+<span class="c">!                                                         divVector % interior % deviceData, &amp;</span>
+<span class="c">!                                                         compVector % nvar, &amp;</span>
+<span class="c">!                                                         compVector % nelem)</span>
+<span class="c">!      ELSE</span>
+        <span class="k">CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDGDivergence_3D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">compVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">divVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">compVector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">compVector</span> <span class="p">%</span> <span class="n">nelem</span><span class="p">)</span>
+<span class="c">!      ENDIF</span>
+
+    <span class="k">ELSE IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfStrongForm</span><span class="p">)</span> <span class="k">THEN</span>
+
+<span class="c">!      IF (gpuAccel) THEN</span>
+<span class="c">!        CALL compVector % interp % VectorDivergence_3D(compVector % interior % deviceData, &amp;</span>
+<span class="c">!                                                       divVector % interior % deviceData, &amp;</span>
+<span class="c">!                                                       compVector % nvar, &amp;</span>
+<span class="c">!                                                       compVector % nelem)</span>
+<span class="c">!      ELSE</span>
+        <span class="k">CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDivergence_3D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">divVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">compVector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">compVector</span> <span class="p">%</span> <span class="n">nelem</span><span class="p">)</span>
+<span class="c">!      ENDIF</span>
+
+    <span class="k">END IF</span>
+
+<span class="k">    CALL </span><span class="n">divVector</span> <span class="p">%</span> <span class="n">JacobianWeight</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
+
+  <span class="k">END SUBROUTINE </span><span class="n">Divergence_MappedVector3D</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -385,10 +450,10 @@ public subroutine Divergence_MappedVector3D(physVector, compVector, geometry, di
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>JacobianWeight_MappedTensor2D &ndash; Fortran Program</title>
+    <title>JacobianWeight_MappedTensor2D &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/jacobianweight_mappedtensor2d.html#src">JacobianWeight_MappedTensor2D</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ public subroutine JacobianWeight_MappedTensor2D(tensor, geometry, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-tensor~3"></span>class(<a href='../type/mappedtensor2d.html'>MappedTensor2D</a>),</td>
+  <td><span class="anchor" id="variable-tensor"></span>class(<a href='../type/mappedtensor2d.html'>MappedTensor2D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -241,7 +247,7 @@ public subroutine JacobianWeight_MappedTensor2D(tensor, geometry, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-geometry~17"></span>type(SEMQuad),</td>
+  <td><span class="anchor" id="variable-geometry~15"></span>type(SEMQuad),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -256,7 +262,7 @@ public subroutine JacobianWeight_MappedTensor2D(tensor, geometry, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-gpuaccel~42"></span>logical,</td>
+  <td><span class="anchor" id="variable-gpuaccel~36"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -300,7 +306,13 @@ public subroutine JacobianWeight_MappedTensor2D(tensor, geometry, gpuAccel)
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/jacobianweight_mappedtensor2d.html#src">JacobianWeight_MappedTensor2D</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -324,6 +336,52 @@ public subroutine JacobianWeight_MappedTensor2D(tensor, geometry, gpuAccel)
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">JacobianWeight_MappedTensor2D</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span><span class="n">geometry</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
+  <span class="c">! Applies the inverse jacobian</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    CLASS</span><span class="p">(</span><span class="n">MappedTensor2D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">tensor</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">SEMQuad</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">geometry</span>
+    <span class="kt">LOGICAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">gpuAccel</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">iEl</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span>
+
+<span class="c">!    IF (gpuAccel) THEN</span>
+<span class="c">!</span>
+<span class="c">!      CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &amp;</span>
+<span class="c">!                                                     geometry % dxds % interior % deviceData, &amp;</span>
+<span class="c">!                                                     tensor % N, &amp;</span>
+<span class="c">!                                                     tensor % nVar, &amp;</span>
+<span class="c">!                                                     tensor % nElem)</span>
+<span class="c">!</span>
+<span class="c">!    ELSE</span>
+
+      <span class="k">DO </span><span class="n">iEl</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">tensor</span> <span class="p">%</span> <span class="n">nElem</span>
+        <span class="k">DO </span><span class="n">iVar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">tensor</span> <span class="p">%</span> <span class="n">nVar</span>
+          <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">tensor</span> <span class="p">%</span> <span class="n">N</span>
+            <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">tensor</span> <span class="p">%</span> <span class="n">N</span>
+              <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="o">/</span><span class="p">&amp;</span>
+                                                             <span class="n">geometry</span> <span class="p">%</span> <span class="n">J</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+              <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="o">/</span><span class="p">&amp;</span>
+                                                             <span class="n">geometry</span> <span class="p">%</span> <span class="n">J</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+              <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="o">/</span><span class="p">&amp;</span>
+                                                             <span class="n">geometry</span> <span class="p">%</span> <span class="n">J</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+              <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">tensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span><span class="o">/</span><span class="p">&amp;</span>
+                                                             <span class="n">geometry</span> <span class="p">%</span> <span class="n">J</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+            <span class="n">ENDDO</span>
+          <span class="n">ENDDO</span>
+        <span class="n">ENDDO</span>
+      <span class="n">ENDDO</span>
+
+<span class="c">!    ENDIF</span>
+
+  <span class="k">END SUBROUTINE </span><span class="n">JacobianWeight_MappedTensor2D</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -340,10 +398,10 @@ public subroutine JacobianWeight_MappedTensor2D(tensor, geometry, gpuAccel)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

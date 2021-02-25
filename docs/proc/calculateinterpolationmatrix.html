@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>CalculateInterpolationMatrix &ndash; Fortran Program</title>
+    <title>CalculateInterpolationMatrix &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/calculateinterpolationmatrix.html#src">CalculateInterpolationMatrix</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ public subroutine CalculateInterpolationMatrix(myPoly)
   
 <tr>
   
-  <td><span class="anchor" id="variable-mypoly~71"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+  <td><span class="anchor" id="variable-mypoly~4"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -278,8 +284,8 @@ public subroutine CalculateInterpolationMatrix(myPoly)
 <!-- proc~calculateinterpolationmatrix&#45;&gt;proc~almostequal -->
 <g id="proc~~calculateinterpolationmatrix~~CallsGraph_edge1" class="edge">
 <title>proc~calculateinterpolationmatrix&#45;&gt;proc~almostequal</title>
-<path fill="none" stroke="#000000" d="M164.4402,-12C173.1274,-12 181.7545,-12 189.8976,-12"/>
-<polygon fill="#000000" stroke="#000000" points="189.9213,-15.5001 199.9213,-12 189.9213,-8.5001 189.9213,-15.5001"/>
+<path fill="none" stroke="#ff0000" d="M164.4402,-12C173.1274,-12 181.7545,-12 189.8976,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="189.9213,-15.5001 199.9213,-12 189.9213,-8.5001 189.9213,-15.5001"/>
 </g>
 </g>
 </svg>
@@ -339,7 +345,7 @@ public subroutine CalculateInterpolationMatrix(myPoly)
     <p>Solid arrows point from a procedure to one which it calls. Dashed 
     arrows point from an interface to procedures which implement that interface.
     This could include the module procedures in a generic interface or the
-    implementation in a submodule of an interface in a parent module.
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
     </p>
     </div></div></div></div>
       </div>
@@ -373,7 +379,13 @@ public subroutine CalculateInterpolationMatrix(myPoly)
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/calculateinterpolationmatrix.html#src">CalculateInterpolationMatrix</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -397,6 +409,75 @@ public subroutine CalculateInterpolationMatrix(myPoly)
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">CalculateInterpolationMatrix</span><span class="p">(</span><span class="n">myPoly</span><span class="p">)</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    CLASS</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">myPoly</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span>    <span class="kd">::</span> <span class="n">row</span><span class="p">,</span><span class="n">col</span>
+    <span class="kt">LOGICAL</span>    <span class="kd">::</span> <span class="n">rowHasMatch</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span> <span class="kd">::</span> <span class="n">temp1</span><span class="p">,</span><span class="n">temp2</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span> <span class="kd">::</span> <span class="n">iMatrix</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">M</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span> <span class="kd">::</span> <span class="n">bWeights</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span><span class="p">%</span><span class="n">N</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span> <span class="kd">::</span> <span class="n">controlPoints</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span><span class="p">%</span><span class="n">N</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span> <span class="kd">::</span> <span class="n">targetPoints</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span><span class="p">%</span><span class="n">M</span><span class="p">)</span>
+
+    <span class="k">DO </span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+      <span class="n">controlPoints</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">controlPoints</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">col</span><span class="p">),</span><span class="n">real64</span><span class="p">)</span>
+      <span class="n">bWeights</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">bWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">col</span><span class="p">),</span><span class="n">real64</span><span class="p">)</span>
+    <span class="k">END DO</span>
+<span class="k">    DO </span><span class="n">row</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">M</span>
+      <span class="n">targetPoints</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">=</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">targetPoints</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">row</span><span class="p">),</span><span class="n">real64</span><span class="p">)</span>
+    <span class="k">END DO</span>
+
+<span class="k">    DO </span><span class="n">row</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">M</span>
+
+      <span class="n">rowHasMatch</span> <span class="o">=</span> <span class="p">.</span><span class="n">FALSE</span><span class="p">.</span>
+
+      <span class="k">DO </span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+
+        <span class="n">iMatrix</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0_real64</span>
+
+        <span class="k">IF</span> <span class="p">(</span><span class="n">AlmostEqual</span><span class="p">(</span><span class="n">targetPoints</span><span class="p">(</span><span class="n">row</span><span class="p">),</span><span class="n">controlPoints</span><span class="p">(</span><span class="n">col</span><span class="p">)))</span> <span class="k">THEN</span>
+<span class="k">          </span><span class="n">rowHasMatch</span> <span class="o">=</span> <span class="p">.</span><span class="n">TRUE</span><span class="p">.</span>
+          <span class="n">iMatrix</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0_real64</span>
+        <span class="k">END IF</span>
+
+<span class="k">      END DO</span>
+
+<span class="k">      IF</span> <span class="p">(.</span><span class="nb">NOT</span><span class="p">.</span> <span class="p">(</span><span class="n">rowHasMatch</span><span class="p">))</span> <span class="k">THEN</span>
+
+<span class="k">        </span><span class="n">temp1</span> <span class="o">=</span> <span class="mf">0.0_real64</span>
+
+        <span class="k">DO </span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+          <span class="n">temp2</span> <span class="o">=</span> <span class="n">bWeights</span><span class="p">(</span><span class="n">col</span><span class="p">)</span><span class="o">/</span> <span class="p">&amp;</span>
+                  <span class="p">(</span><span class="n">targetPoints</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">-</span> <span class="p">&amp;</span>
+                   <span class="n">controlPoints</span><span class="p">(</span><span class="n">col</span><span class="p">))</span>
+          <span class="n">iMatrix</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="n">temp2</span>
+          <span class="n">temp1</span> <span class="o">=</span> <span class="n">temp1</span> <span class="o">+</span> <span class="n">temp2</span>
+        <span class="k">END DO</span>
+
+<span class="k">        DO </span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+          <span class="n">iMatrix</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span> <span class="o">=</span> <span class="n">iMatrix</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">)</span><span class="o">/</span><span class="n">temp1</span>
+        <span class="k">END DO</span>
+
+<span class="k">      END IF</span>
+
+<span class="k">    END DO</span>
+
+<span class="k">    DO </span><span class="n">row</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">M</span>
+      <span class="k">DO </span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+        <span class="n">myPoly</span> <span class="p">%</span> <span class="n">iMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">col</span><span class="p">,</span><span class="n">row</span><span class="p">)</span> <span class="o">=</span> <span class="kt">REAL</span><span class="p">(</span><span class="n">iMatrix</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">),</span><span class="n">prec</span><span class="p">)</span>
+      <span class="n">ENDDO</span>
+    <span class="n">ENDDO</span>
+
+  <span class="k">END SUBROUTINE </span><span class="n">CalculateInterpolationMatrix</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -413,10 +494,10 @@ public subroutine CalculateInterpolationMatrix(myPoly)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

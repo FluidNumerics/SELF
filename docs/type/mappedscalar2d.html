@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>MappedScalar2D &ndash; Fortran Program </title>
+    <title>MappedScalar2D &ndash; SELF </title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -191,11 +191,11 @@
   <div id="boundprocs-0" class="panel-collapse collapse">
     <div class="list-group">
       
+      <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-contravariantweight">ContravariantWeight</a>
+      
       <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-gradient">Gradient</a>
       
       <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-gradient_mappedscalar2d">Gradient_MappedScalar2D</a>
-      
-      <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-contravariantweight">ContravariantWeight</a>
       
       <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-jacobianweight~2">JacobianWeight</a>
       
@@ -204,6 +204,14 @@
 </div>
 
 
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/mappedscalar2d.html#src">MappedScalar2D</a>
+  </div>
+</div>
 
 
 
@@ -247,11 +255,11 @@
   <div id="boundprocs-1" class="panel-collapse collapse">
     <div class="list-group">
       
+      <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-contravariantweight">ContravariantWeight</a>
+      
       <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-gradient">Gradient</a>
       
       <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-gradient_mappedscalar2d">Gradient_MappedScalar2D</a>
-      
-      <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-contravariantweight">ContravariantWeight</a>
       
       <a class="list-group-item" href="../type/mappedscalar2d.html#boundprocedure-jacobianweight~2">JacobianWeight</a>
       
@@ -260,6 +268,14 @@
 </div>
 
 
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../type/mappedscalar2d.html#src">MappedScalar2D</a>
+  </div>
+</div>
 
 
 
@@ -275,6 +291,115 @@
      
     <section>
     <h2>Type-Bound Procedures</h2>
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-contravariantweight"></span><h3>procedure, private :: <strong>ContravariantWeight</strong>  => <a href='../proc/contravariantweight_mappedscalar2d.html'>ContravariantWeight_MappedScalar2D</a> 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/contravariantweight_mappedscalar2d.html'>ContravariantWeight_MappedScalar2D</a>(scalar, geometry, workTensor, gpuAccel)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>scalar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(SEMQuad),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(<a href='../type/mappedtensor2d.html'>MappedTensor2D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>workTensor</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>gpuAccel</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
     
      
 <div class="panel panel-default">
@@ -556,115 +681,6 @@ public subroutine <a href='../proc/gradient_mappedscalar2d.html'>Gradient_Mapped
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-contravariantweight"></span><h3>procedure, private :: <strong>ContravariantWeight</strong>  => <a href='../proc/contravariantweight_mappedscalar2d.html'>ContravariantWeight_MappedScalar2D</a> 
-    
-  </h3></div>
-  
-  <ul class="list-group">
-    
-      <li class="list-group-item">
-      
-        
-          
-    
-    <h3>
-public subroutine <a href='../proc/contravariantweight_mappedscalar2d.html'>ContravariantWeight_MappedScalar2D</a>(scalar, geometry, workTensor, gpuAccel)
-    
-    
-   
-</h3>
-    
-    
-    <h4>Arguments</h4>
-    
-      
-      
-<table class="table table-striped varlist">
-<thead><tr><th>Type</th>
-<th>Intent</th><th>Optional</th>
-<th>Attributes</th><th></th><th>Name</th><th></th></thead>
-
-
-
-<tbody>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>class(<a href='../type/mappedscalar2d.html'>MappedScalar2D</a>),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>scalar</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(SEMQuad),</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>geometry</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>type(<a href='../type/mappedtensor2d.html'>MappedTensor2D</a>),</td>
-  <td>intent(inout)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>workTensor</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" ></span>logical,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>gpuAccel</strong></td><td></td>
-  
-</tr>
-
-</tbody>
-</table>
-
-      
-    
-    
-
-        
-      
-      </li>
-    
-  </ul>
-</div>
-
-    
-     
-<div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-jacobianweight~2"></span><h3>procedure, private :: <strong>JacobianWeight</strong>  => <a href='../proc/jacobianweight_mappedscalar2d.html'>JacobianWeight_MappedScalar2D</a> 
     
   </h3></div>
@@ -761,6 +777,22 @@ public subroutine <a href='../proc/jacobianweight_mappedscalar2d.html'>JacobianW
     
     
     
+    <section>
+    <h3><span class="anchor" id="src"></span>Source Code</h3>
+    <div class="highlight"><pre><span></span>  <span class="k">TYPE</span><span class="p">,</span><span class="k">EXTENDS</span><span class="p">(</span><span class="n">Scalar2D</span><span class="p">),</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">MappedScalar2D</span>
+
+  <span class="k">CONTAINS</span>
+
+<span class="k">    GENERIC</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">Gradient</span> <span class="o">=&gt;</span> <span class="n">Gradient_MappedScalar2D</span>
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">Gradient_MappedScalar2D</span>
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">ContravariantWeight</span> <span class="o">=&gt;</span> <span class="n">ContravariantWeight_MappedScalar2D</span>
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">JacobianWeight</span> <span class="o">=&gt;</span> <span class="n">JacobianWeight_MappedScalar2D</span>
+
+  <span class="k">END TYPE </span><span class="n">MappedScalar2D</span>
+</pre></div>
+
+    </section>
+    
     
     </div>
   </div>
@@ -777,10 +809,10 @@ public subroutine <a href='../proc/jacobianweight_mappedscalar2d.html'>JacobianW
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

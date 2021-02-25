@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>ContravariantProjection_MappedVector2D &ndash; Fortran Program</title>
+    <title>ContravariantProjection_MappedVector2D &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/contravariantprojection_mappedvector2d.html#src">ContravariantProjection_MappedVector2D</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
   
 <tr>
   
-  <td><span class="anchor" id="variable-physvector~2"></span>class(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+  <td><span class="anchor" id="variable-physvector"></span>class(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -241,7 +247,7 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
   
 <tr>
   
-  <td><span class="anchor" id="variable-geometry~11"></span>type(SEMQuad),</td>
+  <td><span class="anchor" id="variable-geometry"></span>type(SEMQuad),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -256,7 +262,7 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
   
 <tr>
   
-  <td><span class="anchor" id="variable-compvector~2"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+  <td><span class="anchor" id="variable-compvector"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -271,7 +277,7 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
   
 <tr>
   
-  <td><span class="anchor" id="variable-gpuaccel~34"></span>logical,</td>
+  <td><span class="anchor" id="variable-gpuaccel~22"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -315,7 +321,13 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/contravariantprojection_mappedvector2d.html#src">ContravariantProjection_MappedVector2D</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -339,6 +351,85 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">ContravariantProjection_MappedVector2D</span><span class="p">(</span><span class="n">physVector</span><span class="p">,</span><span class="n">geometry</span><span class="p">,</span><span class="n">compVector</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
+    <span class="c">! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector</span>
+    <span class="c">! into the the contravariant basis vector directions. Keep in mind that the contravariant basis</span>
+    <span class="c">! vectors are really the Jacobian weighted contravariant basis vectors</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    CLASS</span><span class="p">(</span><span class="n">MappedVector2D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">physVector</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">SEMQuad</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">geometry</span>
+    <span class="kt">LOGICAL</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">gpuAccel</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">MappedVector2D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span> <span class="kd">::</span> <span class="n">compVector</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">,</span><span class="n">iside</span>
+
+<span class="c">!    IF (gpuAccel) THEN</span>
+<span class="c">!</span>
+<span class="c">!      ! TO DO : Add boundary projection routine for GPU</span>
+<span class="c">!      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &amp;</span>
+<span class="c">!                                                              compVector % interior % deviceData, &amp;</span>
+<span class="c">!                                                              geometry % dsdx % interior % deviceData, &amp;</span>
+<span class="c">!                                                              physVector % N, &amp;</span>
+<span class="c">!                                                              physVector % nVar, &amp;</span>
+<span class="c">!                                                              physVector % nElem)</span>
+<span class="c">!</span>
+<span class="c">!    ELSE</span>
+      <span class="c">! Assume that tensor(j,i) is vector i, component j</span>
+      <span class="c">! =&gt; dot product is done along first dimension</span>
+      <span class="c">! to project onto computational space</span>
+      <span class="k">DO </span><span class="n">iel</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">nElem</span>
+        <span class="k">DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">nVar</span>
+          <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">N</span>
+            <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">N</span>
+
+              <span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">+</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span>
+
+              <span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">+</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span>
+
+            <span class="k">END DO</span>
+<span class="k">          END DO</span>
+<span class="k">        END DO</span>
+<span class="k">      END DO</span>
+
+      <span class="c">! Boundary Terms</span>
+      <span class="k">DO </span><span class="n">iel</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">nElem</span>
+        <span class="k">DO </span><span class="n">iside</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="mi">4</span>
+          <span class="k">DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">nVar</span>
+            <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">physVector</span> <span class="p">%</span> <span class="n">N</span>
+              <span class="n">compVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">+</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span>
+
+              <span class="n">compVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span> <span class="o">+</span> <span class="p">&amp;</span>
+                <span class="n">geometry</span> <span class="p">%</span> <span class="n">dsdx</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span><span class="o">*</span> <span class="p">&amp;</span>
+                <span class="n">physVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">iside</span><span class="p">,</span><span class="n">iel</span><span class="p">)</span>
+            <span class="n">ENDDO</span>
+          <span class="n">ENDDO</span>
+        <span class="n">ENDDO</span>
+      <span class="n">ENDDO</span>
+
+<span class="c">!    END IF</span>
+
+  <span class="k">END SUBROUTINE </span><span class="n">ContravariantProjection_MappedVector2D</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -355,10 +446,10 @@ public subroutine ContravariantProjection_MappedVector2D(physVector, geometry, c
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

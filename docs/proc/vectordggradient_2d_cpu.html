@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>VectorDGGradient_2D_cpu &ndash; Fortran Program</title>
+    <title>VectorDGGradient_2D_cpu &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/vectordggradient_2d_cpu.html#src">VectorDGGradient_2D_cpu</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
   
 <tr>
   
-  <td><span class="anchor" id="variable-mypoly~30"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+  <td><span class="anchor" id="variable-mypoly~59"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -241,7 +247,7 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
   
 <tr>
   
-  <td><span class="anchor" id="variable-f~13"></span>real(kind=prec),</td>
+  <td><span class="anchor" id="variable-f~33"></span>real(kind=prec),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -256,7 +262,7 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
   
 <tr>
   
-  <td><span class="anchor" id="variable-bf~3"></span>real(kind=prec),</td>
+  <td><span class="anchor" id="variable-bf~5"></span>real(kind=prec),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -286,7 +292,7 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
   
 <tr>
   
-  <td><span class="anchor" id="variable-nvariables~25"></span>integer,</td>
+  <td><span class="anchor" id="variable-nvariables~51"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -301,7 +307,7 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
   
 <tr>
   
-  <td><span class="anchor" id="variable-nelements~25"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelements~51"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -345,7 +351,13 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/vectordggradient_2d_cpu.html#src">VectorDGGradient_2D_cpu</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -369,6 +381,67 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">VectorDGGradient_2D_cpu</span><span class="p">(</span><span class="n">myPoly</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">bf</span><span class="p">,</span><span class="n">gradF</span><span class="p">,</span><span class="n">nVariables</span><span class="p">,</span><span class="n">nElements</span><span class="p">)</span>
+    <span class="c">!</span>
+    <span class="c">! Input : Vector(1:2,...)</span>
+    <span class="c">! Output : Tensor(1:2,1:2,....)</span>
+    <span class="c">!          &gt; Tensor(1,1) = d/ds1( Vector(1,...) )</span>
+    <span class="c">!          &gt; Tensor(2,1) = d/ds1( Vector(2,...) )</span>
+    <span class="c">!          &gt; Tensor(1,2) = d/ds2( Vector(1,...) )</span>
+    <span class="c">!          &gt; Tensor(2,2) = d/ds2( Vector(2,...) )</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    CLASS</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">myPoly</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>     <span class="kd">::</span> <span class="n">nVariables</span><span class="p">,</span><span class="n">nElements</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nVariables</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nElements</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">bf</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nVariables</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nElements</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nVariables</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="n">nElements</span><span class="p">)</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span>    <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span>
+
+    <span class="k">DO </span><span class="n">iEl</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">nElements</span>
+      <span class="k">DO </span><span class="n">iVar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">nVariables</span>
+        <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+          <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0_prec</span>
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0_prec</span>
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0_prec</span>
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.0_prec</span>
+            <span class="k">DO </span><span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">N</span>
+              <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="n">myPoly</span> <span class="p">%</span> <span class="n">dgMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+              <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="n">myPoly</span> <span class="p">%</span> <span class="n">dgMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+              <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="n">myPoly</span> <span class="p">%</span> <span class="n">dgMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+              <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="n">myPoly</span> <span class="p">%</span> <span class="n">dgMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">f</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">ii</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span>
+            <span class="k">END DO</span>
+<span class="k">            </span><span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span><span class="p">&amp;</span>
+                                                                 <span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">iEl</span><span class="p">))</span><span class="o">/</span><span class="p">&amp;</span>
+                                                                <span class="n">myPoly</span> <span class="p">%</span> <span class="n">qWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span><span class="p">&amp;</span>
+                                                                 <span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">iEl</span><span class="p">))</span><span class="o">/</span><span class="p">&amp;</span>
+                                                                <span class="n">myPoly</span> <span class="p">%</span> <span class="n">qWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span><span class="p">&amp;</span>
+                                                                 <span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">))</span><span class="o">/</span><span class="p">&amp;</span>
+                                                                <span class="n">myPoly</span> <span class="p">%</span> <span class="n">qWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+            <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">=</span> <span class="n">gradF</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">iEl</span><span class="p">)</span> <span class="o">+</span><span class="p">&amp;</span>
+                                                                 <span class="n">myPoly</span> <span class="p">%</span> <span class="n">bMatrix</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="n">bf</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">iEl</span><span class="p">))</span><span class="o">/</span><span class="p">&amp;</span>
+                                                                <span class="n">myPoly</span> <span class="p">%</span> <span class="n">qWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+          <span class="k">END DO</span>
+<span class="k">        END DO</span>
+<span class="k">      END DO</span>
+<span class="k">    END DO</span>
+
+<span class="k">  END SUBROUTINE </span><span class="n">VectorDGGradient_2D_cpu</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -385,10 +458,10 @@ public subroutine VectorDGGradient_2D_cpu(myPoly, f, bf, gradF, nVariables, nEle
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

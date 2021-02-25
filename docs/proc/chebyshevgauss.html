@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>ChebyshevGauss &ndash; Fortran Program</title>
+    <title>ChebyshevGauss &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/chebyshevgauss.html#src">ChebyshevGauss</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ private subroutine ChebyshevGauss(N, nodes, weights)
   
 <tr>
   
-  <td><span class="anchor" id="variable-n~17"></span>integer</td>
+  <td><span class="anchor" id="variable-n~15"></span>integer</td>
   <td></td>
   <td></td>
   
@@ -241,7 +247,7 @@ private subroutine ChebyshevGauss(N, nodes, weights)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nodes~3"></span>real(kind=real64)</td>
+  <td><span class="anchor" id="variable-nodes"></span>real(kind=real64)</td>
   <td></td>
   <td></td>
   
@@ -256,7 +262,7 @@ private subroutine ChebyshevGauss(N, nodes, weights)
   
 <tr>
   
-  <td><span class="anchor" id="variable-weights~3"></span>real(kind=real64)</td>
+  <td><span class="anchor" id="variable-weights"></span>real(kind=real64)</td>
   <td></td>
   <td></td>
   
@@ -309,8 +315,8 @@ private subroutine ChebyshevGauss(N, nodes, weights)
 <!-- proc~chebyshevquadrature&#45;&gt;proc~chebyshevgauss -->
 <g id="proc~~chebyshevgauss~~CalledByGraph_edge1" class="edge">
 <title>proc~chebyshevquadrature&#45;&gt;proc~chebyshevgauss</title>
-<path fill="none" stroke="#000000" d="M133.151,-12C141.5886,-12 150.195,-12 158.5551,-12"/>
-<polygon fill="#000000" stroke="#000000" points="158.6025,-15.5001 168.6025,-12 158.6024,-8.5001 158.6025,-15.5001"/>
+<path fill="none" stroke="#ff0000" d="M133.151,-12C141.5886,-12 150.195,-12 158.5551,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="158.6025,-15.5001 168.6025,-12 158.6024,-8.5001 158.6025,-15.5001"/>
 </g>
 </g>
 </svg>
@@ -370,7 +376,7 @@ private subroutine ChebyshevGauss(N, nodes, weights)
     <p>Solid arrows point from a procedure to one which it calls. Dashed 
     arrows point from an interface to procedures which implement that interface.
     This could include the module procedures in a generic interface or the
-    implementation in a submodule of an interface in a parent module.
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
     </p>
     </div></div></div></div>
       </div>
@@ -403,7 +409,13 @@ private subroutine ChebyshevGauss(N, nodes, weights)
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/chebyshevgauss.html#src">ChebyshevGauss</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -427,6 +439,29 @@ private subroutine ChebyshevGauss(N, nodes, weights)
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">ChebyshevGauss</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">nodes</span><span class="p">,</span><span class="n">weights</span><span class="p">)</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    </span><span class="kt">INTEGER</span>       <span class="kd">::</span> <span class="n">N</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">nodes</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span>    <span class="kd">::</span> <span class="n">weights</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">N</span><span class="p">)</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span>    <span class="kd">::</span> <span class="n">j</span>
+
+    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">N</span>
+
+      <span class="n">weights</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="kt">REAL</span><span class="p">(</span><span class="n">N</span><span class="p">,</span><span class="n">real64</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0_real64</span><span class="p">)</span>
+      <span class="n">nodes</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="nb">cos</span><span class="p">(</span><span class="mf">0.5_real64</span><span class="o">*</span><span class="p">(</span><span class="mf">2.0_real64</span><span class="o">*</span><span class="kt">REAL</span><span class="p">(</span><span class="n">j</span><span class="p">,</span><span class="n">real64</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0_real64</span><span class="p">)</span><span class="o">*</span><span class="n">weights</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+
+    <span class="k">END DO</span>
+
+<span class="k">  END SUBROUTINE </span><span class="n">ChebyshevGauss</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -443,10 +478,10 @@ private subroutine ChebyshevGauss(N, nodes, weights)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

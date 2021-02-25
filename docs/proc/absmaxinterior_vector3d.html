@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>AbsMaxInterior_Vector3D &ndash; Fortran Program</title>
+    <title>AbsMaxInterior_Vector3D &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/absmaxinterior_vector3d.html#src">AbsMaxInterior_Vector3D</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -226,7 +232,7 @@ public function AbsMaxInterior_Vector3D(vector) result(absMax)
   
 <tr>
   
-  <td><span class="anchor" id="variable-vector~11"></span>class(<a href='../type/vector3d.html'>Vector3D</a>)</td>
+  <td><span class="anchor" id="variable-vector~12"></span>class(<a href='../type/vector3d.html'>Vector3D</a>)</td>
   <td></td>
   <td></td>
   
@@ -245,7 +251,7 @@ public function AbsMaxInterior_Vector3D(vector) result(absMax)
     
     
     
-   <h3>Return Value <small><span class="anchor" id="variable-absmax~9"></span>real(kind=prec)
+   <h3>Return Value <small><span class="anchor" id="variable-absmax~14"></span>real(kind=prec)
   (1:vector%nVar)</small></h3>
     
     
@@ -279,7 +285,13 @@ public function AbsMaxInterior_Vector3D(vector) result(absMax)
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/absmaxinterior_vector3d.html#src">AbsMaxInterior_Vector3D</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -303,6 +315,36 @@ public function AbsMaxInterior_Vector3D(vector) result(absMax)
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">FUNCTION </span><span class="n">AbsMaxInterior_Vector3D</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span> <span class="k">RESULT</span><span class="p">(</span><span class="n">absMax</span><span class="p">)</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    CLASS</span><span class="p">(</span><span class="n">Vector3D</span><span class="p">)</span> <span class="kd">::</span> <span class="n">vector</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span> <span class="kd">::</span> <span class="n">absMax</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nVar</span><span class="p">)</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">iEl</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iDir</span>
+
+    <span class="n">absMax</span> <span class="o">=</span> <span class="mf">0.0_prec</span>
+    <span class="k">DO </span><span class="n">iEl</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nElem</span>
+      <span class="k">DO </span><span class="n">iVar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nVar</span>
+        <span class="k">DO </span><span class="n">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
+          <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
+            <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
+              <span class="k">DO </span><span class="n">iDir</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="mi">3</span>
+                <span class="n">absMax</span><span class="p">(</span><span class="n">iVar</span><span class="p">)</span> <span class="o">=</span> <span class="nb">MAX</span><span class="p">(</span><span class="nb">ABS</span><span class="p">(</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">iDir</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">)),</span><span class="n">absMax</span><span class="p">(</span><span class="n">iVar</span><span class="p">))</span>
+              <span class="k">END DO</span>
+<span class="k">            END DO</span>
+<span class="k">          END DO</span>
+<span class="k">        END DO</span>
+<span class="k">      END DO</span>
+<span class="k">    END DO</span>
+
+<span class="k">  END FUNCTION </span><span class="n">AbsMaxInterior_Vector3D</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -319,10 +361,10 @@ public function AbsMaxInterior_Vector3D(vector) result(absMax)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

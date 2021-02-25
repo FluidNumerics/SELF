@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>TimeStamp &ndash; Fortran Program</title>
+    <title>TimeStamp &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/timestamp.html#src">TimeStamp</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -294,7 +300,13 @@ public function TimeStamp(time, units) result(timeStampString)
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/timestamp.html#src">TimeStamp</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -318,6 +330,62 @@ public function TimeStamp(time, units) result(timeStampString)
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">FUNCTION </span><span class="n">TimeStamp</span><span class="p">(</span><span class="nb">time</span><span class="p">,</span><span class="n">units</span><span class="p">)</span> <span class="k">RESULT</span><span class="p">(</span><span class="n">timeStampString</span><span class="p">)</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    </span><span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span>    <span class="kd">::</span> <span class="nb">time</span>
+<span class="nb">    </span><span class="kt">CHARACTER</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="kd">::</span> <span class="n">units</span>
+    <span class="kt">CHARACTER</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span> <span class="kd">::</span> <span class="n">timeStampString</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span>      <span class="kd">::</span> <span class="n">day</span><span class="p">,</span><span class="n">minute</span><span class="p">,</span><span class="n">hour</span><span class="p">,</span><span class="nb">second</span><span class="p">,</span><span class="n">millisecond</span>
+    <span class="kt">CHARACTER</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="kd">::</span> <span class="n">dayStamp</span>
+    <span class="kt">CHARACTER</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="kd">::</span> <span class="n">hourStamp</span><span class="p">,</span><span class="n">minuteStamp</span><span class="p">,</span><span class="n">secondStamp</span>
+    <span class="kt">CHARACTER</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="kd">::</span> <span class="n">milliSecondStamp</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">real64</span><span class="p">)</span>     <span class="kd">::</span> <span class="n">time_real64</span>
+
+    <span class="n">time_real64</span> <span class="o">=</span> <span class="kt">REAL</span><span class="p">(</span><span class="nb">time</span><span class="p">,</span><span class="n">real64</span><span class="p">)</span>
+    <span class="c">! Units in &quot;seconds&quot;</span>
+    <span class="k">IF</span> <span class="p">(</span><span class="n">units</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span> <span class="k">THEN</span>
+
+      <span class="c">! Obtain the day</span>
+      <span class="n">day</span> <span class="o">=</span> <span class="nb">INT</span><span class="p">(</span><span class="n">time_real64</span><span class="o">/</span><span class="mi">8640</span><span class="mf">0.0_real64</span><span class="p">)</span>
+      <span class="n">hour</span> <span class="o">=</span> <span class="nb">INT</span><span class="p">((</span><span class="n">time_real64</span> <span class="p">&amp;</span>
+                  <span class="o">-</span> <span class="mi">8640</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">day</span><span class="p">)</span><span class="o">/</span><span class="mi">360</span><span class="mf">0.0_real64</span><span class="p">)</span>
+      <span class="n">minute</span> <span class="o">=</span> <span class="nb">INT</span><span class="p">((</span><span class="n">time_real64</span> <span class="p">&amp;</span>
+                    <span class="o">-</span> <span class="mi">360</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">hour</span> <span class="p">&amp;</span>
+                    <span class="o">-</span> <span class="mi">8640</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">day</span><span class="p">)</span><span class="o">/</span><span class="mi">6</span><span class="mf">0.0_real64</span><span class="p">)</span>
+      <span class="nb">second</span> <span class="o">=</span> <span class="nb">INT</span><span class="p">((</span><span class="n">time_real64</span> <span class="p">&amp;</span>
+                    <span class="o">-</span> <span class="mi">6</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">minute</span> <span class="p">&amp;</span>
+                    <span class="o">-</span> <span class="mi">360</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">hour</span> <span class="p">&amp;</span>
+                    <span class="o">-</span> <span class="mi">8640</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">day</span><span class="p">))</span>
+      <span class="n">milliSecond</span> <span class="o">=</span> <span class="nb">NINT</span><span class="p">(((</span><span class="n">time_real64</span> <span class="p">&amp;</span>
+                           <span class="o">-</span> <span class="mi">6</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">minute</span> <span class="p">&amp;</span>
+                           <span class="o">-</span> <span class="mi">360</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">hour</span> <span class="p">&amp;</span>
+                           <span class="o">-</span> <span class="mi">8640</span><span class="mf">0.0_real64</span><span class="o">*</span><span class="n">day</span><span class="p">)</span> <span class="p">&amp;</span>
+                          <span class="o">-</span> <span class="kt">REAL</span><span class="p">(</span><span class="nb">second</span><span class="p">,</span><span class="n">real64</span><span class="p">))</span><span class="o">*</span><span class="mi">100</span><span class="mf">0.0_real64</span><span class="p">)</span>
+
+      <span class="k">WRITE</span> <span class="p">(</span><span class="n">dayStamp</span><span class="p">,</span><span class="s1">&#39;(I4.4)&#39;</span><span class="p">)</span> <span class="n">day</span>
+      <span class="k">WRITE</span> <span class="p">(</span><span class="n">hourStamp</span><span class="p">,</span><span class="s1">&#39;(I2.2)&#39;</span><span class="p">)</span> <span class="n">hour</span>
+      <span class="k">WRITE</span> <span class="p">(</span><span class="n">minuteStamp</span><span class="p">,</span><span class="s1">&#39;(I2.2)&#39;</span><span class="p">)</span> <span class="n">minute</span>
+      <span class="k">WRITE</span> <span class="p">(</span><span class="n">secondStamp</span><span class="p">,</span><span class="s1">&#39;(I2.2)&#39;</span><span class="p">)</span> <span class="nb">second</span>
+<span class="nb">      </span><span class="k">WRITE</span> <span class="p">(</span><span class="n">milliSecondStamp</span><span class="p">,</span><span class="s1">&#39;(I3.3)&#39;</span><span class="p">)</span> <span class="n">millisecond</span>
+      <span class="n">timeStampString</span> <span class="o">=</span> <span class="n">dayStamp</span><span class="o">//</span><span class="n">hourStamp</span><span class="o">//</span><span class="n">minuteStamp</span><span class="o">//</span><span class="n">secondStamp</span><span class="o">//</span><span class="n">milliSecondStamp</span>
+
+      <span class="c">! minutes</span>
+    <span class="n">ELSEIF</span> <span class="p">(</span><span class="n">units</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span> <span class="k">THEN</span>
+
+      <span class="c">! hours</span>
+    <span class="n">ELSEIF</span> <span class="p">(</span><span class="n">units</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;h&#39;</span><span class="p">)</span> <span class="k">THEN</span>
+
+<span class="k">    END IF</span>
+
+<span class="k">  END FUNCTION </span><span class="n">TimeStamp</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -334,10 +402,10 @@ public function TimeStamp(time, units) result(timeStampString)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

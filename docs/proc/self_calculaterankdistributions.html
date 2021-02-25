@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="A portable library of Fortran classes for implementing spectral element methods.">
+   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
 
-    <title>SELF_CalculateRankDistributions &ndash; Fortran Program</title>
+    <title>SELF_CalculateRankDistributions &ndash; SELF</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/pygments.css" rel="stylesheet">
@@ -44,7 +44,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="../index.html">Fortran Program </a>
+          <a class="navbar-brand" href="../index.html">SELF </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -188,7 +188,13 @@
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/self_calculaterankdistributions.html#src">SELF_CalculateRankDistributions</a>
+  </div>
+</div>
+
 
 
 </div>
@@ -300,7 +306,13 @@ public subroutine SELF_CalculateRankDistributions(nObj, nRanks, objBounds)
 
 
 
-<em>None</em>
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/self_calculaterankdistributions.html#src">SELF_CalculateRankDistributions</a>
+  </div>
+</div>
+
 
 
     </section>
@@ -324,6 +336,46 @@ public subroutine SELF_CalculateRankDistributions(nObj, nRanks, objBounds)
     
     
     
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">SELF_CalculateRankDistributions</span><span class="p">(</span><span class="n">nObj</span><span class="p">,</span><span class="n">nRanks</span><span class="p">,</span><span class="n">objBounds</span><span class="p">)</span>
+<span class="cp">#undef __FUNC__</span>
+<span class="cp">#define __FUNC__ SELF_CalculateRankDistributions</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    </span><span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nObj</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nRanks</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">objBounds</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">nRanks</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">rank</span><span class="p">,</span><span class="n">nObjPerRank</span><span class="p">,</span><span class="n">remainder</span><span class="p">,</span><span class="n">lastUpperBound</span>
+
+    <span class="n">nObjPerRank</span> <span class="o">=</span> <span class="n">nObj</span><span class="o">/</span><span class="n">nRanks</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="n">nObj</span> <span class="o">-</span> <span class="n">nObjPerRank</span><span class="o">*</span><span class="n">nRanks</span>
+
+    <span class="n">lastUpperBound</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">DO </span><span class="n">rank</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">nRanks</span> <span class="o">-</span> <span class="mi">1</span>
+
+      <span class="n">objBounds</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">rank</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">lastUpperBound</span>
+      <span class="k">IF</span> <span class="p">(</span><span class="n">rank</span> <span class="o">&lt;</span> <span class="n">remainder</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">        </span><span class="n">objBounds</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">rank</span><span class="p">)</span> <span class="o">=</span> <span class="n">objBounds</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="n">nObjPerRank</span> <span class="o">+</span> <span class="mi">1</span>
+      <span class="k">ELSE</span>
+<span class="k">        </span><span class="n">objBounds</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">rank</span><span class="p">)</span> <span class="o">=</span> <span class="n">objBounds</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">rank</span><span class="p">)</span> <span class="o">+</span> <span class="n">nObjPerRank</span>
+      <span class="k">END IF</span>
+<span class="k">      </span><span class="n">lastUpperBound</span> <span class="o">=</span> <span class="n">objBounds</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">rank</span><span class="p">)</span>
+
+      <span class="c">!   INFO( &#39;Rank &#39;//TRIM(Int2Str(rank))//&amp;</span>
+      <span class="c">!         &#39; [lower,upper/total] = &#39;//&amp;</span>
+      <span class="c">!         TRIM(Int2Str(objBounds(1,rank)))//&#39;,&#39;//&amp;</span>
+      <span class="c">!         TRIM(Int2Str(objBounds(2,rank)))//&#39;/&#39;//&amp;</span>
+      <span class="c">!         TRIM(Int2Str(nObj)) )</span>
+
+    <span class="k">END DO</span>
+
+<span class="k">  END SUBROUTINE </span><span class="n">SELF_CalculateRankDistributions</span>
+</pre></div>
+
+    </section>
+    <br>
+    
     
     </div>
   </div>
@@ -340,10 +392,10 @@ public subroutine SELF_CalculateRankDistributions(nObj, nRanks, objBounds)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-            
+             on 2021-02-25 19:01  
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> Fortran Program was developed by Joe Schoonover</p></div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    
