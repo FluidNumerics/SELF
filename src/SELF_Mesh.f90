@@ -5,7 +5,6 @@ MODULE SELF_Mesh
   USE SELF_Data
   USE SELF_SupportRoutines
 
-!  USE hipfort
   USE ISO_C_BINDING
 
   IMPLICIT NONE
@@ -122,10 +121,8 @@ MODULE SELF_Mesh
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh1D
     PROCEDURE,PUBLIC :: Free => Free_Mesh1D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh1D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
-#endif
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
   END TYPE Mesh1D
@@ -153,10 +150,8 @@ MODULE SELF_Mesh
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh2D
     PROCEDURE,PUBLIC :: Free => Free_Mesh2D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
-#endif
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
 
   END TYPE Mesh2D
@@ -182,10 +177,8 @@ MODULE SELF_Mesh
 
     PROCEDURE,PUBLIC :: Init => Init_Mesh3D
     PROCEDURE,PUBLIC :: Free => Free_Mesh3D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh3D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
-#endif
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
 !      PROCEDURE, PUBLIC :: LoadHOPRMesh => LoadHOPRMesh_3D
@@ -249,15 +242,16 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh1D
-#ifdef GPU
   SUBROUTINE UpdateHost_Mesh1D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateHost()
     CALL myMesh % nodeCoords % UpdateHost()
     CALL myMesh % globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Mesh1D
 
@@ -265,13 +259,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateDevice()
     CALL myMesh % nodeCoords % UpdateDevice()
     CALL myMesh % globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Mesh1D
-#endif
 
   SUBROUTINE UniformBlockMesh_Mesh1D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
@@ -320,9 +315,7 @@ CONTAINS
       myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
     END DO
 
-#ifdef GPU
     CALL myMesh % UpdateDevice()
-#endif
 
     CALL xLinear % Free()
     CALL xGeo % Free()
@@ -387,16 +380,17 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh2D
-#ifdef GPU
   SUBROUTINE UpdateHost_Mesh2D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateHost()
     CALL myMesh % sideInfo % UpdateHost()
     CALL myMesh % nodeCoords % UpdateHost()
     CALL myMesh % globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Mesh2D
 
@@ -404,14 +398,15 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateDevice()
     CALL myMesh % sideInfo % UpdateDevice()
     CALL myMesh % nodeCoords % UpdateDevice()
     CALL myMesh % globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Mesh2D
-#endif
   SUBROUTINE UniformBlockMesh_Mesh2D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(out) :: myMesh
@@ -482,9 +477,7 @@ CONTAINS
 
     ! TO DO: Add Side information !
 
-#ifdef GPU
     CALL myMesh % UpdateDevice()
-#endif
 
     CALL xLinear % Free()
     CALL xGeo % Free()
@@ -549,16 +542,17 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh3D
-#ifdef GPU
   SUBROUTINE UpdateHost_Mesh3D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateHost()
     CALL myMesh % sideInfo % UpdateHost()
     CALL myMesh % nodeCoords % UpdateHost()
     CALL myMesh % globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Mesh3D
 
@@ -566,14 +560,15 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateDevice()
     CALL myMesh % sideInfo % UpdateDevice()
     CALL myMesh % nodeCoords % UpdateDevice()
     CALL myMesh % globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Mesh3D
-#endif
   SUBROUTINE UniformBlockMesh_Mesh3D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(out) :: myMesh
@@ -663,9 +658,7 @@ CONTAINS
 
     ! TO DO: Add Side information !
 
-#ifdef GPU
     CALL myMesh % UpdateDevice()
-#endif
 
     CALL xLinear % Free()
     CALL xGeo % Free()

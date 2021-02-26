@@ -11,7 +11,6 @@ MODULE SELF_Data
   USE SELF_Constants
   USE SELF_Lagrange
 
-!  USE hipfort
   USE ISO_C_BINDING
 
   IMPLICIT NONE

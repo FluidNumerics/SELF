@@ -105,6 +105,115 @@ MODULE SELF_MappedData
 
   END TYPE MappedTensor3D
 
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,dxds
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper(scalar,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper(scalar,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantWeight_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,workTensor,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantWeight_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,workTensor,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantProjection_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: physVector,compVector,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: vector,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantProjection_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: physVector,compVector,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: vector,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedTensor2D_gpu_wrapper(tensor,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedTensor2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedTensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper(tensor,jacobian,N,nVar,nEl) &
+      bind(c,name="JacobianWeight_MappedTensor3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,jacobian
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper
+  END INTERFACE
 CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
@@ -127,33 +236,33 @@ CONTAINS
 
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL scalar % interp % DGDerivative_1D(scalar % interior % deviceData, &
-!                                               scalar % boundary % deviceData, &
-!                                               df % interior % deviceData, &
-!                                               scalar % nVar, &
-!                                               scalar % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL scalar % interp % DGDerivative_1D(scalar % interior % deviceData, &
+                                               scalar % boundary % deviceData, &
+                                               df % interior % deviceData, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
+      ELSE
         CALL scalar % interp % DGDerivative_1D(scalar % interior % hostData, &
                                                scalar % boundary % hostData, &
                                                df % interior % hostData, &
                                                scalar % nVar, &
                                                scalar % nElem)
-!      END IF
+      END IF
 
     ELSEIF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL scalar % interp % Derivative_1D(scalar % interior % deviceData, &
-!                                             df % interior % deviceData, &
-!                                             scalar % nVar, &
-!                                             scalar % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL scalar % interp % Derivative_1D(scalar % interior % deviceData, &
+                                             df % interior % deviceData, &
+                                             scalar % nVar, &
+                                             scalar % nElem)
+      ELSE
         CALL scalar % interp % Derivative_1D(scalar % interior % hostData, &
                                              df % interior % hostData, &
                                              scalar % nVar, &
                                              scalar % nElem)
-!      END IF
+      END IF
 
     ENDIF
 
@@ -170,15 +279,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl, iVar, i
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedScalar1D_gpu_wrapper(scalar % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     scalar % N, &
-!                                                     scalar % nVar, &
-!                                                     scalar % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedScalar1D_gpu_wrapper(scalar % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     scalar % N, &
+                                                     scalar % nVar, &
+                                                     scalar % nElem)
+
+    ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
@@ -189,7 +298,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedScalar1D
 
@@ -213,33 +322,33 @@ CONTAINS
     CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
-!                                                         workTensor % boundary % deviceData, &
-!                                                         gradF % interior % deviceData, &
-!                                                         workTensor % nVar, &
-!                                                         workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         gradF % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
                                                          workTensor % boundary % hostData, &
                                                          gradF % interior % hostData, &
                                                          workTensor % nVar, &
                                                          workTensor % nElem)
-!      END IF
+      END IF
 
     ELSEIF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
-!                                                       gradF % interior % deviceData, &
-!                                                       workTensor % nVar, &
-!                                                       workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
+                                                       gradF % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
                                                        gradF % interior % hostData, &
                                                        workTensor % nVar, &
                                                        workTensor % nElem)
-!      END IF
+      END IF
 
     ENDIF
 
@@ -256,17 +365,17 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iVar,iEl,iside
 
-!    IF (gpuAccel) THEN
-!
-!      ! TO DO : Add contravariant weight on boundary terms
-!      CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
-!                                                          workTensor % interior % deviceData, &
-!                                                          geometry % dsdx % interior % deviceData, &
-!                                                          scalar % N, &
-!                                                          scalar % nVar, &
-!                                                          scalar % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      ! TO DO : Add contravariant weight on boundary terms
+      CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+                                                          workTensor % interior % deviceData, &
+                                                          geometry % dsdx % interior % deviceData, &
+                                                          scalar % N, &
+                                                          scalar % nVar, &
+                                                          scalar % nElem)
+
+    ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
@@ -320,7 +429,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    END IF
+    END IF
 
   END SUBROUTINE ContravariantWeight_MappedScalar2D
 
@@ -333,15 +442,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl,iVar,i,j
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     scalar % N, &
-!                                                     scalar % nVar, &
-!                                                     scalar % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     scalar % N, &
+                                                     scalar % nVar, &
+                                                     scalar % nElem)
+
+    ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
@@ -354,7 +463,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedScalar2D
 
@@ -378,33 +487,33 @@ CONTAINS
     CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
-!                                                         workTensor % boundary % deviceData, &
-!                                                         gradF % interior % deviceData, &
-!                                                         workTensor % nVar, &
-!                                                         workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         gradF % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
                                                          workTensor % boundary % hostData, &
                                                          gradF % interior % hostData, &
                                                          workTensor % nVar, &
                                                          workTensor % nElem)
-!      END IF
+      END IF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
-!                                                       gradF % interior % deviceData, &
-!                                                       workTensor % nVar, &
-!                                                       workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+                                                       gradF % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
                                                        gradF % interior % hostData, &
                                                        workTensor % nVar, &
                                                        workTensor % nElem)
-!      END IF
+      END IF
 
     END IF
     CALL gradF % JacobianWeight(geometry,gpuAccel)
@@ -420,16 +529,16 @@ CONTAINS
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iside
 
-!    IF (gpuAccel) THEN
-!
-!      ! TO DO : Add weighting of boundary terms
-!      CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
-!                                                          workTensor % interior % deviceData, &
-!                                                          geometry % dsdx % interior % deviceData, &
-!                                                          scalar % N, &
-!                                                          scalar % nVar, &
-!                                                          scalar % nElem)
-!    ELSE
+    IF (gpuAccel) THEN
+
+      ! TO DO : Add weighting of boundary terms
+      CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
+                                                          workTensor % interior % deviceData, &
+                                                          geometry % dsdx % interior % deviceData, &
+                                                          scalar % N, &
+                                                          scalar % nVar, &
+                                                          scalar % nElem)
+    ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
@@ -540,7 +649,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    END IF
+    END IF
 
   END SUBROUTINE ContravariantWeight_MappedScalar3D
 
@@ -553,15 +662,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl,iVar,i,j,k
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     scalar % N, &
-!                                                     scalar % nVar, &
-!                                                     scalar % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     scalar % N, &
+                                                     scalar % nVar, &
+                                                     scalar % nElem)
+
+    ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
@@ -576,7 +685,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedScalar3D
 
@@ -597,33 +706,33 @@ CONTAINS
     CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % deviceData, &
-!                                                         compVector % boundary % deviceData, &
-!                                                         divVector % interior % deviceData, &
-!                                                         compVector % nvar, &
-!                                                         compVector % nelem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % deviceData, &
+                                                         compVector % boundary % deviceData, &
+                                                         divVector % interior % deviceData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ELSE
         CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % hostData, &
                                                          compVector % boundary % hostData, &
                                                          divVector % interior % hostData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
-!      ENDIF
+      ENDIF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL compVector % interp % VectorDivergence_2D(compVector % interior % deviceData, &
-!                                                       divVector % interior % deviceData, &
-!                                                       compVector % nvar, &
-!                                                       compVector % nelem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDivergence_2D(compVector % interior % deviceData, &
+                                                       divVector % interior % deviceData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ELSE
         CALL compVector % interp % VectorDivergence_2D(compVector % interior % hostData, &
                                                        divVector % interior % hostData, &
                                                        compVector % nvar, &
                                                        compVector % nelem)
-!      ENDIF
+      ENDIF
 
     END IF
 
@@ -656,33 +765,33 @@ CONTAINS
 
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
-!                                                         workTensor % boundary % deviceData, &
-!                                                         workVector % interior % deviceData, &
-!                                                         workTensor % nVar, &
-!                                                         workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         workVector % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
                                                          workTensor % boundary % hostData, &
                                                          workVector % interior % hostData, &
                                                          workTensor % nVar, &
                                                          workTensor % nElem)
-!      END IF
+      END IF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
-!                                                       workVector % interior % deviceData, &
-!                                                       workTensor % nVar, &
-!                                                       workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
+                                                       workVector % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
                                                        workVector % interior % hostData, &
                                                        workTensor % nVar, &
                                                        workTensor % nElem)
-!      END IF
+      END IF
 
     END IF
 
@@ -700,9 +809,9 @@ CONTAINS
     ! Local
     INTEGER :: row,i,j,ivar,jvar,iel,iside
 
-!    IF (gpuAccel) THEN
-!      PRINT*, 'GPU Acceleration of MapToScalar_MappedVector2D not supported yet!'
-!    ELSE
+    IF (gpuAccel) THEN
+      PRINT*, 'GPU Acceleration of MapToScalar_MappedVector2D not supported yet!'
+    ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
           DO j = 0,vector % N
@@ -730,7 +839,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE MapToScalar_MappedVector2D
 
@@ -742,9 +851,9 @@ CONTAINS
     ! Local
     INTEGER :: row,col,i,j,ivar,jvar,iel,iside
 
-!    IF (gpuAccel) THEN
-!      PRINT*, 'GPU Acceleration of MapToTensor_MappedVector2D not supported yet!'
-!    ELSE
+    IF (gpuAccel) THEN
+      PRINT*, 'GPU Acceleration of MapToTensor_MappedVector2D not supported yet!'
+    ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
           DO j = 0,tensor % N
@@ -776,7 +885,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
   END SUBROUTINE MapToTensor_MappedVector2D
 
   SUBROUTINE ContravariantProjection_MappedVector2D(physVector,geometry,compVector,gpuAccel)
@@ -791,17 +900,17 @@ CONTAINS
     ! Local
     INTEGER :: i,j,ivar,iel,iside
 
-!    IF (gpuAccel) THEN
-!
-!      ! TO DO : Add boundary projection routine for GPU
-!      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
-!                                                              compVector % interior % deviceData, &
-!                                                              geometry % dsdx % interior % deviceData, &
-!                                                              physVector % N, &
-!                                                              physVector % nVar, &
-!                                                              physVector % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      ! TO DO : Add boundary projection routine for GPU
+      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
+                                                              compVector % interior % deviceData, &
+                                                              geometry % dsdx % interior % deviceData, &
+                                                              physVector % N, &
+                                                              physVector % nVar, &
+                                                              physVector % nElem)
+
+    ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
       ! to project onto computational space
@@ -848,7 +957,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    END IF
+    END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector2D
 
@@ -861,15 +970,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl,iVar,i,j
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     vector % N, &
-!                                                     vector % nVar, &
-!                                                     vector % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     vector % N, &
+                                                     vector % nVar, &
+                                                     vector % nElem)
+
+    ELSE
 
       DO iEl = 1,vector % nElem
         DO iVar = 1,vector % nVar
@@ -884,7 +993,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedVector2D
 
@@ -901,33 +1010,33 @@ CONTAINS
     CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % deviceData, &
-!                                                         compVector % boundary % deviceData, &
-!                                                         divVector % interior % deviceData, &
-!                                                         compVector % nvar, &
-!                                                         compVector % nelem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % deviceData, &
+                                                         compVector % boundary % deviceData, &
+                                                         divVector % interior % deviceData, &
+                                                         compVector % nvar, &
+                                                         compVector % nelem)
+      ELSE
         CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % hostData, &
                                                          compVector % boundary % hostData, &
                                                          divVector % interior % hostData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
-!      ENDIF
+      ENDIF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL compVector % interp % VectorDivergence_3D(compVector % interior % deviceData, &
-!                                                       divVector % interior % deviceData, &
-!                                                       compVector % nvar, &
-!                                                       compVector % nelem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL compVector % interp % VectorDivergence_3D(compVector % interior % deviceData, &
+                                                       divVector % interior % deviceData, &
+                                                       compVector % nvar, &
+                                                       compVector % nelem)
+      ELSE
         CALL compVector % interp % VectorDivergence_3D(compVector % interior % hostData, &
                                                        divVector % interior % hostData, &
                                                        compVector % nvar, &
                                                        compVector % nelem)
-!      ENDIF
+      ENDIF
 
     END IF
 
@@ -960,33 +1069,33 @@ CONTAINS
 
     IF (dForm == selfWeakDGForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
-!                                                         workTensor % boundary % deviceData, &
-!                                                         workVector % interior % deviceData, &
-!                                                         workTensor % nVar, &
-!                                                         workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &
+                                                         workTensor % boundary % deviceData, &
+                                                         workVector % interior % deviceData, &
+                                                         workTensor % nVar, &
+                                                         workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % hostData, &
                                                          workTensor % boundary % hostData, &
                                                          workVector % interior % hostData, &
                                                          workTensor % nVar, &
                                                          workTensor % nElem)
-!      END IF
+      END IF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
-!                                                       workVector % interior % deviceData, &
-!                                                       workTensor % nVar, &
-!                                                       workTensor % nElem)
-!      ELSE
+      IF (gpuAccel) THEN
+        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &
+                                                       workVector % interior % deviceData, &
+                                                       workTensor % nVar, &
+                                                       workTensor % nElem)
+      ELSE
         CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % hostData, &
                                                        workVector % interior % hostData, &
                                                        workTensor % nVar, &
                                                        workTensor % nElem)
-!      END IF
+      END IF
 
     END IF
 
@@ -1004,9 +1113,9 @@ CONTAINS
     ! Local
     INTEGER :: row,i,j,k,ivar,jvar,iel,iside
 
-!    IF (gpuAccel) THEN
-!      PRINT*, 'GPU Acceleration of MapToScalar_MappedVector3D not supported yet!'
-!    ELSE
+    IF (gpuAccel) THEN
+      PRINT*, 'GPU Acceleration of MapToScalar_MappedVector3D not supported yet!'
+    ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
           DO k = 0,vector % N
@@ -1038,7 +1147,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
   END SUBROUTINE MapToScalar_MappedVector3D
 
   SUBROUTINE MapToTensor_MappedVector3D(vector,tensor,gpuAccel)
@@ -1049,9 +1158,9 @@ CONTAINS
     ! Local
     INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
 
-!    IF (gpuAccel) THEN
-!      PRINT*, 'GPU Acceleration of MapToTensor_MappedVector3D not supported yet!'
-!    ELSE
+    IF (gpuAccel) THEN
+      PRINT*, 'GPU Acceleration of MapToTensor_MappedVector3D not supported yet!'
+    ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
           DO k = 0,tensor % N
@@ -1087,7 +1196,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
   END SUBROUTINE MapToTensor_MappedVector3D
 
   SUBROUTINE ContravariantProjection_MappedVector3D(physVector,geometry,compVector,gpuAccel)
@@ -1102,17 +1211,17 @@ CONTAINS
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iDir,iside
 
-!    IF (gpuAccel) THEN
-!
-!      ! TO DO : Add projection for boundary terms
-!      CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
-!                                                              compVector % interior % deviceData, &
-!                                                              geometry % dsdx % interior % deviceData, &
-!                                                              physVector % N, &
-!                                                              physVector % nVar, &
-!                                                              physVector % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      ! TO DO : Add projection for boundary terms
+      CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
+                                                              compVector % interior % deviceData, &
+                                                              geometry % dsdx % interior % deviceData, &
+                                                              physVector % N, &
+                                                              physVector % nVar, &
+                                                              physVector % nElem)
+
+    ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension to
       ! project onto computational space
@@ -1187,7 +1296,7 @@ CONTAINS
         ENDDO
       ENDDO
       
-!    END IF
+    END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector3D
 
@@ -1200,15 +1309,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl,iVar,i,j,k
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     vector % N, &
-!                                                     vector % nVar, &
-!                                                     vector % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     vector % N, &
+                                                     vector % nVar, &
+                                                     vector % nElem)
+
+    ELSE
 
       DO iEl = 1,vector % nElem
         DO iVar = 1,vector % nVar
@@ -1227,7 +1336,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedVector3D
 
@@ -1242,15 +1351,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl,iVar,i,j
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     tensor % N, &
-!                                                     tensor % nVar, &
-!                                                     tensor % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     tensor % N, &
+                                                     tensor % nVar, &
+                                                     tensor % nElem)
+
+    ELSE
 
       DO iEl = 1,tensor % nElem
         DO iVar = 1,tensor % nVar
@@ -1269,7 +1378,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedTensor2D
 
@@ -1282,15 +1391,15 @@ CONTAINS
     ! Local
     INTEGER :: iEl,iVar,i,j,k
 
-!    IF (gpuAccel) THEN
-!
-!      CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
-!                                                     geometry % dxds % interior % deviceData, &
-!                                                     tensor % N, &
-!                                                     tensor % nVar, &
-!                                                     tensor % nElem)
-!
-!    ELSE
+    IF (gpuAccel) THEN
+
+      CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
+                                                     geometry % dxds % interior % deviceData, &
+                                                     tensor % N, &
+                                                     tensor % nVar, &
+                                                     tensor % nElem)
+
+    ELSE
 
       DO iEl = 1,tensor % nElem
         DO iVar = 1,tensor % nVar
@@ -1321,7 +1430,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE JacobianWeight_MappedTensor3D
 
