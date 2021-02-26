@@ -167,6 +167,16 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,workTensor,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
       bind(c,name="ContravariantProjection_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -556,10 +566,16 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      ! TO DO : Add weighting of boundary terms
       CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
+                                                          scalar % N, &
+                                                          scalar % nVar, &
+                                                          scalar % nElem)
+
+      CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % boundary % deviceData, &
+                                                          workTensor % boundary % deviceData, &
+                                                          geometry % dsdx % boundary % deviceData, &
                                                           scalar % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
