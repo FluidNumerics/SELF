@@ -105,6 +105,7 @@ MODULE SELF_MappedData
 
   END TYPE MappedTensor3D
 
+#ifdef GPU
   INTERFACE
     SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
       bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
@@ -143,6 +144,16 @@ MODULE SELF_MappedData
       TYPE(c_ptr) :: scalar,workTensor,dsdx
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar,workTensor,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,workTensor,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -214,6 +225,8 @@ MODULE SELF_MappedData
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper
   END INTERFACE
+#endif
+
 CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
@@ -271,6 +284,8 @@ CONTAINS
   END SUBROUTINE Derivative_MappedScalar1D
 
   SUBROUTINE JacobianWeight_MappedScalar1D(scalar,geometry,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "JacobianWeight_MappedScalar1D"
   ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedScalar1D),INTENT(inout) :: scalar
@@ -281,11 +296,15 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+#ifdef GPU
       CALL JacobianWeight_MappedScalar1D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
                                                      scalar % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
+#else
+      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+#endif
 
     ELSE
 
@@ -367,10 +386,16 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      ! TO DO : Add contravariant weight on boundary terms
       CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
+                                                          scalar % N, &
+                                                          scalar % nVar, &
+                                                          scalar % nElem)
+
+      CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % boundary % deviceData, &
+                                                          workTensor % boundary % deviceData, &
+                                                          geometry % dsdx % boundary % deviceData, &
                                                           scalar % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
@@ -810,6 +835,7 @@ CONTAINS
     INTEGER :: row,i,j,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
+      ! TO DO : MapToScalar_MappedVector2D_gpu_wrapper
       PRINT*, 'GPU Acceleration of MapToScalar_MappedVector2D not supported yet!'
     ELSE
       DO iel = 1,vector % nelem
@@ -852,6 +878,7 @@ CONTAINS
     INTEGER :: row,col,i,j,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
+      ! TO DO : MapToTensor_MappedVector2D_gpu_wrapper
       PRINT*, 'GPU Acceleration of MapToTensor_MappedVector2D not supported yet!'
     ELSE
       DO iel = 1,tensor % nelem
@@ -889,6 +916,8 @@ CONTAINS
   END SUBROUTINE MapToTensor_MappedVector2D
 
   SUBROUTINE ContravariantProjection_MappedVector2D(physVector,geometry,compVector,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "ContravariantProjection_MappedVector2D"
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
@@ -903,12 +932,16 @@ CONTAINS
     IF (gpuAccel) THEN
 
       ! TO DO : Add boundary projection routine for GPU
+#ifdef GPU
       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
+#else
+      WARNING("GPU Acceleration not enabled in SELF.")
+#endif
 
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
@@ -962,6 +995,8 @@ CONTAINS
   END SUBROUTINE ContravariantProjection_MappedVector2D
 
   SUBROUTINE JacobianWeight_MappedVector2D(vector,geometry,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "JacobianWeight_MappedVector2D"
   ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(inout) :: vector
@@ -972,11 +1007,15 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+#ifdef GPU
       CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
                                                      vector % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
+#else
+      WARNING("GPU Acceleration not currently enabled in SELF.")
+#endif
 
     ELSE
 
@@ -1114,6 +1153,7 @@ CONTAINS
     INTEGER :: row,i,j,k,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
+      ! TO DO : MapToScalar_MappedVector3D_gpu_wrapper
       PRINT*, 'GPU Acceleration of MapToScalar_MappedVector3D not supported yet!'
     ELSE
       DO iel = 1,vector % nelem
@@ -1159,6 +1199,7 @@ CONTAINS
     INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
+      ! TO DO : MapToTensor_MappedVector3D_gpu_wrapper
       PRINT*, 'GPU Acceleration of MapToTensor_MappedVector3D not supported yet!'
     ELSE
       DO iel = 1,tensor % nelem
@@ -1200,6 +1241,8 @@ CONTAINS
   END SUBROUTINE MapToTensor_MappedVector3D
 
   SUBROUTINE ContravariantProjection_MappedVector3D(physVector,geometry,compVector,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "ContravariantProjection_MappedVector3D"
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
@@ -1213,6 +1256,7 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+#ifdef GPU
       ! TO DO : Add projection for boundary terms
       CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
@@ -1220,6 +1264,9 @@ CONTAINS
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
+#else
+     WARNING("GPU Acceleration currently not enabled in SELF")
+#endif
 
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
@@ -1301,6 +1348,8 @@ CONTAINS
   END SUBROUTINE ContravariantProjection_MappedVector3D
 
   SUBROUTINE JacobianWeight_MappedVector3D(vector,geometry,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "JacobianWeight_MappedVector3D"
   ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(inout) :: vector
@@ -1311,11 +1360,15 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+#ifdef GPU
       CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
                                                      vector % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
+#else
+      WARNING("GPU Acceleration currently not enabled in SELF.")
+#endif
 
     ELSE
 
@@ -1343,6 +1396,8 @@ CONTAINS
   ! ---------------------- Tensors ---------------------- !
 
   SUBROUTINE JacobianWeight_MappedTensor2D(tensor,geometry,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "JacobianWeight_MappedTensor2D"
   ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedTensor2D),INTENT(inout) :: tensor
@@ -1353,11 +1408,15 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+#ifdef GPU
       CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
                                                      tensor % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
+#else
+      WARNING("GPU Acceleration currently not enabled in SELF.")
+#endif
 
     ELSE
 
@@ -1383,6 +1442,8 @@ CONTAINS
   END SUBROUTINE JacobianWeight_MappedTensor2D
 
   SUBROUTINE JacobianWeight_MappedTensor3D(tensor,geometry,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "JacobianWeight_MappedTensor3D"
   ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedTensor3D),INTENT(inout) :: tensor
@@ -1393,11 +1454,15 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+#ifdef GPU
       CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
                                                      tensor % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
+#else
+      WARNING("GPU Acceleration currently not enabled in SELF.")
+#endif
 
     ELSE
 
