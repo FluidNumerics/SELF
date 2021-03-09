@@ -19,6 +19,8 @@ MODULE SELF_MappedData
 
   IMPLICIT NONE
 
+#include "SELF_Macros.h"
+
   TYPE,EXTENDS(Scalar1D),PUBLIC :: MappedScalar1D
 
   CONTAINS
