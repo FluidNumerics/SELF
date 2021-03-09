@@ -222,6 +222,52 @@ extern "C"
   } 
 }
 
+// ContravariantWeightBoundary_MappedScalar3D_gpu
+__global__ void ContravariantWeightBoundary_MappedScalar3D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t iVar = hipThreadIdx_z;
+
+  workTensor[TEB_3D_INDEX(1,1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,1,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(2,1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,2,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(3,1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,3,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(1,2,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(2,1,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(2,2,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(2,2,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(3,2,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(2,3,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(1,3,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(3,1,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(2,3,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(3,2,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+  workTensor[TEB_3D_INDEX(3,3,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(3,3,i,j,1,iSide,iEl,N,1)]*
+                                                       scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
+
+}
+
+extern "C"
+{
+  void ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ContravariantWeightBoundary_MappedScalar3D_gpu), dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0, *scalar, *workTensor, *dsdx, N, nVar);
+  } 
+}
+
 // ContravariantProjection_MappedVector2D_gpu
 __global__ void ContravariantProjection_MappedVector2D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
 
@@ -459,5 +505,52 @@ extern "C"
   void CalculateCurl_MappedTensor3D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
   {
     hipLaunchKernelGGL((JacobianWeight_MappedTensor3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dfdx, *curlf, N, nVar);
+  }
+}
+
+// MapTo support routines
+__global__ void MapToScalar_MappedVector2D_gpu(real* scalar, real* vector, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+    jVar = 1 + 2*(iVar-1);
+    scalar[SC_2D_INDEX(i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(1,i,j,ivar,iel,N,nVar)];
+
+    jVar = 2 + 2*(iVar-1);
+    scalar[SC_2D_INDEX(i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(2,i,j,ivar,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToScalar_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToScalar_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *scalar, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToScalarBoundary_MappedVector2D_gpu(real* scalar, real* vector, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iVar = hipBlockIdx_y;
+  size_t iEl = hipBlockIdx_z;
+  size_t i = hipThreadIdx_x;
+
+    jVar = 1 + 2*(iVar-1);
+    scalar[SCB_2D_INDEX(j,jVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(1,j,ivar,iSide,iel,N,nVar)];
+
+    jVar = 2 + 2*(iVar-1);
+    scalar[SCB_2D_INDEX(j,jVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(2,j,ivar,iSide,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToScalarBoundary_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToScalarBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *scalar, *vector, N, nVar);
   }
 }
