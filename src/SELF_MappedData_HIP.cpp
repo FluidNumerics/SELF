@@ -537,7 +537,7 @@ __global__ void MapToScalarBoundary_MappedVector2D_gpu(real* scalar, real* vecto
   size_t iSide = hipBlockIdx_x;
   size_t iVar = hipBlockIdx_y;
   size_t iEl = hipBlockIdx_z;
-  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_x;
 
     jVar = 1 + 2*(iVar-1);
     scalar[SCB_2D_INDEX(j,jVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(1,j,ivar,iSide,iel,N,nVar)];
@@ -552,5 +552,191 @@ extern "C"
   void MapToScalarBoundary_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
     hipLaunchKernelGGL((MapToScalarBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *scalar, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToTensor_MappedVector2D_gpu(real* tensor, real* vector, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+    jVar = 1 + 2*(iVar-1);
+    tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(1,i,j,jvar,iel,N,nVar)];
+
+    tensor[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(2,i,j,jvar,iel,N,nVar)];
+
+    jVar = 2 + 2*(iVar-1);
+    tensor[TE_2D_INDEX(2,1,i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(1,i,j,jvar,iel,N,nVar)];
+
+    tensor[TE_2D_INDEX(2,2,i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(2,i,j,jvar,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToTensor_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToTensor_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *tensor, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToTensorBoundary_MappedVector2D_gpu(real* tensor, real* vector, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iVar = hipBlockIdx_y;
+  size_t iEl = hipBlockIdx_z;
+  size_t j = hipThreadIdx_x;
+
+    jVar = 1 + 2*(iVar-1);
+    tensor[TEB_2D_INDEX(1,1,j,iVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(1,j,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_2D_INDEX(1,2,j,iVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(2,j,jvar,iSide,iel,N,nVar)];
+
+    jVar = 2 + 2*(iVar-1);
+    tensor[TEB_2D_INDEX(2,1,j,iVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(1,j,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_2D_INDEX(2,2,j,iVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(2,j,jvar,iSide,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToTensorBoundary_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToTensorBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *tensor, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToScalar_MappedVector3D_gpu(real* scalar, real* vector, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+    jVar = 1 + 3*(iVar-1);
+    scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(1,i,j,k,ivar,iel,N,nVar)];
+
+    jVar = 2 + 3*(iVar-1);
+    scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(2,i,j,k,ivar,iel,N,nVar)];
+
+    jVar = 3 + 3*(iVar-1);
+    scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(3,i,j,k,ivar,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToScalar_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToScalar_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *scalar, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToScalarBoundary_MappedVector3D_gpu(real* scalar, real* vector, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iVar = hipBlockIdx_y;
+  size_t iEl = hipBlockIdx_z;
+  size_t j = hipThreadIdx_x;
+  size_t k = hipThreadIdx_y;
+
+    jVar = 1 + 3*(iVar-1);
+    scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(1,j,k,ivar,iSide,iel,N,nVar)];
+
+    jVar = 2 + 3*(iVar-1);
+    scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(2,j,k,ivar,iSide,iel,N,nVar)];
+
+    jVar = 3 + 3*(iVar-1);
+    scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(3,j,k,ivar,iSide,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToScalarBoundary_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToScalarBoundary_MappedVector3D_gpu), dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0, *scalar, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToTensor_MappedVector3D_gpu(real* tensor, real* vector, int N, int nVar){
+
+  size_t iVar = hipBlockIdx_x;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+  size_t k = hipThreadIdx_z;
+
+    jVar = 1 + 3*(iVar-1);
+    tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(1,i,j,k,jvar,iel,N,nVar)];
+
+    tensor[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(2,i,j,k,jvar,iel,N,nVar)];
+
+    tensor[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(3,i,j,k,jvar,iel,N,nVar)];
+
+    jVar = 2 + 3*(iVar-1);
+    tensor[TE_3D_INDEX(2,1,i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(1,i,j,k,jvar,iel,N,nVar)];
+
+    tensor[TE_3D_INDEX(2,2,i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(2,i,j,k,jvar,iel,N,nVar)];
+
+    tensor[TE_3D_INDEX(2,3,i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(3,i,j,k,jvar,iel,N,nVar)];
+
+    jVar = 3 + 3*(iVar-1);
+    tensor[TE_3D_INDEX(3,1,i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(1,i,j,k,jvar,iel,N,nVar)];
+
+    tensor[TE_3D_INDEX(3,2,i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(2,i,j,k,jvar,iel,N,nVar)];
+
+    tensor[TE_3D_INDEX(3,3,i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(3,i,j,k,jvar,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToTensor_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToTensor_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *tensor, *vector, N, nVar);
+  }
+}
+
+__global__ void MapToTensorBoundary_MappedVector3D_gpu(real* tensor, real* vector, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iVar = hipBlockIdx_y;
+  size_t iEl = hipBlockIdx_z;
+  size_t j = hipThreadIdx_x;
+  size_t k = hipThreadIdx_x;
+
+    jVar = 1 + 3*(iVar-1);
+    tensor[TEB_3D_INDEX(1,1,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(1,j,k,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_3D_INDEX(1,2,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(2,j,k,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_3D_INDEX(1,3,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(3,j,k,jvar,iSide,iel,N,nVar)];
+
+    jVar = 2 + 3*(iVar-1);
+    tensor[TEB_3D_INDEX(2,1,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(1,j,k,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_3D_INDEX(2,2,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(2,j,k,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_3D_INDEX(2,3,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(3,j,k,jvar,iSide,iel,N,nVar)];
+
+    jVar = 3 + 3*(iVar-1);
+    tensor[TEB_3D_INDEX(3,1,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(1,j,k,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_3D_INDEX(3,2,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(2,j,k,jvar,iSide,iel,N,nVar)];
+
+    tensor[TEB_3D_INDEX(3,3,j,k,iVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(3,j,k,jvar,iSide,iel,N,nVar)];
+
+}
+
+extern "C"
+{
+  void MapToTensorBoundary_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
+  {
+    hipLaunchKernelGGL((MapToTensorBoundary_MappedVector3D_gpu), dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0, *tensor, *vector, N, nVar);
   }
 }

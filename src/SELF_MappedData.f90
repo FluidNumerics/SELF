@@ -255,6 +255,66 @@ MODULE SELF_MappedData
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE MapToScalarBoundary_MappedVector2D_gpu_wrapper
   END INTERFACE
+
+  INTERFACE
+    SUBROUTINE MapToTensor_MappedVector2D_gpu_wrapper(tensor,vector,N,nVar,nEl) &
+      bind(c,name="MapToTensor_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,vector
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE MapToTensor_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE MapToTensorBoundary_MappedVector2D_gpu_wrapper(tensor,vector,N,nVar,nEl) &
+      bind(c,name="MapToTensorBoundary_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,vector
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE MapToTensorBoundary_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE MapToScalar_MappedVector3D_gpu_wrapper(scalar,vector,N,nVar,nEl) &
+      bind(c,name="MapToScalar_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,vector
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE MapToScalar_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE MapToScalarBoundary_MappedVector3D_gpu_wrapper(scalar,vector,N,nVar,nEl) &
+      bind(c,name="MapToScalarBoundary_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,vector
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE MapToScalarBoundary_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE MapToTensor_MappedVector3D_gpu_wrapper(tensor,vector,N,nVar,nEl) &
+      bind(c,name="MapToTensor_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,vector
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE MapToTensor_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE MapToTensorBoundary_MappedVector3D_gpu_wrapper(tensor,vector,N,nVar,nEl) &
+      bind(c,name="MapToTensorBoundary_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor,vector
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE MapToTensorBoundary_MappedVector3D_gpu_wrapper
+  END INTERFACE
 #endif
 
 CONTAINS
@@ -1227,6 +1287,8 @@ CONTAINS
   END SUBROUTINE Gradient_MappedVector3D
 
   SUBROUTINE MapToScalar_MappedVector3D(vector,scalar,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "MapToScalar_MappedVector3D"
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(in) :: vector
     TYPE(MappedScalar3D),INTENT(inout) :: scalar
@@ -1235,8 +1297,21 @@ CONTAINS
     INTEGER :: row,i,j,k,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
-      ! TO DO : MapToScalar_MappedVector3D_gpu_wrapper
-      PRINT*, 'GPU Acceleration of MapToScalar_MappedVector3D not supported yet!'
+#ifdef GPU
+      CALL MapToScalar_MappedVector3D_gpu_wrapper( scalar % interior % deviceData,&
+                                                   vector % interior % deviceData,&
+                                                   vector % N, &
+                                                   vector % nVar, &
+                                                   vector % nEl )
+
+      CALL MapToScalarBoundary_MappedVector3D_gpu_wrapper( scalar % boundary % deviceData,&
+                                                   vector % boundary % deviceData,&
+                                                   vector % N, &
+                                                   vector % nVar, &
+                                                   vector % nEl )
+#else
+      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+#endif
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
@@ -1273,6 +1348,8 @@ CONTAINS
   END SUBROUTINE MapToScalar_MappedVector3D
 
   SUBROUTINE MapToTensor_MappedVector3D(vector,tensor,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "MapToTensor_MappedVector3D"
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(in) :: vector
     TYPE(MappedTensor3D),INTENT(inout) :: tensor
@@ -1281,8 +1358,21 @@ CONTAINS
     INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
 
     IF (gpuAccel) THEN
-      ! TO DO : MapToTensor_MappedVector3D_gpu_wrapper
-      PRINT*, 'GPU Acceleration of MapToTensor_MappedVector3D not supported yet!'
+#ifdef GPU
+      CALL MapToTensor_MappedVector3D_gpu_wrapper( tensor % interior % deviceData,&
+                                                   vector % interior % deviceData,&
+                                                   vector % N, &
+                                                   vector % nVar, &
+                                                   vector % nEl )
+
+      CALL MapToTensorBoundary_MappedVector3D_gpu_wrapper( tensor % boundary % deviceData,&
+                                                   vector % boundary % deviceData,&
+                                                   vector % N, &
+                                                   vector % nVar, &
+                                                   vector % nEl )
+#else
+      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+#endif
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
