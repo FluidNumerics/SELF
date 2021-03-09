@@ -385,6 +385,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl, iVar, i
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -394,7 +395,8 @@ CONTAINS
                                                      scalar % nVar, &
                                                      scalar % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
 
@@ -475,6 +477,7 @@ CONTAINS
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i,j,iVar,iEl,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -492,7 +495,8 @@ CONTAINS
                                                           scalar % nVar, &
                                                           scalar % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
 
@@ -562,6 +566,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -571,7 +576,8 @@ CONTAINS
                                                      scalar % nVar, &
                                                      scalar % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
 
@@ -653,6 +659,7 @@ CONTAINS
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -670,7 +677,8 @@ CONTAINS
                                                           scalar % nVar, &
                                                           scalar % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
 
@@ -797,6 +805,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -806,7 +815,8 @@ CONTAINS
                                                      scalar % nVar, &
                                                      scalar % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
 
     ELSE
@@ -949,6 +959,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,i,j,ivar,jvar,iel,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -964,7 +975,8 @@ CONTAINS
                                                    vector % nVar, &
                                                    vector % nEl )
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
       DO iel = 1,vector % nelem
@@ -1007,6 +1019,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,col,i,j,ivar,jvar,iel,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -1022,7 +1035,8 @@ CONTAINS
                                                    vector % nVar, &
                                                    vector % nEl )
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
       DO iel = 1,tensor % nelem
@@ -1072,6 +1086,7 @@ CONTAINS
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
     INTEGER :: i,j,ivar,iel,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1084,7 +1099,8 @@ CONTAINS
                                                               physVector % nVar, &
                                                               physVector % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
 
     ELSE
@@ -1148,6 +1164,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1158,7 +1175,8 @@ CONTAINS
                                                      vector % nVar, &
                                                      vector % nElem)
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
 
     ELSE
@@ -1297,6 +1315,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,i,j,k,ivar,jvar,iel,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -1312,7 +1331,8 @@ CONTAINS
                                                    vector % nVar, &
                                                    vector % nEl )
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
       DO iel = 1,vector % nelem
@@ -1358,6 +1378,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 #ifdef GPU
@@ -1373,7 +1394,8 @@ CONTAINS
                                                    vector % nVar, &
                                                    vector % nEl )
 #else
-      WARNING("GPU Acceleration is not currently enabled in SELF.") 
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
 #endif
     ELSE
       DO iel = 1,tensor % nelem
@@ -1427,6 +1449,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iDir,iside
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1439,7 +1462,8 @@ CONTAINS
                                                               physVector % nVar, &
                                                               physVector % nElem)
 #else
-     WARNING("GPU Acceleration currently not enabled in SELF")
+     msg = "GPU Acceleration currently not enabled in SELF"
+     WARNING(msg)
 #endif
 
     ELSE
@@ -1531,6 +1555,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1541,7 +1566,8 @@ CONTAINS
                                                      vector % nVar, &
                                                      vector % nElem)
 #else
-      WARNING("GPU Acceleration currently not enabled in SELF.")
+      msg = "GPU Acceleration currently not enabled in SELF."
+      WARNING(msg)
 #endif
 
     ELSE
@@ -1579,6 +1605,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1589,7 +1616,8 @@ CONTAINS
                                                      tensor % nVar, &
                                                      tensor % nElem)
 #else
-      WARNING("GPU Acceleration currently not enabled in SELF.")
+      msg = "GPU Acceleration currently not enabled in SELF."
+      WARNING(msg)
 #endif
 
     ELSE
@@ -1625,6 +1653,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1635,7 +1664,8 @@ CONTAINS
                                                      tensor % nVar, &
                                                      tensor % nElem)
 #else
-      WARNING("GPU Acceleration currently not enabled in SELF.")
+      msg = "GPU Acceleration currently not enabled in SELF."
+      WARNING(msg)
 #endif
 
     ELSE
