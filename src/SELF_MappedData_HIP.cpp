@@ -269,31 +269,58 @@ extern "C"
 }
 
 // ContravariantProjection_MappedVector2D_gpu
-__global__ void ContravariantProjection_MappedVector2D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
+__global__ void ContravariantProjection_MappedVector2D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
   size_t i = hipThreadIdx_x;
   size_t j = hipThreadIdx_y;
 
-    workTensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,1,iEl,N,1)]*
-                                                       scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; 
+
+    compVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,1,iEl,N,1)]*
+                                                     physVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)]+ 
+						     dsdx[TE_2D_INDEX(2,1,i,j,1,iEl,N,1)]*
+                                                     physVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
+
+    compVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,1,iEl,N,1)]*
+                                                     physVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)]+ 
+						     dsdx[TE_2D_INDEX(2,2,i,j,1,iEl,N,1)]*
+                                                     physVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
   
-    workTensor[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,1,iEl,N,1)]*
-                                                       scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; 
-  
-    workTensor[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(2,1,i,j,1,iEl,N,1)]*
-                                                       scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; 
-  
-    workTensor[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(2,2,i,j,1,iEl,N,1)]*
-                                                       scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; 
 }
 
 extern "C"
 {
-  void ContravariantProjection_MappedVector2D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
+  void ContravariantProjection_MappedVector2D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantProjection_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *scalar, *workTensor, *dsdx, N, nVar);
+	  hipLaunchKernelGGL((ContravariantProjection_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
+  } 
+}
+
+__global__ void ContravariantProjectionBoundary_MappedVector2D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iVar = hipBlockIdx_y;
+  size_t iEl = hipBlockIdx_z;
+  size_t i = hipThreadIdx_x;
+
+    compVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_2D_INDEX(1,1,i,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)]+ 
+						     dsdx[TEB_2D_INDEX(2,1,i,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_2D_INDEX(2,i,iVar,iSide,iEl,N,nVar)];
+
+    compVector[VEB_2D_INDEX(2,i,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_2D_INDEX(1,2,i,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)]+ 
+						     dsdx[TEB_2D_INDEX(2,2,i,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_2D_INDEX(2,i,iVar,iSide,iEl,N,nVar)];
+
+}
+
+extern "C"
+{
+  void ContravariantProjection_MappedVector2D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ContravariantProjectionBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
   } 
 }
 
@@ -357,6 +384,45 @@ extern "C"
   void ContravariantProjection_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
 	  hipLaunchKernelGGL((ContravariantProjection_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
+  } 
+}
+
+__global__ void ContravariantProjectionBoundary_MappedVector3D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
+
+  size_t iSide = hipBlockIdx_x;
+  size_t iVar = hipBlockIdx_y;
+  size_t iEl = hipBlockIdx_z;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+  compVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,1,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
+                                                     dsdx[TEB_3D_INDEX(2,1,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)]+
+                                                     dsdx[TEB_3D_INDEX(3,1,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)];
+
+  compVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,2,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
+                                                     dsdx[TEB_3D_INDEX(2,2,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)]+
+                                                     dsdx[TEB_3D_INDEX(3,2,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)];
+
+  compVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,3,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
+                                                     dsdx[TEB_3D_INDEX(2,3,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)]+
+                                                     dsdx[TEB_3D_INDEX(3,3,i,j,1,iSide,iEl,N,1)]*
+                                                     physVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)];
+
+}
+
+extern "C"
+{
+  void ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
+  {
+	  hipLaunchKernelGGL((ContravariantProjectionBoundary_MappedVector3D_gpu), dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
   } 
 }
 

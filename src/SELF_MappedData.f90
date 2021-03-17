@@ -189,6 +189,16 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: physVector,compVector,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper(vector,jacobian,N,nVar,nEl) &
       bind(c,name="JacobianWeight_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -206,6 +216,16 @@ MODULE SELF_MappedData
       TYPE(c_ptr) :: physVector,compVector,dsdx
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
+      bind(c,name="ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: physVector,compVector,dsdx
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -1089,12 +1109,17 @@ CONTAINS
     CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
-
-      ! TO DO : Add boundary projection routine for GPU
 #ifdef GPU
       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
+                                                              physVector % N, &
+                                                              physVector % nVar, &
+                                                              physVector % nElem)
+
+      CALL ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector % boundary % deviceData, &
+                                                              compVector % boundary % deviceData, &
+                                                              geometry % dsdx % boundary % deviceData, &
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
@@ -1452,12 +1477,17 @@ CONTAINS
     CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
-
 #ifdef GPU
-      ! TO DO : Add projection for boundary terms
       CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
+                                                              physVector % N, &
+                                                              physVector % nVar, &
+                                                              physVector % nElem)
+
+      CALL ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector % boundary % deviceData, &
+                                                              compVector % boundary % deviceData, &
+                                                              geometry % dsdx % boundary % deviceData, &
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
