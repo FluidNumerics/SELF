@@ -2,20 +2,26 @@
 BUILD ?= dev
 SELF_DIR ?= ./
 
+# Compiler options
+include $(SELF_DIR)/make.compiler
+
+# Dependencies options
+include $(SELF_DIR)/make.dependencies
+
 SELF_INCDIR = $(SELF_DIR)/include/
 SELF_LIBDIR = $(SELF_DIR)/lib/
 SELF_OBJDIR = $(SELF_DIR)/obj/
 SELF_BINDIR = $(SELF_DIR)/bin/
 
-vpath %.f90 %.cpp $(SELF_DIR)/src
-
+vpath %.f90 $(SELF_DIR)/src
+vpath %.cpp $(SELF_DIR)/src
+vpath %.h $(SELF_DIR)/src
 
 SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_Memory \
                 SELF_Quadrature SELF_Lagrange SELF_Data \
                 SELF_Mesh SELF_Geometry SELF_MappedData
 
 SELF_DEV_SRCS = SELF_Tests SELF
-
 
 SELF_CPP_SRCS = SELF_Lagrange_HIP SELF_MappedData_HIP
 
@@ -24,16 +30,13 @@ SELF_LIBS = self
 #src/SELF_HIP_Macros.h
 #src/SELF_Macros.h
 
-SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .o, $(SELF_F90_SRCS)))
-SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .o, $(SELF_DEV_SRCS)))
+SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
+ifeq ($(GPU_ACCELERATED),true)
+  SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
+endif
+SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_DEV_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR)
-
-# Compiler options
-include $(SELF_DIR)/make.compiler
-
-# Dependencies options
-include $(SELF_DIR)/make.dependencies
 
 # Recipes
 
@@ -54,9 +57,11 @@ $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
 	rm -f $@
 	$(AR) -cq $@ $^
 
-$(SELF_OBJDIR)%.o: %.f90
+$(SELF_OBJDIR)%.f.o: %.f90
 	$(FC) $(SELF_FFLAGS) -c $< -o $@
 
+$(SELF_OBJDIR)%.cpp.o: %.cpp
+	$(FC) $(SELF_CXXFLAGS) -c $< -o $@
 
 # Dependency on build tree existence
 $(SELF_OBJS): | $(SELF_BUILDDIRS)
