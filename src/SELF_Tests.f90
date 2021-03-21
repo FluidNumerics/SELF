@@ -2721,7 +2721,7 @@ CONTAINS
       CALL dfInterp % UpdateHost()
     END IF
 #endif
-
+ 
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -2985,7 +2985,7 @@ CONTAINS
 #endif
 
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(gpuAccel)
+     CALL f % BoundaryInterp(gpuAccel)
 
 #ifdef GPU     
     IF (gpuAccel) THEN

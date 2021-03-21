@@ -451,6 +451,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
+
     IF (dForm == selfWeakDGForm) THEN
 
       IF (gpuAccel) THEN
@@ -591,7 +592,7 @@ CONTAINS
     IF (gpuAccel) THEN
 #ifdef GPU
       CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
-                                                     geometry % dxds % interior % deviceData, &
+                                                     geometry % J % interior % deviceData, &
                                                      scalar % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
@@ -830,7 +831,7 @@ CONTAINS
     IF (gpuAccel) THEN
 #ifdef GPU
       CALL JacobianWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
-                                                     geometry % dxds % interior % deviceData, &
+                                                     geometry % J % interior % deviceData, &
                                                      scalar % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
@@ -987,13 +988,13 @@ CONTAINS
                                                    vector % interior % deviceData,&
                                                    vector % N, &
                                                    vector % nVar, &
-                                                   vector % nEl )
+                                                   vector % nelem )
 
       CALL MapToScalarBoundary_MappedVector2D_gpu_wrapper( scalar % boundary % deviceData,&
                                                    vector % boundary % deviceData,&
                                                    vector % N, &
                                                    vector % nVar, &
-                                                   vector % nEl )
+                                                   vector % nelem )
 #else
       msg = "GPU Acceleration is not currently enabled in SELF."
       WARNING(msg)
@@ -1045,15 +1046,15 @@ CONTAINS
 #ifdef GPU
       CALL MapToTensor_MappedVector2D_gpu_wrapper( tensor % interior % deviceData,&
                                                    vector % interior % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nEl )
+                                                   tensor % N, &
+                                                   tensor % nVar, &
+                                                   tensor % nelem )
 
       CALL MapToTensorBoundary_MappedVector2D_gpu_wrapper( tensor % boundary % deviceData,&
                                                    vector % boundary % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nEl )
+                                                   tensor % N, &
+                                                   tensor % nVar, &
+                                                   tensor % nelem )
 #else
       msg = "GPU Acceleration is not currently enabled in SELF."
       WARNING(msg)
@@ -1195,7 +1196,7 @@ CONTAINS
 
 #ifdef GPU
       CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
-                                                     geometry % dxds % interior % deviceData, &
+                                                     geometry % J % interior % deviceData, &
                                                      vector % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
@@ -1234,6 +1235,7 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
 
     CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
+
     IF (dForm == selfWeakDGForm) THEN
 
       IF (gpuAccel) THEN
@@ -1348,13 +1350,13 @@ CONTAINS
                                                    vector % interior % deviceData,&
                                                    vector % N, &
                                                    vector % nVar, &
-                                                   vector % nEl )
+                                                   vector % nelem )
 
       CALL MapToScalarBoundary_MappedVector3D_gpu_wrapper( scalar % boundary % deviceData,&
                                                    vector % boundary % deviceData,&
                                                    vector % N, &
                                                    vector % nVar, &
-                                                   vector % nEl )
+                                                   vector % nelem )
 #else
       msg = "GPU Acceleration is not currently enabled in SELF."
       WARNING(msg)
@@ -1409,15 +1411,15 @@ CONTAINS
 #ifdef GPU
       CALL MapToTensor_MappedVector3D_gpu_wrapper( tensor % interior % deviceData,&
                                                    vector % interior % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nEl )
+                                                   tensor % N, &
+                                                   tensor % nVar, &
+                                                   tensor % nelem )
 
       CALL MapToTensorBoundary_MappedVector3D_gpu_wrapper( tensor % boundary % deviceData,&
                                                    vector % boundary % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nEl )
+                                                   tensor % N, &
+                                                   tensor % nVar, &
+                                                   tensor % nelem )
 #else
       msg = "GPU Acceleration is not currently enabled in SELF."
       WARNING(msg)
@@ -1591,7 +1593,7 @@ CONTAINS
 
 #ifdef GPU
       CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
-                                                     geometry % dxds % interior % deviceData, &
+                                                     geometry % J % interior % deviceData, &
                                                      vector % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
@@ -1641,7 +1643,7 @@ CONTAINS
 
 #ifdef GPU
       CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
-                                                     geometry % dxds % interior % deviceData, &
+                                                     geometry % J % interior % deviceData, &
                                                      tensor % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
@@ -1689,7 +1691,7 @@ CONTAINS
 
 #ifdef GPU
       CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
-                                                     geometry % dxds % interior % deviceData, &
+                                                     geometry % J % interior % deviceData, &
                                                      tensor % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
