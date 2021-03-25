@@ -14,8 +14,8 @@ SELF_OBJDIR = $(SELF_DIR)/obj/
 SELF_BINDIR = $(SELF_DIR)/bin/
 
 vpath %.f90 $(SELF_DIR)/src
-vpath %.cpp $(SELF_DIR)/src
-vpath %.h $(SELF_DIR)/src
+vpath %.cpp $(SELF_DIR)/src/hip
+vpath %.h $(SELF_DIR)/src $(SELF_DIR)/src/hip
 
 SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_Memory \
                 SELF_Quadrature SELF_Lagrange SELF_Data \
@@ -23,7 +23,7 @@ SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_Memory \
 
 SELF_DEV_SRCS = SELF_Tests SELF
 
-SELF_CPP_SRCS = SELF_Lagrange_HIP SELF_MappedData_HIP
+SELF_CPP_SRCS = SELF_Lagrange SELF_MappedData
 
 SELF_LIBS = self
             
