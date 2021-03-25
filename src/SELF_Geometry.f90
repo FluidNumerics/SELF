@@ -368,7 +368,7 @@ CONTAINS
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
 
     ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    CALL myGeom % dxds % Determinant(myGeom % J)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
     CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
 
     CALL myGeom % CalculateContravariantBasis()
@@ -495,9 +495,14 @@ CONTAINS
     END DO
 
     ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+    CALL xMesh % UpdateDevice()
+    CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
 
-    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+!    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+!    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % x % UpdateHost()
+
     CALL myGeom % CalculateMetricTerms()
 
     CALL myGeom % UpdateDevice()
@@ -612,15 +617,23 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
-    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
-    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-
-    ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    CALL myGeom % dxds % Determinant(myGeom % J)
-    CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+    CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % J % UpdateHost()
+    CALL myGeom % dxds % UpdateHost()
 
     CALL myGeom % CalculateContravariantBasis()
-    CALL myGeom % UpdateDevice()
+    CALL myGeom % dsdx % UpdateDevice()
+    CALL myGeom % J % UpdateDevice()
+
+    !CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
+    !CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
+    !CALL myGeom % dxds % Determinant(myGeom % J)
+    !CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
+    !CALL myGeom % CalculateContravariantBasis()
+    !CALL myGeom % UpdateDevice()
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 

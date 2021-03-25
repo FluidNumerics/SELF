@@ -2714,7 +2714,9 @@ CONTAINS
 #endif
 
     ! Run the grid interpolation
+    DO i = 1, 1000
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
+    END DO
 
 #ifdef GPU     
     IF (gpuAccel) THEN

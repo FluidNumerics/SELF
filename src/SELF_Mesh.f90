@@ -114,7 +114,6 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: elemInfo
     TYPE(hfReal_r1) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
-    ! TYPE(hfInt_r1) :: cornerNodeIDs
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -141,9 +140,8 @@ MODULE SELF_Mesh
     INTEGER :: nBCs
     TYPE(hfInt32_r2) :: elemInfo
     TYPE(hfInt32_r2) :: sideInfo
-    TYPE(hfReal_r2)  :: nodeCoords
-    TYPE(hfReal_r1)  :: globalNodeIDs
-    !TYPE(hfInt_r1) :: cornerNodeIDs
+    TYPE(hfReal_r2) :: nodeCoords
+    TYPE(hfReal_r1) :: globalNodeIDs
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -153,6 +151,8 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
+
+!    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh2D
 
   END TYPE Mesh2D
 
@@ -169,7 +169,6 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: sideInfo
     TYPE(hfReal_r2) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
-    !TYPE(hfInt_r1) :: cornerNodeIDs
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -187,7 +186,7 @@ MODULE SELF_Mesh
 !      PROCEDURE, PUBLIC :: Read_UCDMesh
 !      PROCEDURE, PUBLIC :: Read_TrellisUCDMesh
 !
-!      PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
+!    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
 
   END TYPE Mesh3D
 
@@ -204,7 +203,7 @@ CONTAINS
     myMesh % nGeo = nGeo
     myMesh % nElem = nElem
     myMesh % nNodes = nNodes
-    myMesh % nCornerNodes = 0
+    myMesh % nCornerNodes = nElem*2
     myMesh % nUniqueNodes = 0
     myMesh % nBCs = nBCs
 
@@ -380,6 +379,7 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh2D
+
   SUBROUTINE UpdateHost_Mesh2D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
@@ -407,6 +407,58 @@ CONTAINS
 #endif
 
   END SUBROUTINE UpdateDevice_Mesh2D
+
+!  SUBROUTINE GenerateConnectivity_Mesh2D(myMesh)
+!  ! Create the sideInfo information given eleminfo
+!  !  > Assumes quadrilateral mesh in 2-D
+!  !  > Assumes hexahedral mesh in 3-D
+!    IMPLICIT NONE
+!    CLASS(Mesh2D),INTENT(inout) :: myMesh
+!
+!    ! SideInfo
+!    !
+!    !  SideType : Side Type encoding. The number of corner nodes is the last digit.
+!    !  GlobalSideID : Unique side ID global identifier
+!    !
+!    !  nbElemID : Neighbor Element ID
+!    !
+!    !  10*nbLocSide+Flip : first digit - local side of the connected neighbor element; last digit - Orientation between the sides
+!    !  (flip in [0,2])
+!    !
+!    !  BCID : Refers to the row index of the Boundary Condition List in BCNames/BCType array (in [1,nBCs]); = 0 for inner sides
+!
+!    ! Nodes are assumed to be defined on gauss-lobatto points - This allows us to check if nodes are the same along boundary
+!    ! edges/faces
+!
+!    ! Loop over elements,
+!    !   > Loop over local nodes    
+!    !     > Loop over elements up to current element minus 1
+!    !       > Loop over local nodes
+!    !         > Check for match with previous node
+!    !         > IF MATCH
+!    !           > Update Global Node ID to matched node Global Node ID
+!    !         > ELSE
+!    !           > Assign new global node id
+!
+!    ! Loop over elements,
+!    !   > Loop over local sides
+!    !     > Assign side type (Assume line in 2-D)
+!    !     > Set nbElemID = current element ID
+!    !     > Set "current local side" as nbLocalSideID, "0" orientiation 
+!    !     > Set the BCID = 0
+!    !     > Save nodelist for this side
+!    !
+!    !   > Loop over elements up to current element minus 1
+!    !      > Check for match with previous side
+!    !      > IF MATCH
+!    !        > Update Global ID of secondary element
+!    !        > Set nbElemID for both elements; nbElemID of primary element is secondary element ID and vice-versa.
+!    !        > Set nbLocalSideID for local side of neighboring element (
+!    !        > Update "Flip" of secondary element, relative to primary element
+!
+!
+!  END SUBROUTINE GenerateConnectivity_Mesh2D
+
   SUBROUTINE UniformBlockMesh_Mesh2D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(out) :: myMesh
@@ -415,7 +467,7 @@ CONTAINS
     REAL(prec),INTENT(in) :: x(1:4)
     ! Local
     INTEGER :: iel,jel,nEl,elid
-    INTEGER :: nid,nNodes
+    INTEGER :: sid,nid,nNodes
     INTEGER :: nSides
     INTEGER :: i,j
     REAL(prec) :: xU(1:nElem(1) + 1)
@@ -458,19 +510,23 @@ CONTAINS
 
     ! Set the element information
     nid = 1
+    sid = 0
     elid = 1
     DO jel = 1,nElem(2)
       DO iel = 1,nElem(1)
         myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
         myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
-        myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
+        myMesh % eleminfo % hostData(3,iel) = sid ! Side Index Start
+        sid = sid+4
+        myMesh % eleminfo % hostData(4,iel) = sid ! Side Index End
+        myMesh % eleminfo % hostData(5,iel) = nid-1 ! Node Index Start
         DO j = 0,nGeo
           DO i = 0,nGeo
             myMesh % nodeCoords % hostData(1:2,nid) = xGeo % interior % hostData(1:2,i,j,1,elid)
             nid = nid + 1
           END DO
         END DO
-        myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
+        myMesh % eleminfo % hostData(6,iel) = nid ! Node Index End
         elid = elid + 1
       END DO
     END DO
@@ -569,6 +625,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE UpdateDevice_Mesh3D
+
   SUBROUTINE UniformBlockMesh_Mesh3D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(out) :: myMesh
@@ -577,7 +634,7 @@ CONTAINS
     REAL(prec),INTENT(in) :: x(1:6)
     ! Local
     INTEGER :: iel,jel,kel,nEl,elid
-    INTEGER :: nid,nNodes
+    INTEGER :: sid,nid,nNodes
     INTEGER :: nSides
     INTEGER :: i,j,k
     REAL(prec) :: xU(1:nElem(1) + 1)
@@ -635,13 +692,17 @@ CONTAINS
 
     ! Set the element information
     nid = 1
+    sid = 0
     elid = 1
     DO kel = 1,nElem(3)
       DO jel = 1,nElem(2)
         DO iel = 1,nElem(1)
           myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
           myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
-          myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
+          myMesh % eleminfo % hostData(3,iel) = sid ! Side Index Start
+          sid = sid + 6
+          myMesh % eleminfo % hostData(4,iel) = sid ! Side Index End
+          myMesh % eleminfo % hostData(5,iel) = nid-1 ! Node Index Start
           DO k = 0,nGeo
             DO j = 0,nGeo
               DO i = 0,nGeo
@@ -650,7 +711,7 @@ CONTAINS
               END DO
             END DO
           END DO
-          myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
+          myMesh % eleminfo % hostData(6,iel) = nid ! Node Index End
           elid = elid + 1
         END DO
       END DO
