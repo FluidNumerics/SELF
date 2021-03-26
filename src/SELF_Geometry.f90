@@ -69,6 +69,28 @@ MODULE SELF_Geometry
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
 
   END TYPE SEMHex
+#ifdef GPU
+!  INTERFACE
+!    SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper(dxds,J,dsdx,N,nEl) &
+!      bind(c,name="CalculateContravariantBasis_SEMQuad_gpu_wrapper")
+!      USE iso_c_binding
+!      IMPLICIT NONE
+!      TYPE(c_ptr) :: dxds,J,dsdx
+!      INTEGER,VALUE :: N,nEl
+!    END SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper
+!  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper(dxds,dsdx,N,nEl) &
+      bind(c,name="CalculateContravariantBasis_SEMHex_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dxds,dsdx
+      INTEGER,VALUE :: N,nEl
+    END SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper
+  END INTERFACE
+
+#endif
 
 CONTAINS
 
@@ -518,6 +540,20 @@ CONTAINS
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
 
+#ifdef GPU
+
+    CALL CalculateContravariantBasis_SEMHex_gpu_wrapper(myGeom % dxds % interior % deviceData, &
+                                                        myGeom % dsdx % interior % deviceData, &
+                                                        myGeom % dxds % N, &
+                                                        myGeom % dxds % nElem)
+
+
+    ! Interpolate the contravariant tensor to the boundaries
+    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % dsdx % UpdateHost()
+    CALL myGeom % J % UpdateHost()
+
+#else
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
@@ -591,6 +627,8 @@ CONTAINS
     ! Interpolate the contravariant tensor to the boundaries
     CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
 
+#endif
+
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
 
@@ -621,12 +659,10 @@ CONTAINS
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
     CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
     CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % J % UpdateHost()
-    CALL myGeom % dxds % UpdateHost()
 
     CALL myGeom % CalculateContravariantBasis()
-    CALL myGeom % dsdx % UpdateDevice()
-    CALL myGeom % J % UpdateDevice()
+!    CALL myGeom % dsdx % UpdateDevice()
+!    CALL myGeom % J % UpdateDevice()
 
     !CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
     !CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
