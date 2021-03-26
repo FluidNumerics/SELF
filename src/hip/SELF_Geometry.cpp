@@ -1,4 +1,5 @@
 #include <hip/hip_runtime.h>
+#include <math.h>
 #include "SELF_HIP_Macros.h"
 
 /*
@@ -144,5 +145,33 @@ extern "C"
   void CalculateContravariantBasis_SEMHex_gpu_wrapper(real **dxds, real **dsdx, int N, int nEl)
   { 
 	  hipLaunchKernelGGL((CalculateContravariantBasis_SEMHex_gpu), dim3(nEl,1,1), dim3(N+1,N+1,N+1), 0, 0, *dxds, *dsdx, N);
+  } 
+}
+
+__global__ void AdjustBoundaryContravariantBasis_SEMHex_gpu(real *dsdx, real *J, int N){
+
+  size_t iSide = hipBlockIdx_x+1;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+    real fac = fabs(J[SCB_3D_INDEX(i,j,iSide,0,iEl,N,1)])/J[SCB_3D_INDEX(i,j,iSide,0,iEl,N,1)];
+    if (iSide == 5 || iSide == 1 || iSide == 2){
+      fac = -fac;
+    } 
+
+    for( int row = 1; row <= 3; row++ ){
+      for( int col = 1; col <= 3; col++ ){
+        dsdx[TEB_3D_INDEX(row,col,i,j,0,iSide,iEl,N,1)] = fac*dsdx[TEB_3D_INDEX(row,col,i,j,0,iSide,iEl,N,1)]; 
+      }
+    }
+
+}
+
+extern "C"
+{
+  void AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(real **dsdx, real **J, int N, int nEl)
+  { 
+	  hipLaunchKernelGGL((AdjustBoundaryContravariantBasis_SEMHex_gpu), dim3(6,nEl,1), dim3(N+1,N+1,1), 0, 0, *dsdx, *J, N);
   } 
 }

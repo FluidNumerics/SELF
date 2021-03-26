@@ -90,6 +90,16 @@ MODULE SELF_Geometry
     END SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper
   END INTERFACE
 
+  INTERFACE
+    SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(dsdx,J,N,nEl) &
+      bind(c,name="AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dsdx,J
+      INTEGER,VALUE :: N,nEl
+    END SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper
+  END INTERFACE
+
 #endif
 
 CONTAINS
@@ -546,12 +556,12 @@ CONTAINS
                                                         myGeom % dsdx % interior % deviceData, &
                                                         myGeom % dxds % N, &
                                                         myGeom % dxds % nElem)
-
-
     ! Interpolate the contravariant tensor to the boundaries
     CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % dsdx % UpdateHost()
-    CALL myGeom % J % UpdateHost()
+    CALL AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
+                                                             myGeom % J % boundary % deviceData, &
+                                                             myGeom % J % N, &
+                                                             myGeom % J % nElem)
 
 #else
     ! Now calculate the contravariant basis vectors
@@ -627,11 +637,8 @@ CONTAINS
     ! Interpolate the contravariant tensor to the boundaries
     CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
 
-#endif
-
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-
     DO iEl = 1,myGeom % nElem
       DO k = 1,6
         DO j = 0,myGeom % J % N
@@ -649,27 +656,29 @@ CONTAINS
       END DO
     END DO
 
+#endif
+
+
   END SUBROUTINE CalculateContravariantBasis_SEMHex
 
   SUBROUTINE CalculateMetricTerms_SEMHex(myGeom)
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
+#ifdef GPU           
     CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
     CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
     CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-
     CALL myGeom % CalculateContravariantBasis()
-!    CALL myGeom % dsdx % UpdateDevice()
-!    CALL myGeom % J % UpdateDevice()
-
-    !CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
-    !CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-    !CALL myGeom % dxds % Determinant(myGeom % J)
-    !CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-    !CALL myGeom % CalculateContravariantBasis()
-    !CALL myGeom % UpdateDevice()
+    CALL myGeom % UpdateHost()
+#else
+    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
+    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % dxds % Determinant(myGeom % J)
+    CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % CalculateContravariantBasis()
+#endif
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 
