@@ -76,6 +76,55 @@ extern "C"
   } 
 }
 */
+__global__ void CalculateContravariantBasis_SEMQuad_gpu(real *dxds, real *dsdx, int N){
+
+  size_t iEl = hipBlockIdx_x;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
+
+    // Ja1
+    dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)] = dxds[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)];
+    dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)] = -dxds[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)];
+
+    // Ja2
+    dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)] = -dxds[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)];
+    dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)] = dxds[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)];
+
+}
+extern "C"
+{
+  void CalculateContravariantBasis_SEMQuad_gpu_wrapper(real **dxds, real **dsdx, int N, int nEl)
+  { 
+	  hipLaunchKernelGGL((CalculateContravariantBasis_SEMQuad_gpu), dim3(nEl,1,1), dim3(N+1,N+1), 0, 0, *dxds, *dsdx, N);
+  } 
+}
+
+__global__ void AdjustBoundaryContravariantBasis_SEMQuad_gpu(real *dsdx, real *J, int N){
+
+  size_t iSide = hipBlockIdx_x+1;
+  size_t iEl = hipBlockIdx_y;
+  size_t i = hipThreadIdx_x;
+
+    real fac = fabs(J[SCB_2D_INDEX(i,iSide,0,iEl,N,1)])/J[SCB_2D_INDEX(i,iSide,0,iEl,N,1)];
+    if (iSide == 4 || iSide == 1 ){
+      fac = -fac;
+    } 
+
+    for( int row = 1; row <= 2; row++ ){
+      for( int col = 1; col <= 2; col++ ){
+        dsdx[TEB_2D_INDEX(row,col,i,0,iSide,iEl,N,1)] = fac*dsdx[TEB_2D_INDEX(row,col,i,0,iSide,iEl,N,1)]; 
+      }
+    }
+
+}
+
+extern "C"
+{
+  void AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(real **dsdx, real **J, int N, int nEl)
+  { 
+	  hipLaunchKernelGGL((AdjustBoundaryContravariantBasis_SEMQuad_gpu), dim3(4,nEl,1), dim3(N+1,1,1), 0, 0, *dsdx, *J, N);
+  } 
+}
 __global__ void CalculateContravariantBasis_SEMHex_gpu(real *dxds, real *dsdx, int N){
 
   size_t iEl = hipBlockIdx_x;
