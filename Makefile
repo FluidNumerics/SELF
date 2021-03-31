@@ -17,6 +17,9 @@
 #     SELF_PREFIX            Set the path to install SELF (Default: /opt/self)
 #     BUILD                  Set the type of build. (Default: dev | Options : dev, release)
 #
+#   Precision Options
+#     PREC                   Set the floating point precision in SELF. (Default: single | Options : single, double)
+#
 #   Compiler and Target Hardware Options
 #     FC                     Set the Fortran compiler. (Default: gfortran | Options: gfortran)
 #     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: gfortran | Options: gfortran)

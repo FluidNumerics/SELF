@@ -7,6 +7,12 @@ HIPFORT_GPU ?= gfx900
 ROCM_DIR ?= /opt/rocm
 CUDA_PATH ?= /usr/local/cuda
 BUILD ?= dev
+PREC ?= single
+
+
+ifeq ($(PREC),double)
+  SELF_FFLAGS += -DDOUBLE_PRECISION
+endif
 
  
 ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER)), hipfc-gfortran)
