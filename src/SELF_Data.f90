@@ -15,6 +15,8 @@ MODULE SELF_Data
 
   IMPLICIT NONE
 
+#include "SELF_Macros.h"
+
 ! ---------------------- Scalars ---------------------- !
   TYPE,PUBLIC :: Scalar1D
 
@@ -1651,20 +1653,27 @@ CONTAINS
   END SUBROUTINE Divergence_Tensor2D
 
   SUBROUTINE Determinant_Tensor2D(SELFStorage,SELFout,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "Determinant_Tensor2D"
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(in) :: SELFStorage
     TYPE(Scalar2D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
-
+#ifdef GPU
       CALL Determinant_Tensor2D_gpu_wrapper(SELFStorage % interior % deviceData, &
                                             SELFOut % interior % deviceData, &
                                             SELFStorage % N, &
                                             SELFStorage % nVar, &
                                             SELFStorage % nElem)
+#else
+     msg = "GPU Acceleration currently not enabled in SELF"
+     WARNING(msg)
+#endif
 
     ELSE
 
@@ -1914,20 +1923,27 @@ CONTAINS
   END SUBROUTINE Divergence_Tensor3D
 
   SUBROUTINE Determinant_Tensor3D(SELFStorage,SELFOut,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "Determinant_Tensor3D"
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(in) :: SELFStorage
     TYPE(Scalar3D),INTENT(inout) :: SELFOut
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
+    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
-
+#ifdef GPU
       CALL Determinant_Tensor3D_gpu_wrapper(SELFStorage % interior % deviceData, &
                                             SELFOut % interior % deviceData, &
                                             SELFStorage % N, &
                                             SELFStorage % nVar, &
                                             SELFStorage % nElem)
+#else
+     msg = "GPU Acceleration currently not enabled in SELF"
+     WARNING(msg)
+#endif
 
     ELSE
 
