@@ -709,7 +709,7 @@ CONTAINS
 #else
     CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % dxds % Determinant(myGeom % J)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
     CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
     CALL myGeom % CalculateContravariantBasis()
 #endif
