@@ -142,6 +142,10 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: sideInfo
     TYPE(hfReal_r2) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
+    TYPE(hfInt32_r1) :: CGNSCornerMap
+    TYPE(hfInt32_r2) :: CGNSSideMap
+    TYPE(hfInt32_r2) :: curveNodeMap
+    TYPE(hfInt32_r2) :: curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -169,6 +173,10 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: sideInfo
     TYPE(hfReal_r2) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
+    TYPE(hfInt32_r1) :: CGNSCornerMap
+    TYPE(hfInt32_r2) :: CGNSSideMap
+    TYPE(hfInt32_r2) :: curveNodeMap
+    TYPE(hfInt32_r3) :: curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -329,6 +337,8 @@ CONTAINS
     INTEGER,INTENT(in) :: nSides
     INTEGER,INTENT(in) :: nNodes
     INTEGER,INTENT(in) :: nBCs
+    ! Local
+    INTEGER :: i,j,l
 
     myMesh % nGeo = nGeo
     myMesh % nElem = nElem
@@ -351,10 +361,42 @@ CONTAINS
     CALL myMesh % globalNodeIDs % Alloc(loBound=1, &
                                         upBound=nNodes)
 
+    CALL myMesh % CGNSCornerMap % Alloc(loBound=1, &
+                                        upBound=4)
+
+    CALL myMesh % CGNSSideMap % Alloc(loBound=(/1,1/), &
+                                      upBound=(/2,4/))
+
+    CALL myMesh % curveNodeMap % Alloc(loBound=(/1,1/),&
+                                       upBound=(/2,(nGeo+1)**2/))
+
+    CALL myMesh % curveNodeMapInv % Alloc(loBound=(/0,0/), &
+                                          upBound=(/nGeo,nGeo/))
+
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
 
     ALLOCATE (myMesh % BCNames(1:nBCs))
+
+    ! Create lookup tables to assist with connectivity generation
+    myMesh % CGNSCornerMap % hostData(1) = 1
+    myMesh % CGNSCornerMap % hostData(2) = nGeo+1
+    myMesh % CGNSCornerMap % hostData(3) = (nGeo+1)**2
+    myMesh % CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
+
+    DO j = 0, nGeo
+      DO i = 0, nGeo
+        l = l+1
+        myMesh % curveNodeMap % hostData(1:2,l) = (/i,j/)
+        myMesh % curveNodeMapInv % hostData(i,j) = l
+      ENDDO
+    ENDDO
+
+    ! Maps from local corner node id to CGNS side
+    myMesh % CGNSSideMap % hostData(1:2,1) = (/1,2/)
+    myMesh % CGNSSideMap % hostData(1:2,2) = (/2,3/)
+    myMesh % CGNSSideMap % hostData(1:2,3) = (/4,3/)
+    myMesh % CGNSSideMap % hostData(1:2,4) = (/1,4/)
 
   END SUBROUTINE Init_Mesh2D
 
@@ -373,6 +415,7 @@ CONTAINS
     CALL myMesh % elemInfo % Free()
     CALL myMesh % sideInfo % Free()
     CALL myMesh % nodeCoords % Free()
+    CALL myMesh % CGNSCornerMap % Free()
     CALL myMesh % globalNodeIDs % Free()
     CALL myMesh % BCType % Free()
 
@@ -415,6 +458,8 @@ CONTAINS
 !    IMPLICIT NONE
 !    CLASS(Mesh2D),INTENT(inout) :: myMesh
 !
+!    ! Find matching nodes
+!    DO 
 !    ! SideInfo
 !    !
 !    !  SideType : Side Type encoding. The number of corner nodes is the last digit.
@@ -531,7 +576,6 @@ CONTAINS
       END DO
     END DO
 
-    ! TO DO: Add Side information !
 
     CALL myMesh % UpdateDevice()
 
@@ -548,6 +592,8 @@ CONTAINS
     INTEGER,INTENT(in) :: nSides
     INTEGER,INTENT(in) :: nNodes
     INTEGER,INTENT(in) :: nBCs
+    ! Local
+    INTEGER :: i,j,k,l
 
     myMesh % nElem = nElem
     myMesh % nGeo = nGeo
@@ -570,10 +616,50 @@ CONTAINS
     CALL myMesh % globalNodeIDs % Alloc(loBound=1, &
                                         upBound=nNodes)
 
+    CALL myMesh % CGNSCornerMap % Alloc(loBound=1, &
+                                        upBound=8)
+
+    CALL myMesh % CGNSSideMap % Alloc(loBound=(/1,1/), &
+                                      upBound=(/4,6/))
+
+    CALL myMesh % curveNodeMap % Alloc(loBound=(/1,1/), &
+                                       upBound=(/3,(nGeo+1)**3/))
+
+    CALL myMesh % curveNodeMapInv % Alloc(loBound=(/0,0,0/), &
+                                          upBound=(/nGeo,nGeo,nGeo/))
+
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
 
     ALLOCATE (myMesh % BCNames(1:nBCs))
+
+    ! Create lookup tables to assist with connectivity generation
+    myMesh % CGNSCornerMap % hostData(1) = 1
+    myMesh % CGNSCornerMap % hostData(2) = nGeo+1
+    myMesh % CGNSCornerMap % hostData(3) = (nGeo+1)**2
+    myMesh % CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
+    myMesh % CGNSCornerMap % hostData(5) = nGeo*(nGeo+1)**2+1
+    myMesh % CGNSCornerMap % hostData(6) = nGeo*(nGeo+1)**2+(nGeo+1)
+    myMesh % CGNSCornerMap % hostData(7) = (nGeo+1)**3
+    myMesh % CGNSCornerMap % hostData(8) = nGeo*(nGeo+1)*(nGeo+2)+1
+
+    DO k = 0, nGeo
+      DO j = 0, nGeo
+        DO i = 0, nGeo
+          l = l+1
+          myMesh % curveNodeMap % hostData(1:3,l) = (/i,j,k/)
+          myMesh % curveNodeMapInv % hostData(i,j,k) = l
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Maps from local corner node id to CGNS side
+    myMesh % CGNSSideMap % hostData(1:4,1) = (/1,4,3,2/)
+    myMesh % CGNSSideMap % hostData(1:4,2) = (/1,2,6,5/)
+    myMesh % CGNSSideMap % hostData(1:4,3) = (/2,3,7,6/)
+    myMesh % CGNSSideMap % hostData(1:4,4) = (/3,4,8,7/)
+    myMesh % CGNSSideMap % hostData(1:4,5) = (/1,5,8,4/)
+    myMesh % CGNSSideMap % hostData(1:4,6) = (/5,6,7,8/)
 
   END SUBROUTINE Init_Mesh3D
 
@@ -592,6 +678,7 @@ CONTAINS
     CALL myMesh % elemInfo % Free()
     CALL myMesh % sideInfo % Free()
     CALL myMesh % nodeCoords % Free()
+    CALL myMesh % CGNSCornerMap % Free()
     CALL myMesh % globalNodeIDs % Free()
     CALL myMesh % BCType % Free()
 
