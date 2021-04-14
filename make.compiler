@@ -20,8 +20,15 @@ ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER)), hipf
   FC = hipfc
   CXX = hipfc  
   AR = gcc-ar
-  SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
-  SELF_CXXFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
+
+  ifeq ($(findstring gfx, $(OFFLOAD_ARCH)), gfx)
+    SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
+    SELF_CXXFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
+  else ifeq ($(findstring sm, $(OFFLOAD_ARCH)), sm)
+    SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
+    SELF_CXXFLAGS += --gpu-architecture $(HIPFORT_GPU)
+  endif
+
   $(info Fortran Compiler : $(FC))
   $(info HIPFORT Compiler : $(HIPFORT_COMPILER))
   GPU_ACCELERATED = true
