@@ -1673,7 +1673,7 @@ CONTAINS
     INTEGER    :: i,j,ii,iVar,iEl
 
 #ifdef GPU
-    CALL VectorDGDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+    CALL VectorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
                                            myPoly % qWeights % deviceData, &
                                            f_dev,bF_dev,dF_dev,myPoly % N, &
@@ -1830,7 +1830,7 @@ CONTAINS
     INTEGER    :: i,j,ii,iVar,iEl
 
 #ifdef GPU
-    CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+    CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
                                            myPoly % qWeights % deviceData, &
                                            f_dev,bF_dev,dF_dev,myPoly % N, &

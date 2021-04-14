@@ -432,24 +432,49 @@ __global__ void TensorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
-  size_t tid = hipThreadIdx_x;
-  size_t i = hipThreadIdx_y;
+  size_t i = hipThreadIdx_x;
 
-  // tid varies from 0 to 4 - we want to calculate the row and column for the tensor
-  int col = tid/2+1;
-  int row = tid-col*2+1;
-
-  real fb[4] = {0.0};
+  real fb[16] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
-    fb[0] += f[TE_2D_INDEX(row,col,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
-    fb[1] += f[TE_2D_INDEX(row,col,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
-    fb[2] += f[TE_2D_INDEX(row,col,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
-    fb[3] += f[TE_2D_INDEX(row,col,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+    fb[0] += f[TE_2D_INDEX(1,1,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
+    fb[1] += f[TE_2D_INDEX(1,1,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
+    fb[2] += f[TE_2D_INDEX(1,1,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
+    fb[3] += f[TE_2D_INDEX(1,1,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+
+    fb[4] += f[TE_2D_INDEX(2,1,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
+    fb[5] += f[TE_2D_INDEX(2,1,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
+    fb[6] += f[TE_2D_INDEX(2,1,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
+    fb[7] += f[TE_2D_INDEX(2,1,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+
+    fb[8] += f[TE_2D_INDEX(1,2,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
+    fb[9] += f[TE_2D_INDEX(1,2,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
+    fb[10] += f[TE_2D_INDEX(1,2,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
+    fb[11] += f[TE_2D_INDEX(1,2,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+
+    fb[12] += f[TE_2D_INDEX(2,2,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
+    fb[13] += f[TE_2D_INDEX(2,2,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
+    fb[14] += f[TE_2D_INDEX(2,2,i,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
+    fb[15] += f[TE_2D_INDEX(2,2,ii,i,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
   }
-  fBound[TEB_2D_INDEX(row,col,i,iVar,1,iEl,N,nVar)] = fb[0];
-  fBound[TEB_2D_INDEX(row,col,i,iVar,2,iEl,N,nVar)] = fb[1];
-  fBound[TEB_2D_INDEX(row,col,i,iVar,3,iEl,N,nVar)] = fb[2];
-  fBound[TEB_2D_INDEX(row,col,i,iVar,4,iEl,N,nVar)] = fb[3];
+  fBound[TEB_2D_INDEX(1,1,i,iVar,1,iEl,N,nVar)] = fb[0];
+  fBound[TEB_2D_INDEX(1,1,i,iVar,2,iEl,N,nVar)] = fb[1];
+  fBound[TEB_2D_INDEX(1,1,i,iVar,3,iEl,N,nVar)] = fb[2];
+  fBound[TEB_2D_INDEX(1,1,i,iVar,4,iEl,N,nVar)] = fb[3];
+
+  fBound[TEB_2D_INDEX(2,1,i,iVar,1,iEl,N,nVar)] = fb[4];
+  fBound[TEB_2D_INDEX(2,1,i,iVar,2,iEl,N,nVar)] = fb[5];
+  fBound[TEB_2D_INDEX(2,1,i,iVar,3,iEl,N,nVar)] = fb[6];
+  fBound[TEB_2D_INDEX(2,1,i,iVar,4,iEl,N,nVar)] = fb[7];
+
+  fBound[TEB_2D_INDEX(1,2,i,iVar,1,iEl,N,nVar)] = fb[8];
+  fBound[TEB_2D_INDEX(1,2,i,iVar,2,iEl,N,nVar)] = fb[9];
+  fBound[TEB_2D_INDEX(1,2,i,iVar,3,iEl,N,nVar)] = fb[10];
+  fBound[TEB_2D_INDEX(1,2,i,iVar,4,iEl,N,nVar)] = fb[11];
+
+  fBound[TEB_2D_INDEX(2,2,i,iVar,1,iEl,N,nVar)] = fb[12];
+  fBound[TEB_2D_INDEX(2,2,i,iVar,2,iEl,N,nVar)] = fb[13];
+  fBound[TEB_2D_INDEX(2,2,i,iVar,3,iEl,N,nVar)] = fb[14];
+  fBound[TEB_2D_INDEX(2,2,i,iVar,4,iEl,N,nVar)] = fb[15];
 
 }
 
@@ -457,7 +482,7 @@ extern "C"
 {
   void TensorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((TensorBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(4,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+    hipLaunchKernelGGL((TensorBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
   }
 }
 // ScalarBoundaryInterp_3D //
@@ -532,36 +557,39 @@ __global__ void TensorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound
 
   size_t iVar = hipBlockIdx_x;
   size_t iEl = hipBlockIdx_y;
-  size_t tid = hipThreadIdx_x;
-  size_t i = hipThreadIdx_y;
-  size_t j = hipThreadIdx_z;
+  size_t i = hipThreadIdx_x;
+  size_t j = hipThreadIdx_y;
 
-  // tid varies from 0 to 8 - we want to calculate the row and column for the tensor
-  int col = tid/3+1;
-  int row = tid-col*3+1;
-
-  real fb[6] = {0.0};
-  for (int ii=0; ii<N+1; ii++) {
-    fb[0] += f[TE_3D_INDEX(row,col,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // Bottom
-    fb[1] += f[TE_3D_INDEX(row,col,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
-    fb[2] += f[TE_3D_INDEX(row,col,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
-    fb[3] += f[TE_3D_INDEX(row,col,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
-    fb[4] += f[TE_3D_INDEX(row,col,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
-    fb[5] += f[TE_3D_INDEX(row,col,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // Top
+  for (int col=1; col<=3; col++){
+    for (int row=1; row<=3; row++){
+      fBound[TEB_3D_INDEX(row,col,i,j,iVar,1,iEl,N,nVar)] = 0.0;
+      fBound[TEB_3D_INDEX(row,col,i,j,iVar,2,iEl,N,nVar)] = 0.0;
+      fBound[TEB_3D_INDEX(row,col,i,j,iVar,3,iEl,N,nVar)] = 0.0;
+      fBound[TEB_3D_INDEX(row,col,i,j,iVar,4,iEl,N,nVar)] = 0.0;
+      fBound[TEB_3D_INDEX(row,col,i,j,iVar,5,iEl,N,nVar)] = 0.0;
+      fBound[TEB_3D_INDEX(row,col,i,j,iVar,6,iEl,N,nVar)] = 0.0;
+    }
   }
-  fBound[TEB_3D_INDEX(row,col,i,j,iVar,1,iEl,N,nVar)] = fb[0];
-  fBound[TEB_3D_INDEX(row,col,i,j,iVar,2,iEl,N,nVar)] = fb[1];
-  fBound[TEB_3D_INDEX(row,col,i,j,iVar,3,iEl,N,nVar)] = fb[2];
-  fBound[TEB_3D_INDEX(row,col,i,j,iVar,4,iEl,N,nVar)] = fb[3];
-  fBound[TEB_3D_INDEX(row,col,i,j,iVar,5,iEl,N,nVar)] = fb[4];
-  fBound[TEB_3D_INDEX(row,col,i,j,iVar,6,iEl,N,nVar)] = fb[5];
+  for (int ii=0; ii<N+1; ii++) {
+    for (int col=1; col<=3; col++){
+      for (int row=1; row<=3; row++){
+        fBound[TEB_3D_INDEX(row,col,i,j,iVar,1,iEl,N,nVar)] += f[TE_3D_INDEX(row,col,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii]; // Bottom
+        fBound[TEB_3D_INDEX(row,col,i,j,iVar,2,iEl,N,nVar)] += f[TE_3D_INDEX(row,col,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii]; // South
+        fBound[TEB_3D_INDEX(row,col,i,j,iVar,3,iEl,N,nVar)] += f[TE_3D_INDEX(row,col,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // East
+        fBound[TEB_3D_INDEX(row,col,i,j,iVar,4,iEl,N,nVar)] += f[TE_3D_INDEX(row,col,i,ii,j,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // North
+        fBound[TEB_3D_INDEX(row,col,i,j,iVar,5,iEl,N,nVar)] += f[TE_3D_INDEX(row,col,ii,i,j,iVar,iEl,N,nVar)]*bMatrix[ii]; // West
+        fBound[TEB_3D_INDEX(row,col,i,j,iVar,6,iEl,N,nVar)] += f[TE_3D_INDEX(row,col,i,j,ii,iVar,iEl,N,nVar)]*bMatrix[ii+(N+1)]; // Top
+      }
+    }
+  }
+
 }
 
 extern "C"
 {
   void TensorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(9,N+1,N+1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  hipLaunchKernelGGL((TensorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
@@ -600,8 +628,8 @@ __global__ void DGDerivative_1D_gpu(real *dMatrix, real *bMatrix, real *qWeight,
     fm += f[SC_1D_INDEX(ii,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)];
   }
 
-  fm += (-bMatrix[i]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)] +
-          bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,2,iEl,N,nVar)])/qWeight[i];
+  fm += (bMatrix[i+(N+1)]*bf[SCB_1D_INDEX(iVar,1,iEl,N,nVar)]-
+	 bMatrix[i]*bf[SCB_1D_INDEX(iVar,0,iEl,N,nVar)])/qWeight[i];
 
   df[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = fm;
 
@@ -779,20 +807,19 @@ __global__ void VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *q
   size_t i = hipThreadIdx_x;
   size_t j = hipThreadIdx_y;
 
-  real dfloc = 0.0;
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 0.0;
   for (int ii=0; ii<N+1; ii++) {
-    dfloc += f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
+    df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
              f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
   }
 
-  dfloc += (bf[VEB_2D_INDEX(1,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] -
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += (bf[VEB_2D_INDEX(1,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
             bf[VEB_2D_INDEX(1,j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
            qWeights[i] +
-           (bf[VEB_2D_INDEX(2,i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] -
+           (bf[VEB_2D_INDEX(2,i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
             bf[VEB_2D_INDEX(2,i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
            qWeights[j];
 
-  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc;
 
 }
 
@@ -867,36 +894,33 @@ __global__ void TensorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *q
   size_t i = hipThreadIdx_x;
   size_t j = hipThreadIdx_y;
 
-  real df1 = 0.0;
-  real df2 = 0.0;
+  df[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 0.0;
+  df[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 0.0;
   for (int ii=0; ii<N+1; ii++) {
-    df1 += f[TE_2D_INDEX(1,1,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
+    df[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] += f[TE_2D_INDEX(1,1,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
            f[TE_2D_INDEX(2,1,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
 
-    df2 += f[TE_2D_INDEX(1,2,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
+    df[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] += f[TE_2D_INDEX(1,2,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
            f[TE_2D_INDEX(2,2,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
   }
 
-  df1 += (bf[TEB_2D_INDEX(1,1,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)]+
+  df[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] += (bf[TEB_2D_INDEX(1,1,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)]+
           bf[TEB_2D_INDEX(1,1,j,iVar,4,iEl,N,nVar)]*bMatrix[i])/qWeights[i]+
          (bf[TEB_2D_INDEX(2,1,i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)]+
           bf[TEB_2D_INDEX(2,1,i,iVar,1,iEl,N,nVar)]*bMatrix[j])/qWeights[j];
 
-  df2 += (bf[TEB_2D_INDEX(1,2,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)]+
+  df[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] += (bf[TEB_2D_INDEX(1,2,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)]+
           bf[TEB_2D_INDEX(1,2,j,iVar,4,iEl,N,nVar)]*bMatrix[i])/qWeights[i]+
          (bf[TEB_2D_INDEX(2,2,i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)]+
           bf[TEB_2D_INDEX(2,2,i,iVar,1,iEl,N,nVar)]*bMatrix[j])/qWeights[j];
-
-  df[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = df1;
-  df[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = df2;
 
 }
 
 extern "C"
 {
-  void TensorDGDivergence_2D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
+  void TensorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorDGDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  hipLaunchKernelGGL((TensorDGDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   }
 }
 
@@ -977,13 +1001,12 @@ __global__ void VectorDivergence_3D_gpu(real *dMatrix, real *f, real *df, int N,
   size_t j = hipThreadIdx_y;
   size_t k = hipThreadIdx_z;
 
-  real dfloc = 0.0;
+  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = 0.0; 
   for (int ii=0; ii<N+1; ii++) {
-    dfloc += f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
+    df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
             +f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)]
-            +f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+            +f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
   }
-  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = dfloc; 
 
 }
 
@@ -1004,31 +1027,30 @@ __global__ void VectorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *q
   size_t j = hipThreadIdx_y;
   size_t k = hipThreadIdx_z;
 
-  real dfloc = 0.0;
+  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = 0.0; 
   for (int ii=0; ii<N+1; ii++) {
-    dfloc += f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
+    df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += f[VE_3D_INDEX(1,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
              f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]+
-             f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
+             f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+k*(N+1)];
   }
-  dfloc += (bf[VEB_3D_INDEX(1,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]-
+  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += (bf[VEB_3D_INDEX(1,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
             bf[VEB_3D_INDEX(1,j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
            qWeights[i]+
-           (bf[VEB_3D_INDEX(2,i,k,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)]-
-            bf[VEB_3D_INDEX(2,i,k,iVar,5,iEl,N,nVar)]*bMatrix[j])/
+           (bf[VEB_3D_INDEX(2,i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
+            bf[VEB_3D_INDEX(2,i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
            qWeights[j]+
-           (bf[VEB_3D_INDEX(3,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]-
+           (bf[VEB_3D_INDEX(3,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
             bf[VEB_3D_INDEX(3,i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
            qWeights[k];
 
-  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = dfloc; 
 
 }
 
 extern "C"
 {
-  void VectorDGDivergence_3D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
+  void VectorDGDivergence_3D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorDGDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  hipLaunchKernelGGL((VectorDGDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   } 
 }
 
@@ -1079,15 +1101,15 @@ __global__ void TensorDivergence_3D_gpu(real *dMatrix, real *f, real *df, int N,
   for (int ii=0; ii<N+1; ii++) {
     df1 += f[TE_3D_INDEX(1,1,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
           +f[TE_3D_INDEX(2,1,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)]
-          +f[TE_3D_INDEX(3,1,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+          +f[TE_3D_INDEX(3,1,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
 
     df2 += f[TE_3D_INDEX(1,2,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
           +f[TE_3D_INDEX(2,2,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)]
-          +f[TE_3D_INDEX(3,2,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+          +f[TE_3D_INDEX(3,2,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
 
     df3 += f[TE_3D_INDEX(1,3,ii,j,k,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)] 
           +f[TE_3D_INDEX(2,3,i,ii,k,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)]
-          +f[TE_3D_INDEX(3,3,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+          +f[TE_3D_INDEX(3,3,i,j,ii,iVar,iEl,N,nVar)]*dMatrix[ii+k*(N+1)];
   }
   df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = df1; 
   df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = df2; 
@@ -1112,56 +1134,53 @@ __global__ void TensorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *q
   size_t j = hipThreadIdx_y;
   size_t k = hipThreadIdx_z;
 
-  real df1 = 0.0;
-  real df2 = 0.0;
-  real df3 = 0.0;
+  df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = 0.0;
+  df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = 0.0;
+  df[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = 0.0;
   for (int ii=0; ii<N+1; ii++) {
-    df1 += f[TE_3D_INDEX(1,1,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)] 
-          +f[TE_3D_INDEX(2,1,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]
-          +f[TE_3D_INDEX(3,1,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
+    df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] += f[TE_3D_INDEX(1,1,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)] 
+       +f[TE_3D_INDEX(2,1,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]
+       +f[TE_3D_INDEX(3,1,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+k*(N+1)];
 
-    df2 += f[TE_3D_INDEX(1,2,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)] 
-          +f[TE_3D_INDEX(2,2,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]
-          +f[TE_3D_INDEX(3,2,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
+    df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] += f[TE_3D_INDEX(1,2,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)] 
+       +f[TE_3D_INDEX(2,2,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]
+       +f[TE_3D_INDEX(3,2,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+k*(N+1)];
 
-    df3 += f[TE_3D_INDEX(1,3,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)] 
+    df[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] += f[TE_3D_INDEX(1,3,ii,j,k,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)] 
           +f[TE_3D_INDEX(2,3,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]
-          +f[TE_3D_INDEX(3,3,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
+          +f[TE_3D_INDEX(3,3,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+k*(N+1)];
   }
 
-  df1 += (bf[TEB_3D_INDEX(1,1,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]-
+  df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] += (bf[TEB_3D_INDEX(1,1,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
           bf[TEB_3D_INDEX(1,1,j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
          qWeights[i]+
-         (bf[TEB_3D_INDEX(2,1,i,k,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)]-
-          bf[TEB_3D_INDEX(2,1,i,k,iVar,5,iEl,N,nVar)]*bMatrix[j])/
+         (bf[TEB_3D_INDEX(2,1,i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
+          bf[TEB_3D_INDEX(2,1,i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
          qWeights[j]+
-         (bf[TEB_3D_INDEX(3,1,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]-
+         (bf[TEB_3D_INDEX(3,1,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
           bf[TEB_3D_INDEX(3,1,i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
          qWeights[k];
 
-  df2 += (bf[TEB_3D_INDEX(1,2,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]-
+  df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] += (bf[TEB_3D_INDEX(1,2,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
           bf[TEB_3D_INDEX(1,2,j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
          qWeights[i]+
-         (bf[TEB_3D_INDEX(2,2,i,k,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)]-
-          bf[TEB_3D_INDEX(2,2,i,k,iVar,5,iEl,N,nVar)]*bMatrix[j])/
+         (bf[TEB_3D_INDEX(2,2,i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
+          bf[TEB_3D_INDEX(2,2,i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
          qWeights[j]+
-         (bf[TEB_3D_INDEX(3,2,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]-
+         (bf[TEB_3D_INDEX(3,2,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
           bf[TEB_3D_INDEX(3,2,i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
          qWeights[k];
 
-  df3 += (bf[TEB_3D_INDEX(1,3,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]-
+  df[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] += (bf[TEB_3D_INDEX(1,3,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
           bf[TEB_3D_INDEX(1,3,j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
          qWeights[i]+
-         (bf[TEB_3D_INDEX(2,3,i,k,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)]-
-          bf[TEB_3D_INDEX(2,3,i,k,iVar,5,iEl,N,nVar)]*bMatrix[j])/
+         (bf[TEB_3D_INDEX(2,3,i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
+          bf[TEB_3D_INDEX(2,3,i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
          qWeights[j]+
-         (bf[TEB_3D_INDEX(3,3,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]-
+         (bf[TEB_3D_INDEX(3,3,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
           bf[TEB_3D_INDEX(3,3,i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
          qWeights[k];
 
-  df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = df1;
-  df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = df2;
-  df[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = df3;
 
 }
 

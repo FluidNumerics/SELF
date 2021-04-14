@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -130,7 +130,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.4% of total for procedures.">28 statements</a>
+    title=" 0.4% of total for procedures.">32 statements</a>
      </li> 
      
      
@@ -232,7 +232,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
   
 <tr>
   
-  <td><span class="anchor" id="variable-mygeom~11"></span>class(<a href='../type/semquad.html'>SEMQuad</a>),</td>
+  <td><span class="anchor" id="variable-mygeom%7E11"></span>class(<a href='../type/semquad.html'>SEMQuad</a>),</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -247,7 +247,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
   
 <tr>
   
-  <td><span class="anchor" id="variable-mesh~3"></span>type(Mesh2D),</td>
+  <td><span class="anchor" id="variable-mesh%7E3"></span>type(Mesh2D),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
   
 <tr>
   
-  <td><span class="anchor" id="variable-cqtype~30"></span>integer,</td>
+  <td><span class="anchor" id="variable-cqtype%7E6"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -277,7 +277,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
   
 <tr>
   
-  <td><span class="anchor" id="variable-tqtype~30"></span>integer,</td>
+  <td><span class="anchor" id="variable-tqtype%7E6"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -292,7 +292,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
   
 <tr>
   
-  <td><span class="anchor" id="variable-cqdegree~27"></span>integer,</td>
+  <td><span class="anchor" id="variable-cqdegree%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -307,7 +307,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
   
 <tr>
   
-  <td><span class="anchor" id="variable-tqdegree~27"></span>integer,</td>
+  <td><span class="anchor" id="variable-tqdegree%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -420,14 +420,16 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
 <span class="k">      END DO</span>
 <span class="k">    END DO</span>
 
-    <span class="c">! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)</span>
+<span class="cp">#ifdef GPU</span>
+    <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">UpdateDevice</span><span class="p">()</span>
+    <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">GridInterp</span><span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span><span class="p">,.</span><span class="n">TRUE</span><span class="p">.)</span>
+    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">BoundaryInterp</span><span class="p">(</span><span class="n">gpuAccel</span><span class="o">=</span><span class="p">.</span><span class="n">TRUE</span><span class="p">.)</span>
+    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">CalculateMetricTerms</span><span class="p">()</span>
+    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">UpdateHost</span><span class="p">()</span>
+<span class="cp">#else</span>
     <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">GridInterp</span><span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span><span class="p">,.</span><span class="n">FALSE</span><span class="p">.)</span>
-
     <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">BoundaryInterp</span><span class="p">(</span><span class="n">gpuAccel</span><span class="o">=</span><span class="p">.</span><span class="n">FALSE</span><span class="p">.)</span>
     <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">CalculateMetricTerms</span><span class="p">()</span>
-
-<span class="cp">#ifdef GPU</span>
-    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">UpdateDevice</span><span class="p">()</span>
 <span class="cp">#endif</span>
 
     <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span>
@@ -454,7 +456,7 @@ public subroutine GenerateFromMesh_SEMQuad(myGeom, mesh, cqType, tqType, cqDegre
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-02-25 19:01  
+             on 2021-04-14 00:34  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>

@@ -2714,14 +2714,16 @@ CONTAINS
 #endif
 
     ! Run the grid interpolation
+    DO i = 1, 1000
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
+    END DO
 
 #ifdef GPU     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
 #endif
-
+ 
     dfError = dfActual - dfInterp
 
     ! Calculate Absolute Maximum Error
@@ -2985,7 +2987,7 @@ CONTAINS
 #endif
 
     ! Run the grid interpolation
-    CALL f % BoundaryInterp(gpuAccel)
+     CALL f % BoundaryInterp(gpuAccel)
 
 #ifdef GPU     
     IF (gpuAccel) THEN

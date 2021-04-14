@@ -11,10 +11,11 @@ MODULE SELF_Data
   USE SELF_Constants
   USE SELF_Lagrange
 
-!  USE hipfort
   USE ISO_C_BINDING
 
   IMPLICIT NONE
+
+#include "SELF_Macros.h"
 
 ! ---------------------- Scalars ---------------------- !
   TYPE,PUBLIC :: Scalar1D
@@ -295,6 +296,28 @@ MODULE SELF_Data
   INTEGER, PARAMETER :: selfStrongForm = 0
   INTEGER, PARAMETER :: selfWeakDGForm = 1
   INTEGER, PARAMETER :: selfWeakCGForm = 2
+
+#ifdef GPU
+  INTERFACE
+    SUBROUTINE Determinant_Tensor2D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &
+      bind(c,name="Determinant_Tensor2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor_dev,detTensor_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE Determinant_Tensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE Determinant_Tensor3D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &
+      bind(c,name="Determinant_Tensor3D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: tensor_dev,detTensor_dev
+      INTEGER,VALUE :: N,nVar,nEl
+    END SUBROUTINE Determinant_Tensor3D_gpu_wrapper
+  END INTERFACE
+#endif
 
 CONTAINS
 
@@ -1629,27 +1652,47 @@ CONTAINS
 
   END SUBROUTINE Divergence_Tensor2D
 
-  SUBROUTINE Determinant_Tensor2D(SELFStorage,SELFout)
+  SUBROUTINE Determinant_Tensor2D(SELFStorage,SELFout,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "Determinant_Tensor2D"
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(in) :: SELFStorage
     TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
+    CHARACTER(100) :: msg
 
-    DO iEl = 1,SELFStorage % nElem
-      DO iVar = 1,SELFStorage % nVar
-        DO j = 0,SELFStorage % N
-          DO i = 0,SELFStorage % N
+    IF (gpuAccel) THEN
+#ifdef GPU
+      CALL Determinant_Tensor2D_gpu_wrapper(SELFStorage % interior % deviceData, &
+                                            SELFOut % interior % deviceData, &
+                                            SELFStorage % N, &
+                                            SELFStorage % nVar, &
+                                            SELFStorage % nElem)
+#else
+     msg = "GPU Acceleration currently not enabled in SELF"
+     WARNING(msg)
+#endif
 
-            SELFOut % interior % hostData(i,j,iVar,iEl) = SELFStorage % interior % hostData(1,1,i,j,iVar,iEl)* &
-                                                          SELFStorage % interior % hostData(2,2,i,j,iVar,iEl) - &
-                                                          SELFStorage % interior % hostData(1,2,i,j,iVar,iEl)* &
-                                                          SELFStorage % interior % hostData(2,1,i,j,iVar,iEl)
+    ELSE
 
+      DO iEl = 1,SELFStorage % nElem
+        DO iVar = 1,SELFStorage % nVar
+          DO j = 0,SELFStorage % N
+            DO i = 0,SELFStorage % N
+  
+              SELFOut % interior % hostData(i,j,iVar,iEl) = SELFStorage % interior % hostData(1,1,i,j,iVar,iEl)* &
+                                                            SELFStorage % interior % hostData(2,2,i,j,iVar,iEl) - &
+                                                            SELFStorage % interior % hostData(1,2,i,j,iVar,iEl)* &
+                                                            SELFStorage % interior % hostData(2,1,i,j,iVar,iEl)
+  
+            END DO
           END DO
         END DO
       END DO
-    END DO
+
+    ENDIF
 
   END SUBROUTINE Determinant_Tensor2D
 
@@ -1879,41 +1922,61 @@ CONTAINS
 
   END SUBROUTINE Divergence_Tensor3D
 
-  SUBROUTINE Determinant_Tensor3D(SELFStorage,SELFOut)
+  SUBROUTINE Determinant_Tensor3D(SELFStorage,SELFOut,gpuAccel)
+#undef __FUNC__
+#define __FUNC__ "Determinant_Tensor3D"
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(in) :: SELFStorage
     TYPE(Scalar3D),INTENT(inout) :: SELFOut
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
+    CHARACTER(100) :: msg
 
-    DO iEl = 1,SELFStorage % nElem
-      DO iVar = 1,SELFStorage % nVar
-        DO k = 0,SELFStorage % N
-          DO j = 0,SELFStorage % N
-            DO i = 0,SELFStorage % N
+    IF (gpuAccel) THEN
+#ifdef GPU
+      CALL Determinant_Tensor3D_gpu_wrapper(SELFStorage % interior % deviceData, &
+                                            SELFOut % interior % deviceData, &
+                                            SELFStorage % N, &
+                                            SELFStorage % nVar, &
+                                            SELFStorage % nElem)
+#else
+     msg = "GPU Acceleration currently not enabled in SELF"
+     WARNING(msg)
+#endif
 
-              SELFOut % interior % hostData(i,j,k,iVar,iEl) = &
-                SELFStorage % interior % hostData(1,1,i,j,k,iVar,iEl)* &
-                (SELFStorage % interior % hostData(2,2,i,j,k,iVar,iEl)* &
-                 SELFStorage % interior % hostData(3,3,i,j,k,iVar,iEl) - &
-                 SELFStorage % interior % hostData(2,3,i,j,k,iVar,iEl)* &
-                 SELFStorage % interior % hostData(3,2,i,j,k,iVar,iEl)) - &
-                SELFStorage % interior % hostData(2,1,i,j,k,iVar,iEl)* &
-                (SELFStorage % interior % hostData(1,2,i,j,k,iVar,iEl)* &
-                 SELFStorage % interior % hostData(3,3,i,j,k,iVar,iEl) - &
-                 SELFStorage % interior % hostData(1,3,i,j,k,iVar,iEl)* &
-                 SELFStorage % interior % hostData(3,2,i,j,k,iVar,iEl)) + &
-                SELFStorage % interior % hostData(3,1,i,j,k,iVar,iEl)* &
-                (SELFStorage % interior % hostData(1,2,i,j,k,iVar,iEl)* &
-                 SELFStorage % interior % hostData(2,3,i,j,k,iVar,iEl) - &
-                 SELFStorage % interior % hostData(1,3,i,j,k,iVar,iEl)* &
-                 SELFStorage % interior % hostData(2,2,i,j,k,iVar,iEl))
+    ELSE
 
+      DO iEl = 1,SELFStorage % nElem
+        DO iVar = 1,SELFStorage % nVar
+          DO k = 0,SELFStorage % N
+            DO j = 0,SELFStorage % N
+              DO i = 0,SELFStorage % N
+
+                SELFOut % interior % hostData(i,j,k,iVar,iEl) = &
+                  SELFStorage % interior % hostData(1,1,i,j,k,iVar,iEl)* &
+                  (SELFStorage % interior % hostData(2,2,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,3,i,j,k,iVar,iEl) - &
+                   SELFStorage % interior % hostData(2,3,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,2,i,j,k,iVar,iEl)) - &
+                  SELFStorage % interior % hostData(2,1,i,j,k,iVar,iEl)* &
+                  (SELFStorage % interior % hostData(1,2,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,3,i,j,k,iVar,iEl) - &
+                   SELFStorage % interior % hostData(1,3,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(3,2,i,j,k,iVar,iEl)) + &
+                  SELFStorage % interior % hostData(3,1,i,j,k,iVar,iEl)* &
+                  (SELFStorage % interior % hostData(1,2,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(2,3,i,j,k,iVar,iEl) - &
+                   SELFStorage % interior % hostData(1,3,i,j,k,iVar,iEl)* &
+                   SELFStorage % interior % hostData(2,2,i,j,k,iVar,iEl))
+
+              END DO
             END DO
           END DO
         END DO
       END DO
-    END DO
+
+    ENDIF
 
   END SUBROUTINE Determinant_Tensor3D
 

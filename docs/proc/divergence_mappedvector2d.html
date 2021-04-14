@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -130,7 +130,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">16 statements</a>
+    title=" 0.3% of total for procedures.">24 statements</a>
      </li> 
      
      
@@ -232,7 +232,7 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-physvector~3"></span>class(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+  <td><span class="anchor" id="variable-physvector%7E3"></span>class(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -247,7 +247,7 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-compvector~3"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+  <td><span class="anchor" id="variable-compvector%7E3"></span>type(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-geometry~6"></span>type(SEMQuad),</td>
+  <td><span class="anchor" id="variable-geometry%7E6"></span>type(SEMQuad),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -292,7 +292,7 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-dform~9"></span>integer,</td>
+  <td><span class="anchor" id="variable-dform%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -307,7 +307,7 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
   
 <tr>
   
-  <td><span class="anchor" id="variable-gpuaccel~27"></span>logical,</td>
+  <td><span class="anchor" id="variable-gpuaccel%7E33"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -399,35 +399,35 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
     <span class="k">CALL </span><span class="n">physVector</span> <span class="p">%</span> <span class="n">ContravariantProjection</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span><span class="n">compVector</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
     <span class="k">IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfWeakDGForm</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="c">!      IF (gpuAccel) THEN</span>
-<span class="c">!        CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % deviceData, &amp;</span>
-<span class="c">!                                                         compVector % boundary % deviceData, &amp;</span>
-<span class="c">!                                                         divVector % interior % deviceData, &amp;</span>
-<span class="c">!                                                         compVector % nvar, &amp;</span>
-<span class="c">!                                                         compVector % nelem)</span>
-<span class="c">!      ELSE</span>
-        <span class="k">CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDGDivergence_2D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+<span class="k">      IF</span> <span class="p">(</span><span class="n">gpuAccel</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">        CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDGDivergence_2D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">compVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">divVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">compVector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">compVector</span> <span class="p">%</span> <span class="n">nelem</span><span class="p">)</span>
+      <span class="k">ELSE</span>
+<span class="k">        CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDGDivergence_2D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">compVector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">divVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">compVector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">compVector</span> <span class="p">%</span> <span class="n">nelem</span><span class="p">)</span>
-<span class="c">!      ENDIF</span>
+      <span class="k">ENDIF</span>
 
-    <span class="k">ELSE IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfStrongForm</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">    ELSE IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfStrongForm</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="c">!      IF (gpuAccel) THEN</span>
-<span class="c">!        CALL compVector % interp % VectorDivergence_2D(compVector % interior % deviceData, &amp;</span>
-<span class="c">!                                                       divVector % interior % deviceData, &amp;</span>
-<span class="c">!                                                       compVector % nvar, &amp;</span>
-<span class="c">!                                                       compVector % nelem)</span>
-<span class="c">!      ELSE</span>
-        <span class="k">CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDivergence_2D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+<span class="k">      IF</span> <span class="p">(</span><span class="n">gpuAccel</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">        CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDivergence_2D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">divVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">compVector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">compVector</span> <span class="p">%</span> <span class="n">nelem</span><span class="p">)</span>
+      <span class="k">ELSE</span>
+<span class="k">        CALL </span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">VectorDivergence_2D</span><span class="p">(</span><span class="n">compVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                        <span class="n">divVector</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                        <span class="n">compVector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
                                                        <span class="n">compVector</span> <span class="p">%</span> <span class="n">nelem</span><span class="p">)</span>
-<span class="c">!      ENDIF</span>
+      <span class="k">ENDIF</span>
 
-    <span class="k">END IF</span>
+<span class="k">    END IF</span>
 
 <span class="k">    CALL </span><span class="n">divVector</span> <span class="p">%</span> <span class="n">JacobianWeight</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
 
@@ -453,7 +453,7 @@ public subroutine Divergence_MappedVector2D(physVector, compVector, geometry, di
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-02-25 19:01  
+             on 2021-04-14 00:34  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>

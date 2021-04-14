@@ -5,7 +5,6 @@ MODULE SELF_Mesh
   USE SELF_Data
   USE SELF_SupportRoutines
 
-!  USE hipfort
   USE ISO_C_BINDING
 
   IMPLICIT NONE
@@ -115,17 +114,14 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: elemInfo
     TYPE(hfReal_r1) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
-    ! TYPE(hfInt_r1) :: cornerNodeIDs
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh1D
     PROCEDURE,PUBLIC :: Free => Free_Mesh1D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh1D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
-#endif
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
   END TYPE Mesh1D
@@ -144,20 +140,23 @@ MODULE SELF_Mesh
     INTEGER :: nBCs
     TYPE(hfInt32_r2) :: elemInfo
     TYPE(hfInt32_r2) :: sideInfo
-    TYPE(hfReal_r2)  :: nodeCoords
-    TYPE(hfReal_r1)  :: globalNodeIDs
-    !TYPE(hfInt_r1) :: cornerNodeIDs
+    TYPE(hfReal_r2) :: nodeCoords
+    TYPE(hfReal_r1) :: globalNodeIDs
+    TYPE(hfInt32_r1) :: CGNSCornerMap
+    TYPE(hfInt32_r2) :: CGNSSideMap
+    TYPE(hfInt32_r2) :: curveNodeMap
+    TYPE(hfInt32_r2) :: curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
   CONTAINS
     PROCEDURE,PUBLIC :: Init => Init_Mesh2D
     PROCEDURE,PUBLIC :: Free => Free_Mesh2D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
-#endif
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
+
+!    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh2D
 
   END TYPE Mesh2D
 
@@ -174,7 +173,10 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: sideInfo
     TYPE(hfReal_r2) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
-    !TYPE(hfInt_r1) :: cornerNodeIDs
+    TYPE(hfInt32_r1) :: CGNSCornerMap
+    TYPE(hfInt32_r2) :: CGNSSideMap
+    TYPE(hfInt32_r2) :: curveNodeMap
+    TYPE(hfInt32_r3) :: curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -182,10 +184,8 @@ MODULE SELF_Mesh
 
     PROCEDURE,PUBLIC :: Init => Init_Mesh3D
     PROCEDURE,PUBLIC :: Free => Free_Mesh3D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh3D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
-#endif
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
 !      PROCEDURE, PUBLIC :: LoadHOPRMesh => LoadHOPRMesh_3D
@@ -194,7 +194,7 @@ MODULE SELF_Mesh
 !      PROCEDURE, PUBLIC :: Read_UCDMesh
 !      PROCEDURE, PUBLIC :: Read_TrellisUCDMesh
 !
-!      PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
+!    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
 
   END TYPE Mesh3D
 
@@ -211,7 +211,7 @@ CONTAINS
     myMesh % nGeo = nGeo
     myMesh % nElem = nElem
     myMesh % nNodes = nNodes
-    myMesh % nCornerNodes = 0
+    myMesh % nCornerNodes = nElem*2
     myMesh % nUniqueNodes = 0
     myMesh % nBCs = nBCs
 
@@ -249,15 +249,16 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh1D
-#ifdef GPU
   SUBROUTINE UpdateHost_Mesh1D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateHost()
     CALL myMesh % nodeCoords % UpdateHost()
     CALL myMesh % globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Mesh1D
 
@@ -265,13 +266,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateDevice()
     CALL myMesh % nodeCoords % UpdateDevice()
     CALL myMesh % globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Mesh1D
-#endif
 
   SUBROUTINE UniformBlockMesh_Mesh1D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
@@ -320,9 +322,7 @@ CONTAINS
       myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
     END DO
 
-#ifdef GPU
     CALL myMesh % UpdateDevice()
-#endif
 
     CALL xLinear % Free()
     CALL xGeo % Free()
@@ -337,6 +337,8 @@ CONTAINS
     INTEGER,INTENT(in) :: nSides
     INTEGER,INTENT(in) :: nNodes
     INTEGER,INTENT(in) :: nBCs
+    ! Local
+    INTEGER :: i,j,l
 
     myMesh % nGeo = nGeo
     myMesh % nElem = nElem
@@ -359,10 +361,42 @@ CONTAINS
     CALL myMesh % globalNodeIDs % Alloc(loBound=1, &
                                         upBound=nNodes)
 
+    CALL myMesh % CGNSCornerMap % Alloc(loBound=1, &
+                                        upBound=4)
+
+    CALL myMesh % CGNSSideMap % Alloc(loBound=(/1,1/), &
+                                      upBound=(/2,4/))
+
+    CALL myMesh % curveNodeMap % Alloc(loBound=(/1,1/),&
+                                       upBound=(/2,(nGeo+1)**2/))
+
+    CALL myMesh % curveNodeMapInv % Alloc(loBound=(/0,0/), &
+                                          upBound=(/nGeo,nGeo/))
+
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
 
     ALLOCATE (myMesh % BCNames(1:nBCs))
+
+    ! Create lookup tables to assist with connectivity generation
+    myMesh % CGNSCornerMap % hostData(1) = 1
+    myMesh % CGNSCornerMap % hostData(2) = nGeo+1
+    myMesh % CGNSCornerMap % hostData(3) = (nGeo+1)**2
+    myMesh % CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
+
+    DO j = 0, nGeo
+      DO i = 0, nGeo
+        l = l+1
+        myMesh % curveNodeMap % hostData(1:2,l) = (/i,j/)
+        myMesh % curveNodeMapInv % hostData(i,j) = l
+      ENDDO
+    ENDDO
+
+    ! Maps from local corner node id to CGNS side
+    myMesh % CGNSSideMap % hostData(1:2,1) = (/1,2/)
+    myMesh % CGNSSideMap % hostData(1:2,2) = (/2,3/)
+    myMesh % CGNSSideMap % hostData(1:2,3) = (/4,3/)
+    myMesh % CGNSSideMap % hostData(1:2,4) = (/1,4/)
 
   END SUBROUTINE Init_Mesh2D
 
@@ -381,22 +415,25 @@ CONTAINS
     CALL myMesh % elemInfo % Free()
     CALL myMesh % sideInfo % Free()
     CALL myMesh % nodeCoords % Free()
+    CALL myMesh % CGNSCornerMap % Free()
     CALL myMesh % globalNodeIDs % Free()
     CALL myMesh % BCType % Free()
 
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh2D
-#ifdef GPU
+
   SUBROUTINE UpdateHost_Mesh2D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateHost()
     CALL myMesh % sideInfo % UpdateHost()
     CALL myMesh % nodeCoords % UpdateHost()
     CALL myMesh % globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Mesh2D
 
@@ -404,14 +441,69 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateDevice()
     CALL myMesh % sideInfo % UpdateDevice()
     CALL myMesh % nodeCoords % UpdateDevice()
     CALL myMesh % globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Mesh2D
-#endif
+
+!  SUBROUTINE GenerateConnectivity_Mesh2D(myMesh)
+!  ! Create the sideInfo information given eleminfo
+!  !  > Assumes quadrilateral mesh in 2-D
+!  !  > Assumes hexahedral mesh in 3-D
+!    IMPLICIT NONE
+!    CLASS(Mesh2D),INTENT(inout) :: myMesh
+!
+!    ! Find matching nodes
+!    DO 
+!    ! SideInfo
+!    !
+!    !  SideType : Side Type encoding. The number of corner nodes is the last digit.
+!    !  GlobalSideID : Unique side ID global identifier
+!    !
+!    !  nbElemID : Neighbor Element ID
+!    !
+!    !  10*nbLocSide+Flip : first digit - local side of the connected neighbor element; last digit - Orientation between the sides
+!    !  (flip in [0,2])
+!    !
+!    !  BCID : Refers to the row index of the Boundary Condition List in BCNames/BCType array (in [1,nBCs]); = 0 for inner sides
+!
+!    ! Nodes are assumed to be defined on gauss-lobatto points - This allows us to check if nodes are the same along boundary
+!    ! edges/faces
+!
+!    ! Loop over elements,
+!    !   > Loop over local nodes    
+!    !     > Loop over elements up to current element minus 1
+!    !       > Loop over local nodes
+!    !         > Check for match with previous node
+!    !         > IF MATCH
+!    !           > Update Global Node ID to matched node Global Node ID
+!    !         > ELSE
+!    !           > Assign new global node id
+!
+!    ! Loop over elements,
+!    !   > Loop over local sides
+!    !     > Assign side type (Assume line in 2-D)
+!    !     > Set nbElemID = current element ID
+!    !     > Set "current local side" as nbLocalSideID, "0" orientiation 
+!    !     > Set the BCID = 0
+!    !     > Save nodelist for this side
+!    !
+!    !   > Loop over elements up to current element minus 1
+!    !      > Check for match with previous side
+!    !      > IF MATCH
+!    !        > Update Global ID of secondary element
+!    !        > Set nbElemID for both elements; nbElemID of primary element is secondary element ID and vice-versa.
+!    !        > Set nbLocalSideID for local side of neighboring element (
+!    !        > Update "Flip" of secondary element, relative to primary element
+!
+!
+!  END SUBROUTINE GenerateConnectivity_Mesh2D
+
   SUBROUTINE UniformBlockMesh_Mesh2D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(out) :: myMesh
@@ -420,7 +512,7 @@ CONTAINS
     REAL(prec),INTENT(in) :: x(1:4)
     ! Local
     INTEGER :: iel,jel,nEl,elid
-    INTEGER :: nid,nNodes
+    INTEGER :: sid,nid,nNodes
     INTEGER :: nSides
     INTEGER :: i,j
     REAL(prec) :: xU(1:nElem(1) + 1)
@@ -463,28 +555,29 @@ CONTAINS
 
     ! Set the element information
     nid = 1
+    sid = 0
     elid = 1
     DO jel = 1,nElem(2)
       DO iel = 1,nElem(1)
         myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
         myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
-        myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
+        myMesh % eleminfo % hostData(3,iel) = sid ! Side Index Start
+        sid = sid+4
+        myMesh % eleminfo % hostData(4,iel) = sid ! Side Index End
+        myMesh % eleminfo % hostData(5,iel) = nid-1 ! Node Index Start
         DO j = 0,nGeo
           DO i = 0,nGeo
             myMesh % nodeCoords % hostData(1:2,nid) = xGeo % interior % hostData(1:2,i,j,1,elid)
             nid = nid + 1
           END DO
         END DO
-        myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
+        myMesh % eleminfo % hostData(6,iel) = nid ! Node Index End
         elid = elid + 1
       END DO
     END DO
 
-    ! TO DO: Add Side information !
 
-#ifdef GPU
     CALL myMesh % UpdateDevice()
-#endif
 
     CALL xLinear % Free()
     CALL xGeo % Free()
@@ -499,6 +592,8 @@ CONTAINS
     INTEGER,INTENT(in) :: nSides
     INTEGER,INTENT(in) :: nNodes
     INTEGER,INTENT(in) :: nBCs
+    ! Local
+    INTEGER :: i,j,k,l
 
     myMesh % nElem = nElem
     myMesh % nGeo = nGeo
@@ -521,10 +616,50 @@ CONTAINS
     CALL myMesh % globalNodeIDs % Alloc(loBound=1, &
                                         upBound=nNodes)
 
+    CALL myMesh % CGNSCornerMap % Alloc(loBound=1, &
+                                        upBound=8)
+
+    CALL myMesh % CGNSSideMap % Alloc(loBound=(/1,1/), &
+                                      upBound=(/4,6/))
+
+    CALL myMesh % curveNodeMap % Alloc(loBound=(/1,1/), &
+                                       upBound=(/3,(nGeo+1)**3/))
+
+    CALL myMesh % curveNodeMapInv % Alloc(loBound=(/0,0,0/), &
+                                          upBound=(/nGeo,nGeo,nGeo/))
+
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
 
     ALLOCATE (myMesh % BCNames(1:nBCs))
+
+    ! Create lookup tables to assist with connectivity generation
+    myMesh % CGNSCornerMap % hostData(1) = 1
+    myMesh % CGNSCornerMap % hostData(2) = nGeo+1
+    myMesh % CGNSCornerMap % hostData(3) = (nGeo+1)**2
+    myMesh % CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
+    myMesh % CGNSCornerMap % hostData(5) = nGeo*(nGeo+1)**2+1
+    myMesh % CGNSCornerMap % hostData(6) = nGeo*(nGeo+1)**2+(nGeo+1)
+    myMesh % CGNSCornerMap % hostData(7) = (nGeo+1)**3
+    myMesh % CGNSCornerMap % hostData(8) = nGeo*(nGeo+1)*(nGeo+2)+1
+
+    DO k = 0, nGeo
+      DO j = 0, nGeo
+        DO i = 0, nGeo
+          l = l+1
+          myMesh % curveNodeMap % hostData(1:3,l) = (/i,j,k/)
+          myMesh % curveNodeMapInv % hostData(i,j,k) = l
+        ENDDO
+      ENDDO
+    ENDDO
+
+    ! Maps from local corner node id to CGNS side
+    myMesh % CGNSSideMap % hostData(1:4,1) = (/1,4,3,2/)
+    myMesh % CGNSSideMap % hostData(1:4,2) = (/1,2,6,5/)
+    myMesh % CGNSSideMap % hostData(1:4,3) = (/2,3,7,6/)
+    myMesh % CGNSSideMap % hostData(1:4,4) = (/3,4,8,7/)
+    myMesh % CGNSSideMap % hostData(1:4,5) = (/1,5,8,4/)
+    myMesh % CGNSSideMap % hostData(1:4,6) = (/5,6,7,8/)
 
   END SUBROUTINE Init_Mesh3D
 
@@ -543,22 +678,24 @@ CONTAINS
     CALL myMesh % elemInfo % Free()
     CALL myMesh % sideInfo % Free()
     CALL myMesh % nodeCoords % Free()
+    CALL myMesh % CGNSCornerMap % Free()
     CALL myMesh % globalNodeIDs % Free()
     CALL myMesh % BCType % Free()
 
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh3D
-#ifdef GPU
   SUBROUTINE UpdateHost_Mesh3D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateHost()
     CALL myMesh % sideInfo % UpdateHost()
     CALL myMesh % nodeCoords % UpdateHost()
     CALL myMesh % globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Mesh3D
 
@@ -566,14 +703,16 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
+#ifdef GPU
     CALL myMesh % elemInfo % UpdateDevice()
     CALL myMesh % sideInfo % UpdateDevice()
     CALL myMesh % nodeCoords % UpdateDevice()
     CALL myMesh % globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Mesh3D
-#endif
+
   SUBROUTINE UniformBlockMesh_Mesh3D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(out) :: myMesh
@@ -582,7 +721,7 @@ CONTAINS
     REAL(prec),INTENT(in) :: x(1:6)
     ! Local
     INTEGER :: iel,jel,kel,nEl,elid
-    INTEGER :: nid,nNodes
+    INTEGER :: sid,nid,nNodes
     INTEGER :: nSides
     INTEGER :: i,j,k
     REAL(prec) :: xU(1:nElem(1) + 1)
@@ -640,13 +779,17 @@ CONTAINS
 
     ! Set the element information
     nid = 1
+    sid = 0
     elid = 1
     DO kel = 1,nElem(3)
       DO jel = 1,nElem(2)
         DO iel = 1,nElem(1)
           myMesh % eleminfo % hostData(1,iel) = selfQuadLinear ! Element Type
           myMesh % eleminfo % hostData(2,iel) = 1 ! Element Zone
-          myMesh % eleminfo % hostData(3,iel) = nid ! Node Index Start
+          myMesh % eleminfo % hostData(3,iel) = sid ! Side Index Start
+          sid = sid + 6
+          myMesh % eleminfo % hostData(4,iel) = sid ! Side Index End
+          myMesh % eleminfo % hostData(5,iel) = nid-1 ! Node Index Start
           DO k = 0,nGeo
             DO j = 0,nGeo
               DO i = 0,nGeo
@@ -655,7 +798,7 @@ CONTAINS
               END DO
             END DO
           END DO
-          myMesh % eleminfo % hostData(4,iel) = nid - 1 ! Node Index End
+          myMesh % eleminfo % hostData(6,iel) = nid ! Node Index End
           elid = elid + 1
         END DO
       END DO
@@ -663,9 +806,7 @@ CONTAINS
 
     ! TO DO: Add Side information !
 
-#ifdef GPU
     CALL myMesh % UpdateDevice()
-#endif
 
     CALL xLinear % Free()
     CALL xGeo % Free()

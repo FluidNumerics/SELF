@@ -9,7 +9,7 @@ project_github: https://github.com/FluidNumerics/SELF
 project_website: https://www.fluidnumerics.com/products/selffluids
 src_dir: ./src/
 output_dir: ./docs
-exclude_dir: ./src/test
+exclude_dir: ./src/dev
 fpp_extensions: fpp
 predocmark: >
 docmark_alt: #

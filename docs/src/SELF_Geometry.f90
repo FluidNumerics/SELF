@@ -22,10 +22,8 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_Geometry1D
     PROCEDURE,PUBLIC :: Free => Free_Geometry1D
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_Geometry1D
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Geometry1D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Geometry1D
-#endif
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
 
   END TYPE Geometry1D
@@ -44,10 +42,8 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_SEMQuad
     PROCEDURE,PUBLIC :: Free => Free_SEMQuad
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMQuad
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_SEMQuad
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMQuad
-#endif
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
 
@@ -67,14 +63,54 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: Init => Init_SEMHex
     PROCEDURE,PUBLIC :: Free => Free_SEMHex
     PROCEDURE,PUBLIC :: GenerateFromMesh => GenerateFromMesh_SEMHex
-#ifdef GPU
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_SEMHex
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMHex
-#endif
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
 
   END TYPE SEMHex
+#ifdef GPU
+  INTERFACE
+    SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper(dxds,dsdx,N,nEl) &
+      bind(c,name="CalculateContravariantBasis_SEMQuad_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dxds,dsdx
+      INTEGER,VALUE :: N,nEl
+    END SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(dsdx,J,N,nEl) &
+      bind(c,name="AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dsdx,J
+      INTEGER,VALUE :: N,nEl
+    END SUBROUTINE AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper(dxds,dsdx,N,nEl) &
+      bind(c,name="CalculateContravariantBasis_SEMHex_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dxds,dsdx
+      INTEGER,VALUE :: N,nEl
+    END SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(dsdx,J,N,nEl) &
+      bind(c,name="AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dsdx,J
+      INTEGER,VALUE :: N,nEl
+    END SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper
+  END INTERFACE
+
+#endif
 
 CONTAINS
 
@@ -115,13 +151,15 @@ CONTAINS
     CALL myGeom % dxds % Free()
 
   END SUBROUTINE Free_Geometry1D
-#ifdef GPU
+
   SUBROUTINE UpdateHost_Geometry1D(myGeom)
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
+#ifdef GPU
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_Geometry1D
 
@@ -129,11 +167,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
+#ifdef GPU
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_Geometry1D
-#endif
 
   SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
@@ -172,9 +211,7 @@ CONTAINS
     CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
     CALL myGeom % CalculateMetricTerms()
 
-#ifdef GPU
     CALL myGeom % UpdateDevice()
-#endif
 
     CALL xMesh % Free()
 
@@ -187,9 +224,7 @@ CONTAINS
     CALL myGeom % x % Derivative(myGeom % dxds,gpuAccel=.FALSE.)
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
 
-#ifdef GPU
     CALL myGeom % UpdateDevice()
-#endif
 
   END SUBROUTINE CalculateMetricTerms_Geometry1D
 
@@ -246,15 +281,17 @@ CONTAINS
     CALL myGeom % J % Free()
 
   END SUBROUTINE Free_SEMQuad
-#ifdef GPU
+
   SUBROUTINE UpdateHost_SEMQuad(myGeom)
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
+#ifdef GPU
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
     CALL myGeom % J % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_SEMQuad
 
@@ -262,13 +299,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
+#ifdef GPU
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_SEMQuad
-#endif
   SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
@@ -306,14 +344,16 @@ CONTAINS
       END DO
     END DO
 
-    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+#ifdef GPU
+    CALL xMesh % UpdateDevice()
+    CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % CalculateMetricTerms()
+    CALL myGeom % UpdateHost()
+#else
     CALL xMesh % GridInterp(myGeom % x,.FALSE.)
-
     CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
     CALL myGeom % CalculateMetricTerms()
-
-#ifdef GPU
-    CALL myGeom % UpdateDevice()
 #endif
 
     CALL xMesh % Free()
@@ -327,6 +367,20 @@ CONTAINS
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
 
+#ifdef GPU
+
+    CALL CalculateContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dxds % interior % deviceData, &
+                                                        myGeom % dsdx % interior % deviceData, &
+                                                        myGeom % dxds % N, &
+                                                        myGeom % dxds % nElem)
+    ! Interpolate the contravariant tensor to the boundaries
+    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
+                                                             myGeom % J % boundary % deviceData, &
+                                                             myGeom % J % N, &
+                                                             myGeom % J % nElem)
+
+#else
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
@@ -335,8 +389,8 @@ CONTAINS
         DO i = 0,myGeom % dxds % N
 
           myGeom % dsdx % interior % hostData(1,1,i,j,1,iEl) = myGeom % dxds % interior % hostData(2,2,i,j,1,iEl)
-          myGeom % dsdx % interior % hostData(1,2,i,j,1,iEl) = -myGeom % dxds % interior % hostData(1,2,i,j,1,iEl)
-          myGeom % dsdx % interior % hostData(2,1,i,j,1,iEl) = -myGeom % dxds % interior % hostData(2,1,i,j,1,iEl)
+          myGeom % dsdx % interior % hostData(2,1,i,j,1,iEl) = -myGeom % dxds % interior % hostData(1,2,i,j,1,iEl)
+          myGeom % dsdx % interior % hostData(1,2,i,j,1,iEl) = -myGeom % dxds % interior % hostData(2,1,i,j,1,iEl)
           myGeom % dsdx % interior % hostData(2,2,i,j,1,iEl) = myGeom % dxds % interior % hostData(1,1,i,j,1,iEl)
 
         END DO
@@ -363,6 +417,7 @@ CONTAINS
         END DO
       END DO
     END DO
+#endif
 
   END SUBROUTINE CalculateContravariantBasis_SEMQuad
 
@@ -370,18 +425,20 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
+#ifdef GPU           
+    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+    CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % CalculateContravariantBasis()
+#else
     CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-
-    ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    CALL myGeom % dxds % Determinant(myGeom % J)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
     CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-
     CALL myGeom % CalculateContravariantBasis()
-
-#ifdef GPU
-    CALL myGeom % UpdateDevice()
 #endif
+
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
 
@@ -438,15 +495,16 @@ CONTAINS
     CALL myGeom % J % Free()
 
   END SUBROUTINE Free_SEMHex
-#ifdef GPU
   SUBROUTINE UpdateHost_SEMHex(myGeom)
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
+#ifdef GPU
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
     CALL myGeom % J % UpdateHost()
+#endif
 
   END SUBROUTINE UpdateHost_SEMHex
 
@@ -454,13 +512,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
+#ifdef GPU
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
+#endif
 
   END SUBROUTINE UpdateDevice_SEMHex
-#endif
   SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
@@ -501,14 +560,19 @@ CONTAINS
     END DO
 
     ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
-
-    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % CalculateMetricTerms()
+    CALL xMesh % UpdateDevice()
 
 #ifdef GPU
-    CALL myGeom % UpdateDevice()
+    CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % CalculateMetricTerms()
+    CALL myGeom % UpdateHost()
+#else
+    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL myGeom % CalculateMetricTerms()
 #endif
+
 
     CALL xMesh % Free()
 
@@ -521,6 +585,20 @@ CONTAINS
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
 
+#ifdef GPU
+
+    CALL CalculateContravariantBasis_SEMHex_gpu_wrapper(myGeom % dxds % interior % deviceData, &
+                                                        myGeom % dsdx % interior % deviceData, &
+                                                        myGeom % dxds % N, &
+                                                        myGeom % dxds % nElem)
+    ! Interpolate the contravariant tensor to the boundaries
+    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
+                                                             myGeom % J % boundary % deviceData, &
+                                                             myGeom % J % N, &
+                                                             myGeom % J % nElem)
+
+#else
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
@@ -596,7 +674,6 @@ CONTAINS
 
     ! Now, modify the sign of dsdx so that
     ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-
     DO iEl = 1,myGeom % nElem
       DO k = 1,6
         DO j = 0,myGeom % J % N
@@ -614,22 +691,27 @@ CONTAINS
       END DO
     END DO
 
+#endif
+
+
   END SUBROUTINE CalculateContravariantBasis_SEMHex
 
   SUBROUTINE CalculateMetricTerms_SEMHex(myGeom)
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
+#ifdef GPU           
+    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+    CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+    CALL myGeom % CalculateContravariantBasis()
+#else
     CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
     CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-
-    ! Calculate the Jacobian = determinant of the covariant matrix at each point
-    CALL myGeom % dxds % Determinant(myGeom % J)
+    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
     CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-
     CALL myGeom % CalculateContravariantBasis()
-#ifdef GPU
-    CALL myGeom % UpdateDevice()
 #endif
 
   END SUBROUTINE CalculateMetricTerms_SEMHex

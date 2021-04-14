@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -130,7 +130,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">23 statements</a>
+    title=" 0.6% of total for procedures.">43 statements</a>
      </li> 
      
      
@@ -232,7 +232,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
   
 <tr>
   
-  <td><span class="anchor" id="variable-mymesh~5"></span>class(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
+  <td><span class="anchor" id="variable-mymesh%7E5"></span>class(<a href='../type/mesh2d.html'>Mesh2D</a>),</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -247,7 +247,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
   
 <tr>
   
-  <td><span class="anchor" id="variable-ngeo~5"></span>integer,</td>
+  <td><span class="anchor" id="variable-ngeo%7E5"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nelem~42"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem%7E25"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -277,7 +277,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nsides~3"></span>integer,</td>
+  <td><span class="anchor" id="variable-nsides%7E3"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -292,7 +292,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nnodes~5"></span>integer,</td>
+  <td><span class="anchor" id="variable-nnodes%7E5"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -307,7 +307,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nbcs~5"></span>integer,</td>
+  <td><span class="anchor" id="variable-nbcs%7E5"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -391,6 +391,8 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nSides</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nNodes</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nBCs</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">l</span>
 
     <span class="n">myMesh</span> <span class="p">%</span> <span class="n">nGeo</span> <span class="o">=</span> <span class="n">nGeo</span>
     <span class="n">myMesh</span> <span class="p">%</span> <span class="n">nElem</span> <span class="o">=</span> <span class="n">nElem</span>
@@ -413,10 +415,42 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
     <span class="k">CALL </span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">globalNodeIDs</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
                                         <span class="n">upBound</span><span class="o">=</span><span class="n">nNodes</span><span class="p">)</span>
 
+    <span class="k">CALL </span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSCornerMap</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
+                                        <span class="n">upBound</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">CALL </span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSSideMap</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="p">),</span> <span class="p">&amp;</span>
+                                      <span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="o">/</span><span class="p">))</span>
+
+    <span class="k">CALL </span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">curveNodeMap</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="p">),&amp;</span>
+                                       <span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">2</span><span class="p">,(</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">))</span>
+
+    <span class="k">CALL </span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">curveNodeMapInv</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="o">/</span><span class="p">),</span> <span class="p">&amp;</span>
+                                          <span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="n">nGeo</span><span class="p">,</span><span class="n">nGeo</span><span class="o">/</span><span class="p">))</span>
+
     <span class="k">CALL </span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">BCType</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="p">),</span> <span class="p">&amp;</span>
                                  <span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="n">nBCs</span><span class="o">/</span><span class="p">))</span>
 
     <span class="k">ALLOCATE</span> <span class="p">(</span><span class="n">myMesh</span> <span class="p">%</span> <span class="n">BCNames</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nBCs</span><span class="p">))</span>
+
+    <span class="c">! Create lookup tables to assist with connectivity generation</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSCornerMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSCornerMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSCornerMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSCornerMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="n">nGeo</span><span class="o">*</span><span class="p">(</span><span class="n">nGeo</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nGeo</span>
+      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nGeo</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">l</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">myMesh</span> <span class="p">%</span> <span class="n">curveNodeMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="n">l</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="o">/</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="o">/</span><span class="p">)</span>
+        <span class="n">myMesh</span> <span class="p">%</span> <span class="n">curveNodeMapInv</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">l</span>
+      <span class="k">ENDDO</span>
+<span class="k">    ENDDO</span>
+
+    <span class="c">! Maps from local corner node id to CGNS side</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSSideMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">/</span><span class="p">)</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSSideMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="p">)</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSSideMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="o">/</span><span class="p">)</span>
+    <span class="n">myMesh</span> <span class="p">%</span> <span class="n">CGNSSideMap</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="o">/</span><span class="p">)</span>
 
   <span class="k">END SUBROUTINE </span><span class="n">Init_Mesh2D</span>
 </pre></div>
@@ -440,7 +474,7 @@ public subroutine Init_Mesh2D(myMesh, nGeo, nElem, nSides, nNodes, nBCs)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-02-25 19:01  
+             on 2021-04-14 00:34  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -130,7 +130,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">16 statements</a>
+    title=" 0.3% of total for procedures.">24 statements</a>
      </li> 
      
      
@@ -232,7 +232,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
   
 <tr>
   
-  <td><span class="anchor" id="variable-scalar~5"></span>class(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
+  <td><span class="anchor" id="variable-scalar%7E11"></span>class(<a href='../type/mappedscalar3d.html'>MappedScalar3D</a>),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -247,7 +247,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
   
 <tr>
   
-  <td><span class="anchor" id="variable-worktensor~4"></span>type(<a href='../type/mappedtensor3d.html'>MappedTensor3D</a>),</td>
+  <td><span class="anchor" id="variable-worktensor%7E4"></span>type(<a href='../type/mappedtensor3d.html'>MappedTensor3D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -262,7 +262,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
   
 <tr>
   
-  <td><span class="anchor" id="variable-geometry~9"></span>type(SEMHex),</td>
+  <td><span class="anchor" id="variable-geometry%7E9"></span>type(SEMHex),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -277,7 +277,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
   
 <tr>
   
-  <td><span class="anchor" id="variable-gradf~8"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+  <td><span class="anchor" id="variable-gradf%7E8"></span>type(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -292,7 +292,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
   
 <tr>
   
-  <td><span class="anchor" id="variable-dform~12"></span>integer,</td>
+  <td><span class="anchor" id="variable-dform%7E6"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -307,7 +307,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
   
 <tr>
   
-  <td><span class="anchor" id="variable-gpuaccel~30"></span>logical,</td>
+  <td><span class="anchor" id="variable-gpuaccel%7E36"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -403,35 +403,35 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
     <span class="k">CALL </span><span class="n">scalar</span> <span class="p">%</span> <span class="n">ContravariantWeight</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span><span class="n">workTensor</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
     <span class="k">IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfWeakDGForm</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="c">!      IF (gpuAccel) THEN</span>
-<span class="c">!        CALL workTensor % interp % TensorDGDivergence_3D(workTensor % interior % deviceData, &amp;</span>
-<span class="c">!                                                         workTensor % boundary % deviceData, &amp;</span>
-<span class="c">!                                                         gradF % interior % deviceData, &amp;</span>
-<span class="c">!                                                         workTensor % nVar, &amp;</span>
-<span class="c">!                                                         workTensor % nElem)</span>
-<span class="c">!      ELSE</span>
-        <span class="k">CALL </span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">TensorDGDivergence_3D</span><span class="p">(</span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+<span class="k">      IF</span> <span class="p">(</span><span class="n">gpuAccel</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">        CALL </span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">TensorDGDivergence_3D</span><span class="p">(</span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">workTensor</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">gradF</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nVar</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                         <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+      <span class="k">ELSE</span>
+<span class="k">        CALL </span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">TensorDGDivergence_3D</span><span class="p">(</span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">workTensor</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">gradF</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nVar</span><span class="p">,</span> <span class="p">&amp;</span>
                                                          <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-<span class="c">!      END IF</span>
+      <span class="k">END IF</span>
 
-    <span class="k">ELSE IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfStrongForm</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">    ELSE IF</span> <span class="p">(</span><span class="n">dForm</span> <span class="o">==</span> <span class="n">selfStrongForm</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="c">!      IF (gpuAccel) THEN</span>
-<span class="c">!        CALL workTensor % interp % TensorDivergence_3D(workTensor % interior % deviceData, &amp;</span>
-<span class="c">!                                                       gradF % interior % deviceData, &amp;</span>
-<span class="c">!                                                       workTensor % nVar, &amp;</span>
-<span class="c">!                                                       workTensor % nElem)</span>
-<span class="c">!      ELSE</span>
-        <span class="k">CALL </span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">TensorDivergence_3D</span><span class="p">(</span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+<span class="k">      IF</span> <span class="p">(</span><span class="n">gpuAccel</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">        CALL </span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">TensorDivergence_3D</span><span class="p">(</span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">gradF</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nVar</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                       <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+      <span class="k">ELSE</span>
+<span class="k">        CALL </span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">TensorDivergence_3D</span><span class="p">(</span><span class="n">workTensor</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                        <span class="n">gradF</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                        <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nVar</span><span class="p">,</span> <span class="p">&amp;</span>
                                                        <span class="n">workTensor</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-<span class="c">!      END IF</span>
+      <span class="k">END IF</span>
 
-    <span class="k">END IF</span>
+<span class="k">    END IF</span>
 <span class="k">    CALL </span><span class="n">gradF</span> <span class="p">%</span> <span class="n">JacobianWeight</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span><span class="n">gpuAccel</span><span class="p">)</span>
 
   <span class="k">END SUBROUTINE </span><span class="n">Gradient_MappedScalar3D</span>
@@ -456,7 +456,7 @@ public subroutine Gradient_MappedScalar3D(scalar, workTensor, geometry, gradF, d
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-02-25 19:01  
+             on 2021-04-14 00:34  
           </p>
         </div>
         <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
