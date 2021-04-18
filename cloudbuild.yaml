@@ -46,6 +46,7 @@ steps:
                     gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
                         --ssh-key-file=/tmp/sshkey \
                         --command="rm -rf ${BUILD_ID}" || exit 1
+                    for i in $(gcloud compute os-login ssh-keys list); do echo $i; gcloud compute os-login ssh-keys remove --key $i; done
 
           waitFor: ["Build Singularity Image"]
 
