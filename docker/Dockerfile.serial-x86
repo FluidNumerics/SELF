@@ -1,13 +1,9 @@
-FROM debian:bullseye AS devel
+FROM cmg:gcc-10.2.0-serial-x86_hdf5 AS devel
 ARG BUILD_TYPE=release
 
 COPY . /tmp
 
 RUN mkdir -p /tmp/extern
-
-# Install gcc, gfortran, and cmake
-RUN apt update -y && \
-    apt install -y gcc gfortran cmake git
 
 # FEQParse
 RUN git clone https://github.com/FluidNumerics/feq-parse.git /tmp/extern/feq-parse && \
@@ -27,15 +23,12 @@ RUN cd /tmp && \
     BUILD=${BUILD_TYPE} \
     SELF_PREFIX=/opt/self \
     FC=gfortran \
+    PREC=double \
     make
 
-FROM debian:bullseye
+FROM cmg:gcc-10.2.0-serial-x86-hdf5 AS devel
 COPY --from=devel /opt /opt
 LABEL maintainer="joe@fluidnumerics.com"
-
-# Install gcc, gfortran
-RUN apt update -y && \
-    apt install -y gcc gfortran
 
 ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
     PATH=/opt/self/bin:$PATH \
