@@ -1,4 +1,4 @@
-FROM cmg:gcc-10.2.0-serial-x86_hdf5 AS devel
+FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5 AS devel
 ARG BUILD_TYPE=release
 
 COPY . /tmp
@@ -26,7 +26,7 @@ RUN cd /tmp && \
     PREC=double \
     make
 
-FROM cmg:gcc-10.2.0-serial-x86-hdf5 AS devel
+FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5
 COPY --from=devel /opt /opt
 LABEL maintainer="joe@fluidnumerics.com"
 
