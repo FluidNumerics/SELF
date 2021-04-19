@@ -17,8 +17,7 @@ endif
 
  
 ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER)), hipfc-gfortran)
-  FC = hipfc
-  CXX = hipfc  
+  CXX = $(FC) 
   AR = gcc-ar
 
   ifeq ($(findstring gfx, $(OFFLOAD_ARCH)), gfx)
@@ -50,5 +49,7 @@ else ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER))-
 else ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER))-$(BUILD), hipfc-gfortran-release)
   SELF_FFLAGS += -v -cpp -O3 -DGPU
 else
-  $(error unrecognized build target $(BUILD).)
+  $(info Fortran compiler $(FC))
+  $(info Release $(BUILD))
+  $(error unrecognized build target $(FC)-$(BUILD).)
 endif
