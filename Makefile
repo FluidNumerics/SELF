@@ -32,6 +32,8 @@
 #     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/feqparse/include)
 #     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF) 
 #     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/self/include/FACE)
+#     SELF_HDF5_LIBS         Set the linker flags for hdf5 (Default: -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm)
+#     SELF_HDF5_INC          Set the includes flags for hdf5 (Default: -I/opt/view/include)
 #
 # ================================================================================================================================================= #
 
