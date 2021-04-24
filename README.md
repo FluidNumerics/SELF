@@ -13,6 +13,8 @@ See the [Specifications](./SPECIFICATIONS.md) for more details.
 Currently SELF is being developed from a refactoring of SELF-Fluids.
 
 ## Getting started
+[Join the SELF Discord Server](https://discord.gg/57aNxcpYMW) to get community support.
+
 ### Dependencies
 Before installing SELF, make sure your system has the following dependencies installed : 
 * Fortran compiler (e.g. gfortran)
