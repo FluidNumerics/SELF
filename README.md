@@ -12,8 +12,7 @@ The SELF API is designed based on the assumption that SEM developers and researc
 
 See the [Specifications](./SPECIFICATIONS.md) for more details.
 
-Currently SELF is being developed from a refactoring of SELF-Fluids.
-
+To learn more about the SELF API and the software layout, [check out the SELF documentation](https://higherordermethods.github.io/SELF/)
 ## Getting started
 [Join the HigherOrderMethods Discord Server](https://discord.gg/57aNxcpYMW) to get community support.
 
