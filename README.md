@@ -1,6 +1,8 @@
 # Spectral Element Libraries in Fortran (SELF)
 Copyright 2020 Fluid Numerics LLC
 
+**SELF will be migrating to [HigherOrderMethods/SELF](https://github.com/HigherOrderMethods/SELF) in June 2021**
+
 SELF is licensed for use under the [Anti-Capitalist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
 
 ## About
@@ -13,7 +15,7 @@ See the [Specifications](./SPECIFICATIONS.md) for more details.
 Currently SELF is being developed from a refactoring of SELF-Fluids.
 
 ## Getting started
-[Join the SELF Discord Server](https://discord.gg/57aNxcpYMW) to get community support.
+[Join the HigherOrderMethods Discord Server](https://discord.gg/57aNxcpYMW) to get community support.
 
 ### Dependencies
 Before installing SELF, make sure your system has the following dependencies installed : 
