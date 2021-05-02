@@ -4,6 +4,8 @@ MODULE SELF_Mesh
   USE SELF_Lagrange
   USE SELF_Data
   USE SELF_SupportRoutines
+  USE SELF_HDF5
+  USE HDF5
 
   USE ISO_C_BINDING
 
@@ -188,11 +190,11 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
-!      PROCEDURE, PUBLIC :: LoadHOPRMesh => LoadHOPRMesh_3D
-!
+    PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
 !      PROCEDURE, PUBLIC :: Read_CGNSMesh
 !      PROCEDURE, PUBLIC :: Read_UCDMesh
-!      PROCEDURE, PUBLIC :: Read_TrellisUCDMesh
+!      PROCEDURE, PUBLIC :: Read_SpecMesh
+!      PROCEDURE, PUBLIC :: Read_NektarMesh
 !
 !    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
 
@@ -812,5 +814,122 @@ CONTAINS
     CALL xGeo % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh3D
+
+  SUBROUTINE Read_HOPr_Mesh3D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+    IMPLICIT NONE
+    CLASS(Mesh3D), INTENT(out) :: myMesh
+    CHARACTER(*), INTENT(in) :: meshFile
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+    ! Local
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER :: nGlobalElems
+    INTEGER :: offSetElem(0:nRanks)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: firstNode, nLocalNodes
+    INTEGER :: firstSide, nLocalSides
+    INTEGER :: nGeo, nBCS
+    TYPE(hfInt32_r2) :: elemInfo
+    TYPE(hfInt32_r2) :: sideInfo
+    TYPE(hfReal_r2) :: nodeCoords
+    TYPE(hfReal_r1) :: globalNodeIDs
+
+    IF( PRESENT(mpiComm) )THEN
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
+    ELSE
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    ENDIF
+
+    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElems)
+
+    ! TO DO: Need to get nGeo and nBCS
+
+    CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    ! Read local subarray of ElemInfo
+    firstElem = offsetElem(myRank)+1
+
+    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+
+    ! Allocate Space for elemInfo!
+    CALL elemInfo % Alloc(loBound=(/1,1/), &
+                          upBound=(/6,nLocalElems/))
+
+    offset = (/0, firstElem-1/)
+    CALL ReadArray_HDF5(fileId, 'ElemInfo', offset, elemInfo  )
+
+    ! Read local subarray of NodeCoords and GlobalNodeIDs
+    firstNode= elemInfo % hostData(5,1)+1
+
+    nLocalNodes = elemInfo % hostData(6,nLocalElems)-elemInfo % hostData(5,1)
+
+    ! Allocate Space for nodeCoords and globalNodeIds !
+
+    CALL nodeCoords % Alloc(loBound=(/1,1/), &
+                            upBound=(/3,nLocalNodes/))
+
+    CALL globalNodeIDs % Alloc(loBound=1, &
+                               upBound=nLocalNodes)
+
+    offset = (/0, firstNode-1/)
+    CALL ReadArray_HDF5(fileId, 'NodeCoords', offset, nodeCoords  )
+    gOffset = (/firstNode-1/)
+    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', gOffset, globalNodeIds  )
+
+    ! Read local subarray of SideInfo
+    firstSide= elemInfo % hostData(3,1)+1
+
+    nLocalSides = elemInfo % hostData(4,nLocalElems)-elemInfo % hostData(3,1)
+
+    ! Allocate space for sideInfo
+    CALL sideInfo % Alloc(loBound=(/1,1/), &
+                          upBound=(/5,nLocalSides/))
+
+    offset = (/0, firstSide-1/)
+    CALL ReadArray_HDF5(fileId, 'SideInfo', offset, sideInfo  )
+
+    CALL Close_HDF5(fileID)
+
+    CALL myMesh % Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
+
+    ! Copy data from local arrays into myMesh
+    myMesh % elemInfo = elemInfo
+    myMesh % nodeCoords = nodeCoords
+    myMesh % globalNodeIds = globalNodeIds
+    myMesh % sideInfo = sideInfo
+
+    CALL myMesh % UpdateDevice()
+
+    CALL elemInfo % Free()
+    CALL nodeCoords % Free()
+    CALL globalNodeIds % Free()
+    CALL sideInfo % Free()
+
+  END SUBROUTINE Read_HOPr_Mesh3D
+
+  ! Support Routines
+
+  SUBROUTINE DomainDecomp(nElems,nDomains,offSetElem)
+  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 4
+    IMPLICIT NONE
+    INTEGER, INTENT(in) :: nElems
+    INTEGER, INTENT(in) :: nDomains
+    INTEGER, INTENT(out) :: offsetElem(0:nDomains)
+    ! Local
+    INTEGER :: nLocalElems
+    INTEGER :: remainElems
+    INTEGER :: iDom
+
+      nLocalElems = nElems/nDomains
+      remainElems = nElems - nLocalElems*nDomains
+      DO iDom = 0, nDomains-1
+        offSetElem(iDom) = iDom*nLocalElems + MIN(iDom,remainElems)
+      ENDDO
+      offSetElem(nDomains) = nElems
+
+  END SUBROUTINE DomainDecomp
 
 END MODULE SELF_Mesh

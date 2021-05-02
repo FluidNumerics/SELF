@@ -174,7 +174,7 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Geometry1D
 
-  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
     IMPLICIT NONE
@@ -184,15 +184,23 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,i,nid
     TYPE(Scalar1D) :: xMesh
+    INTEGER :: quadrature
+
+    IF(PRESENT(meshQuadrature))THEN
+      quadrature = meshQuadrature
+    ELSE
+      quadrature = GAUSS_LOBATTO
+    ENDIF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
     ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+    CALL xMesh % Init(mesh % nGeo,quadrature, &
                       cqDegree,cqType, &
                       1,mesh % nElem)
 
@@ -307,7 +315,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE UpdateDevice_SEMQuad
-  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
     !  * the degree is given by mesh % nGeo
@@ -320,16 +328,25 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,jel,elid
     INTEGER :: i,j,nid
     TYPE(Vector2D) :: xMesh
+    INTEGER :: quadrature
+
+    IF(PRESENT(meshQuadrature))THEN
+      quadrature = meshQuadrature
+    ELSE
+      quadrature = GAUSS_LOBATTO
+    ENDIF
+
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
     ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+    CALL xMesh % Init(mesh % nGeo,quadrature, &
                       cqDegree,cqType, &
                       1,mesh % nElem)
 
@@ -520,7 +537,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE UpdateDevice_SEMHex
-  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
     !  * the degree is given by mesh % nGeo
@@ -533,16 +550,25 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,jel,kel,elid
     INTEGER :: i,j,k,nid
     TYPE(Vector3D) :: xMesh
+    INTEGER :: quadrature
+
+    IF(PRESENT(meshQuadrature))THEN
+      quadrature = meshQuadrature
+    ELSE
+      quadrature = GAUSS_LOBATTO
+    ENDIF
+
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
     ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+    CALL xMesh % Init(mesh % nGeo,quadrature, &
                       cqDegree,cqType, &
                       1,mesh % nElem)
 
