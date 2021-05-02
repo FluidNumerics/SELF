@@ -831,7 +831,7 @@ CONTAINS
     INTEGER :: firstElem, nLocalElems
     INTEGER :: firstNode, nLocalNodes
     INTEGER :: firstSide, nLocalSides
-    INTEGER :: nGeo, nBCS
+    INTEGER :: nGeo, nBCs
     TYPE(hfInt32_r2) :: elemInfo
     TYPE(hfInt32_r2) :: sideInfo
     TYPE(hfReal_r2) :: nodeCoords
@@ -844,8 +844,8 @@ CONTAINS
     ENDIF
 
     CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElems)
-
-    ! TO DO: Need to get nGeo and nBCS
+    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
+    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
 
     CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
 
