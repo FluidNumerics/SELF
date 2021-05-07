@@ -200,6 +200,9 @@ MODULE SELF_Mesh
 
   END TYPE Mesh3D
 
+  PRIVATE :: DomainDecomp
+  PUBLIC :: ElemToRank
+
 CONTAINS
 
   SUBROUTINE Init_Mesh1D(myMesh,nGeo,nElem,nNodes,nBCs)
@@ -836,6 +839,7 @@ CONTAINS
     TYPE(hfInt32_r2) :: sideInfo
     TYPE(hfReal_r2) :: nodeCoords
     TYPE(hfReal_r1) :: globalNodeIDs
+    TYPE(hfInt32_r2) :: bcType
 
     IF( PRESENT(mpiComm) )THEN
       CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
@@ -848,6 +852,12 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
 
     CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    ! Read BCType
+    CALL bcType % Alloc(loBound=(/1,1/), &
+                        upBound=(/4,nBCs/))
+    offset(:) = 0
+    CALL ReadArray_HDF5(fileId, 'BCType', offset, bcType)
 
     ! Read local subarray of ElemInfo
     firstElem = offsetElem(myRank)+1
@@ -931,5 +941,44 @@ CONTAINS
       offSetElem(nDomains) = nElems
 
   END SUBROUTINE DomainDecomp
+
+  SUBROUTINE ElemToRank(nDomains,offsetElem,elemID,domain)
+  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 7
+  !   "Find domain containing element index"
+  !
+    IMPLICIT NONE
+    INTEGER, INTENT(in) :: nDomains
+    INTEGER, INTENT(in) :: offsetElem(0:nDomains)
+    INTEGER, INTENT(in) :: elemID
+    INTEGER, INTENT(out) :: domain
+    ! Local
+    INTEGER :: maxSteps
+    INTEGER :: low,up,mid
+    INTEGER :: i
+
+      domain = 0
+      maxSteps = INT(LOG10(REAL(nDomains))/LOG10(2.0))+1
+      low = 0
+      up = nDomains-1
+
+      IF(offsetElem(low) < elemID .AND. elemID <= offsetElem(low+1))THEN
+        domain = low
+      ELSEIF(offsetElem(up) < elemID .AND. elemID <= offsetElem(up+1))THEN
+        domain = up
+      ELSE
+        DO i = 1, maxSteps
+          mid = (up-low)/2+low
+          IF(offsetElem(mid) < elemID .AND. elemID <= offsetElem(mid+1))THEN
+            domain = mid
+            RETURN
+          ELSEIF(elemID > offsetElem(mid+1))THEN
+            low = mid+1
+          ELSE
+            up = mid
+          ENDIF
+        ENDDO
+      ENDIF
+
+  END SUBROUTINE ElemToRank
 
 END MODULE SELF_Mesh
