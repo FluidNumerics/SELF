@@ -16,7 +16,7 @@ MODULE SELF_Tests
 
 CONTAINS
 
-  SUBROUTINE BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,tolerance,error)
+  SUBROUTINE BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
 #undef __FUNC__
 #define __FUNC__ "BlockMesh1D_Test"
     IMPLICIT NONE
@@ -25,75 +25,30 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
-    REAL(prec),INTENT(in) :: tolerance
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh1D) :: mesh
     TYPE(Geometry1D) :: geometry
-    REAL(prec) :: expect_dxds,dxds_error,expect_boundx,boundx_error
     INTEGER :: iel,i
 
     error = 0
     INFO('Number of elements : '//Int2Str(nElem))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     CALL mesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
 
     ! Create the geometry
     CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
 
-    ! Verify the mesh
-    expect_dxds = (1.0_prec/REAL(nElem,prec))/2.0_prec
-
-    ! Calculate error in metric terms
-    dxds_error = 0.0_prec
-    DO iel = 1,nElem
-      DO i = 0,cqDegree
-        dxds_error = MAX(dxds_error,ABS(geometry % dxds % interior % hostData(i,1,iel) - expect_dxds))
-      END DO
-    END DO
-
-    ! Calculate error in boundary interpolation
-    boundx_error = 0.0_prec
-    DO iel = 1,nElem
-      i = mesh % eleminfo % hostData(3,iel)
-      expect_boundx = mesh % nodeCoords % hostData(i)
-      boundx_error = MAX(boundx_error,ABS(geometry % x % boundary % hostData(1,1,iel) - expect_boundx))
-
-      i = mesh % eleminfo % hostData(4,iel)
-      expect_boundx = mesh % nodeCoords % hostData(i)
-      boundx_error = MAX(boundx_error,ABS(geometry % x % boundary % hostData(1,2,iel) - expect_boundx))
-    END DO
+    ! To do : File IO for mesh and geometry
 
     CALL mesh % Free()
     CALL geometry % Free()
 
-    msg = "Numerical Error (dx/ds) : "//Float2Str(dxds_error)
-    IF (dxds_error > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
-
-    msg = "Numerical Error (xBound) : "//Float2Str(boundx_error)
-    IF (boundx_error > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
-
   END SUBROUTINE BlockMesh1D_Test
 
-  SUBROUTINE BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,tolerance,error)
+  SUBROUTINE BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
 #undef __FUNC__
 #define __FUNC__ "BlockMesh2D_Test"
     IMPLICIT NONE
@@ -102,14 +57,10 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
-    REAL(prec),INTENT(in) :: tolerance
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: mesh
     TYPE(SEMQuad) :: geometry
-    REAL(prec) :: expect_dxds(1:2,1:2),dxds_error(1:2,1:2)
-    REAL(prec) :: expect_J,J_error
     INTEGER :: iel,jel,i,j
     INTEGER :: row,col
 
@@ -117,7 +68,6 @@ CONTAINS
     INFO('Number of elements : '//Int2Str(nElem*nElem))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     CALL mesh % UniformBlockMesh(cqDegree, &
                                  (/nElem,nElem/), &
@@ -127,67 +77,14 @@ CONTAINS
     ! Create the geometry
     CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
 
-    ! Verify the mesh
-    expect_dxds(1,1) = (1.0_prec/REAL(nElem,prec))/2.0_prec
-    expect_dxds(1,2) = 0.0_prec
-    expect_dxds(2,1) = 0.0_prec
-    expect_dxds(2,2) = (1.0_prec/REAL(nElem,prec))/2.0_prec
-
-    expect_J = expect_dxds(1,1)*expect_dxds(2,2)
-
-    ! Calculate error in metric terms
-    dxds_error = 0.0_prec
-    DO iel = 1,nElem
-      DO j = 0,cqDegree
-        DO i = 0,cqDegree
-          DO col = 1,2
-            DO row = 1,2
-              dxds_error(row,col) = MAX(dxds_error(row,col), &
-                                        ABS(geometry % dxds % &
-                                            interior % hostData(row,col,i,j,1,iel) - &
-                                            expect_dxds(row,col)))
-            END DO
-          END DO
-          J_error = MAX(J_error,ABS(geometry % J % &
-                                    interior % hostData(i,j,1,iel) - &
-                                    expect_J))
-        END DO
-      END DO
-    END DO
+    ! To do : file io for mesh and geometry
 
     CALL mesh % Free()
     CALL geometry % Free()
 
-    DO col = 1,2
-      DO row = 1,2
-        msg = "Numerical Error (dx/ds) ("// &
-              TRIM(Int2Str(row))//","// &
-              TRIM(Int2Str(col))//") : "// &
-              Float2Str(dxds_error(row,col))
-        IF (dxds_error(row,col) > tolerance) THEN
-          error = error + 1
-          ERROR(TRIM(msg))
-          ERROR("Status : [FAIL]")
-        ELSE
-          INFO(TRIM(msg))
-          INFO("Status : [PASS]")
-        END IF
-      END DO
-    END DO
-
-    msg = "Numerical Error (Jacobian) : "//Float2Str(J_error)
-    IF (J_error > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
-
   END SUBROUTINE BlockMesh2D_Test
 
-  SUBROUTINE BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,tolerance,error)
+  SUBROUTINE BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
 #undef __FUNC__
 #define __FUNC__ "BlockMesh3D_Test"
     IMPLICIT NONE
@@ -196,14 +93,10 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nElem
-    REAL(prec),INTENT(in) :: tolerance
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: mesh
     TYPE(SEMHex) :: geometry
-    REAL(prec) :: expect_dxds(1:3,1:3),dxds_error(1:3,1:3)
-    REAL(prec) :: expect_J,J_error
     INTEGER :: iel,jel,kel,i,j,k
     INTEGER :: row,col
 
@@ -212,7 +105,6 @@ CONTAINS
     INFO(TRIM(msg))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     CALL mesh % UniformBlockMesh(cqDegree, &
                                  (/nElem,nElem,nElem/), &
@@ -223,75 +115,14 @@ CONTAINS
     ! Create the geometry
     CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
 
-    ! Verify the mesh
-    expect_dxds(1,1) = (1.0_prec/REAL(nElem,prec))/2.0_prec
-    expect_dxds(1,2) = 0.0_prec
-    expect_dxds(1,3) = 0.0_prec
-    expect_dxds(2,1) = 0.0_prec
-    expect_dxds(2,2) = (1.0_prec/REAL(nElem,prec))/2.0_prec
-    expect_dxds(2,3) = 0.0_prec
-    expect_dxds(3,1) = 0.0_prec
-    expect_dxds(3,2) = 0.0_prec
-    expect_dxds(3,3) = (1.0_prec/REAL(nElem,prec))/2.0_prec
-
-    expect_J = expect_dxds(1,1)*expect_dxds(2,2)*expect_dxds(3,3)
-
-    ! Calculate error in metric terms
-    dxds_error = 0.0_prec
-    J_error = 0.0_prec
-    DO iel = 1,nElem
-      DO k = 0,cqDegree
-        DO j = 0,cqDegree
-          DO i = 0,cqDegree
-            DO col = 1,3
-              DO row = 1,3
-                dxds_error(row,col) = MAX(dxds_error(row,col), &
-                                          ABS(geometry % dxds % &
-                                              interior % hostData(row,col,i,j,k,1,iel) - &
-                                              expect_dxds(row,col)))
-              END DO
-            END DO
-            J_error = MAX(J_error,ABS(geometry % J % &
-                                      interior % hostData(i,j,k,1,iel) - &
-                                      expect_J))
-          END DO
-        END DO
-      END DO
-    END DO
+    ! To do : file IO for mesh and geometry
 
     CALL mesh % Free()
     CALL geometry % Free()
 
-    DO col = 1,3
-      DO row = 1,3
-        msg = "Numerical Error (dx/ds) ("// &
-              TRIM(Int2Str(row))//","// &
-              TRIM(Int2Str(col))//") : "// &
-              Float2Str(dxds_error(row,col))
-        IF (dxds_error(row,col) > tolerance) THEN
-          error = error + 1
-          ERROR(TRIM(msg))
-          ERROR("Status : [FAIL]")
-        ELSE
-          INFO(TRIM(msg))
-          INFO("Status : [PASS]")
-        END IF
-      END DO
-    END DO
-
-    msg = "Numerical Error (Jacobian) : "//Float2Str(J_error)
-    IF (J_error > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
-
   END SUBROUTINE BlockMesh3D_Test
 
-  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,tolerance,gpuAccel,error)
+  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp1D_Test"
     IMPLICIT NONE
@@ -302,16 +133,13 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh1D) :: controlMesh,targetMesh
     TYPE(Geometry1D) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: feq
-    TYPE(Scalar1D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Scalar1D) :: f,fInterp
     INTEGER :: iel,i,ivar
 
     error = 0
@@ -323,7 +151,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
@@ -336,8 +163,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nElem)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nElem)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nElem)
 
     ! Create the equation parser object
     feq = EquationParser(functionChar, (/'x'/))
@@ -348,16 +173,6 @@ CONTAINS
          DO i = 0, cqDegree
            f % interior % hostData(i,ivar,iel) = &
              feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
-         ENDDO
-       ENDDO
-     ENDDO
-
-    ! Load the target function
-     DO iel = 1, targetGeometry % nElem
-       DO ivar = 1, nvar
-         DO i = 0, tqDegree
-           fActual % interior % hostData(i,ivar,iel) = &
-             feq % Evaluate( (/targetGeometry % x % interior % hostData(i,1,iel)/) )
          ENDDO
        ENDDO
      ENDDO
@@ -376,21 +191,8 @@ CONTAINS
       CALL fInterp % UpdateHost()
     END IF
 #endif
-
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    
+    ! To do : file IO for fInterp, targetMesh, targetGeometry
 
     ! Clean up
     CALL controlMesh % Free()
@@ -399,13 +201,11 @@ CONTAINS
     CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE ScalarInterp1D_Test
 
   SUBROUTINE ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         functionChar,tolerance,gpuAccel,error)
+                                         functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp1D_Test"
     IMPLICIT NONE
@@ -424,8 +224,7 @@ CONTAINS
     TYPE(Mesh1D) :: controlMesh
     TYPE(Geometry1D) :: controlGeometry
     TYPE(EquationParser)  :: feq
-    TYPE(Scalar1D) :: f,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:2)
+    TYPE(Scalar1D) :: f
     INTEGER :: iel,i,ivar,iSide
 
     error = 0
@@ -437,8 +236,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
@@ -446,8 +243,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
 
     ! Create the equation parser object
     feq = EquationParser(functionChar, (/'x'/))
@@ -459,12 +254,6 @@ CONTAINS
            f % interior % hostData(i,ivar,iel) = &
              feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
          ENDDO
-         ! Right Boundary
-         fActual % boundary % hostData(ivar,1,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
-         ! Right boundary
-         fActual % boundary % hostData(ivar,2,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,2,iel)/) )
        ENDDO
      ENDDO
 
@@ -483,36 +272,17 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iSide = 1,2
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file IO for f
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE ScalarBoundaryInterp1D_Test
 
   SUBROUTINE ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                     fChar,dfChar,tolerance,gpuAccel,error)
+                                     fChar,dfChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarDerivative1D_Test"
     IMPLICIT NONE
@@ -525,9 +295,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(*),INTENT(in) :: dfChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh1D) :: controlMesh

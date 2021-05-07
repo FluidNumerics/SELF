@@ -2,7 +2,7 @@ PROGRAM SELF
 
   USE SELF_Constants
   USE SELF_SupportRoutines
-  USE SELF_Tests
+  USE SELF_CLI
   USE FLAP
 
   IMPLICIT NONE
