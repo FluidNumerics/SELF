@@ -5,11 +5,11 @@
 // Template
 __global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
 
   // How to access scalars 
@@ -60,9 +60,9 @@ extern "C"
 // JacobianWeight_MappedScalar1D_gpu
 __global__ void JacobianWeight_MappedScalar1D_gpu(real *scalar, real *dxds, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
     scalar[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = scalar[SC_1D_INDEX(i,iVar,iEl,N,nVar)]/
                                              dxds[SC_1D_INDEX(i,0,iEl,N,1)];
@@ -79,10 +79,10 @@ extern "C"
 // JacobianWeight_MappedScalar2D_gpu
 __global__ void JacobianWeight_MappedScalar2D_gpu(real *scalar, real *jacobian, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]/
                                                jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
@@ -99,11 +99,11 @@ extern "C"
 // JacobianWeight_MappedScalar3D_gpu
 __global__ void JacobianWeight_MappedScalar3D_gpu(real *scalar, real *jacobian, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     scalar[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = scalar[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)]/
                                                  jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
@@ -120,10 +120,10 @@ extern "C"
 // ContravariantWeight_MappedScalar2D_gpu
 __global__ void ContravariantWeight_MappedScalar2D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     workTensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*
                                                        scalar[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; 
@@ -149,10 +149,10 @@ extern "C"
 // ContravariantWeightBoundary_MappedScalar2D_gpu
 __global__ void ContravariantWeightBoundary_MappedScalar2D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t iVar = hipThreadIdx_y;
+  size_t iSide = blockIdx.x+1;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t iVar = threadIdx.y;
 
     workTensor[TEB_2D_INDEX(1,1,i,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_2D_INDEX(1,1,i,0,iSide,iEl,N,1)]*
                                                        scalar[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)]; 
@@ -178,11 +178,11 @@ extern "C"
 // ContravariantWeight_MappedScalar3D_gpu
 __global__ void ContravariantWeight_MappedScalar3D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   workTensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*
                                                        scalar[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)]; 
@@ -224,11 +224,11 @@ extern "C"
 // ContravariantWeightBoundary_MappedScalar3D_gpu
 __global__ void ContravariantWeightBoundary_MappedScalar3D_gpu(real *scalar, real *workTensor, real *dsdx, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t iVar = hipThreadIdx_z;
+  size_t iSide = blockIdx.x+1;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t iVar = threadIdx.z;
 
   workTensor[TEB_3D_INDEX(1,1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,1,i,j,0,iSide,iEl,N,1)]*
                                                        scalar[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)]; 
@@ -270,10 +270,10 @@ extern "C"
 // ContravariantProjection_MappedVector2D_gpu
 __global__ void ContravariantProjection_MappedVector2D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
 
     compVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*
@@ -298,10 +298,10 @@ extern "C"
 
 __global__ void ContravariantProjectionBoundary_MappedVector2D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iVar = hipBlockIdx_y;
-  size_t iEl = hipBlockIdx_z;
-  size_t i = hipThreadIdx_x;
+  size_t iSide = blockIdx.x+1;
+  size_t iVar = blockIdx.y;
+  size_t iEl = blockIdx.z;
+  size_t i = threadIdx.x;
 
     compVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_2D_INDEX(1,1,i,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)]+ 
@@ -326,10 +326,10 @@ extern "C"
 // JacobianWeight_MappedVector2D_gpu
 __global__ void JacobianWeight_MappedVector2D_gpu(real *vector, real *jacobian, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)]/
                                                  jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
@@ -349,11 +349,11 @@ extern "C"
 // ContravariantProjection_MappedVector3D_gpu
 __global__ void ContravariantProjection_MappedVector3D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   compVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*
                                                      physVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)]+ 
@@ -388,11 +388,11 @@ extern "C"
 
 __global__ void ContravariantProjectionBoundary_MappedVector3D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iVar = hipBlockIdx_y;
-  size_t iEl = hipBlockIdx_z;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iSide = blockIdx.x+1;
+  size_t iVar = blockIdx.y;
+  size_t iEl = blockIdx.z;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   compVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,1,i,j,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
@@ -428,11 +428,11 @@ extern "C"
 // JacobianWeight_MappedVector3D_gpu
 __global__ void JacobianWeight_MappedVector3D_gpu(real *vector, real *jacobian, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     vector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)]/
                                                    jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
@@ -455,10 +455,10 @@ extern "C"
 // JacobianWeight_MappedTensor2D_gpu
 __global__ void JacobianWeight_MappedTensor2D_gpu(real *tensor, real *jacobian, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)]/
                                                  jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
@@ -484,11 +484,11 @@ extern "C"
 // JacobianWeight_MappedTensor3D_gpu
 __global__ void JacobianWeight_MappedTensor3D_gpu(real *tensor, real *jacobian, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)]/
                                                    jacobian[SC_3D_INDEX(i,j,k,0,iEl,N,1)];
@@ -529,10 +529,10 @@ extern "C"
 // CalculateCurl_MappedTensor2D_gpu
 __global__ void CalculateCurl_MappedTensor2D_gpu(real *dfdx, real *curlf, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     curlf[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfdx[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)]-
                                               dfdx[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)];
@@ -549,11 +549,11 @@ extern "C"
 // CalculateCurl_MappedTensor3D_gpu
 __global__ void CalculateCurl_MappedTensor3D_gpu(real *dfdx, real *curlf, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     curlf[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dfdx[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)]-
                                                   dfdx[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)];
@@ -576,10 +576,10 @@ extern "C"
 // MapTo support routines
 __global__ void MapToScalar_MappedVector2D_gpu(real* scalar, real* vector, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     size_t jVar = 2*(iVar);
     scalar[SC_2D_INDEX(i,j,jVar,iEl,N,nVar*2)] = vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
@@ -599,10 +599,10 @@ extern "C"
 
 __global__ void MapToScalarBoundary_MappedVector2D_gpu(real* scalar, real* vector, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iVar = hipBlockIdx_y;
-  size_t iEl = hipBlockIdx_z;
-  size_t j = hipThreadIdx_x;
+  size_t iSide = blockIdx.x+1;
+  size_t iVar = blockIdx.y;
+  size_t iEl = blockIdx.z;
+  size_t j = threadIdx.x;
 
     size_t jVar = 2*(iVar);
     scalar[SCB_2D_INDEX(j,jVar,iSide,iEl,N,nVar*2)] = vector[VEB_2D_INDEX(1,j,iVar,iSide,iEl,N,nVar)];
@@ -622,10 +622,10 @@ extern "C"
 
 __global__ void MapToTensor_MappedVector2D_gpu(real* tensor, real* vector, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     size_t jVar = 2*(iVar);
     tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)] = vector[VE_2D_INDEX(1,i,j,jVar,iEl,N,nVar*2)];
@@ -649,10 +649,10 @@ extern "C"
 
 __global__ void MapToTensorBoundary_MappedVector2D_gpu(real* tensor, real* vector, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iVar = hipBlockIdx_y;
-  size_t iEl = hipBlockIdx_z;
-  size_t j = hipThreadIdx_x;
+  size_t iSide = blockIdx.x+1;
+  size_t iVar = blockIdx.y;
+  size_t iEl = blockIdx.z;
+  size_t j = threadIdx.x;
 
     size_t jVar =2*(iVar);
     tensor[TEB_2D_INDEX(1,1,j,iVar,iSide,iEl,N,nVar)] = vector[VEB_2D_INDEX(1,j,jVar,iSide,iEl,N,nVar*2)];
@@ -676,11 +676,11 @@ extern "C"
 
 __global__ void MapToScalar_MappedVector3D_gpu(real* scalar, real* vector, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     size_t jVar = 3*(iVar);
     scalar[SC_3D_INDEX(i,j,k,jVar,iEl,N,nVar*3)] = vector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
@@ -703,11 +703,11 @@ extern "C"
 
 __global__ void MapToScalarBoundary_MappedVector3D_gpu(real* scalar, real* vector, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iEl = hipBlockIdx_y;
-  size_t j = hipThreadIdx_x;
-  size_t k = hipThreadIdx_y;
-  size_t iVar = hipThreadIdx_z;
+  size_t iSide = blockIdx.x+1;
+  size_t iEl = blockIdx.y;
+  size_t j = threadIdx.x;
+  size_t k = threadIdx.y;
+  size_t iVar = threadIdx.z;
 
     size_t jVar = 3*(iVar);
     scalar[SCB_3D_INDEX(j,k,jVar,iSide,iEl,N,nVar*3)] = vector[VEB_3D_INDEX(1,j,k,iVar,iSide,iEl,N,nVar)];
@@ -730,11 +730,11 @@ extern "C"
 
 __global__ void MapToTensor_MappedVector3D_gpu(real* tensor, real* vector, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     size_t jVar = 3*(iVar);
     tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)] = vector[VE_3D_INDEX(1,i,j,k,jVar,iEl,N,nVar*3)];
@@ -769,11 +769,11 @@ extern "C"
 
 __global__ void MapToTensorBoundary_MappedVector3D_gpu(real* tensor, real* vector, int N, int nVar){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iEl = hipBlockIdx_y;
-  size_t j = hipThreadIdx_x;
-  size_t k = hipThreadIdx_x;
-  size_t iVar = hipThreadIdx_z;
+  size_t iSide = blockIdx.x+1;
+  size_t iEl = blockIdx.y;
+  size_t j = threadIdx.x;
+  size_t k = threadIdx.x;
+  size_t iVar = threadIdx.z;
 
     size_t jVar = 3*(iVar);
     tensor[TEB_3D_INDEX(1,1,j,k,iVar,iSide,iEl,N,nVar)] = vector[VEB_3D_INDEX(1,j,k,jVar,iSide,iEl,N,nVar*3)];

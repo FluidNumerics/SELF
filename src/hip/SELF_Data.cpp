@@ -5,11 +5,11 @@
 // Template
 __global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
 
   // How to access scalars 
@@ -59,10 +59,10 @@ extern "C"
 
 __global__ void Determinant_Tensor2D_gpu(real *tensor, real *detTensor, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     detTensor[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = tensor[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)]*
 	                                          tensor[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)]-
@@ -79,11 +79,11 @@ extern "C"
 
 __global__ void Determinant_Tensor3D_gpu(real *tensor, real *detTensor, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     detTensor[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = tensor[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)]*
 	                                            (tensor[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)]*

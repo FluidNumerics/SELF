@@ -6,11 +6,11 @@
 // Template
 __global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
 
   // How to access scalars 
@@ -60,10 +60,10 @@ extern "C"
 /*
 __global__ void CalculateContravariantBasis_SEMQuad_gpu(real *scalar, real *dxds, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     scalar[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = scalar[SC_1D_INDEX(i,iVar,iEl,N,nVar)]/
                                              dxds[SC_1D_INDEX(i,0,iEl,N,1)];
@@ -78,9 +78,9 @@ extern "C"
 */
 __global__ void CalculateContravariantBasis_SEMQuad_gpu(real *dxds, real *dsdx, int N){
 
-  size_t iEl = hipBlockIdx_x;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iEl = blockIdx.x;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     // Ja1
     dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)] = dxds[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)];
@@ -101,9 +101,9 @@ extern "C"
 
 __global__ void AdjustBoundaryContravariantBasis_SEMQuad_gpu(real *dsdx, real *J, int N){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iSide = blockIdx.x+1;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
     real fac = fabs(J[SCB_2D_INDEX(i,iSide,0,iEl,N,1)])/J[SCB_2D_INDEX(i,iSide,0,iEl,N,1)];
     if (iSide == 4 || iSide == 1 ){
@@ -127,10 +127,10 @@ extern "C"
 }
 __global__ void CalculateContravariantBasis_SEMHex_gpu(real *dxds, real *dsdx, int N){
 
-  size_t iEl = hipBlockIdx_x;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iEl = blockIdx.x;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
     // Ja1
     dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)] = 
@@ -199,10 +199,10 @@ extern "C"
 
 __global__ void AdjustBoundaryContravariantBasis_SEMHex_gpu(real *dsdx, real *J, int N){
 
-  size_t iSide = hipBlockIdx_x+1;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iSide = blockIdx.x+1;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
     real fac = fabs(J[SCB_3D_INDEX(i,j,iSide,0,iEl,N,1)])/J[SCB_3D_INDEX(i,j,iSide,0,iEl,N,1)];
     if (iSide == 5 || iSide == 1 || iSide == 2){
