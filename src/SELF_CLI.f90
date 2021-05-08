@@ -1,4 +1,4 @@
-MODULE SELF_Tests
+MODULE SELF_CLI
 
   USE SELF_Constants
   USE SELF_Memory
@@ -31,7 +31,7 @@ CONTAINS
     TYPE(Geometry1D) :: geometry
     INTEGER :: iel,i
 
-    error = 0
+    
     INFO('Number of elements : '//Int2Str(nElem))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
@@ -64,7 +64,7 @@ CONTAINS
     INTEGER :: iel,jel,i,j
     INTEGER :: row,col
 
-    error = 0
+    
     INFO('Number of elements : '//Int2Str(nElem*nElem))
     INFO('Control point degree : '//Int2Str(cqDegree))
     INFO('Target point degree : '//Int2Str(tqDegree))
@@ -100,7 +100,7 @@ CONTAINS
     INTEGER :: iel,jel,kel,i,j,k
     INTEGER :: row,col
 
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
     INFO(TRIM(msg))
     INFO('Control point degree : '//Int2Str(cqDegree))
@@ -142,7 +142,7 @@ CONTAINS
     TYPE(Scalar1D) :: f,fInterp
     INTEGER :: iel,i,ivar
 
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -216,9 +216,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh1D) :: controlMesh
@@ -227,7 +225,7 @@ CONTAINS
     TYPE(Scalar1D) :: f
     INTEGER :: iel,i,ivar,iSide
 
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -301,11 +299,10 @@ CONTAINS
     TYPE(Mesh1D) :: controlMesh
     TYPE(Geometry1D) :: controlGeometry
     TYPE(EquationParser)  :: feq,dfeq
-    TYPE(MappedScalar1D) :: f,dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedScalar1D) :: f,dfInterp
     INTEGER :: iel,i,ivar
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -322,8 +319,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
@@ -332,8 +327,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nElem)
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x'/))
@@ -345,8 +338,6 @@ CONTAINS
          DO i = 0, cqDegree
            f % interior % hostData(i,ivar,iel) = &
              feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
-           dfActual % interior % hostData(i,ivar,iel) = &
-             dfeq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
          ENDDO
          ! Left Boundary
          f % boundary % hostData(ivar,1,iel) = &
@@ -372,33 +363,18 @@ CONTAINS
     END IF
 #endif
 
-    dfError = dfActual - dfInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE ScalarDerivative1D_Test
 
   SUBROUTINE ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 functionChar,tolerance,gpuAccel,error)
+                                 functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp2D_Test"
     IMPLICIT NONE
@@ -409,21 +385,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh,targetMesh
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: feq
-    TYPE(Scalar2D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Scalar2D) :: f,fInterp
     INTEGER :: nel,iel,jel
     INTEGER :: i,j,ivar
 
     nel = nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -432,7 +405,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -451,8 +423,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     feq = EquationParser(functionChar, (/'x','y'/))
@@ -469,17 +439,6 @@ CONTAINS
       ENDDO
     ENDDO
 
-    ! Load the target function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, tqDegree
-          DO i = 0, tqDegree
-           fActual % interior % hostData(i,j,ivar,iel) = &
-             feq % Evaluate( targetGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
 
 #ifdef GPU     
     IF (gpuAccel) THEN
@@ -496,21 +455,8 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
-
+    ! To do : file IO for fInterp, targetMesh, targetGeometry
+    
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
@@ -518,13 +464,11 @@ CONTAINS
     CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE ScalarInterp2D_Test
 
   SUBROUTINE ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         functionChar,tolerance,gpuAccel,error)
+                                         functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -535,21 +479,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
     TYPE(SEMQuad) :: controlGeometry
     TYPE(EquationParser)  :: feq
-    TYPE(Scalar2D) :: f,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:4)
+    TYPE(Scalar2D) :: f
     INTEGER :: nel,iel,jel
     INTEGER :: i,j,ivar,iside
 
     nel = nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -557,8 +498,6 @@ CONTAINS
     msg = 'Number of target points : '//Int2Str(tqDegree)
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
@@ -570,8 +509,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     feq = EquationParser(functionChar, (/'x','y'/))
@@ -583,10 +520,6 @@ CONTAINS
           DO i = 0, cqDegree
              f % interior % hostData(i,j,ivar,iel) = &
                feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-          ENDDO
-          DO iside = 1,4
-            fActual % boundary % hostData(j,ivar,iside,iel) = &
-               feq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
           ENDDO
         ENDDO
       ENDDO
@@ -607,36 +540,17 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iside = 1,4
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file io for f
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE ScalarBoundaryInterp2D_Test
 
   SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   fChar,gradientChar,tolerance,gpuAccel,error)
+                                   fChar,gradientChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D_Test"
     IMPLICIT NONE
@@ -649,9 +563,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:2)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
@@ -659,11 +571,10 @@ CONTAINS
     TYPE(EquationParser)  :: feq,gxeq,gyeq
     TYPE(MappedScalar2D) :: f
     TYPE(MappedTensor2D) :: workTensor
-    TYPE(MappedVector2D) :: dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedVector2D) :: dfInterp
     INTEGER :: iel,i,j,ivar,iside
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -681,8 +592,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -695,8 +604,6 @@ CONTAINS
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x','y'/))
@@ -710,12 +617,6 @@ CONTAINS
           DO i = 0, cqDegree
             f % interior % hostData(i,j,ivar,iel) = &
               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-
-            dfActual % interior % hostData(1,i,j,ivar,iel) = &
-              gxeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-
-            dfActual % interior % hostData(2,i,j,ivar,iel) = &
-              gyeq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
           ENDDO
           DO iside = 1,4
             f % boundary % hostData(j,ivar,iside,iel) = &
@@ -740,20 +641,7 @@ CONTAINS
     END IF
 #endif
 
-    dfError = dfActual - dfInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp
 
     ! Clean up
     CALL controlMesh % Free()
@@ -761,13 +649,11 @@ CONTAINS
     CALL f % Free()
     CALL workTensor % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE ScalarGradient2D_Test
 
   SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 vectorChar,tolerance,gpuAccel,error)
+                                 vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp2D_Test"
     IMPLICIT NONE
@@ -778,21 +664,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh,targetMesh
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: vEq(1:2)
-    TYPE(Vector2D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Vector2D) :: f,fInterp
     INTEGER :: nel,iel,jel
     INTEGER :: i,j,ivar,idir
 
     nel = nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -801,7 +684,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -820,8 +702,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO idir = 1,2
@@ -842,19 +722,6 @@ CONTAINS
       ENDDO
     ENDDO
 
-    ! Load the target function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, tqDegree
-          DO i = 0, tqDegree
-            DO idir = 1,2
-              fActual % interior % hostData(idir,i,j,ivar,iel) = &
-                vEq(idir) % Evaluate( targetGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
 
 #ifdef GPU     
     IF (gpuAccel) THEN
@@ -871,20 +738,7 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for fInterp
 
     ! Clean up
     CALL controlMesh % Free()
@@ -893,13 +747,11 @@ CONTAINS
     CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE VectorInterp2D_Test
 
   SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         vectorChar,tolerance,gpuAccel,error)
+                                         vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -910,21 +762,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
     TYPE(SEMQuad) :: controlGeometry
     TYPE(EquationParser)  :: vEq(1:2)
-    TYPE(Vector2D) :: f,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:4)
+    TYPE(Vector2D) :: f
     INTEGER :: nel,iel,jel
     INTEGER :: i,j,ivar,iside,idir
 
     nel = nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -932,8 +781,6 @@ CONTAINS
     msg = 'Number of target points : '//Int2Str(tqDegree)
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
@@ -945,8 +792,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO idir = 1,2
@@ -961,12 +806,6 @@ CONTAINS
             DO idir = 1,2
               f % interior % hostData(idir,i,j,ivar,iel) = &
                 vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
-          ENDDO
-          DO iside = 1,4
-            DO idir = 1,2
-              fActual % boundary % hostData(idir,j,ivar,iside,iel) = &
-                vEq(idir) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
             ENDDO
           ENDDO
         ENDDO
@@ -988,36 +827,17 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iside = 1,4
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file io for f
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE VectorBoundaryInterp2D_Test
 
   SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   vectorChar,tensorChar,tolerance,gpuAccel,error)
+                                   vectorChar,tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient2D_Test"
     IMPLICIT NONE
@@ -1030,9 +850,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
@@ -1042,11 +860,10 @@ CONTAINS
     TYPE(MappedScalar2D) :: workScalar
     TYPE(MappedVector2D) :: workVector
     TYPE(MappedTensor2D) :: workTensor
-    TYPE(MappedTensor2D) :: dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedTensor2D) :: dfInterp
     INTEGER :: iel,i,j,ivar,row,col,iside
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -1064,8 +881,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -1077,8 +892,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create work objects
     CALL workScalar % Init(cqDegree,cqType,tqDegree,tqType,2*nvar,controlGeometry % nElem)
@@ -1105,13 +918,6 @@ CONTAINS
             DO row = 1,2
               f % interior % hostData(row,i,j,ivar,iel) = &
                 feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
-
-            DO col = 1,2
-              DO row = 1,2
-                dfActual % interior % hostData(row,col,i,j,ivar,iel) = &
-                  dfeqChar(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-              ENDDO
             ENDDO
 
           ENDDO
@@ -1142,20 +948,7 @@ CONTAINS
     END IF
 #endif
 
-    dfError = dfActual - dfInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp
 
     ! Clean up
     CALL controlMesh % Free()
@@ -1165,13 +958,11 @@ CONTAINS
     CALL workVector % Free()
     CALL workTensor % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE VectorGradient2D_Test
 
   SUBROUTINE VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                     vectorChar,scalarChar,tolerance,gpuAccel,error)
+                                     vectorChar,scalarChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence2D_Test"
     IMPLICIT NONE
@@ -1184,9 +975,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:2)
     CHARACTER(240),INTENT(in) :: scalarChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
@@ -1194,11 +983,10 @@ CONTAINS
     TYPE(EquationParser)  :: feq(1:2),dfeqChar
     TYPE(MappedVector2D) :: f
     TYPE(MappedVector2D) :: workVector
-    TYPE(MappedScalar2D) :: dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedScalar2D) :: dfInterp
     INTEGER :: iel,i,j,ivar,row,col,iside
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -1216,8 +1004,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -1229,8 +1015,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create work objects
     CALL workVector % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
@@ -1252,9 +1036,6 @@ CONTAINS
               f % interior % hostData(row,i,j,ivar,iel) = &
                 feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
             ENDDO
-
-            dfActual % interior % hostData(i,j,ivar,iel) = &
-              dfeqChar % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
 
           ENDDO
 
@@ -1284,20 +1065,7 @@ CONTAINS
     END IF
 #endif
 
-    dfError = dfActual - dfInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp
 
     ! Clean up
     CALL controlMesh % Free()
@@ -1305,13 +1073,11 @@ CONTAINS
     CALL f % Free()
     CALL workVector % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE VectorDivergence2D_Test
 
   SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 tensorChar,tolerance,gpuAccel,error)
+                                 tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp2D_Test"
     IMPLICIT NONE
@@ -1322,22 +1088,19 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh,targetMesh
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: tensorEq(1:2,1:2)
-    TYPE(Tensor2D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Tensor2D) :: f,fInterp
     INTEGER :: nel,iel,jel
     INTEGER :: i,j,ivar
     INTEGER :: row,col
 
     nel = nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1346,7 +1109,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -1365,8 +1127,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO col = 1,2
@@ -1391,21 +1151,6 @@ CONTAINS
       ENDDO
     ENDDO
 
-    ! Load the target function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, tqDegree
-          DO i = 0, tqDegree
-            DO col = 1,2
-              DO row = 1,2
-               fActual % interior % hostData(row,col,i,j,ivar,iel) = &
-                 tensorEq(row,col) % Evaluate( targetGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
 
 #ifdef GPU     
     IF (gpuAccel) THEN
@@ -1422,20 +1167,7 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for fInterp
 
     ! Clean up
     CALL controlMesh % Free()
@@ -1444,13 +1176,11 @@ CONTAINS
     CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE TensorInterp2D_Test
 
   SUBROUTINE TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         tensorChar,tolerance,gpuAccel,error)
+                                         tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorBoundaryInterp2D_Test"
     IMPLICIT NONE
@@ -1461,22 +1191,19 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:2,1:2)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh2D) :: controlMesh
     TYPE(SEMQuad) :: controlGeometry
     TYPE(EquationParser)  :: tensorEq(1:2,1:2)
-    TYPE(Tensor2D) :: f,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:4)
+    TYPE(Tensor2D) :: f
     INTEGER :: nel,iel,jel
     INTEGER :: i,j,ivar,iside
     INTEGER :: row,col
 
     nel = nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1484,8 +1211,6 @@ CONTAINS
     msg = 'Number of target points : '//Int2Str(tqDegree)
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
@@ -1497,8 +1222,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO col = 1,2
@@ -1516,14 +1239,6 @@ CONTAINS
               DO row = 1,2
                 f % interior % hostData(row,col,i,j,ivar,iel) = &
                   tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-          DO iside = 1,4
-            DO col = 1,2
-              DO row = 1,2
-               fActual % boundary % hostData(row,col,j,ivar,iside,iel) = &
-                 tensorEq(row,col) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
               ENDDO
             ENDDO
           ENDDO
@@ -1546,36 +1261,17 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iside = 1,4
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file io for f
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE TensorBoundaryInterp2D_Test
 
   SUBROUTINE ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 functionChar,tolerance,gpuAccel,error)
+                                 functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp3D_Test"
     IMPLICIT NONE
@@ -1586,21 +1282,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh,targetMesh
     TYPE(SEMHex) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: feq
-    TYPE(Scalar3D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Scalar3D) :: f,fInterp
     INTEGER :: nel,iel
     INTEGER :: i,j,k,ivar
 
     nel = nElem*nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1609,7 +1302,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -1630,8 +1322,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     feq = EquationParser(functionChar, (/'x','y','z'/))
@@ -1644,20 +1334,6 @@ CONTAINS
             DO i = 0, cqDegree
                f % interior % hostData(i,j,k,ivar,iel) = &
                  feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    ! Load the target function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, tqDegree
-          DO j = 0, tqDegree
-            DO i = 0, tqDegree
-             fActual % interior % hostData(i,j,k,ivar,iel) = &
-               feq % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
             ENDDO
           ENDDO
         ENDDO
@@ -1679,35 +1355,18 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for fInterp, targetMesh, targetGeometry
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
-    CALL targetMesh % Free()
-    CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE ScalarInterp3D_Test
 
   SUBROUTINE ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         functionChar,tolerance,gpuAccel,error)
+                                         functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -1718,21 +1377,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: functionChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh,targetMesh
     TYPE(SEMHex) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: feq
-    TYPE(Scalar3D) :: f,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:6)
+    TYPE(Scalar3D) :: f
     INTEGER :: nel,iel
     INTEGER :: i,j,k,ivar,iside
 
     nel = nElem*nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1740,8 +1396,6 @@ CONTAINS
     msg = 'Number of target points : '//Int2Str(tqDegree)
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
@@ -1754,8 +1408,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     feq = EquationParser(functionChar, (/'x','y','z'/))
@@ -1768,10 +1420,6 @@ CONTAINS
             DO i = 0, cqDegree
                f % interior % hostData(i,j,k,ivar,iel) = &
                  feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-            ENDDO
-            DO iside = 1,6
-             fActual % boundary % hostData(j,k,ivar,iside,iel) = &
-               feq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
             ENDDO
           ENDDO
         ENDDO
@@ -1793,36 +1441,17 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iside = 1,6
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file io for f
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE ScalarBoundaryInterp3D_Test
 
   SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   fChar,gradientChar,tolerance,gpuAccel,error)
+                                   fChar,gradientChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient3D_Test"
     IMPLICIT NONE
@@ -1835,9 +1464,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:3)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh
@@ -1845,11 +1472,10 @@ CONTAINS
     TYPE(EquationParser) :: feq,gxeq,gyeq,gzeq
     TYPE(MappedScalar3D) :: f
     TYPE(MappedTensor3D) :: workTensor
-    TYPE(MappedVector3D) :: dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedVector3D) :: dfInterp
     INTEGER :: iel,i,j,k,ivar,iside
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -1867,8 +1493,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -1882,8 +1506,6 @@ CONTAINS
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x','y','z'/))
@@ -1899,15 +1521,6 @@ CONTAINS
             DO i = 0, cqDegree
               f % interior % hostData(i,j,k,ivar,iel) = &
                 feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-
-              dfActual % interior % hostData(1,i,j,k,ivar,iel) = &
-                gxeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-
-              dfActual % interior % hostData(2,i,j,k,ivar,iel) = &
-                gyeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-
-              dfActual % interior % hostData(3,i,j,k,ivar,iel) = &
-                gzeq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
             ENDDO
             DO iside = 1,6
              f % boundary % hostData(j,k,ivar,iside,iel) = &
@@ -1933,20 +1546,7 @@ CONTAINS
     END IF
 #endif
 
-    dfError = dfActual - dfInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp and controlGeometry
 
     ! Clean up
     CALL controlMesh % Free()
@@ -1954,13 +1554,11 @@ CONTAINS
     CALL f % Free()
     CALL workTensor % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE ScalarGradient3D_Test
 
   SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 vectorChar,tolerance,gpuAccel,error)
+                                 vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp3D_Test"
     IMPLICIT NONE
@@ -1971,21 +1569,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh,targetMesh
     TYPE(SEMHex) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: vEq(1:3)
-    TYPE(Vector3D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Vector3D) :: f,fInterp
     INTEGER :: nel,iel
     INTEGER :: i,j,k,ivar,idir
 
     nel = nElem*nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1994,7 +1589,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -2015,8 +1609,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO idir = 1,3
@@ -2032,22 +1624,6 @@ CONTAINS
               DO idir = 1,3
                 f % interior % hostData(idir,i,j,k,ivar,iel) = &
                   vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    ! Load the target function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, tqDegree
-          DO j = 0, tqDegree
-            DO i = 0, tqDegree
-              DO idir = 1,3
-                fActual % interior % hostData(idir,i,j,k,ivar,iel) = &
-                  vEq(idir) % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
               ENDDO
             ENDDO
           ENDDO
@@ -2070,20 +1646,7 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for fInterp, targetMesh, targetGeometry
 
     ! Clean up
     CALL controlMesh % Free()
@@ -2092,13 +1655,11 @@ CONTAINS
     CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE VectorInterp3D_Test
 
   SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         vectorChar,tolerance,gpuAccel,error)
+                                         vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -2109,21 +1670,18 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh
     TYPE(SEMHex) :: controlGeometry
     TYPE(EquationParser)  :: vEq(1:3)
-    TYPE(Vector3D) :: f,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:6)
+    TYPE(Vector3D) :: f
     INTEGER :: nel,iel
     INTEGER :: i,j,k,ivar,iside,idir
 
     nel = nElem*nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -2131,8 +1689,6 @@ CONTAINS
     msg = 'Number of target points : '//Int2Str(tqDegree)
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
@@ -2145,8 +1701,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO idir = 1,3
@@ -2162,12 +1716,6 @@ CONTAINS
               DO idir = 1,3
                 f % interior % hostData(idir,i,j,k,ivar,iel) = &
                   vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              ENDDO
-            ENDDO
-            DO iside = 1,6
-              DO idir = 1,3
-                fActual % boundary % hostData(idir,j,k,ivar,iside,iel) = &
-                  vEq(idir) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
               ENDDO
             ENDDO
           ENDDO
@@ -2190,36 +1738,17 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iside = 1,6
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file io for f, controlGeometry
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE VectorBoundaryInterp3D_Test
 
   SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   vectorChar,tensorChar,tolerance,gpuAccel,error)
+                                   vectorChar,tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient3D_Test"
     IMPLICIT NONE
@@ -2232,9 +1761,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh
@@ -2244,11 +1771,10 @@ CONTAINS
     TYPE(MappedScalar3D) :: workScalar
     TYPE(MappedVector3D) :: workVector
     TYPE(MappedTensor3D) :: workTensor
-    TYPE(MappedTensor3D) :: dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedTensor3D) :: dfInterp
     INTEGER :: iel,i,j,k,ivar,row,col,iside
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -2266,8 +1792,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -2280,8 +1804,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create work objects
     CALL workScalar % Init(cqDegree,cqType,tqDegree,tqType,3*nvar,controlGeometry % nElem)
@@ -2311,13 +1833,6 @@ CONTAINS
                   feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
               ENDDO
 
-              DO col = 1,3
-                DO row = 1,3
-                  dfActual % interior % hostData(row,col,i,j,k,ivar,iel) = &
-                    dfeqChar(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-                ENDDO
-              ENDDO
-
             ENDDO
             DO iside = 1,6
               DO row = 1,3
@@ -2345,21 +1860,7 @@ CONTAINS
     END IF
 #endif
 
-    dfError = dfActual - dfInterp
-    !PRINT*, dfError % interior % hostData
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp, controlGeometry
 
     ! Clean up
     CALL controlMesh % Free()
@@ -2369,13 +1870,11 @@ CONTAINS
     CALL workVector % Free()
     CALL workTensor % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE VectorGradient3D_Test
 
   SUBROUTINE VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                     vectorChar,scalarChar,tolerance,gpuAccel,error)
+                                     vectorChar,scalarChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence3D_Test"
     IMPLICIT NONE
@@ -2388,9 +1887,7 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: scalarChar
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh
@@ -2398,11 +1895,10 @@ CONTAINS
     TYPE(EquationParser)  :: feq(1:3),dfeqChar
     TYPE(MappedVector3D) :: f
     TYPE(MappedVector3D) :: workVector
-    TYPE(MappedScalar3D) :: dfInterp,dfActual,dfError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(MappedScalar3D) :: dfInterp
     INTEGER :: iel,i,j,k,ivar,idir,iside
 
-    error = 0
+    
     IF (dForm == selfStrongForm ) THEN
       msg = 'Formulation Type : Strong Form'
     ELSEIF (dForm == selfWeakDGForm ) THEN
@@ -2419,8 +1915,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
-    INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -2433,8 +1927,6 @@ CONTAINS
     ! Create the objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
     CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfError % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create work objects
     CALL workVector % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
@@ -2458,9 +1950,6 @@ CONTAINS
                   feq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
               ENDDO
 
-              dfActual % interior % hostData(i,j,k,ivar,iel) = &
-                dfeqChar % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-
             ENDDO
 
             DO iside = 1,6
@@ -2482,9 +1971,7 @@ CONTAINS
 #endif
 
     ! Run the grid interpolation
-    DO i = 1, 1000
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
-    END DO
 
 #ifdef GPU     
     IF (gpuAccel) THEN
@@ -2492,20 +1979,7 @@ CONTAINS
     END IF
 #endif
  
-    dfError = dfActual - dfInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = dfError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for dfInterp, controlGeometry
 
     ! Clean up
     CALL controlMesh % Free()
@@ -2513,13 +1987,11 @@ CONTAINS
     CALL f % Free()
     CALL workVector % Free()
     CALL dfInterp % Free()
-    CALL dfActual % Free()
-    CALL dfError % Free()
 
   END SUBROUTINE VectorDivergence3D_Test
 
   SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 tensorChar,tolerance,gpuAccel,error)
+                                 tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp3D_Test"
     IMPLICIT NONE
@@ -2530,22 +2002,19 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh,targetMesh
     TYPE(SEMHex) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: tensorEq(1:3,1:3)
-    TYPE(Tensor3D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar)
+    TYPE(Tensor3D) :: f,fInterp
     INTEGER :: nel,iel
     INTEGER :: i,j,k,ivar
     INTEGER :: row,col
 
     nel = nElem*nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -2554,7 +2023,6 @@ CONTAINS
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
     INFO(TRIM(msg))
-    INFO('Error tolerance : '//Float2Str(tolerance))
 
     ! Create the control mesh and geometry
     CALL controlMesh % UniformBlockMesh(cqDegree, &
@@ -2575,8 +2043,6 @@ CONTAINS
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
     CALL fInterp % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(tqDegree,tqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO col = 1,3
@@ -2595,24 +2061,6 @@ CONTAINS
                 DO row = 1,3
                   f % interior % hostData(row,col,i,j,k,ivar,iel) = &
                     tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
-
-    ! Load the target function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, tqDegree
-          DO j = 0, tqDegree
-            DO i = 0, tqDegree
-              DO col = 1,3
-                DO row = 1,3
-                 fActual % interior % hostData(row,col,i,j,k,ivar,iel) = &
-                   tensorEq(row,col) % Evaluate( targetGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
                 ENDDO
               ENDDO
             ENDDO
@@ -2636,20 +2084,7 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - fInterp
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxInterior( )
-
-    msg = "Numerical Error : "//Float2Str(maxErrors(1))
-    IF (maxErrors(1) > tolerance) THEN
-      error = error + 1
-      ERROR(TRIM(msg))
-      ERROR("Status : [FAIL]")
-    ELSE
-      INFO(TRIM(msg))
-      INFO("Status : [PASS]")
-    END IF
+    ! To do : file io for finterp, targetMesh, targetGeometry
 
     ! Clean up
     CALL controlMesh % Free()
@@ -2658,13 +2093,11 @@ CONTAINS
     CALL targetGeometry % Free()
     CALL f % Free()
     CALL fInterp % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE TensorInterp3D_Test
 
   SUBROUTINE TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         tensorChar,tolerance,gpuAccel,error)
+                                         tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorBoundaryInterp3D_Test"
     IMPLICIT NONE
@@ -2675,22 +2108,19 @@ CONTAINS
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     CHARACTER(240),INTENT(in) :: tensorChar(1:3,1:3)
-    REAL(prec),INTENT(in) :: tolerance
     LOGICAL,INTENT(in) :: gpuAccel
-    INTEGER,INTENT(out) :: error
     ! Local
     CHARACTER(240) :: msg
     TYPE(Mesh3D) :: controlMesh
     TYPE(SEMHex) :: controlGeometry
     TYPE(EquationParser)  :: tensorEq(1:3,1:3)
-    TYPE(Tensor3D) :: f,fInterp,fActual,fError
-    REAL(prec) :: maxErrors(1:nvar,1:6)
+    TYPE(Tensor3D) :: f,fInterp
     INTEGER :: nel,iel
     INTEGER :: i,j,k,ivar,iside
     INTEGER :: row,col
 
     nel = nElem*nElem*nElem
-    error = 0
+    
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -2698,8 +2128,6 @@ CONTAINS
     msg = 'Number of target points : '//Int2Str(tqDegree)
     INFO(TRIM(msg))
     msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-    msg = 'Error tolerance : '//Float2Str(tolerance)
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
@@ -2712,8 +2140,6 @@ CONTAINS
 
     ! Create the scalar1d objects
     CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fActual % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
-    CALL fError % Init(cqDegree,cqType,tqDegree,tqType,nvar,nEl)
 
     ! Create the equation parser object
     DO col = 1,3
@@ -2732,14 +2158,6 @@ CONTAINS
                 DO row = 1,3
                   f % interior % hostData(row,col,i,j,k,ivar,iel) = &
                     tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-                ENDDO
-              ENDDO
-            ENDDO
-            DO iside = 1,6
-              DO col = 1,3
-                DO row = 1,3
-                  fActual % boundary % hostData(row,col,j,k,ivar,iside,iel) = &
-                    tensorEq(row,col) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
                 ENDDO
               ENDDO
             ENDDO
@@ -2763,32 +2181,13 @@ CONTAINS
     END IF
 #endif
 
-    fError = fActual - f
-
-    ! Calculate Absolute Maximum Error
-    maxErrors = fError % AbsMaxBoundary( )
-
-    DO iside = 1,6
-      msg = "Numerical Error : "//TRIM(Int2Str(iSide))//Float2Str(maxErrors(1,iSide))
-      IF (maxErrors(1,iSide) > tolerance) THEN
-        error = error + 1
-        ERROR(TRIM(msg))
-        msg = "Status : [FAIL]"
-        ERROR(TRIM(msg))
-      ELSE
-        INFO(TRIM(msg))
-        msg = "Status : [PASS]"
-        INFO(TRIM(msg))
-      END IF
-    ENDDO
+    ! To do : file io for f and controlGeometry
 
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
     CALL f % Free()
-    CALL fActual % Free()
-    CALL fError % Free()
 
   END SUBROUTINE TensorBoundaryInterp3D_Test
 
-END MODULE SELF_Tests
+END MODULE SELF_CLI

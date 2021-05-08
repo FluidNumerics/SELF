@@ -7,7 +7,8 @@ PROGRAM SELF
 
   IMPLICIT NONE
 
-  TYPE(COMMAND_LINE_INTERFACE) :: self_cli
+  TYPE(COMMAND_LINE_INTERFACE) :: selfCLI
+  CHARACTER(240) :: meshFile
   CHARACTER(20) :: cqTypeChar
   CHARACTER(20) :: tqTypeChar
   CHARACTER(240) :: functionChar
@@ -16,7 +17,6 @@ PROGRAM SELF
   CHARACTER(240) :: tensorChar(1:3,1:3)
   CHARACTER(10) :: dFormChar
   CHARACTER(5) :: gpuAccelChar
-  REAL(prec) :: errorTolerance
   INTEGER :: dForm
   INTEGER :: cqType
   INTEGER :: tqType
@@ -24,35 +24,33 @@ PROGRAM SELF
   INTEGER :: tqDegree
   INTEGER :: nElem
   INTEGER :: nVar
-  INTEGER :: error
-  INTEGER :: errorCount
   LOGICAL :: gpuAccel
 
-  CALL Parse_CLI(self_cli)
+  CALL Parse_CLI(selfCLI)
 
-  CALL self_cli % get(val=cqTypeChar,switch='--control-quadrature')
-  CALL self_cli % get(val=tqTypeChar,switch='--target-quadrature')
-  CALL self_cli % get(val=cqDegree,switch='--control-degree')
-  CALL self_cli % get(val=tqDegree,switch='--target-degree')
-  CALL self_cli % get(val=nElem,switch='--nelements')
-  CALL self_cli % get(val=nVar,switch='--nvar')
-  CALL self_cli % get(val=functionChar,switch='--function')
-  CALL self_cli % get(val=dFormChar,switch='--derivative-type')
-  CALL self_cli % get(val=derivativeChar,switch='--derivative')
-  CALL self_cli % get(val=gpuAccelChar,switch='--gpu-accel')
-  CALL self_cli % get(val=vectorChar(1),switch='--vector-x')
-  CALL self_cli % get(val=vectorChar(2),switch='--vector-y')
-  CALL self_cli % get(val=vectorChar(3),switch='--vector-z')
-  CALL self_cli % get(val=tensorChar(1,1),switch='--tensor-11')
-  CALL self_cli % get(val=tensorChar(1,2),switch='--tensor-12')
-  CALL self_cli % get(val=tensorChar(1,3),switch='--tensor-13')
-  CALL self_cli % get(val=tensorChar(2,1),switch='--tensor-21')
-  CALL self_cli % get(val=tensorChar(2,2),switch='--tensor-22')
-  CALL self_cli % get(val=tensorChar(2,3),switch='--tensor-23')
-  CALL self_cli % get(val=tensorChar(3,1),switch='--tensor-31')
-  CALL self_cli % get(val=tensorChar(3,2),switch='--tensor-32')
-  CALL self_cli % get(val=tensorChar(3,3),switch='--tensor-33')
-  CALL self_cli % get(val=errorTolerance,switch='--tolerance')
+  CALL selfCLI % get(val=meshFile,switch='--mesh')
+  CALL selfCLI % get(val=cqTypeChar,switch='--control-quadrature')
+  CALL selfCLI % get(val=tqTypeChar,switch='--target-quadrature')
+  CALL selfCLI % get(val=cqDegree,switch='--control-degree')
+  CALL selfCLI % get(val=tqDegree,switch='--target-degree')
+  CALL selfCLI % get(val=nElem,switch='--nelements')
+  CALL selfCLI % get(val=nVar,switch='--nvar')
+  CALL selfCLI % get(val=functionChar,switch='--function')
+  CALL selfCLI % get(val=dFormChar,switch='--derivative-type')
+  CALL selfCLI % get(val=derivativeChar,switch='--derivative')
+  CALL selfCLI % get(val=gpuAccelChar,switch='--gpu-accel')
+  CALL selfCLI % get(val=vectorChar(1),switch='--vector-x')
+  CALL selfCLI % get(val=vectorChar(2),switch='--vector-y')
+  CALL selfCLI % get(val=vectorChar(3),switch='--vector-z')
+  CALL selfCLI % get(val=tensorChar(1,1),switch='--tensor-11')
+  CALL selfCLI % get(val=tensorChar(1,2),switch='--tensor-12')
+  CALL selfCLI % get(val=tensorChar(1,3),switch='--tensor-13')
+  CALL selfCLI % get(val=tensorChar(2,1),switch='--tensor-21')
+  CALL selfCLI % get(val=tensorChar(2,2),switch='--tensor-22')
+  CALL selfCLI % get(val=tensorChar(2,3),switch='--tensor-23')
+  CALL selfCLI % get(val=tensorChar(3,1),switch='--tensor-31')
+  CALL selfCLI % get(val=tensorChar(3,2),switch='--tensor-32')
+  CALL selfCLI % get(val=tensorChar(3,3),switch='--tensor-33')
 
   IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
     cqType = GAUSS
@@ -86,250 +84,150 @@ PROGRAM SELF
     gpuAccel = .FALSE.
   END IF
 
-  errorCount = 0
-  IF (self_cli % run_command(group="ci-test")) THEN
+  IF (selfCLI % run_command(group="blockmesh_1d")) THEN
 
-    CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
-    errorCount = errorCount + error
+    CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
+    
 
-    CALL BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
-    errorCount = errorCount + error
+  ELSEIF (selfCLI % run_command(group="blockmesh_2d")) THEN
 
-    CALL BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
-    errorCount = errorCount + error
+    CALL BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
+    
 
-    CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+  ELSEIF (selfCLI % run_command(group="blockmesh_3d")) THEN
 
-    CALL ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+    CALL BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
+    
 
-    CALL ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              vectorChar(1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              vectorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              tensorChar(1:2,1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              tensorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      vectorChar(1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      vectorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      tensorChar(1:2,1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      tensorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                  functionChar,derivativeChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                functionChar,vectorChar(1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                functionChar,vectorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                               vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar(1:2),functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar,tensorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-    CALL VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar,functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
-
-  ELSEIF (self_cli % run_command(group="blockmesh_1d")) THEN
-
-    CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
-    errorCount = errorCount + error
-
-  ELSEIF (self_cli % run_command(group="blockmesh_2d")) THEN
-
-    CALL BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
-    errorCount = errorCount + error
-
-  ELSEIF (self_cli % run_command(group="blockmesh_3d")) THEN
-
-    CALL BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,errorTolerance,error)
-    errorCount = errorCount + error
-
-  ELSEIF (self_cli % run_command(group="s1d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="s1d_interp")) THEN
 
     CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              functionChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s2d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="s2d_interp")) THEN
 
     CALL ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              functionChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s3d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="s3d_interp")) THEN
 
     CALL ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              functionChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v2d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="v2d_interp")) THEN
 
     CALL VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              vectorChar(1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              vectorChar(1:2),gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="t2d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="t2d_interp")) THEN
 
     CALL TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              tensorChar(1:2,1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              tensorChar(1:2,1:2),gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v3d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="v3d_interp")) THEN
 
     CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              vectorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              vectorChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="t3d_interp")) THEN
+  ELSEIF (selfCLI % run_command(group="t3d_interp")) THEN
 
     CALL TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              tensorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                              tensorChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s1d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="s1d_binterp")) THEN
 
     CALL ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      functionChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s2d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="s2d_binterp")) THEN
 
     CALL ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      functionChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s3d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="s3d_binterp")) THEN
 
     CALL ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      functionChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v2d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="v2d_binterp")) THEN
 
     CALL VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      vectorChar(1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      vectorChar(1:2),gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="t2d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="t2d_binterp")) THEN
 
     CALL TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      tensorChar(1:2,1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      tensorChar(1:2,1:2),gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v3d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="v3d_binterp")) THEN
 
     CALL VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      vectorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      vectorChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="t3d_binterp")) THEN
+  ELSEIF (selfCLI % run_command(group="t3d_binterp")) THEN
 
     CALL TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      tensorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                      tensorChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s1d_derivative")) THEN
+  ELSEIF (selfCLI % run_command(group="s1d_derivative")) THEN
 
     CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                  functionChar,derivativeChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                  functionChar,derivativeChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s2d_gradient")) THEN
+  ELSEIF (selfCLI % run_command(group="s2d_gradient")) THEN
 
     CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                functionChar,vectorChar(1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                functionChar,vectorChar(1:2),gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="s3d_gradient")) THEN
+  ELSEIF (selfCLI % run_command(group="s3d_gradient")) THEN
 
     CALL ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                functionChar,vectorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                functionChar,vectorChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v2d_gradient")) THEN
+  ELSEIF (selfCLI % run_command(group="v2d_gradient")) THEN
 
     CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar(1:2),tensorChar(1:2,1:2),errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                vectorChar(1:2),tensorChar(1:2,1:2),gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v2d_divergence")) THEN
+  ELSEIF (selfCLI % run_command(group="v2d_divergence")) THEN
 
     CALL VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar(1:2),functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                vectorChar(1:2),functionChar,gpuAccel)
+    
 
 
-  ELSEIF (self_cli % run_command(group="v3d_gradient")) THEN
+  ELSEIF (selfCLI % run_command(group="v3d_gradient")) THEN
 
-    CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,vectorChar,tensorChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+    CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,vectorChar,tensorChar,gpuAccel)
+    
 
-  ELSEIF (self_cli % run_command(group="v3d_divergence")) THEN
+  ELSEIF (selfCLI % run_command(group="v3d_divergence")) THEN
 
     CALL VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar,functionChar,errorTolerance,gpuAccel,error)
-    errorCount = errorCount + error
+                                vectorChar,functionChar,gpuAccel)
+    
 
   END IF
 
-  CALL self_cli % free()
-
-  IF( errorCount > 0 )THEN
-    STOP errorCount
-  ENDIF
+  CALL selfCLI % free()
 
 CONTAINS
 
@@ -343,6 +241,12 @@ CONTAINS
                     license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
                     authors="Joseph Schoonover (Fluid Numerics LLC)")
 
+    CALL cli % add(switch="--mesh", &
+                   switch_ab="-m", &
+                   help="Path to a mesh file for control mesh."//NEW_LINE("A"), &
+                   def="", &
+                   required=.FALSE.)
+    
     CALL cli % add(switch="--control-degree", &
                    switch_ab="-c", &
                    help="The polynomial degree of the control points."//NEW_LINE("A"), &
@@ -387,12 +291,6 @@ CONTAINS
                    help="Boolean flag for enabling or disabling GPU acceleration in tests."//NEW_LINE("A"), &
                    def="false", &
                    choices="true,false", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--tolerance", &
-                   switch_ab="-tol", &
-                   help="Tolerance to use for determining if a test passes."//NEW_LINE("A"), &
-                   def="1.0E-5", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--derivative-type", &
@@ -497,9 +395,6 @@ CONTAINS
                    "to target points"//NEW_LINE("A"), &
                    def="t33=1.0", &
                    required=.FALSE.)
-
-    CALL cli % add_group(group="ci-test", &
-                         description="Run all CI-Tests")
 
     CALL cli % add_group(group="blockmesh_1d", &
                          description="Block Mesh generation in 1D")
