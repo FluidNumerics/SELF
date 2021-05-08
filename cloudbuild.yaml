@@ -12,13 +12,20 @@ steps:
                  '-t',
                  'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}'
           ]
+        - id: Build Singularity Image
+          name: 'quay.io/singularity/singularity:v3.7.1'
+          args: ['build',
+                 'self_${_PLATFORM}.sif',
+                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
+          waitFor: ["Build Docker Image"]
 
-          #        - id: 'Build Singularity Image'
-          #          name: 'quay.io/singularity/singularity:v3.7.1'
-          #          args: ['build',
-          #                 'self_${_PLATFORM}.sif',
-          #                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
-          #          waitFor: ["Build Docker Image"]
+        - id: CI Test
+          name: 'quay.io/singularity/singularity:v3.7.1'
+          args:
+            - 'exec'
+            - 'self_${_PLATFORM}.sif'
+            - 'ci.sh'
+          #        
           #
           #        - id: 'Run tests'
           #          name: 'gcr.io/cloud-builders/gcloud'
@@ -57,7 +64,6 @@ artifacts:
   objects:
     location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
     paths: ['self_${_PLATFORM}.sif']
-
 
 timeout: 7200s
 
