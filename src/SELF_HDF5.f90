@@ -13,11 +13,13 @@ USE HDF5
   INTERFACE ReadAttribute_HDF5
     MODULE PROCEDURE :: ReadAttribute_HDF5_int32
     MODULE PROCEDURE :: ReadAttribute_HDF5_real
+    MODULE PROCEDURE :: ReadAttribute_HDF5_character
   END INTERFACE
 
   INTERFACE WriteAttribute_HDF5
     MODULE PROCEDURE :: WriteAttribute_HDF5_int32
     MODULE PROCEDURE :: WriteAttribute_HDF5_real
+    MODULE PROCEDURE :: WriteAttribute_HDF5_character
   END INTERFACE
 
   INTERFACE ReadArray_HDF5
@@ -72,6 +74,8 @@ USE HDF5
     MODULE PROCEDURE :: WriteArray_HDF5_int64_r7
   END INTERFACE
 
+  PUBLIC :: CreateGroup_HDF5
+
 CONTAINS
 
 SUBROUTINE Open_HDF5( fileName, accessFlag, fileId, mpiComm )
@@ -108,6 +112,20 @@ SUBROUTINE Close_HDF5( fileId )
     CALL h5fclose_f( fileId, error )
 
 END SUBROUTINE Close_HDF5
+
+SUBROUTINE CreateGroup_HDF5( fileId, groupName )
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(in) :: fileId
+  CHARACTER(*), INTENT(in) :: groupName
+  ! Local
+  INTEGER(HID_T) :: groupId
+  INTEGER :: error
+
+    ! Create groups 
+    CALL h5gcreate_f( fileId, TRIM(groupName), groupId, error )
+    CALL h5gclose_f( groupId, error )
+
+END SUBROUTINE CreateGroup_HDF5
 
 SUBROUTINE ReadAttribute_HDF5_int32( fileId, attributeName, attribute )
   IMPLICIT NONE
@@ -153,6 +171,28 @@ SUBROUTINE ReadAttribute_HDF5_real( fileId, attributeName, attribute )
 
 END SUBROUTINE ReadAttribute_HDF5_real
 
+SUBROUTINE ReadAttribute_HDF5_character( fileId, attributeName, attribute )
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(in) :: fileId
+  CHARACTER(*), INTENT(in) :: attributeName
+  CHARACTER(*), INTENT(out) :: attribute
+  ! Local
+  INTEGER(HID_T) :: attrId
+  INTEGER(HID_T) :: typeId
+  INTEGER(HSIZE_T) :: dims(1:1)
+  INTEGER :: error
+
+    dims(1) = 1
+    CALL h5aopen_f(fileId, TRIM(attributeName), attrId, error)
+    CALL h5aget_type_f(attrId, typeId, error)
+
+    CALL h5aread_f(attrId, typeId, attribute, dims, error) 
+
+    CALL h5tclose_f(typeId, error)
+    CALL h5aclose_f(attrId, error) 
+
+END SUBROUTINE ReadAttribute_HDF5_character
+
 SUBROUTINE WriteAttribute_HDF5_int32( fileId, attributeName, attribute )
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(in) :: fileId
@@ -191,11 +231,33 @@ SUBROUTINE WriteAttribute_HDF5_real( fileId, attributeName, attribute )
     CALL h5screate_f(H5S_SCALAR_F,aspaceId,error)
     CALL h5acreate_f(fileId, TRIM(attributeName),HDF5_IO_PREC, &
             aspaceId, attrId, error)
-    CALL h5awrite_f(attrId,H5T_STD_I32LE,attribute,dims,error)
+    CALL h5awrite_f(attrId,HDF5_IO_PREC,attribute,dims,error)
     CALL h5sclose_f(aspaceId, error)
     CALL h5aclose_f(attrId, error) 
 
 END SUBROUTINE WriteAttribute_HDF5_real
+
+SUBROUTINE WriteAttribute_HDF5_character( fileId, attributeName, attribute )
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(in) :: fileId
+  CHARACTER(*), INTENT(in) :: attributeName
+  CHARACTER(*), INTENT(in) :: attribute
+  ! Local
+  INTEGER(HID_T) :: aspaceId
+  INTEGER(HID_T) :: attrId
+  INTEGER(HID_T) :: typeId
+  INTEGER(HSIZE_T) :: dims(1:1)
+  INTEGER :: error
+
+    dims(1) = 1
+    CALL h5screate_f(H5S_SCALAR_F,aspaceId,error)
+    CALL h5acreate_f(fileId, TRIM(attributeName),H5T_STRING, &
+            aspaceId, attrId, error)
+    CALL h5awrite_f(attrId,H5T_STRING,TRIM(attribute),dims,error)
+    CALL h5sclose_f(aspaceId, error)
+    CALL h5aclose_f(attrId, error) 
+
+END SUBROUTINE WriteAttribute_HDF5_character
 
 SUBROUTINE WriteArray_HDF5_real_r1( fileId, arrayName, offset, hfArray, globalDims )
   IMPLICIT NONE

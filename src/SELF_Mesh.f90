@@ -158,6 +158,9 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
 
+    PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D
+    PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh2D
+
 !    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh2D
 
   END TYPE Mesh2D
@@ -191,11 +194,8 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
-!      PROCEDURE, PUBLIC :: Read_CGNSMesh
-!      PROCEDURE, PUBLIC :: Read_UCDMesh
-!      PROCEDURE, PUBLIC :: Read_SpecMesh
-!      PROCEDURE, PUBLIC :: Read_NektarMesh
-!
+    PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh3D
+
 !    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
 
   END TYPE Mesh3D
@@ -254,6 +254,7 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh1D
+  
   SUBROUTINE UpdateHost_Mesh1D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
@@ -333,6 +334,147 @@ CONTAINS
     CALL xGeo % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh1D
+
+    SUBROUTINE Read_HOPr_Mesh1D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+  ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
+    IMPLICIT NONE
+    CLASS(Mesh1D), INTENT(out) :: myMesh
+    CHARACTER(*), INTENT(in) :: meshFile
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+    ! Local
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER :: nGlobalElems
+    INTEGER :: offSetElem(0:nRanks)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: firstNode, nLocalNodes
+    INTEGER :: nGeo, nBCs
+    TYPE(hfInt32_r2) :: elemInfo
+    TYPE(hfReal_r1) :: nodeCoords
+    TYPE(hfReal_r1) :: globalNodeIDs
+    TYPE(hfInt32_r2) :: bcType
+
+    IF( PRESENT(mpiComm) )THEN
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
+    ELSE
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    ENDIF
+
+    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElems)
+    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
+    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+
+    CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    ! Read BCType
+    CALL bcType % Alloc(loBound=(/1,1/), &
+                        upBound=(/4,nBCs/))
+    offset(:) = 0
+    CALL ReadArray_HDF5(fileId, 'BCType', offset, bcType)
+
+    ! Read local subarray of ElemInfo
+    firstElem = offsetElem(myRank)+1
+
+    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+
+    ! Allocate Space for elemInfo!
+    CALL elemInfo % Alloc(loBound=(/1,1/), &
+                          upBound=(/6,nLocalElems/))
+
+    offset = (/0, firstElem-1/)
+    CALL ReadArray_HDF5(fileId, 'ElemInfo', offset, elemInfo  )
+
+    ! Read local subarray of NodeCoords and GlobalNodeIDs
+    firstNode= elemInfo % hostData(5,1)+1
+
+    nLocalNodes = elemInfo % hostData(6,nLocalElems)-elemInfo % hostData(5,1)
+
+    ! Allocate Space for nodeCoords and globalNodeIds !
+
+    CALL nodeCoords % Alloc(loBound=1, &
+                            upBound=nLocalNodes)
+
+    CALL globalNodeIDs % Alloc(loBound=1, &
+                               upBound=nLocalNodes)
+
+    gOffset = (/firstNode-1/)
+    CALL ReadArray_HDF5(fileId, 'NodeCoords', gOffset, nodeCoords  )
+    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', gOffset, globalNodeIds  )
+
+    CALL Close_HDF5(fileID)
+
+    CALL myMesh % Init(nGeo,nLocalElems,nLocalNodes,nBCs)
+
+    ! Copy data from local arrays into myMesh
+    myMesh % elemInfo = elemInfo
+    myMesh % nodeCoords = nodeCoords
+    myMesh % globalNodeIds = globalNodeIds
+
+    CALL myMesh % UpdateDevice()
+
+    CALL elemInfo % Free()
+    CALL nodeCoords % Free()
+    CALL globalNodeIds % Free()
+
+  END SUBROUTINE Read_HOPr_Mesh1D
+
+  SUBROUTINE Write_HOPr_Mesh1D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  ! Writes mesh output in HOPR format
+    IMPLICIT NONE
+    CLASS(Mesh1D), INTENT(inout) :: myMesh
+    CHARACTER(*), INTENT(in) :: meshFile
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+    ! Local
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER :: nGlobalElems
+    INTEGER :: offSetElem(0:nRanks)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: firstNode, nLocalNodes
+    INTEGER :: firstSide, nLocalSides
+    INTEGER :: nGeo, nBCs
+
+    IF( PRESENT(mpiComm) )THEN
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
+    ELSE
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    ENDIF
+
+    CALL WriteAttribute_HDF5(fileId, 'nElems', nGlobalElems)
+    CALL WriteAttribute_HDF5(fileId, 'Ngeo', nGeo)
+    CALL WriteAttribute_HDF5(fileId, 'nBCs', nBCs)
+
+    CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    offset(:) = 0
+    CALL WriteArray_HDF5(fileId, 'BCType', offset, myMesh % bcType)
+
+    ! Read local subarray of ElemInfo
+    firstElem = offsetElem(myRank)+1
+
+    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+
+    offset = (/0, firstElem-1/)
+    CALL WriteArray_HDF5(fileId, 'ElemInfo', offset, myMesh % elemInfo  )
+
+    ! Read local subarray of NodeCoords and GlobalNodeIDs
+    firstNode= myMesh % elemInfo % hostData(5,1)+1
+
+    nLocalNodes = myMesh % elemInfo % hostData(6,nLocalElems)-myMesh % elemInfo % hostData(5,1)
+
+    offset = (/0, firstNode-1/)
+    CALL WriteArray_HDF5(fileId, 'NodeCoords', offset, myMesh % nodeCoords  )
+    gOffset = (/firstNode-1/)
+    CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', gOffset, myMesh % globalNodeIds  )
+
+    CALL Close_HDF5(fileID)
+
+  END SUBROUTINE Write_HOPr_Mesh1D
 
   SUBROUTINE Init_Mesh2D(myMesh,nGeo,nElem,nSides,nNodes,nBCs)
     IMPLICIT NONE
@@ -588,6 +730,172 @@ CONTAINS
     CALL xGeo % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh2D
+
+  SUBROUTINE Read_HOPr_Mesh2D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+  ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
+    IMPLICIT NONE
+    CLASS(Mesh2D), INTENT(out) :: myMesh
+    CHARACTER(*), INTENT(in) :: meshFile
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+    ! Local
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER :: nGlobalElems
+    INTEGER :: offSetElem(0:nRanks)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: firstNode, nLocalNodes
+    INTEGER :: firstSide, nLocalSides
+    INTEGER :: nGeo, nBCs
+    TYPE(hfInt32_r2) :: elemInfo
+    TYPE(hfInt32_r2) :: sideInfo
+    TYPE(hfReal_r2) :: nodeCoords
+    TYPE(hfReal_r1) :: globalNodeIDs
+    TYPE(hfInt32_r2) :: bcType
+
+    IF( PRESENT(mpiComm) )THEN
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
+    ELSE
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    ENDIF
+
+    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElems)
+    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
+    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+
+    CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    ! Read BCType
+    CALL bcType % Alloc(loBound=(/1,1/), &
+                        upBound=(/4,nBCs/))
+    offset(:) = 0
+    CALL ReadArray_HDF5(fileId, 'BCType', offset, bcType)
+
+    ! Read local subarray of ElemInfo
+    firstElem = offsetElem(myRank)+1
+
+    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+
+    ! Allocate Space for elemInfo!
+    CALL elemInfo % Alloc(loBound=(/1,1/), &
+                          upBound=(/6,nLocalElems/))
+
+    offset = (/0, firstElem-1/)
+    CALL ReadArray_HDF5(fileId, 'ElemInfo', offset, elemInfo  )
+
+    ! Read local subarray of NodeCoords and GlobalNodeIDs
+    firstNode= elemInfo % hostData(5,1)+1
+
+    nLocalNodes = elemInfo % hostData(6,nLocalElems)-elemInfo % hostData(5,1)
+
+    ! Allocate Space for nodeCoords and globalNodeIds !
+
+    CALL nodeCoords % Alloc(loBound=(/1,1/), &
+                            upBound=(/2,nLocalNodes/))
+
+    CALL globalNodeIDs % Alloc(loBound=1, &
+                               upBound=nLocalNodes)
+
+    offset = (/0, firstNode-1/)
+    CALL ReadArray_HDF5(fileId, 'NodeCoords', offset, nodeCoords  )
+    gOffset = (/firstNode-1/)
+    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', gOffset, globalNodeIds  )
+
+    ! Read local subarray of SideInfo
+    firstSide= elemInfo % hostData(3,1)+1
+
+    nLocalSides = elemInfo % hostData(4,nLocalElems)-elemInfo % hostData(3,1)
+
+    ! Allocate space for sideInfo
+    CALL sideInfo % Alloc(loBound=(/1,1/), &
+                          upBound=(/5,nLocalSides/))
+
+    offset = (/0, firstSide-1/)
+    CALL ReadArray_HDF5(fileId, 'SideInfo', offset, sideInfo  )
+
+    CALL Close_HDF5(fileID)
+
+    CALL myMesh % Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
+
+    ! Copy data from local arrays into myMesh
+    myMesh % elemInfo = elemInfo
+    myMesh % nodeCoords = nodeCoords
+    myMesh % globalNodeIds = globalNodeIds
+    myMesh % sideInfo = sideInfo
+
+    CALL myMesh % UpdateDevice()
+
+    CALL elemInfo % Free()
+    CALL nodeCoords % Free()
+    CALL globalNodeIds % Free()
+    CALL sideInfo % Free()
+
+  END SUBROUTINE Read_HOPr_Mesh2D
+
+  SUBROUTINE Write_HOPr_Mesh2D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  ! Writes mesh output in HOPR format
+    IMPLICIT NONE
+    CLASS(Mesh2D), INTENT(inout) :: myMesh
+    CHARACTER(*), INTENT(in) :: meshFile
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+    ! Local
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER :: nGlobalElems
+    INTEGER :: offSetElem(0:nRanks)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: firstNode, nLocalNodes
+    INTEGER :: firstSide, nLocalSides
+    INTEGER :: nGeo, nBCs
+
+    IF( PRESENT(mpiComm) )THEN
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
+    ELSE
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    ENDIF
+
+    CALL WriteAttribute_HDF5(fileId, 'nElems', nGlobalElems)
+    CALL WriteAttribute_HDF5(fileId, 'Ngeo', nGeo)
+    CALL WriteAttribute_HDF5(fileId, 'nBCs', nBCs)
+
+    CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    offset(:) = 0
+    CALL WriteArray_HDF5(fileId, 'BCType', offset, myMesh % bcType)
+
+    ! Read local subarray of ElemInfo
+    firstElem = offsetElem(myRank)+1
+
+    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+
+    offset = (/0, firstElem-1/)
+    CALL WriteArray_HDF5(fileId, 'ElemInfo', offset, myMesh % elemInfo  )
+
+    ! Read local subarray of NodeCoords and GlobalNodeIDs
+    firstNode = myMesh % elemInfo % hostData(5,1)+1
+
+    nLocalNodes = myMesh % elemInfo % hostData(6,nLocalElems)-myMesh % elemInfo % hostData(5,1)
+
+    offset = (/0, firstNode-1/)
+    CALL WriteArray_HDF5(fileId, 'NodeCoords', offset, myMesh % nodeCoords  )
+    gOffset = (/firstNode-1/)
+    CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', gOffset, myMesh % globalNodeIds  )
+
+    ! Read local subarray of SideInfo
+    firstSide= myMesh % elemInfo % hostData(3,1)+1
+
+    nLocalSides = myMesh % elemInfo % hostData(4,nLocalElems)-myMesh % elemInfo % hostData(3,1)
+
+    offset = (/0, firstSide-1/)
+    CALL WriteArray_HDF5(fileId, 'SideInfo', offset, myMesh % sideInfo  )
+
+    CALL Close_HDF5(fileID)
+
+  END SUBROUTINE Write_HOPr_Mesh2D
 
   SUBROUTINE Init_Mesh3D(myMesh,nGeo,nElem,nSides,nNodes,nBCs)
     IMPLICIT NONE
@@ -919,6 +1227,69 @@ CONTAINS
     CALL sideInfo % Free()
 
   END SUBROUTINE Read_HOPr_Mesh3D
+
+  SUBROUTINE Write_HOPr_Mesh3D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  ! Writes mesh output in HOPR format
+    IMPLICIT NONE
+    CLASS(Mesh3D), INTENT(inout) :: myMesh
+    CHARACTER(*), INTENT(in) :: meshFile
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+    ! Local
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER :: nGlobalElems
+    INTEGER :: offSetElem(0:nRanks)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: firstNode, nLocalNodes
+    INTEGER :: firstSide, nLocalSides
+    INTEGER :: nGeo, nBCs
+
+    IF( PRESENT(mpiComm) )THEN
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
+    ELSE
+      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    ENDIF
+
+    CALL WriteAttribute_HDF5(fileId, 'nElems', nGlobalElems)
+    CALL WriteAttribute_HDF5(fileId, 'Ngeo', nGeo)
+    CALL WriteAttribute_HDF5(fileId, 'nBCs', nBCs)
+
+    CALL DomainDecomp(nGlobalElems,nRanks,offSetElem)
+
+    offset(:) = 0
+    CALL WriteArray_HDF5(fileId, 'BCType', offset, myMesh % bcType)
+
+    ! Read local subarray of ElemInfo
+    firstElem = offsetElem(myRank)+1
+
+    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+
+    offset = (/0, firstElem-1/)
+    CALL WriteArray_HDF5(fileId, 'ElemInfo', offset, myMesh % elemInfo  )
+
+    ! Read local subarray of NodeCoords and GlobalNodeIDs
+    firstNode = myMesh % elemInfo % hostData(5,1)+1
+
+    nLocalNodes = myMesh % elemInfo % hostData(6,nLocalElems)-myMesh % elemInfo % hostData(5,1)
+
+    offset = (/0, firstNode-1/)
+    CALL WriteArray_HDF5(fileId, 'NodeCoords', offset, myMesh % nodeCoords  )
+    gOffset = (/firstNode-1/)
+    CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', gOffset, myMesh % globalNodeIds  )
+
+    ! Read local subarray of SideInfo
+    firstSide = myMesh % elemInfo % hostData(3,1)+1
+
+    nLocalSides = myMesh % elemInfo % hostData(4,nLocalElems)-myMesh % elemInfo % hostData(3,1)
+
+    offset = (/0, firstSide-1/)
+    CALL WriteArray_HDF5(fileId, 'SideInfo', offset, myMesh % sideInfo  )
+
+    CALL Close_HDF5(fileID)
+
+  END SUBROUTINE Write_HOPr_Mesh3D
 
   ! Support Routines
 
