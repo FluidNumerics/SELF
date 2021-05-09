@@ -1,0 +1,39 @@
+FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86-nvcc_hdf5 AS devel
+ARG BUILD_TYPE=release
+
+COPY . /tmp
+
+RUN mkdir -p /tmp/extern
+
+# FEQParse
+RUN . /etc/profile.d/z10_spack_environment.sh && \
+    git clone https://github.com/FluidNumerics/feq-parse.git /tmp/extern/feq-parse && \
+    mkdir -p /tmp/extern/feq-parse/build && \
+    cd /tmp/extern/feq-parse/build && \
+    cmake -DCMAKE_INSTALL_PREFIX="/opt/feqparse" /tmp/extern/feq-parse && \
+    make && make install
+
+# FLAP
+RUN . /etc/profile.d/z10_spack_environment.sh && \
+    git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/extern/FLAP && \
+    mkdir -p /tmp/extern/FLAP/build && \
+    cd /tmp/extern/FLAP/build && \
+    FFLAGS=-cpp cmake -DCMAKE_INSTALL_PREFIX="/opt/FLAP" /tmp/extern/FLAP && \
+    make && make install
+
+RUN . /etc/profile.d/z10_spack_environment.sh && \
+    cd /tmp && \
+    BUILD=${BUILD_TYPE} \
+    SELF_PREFIX=/opt/self \
+    FC=hipfort \
+    HIPFORT_GPU=sm_37,sm_53,sm_62,sm_72 \
+    PREC=double \
+    make
+
+FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86-nvcc_hdf5
+COPY --from=devel /opt /opt
+LABEL maintainer="joe@fluidnumerics.com"
+
+ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
+    PATH=/opt/self/bin:$PATH \
+    INSTALL_ROOT=/opt/self
