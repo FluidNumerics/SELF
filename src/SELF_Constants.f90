@@ -78,5 +78,6 @@ MODULE SELF_Constants
 ! Misc. INTEGER and CHARACTER flag definitions
   CHARACTER(1),PARAMETER :: nada = ' '
   CHARACTER(6),PARAMETER :: MsgFmt = '(2x,A)'
+  INTEGER,PARAMETER :: self_FileNameLength = 500
 
 END MODULE SELF_Constants

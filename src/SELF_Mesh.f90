@@ -106,6 +106,20 @@ MODULE SELF_Mesh
   INTEGER,PARAMETER :: selfSide3D_West = 5
   INTEGER,PARAMETER :: selfSide3D_Top = 6
 
+  TYPE MeshSpec
+    CHARACTER(self_FileNameLength) :: hoprFile
+
+    LOGICAL :: blockMesh
+    INTEGER :: blockMesh_nGeo
+    INTEGER :: blockMesh_nElemX
+    INTEGER :: blockMesh_nElemY
+    INTEGER :: blockMesh_nElemZ
+    REAL(prec) :: blockMesh_x0, blockMesh_x1
+    REAL(prec) :: blockMesh_y0, blockMesh_y1
+    REAL(prec) :: blockMesh_z0, blockMesh_z1
+
+  END TYPE MeshSpec
+
   TYPE,PUBLIC :: Mesh1D
     INTEGER :: nGeo
     INTEGER :: nElem
@@ -193,6 +207,7 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
+    PROCEDURE,PUBLIC :: Load => Load_Mesh3D
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh3D
 
@@ -1125,6 +1140,41 @@ CONTAINS
     CALL xGeo % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh3D
+
+  SUBROUTINE Load_Mesh3D(myMesh,myMeshSpec,nRanks,myRank,mpiComm)
+#undef __FUNC__
+#define __FUNC__ "Load_Mesh3D"
+    IMPLICIT NONE
+    CLASS(Mesh3D), INTENT(out) :: myMesh
+    TYPE(MeshSpec), INTENT(in) :: myMeshSpec
+    INTEGER, INTENT(in) :: nRanks
+    INTEGER, INTENT(in) :: myRank
+    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
+
+      IF(myMeshSpec % blockMesh)THEN
+
+        IF(nRanks > 1)THEN ! Error out
+          ERROR("Block Mesh only supported in serial")
+          STOP ! TO DO : Safe exit for serial and parallel
+        ELSE
+          CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo,&
+                (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY,myMeshSpec % blockMesh_nElemZ/),&
+                (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1,&
+                  myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1,&
+                  myMeshSpec % blockMesh_z0,myMeshSpec % blockMesh_z1/))
+        ENDIF
+
+      ELSE
+
+        IF(PRESENT(mpiComm))THEN
+          CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,nRanks,myRank,mpiComm)
+        ELSE
+          CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,nRanks,myRank)
+        ENDIF
+
+      ENDIF
+    
+  END SUBROUTINE Load_Mesh3D
 
   SUBROUTINE Read_HOPr_Mesh3D( myMesh, meshFile, nRanks, myRank, mpiComm )
   ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6

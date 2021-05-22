@@ -1,7 +1,6 @@
 
 steps:
         # Add a step for formatting requirements
-        #
 
         - id: Build Docker Image
           name: 'gcr.io/cloud-builders/docker'
@@ -25,37 +24,8 @@ steps:
             - 'exec'
             - 'self_${_PLATFORM}.sif'
             - 'ci.sh'
-          #        
-          #
-          #        - id: 'Run tests'
-          #          name: 'gcr.io/cloud-builders/gcloud'
-          #          entrypoint: '/bin/sh'
-          #          args: 
-          #            - '-c'
-          #            - |
-          #                    ssh-keygen -b 2048 -t rsa -f /tmp/sshkey -q -N ""
-          #                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-          #                        --ssh-key-file=/tmp/sshkey \
-          #                        --command="mkdir ${BUILD_ID}" || exit 1
-          #
-          #                    gcloud compute scp self_${_PLATFORM}.sif ${_CONTROLLER}:${BUILD_ID}/ \
-          #                         --zone=${_ZONE} \
-          #                        --ssh-key-file=/tmp/sshkey || exit 1
-          #
-          #                    gcloud compute scp test/test-wrapper.sh ${_CONTROLLER}:${BUILD_ID}/ \
-          #                         --zone=${_ZONE} \
-          #                        --ssh-key-file=/tmp/sshkey || exit 1
-          #
-          #                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-          #                        --ssh-key-file=/tmp/sshkey \
-          #                        --command="cd ${BUILD_ID} && srun --account=ci-runners ${_SRUN_FLAGS} ./test-wrapper.sh --artifact singularity --image self_${_PLATFORM}.sif --gpu no" || exit 1
-          #          
-          #                    gcloud compute ssh ${_CONTROLLER} --zone=${_ZONE} \
-          #                        --ssh-key-file=/tmp/sshkey \
-          #                        --command="rm -rf ${BUILD_ID}" || exit 1
-          #                    for i in $(gcloud compute os-login ssh-keys list); do echo $i; gcloud compute os-login ssh-keys remove --key $i; done
-          #
-          #          waitFor: ["Build Singularity Image"]
+
+  
 
 
 images: ['gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
