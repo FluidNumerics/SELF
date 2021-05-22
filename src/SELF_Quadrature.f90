@@ -2,7 +2,7 @@
 !
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self-fluids@fluidnumerics.com
+! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 !

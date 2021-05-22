@@ -1,3 +1,9 @@
+!
+! Copyright 2020 Fluid Numerics LLC
+! Author : Joseph Schoonover (joe@fluidnumerics.com)
+! Support : self@higherordermethods.org
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
 PROGRAM SELF
 
   USE SELF_Constants

@@ -1,8 +1,8 @@
 ! SELF_Metadata.F90
 !
-! Copyright 2021 Fluid Numerics LLC
+! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : support@fluidnumerics.com
+! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
