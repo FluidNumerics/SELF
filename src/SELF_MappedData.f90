@@ -34,6 +34,7 @@ MODULE SELF_MappedData
 
   CONTAINS
 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar2D 
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
@@ -45,6 +46,7 @@ MODULE SELF_MappedData
 
   CONTAINS
 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar3D 
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar3D
@@ -55,6 +57,8 @@ MODULE SELF_MappedData
   TYPE,EXTENDS(Vector2D),PUBLIC :: MappedVector2D
 
   CONTAINS
+
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector2D
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
@@ -74,6 +78,8 @@ MODULE SELF_MappedData
 
   CONTAINS
 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector3D 
+
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
 !    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedVector3D
@@ -90,7 +96,9 @@ MODULE SELF_MappedData
   TYPE,EXTENDS(Tensor2D),PUBLIC :: MappedTensor2D
 
   CONTAINS
-!
+
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor2D 
+
 !    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor2D
 !    PROCEDURE,PRIVATE :: Divergence_MappedTensor2D
     PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor2D
@@ -100,7 +108,9 @@ MODULE SELF_MappedData
   TYPE,EXTENDS(Tensor3D),PUBLIC :: MappedTensor3D
 
   CONTAINS
-!
+
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor3D 
+
 !    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor3D
 !    PROCEDURE,PRIVATE :: Divergence_MappedTensor3D
     PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor3D
@@ -433,6 +443,65 @@ CONTAINS
 
   END SUBROUTINE JacobianWeight_MappedScalar1D
 
+  SUBROUTINE SideExchange_MappedScalar2D(scalar,mesh,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: i1, i2, ivar
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+
+    ELSE
+
+      DO e1 = 1, mesh % nElem
+        s1 = 0
+        DO sid = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1) ! Loop over local sides 
+          s1 = s1 + 1 ! Increment local side ID 
+          globalSideId = mesh % sideInfo % hostData(2,sid)
+          e2 = mesh % sideInfo % hostData(3,sid)
+          s2 = mesh % sideInfo % hostData(4,sid)/10
+          flip = mesh % sideInfo % hostData(4,sid)-s2*10
+          bcid = mesh % sideInfo % hostData(5,sid)
+
+          IF(bcid /= 0)THEN   
+
+            IF(flip == 1)THEN 
+          
+              DO ivar = 1, scalar % nvar
+                DO i1 = 0, scalar % N
+                  scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
+                      scalar % boundary % hostData(i1,ivar,s2,e2)
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 2)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO i1 = 0, scalar % N
+                  i2 = scalar % N - i1
+                  scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
+                     scalar % boundary % hostData(i2,ivar,s2,e2)
+                ENDDO
+              ENDDO
+
+            ENDIF
+
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+    END IF
+    
+  END SUBROUTINE SideExchange_MappedScalar2D
+
   SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator - (Conservative Form)
     !
@@ -616,6 +685,100 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE JacobianWeight_MappedScalar2D
+
+  ! SideExchange_MappedScalar3D is used to populate scalar % extBoundary
+  ! by finding neighboring elements that share a side and copying the neighboring
+  ! elements solution % boundary data.
+
+  SUBROUTINE SideExchange_MappedScalar3D(scalar,mesh,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: i1, i2, j1, j2, ivar
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+
+    ELSE
+
+      DO e1 = 1, mesh % nElem
+        s1 = 0
+        DO sid = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1) ! Loop over local sides 
+          s1 = s1 + 1 ! Increment local side ID 
+          globalSideId = mesh % sideInfo % hostData(2,sid)
+          e2 = mesh % sideInfo % hostData(3,sid)
+          s2 = mesh % sideInfo % hostData(4,sid)/10
+          flip = mesh % sideInfo % hostData(4,sid)-s2*10
+          bcid = mesh % sideInfo % hostData(5,sid)
+
+          IF(bcid /= 0)THEN   
+
+            IF(flip == 1)THEN 
+          
+              DO ivar = 1, scalar % nvar
+                DO j1 = 0, scalar % N
+                  DO i1 = 0, scalar % N
+                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                      scalar % boundary % hostData(i1,j1,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 2)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j1 = 0, scalar % N
+                  DO i1 = 0, scalar % N
+                    i2 = scalar % N - j1
+                    j2 = i1
+                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                      scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 3)THEN
+                    
+              DO ivar = 1, scalar % nvar
+                DO j1 = 0, scalar % N
+                  DO i1 = 0, scalar % N
+                    i2 = scalar % N - i1
+                    j2 = scalar % N - j1 
+                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                      scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+          
+            ELSEIF(flip == 4)THEN
+                    
+              DO ivar = 1, scalar % nvar
+                DO j1 = 0, scalar % N
+                  DO i1 = 0, scalar % N
+                    i2 = j1
+                    j2 = scalar % N - i1
+                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                      scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+          
+            ENDIF
+
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+    END IF
+    
+  END SUBROUTINE SideExchange_MappedScalar3D
 
   SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator
@@ -860,6 +1023,69 @@ CONTAINS
   END SUBROUTINE JacobianWeight_MappedScalar3D
 
   ! ---------------------- Vectors ---------------------- !
+  ! SideExchange_MappedVectorvector2D is used to populate vector % extBoundary
+  ! by finding neighboring elements that share a side and copying the neighboring
+  ! elements solution % boundary data.
+
+  SUBROUTINE SideExchange_MappedVector2D(vector,mesh,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector2D),INTENT(inout) :: vector
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: i1, i2, ivar
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+
+    ELSE
+
+      DO e1 = 1, mesh % nElem
+        s1 = 0
+        DO sid = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1) ! Loop over local sides 
+          s1 = s1 + 1 ! Increment local side ID 
+          globalSideId = mesh % sideInfo % hostData(2,sid)
+          e2 = mesh % sideInfo % hostData(3,sid)
+          s2 = mesh % sideInfo % hostData(4,sid)/10
+          flip = mesh % sideInfo % hostData(4,sid)-s2*10
+          bcid = mesh % sideInfo % hostData(5,sid)
+
+          IF(bcid /= 0)THEN   
+
+            IF(flip == 1)THEN 
+          
+              DO ivar = 1, vector % nvar
+                DO i1 = 0, vector % N
+                  vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:2,i1,ivar,s2,e2)
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 2)THEN
+
+              DO ivar = 1, vector % nvar
+                DO i1 = 0, vector % N
+                  i2 = vector % N - i1
+                  vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:2,i2,ivar,s2,e2)
+                ENDDO
+              ENDDO
+
+            ENDIF
+
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+    END IF
+    
+  END SUBROUTINE SideExchange_MappedVector2D
+
   SUBROUTINE Divergence_MappedVector2D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     ! Strong Form Operator
     !
@@ -1223,6 +1449,100 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE JacobianWeight_MappedVector2D
+
+! SideExchange_MappedVector3D is used to populate vector % extBoundary
+  ! by finding neighboring elements that share a side and copying the neighboring
+  ! elements solution % boundary data.
+
+  SUBROUTINE SideExchange_MappedVector3D(vector,mesh,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(inout) :: vector
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: i1, i2, j1, j2, ivar
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+
+    ELSE
+
+      DO e1 = 1, mesh % nElem
+        s1 = 0
+        DO sid = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1) ! Loop over local sides 
+          s1 = s1 + 1 ! Increment local side ID 
+          globalSideId = mesh % sideInfo % hostData(2,sid)
+          e2 = mesh % sideInfo % hostData(3,sid)
+          s2 = mesh % sideInfo % hostData(4,sid)/10
+          flip = mesh % sideInfo % hostData(4,sid)-s2*10
+          bcid = mesh % sideInfo % hostData(5,sid)
+
+          IF(bcid /= 0)THEN   
+
+            IF(flip == 1)THEN 
+          
+              DO ivar = 1, vector % nvar
+                DO j1 = 0, vector % N
+                  DO i1 = 0, vector % N
+                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:3,i1,j1,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 2)THEN
+
+              DO ivar = 1, vector % nvar
+                DO j1 = 0, vector % N
+                  DO i1 = 0, vector % N
+                    i2 = vector % N - j1
+                    j2 = i1
+                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 3)THEN
+                    
+              DO ivar = 1, vector % nvar
+                DO j1 = 0, vector % N
+                  DO i1 = 0, vector % N
+                    i2 = vector % N - i1
+                    j2 = vector % N - j1 
+                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+          
+            ELSEIF(flip == 4)THEN
+                    
+              DO ivar = 1, vector % nvar
+                DO j1 = 0, vector % N
+                  DO i1 = 0, vector % N
+                    i2 = j1
+                    j2 = vector % N - i1
+                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                      vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+          
+            ENDIF
+
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+    END IF
+    
+  END SUBROUTINE SideExchange_MappedVector3D
 
   SUBROUTINE Divergence_MappedVector3D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     !
@@ -1626,6 +1946,68 @@ CONTAINS
   END SUBROUTINE JacobianWeight_MappedVector3D
 
   ! ---------------------- Tensors ---------------------- !
+  ! SideExchange_MappedTensor2D is used to populate tensor % extBoundary
+  ! by finding neighboring elements that share a side and copying the neighboring
+  ! elements solution % boundary data.
+
+  SUBROUTINE SideExchange_MappedTensor2D(tensor,mesh,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedTensor2D),INTENT(inout) :: tensor
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: i1, i2, ivar
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+
+    ELSE
+
+      DO e1 = 1, mesh % nElem
+        s1 = 0
+        DO sid = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1) ! Loop over local sides 
+          s1 = s1 + 1 ! Increment local side ID 
+          globalSideId = mesh % sideInfo % hostData(2,sid)
+          e2 = mesh % sideInfo % hostData(3,sid)
+          s2 = mesh % sideInfo % hostData(4,sid)/10
+          flip = mesh % sideInfo % hostData(4,sid)-s2*10
+          bcid = mesh % sideInfo % hostData(5,sid)
+
+          IF(bcid /= 0)THEN   
+
+            IF(flip == 1)THEN 
+          
+              DO ivar = 1, tensor % nvar
+                DO i1 = 0, tensor % N
+                  tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
+                      tensor % boundary % hostData(1:2,1:2,i1,ivar,s2,e2)
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 2)THEN
+
+              DO ivar = 1, tensor % nvar
+                DO i1 = 0, tensor % N
+                  i2 = tensor % N - i1
+                  tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
+                      tensor % boundary % hostData(1:2,1:2,i2,ivar,s2,e2)
+                ENDDO
+              ENDDO
+
+            ENDIF
+
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+    END IF
+    
+  END SUBROUTINE SideExchange_MappedTensor2D
 
   SUBROUTINE JacobianWeight_MappedTensor2D(tensor,geometry,gpuAccel)
 #undef __FUNC__
@@ -1674,6 +2056,100 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE JacobianWeight_MappedTensor2D
+
+  ! SideExchange_MappedVector3D is used to populate vector % extBoundary
+  ! by finding neighboring elements that share a side and copying the neighboring
+  ! elements solution % boundary data.
+
+  SUBROUTINE SideExchange_MappedTensor3D(tensor,mesh,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedTensor3D),INTENT(inout) :: tensor
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: i1, i2, j1, j2, ivar
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+
+    ELSE
+
+      DO e1 = 1, mesh % nElem
+        s1 = 0
+        DO sid = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1) ! Loop over local sides 
+          s1 = s1 + 1 ! Increment local side ID 
+          globalSideId = mesh % sideInfo % hostData(2,sid)
+          e2 = mesh % sideInfo % hostData(3,sid)
+          s2 = mesh % sideInfo % hostData(4,sid)/10
+          flip = mesh % sideInfo % hostData(4,sid)-s2*10
+          bcid = mesh % sideInfo % hostData(5,sid)
+
+          IF(bcid /= 0)THEN   
+
+            IF(flip == 1)THEN 
+          
+              DO ivar = 1, tensor % nvar
+                DO j1 = 0, tensor % N
+                  DO i1 = 0, tensor % N
+                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                      tensor % boundary % hostData(1:3,1:3,i1,j1,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 2)THEN
+
+              DO ivar = 1, tensor % nvar
+                DO j1 = 0, tensor % N
+                  DO i1 = 0, tensor % N
+                    i2 = tensor % N - j1
+                    j2 = i1
+                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                      tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 3)THEN
+                    
+              DO ivar = 1, tensor % nvar
+                DO j1 = 0, tensor % N
+                  DO i1 = 0, tensor % N
+                    i2 = tensor % N - i1
+                    j2 = tensor % N - j1 
+                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                      tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+          
+            ELSEIF(flip == 4)THEN
+                    
+              DO ivar = 1, tensor % nvar
+                DO j1 = 0, tensor % N
+                  DO i1 = 0, tensor % N
+                    i2 = j1
+                    j2 = tensor % N - i1
+                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                      tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                  ENDDO
+                ENDDO
+              ENDDO
+          
+            ENDIF
+
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+    END IF
+    
+  END SUBROUTINE SideExchange_MappedTensor3D
 
   SUBROUTINE JacobianWeight_MappedTensor3D(tensor,geometry,gpuAccel)
 #undef __FUNC__

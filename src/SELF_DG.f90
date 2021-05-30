@@ -61,7 +61,7 @@ USE SELF_MappedData
     !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_DG3D
     !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_DG3D
 
-    !  PROCEDURE, PUBLIC :: CalculateGradient => CalculateGradient_DG3D 
+      PROCEDURE, PUBLIC :: CalculateGradient => CalculateGradient_DG3D 
     !  PROCEDURE, PUBLIC :: CalculateTendency => CalculateTendency_DG3D
       
     !  PROCEDURE, PUBLIC :: ForwardStepEuler => ForwardStepEuler_DG3D
@@ -73,6 +73,8 @@ USE SELF_MappedData
                                                 ! tecplot file, ...
 
   END TYPE DG3D
+
+  INTEGER, PARAMETER :: SELF_DG_BASSIREBAY = 100
 
 CONTAINS
 
@@ -163,6 +165,41 @@ CONTAINS
       CALL this % workTensor % UpdateDevice()
       CALL this % compFlux % UpdateDevice()
       
-  END SUBROUTINE UpdateDevice_DG3D  
+  END SUBROUTINE UpdateDevice_DG3D 
 
-END MODULE SELF_DG
+  SUBROUTINE CalculateSolutionGradient_DG3D(this,gpuAccel)
+    IMPLICIT NONE
+    CLASS(DG3D), INTENT(inout) :: this
+    LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
+
+    CALL this % solution % SideExchange(this % mesh,gpuAccel)
+
+    CALL this % BassiRebayFaceCalc_DG3D(gpuAccel)
+
+    CALL this % Gradient(this % workTensor, &
+                         this % geometry, &
+                         this % solutionGradient, &
+                         selfWeakDGForm,gpuAccel)
+
+  END SUBROUTINE CalculateSolutionGradient_DG3D
+
+  
+  SUBROUTINE BassiRebayFaceCalc_DG3D(this,gpuAccel)
+    IMPLICIT NONE
+    CLASS(DG3D), INTENT(inout) :: this
+
+      
+  END SUBROUTINE BassiRebayFaceCalc_DG3D
+
+    SUBROUTINE BassiRebayFaceCalc_DG3D_cpu
+    IMPLICIT NONE
+    CLASS(DG3D), INTENT(inout) :: this
+    ! Local
+    INTEGER :: globalSide
+    INTEGER :: e1, e2
+    INTEGER :: s1, s2 
+    INTEGER :: i1, j1, i2, j2
+      
+  END SUBROUTINE BassiRebayFaceCalc_DG3D_cpu
+
+END MODULE SELF_DG 
