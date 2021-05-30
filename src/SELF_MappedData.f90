@@ -35,6 +35,8 @@ MODULE SELF_MappedData
   CONTAINS
 
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar2D 
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar2D 
+
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
@@ -46,7 +48,8 @@ MODULE SELF_MappedData
 
   CONTAINS
 
-    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar3D 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar3D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar3D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar3D
@@ -59,6 +62,7 @@ MODULE SELF_MappedData
   CONTAINS
 
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector2D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedVector2D
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector2D
     GENERIC,PUBLIC :: Gradient => Gradient_MappedVector2D
@@ -78,7 +82,8 @@ MODULE SELF_MappedData
 
   CONTAINS
 
-    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector3D 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector3D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedVector3D 
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
 !    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
@@ -97,7 +102,8 @@ MODULE SELF_MappedData
 
   CONTAINS
 
-    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor2D 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor2D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedTensor2D
 
 !    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor2D
 !    PROCEDURE,PRIVATE :: Divergence_MappedTensor2D
@@ -110,6 +116,8 @@ MODULE SELF_MappedData
   CONTAINS
 
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor3D 
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedTensor3D
+
 
 !    GENERIC,PUBLIC :: Divergence => Divergence_MappedTensor3D
 !    PROCEDURE,PRIVATE :: Divergence_MappedTensor3D
@@ -502,6 +510,38 @@ CONTAINS
     
   END SUBROUTINE SideExchange_MappedScalar2D
 
+  SUBROUTINE BassiRebaySides_MappedScalar2D(scalar,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+
+    ELSE
+
+      DO iel = 1, scalar % nElem
+        DO iside = 1, 4
+          DO ivar = 1, scalar % nVar
+            DO i = 0, scalar % N
+              scalar % boundary % hostData(i,ivar,iside,iel) = 0.5_prec*(&
+                scalar % boundary % hostData(i,ivar,iside,iel) +&
+                scalar % extBoundary % hostData(i,ivar,iside,iel))
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDIF
+
+  END SUBROUTINE BassiRebaySides_MappedScalar2D
+
   SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator - (Conservative Form)
     !
@@ -779,6 +819,41 @@ CONTAINS
     END IF
     
   END SUBROUTINE SideExchange_MappedScalar3D
+
+  SUBROUTINE BassiRebaySides_MappedScalar3D(scalar,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i, j
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+
+    ELSE
+
+      DO iel = 1, scalar % nElem
+        DO iside = 1, 6
+          DO ivar = 1, scalar % nVar
+            DO j = 0, scalar % N
+              DO i = 0, scalar % N
+                scalar % boundary % hostData(i,j,ivar,iside,iel) = 0.5_prec*(&
+                  scalar % boundary % hostData(i,j,ivar,iside,iel) +&
+                  scalar % extBoundary % hostData(i,j,ivar,iside,iel))
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE BassiRebaySides_MappedScalar3D
 
   SUBROUTINE Gradient_MappedScalar3D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator
@@ -1085,6 +1160,39 @@ CONTAINS
     END IF
     
   END SUBROUTINE SideExchange_MappedVector2D
+
+  SUBROUTINE BassiRebaySides_MappedVector2D(vector,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector2D),INTENT(inout) :: vector
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+
+    ELSE
+
+      DO iel = 1, vector % nElem
+        DO iside = 1, 4
+          DO ivar = 1, vector % nVar
+            DO i = 0, vector % N
+              vector % boundary % hostData(1:2,i,ivar,iside,iel) = 0.5_prec*(&
+                vector % boundary % hostData(1:2,i,ivar,iside,iel) +&
+                vector % extBoundary % hostData(1:2,i,ivar,iside,iel))
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+           
+  END SUBROUTINE BassiRebaySides_MappedVector2D
 
   SUBROUTINE Divergence_MappedVector2D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     ! Strong Form Operator
@@ -1543,6 +1651,41 @@ CONTAINS
     END IF
     
   END SUBROUTINE SideExchange_MappedVector3D
+
+  SUBROUTINE BassiRebaySides_MappedVector3D(vector,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedVector3D),INTENT(inout) :: vector
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i, j
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+
+    ELSE
+
+      DO iel = 1, vector % nElem
+        DO iside = 1, 6
+          DO ivar = 1, vector % nVar
+            DO j = 0, vector % N
+              DO i = 0, vector % N
+                vector % boundary % hostData(1:3,i,j,ivar,iside,iel) = 0.5_prec*(&
+                  vector % boundary % hostData(1:3,i,j,ivar,iside,iel) +&
+                  vector % extBoundary % hostData(1:3,i,j,ivar,iside,iel))
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+           
+  END SUBROUTINE BassiRebaySides_MappedVector3D
 
   SUBROUTINE Divergence_MappedVector3D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
     !
@@ -2009,6 +2152,39 @@ CONTAINS
     
   END SUBROUTINE SideExchange_MappedTensor2D
 
+  SUBROUTINE BassiRebaySides_MappedTensor2D(tensor,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedTensor2D),INTENT(inout) :: tensor
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+
+    ELSE
+
+      DO iel = 1, tensor % nElem
+        DO iside = 1, 4
+          DO ivar = 1, tensor % nVar
+            DO i = 0, tensor % N
+              tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) = 0.5_prec*(&
+                tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) +&
+                tensor % extBoundary % hostData(1:2,1:2,i,ivar,iside,iel))
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+           
+  END SUBROUTINE BassiRebaySides_MappedTensor2D
+
   SUBROUTINE JacobianWeight_MappedTensor2D(tensor,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedTensor2D"
@@ -2150,6 +2326,41 @@ CONTAINS
     END IF
     
   END SUBROUTINE SideExchange_MappedTensor3D
+
+  SUBROUTINE BassiRebaySides_MappedTensor3D(tensor,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedTensor3D),INTENT(inout) :: tensor
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i, j
+
+    IF(gpuAccel)THEN
+
+      ! TO DO ! 
+      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+
+    ELSE
+
+      DO iel = 1, tensor % nElem
+        DO iside = 1, 6
+          DO ivar = 1, tensor % nVar
+            DO j = 0, tensor % N
+              DO i = 0, tensor % N
+                tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) = 0.5_prec*(&
+                  tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) +&
+                  tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,iside,iel))
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+           
+  END SUBROUTINE BassiRebaySides_MappedTensor3D
 
   SUBROUTINE JacobianWeight_MappedTensor3D(tensor,geometry,gpuAccel)
 #undef __FUNC__
