@@ -6,9 +6,12 @@
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 MODULE SELF_DG
 
-!USE SELF_Metadata
+USE SELF_Metadata
+USE SELF_MPI
 USE SELF_Mesh
 USE SELF_MappedData
+USE SELF_HDF5
+USE HDF5
 
 !
 ! User supplies : 
@@ -31,9 +34,11 @@ USE SELF_MappedData
     TYPE(MappedVector3D), PUBLIC :: solutionGradient
     TYPE(MappedVector3D), PUBLIC :: flux
     TYPE(MappedScalar3D), PUBLIC :: source
-    TYPE(MappedScalar3D), PUBLIC :: tendency
+    TYPE(MappedScalar3D), PUBLIC :: fluxDivergence
+    TYPE(MPILayer), PUBLIC :: decomp
     TYPE(Mesh3D), PUBLIC :: mesh
     TYPE(SEMHex), PUBLIC :: geometry
+    TYPE(Metadata), ALLOCATABLE, PUBLIC :: solutionMetaData(:)
 
     ! Work arrays
     TYPE(MappedScalar3D), PRIVATE :: workScalar
@@ -62,15 +67,10 @@ USE SELF_MappedData
     !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_DG3D
 
       PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG3D 
-    !  PROCEDURE, PUBLIC :: CalculateTendency => CalculateTendency_DG3D
-      
-    !  PROCEDURE, PUBLIC :: ForwardStepEuler => ForwardStepEuler_DG3D
-    !  PROCEDURE, PUBLIC :: ForwardStepRK2 => ForwardStepRK2_DG3D
-    !  PROCEDURE, PUBLIC :: ForwardStepRK3 => ForwardStepRK3_DG3D
+      PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG3D
 
-    !  PROCEDURE, PUBLIC :: Read => Read_DG3D ! Load from file
-    !  PROCEDURE, PUBLIC :: Write => Write_DG3D ! Drop to file, Options for restart file,
-                                                ! tecplot file, ...
+      PROCEDURE, PUBLIC :: Read => Read_DG3D 
+      PROCEDURE, PUBLIC :: Write => Write_DG3D
 
   END TYPE DG3D
 
@@ -78,7 +78,7 @@ USE SELF_MappedData
 
 CONTAINS
 
-  SUBROUTINE Init_DG3D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec,nRanks,myRank,mpiComm)
+  SUBROUTINE Init_DG3D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     IMPLICIT NONE
     CLASS(DG3D), INTENT(out) :: this
     INTEGER,INTENT(in) :: cqType
@@ -87,15 +87,13 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nvar
     TYPE(MeshSpec), INTENT(in) :: spec
-    INTEGER, INTENT(in) :: nRanks
-    INTEGER, INTENT(in) :: myRank
-    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
 
+      CALL this % decomp % Init()
       ! Load Mesh
-      IF(PRESENT(mpiComm))THEN
-        CALL this % mesh % Load(spec,nRanks,myRank,mpiComm)
+      IF(this % decomp % mpiEnabled)THEN
+        CALL this % mesh % Load(spec,this % decomp)
       ELSE
-        CALL this % mesh % Load(spec,nRanks,myRank)
+        CALL this % mesh % Load(spec)
       ENDIF
       ! Create geometry from mesh
       CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
@@ -104,12 +102,14 @@ CONTAINS
       CALL this % solutionGradient % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
       CALL this % flux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
       CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-      CALL this % tendency % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+      CALL this % fluxDivergence % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
 
       CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
       CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
       CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
       CALL this % compFlux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+
+      ALLOCATE(this % solutionMetaData(1:nvar))
 
   END SUBROUTINE Init_DG3D
 
@@ -123,12 +123,13 @@ CONTAINS
       CALL this % solutionGradient % Free()
       CALL this % flux % Free()
       CALL this % source % Free()
-      CALL this % tendency % Free()
+      CALL this % fluxDivergence % Free()
       CALL this % workScalar % Free()
       CALL this % workVector % Free()
       CALL this % workTensor % Free()
       CALL this % compFlux % Free()
-
+      DEALLOCATE(this % solutionMetaData)
+      
   END SUBROUTINE Free_DG3D
 
   SUBROUTINE UpdateHost_DG3D(this)
@@ -141,7 +142,7 @@ CONTAINS
       CALL this % solutionGradient % UpdateHost()
       CALL this % flux % UpdateHost()
       CALL this % source % UpdateHost()
-      CALL this % tendency % UpdateHost()
+      CALL this % fluxDivergence % UpdateHost()
       CALL this % workScalar % UpdateHost()
       CALL this % workVector % UpdateHost()
       CALL this % workTensor % UpdateHost()
@@ -159,7 +160,7 @@ CONTAINS
       CALL this % solutionGradient % UpdateDevice()
       CALL this % flux % UpdateDevice()
       CALL this % source % UpdateDevice()
-      CALL this % tendency % UpdateDevice()
+      CALL this % fluxDivergence % UpdateDevice()
       CALL this % workScalar % UpdateDevice()
       CALL this % workVector % UpdateDevice()
       CALL this % workTensor % UpdateDevice()
@@ -182,5 +183,89 @@ CONTAINS
                                     selfWeakDGForm,gpuAccel)
 
   END SUBROUTINE CalculateSolutionGradient_DG3D
+
+  SUBROUTINE CalculateFluxDivergence_DG3D(this,gpuAccel)
+    IMPLICIT NONE
+    CLASS(DG3D), INTENT(inout) :: this
+    LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
+
+    CALL this % flux % Divergence(this % compFlux, &
+                                  this % geometry, &
+                                  this % fluxDivergence, &
+                                  selfWeakDGForm,gpuAccel)
+
+  END SUBROUTINE CalculateFluxDivergence_DG3D
+
+  SUBROUTINE Write_DG3D(this,fileName)
+    IMPLICIT NONE
+    CLASS(DG3D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: fileName
+    ! Local 
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: solOffset(1:5)
+    INTEGER(HID_T) :: xOffset(1:6)
+    INTEGER :: firstElem, nLocalElems
+    INTEGER :: nGeo, nBCs
+
+      IF(this % decomp % mpiEnabled)THEN
+        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, this % decomp % mpiComm)
+        IF(this % decomp % rankId == 0)THEN
+          CALL WriteAttribute_HDF5(fileId, 'N', this % solution % N)
+        ENDIF
+      ELSE
+        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId)
+        CALL WriteAttribute_HDF5(fileId, 'N', this % solution % N)
+      ENDIF
+
+      IF(this % decomp % mpiEnabled)THEN
+        firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)+1
+      ELSE
+        firstElem = 1
+      ENDIF
+
+      solOffset(1:5) = (/0,0,0,1,firstElem/)
+      CALL WriteArray_HDF5(fileId, 'solution', solOffset, this % solution % interior)
+
+      xOffset(1:6) = (/1,0,0,0,1,firstElem/)
+      CALL WriteArray_HDF5(fileId, 'x', xOffset, this % geometry % x % interior)
+
+      CALL Close_HDF5(fileId)
+
+  END SUBROUTINE Write_DG3D
+
+  SUBROUTINE Read_DG3D(this,fileName)
+    IMPLICIT NONE
+    CLASS(DG3D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: fileName
+    ! Local 
+    INTEGER(HID_T) :: fileId
+    INTEGER(HID_T) :: solOffset(1:5)
+    INTEGER :: firstElem
+    INTEGER :: N
+
+      IF(this % decomp % mpiEnabled)THEN
+        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, this % decomp % mpiComm)
+      ELSE
+        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId)
+      ENDIF
+
+      CALL ReadAttribute_HDF5(fileId, 'N', N)
+
+      IF(this % solution % N /= N)THEN
+        STOP 'Error : Solution polynomial degree does not match input file'
+      ENDIF
+
+      IF(this % decomp % mpiEnabled)THEN
+        firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)+1
+      ELSE
+        firstElem = 1
+      ENDIF
+
+      solOffset(1:5) = (/0,0,0,1,firstElem/)
+      CALL ReadArray_HDF5(fileId, 'solution', solOffset, this % solution % interior)
+
+      CALL Close_HDF5(fileId)
+
+  END SUBROUTINE Read_DG3D
 
 END MODULE SELF_DG 

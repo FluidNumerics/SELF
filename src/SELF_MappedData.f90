@@ -460,6 +460,7 @@ CONTAINS
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, ivar
+    INTEGER :: neighborRank
 
     IF(gpuAccel)THEN
 
@@ -478,7 +479,7 @@ CONTAINS
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
 
-          IF(bcid /= 0)THEN   
+          IF(bcid == 0)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           

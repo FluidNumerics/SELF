@@ -24,8 +24,8 @@ MODULE SELF_Metadata
 
     PROCEDURE,PUBLIC :: Set_Name => Set_Name_Metadata
     PROCEDURE,PUBLIC :: Set_Description => Set_Description_Metadata
-    PROCEDURE,PUBLIC :: Set_Units => Set_Unit_Metadata
-    PROCEDURE,PUBLIC :: Write_HDF5 => Write_HDF5_Metadata
+    PROCEDURE,PUBLIC :: Set_Units => Set_Units_Metadata
+   ! PROCEDURE,PUBLIC :: Write_HDF5 => Write_HDF5_Metadata
 
   END TYPE Metadata
 
@@ -39,7 +39,7 @@ SUBROUTINE Set_Name_Metadata(mtd, name)
 
     mtd % name = name
 
-SUBROUTINE Set_Name_Metadata
+END SUBROUTINE Set_Name_Metadata
   
 SUBROUTINE Set_Description_Metadata(mtd, description)
   IMPLICIT NONE
@@ -48,7 +48,7 @@ SUBROUTINE Set_Description_Metadata(mtd, description)
 
     mtd % description = description
 
-SUBROUTINE Set_Description_Metadata
+END SUBROUTINE Set_Description_Metadata
 
 SUBROUTINE Set_Units_Metadata(mtd,  units)
   IMPLICIT NONE
@@ -57,15 +57,6 @@ SUBROUTINE Set_Units_Metadata(mtd,  units)
 
     mtd % units = units
 
-SUBROUTINE Set_Units_Metadata
-
-SUBROUTINE Write_HDF5_Metadata(mtd, name)
-  IMPLICIT NONE
-  CLASS(Metadata), INTENT(inout) :: mtd
-  CHARACTER(*), INTENT(in) :: name
-
-    mtd % name = name
-
-SUBROUTINE Write_HDF5_Metadata
+END SUBROUTINE Set_Units_Metadata
 
 END MODULE SELF_Metadata
