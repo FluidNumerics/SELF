@@ -10,10 +10,10 @@ MODULE SELF_MappedData
 
   USE SELF_Constants
   USE SELF_Lagrange
-
   USE SELF_Data
   USE SELF_Mesh
   USE SELF_Geometry
+  USE SELF_MPI
 
   USE ISO_C_BINDING
 
@@ -451,10 +451,11 @@ CONTAINS
 
   END SUBROUTINE JacobianWeight_MappedScalar1D
 
-  SUBROUTINE SideExchange_MappedScalar2D(scalar,mesh,gpuAccel)
+  SUBROUTINE SideExchange_MappedScalar2D(scalar,mesh,decomp,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedScalar2D),INTENT(inout) :: scalar
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(in) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -731,10 +732,11 @@ CONTAINS
   ! by finding neighboring elements that share a side and copying the neighboring
   ! elements solution % boundary data.
 
-  SUBROUTINE SideExchange_MappedScalar3D(scalar,mesh,gpuAccel)
+  SUBROUTINE SideExchange_MappedScalar3D(scalar,mesh,decomp,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(inout) :: scalar
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(in) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -758,7 +760,7 @@ CONTAINS
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
 
-          IF(bcid /= 0)THEN   
+          IF(bcid == 0)THEN   
 
             IF(flip == 1)THEN 
           
@@ -1103,10 +1105,11 @@ CONTAINS
   ! by finding neighboring elements that share a side and copying the neighboring
   ! elements solution % boundary data.
 
-  SUBROUTINE SideExchange_MappedVector2D(vector,mesh,gpuAccel)
+  SUBROUTINE SideExchange_MappedVector2D(vector,mesh,decomp,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(in) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -1130,7 +1133,7 @@ CONTAINS
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
 
-          IF(bcid /= 0)THEN   
+          IF(bcid == 0)THEN   
 
             IF(flip == 1)THEN 
           
@@ -1559,14 +1562,15 @@ CONTAINS
 
   END SUBROUTINE JacobianWeight_MappedVector2D
 
-! SideExchange_MappedVector3D is used to populate vector % extBoundary
+  ! SideExchange_MappedVector3D is used to populate vector % extBoundary
   ! by finding neighboring elements that share a side and copying the neighboring
   ! elements solution % boundary data.
 
-  SUBROUTINE SideExchange_MappedVector3D(vector,mesh,gpuAccel)
+  SUBROUTINE SideExchange_MappedVector3D(vector,mesh,decomp,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(inout) :: vector
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(in) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -1590,7 +1594,7 @@ CONTAINS
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
 
-          IF(bcid /= 0)THEN   
+          IF(bcid == 0)THEN   
 
             IF(flip == 1)THEN 
           
@@ -2094,10 +2098,11 @@ CONTAINS
   ! by finding neighboring elements that share a side and copying the neighboring
   ! elements solution % boundary data.
 
-  SUBROUTINE SideExchange_MappedTensor2D(tensor,mesh,gpuAccel)
+  SUBROUTINE SideExchange_MappedTensor2D(tensor,mesh,decomp,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedTensor2D),INTENT(inout) :: tensor
     TYPE(Mesh2D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(in) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -2121,7 +2126,7 @@ CONTAINS
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
 
-          IF(bcid /= 0)THEN   
+          IF(bcid == 0)THEN   
 
             IF(flip == 1)THEN 
           
@@ -2238,10 +2243,11 @@ CONTAINS
   ! by finding neighboring elements that share a side and copying the neighboring
   ! elements solution % boundary data.
 
-  SUBROUTINE SideExchange_MappedTensor3D(tensor,mesh,gpuAccel)
+  SUBROUTINE SideExchange_MappedTensor3D(tensor,mesh,decomp,gpuAccel)
     IMPLICIT NONE
     CLASS(MappedTensor3D),INTENT(inout) :: tensor
     TYPE(Mesh3D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(in) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -2265,7 +2271,7 @@ CONTAINS
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
 
-          IF(bcid /= 0)THEN   
+          IF(bcid == 0)THEN   
 
             IF(flip == 1)THEN 
           

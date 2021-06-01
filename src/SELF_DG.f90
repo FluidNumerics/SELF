@@ -173,7 +173,9 @@ CONTAINS
     CLASS(DG3D), INTENT(inout) :: this
     LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
 
-    CALL this % solution % SideExchange(this % mesh,gpuAccel)
+    CALL this % solution % SideExchange(this % mesh,&
+                                        this % decomp,&
+                                        gpuAccel)
 
     CALL this % solution % BassiRebaySides(gpuAccel)
 
