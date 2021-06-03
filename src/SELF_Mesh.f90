@@ -1143,7 +1143,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh3D), INTENT(out) :: myMesh
     TYPE(MeshSpec), INTENT(in) :: myMeshSpec
-    TYPE(MPILayer), OPTIONAL, INTENT(inout) :: decomp
+    TYPE(MPILayer), INTENT(inout) :: decomp
 
       IF(myMeshSpec % blockMesh)THEN
 
@@ -1160,7 +1160,7 @@ CONTAINS
 
       ELSE
 
-        IF(PRESENT(decomp))THEN
+        IF(decomp % mpiEnabled)THEN
           CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
         ELSE
           CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)

@@ -89,12 +89,10 @@ CONTAINS
     TYPE(MeshSpec), INTENT(in) :: spec
 
       CALL this % decomp % Init()
+
       ! Load Mesh
-      IF(this % decomp % mpiEnabled)THEN
-        CALL this % mesh % Load(spec,this % decomp)
-      ELSE
-        CALL this % mesh % Load(spec)
-      ENDIF
+      CALL this % mesh % Load(spec,this % decomp)
+
       ! Create geometry from mesh
       CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
@@ -210,13 +208,9 @@ CONTAINS
     INTEGER :: nGeo, nBCs
 
       IF(this % decomp % mpiEnabled)THEN
-        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, this % decomp % mpiComm)
-        IF(this % decomp % rankId == 0)THEN
-          CALL WriteAttribute_HDF5(fileId, 'N', this % solution % N)
-        ENDIF
+        CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, this % decomp % mpiComm)
       ELSE
-        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId)
-        CALL WriteAttribute_HDF5(fileId, 'N', this % solution % N)
+        CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId)
       ENDIF
 
       IF(this % decomp % mpiEnabled)THEN
@@ -226,10 +220,14 @@ CONTAINS
       ENDIF
 
       solOffset(1:5) = (/0,0,0,1,firstElem/)
-      CALL WriteArray_HDF5(fileId, 'solution', solOffset, this % solution % interior)
+      CALL WriteArray_HDF5(fileId, '/solution', solOffset, this % solution % interior)
+
+      CALL WriteArray_HDF5(fileId, '/fluxDivergence', solOffset, this % fluxDivergence % interior)
 
       xOffset(1:6) = (/1,0,0,0,1,firstElem/)
-      CALL WriteArray_HDF5(fileId, 'x', xOffset, this % geometry % x % interior)
+      CALL WriteArray_HDF5(fileId, '/flux', xOffset, this % flux % interior)
+
+      CALL WriteArray_HDF5(fileId, '/x', xOffset, this % geometry % x % interior)
 
       CALL Close_HDF5(fileId)
 

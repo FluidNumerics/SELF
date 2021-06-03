@@ -15,6 +15,7 @@ MODULE SELF_CLI
   USE SELF_Mesh
   USE SELF_MappedData
   USE FEQParse
+  USE SELF_DG
 
   IMPLICIT NONE
 
@@ -1879,8 +1880,8 @@ CONTAINS
 
   END SUBROUTINE VectorGradient3D_Test
 
-  SUBROUTINE VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                     vectorChar,scalarChar,gpuAccel)
+  SUBROUTINE VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nvar,&
+                                     spec,vectorChar,scalarChar,outputFile,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence3D_Test"
     IMPLICIT NONE
@@ -1889,53 +1890,21 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: dForm
-    INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
+    TYPE(MeshSpec), INTENT(in) :: spec
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: scalarChar
+    CHARACTER(*),INTENT(in) :: outputFile
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     CHARACTER(240) :: msg
-    TYPE(Mesh3D) :: controlMesh
-    TYPE(SEMHex) :: controlGeometry
+    TYPE(DG3D) :: dgsol
+    !TYPE(CG3D) :: cgsol
+    !TYPE(Collocation3D) :: collosol
     TYPE(EquationParser)  :: feq(1:3),dfeqChar
-    TYPE(MappedVector3D) :: f
-    TYPE(MappedVector3D) :: workVector
-    TYPE(MappedScalar3D) :: dfInterp
     INTEGER :: iel,i,j,k,ivar,idir,iside
 
-    
-    IF (dForm == selfStrongForm ) THEN
-      msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
-      msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
-      msg = 'Formulation Type : Weak CG Form'
-    ENDIF
-    INFO(TRIM(msg))
-    msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
-    INFO(TRIM(msg))
-    msg = 'Number of control points : '//Int2Str(cqDegree)
-    INFO(TRIM(msg))
-    msg = 'Number of target points : '//Int2Str(tqDegree)
-    INFO(TRIM(msg))
-    msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-
-    ! Create the control mesh and geometry
-    CALL controlMesh % UniformBlockMesh(cqDegree, &
-                                        (/nElem,nElem,nElem/), &
-                                        (/0.0_prec,1.0_prec, &
-                                          0.0_prec,1.0_prec, &
-                                          0.0_prec,1.0_prec/))
-    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
-
-    ! Create the objects
-    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-
-    ! Create work objects
-    CALL workVector % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dgsol % Init(cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
     ! Create the equation parser object
     DO idir = 1,3
@@ -1945,23 +1914,23 @@ CONTAINS
     dfeqChar = EquationParser(scalarChar, (/'x','y','z'/))
 
     ! Load the control function
-    DO iel = 1, controlGeometry % nElem
+    DO iel = 1, dgsol % mesh % nElem
       DO ivar = 1, nvar
         DO k = 0, cqDegree
           DO j = 0, cqDegree
             DO i = 0, cqDegree
 
               DO idir = 1,3
-                f % interior % hostData(idir,i,j,k,ivar,iel) = &
-                  feq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
+                dgsol % flux % interior % hostData(idir,i,j,k,ivar,iel) = &
+                  feq(idir) % Evaluate( dgsol % geometry % x % interior % hostData(1:3,i,j,k,1,iel) )
               ENDDO
 
             ENDDO
 
             DO iside = 1,6
               DO idir = 1,3
-                f % boundary % hostData(idir,j,k,ivar,iside,iel) = &
-                  feq(idir) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
+                dgsol % flux % boundary % hostData(idir,j,k,ivar,iside,iel) = &
+                  feq(idir) % Evaluate( dgsol % geometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
               ENDDO
             ENDDO
 
@@ -1972,29 +1941,25 @@ CONTAINS
 
 #ifdef GPU     
     IF (gpuAccel) THEN
-      CALL f % UpdateDevice()
+      CALL dgsol % flux % UpdateDevice()
     END IF
 #endif
 
     ! Run the grid interpolation
-    CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
+    CALL dgsol % CalculateFluxDivergence(gpuAccel)
 
 #ifdef GPU     
     IF (gpuAccel) THEN
-      CALL dfInterp % UpdateHost()
+      CALL dgsol % fluxDivergence % UpdateHost()
     END IF
 #endif
  
-    ! To do : file io for dfInterp, controlGeometry
+    CALL dgSol % Write(outputFile)
 
     ! Clean up
-    CALL controlMesh % Free()
-    CALL controlGeometry % Free()
-    CALL f % Free()
-    CALL workVector % Free()
-    CALL dfInterp % Free()
+    CALL dgSol % Free()
 
-  END SUBROUTINE VectorDivergence3D_Test
+  END SUBROUTINE VectorDivergence3D
 
   SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  tensorChar,gpuAccel)

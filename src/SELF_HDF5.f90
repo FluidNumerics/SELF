@@ -8,6 +8,7 @@ MODULE SELF_HDF5
 
 USE SELF_Constants
 USE SELF_Memory
+USE ISO_FORTRAN_ENV
 USE HDF5
 
 #ifdef DOUBLE_PRECISION
@@ -84,26 +85,43 @@ USE HDF5
 
 CONTAINS
 
+
 SUBROUTINE Open_HDF5( fileName, accessFlag, fileId, mpiComm )
   IMPLICIT NONE
   CHARACTER(*), INTENT(in) :: fileName
   INTEGER, INTENT(in) :: accessFlag
-  INTEGER(HID_T), INTENT(out) :: fileId
+  INTEGER(HID_T), INTENT(inout) :: fileId
   INTEGER, OPTIONAL, INTENT(in) :: mpiComm
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER :: error
+
+    CALL h5open_f(error)
 
 #ifdef MPI
 
     CALL h5pcreate_f(H5P_FILE_ACCESS_F, plistId, error)
     CALL h5pset_fapl_mpio_f(plistId, mpiComm, MPI_INFO_NULL, error)
     CALL h5fopen_f(TRIM(fileName), accessFlag, fileId, error, plistId)
+    IF(accessFlag == H5F_ACC_TRUNC_F)THEN
+      CALL h5fcreate_f(TRIM(fileName), accessFlag, fileId, error, plistId)
+    ELSE
+      CALL h5fopen_f(TRIM(fileName), accessFlag, fileId, error, plistId)
+    ENDIF
     CALL h5pclose_f(plistId, error)
 
 #else
 
-    CALL h5fopen_f(TRIM(fileName), accessFlag, fileId, error)
+    IF(accessFlag == H5F_ACC_TRUNC_F)THEN
+      CALL h5fcreate_f(TRIM(fileName), accessFlag, fileId, error)
+    ELSE
+      CALL h5fopen_f(TRIM(fileName), accessFlag, fileId, error)
+    ENDIF
+
+    IF(error == -1)THEN
+      PRINT*, 'Failed to open '//TRIM(fileName)//'.'
+      STOP -1
+    ENDIF
 
 #endif
 
@@ -116,6 +134,7 @@ SUBROUTINE Close_HDF5( fileId )
   INTEGER :: error
   
     CALL h5fclose_f( fileId, error )
+    CALL h5close_f(error)
 
 END SUBROUTINE Close_HDF5
 
@@ -278,7 +297,7 @@ SUBROUTINE WriteArray_HDF5_real_r1( fileId, arrayName, offset, hfArray, globalDi
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1)
+  INTEGER(HSIZE_T) :: dims(1)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -313,7 +332,7 @@ SUBROUTINE WriteArray_HDF5_real_r1( fileId, arrayName, offset, hfArray, globalDi
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -338,7 +357,7 @@ SUBROUTINE WriteArray_HDF5_real_r2( fileId, arrayName, offset, hfArray, globalDi
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:2)
+  INTEGER(HSIZE_T) :: dims(1:2)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -373,7 +392,7 @@ SUBROUTINE WriteArray_HDF5_real_r2( fileId, arrayName, offset, hfArray, globalDi
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -398,7 +417,7 @@ SUBROUTINE WriteArray_HDF5_real_r3( fileId, arrayName, offset, hfArray, globalDi
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:3)
+  INTEGER(HSIZE_T) :: dims(1:3)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -433,7 +452,7 @@ SUBROUTINE WriteArray_HDF5_real_r3( fileId, arrayName, offset, hfArray, globalDi
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -458,7 +477,7 @@ SUBROUTINE WriteArray_HDF5_real_r4( fileId, arrayName, offset, hfArray, globalDi
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:4)
+  INTEGER(HSIZE_T) :: dims(1:4)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -493,7 +512,7 @@ SUBROUTINE WriteArray_HDF5_real_r4( fileId, arrayName, offset, hfArray, globalDi
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -515,10 +534,9 @@ SUBROUTINE WriteArray_HDF5_real_r5( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:5)
+  INTEGER(HSIZE_T) :: dims(1:5)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -552,8 +570,7 @@ SUBROUTINE WriteArray_HDF5_real_r5( fileId, arrayName, offset, hfArray, globalDi
     dims = SHAPE(hfArray % hostData)
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
-    CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+    CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, dsetId, error)
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -578,7 +595,7 @@ SUBROUTINE WriteArray_HDF5_real_r6( fileId, arrayName, offset, hfArray, globalDi
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:6)
+  INTEGER(HSIZE_T) :: dims(1:6)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -612,8 +629,7 @@ SUBROUTINE WriteArray_HDF5_real_r6( fileId, arrayName, offset, hfArray, globalDi
     dims = SHAPE(hfArray % hostData)
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
-    CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+    CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, dsetId, error)
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -638,7 +654,7 @@ SUBROUTINE WriteArray_HDF5_real_r7( fileId, arrayName, offset, hfArray, globalDi
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:7)
+  INTEGER(HSIZE_T) :: dims(1:7)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -673,7 +689,7 @@ SUBROUTINE WriteArray_HDF5_real_r7( fileId, arrayName, offset, hfArray, globalDi
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), HDF5_IO_PREC, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, HDF5_IO_PREC, &
            hfArray % hostData, dims, error)
@@ -698,7 +714,7 @@ SUBROUTINE WriteArray_HDF5_int32_r1( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1)
+  INTEGER(HSIZE_T) :: dims(1)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -733,7 +749,7 @@ SUBROUTINE WriteArray_HDF5_int32_r1( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -758,7 +774,7 @@ SUBROUTINE WriteArray_HDF5_int32_r2( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:2)
+  INTEGER(HSIZE_T) :: dims(1:2)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -793,7 +809,7 @@ SUBROUTINE WriteArray_HDF5_int32_r2( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -818,7 +834,7 @@ SUBROUTINE WriteArray_HDF5_int32_r3( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:3)
+  INTEGER(HSIZE_T) :: dims(1:3)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -853,7 +869,7 @@ SUBROUTINE WriteArray_HDF5_int32_r3( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -878,7 +894,7 @@ SUBROUTINE WriteArray_HDF5_int32_r4( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:4)
+  INTEGER(HSIZE_T) :: dims(1:4)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -913,7 +929,7 @@ SUBROUTINE WriteArray_HDF5_int32_r4( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -938,7 +954,7 @@ SUBROUTINE WriteArray_HDF5_int32_r5( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:5)
+  INTEGER(HSIZE_T) :: dims(1:5)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -973,7 +989,7 @@ SUBROUTINE WriteArray_HDF5_int32_r5( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -998,7 +1014,7 @@ SUBROUTINE WriteArray_HDF5_int32_r6( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:6)
+  INTEGER(HSIZE_T) :: dims(1:6)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1033,7 +1049,7 @@ SUBROUTINE WriteArray_HDF5_int32_r6( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -1058,7 +1074,7 @@ SUBROUTINE WriteArray_HDF5_int32_r7( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:7)
+  INTEGER(HSIZE_T) :: dims(1:7)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1093,7 +1109,7 @@ SUBROUTINE WriteArray_HDF5_int32_r7( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I32LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I32LE, &
            hfArray % hostData, dims, error)
@@ -1118,7 +1134,7 @@ SUBROUTINE WriteArray_HDF5_int64_r1( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1)
+  INTEGER(HSIZE_T) :: dims(1)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1153,7 +1169,7 @@ SUBROUTINE WriteArray_HDF5_int64_r1( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)
@@ -1178,7 +1194,7 @@ SUBROUTINE WriteArray_HDF5_int64_r2( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:2)
+  INTEGER(HSIZE_T) :: dims(1:2)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1213,7 +1229,7 @@ SUBROUTINE WriteArray_HDF5_int64_r2( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)
@@ -1238,7 +1254,7 @@ SUBROUTINE WriteArray_HDF5_int64_r3( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:3)
+  INTEGER(HSIZE_T) :: dims(1:3)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1273,7 +1289,7 @@ SUBROUTINE WriteArray_HDF5_int64_r3( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)
@@ -1298,7 +1314,7 @@ SUBROUTINE WriteArray_HDF5_int64_r4( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:4)
+  INTEGER(HSIZE_T) :: dims(1:4)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1333,7 +1349,7 @@ SUBROUTINE WriteArray_HDF5_int64_r4( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)
@@ -1358,7 +1374,7 @@ SUBROUTINE WriteArray_HDF5_int64_r5( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:5)
+  INTEGER(HSIZE_T) :: dims(1:5)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1393,7 +1409,7 @@ SUBROUTINE WriteArray_HDF5_int64_r5( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)
@@ -1418,7 +1434,7 @@ SUBROUTINE WriteArray_HDF5_int64_r6( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:6)
+  INTEGER(HSIZE_T) :: dims(1:6)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1453,7 +1469,7 @@ SUBROUTINE WriteArray_HDF5_int64_r6( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)
@@ -1478,7 +1494,7 @@ SUBROUTINE WriteArray_HDF5_int64_r7( fileId, arrayName, offset, hfArray, globalD
   INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
-  INTEGER(HID_T) :: dims(1:7)
+  INTEGER(HSIZE_T) :: dims(1:7)
   INTEGER :: error
   INTEGER :: aRank
 
@@ -1513,7 +1529,7 @@ SUBROUTINE WriteArray_HDF5_int64_r7( fileId, arrayName, offset, hfArray, globalD
     CALL h5screate_simple_f(aRank, dims, memspace, error)
 
     CALL h5dcreate_f(fileId, TRIM(arrayName), H5T_STD_I64LE, memspace, &
-            dsetId, error, plistId) 
+            dsetId, error) 
 
     CALL h5dwrite_f(dsetId, H5T_STD_I64LE, &
            hfArray % hostData, dims, error)

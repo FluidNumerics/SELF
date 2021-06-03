@@ -58,7 +58,7 @@ $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
 	$(AR) -cq $@ $^
 
 $(SELF_OBJDIR)%.f.o: %.f90
-	$(FC) $(SELF_FFLAGS) -c $< -o $@
+	$(FC) $(SELF_FFLAGS) $(SELF_FLIBS) -c $< -o $@
 
 $(SELF_OBJDIR)%.cpp.o: %.cpp
 	$(FC) $(SELF_CXXFLAGS) -c $< -o $@

@@ -10,10 +10,12 @@ PROGRAM SELF
   USE SELF_SupportRoutines
   USE SELF_CLI
   USE FLAP
+  USE SELF_Mesh
 
   IMPLICIT NONE
 
   TYPE(COMMAND_LINE_INTERFACE) :: selfCLI
+  TYPE(MeshSpec) :: spec
   CHARACTER(240) :: meshFile
   CHARACTER(20) :: cqTypeChar
   CHARACTER(20) :: tqTypeChar
@@ -21,6 +23,7 @@ PROGRAM SELF
   CHARACTER(240) :: derivativeChar
   CHARACTER(240) :: vectorChar(1:3)
   CHARACTER(240) :: tensorChar(1:3,1:3)
+  CHARACTER(240) :: outputFile
   CHARACTER(10) :: dFormChar
   CHARACTER(5) :: gpuAccelChar
   INTEGER :: dForm
@@ -57,6 +60,19 @@ PROGRAM SELF
   CALL selfCLI % get(val=tensorChar(3,1),switch='--tensor-31')
   CALL selfCLI % get(val=tensorChar(3,2),switch='--tensor-32')
   CALL selfCLI % get(val=tensorChar(3,3),switch='--tensor-33')
+  CALL selfCLI % get(val=outputFile,switch='--output')
+
+    spec % blockMesh = .TRUE.
+  spec % blockMesh_nGeo = 1
+  spec % blockMesh_x0 = 0.0_prec
+  spec % blockMesh_x1 = 1.0_prec
+  spec % blockMesh_y0 = 0.0_prec
+  spec % blockMesh_y1 = 1.0_prec
+  spec % blockMesh_z0 = 0.0_prec
+  spec % blockMesh_z1 = 1.0_prec
+  spec % blockMesh_nElemX = nElem
+  spec % blockMesh_nElemY = nElem
+  spec % blockMesh_nElemZ = nElem
 
   IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
     cqType = GAUSS
@@ -227,8 +243,8 @@ PROGRAM SELF
 
   ELSEIF (selfCLI % run_command(group="v3d_divergence")) THEN
 
-    CALL VectorDivergence3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar,functionChar,gpuAccel)
+    CALL VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nVar,&
+                            spec,vectorChar,functionChar,TRIM(outputFile),gpuAccel)
     
 
   END IF
@@ -400,6 +416,12 @@ CONTAINS
                    help="Row 2 column 3 of the tensor function to interpolate from control points "// &
                    "to target points"//NEW_LINE("A"), &
                    def="t33=1.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--output", &
+                   switch_ab="-o", &
+                   help="The name of the HDF5 file to output SELF data."//NEW_LINE("A"), &
+                   def="./self_out.h5", &
                    required=.FALSE.)
 
     CALL cli % add_group(group="blockmesh_1d", &
