@@ -29,6 +29,12 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     PREC=double \
     make
 
+RUN mkdir -p /workspace/test &&\
+    cp test/ci.json test/ci.py test/cmd.tmpl /workspace/ &&\
+    export GPU_ACCEL=false && export WORKSPACE="/workspace" && \
+    cd /workspace && python3 ci.py
+
+
 FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5
 COPY --from=devel /opt /opt
 LABEL maintainer="joe@fluidnumerics.com"
