@@ -3,19 +3,19 @@
 import json
 import os
 import subprocess
+import shutil
 
 WORKSPACE=os.getenv('WORKSPACE')
+INSTALL_ROOT=os.getenv('INSTALL_ROOT')
 GPU_ACCEL=os.getenv('GPU_ACCEL')
-SCHEDULER=os.getenv('SCHEDULER')
-OUTDIR=os.getenv('OUTDIR')
 
 
 def main():
 
-    with open(WORKSPACE+'/test/ci.json','r') as f:
+    with open(INSTALL_ROOT+'/test/ci.json','r') as f:
       ci_conf = json.load(f)
 
-    with open(WORKSPACE+'/tests.json','r')as f:          
+    with open(INSTALL_ROOT+'/tests.json','r')as f:          
       tests = json.load(f)
 
     k = 0
@@ -30,7 +30,7 @@ def main():
                   for addlOpts in test['additional_opts'] :
                     for funcOpts in test['function_opts'] :
 
-                      workdir = WORKSPACE+'/test/'
+                      workdir = INSTALL_ROOT+'/test/'
                       workdir += test['cli_command']+'/'
                       workdir += 'nel_{}'.format(nel)+'/'
                       workdir += 'nvar_{}'.format(nvar)+'/'
@@ -41,20 +41,19 @@ def main():
                       workdir += '{}'.format(addlOpts['name'])+'/'
                       workdir += '{}'.format(funcOpts['name'])+'/'
 
-                      if SCHEDULER == 'none':
-                        print('Running {}'.format(workdir+'/test.sh \n'))
-                        proc = subprocess.Popen([workdir+'/test.sh'],
-                                                 shell=True,
-                                                 stdout=subprocess.PIPE,
-                                                 stderr=subprocess.PIPE)
-                        stdout, stderr = proc.communicate()
-                        print(stdout.decode("utf-8"))
-                        print(stderr.decode("utf-8"))
-                        tests[k]['stdout'] = stdout.decode("utf-8")
-                        tests[k]['stderr'] = stderr.decode("utf-8")
-                        tests[k]['exit_code'] = proc.returncode
+                      print('Running {}'.format(workdir+'/test.sh \n'))
+                      proc = subprocess.Popen([workdir+'/test.sh'],
+                                               shell=True,
+                                               stdout=subprocess.PIPE,
+                                               stderr=subprocess.PIPE)
+                      stdout, stderr = proc.communicate()
+                      print(stdout.decode("utf-8"))
+                      print(stderr.decode("utf-8"))
+                      tests[k]['stdout'] = stdout.decode("utf-8")
+                      tests[k]['stderr'] = stderr.decode("utf-8")
+                      tests[k]['exit_code'] = proc.returncode
 
-                      k+=1
+                    k+=1
                                         
     with open(WORKSPACE+'/tests.json','w')as f:          
       f.write(json.dumps(tests,indent=2))

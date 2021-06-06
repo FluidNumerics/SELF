@@ -31,7 +31,7 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
 
 RUN mkdir -p /opt/self/test &&\
     cp /tmp/test/ci.json /tmp/test/ciGenerator.py /tmp/test/ciCheck.py /tmp/test/cmd.tmpl /opt/self/test/ &&\
-    export GPU_ACCEL=false && export WORKSPACE="/opt/self" && \
+    export GPU_ACCEL=false && export INSTALL_ROOT="/opt/self" && \
     cd /opt/self/test && python3 ciGenerator.py && \
     chmod 755 /opt/self/test/ciCheck.py
 
@@ -43,6 +43,4 @@ LABEL maintainer="joe@fluidnumerics.com"
 ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
     PATH=/opt/self/bin:$PATH \
     INSTALL_ROOT=/opt/self \
-    WORKSPACE="/opt/self" \
-    GPU_ACCEL=false \
-    SCHEDULER=none
+    GPU_ACCEL=false

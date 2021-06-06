@@ -3,16 +3,16 @@
 import json
 import os
 
-WORKSPACE=os.getenv('WORKSPACE')
+INSTALL_ROOT=os.getenv('INSTALL_ROOT')
 GPU_ACCEL=os.getenv('GPU_ACCEL')
 
 
 def main():
 
-  with open(WORKSPACE+'/test/ci.json','r') as f:
+  with open(INSTALL_ROOT+'/test/ci.json','r') as f:
     ci_conf = json.load(f)
         
-  with open(WORKSPACE+'/test/cmd.tmpl') as f:
+  with open(INSTALL_ROOT+'/test/cmd.tmpl') as f:
     cmd_tmpl = f.read()
 
 
@@ -28,7 +28,7 @@ def main():
                 for addlOpts in test['additional_opts'] :
                   for funcOpts in test['function_opts'] :
 
-                    workdir = WORKSPACE+'/test/'
+                    workdir = INSTALL_ROOT+'/test/'
                     workdir += test['cli_command']+'/'
                     workdir += 'nel_{}'.format(nel)+'/'
                     workdir += 'nvar_{}'.format(nvar)+'/'
@@ -41,6 +41,7 @@ def main():
 
                     cmd = cmd_tmpl
 
+                    cmd = cmd.replace('@PROFILER@',workdir)
                     cmd = cmd.replace('@WORKDIR@',workdir)
                     cmd = cmd.replace('@GPU_ACCEL@',GPU_ACCEL)
                     cmd = cmd.replace('@CONTROL_QUADRATURE@',cQuad)
@@ -81,7 +82,7 @@ def main():
                                   }
                                 })
 
-    with open(WORKSPACE+'/tests.json','w')as f:          
+    with open(INSTALL_ROOT+'/tests.json','w')as f:          
       f.write(json.dumps(tests,indent=2))
 
 if __name__=='__main__':
