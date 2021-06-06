@@ -29,10 +29,11 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     PREC=double \
     make
 
-RUN mkdir -p /workspace/test &&\
-    cp test/ci.json test/ci.py test/cmd.tmpl /workspace/ &&\
-    export GPU_ACCEL=false && export WORKSPACE="/workspace" && \
-    cd /workspace && python3 ci.py
+RUN mkdir -p /opt/self/test &&\
+    cp /tmp/test/ci.json /tmp/test/ciGenerator.py /tmp/test/ciCheck.py /tmp/test/cmd.tmpl /opt/self/test/ &&\
+    export GPU_ACCEL=false && export WORKSPACE="/opt/self" && \
+    cd /opt/self/test && python3 ciGenerator.py && \
+    chmod 755 /opt/self/test/ciCheck.py
 
 
 FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5
@@ -41,4 +42,7 @@ LABEL maintainer="joe@fluidnumerics.com"
 
 ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
     PATH=/opt/self/bin:$PATH \
-    INSTALL_ROOT=/opt/self
+    INSTALL_ROOT=/opt/self \
+    WORKSPACE="/opt/self" \
+    GPU_ACCEL=false \
+    SCHEDULER=none

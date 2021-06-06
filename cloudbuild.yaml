@@ -12,18 +12,22 @@ steps:
                  'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}'
           ]
 
-        - id: Serial CPU Test
-          name: 'gcr.io/cloud-builders/docker'
-          args: ['run',
-                 'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}',
-                 '/opt/self/bin/ci.sh'
-          ]
-#        - id: Build Singularity Image
-#          name: 'quay.io/singularity/singularity:v3.7.1'
-#          args: ['build',
-#                 'self_${_PLATFORM}.sif',
-#                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
-#          waitFor: ["Build Docker Image"]
+#        - id: Serial CPU Test
+#          name: 'gcr.io/cloud-builders/docker'
+#          args: ['run',
+#                 '--entrypoint','/usr/bin/python3',
+#                 '--env','OUTDIR=/workspace',
+#                 '--mount', 'type=bind,src=/workspace,dst=/workspace',
+#                 'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}',
+#                 '/opt/self/test/ciCheck.py'
+#          ]
+
+        - id: Build Singularity Image
+          name: 'quay.io/singularity/singularity:v3.7.1'
+          args: ['build',
+                 'self_${_PLATFORM}.sif',
+                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
+          waitFor: ["Build Docker Image"]
 
 #        - id: CI Test
 #          name: 'quay.io/singularity/singularity:v3.7.1'

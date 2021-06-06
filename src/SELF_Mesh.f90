@@ -180,6 +180,7 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
 
+    PROCEDURE,PUBLIC :: Load => Load_Mesh2D
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh2D
 
@@ -748,6 +749,38 @@ CONTAINS
     CALL xGeo % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh2D
+  
+  SUBROUTINE Load_Mesh2D(myMesh,myMeshSpec,decomp)
+#undef __FUNC__
+#define __FUNC__ "Load_Mesh2D"
+    IMPLICIT NONE
+    CLASS(Mesh2D), INTENT(out) :: myMesh
+    TYPE(MeshSpec), INTENT(in) :: myMeshSpec
+    TYPE(MPILayer), INTENT(inout) :: decomp
+
+      IF(myMeshSpec % blockMesh)THEN
+
+        IF(decomp % nRanks > 1)THEN ! Error out
+          ERROR("Block Mesh only supported in serial")
+          STOP ! TO DO : Safe exit for serial and parallel
+        ELSE
+          CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo,&
+                (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY/),&
+                (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1,&
+                  myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
+        ENDIF
+
+      ELSE
+
+        IF(decomp % mpiEnabled)THEN
+          CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+        ELSE
+          CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
+        ENDIF
+
+      ENDIF
+    
+  END SUBROUTINE Load_Mesh2D
 
   SUBROUTINE Read_HOPr_Mesh2D( myMesh, meshFile, decomp )
   ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6

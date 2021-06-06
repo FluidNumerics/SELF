@@ -247,8 +247,8 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     CHARACTER(*), INTENT(in) :: fileName
     ! Local 
     INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: solOffset(1:5)
-    INTEGER(HID_T) :: xOffset(1:6)
+    INTEGER(HID_T) :: solOffset(1:4)
+    INTEGER(HID_T) :: xOffset(1:5)
     INTEGER :: firstElem, nLocalElems
     INTEGER :: nGeo, nBCs
 
@@ -264,16 +264,15 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
         firstElem = 1
       ENDIF
 
-      solOffset(1:5) = (/0,0,0,1,firstElem/)
+      solOffset(1:4) = (/0,0,1,firstElem/)
       CALL WriteArray_HDF5(fileId, '/solution', solOffset, this % solution % interior)
 
       CALL WriteArray_HDF5(fileId, '/fluxDivergence', solOffset, this % fluxDivergence % interior)
 
-      xOffset(1:6) = (/1,0,0,0,1,firstElem/)
+      xOffset(1:5) = (/1,0,0,1,firstElem/)
       CALL WriteArray_HDF5(fileId, '/flux', xOffset, this % flux % interior)
 
-      CALL WriteArray_HDF5(fileId, '/solutionGradient', solOffset, this % solutionGradient % interior)
-
+      CALL WriteArray_HDF5(fileId, '/solutionGradient', xOffset, this % solutionGradient % interior)
 
       CALL WriteArray_HDF5(fileId, '/x', xOffset, this % geometry % x % interior)
 
@@ -287,7 +286,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     CHARACTER(*), INTENT(in) :: fileName
     ! Local 
     INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: solOffset(1:5)
+    INTEGER(HID_T) :: solOffset(1:4)
     INTEGER :: firstElem
     INTEGER :: N
 
@@ -309,7 +308,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
         firstElem = 1
       ENDIF
 
-      solOffset(1:5) = (/0,0,0,1,firstElem/)
+      solOffset(1:4) = (/0,0,1,firstElem/)
       CALL ReadArray_HDF5(fileId, 'solution', solOffset, this % solution % interior)
 
       CALL Close_HDF5(fileId)
@@ -465,7 +464,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       xOffset(1:6) = (/1,0,0,0,1,firstElem/)
       CALL WriteArray_HDF5(fileId, '/flux', xOffset, this % flux % interior)
 
-      CALL WriteArray_HDF5(fileId, '/solutionGradient', solOffset, this % solutionGradient % interior)
+      CALL WriteArray_HDF5(fileId, '/solutionGradient', xOffset, this % solutionGradient % interior)
 
 
       CALL WriteArray_HDF5(fileId, '/x', xOffset, this % geometry % x % interior)
