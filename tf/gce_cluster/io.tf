@@ -7,7 +7,7 @@ variable "project" {
 variable "machine_type" {
   type = string
   description = "GCE instance types for your scheduler-less cluster. Learn more at https://cloud.google.com/compute/docs/machine-types."
-  default = "n1-standard-8"
+  default = "n1-standard-2"
 }
 
 variable "node_count" {
@@ -30,7 +30,7 @@ variable "tags" {
 variable "image" {
   type = string
   description = "VM image used to launch your HPC application"
-  default = "projects/hpc-apps/global/images/gromacs-gcp-latest"
+  default = "projects/hpc-apps/global/images/openmpi-singularity-latest"
 }
 
 variable "disk_size_gb" {
@@ -48,13 +48,13 @@ variable "disk_type" {
 variable "labels" {
   type = map
   description = "Resource labels to apply to each GCE instance in your cluster."
-  default = {"hpc-app"="gromacs"}
+  default = {"hpc-app"="self"}
 }
 
 variable "name_prefix" {
   type = string
   description = "The name to prefix all GCE instances in your cluster"
-  default = "gromacs"
+  default = "self"
 }
 
 variable "gpu_type" {
@@ -65,8 +65,8 @@ variable "gpu_type" {
 
 variable "gpu_count" {
   type = number
-  description = "GCP Project ID"
-  default = 1
+  description = "Number of GPU accelerators to attach to your GCE instance."
+  default = 0
 }
 
 variable "vpc_subnet" {
