@@ -53,10 +53,12 @@ def main():
                       tests[k]['stderr'] = stderr.decode("utf-8")
                       tests[k]['exit_code'] = proc.returncode
 
-                    k+=1
+                      k+=1
                                         
     with open(WORKSPACE+'/tests.json','w')as f:          
       f.write(json.dumps(tests,indent=2))
+      
+    print(json.dumps(tests,indent=2))      
 
 if __name__=='__main__':
     main()
