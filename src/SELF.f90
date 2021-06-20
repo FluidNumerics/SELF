@@ -62,7 +62,7 @@ PROGRAM SELF
   CALL selfCLI % get(val=tensorChar(3,3),switch='--tensor-33')
   CALL selfCLI % get(val=outputFile,switch='--output')
 
-    spec % blockMesh = .TRUE.
+  spec % blockMesh = .TRUE.
   spec % blockMesh_nGeo = 1
   spec % blockMesh_x0 = 0.0_prec
   spec % blockMesh_x1 = 1.0_prec
@@ -106,139 +106,124 @@ PROGRAM SELF
     gpuAccel = .FALSE.
   END IF
 
-  IF (selfCLI % run_command(group="blockmesh_1d")) THEN
+  IF (selfCLI % run_command(group="s1d_interp")) THEN
 
-    CALL BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
-    
-
-  ELSEIF (selfCLI % run_command(group="blockmesh_2d")) THEN
-
-    CALL BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
-    
-
-  ELSEIF (selfCLI % run_command(group="blockmesh_3d")) THEN
-
-    CALL BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
-    
-
-  ELSEIF (selfCLI % run_command(group="s1d_interp")) THEN
-
-    CALL ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL ScalarInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               functionChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s2d_interp")) THEN
 
-    CALL ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL ScalarInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               functionChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s3d_interp")) THEN
 
-    CALL ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL ScalarInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               functionChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v2d_interp")) THEN
 
-    CALL VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL VectorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               vectorChar(1:2),gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="t2d_interp")) THEN
 
-    CALL TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL TensorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               tensorChar(1:2,1:2),gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v3d_interp")) THEN
 
-    CALL VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL VectorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               vectorChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="t3d_interp")) THEN
 
-    CALL TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL TensorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                               tensorChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s1d_binterp")) THEN
 
-    CALL ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL ScalarBoundaryInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       functionChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s2d_binterp")) THEN
 
-    CALL ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL ScalarBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       functionChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s3d_binterp")) THEN
 
-    CALL ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL ScalarBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       functionChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v2d_binterp")) THEN
 
-    CALL VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL VectorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       vectorChar(1:2),gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="t2d_binterp")) THEN
 
-    CALL TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL TensorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       tensorChar(1:2,1:2),gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v3d_binterp")) THEN
 
-    CALL VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL VectorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       vectorChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="t3d_binterp")) THEN
 
-    CALL TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
+    CALL TensorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
                                       tensorChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s1d_derivative")) THEN
 
-    CALL ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+    CALL ScalarDerivative1D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
                                   functionChar,derivativeChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s2d_gradient")) THEN
 
-    CALL ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+    CALL ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
                                 functionChar,vectorChar(1:2),gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s3d_gradient")) THEN
 
-    CALL ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+    CALL ScalarGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
                                 functionChar,vectorChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v2d_gradient")) THEN
 
-    CALL VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+    CALL VectorGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
                                 vectorChar(1:2),tensorChar(1:2,1:2),gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v2d_divergence")) THEN
 
-    CALL VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+    CALL VectorDivergence2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
                                 vectorChar(1:2),functionChar,gpuAccel)
     
 
 
   ELSEIF (selfCLI % run_command(group="v3d_gradient")) THEN
 
-    CALL VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,vectorChar,tensorChar,gpuAccel)
+    CALL VectorGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,vectorChar,tensorChar,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="v3d_divergence")) THEN
@@ -423,15 +408,6 @@ CONTAINS
                    help="The name of the HDF5 file to output SELF data."//NEW_LINE("A"), &
                    def="./self_out.h5", &
                    required=.FALSE.)
-
-    CALL cli % add_group(group="blockmesh_1d", &
-                         description="Block Mesh generation in 1D")
-
-    CALL cli % add_group(group="blockmesh_2d", &
-                         description="Block Mesh generation in 2D")
-
-    CALL cli % add_group(group="blockmesh_3d", &
-                         description="Block Mesh generation in 3D")
 
     CALL cli % add_group(group="s1d_interp", &
                          description="Scalar 1D Grid Interpolation")

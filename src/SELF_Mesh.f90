@@ -148,6 +148,9 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
+    PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh1D
+    PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh1D
+
   END TYPE Mesh1D
 
   ! Mesh format is set up as the HOPr format
@@ -184,8 +187,6 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh2D
 
-!    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh2D
-
   END TYPE Mesh2D
 
   TYPE,PUBLIC :: Mesh3D
@@ -219,8 +220,6 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: Load => Load_Mesh3D
     PROCEDURE,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh3D
-
-!    PROCEDURE, PUBLIC :: GenerateConnectivity => GenerateConnectivity_Mesh3D
 
   END TYPE Mesh3D
 
@@ -442,30 +441,23 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh1D
 
-  SUBROUTINE Write_HOPr_Mesh1D( myMesh, meshFile, nRanks, myRank, mpiComm )
+  SUBROUTINE Write_HOPr_Mesh1D( myMesh, meshFile )
   ! Writes mesh output in HOPR format
     IMPLICIT NONE
     CLASS(Mesh1D), INTENT(inout) :: myMesh
     CHARACTER(*), INTENT(in) :: meshFile
-    INTEGER, INTENT(in) :: nRanks
-    INTEGER, INTENT(in) :: myRank
-    INTEGER, OPTIONAL, INTENT(in) :: mpiComm
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: offset(1:2), gOffset(1) 
     INTEGER :: nGlobalElem
-    INTEGER :: offSetElem(0:nRanks)
     INTEGER :: firstElem, nLocalElems
     INTEGER :: firstNode, nLocalNodes
     INTEGER :: firstSide, nLocalSides
     INTEGER :: nGeo, nBCs
 
-    IF( PRESENT(mpiComm) )THEN
-      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, mpiComm)
-    ELSE
-      CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
-    ENDIF
-
+ 
+    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+ 
     CALL WriteAttribute_HDF5(fileId, 'nElems', myMesh % nElem)
     CALL WriteAttribute_HDF5(fileId, 'Ngeo', myMesh % nGeo )
     CALL WriteAttribute_HDF5(fileId, 'nBCs', myMesh % nBCs)
@@ -474,9 +466,9 @@ CONTAINS
     CALL WriteArray_HDF5(fileId, 'BCType', offset, myMesh % bcType)
 
     ! Read local subarray of ElemInfo
-    firstElem = offsetElem(myRank)+1
+    firstElem = 1
 
-    nLocalElems = offsetElem(myRank+1)-offsetElem(myRank)
+    nLocalElems = myMesh % nElem
 
     offset = (/0, firstElem-1/)
     CALL WriteArray_HDF5(fileId, 'ElemInfo', offset, myMesh % elemInfo  )
@@ -616,59 +608,6 @@ CONTAINS
 #endif
 
   END SUBROUTINE UpdateDevice_Mesh2D
-
-!  SUBROUTINE GenerateConnectivity_Mesh2D(myMesh)
-!  ! Create the sideInfo information given eleminfo
-!  !  > Assumes quadrilateral mesh in 2-D
-!  !  > Assumes hexahedral mesh in 3-D
-!    IMPLICIT NONE
-!    CLASS(Mesh2D),INTENT(inout) :: myMesh
-!
-!    ! Find matching nodes
-!    DO 
-!    ! SideInfo
-!    !
-!    !  SideType : Side Type encoding. The number of corner nodes is the last digit.
-!    !  GlobalSideID : Unique side ID global identifier
-!    !
-!    !  nbElemID : Neighbor Element ID
-!    !
-!    !  10*nbLocSide+Flip : first digit - local side of the connected neighbor element; last digit - Orientation between the sides
-!    !  (flip in [0,2])
-!    !
-!    !  BCID : Refers to the row index of the Boundary Condition List in BCNames/BCType array (in [1,nBCs]); = 0 for inner sides
-!
-!    ! Nodes are assumed to be defined on gauss-lobatto points - This allows us to check if nodes are the same along boundary
-!    ! edges/faces
-!
-!    ! Loop over elements,
-!    !   > Loop over local nodes    
-!    !     > Loop over elements up to current element minus 1
-!    !       > Loop over local nodes
-!    !         > Check for match with previous node
-!    !         > IF MATCH
-!    !           > Update Global Node ID to matched node Global Node ID
-!    !         > ELSE
-!    !           > Assign new global node id
-!
-!    ! Loop over elements,
-!    !   > Loop over local sides
-!    !     > Assign side type (Assume line in 2-D)
-!    !     > Set nbElemID = current element ID
-!    !     > Set "current local side" as nbLocalSideID, "0" orientiation 
-!    !     > Set the BCID = 0
-!    !     > Save nodelist for this side
-!    !
-!    !   > Loop over elements up to current element minus 1
-!    !      > Check for match with previous side
-!    !      > IF MATCH
-!    !        > Update Global ID of secondary element
-!    !        > Set nbElemID for both elements; nbElemID of primary element is secondary element ID and vice-versa.
-!    !        > Set nbLocalSideID for local side of neighboring element (
-!    !        > Update "Flip" of secondary element, relative to primary element
-!
-!
-!  END SUBROUTINE GenerateConnectivity_Mesh2D
 
   SUBROUTINE UniformBlockMesh_Mesh2D(myMesh,nGeo,nElem,x)
     IMPLICIT NONE

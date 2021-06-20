@@ -23,115 +23,9 @@ MODULE SELF_CLI
 
 CONTAINS
 
-  SUBROUTINE BlockMesh1D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
+  SUBROUTINE ScalarInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "BlockMesh1D_Test"
-    IMPLICIT NONE
-    INTEGER,INTENT(in) :: cqType
-    INTEGER,INTENT(in) :: tqType
-    INTEGER,INTENT(in) :: cqDegree
-    INTEGER,INTENT(in) :: tqDegree
-    INTEGER,INTENT(in) :: nElem
-    ! Local
-    CHARACTER(240) :: msg
-    TYPE(Mesh1D) :: mesh
-    TYPE(Geometry1D) :: geometry
-    INTEGER :: iel,i
-
-    
-    INFO('Number of elements : '//Int2Str(nElem))
-    INFO('Control point degree : '//Int2Str(cqDegree))
-    INFO('Target point degree : '//Int2Str(tqDegree))
-
-    CALL mesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
-
-    ! Create the geometry
-    CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
-
-    ! To do : File IO for mesh and geometry
-
-    CALL mesh % Free()
-    CALL geometry % Free()
-
-  END SUBROUTINE BlockMesh1D_Test
-
-  SUBROUTINE BlockMesh2D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
-#undef __FUNC__
-#define __FUNC__ "BlockMesh2D_Test"
-    IMPLICIT NONE
-    INTEGER,INTENT(in) :: cqType
-    INTEGER,INTENT(in) :: tqType
-    INTEGER,INTENT(in) :: cqDegree
-    INTEGER,INTENT(in) :: tqDegree
-    INTEGER,INTENT(in) :: nElem
-    ! Local
-    CHARACTER(240) :: msg
-    TYPE(Mesh2D) :: mesh
-    TYPE(SEMQuad) :: geometry
-    INTEGER :: iel,jel,i,j
-    INTEGER :: row,col
-
-    
-    INFO('Number of elements : '//Int2Str(nElem*nElem))
-    INFO('Control point degree : '//Int2Str(cqDegree))
-    INFO('Target point degree : '//Int2Str(tqDegree))
-
-    CALL mesh % UniformBlockMesh(cqDegree, &
-                                 (/nElem,nElem/), &
-                                 (/0.0_prec,1.0_prec, &
-                                   0.0_prec,1.0_prec/))
-
-    ! Create the geometry
-    CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
-
-    ! To do : file io for mesh and geometry
-
-    CALL mesh % Free()
-    CALL geometry % Free()
-
-  END SUBROUTINE BlockMesh2D_Test
-
-  SUBROUTINE BlockMesh3D_Test(cqType,tqType,cqDegree,tqDegree,nElem)
-#undef __FUNC__
-#define __FUNC__ "BlockMesh3D_Test"
-    IMPLICIT NONE
-    INTEGER,INTENT(in) :: cqType
-    INTEGER,INTENT(in) :: tqType
-    INTEGER,INTENT(in) :: cqDegree
-    INTEGER,INTENT(in) :: tqDegree
-    INTEGER,INTENT(in) :: nElem
-    ! Local
-    CHARACTER(240) :: msg
-    TYPE(Mesh3D) :: mesh
-    TYPE(SEMHex) :: geometry
-    INTEGER :: iel,jel,kel,i,j,k
-    INTEGER :: row,col
-
-    
-    msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
-    INFO(TRIM(msg))
-    INFO('Control point degree : '//Int2Str(cqDegree))
-    INFO('Target point degree : '//Int2Str(tqDegree))
-
-    CALL mesh % UniformBlockMesh(cqDegree, &
-                                 (/nElem,nElem,nElem/), &
-                                 (/0.0_prec,1.0_prec, &
-                                   0.0_prec,1.0_prec, &
-                                   0.0_prec,1.0_prec/))
-
-    ! Create the geometry
-    CALL geometry % GenerateFromMesh(mesh,cqType,tqType,cqDegree,tqDegree)
-
-    ! To do : file IO for mesh and geometry
-
-    CALL mesh % Free()
-    CALL geometry % Free()
-
-  END SUBROUTINE BlockMesh3D_Test
-
-  SUBROUTINE ScalarInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,functionChar,gpuAccel)
-#undef __FUNC__
-#define __FUNC__ "ScalarInterp1D_Test"
+#define __FUNC__ "ScalarInterp1D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -209,12 +103,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE ScalarInterp1D_Test
+  END SUBROUTINE ScalarInterp1D
 
-  SUBROUTINE ScalarBoundaryInterp1D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE ScalarBoundaryInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          functionChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarBoundaryInterp1D_Test"
+#define __FUNC__ "ScalarBoundaryInterp1D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -284,12 +178,12 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE ScalarBoundaryInterp1D_Test
+  END SUBROUTINE ScalarBoundaryInterp1D
 
-  SUBROUTINE ScalarDerivative1D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE ScalarDerivative1D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
                                      fChar,dfChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarDerivative1D_Test"
+#define __FUNC__ "ScalarDerivative1D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -378,12 +272,12 @@ CONTAINS
     CALL f % Free()
     CALL dfInterp % Free()
 
-  END SUBROUTINE ScalarDerivative1D_Test
+  END SUBROUTINE ScalarDerivative1D
 
-  SUBROUTINE ScalarInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE ScalarInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  functionChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarInterp2D_Test"
+#define __FUNC__ "ScalarInterp2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -472,12 +366,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE ScalarInterp2D_Test
+  END SUBROUTINE ScalarInterp2D
 
-  SUBROUTINE ScalarBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE ScalarBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          functionChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarBoundaryInterp2D_Test"
+#define __FUNC__ "ScalarBoundaryInterp2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -554,12 +448,12 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE ScalarBoundaryInterp2D_Test
+  END SUBROUTINE ScalarBoundaryInterp2D
 
-  SUBROUTINE ScalarGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
                                    fChar,gradientChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarGradient2D_Test"
+#define __FUNC__ "ScalarGradient2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -657,12 +551,12 @@ CONTAINS
     CALL workTensor % Free()
     CALL dfInterp % Free()
 
-  END SUBROUTINE ScalarGradient2D_Test
+  END SUBROUTINE ScalarGradient2D
 
-  SUBROUTINE VectorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE VectorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  vectorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorInterp2D_Test"
+#define __FUNC__ "VectorInterp2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -755,12 +649,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE VectorInterp2D_Test
+  END SUBROUTINE VectorInterp2D
 
-  SUBROUTINE VectorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE VectorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          vectorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorBoundaryInterp2D_Test"
+#define __FUNC__ "VectorBoundaryInterp2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -841,12 +735,12 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE VectorBoundaryInterp2D_Test
+  END SUBROUTINE VectorBoundaryInterp2D
 
-  SUBROUTINE VectorGradient2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE VectorGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
                                    vectorChar,tensorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorGradient2D_Test"
+#define __FUNC__ "VectorGradient2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -966,12 +860,12 @@ CONTAINS
     CALL workTensor % Free()
     CALL dfInterp % Free()
 
-  END SUBROUTINE VectorGradient2D_Test
+  END SUBROUTINE VectorGradient2D
 
-  SUBROUTINE VectorDivergence2D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE VectorDivergence2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
                                      vectorChar,scalarChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorDivergence2D_Test"
+#define __FUNC__ "VectorDivergence2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1081,12 +975,12 @@ CONTAINS
     CALL workVector % Free()
     CALL dfInterp % Free()
 
-  END SUBROUTINE VectorDivergence2D_Test
+  END SUBROUTINE VectorDivergence2D
 
-  SUBROUTINE TensorInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE TensorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  tensorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "TensorInterp2D_Test"
+#define __FUNC__ "TensorInterp2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1184,12 +1078,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE TensorInterp2D_Test
+  END SUBROUTINE TensorInterp2D
 
-  SUBROUTINE TensorBoundaryInterp2D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE TensorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          tensorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "TensorBoundaryInterp2D_Test"
+#define __FUNC__ "TensorBoundaryInterp2D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1275,12 +1169,12 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE TensorBoundaryInterp2D_Test
+  END SUBROUTINE TensorBoundaryInterp2D
 
-  SUBROUTINE ScalarInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE ScalarInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  functionChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarInterp3D_Test"
+#define __FUNC__ "ScalarInterp3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1370,12 +1264,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE ScalarInterp3D_Test
+  END SUBROUTINE ScalarInterp3D
 
-  SUBROUTINE ScalarBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE ScalarBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          functionChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarBoundaryInterp3D_Test"
+#define __FUNC__ "ScalarBoundaryInterp3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1455,12 +1349,12 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE ScalarBoundaryInterp3D_Test
+  END SUBROUTINE ScalarBoundaryInterp3D
 
-  SUBROUTINE ScalarGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE ScalarGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
                                    fChar,gradientChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "ScalarGradient3D_Test"
+#define __FUNC__ "ScalarGradient3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1562,12 +1456,12 @@ CONTAINS
     CALL workTensor % Free()
     CALL dfInterp % Free()
 
-  END SUBROUTINE ScalarGradient3D_Test
+  END SUBROUTINE ScalarGradient3D
 
-  SUBROUTINE VectorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE VectorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  vectorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorInterp3D_Test"
+#define __FUNC__ "VectorInterp3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1663,12 +1557,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE VectorInterp3D_Test
+  END SUBROUTINE VectorInterp3D
 
-  SUBROUTINE VectorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE VectorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          vectorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorBoundaryInterp3D_Test"
+#define __FUNC__ "VectorBoundaryInterp3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1752,12 +1646,12 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE VectorBoundaryInterp3D_Test
+  END SUBROUTINE VectorBoundaryInterp3D
 
-  SUBROUTINE VectorGradient3D_Test(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE VectorGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
                                    vectorChar,tensorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorGradient3D_Test"
+#define __FUNC__ "VectorGradient3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1878,12 +1772,12 @@ CONTAINS
     CALL workTensor % Free()
     CALL dfInterp % Free()
 
-  END SUBROUTINE VectorGradient3D_Test
+  END SUBROUTINE VectorGradient3D
 
   SUBROUTINE VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nvar,&
                                      spec,vectorChar,scalarChar,outputFile,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "VectorDivergence3D_Test"
+#define __FUNC__ "VectorDivergence3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -1961,10 +1855,10 @@ CONTAINS
 
   END SUBROUTINE VectorDivergence3D
 
-  SUBROUTINE TensorInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE TensorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                  tensorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "TensorInterp3D_Test"
+#define __FUNC__ "TensorInterp3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -2065,12 +1959,12 @@ CONTAINS
     CALL f % Free()
     CALL fInterp % Free()
 
-  END SUBROUTINE TensorInterp3D_Test
+  END SUBROUTINE TensorInterp3D
 
-  SUBROUTINE TensorBoundaryInterp3D_Test(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
+  SUBROUTINE TensorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
                                          tensorChar,gpuAccel)
 #undef __FUNC__
-#define __FUNC__ "TensorBoundaryInterp3D_Test"
+#define __FUNC__ "TensorBoundaryInterp3D"
     IMPLICIT NONE
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
@@ -2159,6 +2053,6 @@ CONTAINS
     CALL controlGeometry % Free()
     CALL f % Free()
 
-  END SUBROUTINE TensorBoundaryInterp3D_Test
+  END SUBROUTINE TensorBoundaryInterp3D
 
 END MODULE SELF_CLI

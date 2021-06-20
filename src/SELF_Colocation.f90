@@ -4,7 +4,7 @@
 ! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_DG
+MODULE SELF_Colocation
 
 USE SELF_Metadata
 USE SELF_MPI
@@ -28,7 +28,7 @@ USE HDF5
 !     > ForwardStep
 !  > 
 
-TYPE, PUBLIC :: DG2D
+TYPE, PUBLIC :: Colocation2D
     TYPE(MappedScalar2D), PUBLIC :: solution
     TYPE(MappedVector2D), PUBLIC :: solutionGradient
     TYPE(MappedVector2D), PUBLIC :: flux
@@ -47,35 +47,35 @@ TYPE, PUBLIC :: DG2D
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Init => Init_DG2D
-      PROCEDURE, PUBLIC :: Free => Free_DG2D
+      PROCEDURE, PUBLIC :: Init => Init_Colocation2D
+      PROCEDURE, PUBLIC :: Free => Free_Colocation2D
 
-      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_DG2D
-      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_DG2D
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Colocation2D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Colocation2D
 
       ! Accessors
-    !  PROCEDURE, PUBLIC :: GetNumberOfVars => GetNumberOfVars_DG2D
-    !  PROCEDURE, PUBLIC :: GetControlDegree => GetControlDegree_DG2D
-    !  PROCEDURE, PUBLIC :: GetTargetDegree => GetTargetDegree_DG2D
-    !  PROCEDURE, PUBLIC :: GetControlQuadrature => GetControlQuadrature_DG2D
-    !  PROCEDURE, PUBLIC :: GetTargetQuadrature => GetTargetQuadrature_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfElement => GetNumberOfElements_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalSides => GetNumberOfGlobalSides_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueSides => GetNumberOfUniqueSides_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_DG2D
+    !  PROCEDURE, PUBLIC :: GetNumberOfVars => GetNumberOfVars_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetControlDegree => GetControlDegree_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetTargetDegree => GetTargetDegree_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetControlQuadrature => GetControlQuadrature_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetTargetQuadrature => GetTargetQuadrature_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetNumberOfElement => GetNumberOfElements_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalSides => GetNumberOfGlobalSides_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueSides => GetNumberOfUniqueSides_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_Colocation2D
+    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_Colocation2D
 
-      PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG2D 
-      PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG2D
+      PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_Colocation2D 
+      PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_Colocation2D
 
-      PROCEDURE, PUBLIC :: Read => Read_DG2D 
-      PROCEDURE, PUBLIC :: Write => Write_DG2D
+      PROCEDURE, PUBLIC :: Read => Read_Colocation2D 
+      PROCEDURE, PUBLIC :: Write => Write_Colocation2D
 
-  END TYPE DG2D
+  END TYPE Colocation2D
 
 
 
-  TYPE, PUBLIC :: DG3D
+  TYPE, PUBLIC :: Colocation3D
     TYPE(MappedScalar3D), PUBLIC :: solution
     TYPE(MappedVector3D), PUBLIC :: solutionGradient
     TYPE(MappedVector3D), PUBLIC :: flux
@@ -94,39 +94,39 @@ TYPE, PUBLIC :: DG2D
 
     CONTAINS
 
-      PROCEDURE, PUBLIC :: Init => Init_DG3D
-      PROCEDURE, PUBLIC :: Free => Free_DG3D
+      PROCEDURE, PUBLIC :: Init => Init_Colocation3D
+      PROCEDURE, PUBLIC :: Free => Free_Colocation3D
 
-      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_DG3D
-      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_DG3D
+      PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_Colocation3D
+      PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_Colocation3D
 
       ! Accessors
-    !  PROCEDURE, PUBLIC :: GetNumberOfVars => GetNumberOfVars_DG3D
-    !  PROCEDURE, PUBLIC :: GetControlDegree => GetControlDegree_DG3D
-    !  PROCEDURE, PUBLIC :: GetTargetDegree => GetTargetDegree_DG3D
-    !  PROCEDURE, PUBLIC :: GetControlQuadrature => GetControlQuadrature_DG3D
-    !  PROCEDURE, PUBLIC :: GetTargetQuadrature => GetTargetQuadrature_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfElement => GetNumberOfElements_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalSides => GetNumberOfGlobalSides_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueSides => GetNumberOfUniqueSides_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_DG3D
+    !  PROCEDURE, PUBLIC :: GetNumberOfVars => GetNumberOfVars_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetControlDegree => GetControlDegree_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetTargetDegree => GetTargetDegree_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetControlQuadrature => GetControlQuadrature_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetTargetQuadrature => GetTargetQuadrature_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetNumberOfElement => GetNumberOfElements_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalSides => GetNumberOfGlobalSides_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueSides => GetNumberOfUniqueSides_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_Colocation3D
+    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_Colocation3D
 
-      PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG3D 
-      PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG3D
+      PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_Colocation3D 
+      PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_Colocation3D
 
-      PROCEDURE, PUBLIC :: Read => Read_DG3D 
-      PROCEDURE, PUBLIC :: Write => Write_DG3D
+      PROCEDURE, PUBLIC :: Read => Read_Colocation3D 
+      PROCEDURE, PUBLIC :: Write => Write_Colocation3D
 
-  END TYPE DG3D
+  END TYPE Colocation3D
 
-  INTEGER, PARAMETER :: SELF_DG_BASSIREBAY = 100
+  INTEGER, PARAMETER :: SELF_Colocation_BASSIREBAY = 100
 
 CONTAINS
 
-SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
+SUBROUTINE Init_Colocation2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(out) :: this
+    CLASS(Colocation2D), INTENT(out) :: this
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
@@ -155,11 +155,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       ALLOCATE(this % solutionMetaData(1:nvar))
 
-  END SUBROUTINE Init_DG2D
+  END SUBROUTINE Init_Colocation2D
 
-  SUBROUTINE Free_DG2D(this)
+  SUBROUTINE Free_Colocation2D(this)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(inout) :: this
+    CLASS(Colocation2D), INTENT(inout) :: this
 
       CALL this % mesh % Free()
       CALL this % geometry % Free()
@@ -174,11 +174,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % compFlux % Free()
       DEALLOCATE(this % solutionMetaData)
       
-  END SUBROUTINE Free_DG2D
+  END SUBROUTINE Free_Colocation2D
 
-  SUBROUTINE UpdateHost_DG2D(this)
+  SUBROUTINE UpdateHost_Colocation2D(this)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(inout) :: this
+    CLASS(Colocation2D), INTENT(inout) :: this
 
       CALL this % mesh % UpdateHost()
       CALL this % geometry % UpdateHost()
@@ -192,11 +192,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % workTensor % UpdateHost()
       CALL this % compFlux % UpdateHost()
 
-  END SUBROUTINE UpdateHost_DG2D
+  END SUBROUTINE UpdateHost_Colocation2D
 
-  SUBROUTINE UpdateDevice_DG2D(this)
+  SUBROUTINE UpdateDevice_Colocation2D(this)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(inout) :: this
+    CLASS(Colocation2D), INTENT(inout) :: this
 
       CALL this % mesh % UpdateDevice()
       CALL this % geometry % UpdateDevice()
@@ -210,41 +210,35 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % workTensor % UpdateDevice()
       CALL this % compFlux % UpdateDevice()
       
-  END SUBROUTINE UpdateDevice_DG2D 
+  END SUBROUTINE UpdateDevice_Colocation2D 
 
-  SUBROUTINE CalculateSolutionGradient_DG2D(this,gpuAccel)
+  SUBROUTINE CalculateSolutionGradient_Colocation2D(this,gpuAccel)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(inout) :: this
+    CLASS(Colocation2D), INTENT(inout) :: this
     LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
-
-    CALL this % solution % SideExchange(this % mesh,&
-                                        this % decomp,&
-                                        gpuAccel)
-
-    CALL this % solution % BassiRebaySides(gpuAccel)
 
     CALL this % solution % Gradient(this % workTensor, &
                                     this % geometry, &
                                     this % solutionGradient, &
-                                    selfWeakDGForm,gpuAccel)
+                                    selfStrongForm,gpuAccel)
 
-  END SUBROUTINE CalculateSolutionGradient_DG2D
+  END SUBROUTINE CalculateSolutionGradient_Colocation2D
 
-  SUBROUTINE CalculateFluxDivergence_DG2D(this,gpuAccel)
+  SUBROUTINE CalculateFluxDivergence_Colocation2D(this,gpuAccel)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(inout) :: this
+    CLASS(Colocation2D), INTENT(inout) :: this
     LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
 
     CALL this % flux % Divergence(this % compFlux, &
                                   this % geometry, &
                                   this % fluxDivergence, &
-                                  selfWeakDGForm,gpuAccel)
+                                  selfStrongForm,gpuAccel)
 
-  END SUBROUTINE CalculateFluxDivergence_DG2D
+  END SUBROUTINE CalculateFluxDivergence_Colocation2D
 
-  SUBROUTINE Write_DG2D(this,fileName)
+  SUBROUTINE Write_Colocation2D(this,fileName)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(in) :: this
+    CLASS(Colocation2D), INTENT(in) :: this
     CHARACTER(*), INTENT(in) :: fileName
     ! Local 
     INTEGER(HID_T) :: fileId
@@ -279,11 +273,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       CALL Close_HDF5(fileId)
 
-  END SUBROUTINE Write_DG2D
+  END SUBROUTINE Write_Colocation2D
 
-  SUBROUTINE Read_DG2D(this,fileName)
+  SUBROUTINE Read_Colocation2D(this,fileName)
     IMPLICIT NONE
-    CLASS(DG2D), INTENT(inout) :: this
+    CLASS(Colocation2D), INTENT(inout) :: this
     CHARACTER(*), INTENT(in) :: fileName
     ! Local 
     INTEGER(HID_T) :: fileId
@@ -314,11 +308,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       CALL Close_HDF5(fileId)
 
-  END SUBROUTINE Read_DG2D
+  END SUBROUTINE Read_Colocation2D
 
-  SUBROUTINE Init_DG3D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
+  SUBROUTINE Init_Colocation3D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(out) :: this
+    CLASS(Colocation3D), INTENT(out) :: this
     INTEGER,INTENT(in) :: cqType
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
@@ -347,11 +341,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       ALLOCATE(this % solutionMetaData(1:nvar))
 
-  END SUBROUTINE Init_DG3D
+  END SUBROUTINE Init_Colocation3D
 
-  SUBROUTINE Free_DG3D(this)
+  SUBROUTINE Free_Colocation3D(this)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(inout) :: this
+    CLASS(Colocation3D), INTENT(inout) :: this
 
       CALL this % mesh % Free()
       CALL this % geometry % Free()
@@ -366,11 +360,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % compFlux % Free()
       DEALLOCATE(this % solutionMetaData)
       
-  END SUBROUTINE Free_DG3D
+  END SUBROUTINE Free_Colocation3D
 
-  SUBROUTINE UpdateHost_DG3D(this)
+  SUBROUTINE UpdateHost_Colocation3D(this)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(inout) :: this
+    CLASS(Colocation3D), INTENT(inout) :: this
 
       CALL this % mesh % UpdateHost()
       CALL this % geometry % UpdateHost()
@@ -384,11 +378,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % workTensor % UpdateHost()
       CALL this % compFlux % UpdateHost()
 
-  END SUBROUTINE UpdateHost_DG3D
+  END SUBROUTINE UpdateHost_Colocation3D
 
-  SUBROUTINE UpdateDevice_DG3D(this)
+  SUBROUTINE UpdateDevice_Colocation3D(this)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(inout) :: this
+    CLASS(Colocation3D), INTENT(inout) :: this
 
       CALL this % mesh % UpdateDevice()
       CALL this % geometry % UpdateDevice()
@@ -402,41 +396,35 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % workTensor % UpdateDevice()
       CALL this % compFlux % UpdateDevice()
       
-  END SUBROUTINE UpdateDevice_DG3D 
+  END SUBROUTINE UpdateDevice_Colocation3D 
 
-  SUBROUTINE CalculateSolutionGradient_DG3D(this,gpuAccel)
+  SUBROUTINE CalculateSolutionGradient_Colocation3D(this,gpuAccel)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(inout) :: this
+    CLASS(Colocation3D), INTENT(inout) :: this
     LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
-
-    CALL this % solution % SideExchange(this % mesh,&
-                                        this % decomp,&
-                                        gpuAccel)
-
-    CALL this % solution % BassiRebaySides(gpuAccel)
 
     CALL this % solution % Gradient(this % workTensor, &
                                     this % geometry, &
                                     this % solutionGradient, &
-                                    selfWeakDGForm,gpuAccel)
+                                    selfStrongForm,gpuAccel)
 
-  END SUBROUTINE CalculateSolutionGradient_DG3D
+  END SUBROUTINE CalculateSolutionGradient_Colocation3D
 
-  SUBROUTINE CalculateFluxDivergence_DG3D(this,gpuAccel)
+  SUBROUTINE CalculateFluxDivergence_Colocation3D(this,gpuAccel)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(inout) :: this
+    CLASS(Colocation3D), INTENT(inout) :: this
     LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
 
     CALL this % flux % Divergence(this % compFlux, &
                                   this % geometry, &
                                   this % fluxDivergence, &
-                                  selfWeakDGForm,gpuAccel)
+                                  selfStrongForm,gpuAccel)
 
-  END SUBROUTINE CalculateFluxDivergence_DG3D
+  END SUBROUTINE CalculateFluxDivergence_Colocation3D
 
-  SUBROUTINE Write_DG3D(this,fileName)
+  SUBROUTINE Write_Colocation3D(this,fileName)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(in) :: this
+    CLASS(Colocation3D), INTENT(in) :: this
     CHARACTER(*), INTENT(in) :: fileName
     ! Local 
     INTEGER(HID_T) :: fileId
@@ -472,11 +460,11 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       CALL Close_HDF5(fileId)
 
-  END SUBROUTINE Write_DG3D
+  END SUBROUTINE Write_Colocation3D
 
-  SUBROUTINE Read_DG3D(this,fileName)
+  SUBROUTINE Read_Colocation3D(this,fileName)
     IMPLICIT NONE
-    CLASS(DG3D), INTENT(inout) :: this
+    CLASS(Colocation3D), INTENT(inout) :: this
     CHARACTER(*), INTENT(in) :: fileName
     ! Local 
     INTEGER(HID_T) :: fileId
@@ -507,6 +495,6 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       CALL Close_HDF5(fileId)
 
-  END SUBROUTINE Read_DG3D
+  END SUBROUTINE Read_Colocation3D
 
-END MODULE SELF_DG 
+END MODULE SELF_Colocation 
