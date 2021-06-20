@@ -3,7 +3,7 @@ steps:
         # Add a step for formatting requirements
 
         - id: Build Docker Image
-          name: 'gcr.io/cloud-builders/docker'
+          name: gcr.io/cloud-builders/docker
           args: ['build',
                  '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
                  '-f','docker/Dockerfile.${_PLATFORM}',
@@ -12,51 +12,20 @@ steps:
                  'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}'
           ]
 
-        - id: Build Singularity Image
-          name: 'quay.io/singularity/singularity:v3.7.1'
-          args: ['build',
-                 'self_${_PLATFORM}.sif',
-                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
-          waitFor: ["Build Docker Image"]
-
-
-# Create CI Infrastructure
-        - id: Provision Test Cluster
-          name: 'hashicorp/terraform:0.12.26'
-          entrypoint: 'sh'
+        - id: Run CI Tests
+          name: gcr.io/cloud-builders/docker
           args: 
-          - '-c'
-          - | 
-              cd tf/gce_cluster
-              cp fluid.tfvars.tmpl fluid.auto.tfvars
-              sed -i "s/<name>/${_SELF_NAME}/g" fluid.auto.tfvars
-              sed -i "s/<project>/${PROJECT_ID}/g" fluid.auto.tfvars
-              sed -i "s/<zone>/${_SELF_ZONE}/g" fluid.auto.tfvars
-              sed -i "s/<machine_type>/${_SELF_MACHINE_TYPE}/g" fluid.auto.tfvars
-              sed -i "s/<node_count>/${_SELF_NODE_COUNT}/g" fluid.auto.tfvars
-              sed -i "s#<image>#${_SELF_IMAGE}#g" fluid.auto.tfvars
-              sed -i "s/<gpu_type>/${_SELF_GPU_TYPE}/g" fluid.auto.tfvars
-              sed -i "s/<gpu_count>/${_SELF_GPU_COUNT}/g" fluid.auto.tfvars
-              terraform init
-              terraform plan
-              terraform apply --auto-approve
-              
-# Copy Singularity image up to CI infrastructure
-
-# Launch CI job on head node
-
-# Copy Artifacts back from CI infrastructure
-
-# Delete CI Infrastructure
-        - id: Delete Test Cluster
-          name: 'hashicorp/terraform:0.12.26'
-          entrypoint: 'sh'
-          args: 
-          - '-c'
-          - | 
-              cd tf/gce_cluster
-              terraform destroy --auto-approve
-
+          - run
+          - -v
+          - "/workspace:/workspace"
+          - --env 
+          - WORKSPACE=/workspace
+          - --entrypoint
+          - /usr/bin/python3
+          - gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}
+          - /opt/self/test/ciRun.py
+          
+      
 # Check for zero exit codes
 
 # Check for correctness
@@ -65,21 +34,9 @@ steps:
 
 images: ['gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
 
-artifacts:
-  objects:
-    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
-    paths: ['self_${_PLATFORM}.sif']
-
 timeout: 7200s
 
 substitutions:
         _IMAGE_TAG: 'dev'
         _BUILD_TYPE: 'dev'
         _PLATFORM: 'serial-x86'
-        _SELF_NAME: 'self'
-        _SELF_ZONE: 'us-west1-b'
-        _SELF_MACHINE_TYPE: 'n1-standard-2'
-        _SELF_NODE_COUNT: '1'
-        _SELF_IMAGE: 'projects/hpc-apps/global/images/singularity-gcp-dev'
-        _SELF_GPU_TYPE: 'nvidia-tesla-v100'
-        _SELF_GPU_COUNT: '0'
