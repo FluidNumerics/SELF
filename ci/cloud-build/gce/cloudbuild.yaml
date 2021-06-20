@@ -26,7 +26,7 @@ steps:
           args: 
           - '-c'
           - | 
-              cd tf/gce_cluster
+              cd ci/tf/gce_cluster
               cp fluid.tfvars.tmpl fluid.auto.tfvars
               sed -i "s/<name>/${_SELF_NAME}/g" fluid.auto.tfvars
               sed -i "s/<project>/${PROJECT_ID}/g" fluid.auto.tfvars
@@ -107,7 +107,7 @@ steps:
           args: 
           - '-c'
           - | 
-              cd tf/gce_cluster
+              cd ci/tf/gce_cluster
               terraform destroy --auto-approve
           waitFor: ["Copy Artifacts from Cluster"]
 

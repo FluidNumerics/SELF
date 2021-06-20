@@ -30,10 +30,10 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     make
 
 RUN mkdir -p /opt/self/test &&\
-    cp /tmp/test/ci.json /opt/self/test/ &&\
-    cp /tmp/test/ciGenerator.py /opt/self/test/ &&\
-    cp /tmp/test/ciRun.py /opt/self/test/ &&\
-    cp /tmp/test/cmd.tmpl /opt/self/test/ &&\
+    cp /tmp/ci/test/ci.json /opt/self/test/ &&\
+    cp /tmp/ci/test/ciGenerator.py /opt/self/test/ &&\
+    cp /tmp/ci/test/ciRun.py /opt/self/test/ &&\
+    cp /tmp/ci/test/cmd.tmpl /opt/self/test/ &&\
     export GPU_ACCEL=false && export INSTALL_ROOT="/opt/self" && \
     cd /opt/self/test && python3 ciGenerator.py
 
