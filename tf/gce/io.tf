@@ -75,6 +75,12 @@ variable "vpc_subnet" {
   default = ""
 }
 
+variable "service_account" {
+  type = string
+  description = "Optional service account to attach to compute resources"
+  default = ""
+}
+
 variable "subnet_cidr" {
   type = string
   description = "CIDR Range for the subnet (if vpc_subnet is not provided)."

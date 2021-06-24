@@ -3,13 +3,15 @@ provider "google" {
 }
 
 resource "google_service_account" "gce_service_account" {
-  account_id = "self-service"
+  count = var.service_account == "" ? 1:0
+  account_id = "${var.name_prefix}-sa"
   display_name = "SELF Service account"
   project = var.project
 }
 
 locals {
   region = trimsuffix(var.zone,substr(var.zone,-2,-2))
+  service_account = var.service_account == "" ? google_service_account.gce_service_account[0].email:var.service_account
 }
 
 
@@ -120,7 +122,7 @@ resource "google_compute_instance" "gce_nodes" {
 
 
   service_account {
-    email  = google_service_account.gce_service_account.email
+    email  = local.service_account
     scopes = ["cloud-platform"]
   }
   lifecycle{
