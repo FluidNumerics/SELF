@@ -51,6 +51,11 @@ steps:
           - '-c'
           - | 
               ssh-keygen -b 2048 -t rsa -f /workspace/sshkey -q -N ""
+              gcloud compute os-login ssh-keys add --key-file=/workspace/sshkey
+              sleep 30
+              gcloud compute ssh self${SHORT_SHA} --zone=${_SELF_ZONE}
+                                                  --ssh-key-file=/workspace/sshkey \
+                                                  --command="singularity --version"
           waitFor: ["Provision Test Cluster"]
 
         # Copy Singularity image up to CI infrastructure
@@ -99,7 +104,6 @@ steps:
           - ssh-keys
           - remove
           - --key-file=/workspace/sshkey
-          - --ssh-key-file=/workspace/sshkey
           waitFor: ["Copy Artifacts from Cluster"]
 
         # Delete CI Infrastructure
