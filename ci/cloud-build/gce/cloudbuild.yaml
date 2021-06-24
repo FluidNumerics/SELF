@@ -9,14 +9,14 @@ steps:
                  '-f','docker/Dockerfile.${_PLATFORM}',
                  '.',
                  '-t',
-                 'gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}'
+                 'gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}'
           ]
 
         - id: Build Singularity Image
           name: 'quay.io/singularity/singularity:v3.7.1'
           args: ['build',
                  'self_${_PLATFORM}.sif',
-                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
+                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
           waitFor: ["Build Docker Image"]
 
         # Create CI Infrastructure
@@ -28,7 +28,7 @@ steps:
           - | 
               cd tf/gce
               cp fluid.tfvars.tmpl fluid.auto.tfvars
-              sed -i "s/<name>/${_SELF_NAME}/g" fluid.auto.tfvars
+              sed -i "s/<sha>/${SHORT_SHA}/g" fluid.auto.tfvars
               sed -i "s/<project>/${PROJECT_ID}/g" fluid.auto.tfvars
               sed -i "s/<zone>/${_SELF_ZONE}/g" fluid.auto.tfvars
               sed -i "s/<machine_type>/${_SELF_MACHINE_TYPE}/g" fluid.auto.tfvars
@@ -58,7 +58,7 @@ steps:
           - compute 
           - scp 
           - self_${_PLATFORM}.sif 
-          - self-0:self_${_PLATFORM}.sif 
+          - self${SHORT_SHA}-0:self_${_PLATFORM}.sif 
           - --zone=${_SELF_ZONE}
           - --ssh-key-file=/workspace/sshkey
           waitFor: ["Create SSH Key for Service Account"]
@@ -69,7 +69,7 @@ steps:
           args: 
           - compute 
           - ssh
-          - self-0
+          - self${SHORT_SHA}-0
           - --zone=${_SELF_ZONE}
           - --key-file=/workspace/sshkey
           - --ssh-key-file=/workspace/sshkey
@@ -82,7 +82,7 @@ steps:
           args: 
           - compute 
           - scp 
-          - self-0:/workspace/*
+          - self${SHORT_SHA}-0:/workspace/*
           - /workspace/ 
           - --zone=${_SELF_ZONE}
           - --ssh-key-file=/workspace/sshkey
@@ -117,17 +117,16 @@ steps:
   
 
 
-images: ['gcr.io/self-fluids/self_${_PLATFORM}:${_IMAGE_TAG}']
+images: ['gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
 
 artifacts:
   objects:
-    location: 'gs://self-fluids-singularity/${_IMAGE_TAG}'
+    location: 'gs://self-fluids-singularity/${SHORT_SHA}'
     paths: ['self_${_PLATFORM}.sif']
 
 timeout: 7200s
 
 substitutions:
-        _IMAGE_TAG: 'dev'
         _BUILD_TYPE: 'dev'
         _PLATFORM: 'serial-x86'
         _SELF_NAME: 'self'
@@ -137,4 +136,6 @@ substitutions:
         _SELF_IMAGE: 'projects/hpc-apps/global/images/singularity-gcp-dev'
         _SELF_GPU_TYPE: 'nvidia-tesla-v100'
         _SELF_GPU_COUNT: '0'
-        _SELF_VPC_SUBNET: 'projects/self-fluids/regions/us-west1/subnetworks/default'
+        _SELF_VPC_SUBNET: ''
+        _SELF_SERVICE_ACCOUNT: ''
+        _SELF_TAGS: 'self-ci'
