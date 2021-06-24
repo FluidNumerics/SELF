@@ -37,6 +37,8 @@ steps:
               sed -i "s/<gpu_type>/${_SELF_GPU_TYPE}/g" fluid.auto.tfvars
               sed -i "s/<gpu_count>/${_SELF_GPU_COUNT}/g" fluid.auto.tfvars
               sed -i "s#<vpc_subnet>#${_SELF_VPC_SUBNET}#g" fluid.auto.tfvars
+              sed -i "s/<tags>/${_SELF_TAGS}/g" fluid.auto.tfvars
+              sed -i "s/<service_account>/${_SELF_SERVICE_ACCOUNT}/g" fluid.auto.tfvars
               terraform init
               terraform plan
               terraform apply --auto-approve
