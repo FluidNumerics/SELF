@@ -77,7 +77,6 @@ steps:
           - ssh
           - self${SHORT_SHA}-0
           - --zone=${_SELF_ZONE}
-          - --key-file=/workspace/sshkey
           - --ssh-key-file=/workspace/sshkey
           - --command="mkdir -p /workspace/ && singularity run --env WORKSPACE=/workspace --bind /workspace:/workspace self_${_PLATFORM}.sif /opt/self/test/ciRun.py"
           waitFor: ["Copy Singularity Image to GCE Cluster"]
