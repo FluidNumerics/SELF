@@ -13,22 +13,7 @@ USE SELF_MappedData
 USE SELF_HDF5
 USE HDF5
 
-!
-! User supplies : 
-!  * Interior physical flux
-!  * Boundary physical flux
-!  * Source Terms
-!
-! How someone should use...
-!  > Create the object
-!  > Loop over time
-!     > Fill in source
-!     > Fill in interior flux (Usually a Riemmann Solver); if 2nd order differential operators are included, bassi-rebay flux routine is available to
-!     support gradient calculation.
-!     > ForwardStep
-!  > 
-
-TYPE, PUBLIC :: DG2D
+  TYPE, PUBLIC :: DG2D
     TYPE(MappedScalar2D), PUBLIC :: solution
     TYPE(MappedVector2D), PUBLIC :: solutionGradient
     TYPE(MappedVector2D), PUBLIC :: flux
@@ -53,18 +38,6 @@ TYPE, PUBLIC :: DG2D
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_DG2D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_DG2D
 
-      ! Accessors
-    !  PROCEDURE, PUBLIC :: GetNumberOfVars => GetNumberOfVars_DG2D
-    !  PROCEDURE, PUBLIC :: GetControlDegree => GetControlDegree_DG2D
-    !  PROCEDURE, PUBLIC :: GetTargetDegree => GetTargetDegree_DG2D
-    !  PROCEDURE, PUBLIC :: GetControlQuadrature => GetControlQuadrature_DG2D
-    !  PROCEDURE, PUBLIC :: GetTargetQuadrature => GetTargetQuadrature_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfElement => GetNumberOfElements_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalSides => GetNumberOfGlobalSides_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueSides => GetNumberOfUniqueSides_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_DG2D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_DG2D
-
       PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG2D 
       PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG2D
 
@@ -72,8 +45,6 @@ TYPE, PUBLIC :: DG2D
       PROCEDURE, PUBLIC :: Write => Write_DG2D
 
   END TYPE DG2D
-
-
 
   TYPE, PUBLIC :: DG3D
     TYPE(MappedScalar3D), PUBLIC :: solution
@@ -99,18 +70,6 @@ TYPE, PUBLIC :: DG2D
 
       PROCEDURE, PUBLIC :: UpdateHost => UpdateHost_DG3D
       PROCEDURE, PUBLIC :: UpdateDevice => UpdateDevice_DG3D
-
-      ! Accessors
-    !  PROCEDURE, PUBLIC :: GetNumberOfVars => GetNumberOfVars_DG3D
-    !  PROCEDURE, PUBLIC :: GetControlDegree => GetControlDegree_DG3D
-    !  PROCEDURE, PUBLIC :: GetTargetDegree => GetTargetDegree_DG3D
-    !  PROCEDURE, PUBLIC :: GetControlQuadrature => GetControlQuadrature_DG3D
-    !  PROCEDURE, PUBLIC :: GetTargetQuadrature => GetTargetQuadrature_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfElement => GetNumberOfElements_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalSides => GetNumberOfGlobalSides_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueSides => GetNumberOfUniqueSides_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfGlobalNodes => GetNumberOfGlobalNodes_DG3D
-    !  PROCEDURE, PUBLIC :: GetNumberOfUniqueNodes => GetNumberOfUniqueNodes_DG3D
 
       PROCEDURE, PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG3D 
       PROCEDURE, PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG3D
