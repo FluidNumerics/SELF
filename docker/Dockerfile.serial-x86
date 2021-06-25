@@ -34,17 +34,20 @@ RUN mkdir -p /opt/self/test &&\
     cp /tmp/ci/test/ciGenerator.py /opt/self/test/ &&\
     cp /tmp/ci/test/ciRun.py /opt/self/test/ &&\
     cp /tmp/ci/test/cmd.tmpl /opt/self/test/ &&\
-    export GPU_ACCEL=false && export INSTALL_ROOT="/opt/self" && \
+    export GPU_ACCEL=false && export INSTALL_ROOT="/opt/self" && export WORKSPACE=/workspace && \
     cd /opt/self/test && python3 ciGenerator.py
 
 
 FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5
+
 COPY --from=devel /opt /opt
+COPY --from=devel /workspace /workspace
+
 LABEL maintainer="joe@fluidnumerics.com"
 
 ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
     PATH=/opt/self/bin:$PATH \
     INSTALL_ROOT=/opt/self \
-    GPU_ACCEL=false
+    GPU_ACCEL=false \
+    WORKSPACE=/workspace
 
-RUN mkdir /workspace

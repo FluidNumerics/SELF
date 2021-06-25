@@ -4,6 +4,7 @@ import json
 import os
 
 INSTALL_ROOT=os.getenv('INSTALL_ROOT')
+WORKSPACE=os.getenv('WORKSPACE')
 GPU_ACCEL=os.getenv('GPU_ACCEL')
 
 
@@ -28,6 +29,7 @@ def main():
                 for addlOpts in test['additional_opts'] :
                   for funcOpts in test['function_opts'] :
 
+
                     workdir = INSTALL_ROOT+'/test/'
                     workdir += test['cli_command']+'/'
                     workdir += 'nel_{}'.format(nel)+'/'
@@ -38,6 +40,17 @@ def main():
                     workdir += 'tDeg_{}'.format(tDeg)+'/'
                     workdir += '{}'.format(addlOpts['name'])+'/'
                     workdir += '{}'.format(funcOpts['name'])+'/'
+
+                    outdir = WORKSPACE+'/test/'
+                    outdir += test['cli_command']+'/'
+                    outdir += 'nel_{}'.format(nel)+'/'
+                    outdir += 'nvar_{}'.format(nvar)+'/'
+                    outdir += 'cQuad_{}'.format(cQuad)+'/'
+                    outdir += 'cDeg_{}'.format(cDeg)+'/'
+                    outdir += 'tQuad_{}'.format(tQuad)+'/'
+                    outdir += 'tDeg_{}'.format(tDeg)+'/'
+                    outdir += '{}'.format(addlOpts['name'])+'/'
+                    outdir += '{}'.format(funcOpts['name'])+'/'
 
                     cmd = cmd_tmpl
 
@@ -52,10 +65,12 @@ def main():
                     cmd = cmd.replace('@NVAR@',str(nvar))
                     cmd = cmd.replace('@FUNCTION_OPTS@',funcOpts['value'])
                     cmd = cmd.replace('@ADDITIONAL_OPTS@',addlOpts['value'])
-                    cmd = cmd.replace('@OUTPUT_FILE@',workdir+'self.h5')
+                    cmd = cmd.replace('@OUTPUT_FILE@',outdir+'self.h5')
                     cmd = cmd.replace('@COMMAND@',test['cli_command'])
 
                     os.makedirs(workdir)
+                    os.makedirs(outdir)
+
                     with open(workdir+'test.sh','w') as f:
                       f.write(cmd)
                     os.chmod(workdir+'test.sh',0o755)
