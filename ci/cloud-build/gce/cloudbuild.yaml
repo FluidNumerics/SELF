@@ -78,7 +78,7 @@ steps:
           - self${SHORT_SHA}-0
           - --zone=${_SELF_ZONE}
           - --ssh-key-file=/workspace/sshkey
-          - --command="mkdir -p /workspace/ && singularity run --env WORKSPACE=/workspace --bind /workspace:/workspace self_${_PLATFORM}.sif /opt/self/test/ciRun.py"
+          - --command="singularity exec --bind /workspace:/workspace self_${_PLATFORM}.sif /opt/self/test/ciRun.py"
           waitFor: ["Copy Singularity Image to GCE Cluster"]
           
         # Copy Artifacts back from CI infrastructure
@@ -137,7 +137,7 @@ substitutions:
         _SELF_ZONE: 'us-west1-b'
         _SELF_MACHINE_TYPE: 'n1-standard-2'
         _SELF_NODE_COUNT: '1'
-        _SELF_IMAGE: 'projects/hpc-apps/global/images/singularity-gcp-dev'
+        _SELF_IMAGE: 'projects/hpc-apps/global/images/singularity-gcp-latest'
         _SELF_GPU_TYPE: 'nvidia-tesla-v100'
         _SELF_GPU_COUNT: '0'
         _SELF_VPC_SUBNET: ''
