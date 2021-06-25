@@ -41,7 +41,6 @@ RUN mkdir -p /opt/self/test &&\
 FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5
 
 COPY --from=devel /opt /opt
-COPY --from=devel /workspace /workspace
 
 LABEL maintainer="joe@fluidnumerics.com"
 
@@ -51,3 +50,4 @@ ENV LD_LIBRARY_PATH=/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PA
     GPU_ACCEL=false \
     WORKSPACE=/workspace
 
+RUN mkdir /workspace
