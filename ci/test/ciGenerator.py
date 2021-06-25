@@ -54,8 +54,8 @@ def main():
 
                     cmd = cmd_tmpl
 
-                    cmd = cmd.replace('@PROFILER@',workdir)
-                    cmd = cmd.replace('@WORKDIR@',workdir)
+                    cmd = cmd.replace('@PROFILER@','to-do')
+                    cmd = cmd.replace('@OUTDIR@',outdir)
                     cmd = cmd.replace('@GPU_ACCEL@',GPU_ACCEL)
                     cmd = cmd.replace('@CONTROL_QUADRATURE@',cQuad)
                     cmd = cmd.replace('@CONTROL_DEGREE@',str(cDeg))
@@ -69,7 +69,6 @@ def main():
                     cmd = cmd.replace('@COMMAND@',test['cli_command'])
 
                     os.makedirs(workdir)
-                    os.makedirs(outdir)
 
                     with open(workdir+'test.sh','w') as f:
                       f.write(cmd)
