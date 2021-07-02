@@ -805,3 +805,12 @@ extern "C"
     hipLaunchKernelGGL((MapToTensorBoundary_MappedVector3D_gpu), dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0, *tensor, *vector, N, nVar);
   }
 }
+/*
+extern "C"
+{
+  void SideExchange_MappedScalar2D_gpu_wrapper(real **boundary, real**extBoundary, int **elemInfo, int **sideInfo, int N, int nVar, int nEl)
+  {
+  }
+
+}
+*/
