@@ -73,7 +73,7 @@ extern "C"
 {
   void Determinant_Tensor2D_gpu_wrapper(real **tensor, real **detTensor, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((Determinant_Tensor2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *tensor, *detTensor, N, nVar);
+	  Determinant_Tensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *detTensor, N, nVar);
   } 
 }
 
@@ -105,6 +105,6 @@ extern "C"
 {
   void Determinant_Tensor3D_gpu_wrapper(real **tensor, real **detTensor, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((Determinant_Tensor3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *tensor, *detTensor, N, nVar);
+	  Determinant_Tensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *detTensor, N, nVar);
   } 
 }

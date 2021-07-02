@@ -72,7 +72,7 @@ extern "C"
 {
   void JacobianWeight_MappedScalar1D_gpu_wrapper(real **scalar, real **dxds, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedScalar1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *scalar, *dxds, N, nVar);
+    JacobianWeight_MappedScalar1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*scalar, *dxds, N, nVar);
   }
 }
 
@@ -92,7 +92,7 @@ extern "C"
 {
   void JacobianWeight_MappedScalar2D_gpu_wrapper(real **scalar, real **jacobian, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedScalar2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *scalar, *jacobian, N, nVar);
+    JacobianWeight_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *jacobian, N, nVar);
   }
 }
 
@@ -113,7 +113,7 @@ extern "C"
 {
   void JacobianWeight_MappedScalar3D_gpu_wrapper(real **scalar, real **jacobian, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedScalar3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *scalar, *jacobian, N, nVar);
+    JacobianWeight_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *jacobian, N, nVar);
   }
 }
 
@@ -142,7 +142,7 @@ extern "C"
 {
   void ContravariantWeight_MappedScalar2D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantWeight_MappedScalar2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *scalar, *workTensor, *dsdx, N, nVar);
+    ContravariantWeight_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
   } 
 }
 
@@ -171,7 +171,7 @@ extern "C"
 {
   void ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantWeightBoundary_MappedScalar2D_gpu), dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0, *scalar, *workTensor, *dsdx, N, nVar);
+    ContravariantWeightBoundary_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
   } 
 }
 
@@ -217,7 +217,7 @@ extern "C"
 {
   void ContravariantWeight_MappedScalar3D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantWeight_MappedScalar3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *scalar, *workTensor, *dsdx, N, nVar);
+    ContravariantWeight_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
   } 
 }
 
@@ -263,7 +263,7 @@ extern "C"
 {
   void ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantWeightBoundary_MappedScalar3D_gpu), dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0, *scalar, *workTensor, *dsdx, N, nVar);
+    ContravariantWeightBoundary_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
   } 
 }
 
@@ -292,7 +292,7 @@ extern "C"
 {
   void ContravariantProjection_MappedVector2D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantProjection_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjection_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
   } 
 }
 
@@ -319,7 +319,7 @@ extern "C"
 {
   void ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantProjectionBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjectionBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
   } 
 }
 
@@ -342,7 +342,7 @@ extern "C"
 {
   void JacobianWeight_MappedVector2D_gpu_wrapper(real **vector, real **jacobian, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *vector, *jacobian, N, nVar);
+    JacobianWeight_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *jacobian, N, nVar);
   }
 }
 
@@ -382,7 +382,7 @@ extern "C"
 {
   void ContravariantProjection_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantProjection_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjection_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
   } 
 }
 
@@ -421,7 +421,7 @@ extern "C"
 {
   void ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ContravariantProjectionBoundary_MappedVector3D_gpu), dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0, *physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjectionBoundary_MappedVector3D_gpu<<<dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
   } 
 }
 
@@ -448,7 +448,7 @@ extern "C"
 {
   void JacobianWeight_MappedVector3D_gpu_wrapper(real **vector, real **jacobian, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *vector, *jacobian, N, nVar);
+    JacobianWeight_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*vector, *jacobian, N, nVar);
   }
 }
 
@@ -477,7 +477,7 @@ extern "C"
 {
   void JacobianWeight_MappedTensor2D_gpu_wrapper(real **tensor, real **jacobian, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedTensor2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *tensor, *jacobian, N, nVar);
+    JacobianWeight_MappedTensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *jacobian, N, nVar);
   }
 }
 
@@ -522,7 +522,7 @@ extern "C"
 {
   void JacobianWeight_MappedTensor3D_gpu_wrapper(real **tensor, real **jacobian, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedTensor3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *tensor, *jacobian, N, nVar);
+    JacobianWeight_MappedTensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *jacobian, N, nVar);
   }
 }
 
@@ -542,7 +542,7 @@ extern "C"
 {
   void CalculateCurl_MappedTensor2D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedTensor2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dfdx, *curlf, N, nVar);
+    JacobianWeight_MappedTensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dfdx, *curlf, N, nVar);
   }
 }
 
@@ -569,7 +569,7 @@ extern "C"
 {
   void CalculateCurl_MappedTensor3D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((JacobianWeight_MappedTensor3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dfdx, *curlf, N, nVar);
+    JacobianWeight_MappedTensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dfdx, *curlf, N, nVar);
   }
 }
 
@@ -593,7 +593,7 @@ extern "C"
 {
   void MapToScalar_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToScalar_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *scalar, *vector, N, nVar);
+    MapToScalar_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *vector, N, nVar);
   }
 }
 
@@ -616,7 +616,7 @@ extern "C"
 {
   void MapToScalarBoundary_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToScalarBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *scalar, *vector, N, nVar);
+    MapToScalarBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*scalar, *vector, N, nVar);
   }
 }
 
@@ -643,7 +643,7 @@ extern "C"
 {
   void MapToTensor_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToTensor_MappedVector2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *tensor, *vector, N, nVar);
+    MapToTensor_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *vector, N, nVar);
   }
 }
 
@@ -670,7 +670,7 @@ extern "C"
 {
   void MapToTensorBoundary_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToTensorBoundary_MappedVector2D_gpu), dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0, *tensor, *vector, N, nVar);
+    MapToTensorBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*tensor, *vector, N, nVar);
   }
 }
 
@@ -697,7 +697,7 @@ extern "C"
 {
   void MapToScalar_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToScalar_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *scalar, *vector, N, nVar);
+    MapToScalar_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *vector, N, nVar);
   }
 }
 
@@ -724,7 +724,7 @@ extern "C"
 {
   void MapToScalarBoundary_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToScalarBoundary_MappedVector3D_gpu), dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0, *scalar, *vector, N, nVar);
+    MapToScalarBoundary_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*scalar, *vector, N, nVar);
   }
 }
 
@@ -763,7 +763,7 @@ extern "C"
 {
   void MapToTensor_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToTensor_MappedVector3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *tensor, *vector, N, nVar);
+    MapToTensor_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *vector, N, nVar);
   }
 }
 
@@ -802,7 +802,7 @@ extern "C"
 {
   void MapToTensorBoundary_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((MapToTensorBoundary_MappedVector3D_gpu), dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0, *tensor, *vector, N, nVar);
+    MapToTensorBoundary_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*tensor, *vector, N, nVar);
   }
 }
 /*

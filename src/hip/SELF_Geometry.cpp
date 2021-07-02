@@ -95,7 +95,7 @@ extern "C"
 {
   void CalculateContravariantBasis_SEMQuad_gpu_wrapper(real **dxds, real **dsdx, int N, int nEl)
   { 
-	  hipLaunchKernelGGL((CalculateContravariantBasis_SEMQuad_gpu), dim3(nEl,1,1), dim3(N+1,N+1), 0, 0, *dxds, *dsdx, N);
+	  CalculateContravariantBasis_SEMQuad_gpu<<<dim3(nEl,1,1), dim3(N+1,N+1), 0, 0>>>(*dxds, *dsdx, N);
   } 
 }
 
@@ -122,7 +122,7 @@ extern "C"
 {
   void AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(real **dsdx, real **J, int N, int nEl)
   { 
-	  hipLaunchKernelGGL((AdjustBoundaryContravariantBasis_SEMQuad_gpu), dim3(4,nEl,1), dim3(N+1,1,1), 0, 0, *dsdx, *J, N);
+	  AdjustBoundaryContravariantBasis_SEMQuad_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*dsdx, *J, N);
   } 
 }
 __global__ void CalculateContravariantBasis_SEMHex_gpu(real *dxds, real *dsdx, int N){
@@ -193,7 +193,7 @@ extern "C"
 {
   void CalculateContravariantBasis_SEMHex_gpu_wrapper(real **dxds, real **dsdx, int N, int nEl)
   { 
-	  hipLaunchKernelGGL((CalculateContravariantBasis_SEMHex_gpu), dim3(nEl,1,1), dim3(N+1,N+1,N+1), 0, 0, *dxds, *dsdx, N);
+	  CalculateContravariantBasis_SEMHex_gpu<<<dim3(nEl,1,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dxds, *dsdx, N);
   } 
 }
 
@@ -221,6 +221,6 @@ extern "C"
 {
   void AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(real **dsdx, real **J, int N, int nEl)
   { 
-	  hipLaunchKernelGGL((AdjustBoundaryContravariantBasis_SEMHex_gpu), dim3(6,nEl,1), dim3(N+1,N+1,1), 0, 0, *dsdx, *J, N);
+	  AdjustBoundaryContravariantBasis_SEMHex_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dsdx, *J, N);
   } 
 }
