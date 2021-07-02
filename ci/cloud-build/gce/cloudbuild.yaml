@@ -6,6 +6,7 @@ steps:
           name: 'gcr.io/cloud-builders/docker'
           args: ['build',
                  '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
+                 '--build-arg','GPU_TARGET=${_SELF_GPU_TARGET}',
                  '-f','docker/Dockerfile.${_PLATFORM}',
                  '.',
                  '-t',
@@ -139,6 +140,7 @@ substitutions:
         _SELF_NODE_COUNT: '1'
         _SELF_IMAGE: 'projects/hpc-apps/global/images/singularity-gcp-latest'
         _SELF_GPU_TYPE: 'nvidia-tesla-v100'
+        _SELF_GPU_TARGET: 'sm_72'
         _SELF_GPU_COUNT: '0'
         _SELF_VPC_SUBNET: ''
         _SELF_SERVICE_ACCOUNT: ''
