@@ -71,28 +71,28 @@ steps:
           waitFor: ["Create SSH Key for Service Account"]
 
         # Launch CI job on head node
-        - id: Run CI Tests
-          name: gcr.io/cloud-builders/gcloud
-          args: 
-          - compute 
-          - ssh
-          - self${SHORT_SHA}-0
-          - --zone=${_SELF_ZONE}
-          - --ssh-key-file=/workspace/sshkey
-          - --command="singularity exec --bind /workspace:/workspace self_${_PLATFORM}.sif /opt/self/test/ciRun.py"
-          waitFor: ["Copy Singularity Image to GCE Cluster"]
+        #        - id: Run CI Tests
+        #          name: gcr.io/cloud-builders/gcloud
+        #          args: 
+        #          - compute 
+        #          - ssh
+        #          - self${SHORT_SHA}-0
+        #          - --zone=${_SELF_ZONE}
+        #          - --ssh-key-file=/workspace/sshkey
+        #          - --command="singularity exec --bind /workspace:/workspace self_${_PLATFORM}.sif /opt/self/test/ciRun.py"
+        #          waitFor: ["Copy Singularity Image to GCE Cluster"]
           
-        # Copy Artifacts back from CI infrastructure
-        - id: Copy Artifacts from Cluster
-          name: gcr.io/cloud-builders/gcloud
-          args: 
-          - compute 
-          - scp 
-          - self${SHORT_SHA}-0:/workspace/*
-          - /workspace/ 
-          - --zone=${_SELF_ZONE}
-          - --ssh-key-file=/workspace/sshkey
-          waitFor: ["Run CI Tests"]
+          #        # Copy Artifacts back from CI infrastructure
+          #        - id: Copy Artifacts from Cluster
+          #          name: gcr.io/cloud-builders/gcloud
+          #          args: 
+          #          - compute 
+          #          - scp 
+          #          - self${SHORT_SHA}-0:/workspace/*
+          #          - /workspace/ 
+          #          - --zone=${_SELF_ZONE}
+          #          - --ssh-key-file=/workspace/sshkey
+          #          waitFor: ["Run CI Tests"]
 
         # Remove SSH Key from Service Account
         - id: Remove SSH Key from Service Account
