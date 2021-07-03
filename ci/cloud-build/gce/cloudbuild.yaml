@@ -94,17 +94,6 @@ steps:
           #          - --ssh-key-file=/workspace/sshkey
           #          waitFor: ["Run CI Tests"]
 
-        # Remove SSH Key from Service Account
-        - id: Remove SSH Key from Service Account
-          name: gcr.io/cloud-builders/gcloud
-          args: 
-          - compute 
-          - os-login
-          - ssh-keys
-          - remove
-          - --key-file=/workspace/sshkey
-            #          waitFor: ["Copy Artifacts from Cluster"]
-
         # Delete CI Infrastructure
         - id: Delete Test Cluster
           name: 'hashicorp/terraform:0.12.26'
