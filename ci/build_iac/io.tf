@@ -2,7 +2,7 @@
 variable "gce_image" {
   type = string
   description = "Google Compute Engine instance VM image for the test GCE cluster"
-  default = "projects/hpc-apps/global/images/singularity-gcp-latest"
+  default = "projects/hpc-apps/global/images/singularity-fluid-gcp-latest"
 }
 
 variable "project" {
