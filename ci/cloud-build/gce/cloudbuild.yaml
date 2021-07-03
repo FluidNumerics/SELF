@@ -103,7 +103,7 @@ steps:
           - ssh-keys
           - remove
           - --key-file=/workspace/sshkey
-          waitFor: ["Copy Artifacts from Cluster"]
+            #          waitFor: ["Copy Artifacts from Cluster"]
 
         # Delete CI Infrastructure
         - id: Delete Test Cluster
@@ -114,7 +114,7 @@ steps:
           - | 
               cd tf/gce
               terraform destroy --auto-approve
-          waitFor: ["Copy Artifacts from Cluster"]
+              #          waitFor: ["Copy Artifacts from Cluster"]
 
 # Check for zero exit codes
 
