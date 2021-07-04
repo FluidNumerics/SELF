@@ -73,13 +73,15 @@ steps:
         # Launch CI job on head node
         - id: Run CI Tests
           name: gcr.io/cloud-builders/gcloud
+          entrypoint: /bin/bash
           args: 
-          - compute 
-          - ssh
-          - self${SHORT_SHA}-0
-          - --zone=${_SELF_ZONE}
-          - --ssh-key-file=/workspace/sshkey
-          - --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py"
+          - '-c'
+          - | 
+            sleep 10
+            gcloud compute ssh self${SHORT_SHA}-0 \
+              --zone=${_SELF_ZONE} \
+              --ssh-key-file=/workspace/sshkey
+              --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py"
           waitFor: ["Copy Singularity Image to GCE Cluster"]
           
         # Copy Artifacts back from CI infrastructure
