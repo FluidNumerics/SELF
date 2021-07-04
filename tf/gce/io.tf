@@ -30,7 +30,7 @@ variable "tags" {
 variable "image" {
   type = string
   description = "VM image used to launch your HPC application"
-  default = "projects/hpc-apps/global/images/gromacs-gcp-latest"
+  default = "projects/hpc-apps/global/images/singularity-fluid-gcp-latest"
 }
 
 variable "disk_size_gb" {
