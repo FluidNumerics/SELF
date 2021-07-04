@@ -92,6 +92,7 @@ resource "google_cloudbuild_trigger" "main-serial" {
     _SELF_GPU_TARGET = "none"
     _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
     _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
+    _SELF_SINGULARITY_GPUFLAG = ""
     _SELF_TAGS = "self-ci"
   }
   filename = "ci/cloud-build/gce/cloudbuild.yaml"
@@ -121,6 +122,7 @@ resource "google_cloudbuild_trigger" "main-serial-x86-nvcc" {
     _SELF_GPU_COUNT = "1"
     _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
     _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
+    _SELF_SINGULARITY_GPUFLAG = "--nv"
     _SELF_TAGS = "self-ci"
   }
   filename = "ci/cloud-build/gce/cloudbuild.yaml"
@@ -150,6 +152,7 @@ resource "google_cloudbuild_trigger" "develop-serial" {
     _SELF_GPU_TARGET = "none"
     _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
     _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
+    _SELF_SINGULARITY_GPUFLAG = ""
     _SELF_TAGS = "self-ci"
   }
   filename = "ci/cloud-build/gce/cloudbuild.yaml"
@@ -179,6 +182,7 @@ resource "google_cloudbuild_trigger" "develop-serial-x86-nvcc" {
     _SELF_GPU_TARGET = "sm_72"
     _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
     _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
+    _SELF_SINGULARITY_GPUFLAG = "--nv"
     _SELF_TAGS = "self-ci"
   }
   filename = "ci/cloud-build/gce/cloudbuild.yaml"

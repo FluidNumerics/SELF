@@ -79,7 +79,7 @@ steps:
           - self${SHORT_SHA}-0
           - --zone=${_SELF_ZONE}
           - --ssh-key-file=/workspace/sshkey
-          - --command="singularity exec --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py"
+          - --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py"
           waitFor: ["Copy Singularity Image to GCE Cluster"]
           
         # Copy Artifacts back from CI infrastructure
@@ -132,5 +132,6 @@ substitutions:
         _SELF_GPU_TARGET: 'sm_72'
         _SELF_GPU_COUNT: '0'
         _SELF_VPC_SUBNET: ''
+        _SELF_SINGULARITY_GPUFLAG: ''
         _SELF_SERVICE_ACCOUNT: ''
         _SELF_TAGS: 'self-ci'
