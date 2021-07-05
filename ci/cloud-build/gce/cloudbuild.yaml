@@ -79,7 +79,7 @@ steps:
           - | 
             sleep 10
             gcloud compute ssh self${SHORT_SHA}-0 \
-              --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py" \
+              --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py || exit 0" \
               --zone=${_SELF_ZONE} \
               --ssh-key-file=/workspace/sshkey
           waitFor: ["Copy Singularity Image to GCE Cluster"]
@@ -90,6 +90,7 @@ steps:
           args: 
           - compute 
           - scp 
+          - --recurse
           - self${SHORT_SHA}-0:/workspace/*
           - /workspace/ 
           - --zone=${_SELF_ZONE}
