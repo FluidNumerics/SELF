@@ -355,6 +355,17 @@ MODULE SELF_MappedData
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE MapToTensorBoundary_MappedVector3D_gpu_wrapper
   END INTERFACE
+
+  INTERFACE
+    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,elemInfo,sideInfo,elemToRank,rankId,N,nVar,nEl) &
+      bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,elemInfo,sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE MapToTensorBoundary_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
 #endif
 
 CONTAINS
@@ -463,12 +474,23 @@ CONTAINS
     INTEGER :: i1, i2, ivar
     INTEGER :: neighborRank
 
+    ! TO DO : MPI_Exchange_Async (Begin) !
+
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+      CALL SideExchange_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                    scalar % boundary % deviceData, &
+                                                    mesh % elemInfo % deviceData, &
+                                                    mesh % sideInfo % deviceData, &
+                                                    decomp % elemToRank % deviceData, &
+                                                    decomp % rankId, &
+                                                    scalar % N, &
+                                                    scalar % nvar, &
+                                                    scalar % nElem)
+
 
     ELSE
+
 
       DO e1 = 1, mesh % nElem
         s1 = 0
@@ -479,8 +501,9 @@ CONTAINS
           s2 = mesh % sideInfo % hostData(4,sid)/10
           flip = mesh % sideInfo % hostData(4,sid)-s2*10
           bcid = mesh % sideInfo % hostData(5,sid)
+          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           
@@ -509,6 +532,8 @@ CONTAINS
       ENDDO
 
     END IF
+    
+    ! TO DO : MPI_Exchange_Async (Finalize) !
     
   END SUBROUTINE SideExchange_MappedScalar2D
 
