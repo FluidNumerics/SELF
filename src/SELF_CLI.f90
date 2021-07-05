@@ -451,7 +451,7 @@ CONTAINS
   END SUBROUTINE ScalarBoundaryInterp2D
 
   SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   fChar,gradientChar,gpuAccel)
+                                   spec,fChar,gradientChar,outputFile,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D"
     IMPLICIT NONE
@@ -462,49 +462,18 @@ CONTAINS
     INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
+    TYPE(MeshSpec), INTENT(in) :: spec
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:2)
     LOGICAL,INTENT(in) :: gpuAccel
+    CHARACTER(*),INTENT(in) :: outputFile
     ! Local
     CHARACTER(240) :: msg
-    TYPE(Mesh2D) :: controlMesh
-    TYPE(SEMQuad) :: controlGeometry
+    TYPE(DG2D) :: dgsol
     TYPE(EquationParser)  :: feq,gxeq,gyeq
-    TYPE(MappedScalar2D) :: f
-    TYPE(MappedTensor2D) :: workTensor
-    TYPE(MappedVector2D) :: dfInterp
     INTEGER :: iel,i,j,ivar,iside
 
-    
-    IF (dForm == selfStrongForm ) THEN
-      msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
-      msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
-      msg = 'Formulation Type : Weak CG Form'
-    ENDIF
-    INFO(TRIM(msg))
-    msg = 'Number of elements : '//Int2Str(nElem)
-    msg = 'Number of elements : '//Int2Str(nElem*nElem)
-    INFO(TRIM(msg))
-    msg = 'Number of control points : '//Int2Str(cqDegree)
-    INFO(TRIM(msg))
-    msg = 'Number of target points : '//Int2Str(tqDegree)
-    INFO(TRIM(msg))
-    msg = 'Number of variables : '//Int2Str(nvar)
-    INFO(TRIM(msg))
-
-    ! Create the control mesh and geometry
-    CALL controlMesh % UniformBlockMesh(cqDegree, &
-                                        (/nElem,nElem/), &
-                                        (/0.0_prec,1.0_prec, &
-                                          0.0_prec,1.0_prec/))
-    CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
-
-    ! Create the scalar1d objects
-    CALL f % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
-    CALL dfInterp % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
+    CALL dgsol % Init(cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x','y'/))
@@ -516,12 +485,12 @@ CONTAINS
       DO ivar = 1, nvar
         DO j = 0, cqDegree
           DO i = 0, cqDegree
-            f % interior % hostData(i,j,ivar,iel) = &
-              feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
+            dgsol % solution % interior % hostData(i,j,ivar,iel) = &
+              feq % Evaluate( dgsol % geometry % x % interior % hostData(1:2,i,j,1,iel) )
           ENDDO
           DO iside = 1,4
-            f % boundary % hostData(j,ivar,iside,iel) = &
-               feq % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
+            dgsol % solution % boundary % hostData(j,ivar,iside,iel) = &
+               feq % Evaluate( dgsol % geometry % x % boundary % hostData(1:2,j,1,iside,iel) )
           ENDDO
         ENDDO
       ENDDO
@@ -529,7 +498,7 @@ CONTAINS
 
 #ifdef GPU     
     IF (gpuAccel) THEN
-      CALL f % UpdateDevice()
+      CALL dgsol % solution % UpdateDevice()
     END IF
 #endif
 
@@ -538,18 +507,15 @@ CONTAINS
 
 #ifdef GPU     
     IF (gpuAccel) THEN
-      CALL dfInterp % UpdateHost()
+      CALL dgsol % solutionGradient % UpdateHost()
     END IF
 #endif
 
     ! To do : file io for dfInterp
+    CALL dgsol % Write(outputFile)
 
     ! Clean up
-    CALL controlMesh % Free()
-    CALL controlGeometry % Free()
-    CALL f % Free()
-    CALL workTensor % Free()
-    CALL dfInterp % Free()
+    CALL dgsol % Free()
 
   END SUBROUTINE ScalarGradient2D
 
@@ -1848,10 +1814,10 @@ CONTAINS
     END IF
 #endif
  
-    CALL dgSol % Write(outputFile)
+    CALL dgsol % Write(outputFile)
 
     ! Clean up
-    CALL dgSol % Free()
+    CALL dgsol % Free()
 
   END SUBROUTINE VectorDivergence3D
 
