@@ -481,7 +481,7 @@ CONTAINS
     gyeq = EquationParser(gradientChar(2), (/'x','y'/))
 
     ! Load the control function
-    DO iel = 1, controlGeometry % nElem
+    DO iel = 1, dgsol % geometry % nElem
       DO ivar = 1, nvar
         DO j = 0, cqDegree
           DO i = 0, cqDegree
@@ -502,8 +502,7 @@ CONTAINS
     END IF
 #endif
 
-    ! Run the grid interpolation
-    CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
+    CALL dgsol % CalculateSolutionGradient(gpuAccel)
 
 #ifdef GPU     
     IF (gpuAccel) THEN

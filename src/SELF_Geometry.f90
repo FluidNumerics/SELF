@@ -214,12 +214,12 @@ CONTAINS
     nid = 1
     DO iel = 1,mesh % nElem
       DO i = 0,mesh % nGeo
-        xMesh % interior % hostData(i,1,iel) = mesh % nodeCoords % hostData(nid)
+        xMesh % interior % hostData(i,1,iel) = mesh % hopr_nodeCoords % hostData(nid)
         nid = nid + 1
       END DO
     END DO
 
-    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+    ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
     CALL xMesh % GridInterp(myGeom % x,.FALSE.)
 
     CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
@@ -361,7 +361,7 @@ CONTAINS
     DO iel = 1,mesh % nElem
       DO j = 0,mesh % nGeo
         DO i = 0,mesh % nGeo
-          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % nodeCoords % hostData(1:2,nid)
+          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % hopr_nodeCoords % hostData(1:2,nid)
           nid = nid + 1
         END DO
       END DO
@@ -543,6 +543,7 @@ CONTAINS
 #endif
 
   END SUBROUTINE UpdateDevice_SEMHex
+
   SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
@@ -584,14 +585,14 @@ CONTAINS
       DO k = 0,mesh % nGeo
         DO j = 0,mesh % nGeo
           DO i = 0,mesh % nGeo
-            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % nodeCoords % hostData(1:3,nid)
+            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % hopr_nodeCoords % hostData(1:3,nid)
             nid = nid + 1
           END DO
         END DO
       END DO
     END DO
 
-    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+    ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
     CALL xMesh % UpdateDevice()
 
 #ifdef GPU

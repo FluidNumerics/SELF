@@ -175,16 +175,16 @@ CONTAINS
 !    msgCnt = 0
 !    DO e1 = 1, mesh % nElem
 !      s1 = 1
-!      DO sideId = mesh % elemInfo % hostData(3,e1)+1, mesh % elemInfo % hostData(4,e1)
+!      DO sideId = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1)
 !        ! Secondary element ID for this face
-!        e2 = mesh % sideInfo % hostData(3,sideId)
+!        e2 = mesh % hopr_sideInfo % hostData(3,sideId)
 !
 !        ! In SELF, we read in HOPR pre-processed mesh information. Upon reading in and
 !        ! performing data decomposition, we set e2 = -e2 if the neighboring element is
 !        ! owned by another rank
 !        IF( e2 < 0 )THEN
-!          s2 = mesh % sideInfo % hostData(4,sideId)/10
-!          globalSideId = ABS(mesh % sideInfo % hostdata(2,sideId))
+!          s2 = mesh % hopr_sideInfo % hostData(4,sideId)/10
+!          globalSideId = ABS(mesh % hopr_sideInfo % hostdata(2,sideId))
 !
 !          ! Assume that mesh has been pre-processed with HOPR and
 !          ! elements are distributed to ranks by simply dividing the list [1:nElements]
