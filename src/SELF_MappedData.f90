@@ -366,6 +366,16 @@ MODULE SELF_MappedData
     END SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
+  INTERFACE
+    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+      bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
 #endif
 
 CONTAINS
@@ -771,8 +781,20 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+#ifdef GPU
+      CALL SideExchange_MapppedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                    scalar % boundary % deviceData, &
+                                                    mesh % hopr_elemInfo % deviceData, &
+                                                    mesh % self_sideInfo % deviceData, &
+                                                    decomp % elemToRank % deviceData, &
+                                                    decomp % rankId, &
+                                                    scalar % N, &
+                                                    scalar % nvar, &
+                                                    scalar % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 

@@ -836,8 +836,50 @@ extern "C"
 {
   void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **elemInfo, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *elemInfo, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *elemInfo, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
 
+__global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+
+  size_t s1 = blockIdx.x
+  size_t e1 = blockIdx.y;
+  size_t i1 = threadIdx.x;
+  size_t j1 = threadIdx.y;
+  size_t ivar = threadIdx.z;
+  
+  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int neighborRank = elemToRank[e2];
+  int i2 = N-i1;
+  int j2 = N-j1;
+
+  if(bcid == 0 && neighborRank == rankId){
+    if(flip == 1){
+      extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i1,j1,ivar,s2,e2,N,nVar)];
+    }
+    else if(flip == 2){
+      extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(j2,i1,ivar,s2,e2,N,nVar)];
+    }
+    else if(flip == 3){
+      extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i2,j2,ivar,s2,e2,N,nVar)];
+    }
+    else if(flip == 4){
+      extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(j1,i2,ivar,s2,e2,N,nVar)];
+    }
+  }
+  
+}
+
+extern "C"
+{
+  void SideExchange_MappedScalar3D_gpu_wrapper(real **extBoundary, real **boundary, int **elemInfo, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  {
+    SideExchange_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *elemInfo, *sideInfo, *elemToRank, rankId, N, nVar);
+  }
+
+}
