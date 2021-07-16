@@ -416,6 +416,66 @@ MODULE SELF_MappedData
     END SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
+  INTERFACE
+    SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE BassiRebaySides_MappedTensor2D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_MappedTensor2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE BassiRebaySides_MappedTensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE BassiRebaySides_MappedTensor3D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+      bind(c,name="BassiRebaySides_MappedTensor3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE BassiRebaySides_MappedTensor3D_gpu_wrapper
+  END INTERFACE
+
 #endif
 
 CONTAINS
@@ -600,8 +660,16 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+#ifdef GPU
+      CALL BassiRebay_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                  scalar % boundary % deviceData, &
+                                                  scalar % N, &
+                                                  scalar % nvar, &
+                                                  scalar % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
@@ -921,8 +989,16 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+#ifdef GPU
+      CALL BassiRebay_MapppedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                  scalar % boundary % deviceData, &
+                                                  scalar % N, &
+                                                  scalar % nvar, &
+                                                  scalar % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
@@ -1273,8 +1349,16 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+#ifdef GPU
+      CALL BassiRebay_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
+                                                 vector % boundary % deviceData, &
+                                                 vector % N, &
+                                                 vector % nvar, &
+                                                 vector % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
@@ -1775,8 +1859,16 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+#ifdef GPU
+      CALL BassiRebay_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
+                                                 vector % boundary % deviceData, &
+                                                 vector % N, &
+                                                 vector % nvar, &
+                                                 vector % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
@@ -2284,8 +2376,16 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+#ifdef GPU
+      CALL BassiRebay_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
+                                                 tensor % boundary % deviceData, &
+                                                 tensor % N, &
+                                                 tensor % nvar, &
+                                                 tensor % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
@@ -2468,8 +2568,16 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for BassiRebay'
+#ifdef GPU
+      CALL BassiRebay_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
+                                                 tensor % boundary % deviceData, &
+                                                 tensor % N, &
+                                                 tensor % nvar, &
+                                                 tensor % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
