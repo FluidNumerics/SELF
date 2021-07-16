@@ -376,15 +376,15 @@ MODULE SELF_MappedData
     END SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper
   END INTERFACE
 
-!  INTERFACE
-!    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
-!      bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
-!      USE ISO_C_BINDING
-!      IMPLICIT NONE
-!      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-!      INTEGER,VALUE :: rankId,N,nVar,nEl
-!    END SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper
-!  END INTERFACE
+  INTERFACE
+    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+      bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper
+  END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
@@ -2216,10 +2216,20 @@ CONTAINS
     INTEGER :: i1, i2, ivar
 
     IF(gpuAccel)THEN
-
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
-
+#ifdef GPU
+      CALL SideExchange_MapppedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
+                                                    tensor % boundary % deviceData, &
+                                                    mesh % hopr_elemInfo % deviceData, &
+                                                    mesh % self_sideInfo % deviceData, &
+                                                    decomp % elemToRank % deviceData, &
+                                                    decomp % rankId, &
+                                                    tensor % N, &
+                                                    tensor % nvar, &
+                                                    tensor % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
     ELSE
 
       DO e1 = 1, mesh % nElem
