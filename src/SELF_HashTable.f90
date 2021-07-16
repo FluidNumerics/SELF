@@ -39,8 +39,8 @@ MODULE SELF_HashTable
 
       CONTAINS
 
-      PROCEDURE :: Build => Build_HashTable
-      PROCEDURE :: Trash => Trash_HashTable
+      PROCEDURE :: Init => Init_HashTable
+      PROCEDURE :: Free => Free_HashTable
       PROCEDURE :: AddDataForKeys => AddDataForKeys_HashTable
       PROCEDURE :: ContainsKeys => ContainsKeys_HashTable
       PROCEDURE :: GetDataForKeys => GetDataForKeys_HashTable
@@ -60,16 +60,16 @@ MODULE SELF_HashTable
 !> \addtogroup SELF_HashTable
 !! @{ 
 ! ================================================================================================ !
-! S/R Build
+! S/R Init
 ! 
-!> \fn Build_HashTable  
+!> \fn Init_HashTable  
 !! Allocates space for the hash table and initializes each linked list within the hash-table 
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(HashTable) :: this <BR>
 !! <B>INTEGER</B>         :: N <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Build( N ) <BR>
+!!     <B>CALL</B> this % Init( N ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
@@ -79,7 +79,7 @@ MODULE SELF_HashTable
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Build_HashTable( myTable, N )
+ SUBROUTINE Init_HashTable( myTable, N )
  
   IMPLICIT NONE
   CLASS( HashTable ) :: myTable
@@ -91,23 +91,23 @@ MODULE SELF_HashTable
      ALLOCATE( myTable % list(1:N) )
 
      DO i = 1,N
-        CALL myTable % list(i) % Build( )
+        CALL myTable % list(i) % Init( )
      ENDDO
 
- END SUBROUTINE Build_HashTable
+ END SUBROUTINE Init_HashTable
 !
 !> \addtogroup SELF_HashTable
 !! @{ 
 ! ================================================================================================ !
-! S/R Trash
+! S/R Free
 ! 
-!> \fn Trash_HashTable  
+!> \fn Free_HashTable  
 !!  Deallocates memory associated with the Hash-Table
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(HashTable) :: this <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Trash( ) <BR>
+!!     <B>CALL</B> this % Free( ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
@@ -118,7 +118,7 @@ MODULE SELF_HashTable
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Trash_HashTable( myTable )
+ SUBROUTINE Free_HashTable( myTable )
  
   IMPLICIT NONE
   CLASS( HashTable ) :: myTable
@@ -129,12 +129,12 @@ MODULE SELF_HashTable
      N = SIZE( myTable % list )
 
      DO i = 1, N
-        CALL myTable % list(i) % Trash( )
+        CALL myTable % list(i) % Free( )
      ENDDO
 
      DEALLOCATE( myTable % list )
   
- END SUBROUTINE Trash_HashTable
+ END SUBROUTINE Free_HashTable
 !
 !
 !==================================================================================================!

@@ -69,8 +69,8 @@ MODULE SELF_LinkedList
 !!    PUBLIC type-bound procedures for the LinkedList data-structure.
 !!
 !!    <table>
-!!       <tr> <th> Build <td> Build_LinkedList
-!!       <tr> <th> Trash <td> Trash_LinkedList
+!!       <tr> <th> Init <td> Init_LinkedList
+!!       <tr> <th> Free <td> Free_LinkedList
 !!       <tr> <th> GetData <td> GetData_LinkedList
 !!       <tr> <th> SetData <td> SetData_LinkedList
 !!       <tr> <th> GetKey <td> GetKey_LinkedList
@@ -89,8 +89,8 @@ MODULE SELF_LinkedList
 
       CONTAINS
 
-      PROCEDURE :: Build => Build_LinkedList
-      PROCEDURE :: Trash => Trash_LinkedList
+      PROCEDURE :: Init => Init_LinkedList
+      PROCEDURE :: Free => Free_LinkedList
       
       
       PROCEDURE :: GetData => GetCurrentData_LinkedList
@@ -123,15 +123,15 @@ MODULE SELF_LinkedList
 !> \addtogroup SELF_LinkedList 
 !! @{ 
 ! ================================================================================================ !
-! S/R Build 
+! S/R Init 
 ! 
-!> \fn Build_LinkedList  
+!> \fn Init_LinkedList  
 !! Initializes a LinkedList by nullifying the head, tail, and current pointers
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(LinkedList) :: this <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Build(  ) <BR>
+!!     <B>CALL</B> this % Init(  ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
@@ -140,7 +140,7 @@ MODULE SELF_LinkedList
 !!   
 ! ================================================================================================ ! 
 !>@}
- SUBROUTINE Build_LinkedList( myList )
+ SUBROUTINE Init_LinkedList( myList )
    IMPLICIT NONE
    CLASS( LinkedList ) :: myList
 
@@ -149,21 +149,21 @@ MODULE SELF_LinkedList
       myList % tail => NULL()
       myList % current => NULL( )
   
- END SUBROUTINE Build_LinkedList
+ END SUBROUTINE Init_LinkedList
 !
 !> \addtogroup SELF_LinkedList 
 !! @{ 
 ! ================================================================================================ !
-! S/R Trash
+! S/R Free
 ! 
-!> \fn Trash_LinkedList 
+!> \fn Free_LinkedList 
 !!  Cycles through the Linked List, deallocates associated memory, and nullifies the LinkedList 
 !!  pointers. 
 !! 
 !! <H2> Usage : </H2> 
 !! <B>TYPE</B>(LinkedList) :: this <BR>
 !!         .... <BR>
-!!     <B>CALL</B> this % Trash( Inputs/Outputs ) <BR>
+!!     <B>CALL</B> this % Free( Inputs/Outputs ) <BR>
 !! 
 !!  <H2> Parameters : </H2>
 !!  <table> 
@@ -172,7 +172,7 @@ MODULE SELF_LinkedList
 !!   
 ! ================================================================================================ ! 
 !>@} 
- SUBROUTINE Trash_LinkedList( myList )
+ SUBROUTINE Free_LinkedList( myList )
    IMPLICIT NONE
    CLASS( LinkedList ) :: myList
    ! LOCAL
@@ -190,7 +190,7 @@ MODULE SELF_LinkedList
 
       ENDDO
   
- END SUBROUTINE Trash_LinkedList
+ END SUBROUTINE Free_LinkedList
 ! 
 !==================================================================================================!
 !---------------------------------------- ACCESSORS -----------------------------------------------!

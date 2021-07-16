@@ -7,6 +7,7 @@
 MODULE SELF_Mesh
 
   USE SELF_Constants
+  USE SELF_HashTable
   USE SELF_Lagrange
   USE SELF_MPI
   USE SELF_Data
@@ -102,6 +103,8 @@ MODULE SELF_Mesh
   INTEGER,PARAMETER :: selfMinNodalValence3D = 8
   INTEGER,PARAMETER :: selfMaxNodalValence2D = 6
   INTEGER,PARAMETER :: selfMaxNodalValence3D = 10
+
+
   ! Side Ordering
   INTEGER,PARAMETER :: selfSide2D_South = 1
   INTEGER,PARAMETER :: selfSide2D_East = 2
@@ -773,6 +776,7 @@ CONTAINS
     REAL(prec) :: wSurf(1:2),eSurf(1:2),nSurf(1:2),sSurf(1:2)
     REAL(prec) :: P1(1:2),P2(1:2)
     REAL(prec) :: l1(1:2),l2(1:2)
+    REAL(prec) :: se(1:2),sw(1:2),ne(1:2),nw(1:2)
     INTEGER :: bCurveFlag(1:4)
     TYPE(Lagrange) :: interp
 
@@ -876,6 +880,12 @@ CONTAINS
       nid = 1
       DO eid = 1, myMesh % nElem
         lnid = 1
+        ! Evaluate for corner points of mapping. This requires computational coordinates
+        ! that include -1 and 1 in each computational direction (e.g. Gauss Lobatto)
+        sw = myMesh % hohq_sideCurves % hostData(1:2,0,1,eid)
+        se = myMesh % hohq_sideCurves % hostData(1:2,nGeo,1,eid)
+        ne = myMesh % hohq_sideCurves % hostData(1:2,nGeo,3,eid)
+        nw = myMesh % hohq_sideCurves % hostData(1:2,0,3,eid)
         DO j = 0, nGeo
           wSurf = myMesh % hohq_sideCurves % hostData(1:2,j,4,eid)
           eSurf = myMesh % hohq_sideCurves % hostData(1:2,j,2,eid)
@@ -888,9 +898,16 @@ CONTAINS
             P1 = l1(1)*wSurf + l1(2)*eSurf
             P2 = l2(1)*sSurf + l2(2)*nSurf
 
-            ! TO DO : Verify implementation for Transfinite Interpolation
-            myMesh % self_nodeCoords % hostData(1:2,lnid,eid) = P1+P2
-            myMesh % hopr_nodeCoords % hostData(1:2,nid) = P1+P2
+            ! Apply transfinite interpolation with linear blending
+            myMesh % self_nodeCoords % hostData(1:2,lnid,eid) = P1+P2-&
+                    l1(1)*(l2(1)*sw + l2(2)*nw) - l1(2)*(l2(1)*se + l2(2)*ne)
+
+            myMesh % hopr_nodeCoords % hostData(1:2,nid) = myMesh % self_nodeCoords % hostData(1:2,lnid,eid)
+
+            ! Increment node ids
+            nid = nid+1
+            lnid = lnid+1
+
           ENDDO
         ENDDO
       ENDDO
@@ -899,23 +916,6 @@ CONTAINS
 
       CALL interp % Free()
 
-      ! TO DO : Fill in self_* attributes from hohq_ attributes 
-      !   hohq_sideInfo(1:6)
-      !       1. start node ID (corner node ID)
-      !       2. end node ID (corner node ID)
-      !       3. primary element ID
-      !       4. secondary element ID
-      !       5. local side ID for primary element
-      !       6. local side ID for secondary element
-      !
-      !   hohq_elemInfo(1:4)
-      !       > Global Corner Node IDs, locally ordered by CGNS mapping
-      !
-      !   To create self_* attributes, we need to 
-      !       4. Use hopr_globalNodeIDs and hopr_CGNSSideMap to set hopr_sideInfo (uniqe side identifcation and connectivity
-      !       mapping)
-      !       
-      
   END SUBROUTINE Read_ISMv2_Mesh2D
 
   SUBROUTINE GenerateConnectivity_Mesh2D( myMesh )
@@ -923,8 +923,11 @@ CONTAINS
     CLASS(Mesh2D), INTENT(inout) :: myMesh
     ! Local
     INTEGER :: nid, unid, cnid, lnid, rnid
-    INTEGER :: eid, sid, lsid, gn1, gn2
+    INTEGER :: eid, sid, lsid, usid, gn1, gn2
+    INTEGER :: key1, key2, e1, e2, e2gn1
     INTEGER :: nUniqueSides
+    INTEGER :: side(1:2,1:myMesh % nUniqueSides)
+    TYPE(HashTable) :: sideTable
 
       ! Set the globalNodeIDs
       !  > Nodes in the nodeCoords list are possibly repeated since elements may share common sides. When the sides are shared
@@ -952,6 +955,8 @@ CONTAINS
 
       ENDDO
 
+      CALL sideTable % Init( myMesh % nUniqueNodes )
+
       ! In this case, HOHQMesh information is provided before calling this routine
       ! and we have a way to validate whether or not we created the correct side information
       ! To validate, we temporarily store the number of unique sides and reset the number of
@@ -965,6 +970,7 @@ CONTAINS
       ENDIF
 
       ! Set the sideInfo
+      sid = 1
       DO eid = 1, myMesh % nElem
         DO lsid = 1, 4
 
@@ -978,31 +984,64 @@ CONTAINS
           nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
           gn2 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
 
-          ! Hash table lookup for HASH(gn1,gn2) !
-          ! gsid = HASH(gn1,gn2)
-          ! IF( gsid /= 0 )THEN
-          !
-          !   Determine neighbor (e2)
-          !   Determine neighbor side (s2)
-          !   Determine orientiation relative to neighbor (flip)
-          !   Populate sideInfo(1:6,eid) and sideInfo(1:6,e2)
-          !     1. Side Type
-          !     2. GlobalSideID (negative for e2)
-          !     3. NeighborElementID
-          !     4. 10*NeighborLocalSide+FLIP
-          !     5. BCID
-          !
-          ! ELSE
-          !
-          !   Increment myMesh % nUniqueSides
-          !   Set HASH(gn1,gn2) = myMesh % nUniqueSides
-          !   Set sidemap(1,myMesh % nUniqueSides) = eid
-          !   Set sidemap(2,myMesh % nUniqueSides) = lsid
-          !   
+          ! Fill side info for eid
+          myMesh % self_sideInfo % hostData(1,lsid,eid) = selfLineNonlinear ! SideType
+          myMesh % self_sideInfo % hostData(2,lsid,eid) = 0 ! Global Side ID
+          myMesh % self_sideInfo % hostData(3,lsid,eid) = 0 ! Neighbor Element ID
+          myMesh % self_sideInfo % hostData(4,lsid,eid) = 0 ! Encoding for neighbor side ID and flip (10*s2+flip)
+          myMesh % self_sideInfo % hostData(5,lsid,eid) = 1 ! Boundary Condition ID
+
+          key1 = MIN(gn1,gn2)
+          key2 = MAX(gn1,gn2)
+
+          IF(sideTable % ContainsKeys(key1,key2))THEN
+
+            ! Get e2, s2, and flip
+            CALL sideTable % GetDataForKeys(usid,key1,key2)
+
+            e2 = side(1,usid)
+            s2 = side(2,usid)
+
+            ! Calculate flip
+            ! > Get the starting global node ID for the other element
+            cnid = myMesh % hopr_CGNSSideMap % hostData(1,s2) ! Local Corner ID
+            lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
+            nid = myMesh % hopr_elemInfo % hostData(5,e2) + lnid ! Add the offSetIndNODE to get the hopr node id
+            e2gn1 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+
+            flip = 0
+            IF(e2gn1 /= gn1)THEN
+              flip = 1
+            ENDIF
+
+            ! Populate information for this element
+            myMesh % self_sideInfo % hostData(2,sid,eid) = usid ! Global Side ID
+            myMesh % self_sideInfo % hostData(3,sid,eid) = e2 ! Neighbor Element ID
+            myMesh % self_sideInfo % hostData(4,sid,eid) = 10*s2+flip ! Neighbor Element ID
+
+            ! Population information for the other element
+            myMesh % sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
+            myMesh % sideInfo % hostData(3,s2,e2) = eid ! Neighbor Element ID
+            myMesh % sideInfo % hostData(4,s2,e2) = 10*lsid+flip ! Neighbor Element ID
+
+
+          ELSE
+
+            nUniqueSides = nUniqueSides + 1
+            side(1,nUniqueSides) = eid ! Store the element ID
+            side(2,nUniqueSides) = lsid ! Store the local side ID
+            ! Add the side to the hash table
+
+            CALL sideTable % AddDataForKeys(nUniqueSides,key1,key2)
+
+          ENDIF
+
+          sid = sid + 1
 
         ENDDO
       ENDDO
 
+      CALL sideTable % Free()
 
   END SUBROUTINE GenerateConnectivity_Mesh2D
 
