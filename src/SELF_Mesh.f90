@@ -922,10 +922,10 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh2D), INTENT(inout) :: myMesh
     ! Local
-    INTEGER :: nid, unid, cnid, lnid, rnid
-    INTEGER :: eid, sid, lsid, usid, gn1, gn2
-    INTEGER :: key1, key2, e1, e2, e2gn1
-    INTEGER :: nUniqueSides
+    INTEGER :: nid,unid,cnid,lnid,rnid
+    INTEGER :: eid,sid,lsid,usid,gn1,gn2
+    INTEGER :: key1,key2,e1,e2,s2,e2gn1
+    INTEGER :: nUniqueSides,flip
     INTEGER :: side(1:2,1:myMesh % nUniqueSides)
     TYPE(HashTable) :: sideTable
 
@@ -1020,9 +1020,9 @@ CONTAINS
             myMesh % self_sideInfo % hostData(4,sid,eid) = 10*s2+flip ! Neighbor Element ID
 
             ! Population information for the other element
-            myMesh % sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
-            myMesh % sideInfo % hostData(3,s2,e2) = eid ! Neighbor Element ID
-            myMesh % sideInfo % hostData(4,s2,e2) = 10*lsid+flip ! Neighbor Element ID
+            myMesh % self_sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
+            myMesh % self_sideInfo % hostData(3,s2,e2) = eid ! Neighbor Element ID
+            myMesh % self_sideInfo % hostData(4,s2,e2) = 10*lsid+flip ! Neighbor Element ID
 
 
           ELSE
