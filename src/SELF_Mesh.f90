@@ -139,7 +139,7 @@ MODULE SELF_Mesh
     INTEGER :: nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfReal_r1) :: hopr_nodeCoords
-    TYPE(hfReal_r1) :: hopr_globalNodeIDs
+    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -176,7 +176,7 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
-    TYPE(hfReal_r1) :: hopr_globalNodeIDs
+    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r1) :: hopr_CGNSCornerMap
     TYPE(hfInt32_r2) :: hopr_CGNSSideMap
     TYPE(hfInt32_r2) :: hopr_curveNodeMap
@@ -197,6 +197,8 @@ MODULE SELF_Mesh
 
     PROCEDURE,PUBLIC :: Read_ISMv2 => Read_ISMv2_Mesh2D
 
+    PROCEDURE,PRIVATE :: GenerateConnectivity => GenerateConnectivity_Mesh2D
+
   END TYPE Mesh2D
 
   TYPE,PUBLIC :: Mesh3D
@@ -213,11 +215,11 @@ MODULE SELF_Mesh
     TYPE(hfReal_r2) :: hohq_cornerNodes
     TYPE(hfInt32_r2) :: hohq_elemInfo
     TYPE(hfInt32_r2) :: hohq_sideInfo
-    TYPE(hfReal_r4) :: hohq_sideCurves
+    TYPE(hfReal_r5) :: hohq_sideSurfaces
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
-    TYPE(hfReal_r1) :: hopr_globalNodeIDs
+    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r1) :: hopr_CGNSCornerMap
     TYPE(hfInt32_r2) :: hopr_CGNSSideMap
     TYPE(hfInt32_r2) :: hopr_curveNodeMap
@@ -240,6 +242,9 @@ MODULE SELF_Mesh
   END TYPE Mesh3D
 
 CONTAINS
+
+
+
 
   SUBROUTINE Init_Mesh1D(myMesh,nGeo,nElem,nNodes,nBCs)
     IMPLICIT NONE
@@ -390,7 +395,7 @@ CONTAINS
     INTEGER :: nGeo, nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfReal_r1) :: hopr_nodeCoords
-    TYPE(hfReal_r1) :: hopr_globalNodeIDs
+    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
     IF( PRESENT(mpiComm) )THEN
@@ -709,8 +714,6 @@ CONTAINS
       END DO
     END DO
 
-    ! Set the SideInfo
-
 
     CALL myMesh % UpdateDevice()
 
@@ -767,6 +770,9 @@ CONTAINS
     CHARACTER(100) :: line
     CHARACTER(500) :: msg
     REAL(prec) :: x(1:3), x0(1:2), x1(1:2)
+    REAL(prec) :: wSurf(1:2),eSurf(1:2),nSurf(1:2),sSurf(1:2)
+    REAL(prec) :: P1(1:2),P2(1:2)
+    REAL(prec) :: l1(1:2),l2(1:2)
     INTEGER :: bCurveFlag(1:4)
     TYPE(Lagrange) :: interp
 
@@ -850,11 +856,46 @@ CONTAINS
 
       CLOSE(fUnit)
 
+      ! Fill in hopr_elemInfo
+      ! To fill in the element info, we apply the assumption of a mesh with all quadrilateral elements
+      ! with uniform polynomial order
+      sid = 1
+      nid = 1
+      DO eid = 1, myMesh % nElem
+        myMesh % hopr_elemInfo % hostData(1,eid) = selfQuadLinear ! Element Type
+        myMesh % hopr_elemInfo % hostData(2,eid) = 1 ! Element Zone
+        myMesh % hopr_elemInfo % hostData(3,eid) = sid ! Side Index Start
+        sid = sid+4
+        myMesh % hopr_elemInfo % hostData(4,eid) = sid ! Side Index End
+        myMesh % hopr_elemInfo % hostData(5,eid) = nid-1 ! Node Index Start
+        nid = nid + (nGeo+1)**2
+        myMesh % hopr_elemInfo % hostData(6,eid) = nid ! Node Index End
+      ENDDO
+
       ! Generate the self_nodeCoords through transfinite interpolation with linear blending
-      !DO eid = 1, myMesh % nElem
+      nid = 1
+      DO eid = 1, myMesh % nElem
+        lnid = 1
+        DO j = 0, nGeo
+          wSurf = myMesh % hohq_sideCurves % hostData(1:2,j,4,eid)
+          eSurf = myMesh % hohq_sideCurves % hostData(1:2,j,2,eid)
+          l2 = LinearBlend(interp % controlPoints % hostData(j))
+          DO i = 0, nGeo
+            sSurf = myMesh % hohq_sideCurves % hostData(1:2,i,1,eid)
+            nSurf = myMesh % hohq_sideCurves % hostData(1:2,i,3,eid)
+            l1 = LinearBlend(interp % controlPoints % hostData(i))
 
+            P1 = l1(1)*wSurf + l1(2)*eSurf
+            P2 = l2(1)*sSurf + l2(2)*nSurf
 
-      !ENDDO
+            ! TO DO : Verify implementation for Transfinite Interpolation
+            myMesh % self_nodeCoords % hostData(1:2,lnid,eid) = P1+P2
+            myMesh % hopr_nodeCoords % hostData(1:2,nid) = P1+P2
+          ENDDO
+        ENDDO
+      ENDDO
+
+      CALL myMesh % GenerateConnectivity()
 
       CALL interp % Free()
 
@@ -871,14 +912,99 @@ CONTAINS
       !       > Global Corner Node IDs, locally ordered by CGNS mapping
       !
       !   To create self_* attributes, we need to 
-      !       1. Use hohq_sideCurves to generate self_nodeCoords (transfinite interpolation with linear blending)
-      !       2. Copy self_nodeCoords to hopr_nodeCoords (array reshape)
-      !       3. Find unique hopr_nodeCoords to set hopr_globalNodeIDs
       !       4. Use hopr_globalNodeIDs and hopr_CGNSSideMap to set hopr_sideInfo (uniqe side identifcation and connectivity
       !       mapping)
       !       
       
   END SUBROUTINE Read_ISMv2_Mesh2D
+
+  SUBROUTINE GenerateConnectivity_Mesh2D( myMesh )
+    IMPLICIT NONE
+    CLASS(Mesh2D), INTENT(inout) :: myMesh
+    ! Local
+    INTEGER :: nid, unid, cnid, lnid, rnid
+    INTEGER :: eid, sid, lsid, gn1, gn2
+    INTEGER :: nUniqueSides
+
+      ! Set the globalNodeIDs
+      !  > Nodes in the nodeCoords list are possibly repeated since elements may share common sides. When the sides are shared
+      !    the nodeCoords have the same x,y values (to machine precision)
+
+      myMesh % nUniqueNodes = 1
+      myMesh % hopr_globalNodeIDs % hostData(1) = 1
+      DO nid = 2, myMesh % nNodes
+
+        unid = myMesh % nUniqueNodes+1
+        DO rnid = 1, nid
+          IF( AlmostEqual(myMesh % hopr_nodeCoords % hostData(1,nid),myMesh % hopr_nodeCoords % hostData(1,rnid)) .AND.& 
+              AlmostEqual(myMesh % hopr_nodeCoords % hostData(2,nid),myMesh % hopr_nodeCoords % hostData(2,rnid)) )THEN
+
+            unid = myMesh % hopr_globalNodeIDs % hostData(rnid)
+            EXIT
+
+          ENDIF
+        ENDDO 
+
+        myMesh % hopr_globalNodeIDs % hostData(nid) = unid
+        IF( unid == myMesh % nUniqueNodes + 1 )THEN
+          myMesh % nUniqueNodes = myMesh % nUniqueNodes + 1
+        ENDIF
+
+      ENDDO
+
+      ! In this case, HOHQMesh information is provided before calling this routine
+      ! and we have a way to validate whether or not we created the correct side information
+      ! To validate, we temporarily store the number of unique sides and reset the number of
+      ! unique sides mesh attribute to 0. After we generate the side information, we can then
+      ! check that the number of unique sides matches the original number provided by HOHQMesh.
+      IF(myMesh % nUniqueSides > 0)THEN
+        nUniqueSides = myMesh % nUniqueSides
+        myMesh % nUniqueSides = 0
+      ELSE
+        nUniqueSides = 0
+      ENDIF
+
+      ! Set the sideInfo
+      DO eid = 1, myMesh % nElem
+        DO lsid = 1, 4
+
+          cnid = myMesh % hopr_CGNSSideMap % hostData(1,lsid) ! Local Corner ID
+          lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
+          nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
+          gn1 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+
+          cnid = myMesh % hopr_CGNSSideMap % hostData(2,lsid) ! Local Corner ID
+          lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
+          nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
+          gn2 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+
+          ! Hash table lookup for HASH(gn1,gn2) !
+          ! gsid = HASH(gn1,gn2)
+          ! IF( gsid /= 0 )THEN
+          !
+          !   Determine neighbor (e2)
+          !   Determine neighbor side (s2)
+          !   Determine orientiation relative to neighbor (flip)
+          !   Populate sideInfo(1:6,eid) and sideInfo(1:6,e2)
+          !     1. Side Type
+          !     2. GlobalSideID (negative for e2)
+          !     3. NeighborElementID
+          !     4. 10*NeighborLocalSide+FLIP
+          !     5. BCID
+          !
+          ! ELSE
+          !
+          !   Increment myMesh % nUniqueSides
+          !   Set HASH(gn1,gn2) = myMesh % nUniqueSides
+          !   Set sidemap(1,myMesh % nUniqueSides) = eid
+          !   Set sidemap(2,myMesh % nUniqueSides) = lsid
+          !   
+
+        ENDDO
+      ENDDO
+
+
+  END SUBROUTINE GenerateConnectivity_Mesh2D
 
   SUBROUTINE Read_HOPr_Mesh2D( myMesh, meshFile, decomp )
   ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
@@ -899,7 +1025,7 @@ CONTAINS
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
-    TYPE(hfReal_r1) :: hopr_globalNodeIDs
+    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
     IF( PRESENT(decomp) )THEN
@@ -1333,7 +1459,7 @@ CONTAINS
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
-    TYPE(hfReal_r1) :: hopr_globalNodeIDs
+    TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
     IF( PRESENT(decomp) )THEN
@@ -1474,6 +1600,225 @@ CONTAINS
     CALL Close_HDF5(fileID)
 
   END SUBROUTINE Write_HOPr_Mesh3D
+
+!  FUNCTION TransfiniteInterpolation_2D( interp, bCurves, iEl, a, b ) RESULT( P )
+!    ! TransfiniteInterpolation
+!    !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the
+!    !  bidirectional mapping at xi^1 = a, xi^2 = b, xi^3 = c. The boundary of the computational
+!    !  coordinate system is assumed to be at +/- 1 in each direction.
+!    !
+!    ! =============================================================================================== !
+!    ! DECLARATIONS
+!    IMPLICIT NONE
+!    REAL(prec) :: bCurves(1:2,1:4)
+!    INTEGER :: i,j
+!    REAL(prec) :: P(1:2)
+!    ! LOCAL
+!    REAL(prec)  :: P1(1:2), P2(1:2), P2(1:2)
+!    REAL(prec)  :: sSurf(1:2), nSurf(1:2), eSurf(1:2), wSurf(1:2)
+!    REAL(prec)  :: l1(1:2), l2(1:2), l2(1:2)
+!    REAL(prec)  :: ref(1:2)
+!    INTEGER     :: i, j, iSurf
+!
+!    ref = (/ -1.0_prec, 1.0_prec /)
+!
+!    ! Transfinite interpolation with linear blending USEs linear lagrange interpolating polynomials
+!    ! to blend the bounding surfaces.
+!    ! The linear blending weights in the first computational direction are calculated.
+!
+!    l1 = LinearBlend(a)
+!    l2 = LinearBlend(b)
+!    l3 = LinearBlend(c)
+!
+!    ! The bounding surfaces need to be evaluated at the provided computational coordinates
+!
+!    wSurf = bCurves(1:2,4)
+!    eSurf = bCurves(1:2,2)
+!    sSurf = bCurves(1:2,1)
+!    nSurf = bCurves(1:2,3)
+!
+!    ! P1 CONTAINS the interpolation in the first computational coordinate
+!    ! The first computational coordinate is assumed to vary between the (computational) east and
+!    ! west boundaries.
+!
+!    P1 = l1(1)*wSurf + l1(2)*eSurf
+!
+!    ! P2 CONTAINS the interpolation in the second computational coordinate
+!    ! The second computational coordinate is assumed to vary between the (computational) south and
+!    ! north boundaries.
+!
+!    P2 = l2(1)*sSurf + l2(2)*nSurf
+!
+!    ! P3 CONTAINS the interpolation in the first computational coordinate
+!    ! The first computational coordinate is assumed to vary between the (computational) bottom and
+!    ! top boundaries.
+!
+!    P3 = l3(1)*bSurf + l3(2)*tSurf
+!
+!    DO i = 1, 2
+!
+!      ! Now we need to compute the tensor product of the first and second computational direction
+!      ! interpolants and subtract from P1.
+!
+!      wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west + (iEl-1)*6 )
+!      eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east + (iEl-1)*6 )
+!      P1 = P1 - l2(i)*( wSurf*l1(1) + eSurf*l1(2) )
+!
+!      ! Now we need to compute the tensor product of the first and third computational direction
+!      ! interpolants and subtract from P1.
+!
+!      wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west + (iEl-1)*6 )
+!      eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east + (iEl-1)*6 )
+!
+!      P1 = P1 - l3(i)*( wSurf*l1(1) + eSurf*l1(2) )
+!
+!      ! Now we need to compute the tensor product of the second and third computational direction
+!      ! interpolants and subtract from P2.
+!
+!      sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south + (iEl-1)*6 )
+!      nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north + (iEl-1)*6 )
+!
+!      P2 = P2 - l3(i)*( sSurf*l2(1) + nSurf*l2(2) )
+!
+!    ENDDO
+!
+!    ! Next, the compounded tensor product is computed and added to P3.
+!    DO j = 1,2
+!      DO i = 1,2
+!
+!        wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west + (iEl-1)*6 )
+!        eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east + (iEl-1)*6 )
+!        P3 = P3 + l2(i)*l3(j)*( wSurf*l1(1) + eSurf*l1(2) )
+!
+!      ENDDO
+!    ENDDO
+!
+!    !Finally, the sum the interpolants is computed to yield the computational coordinate
+!    P = P1 + P2 + P3
+!
+!  END FUNCTION TransfiniteInterpolation_2D
+
+!  FUNCTION TransfiniteInterpolation( boundingSurfaces, iEl, a, b, c ) RESULT( P )
+!    ! TransfiniteInterpolation
+!    !  Takes in the six surfaces (south, east, north, west, bottom, top) and evaluates the
+!    !  bidirectional mapping at xi^1 = a, xi^2 = b, xi^3 = c. The boundary of the computational
+!    !  coordinate system is assumed to be at +/- 1 in each direction.
+!    !
+!    ! =============================================================================================== !
+!    ! DECLARATIONS
+!    IMPLICIT NONE
+!    TYPE( Surfaces )  :: boundingSurfaces
+!    INTEGER           :: iEl
+!    REAL(prec)       :: a, b, c
+!    REAL(prec)       :: P(1:3)
+!    ! LOCAL
+!    REAL(prec)  :: P1(1:3), P2(1:3), P3(1:3)
+!    REAL(prec)  :: sSurf(1:3), nSurf(1:3), eSurf(1:3), wSurf(1:3), bSurf(1:3), tSurf(1:3)
+!    REAL(prec)  :: l1(1:2), l2(1:2), l3(1:2)
+!    REAL(prec)  :: ref(1:2)
+!    INTEGER     :: i, j, iSurf
+!
+!    ref = (/ -1.0_prec, 1.0_prec /)
+!
+!    ! Transfinite interpolation with linear blending USEs linear lagrange interpolating polynomials
+!    ! to blend the bounding surfaces.
+!    ! The linear blending weights in the first computational direction are calculated.
+!
+!    l1 = LinearBlend( a )
+!    l2 = LinearBlend( b )
+!    l3 = LinearBlend( c )
+!
+!    ! The bounding surfaces need to be evaluated at the provided computational coordinates
+!
+!    wSurf = boundingSurfaces % Evaluate( (/b, c/), west + (iEl-1)*6 )   ! west
+!    eSurf = boundingSurfaces % Evaluate( (/b, c/), east + (iEl-1)*6 )   ! east
+!    sSurf = boundingSurfaces % Evaluate( (/a, c/), south + (iEl-1)*6 )  ! south
+!    nSurf = boundingSurfaces % Evaluate( (/a, c/), north + (iEl-1)*6 )  ! north
+!    bSurf = boundingSurfaces % Evaluate( (/a, b/), bottom + (iEl-1)*6 ) ! bottom
+!    tSurf = boundingSurfaces % Evaluate( (/a, b/), top + (iEl-1)*6 )    ! top
+!
+!    ! P1 CONTAINS the interpolation in the first computational coordinate
+!    ! The first computational coordinate is assumed to vary between the (computational) east and
+!    ! west boundaries.
+!
+!    P1 = l1(1)*wSurf + l1(2)*eSurf
+!
+!    ! P2 CONTAINS the interpolation in the second computational coordinate
+!    ! The second computational coordinate is assumed to vary between the (computational) south and
+!    ! north boundaries.
+!
+!    P2 = l2(1)*sSurf + l2(2)*nSurf
+!
+!    ! P3 CONTAINS the interpolation in the first computational coordinate
+!    ! The first computational coordinate is assumed to vary between the (computational) bottom and
+!    ! top boundaries.
+!
+!    P3 = l3(1)*bSurf + l3(2)*tSurf
+!
+!    DO i = 1, 2
+!
+!      ! Now we need to compute the tensor product of the first and second computational direction
+!      ! interpolants and subtract from P1.
+!
+!      wSurf = boundingsurfaces % Evaluate( (/ref(i), c/), west + (iEl-1)*6 )
+!      eSurf = boundingsurfaces % Evaluate( (/ref(i), c/), east + (iEl-1)*6 )
+!      P1 = P1 - l2(i)*( wSurf*l1(1) + eSurf*l1(2) )
+!
+!      ! Now we need to compute the tensor product of the first and third computational direction
+!      ! interpolants and subtract from P1.
+!
+!      wSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), west + (iEl-1)*6 )
+!      eSurf = boundingsurfaces % Evaluate( (/b, ref(i)/), east + (iEl-1)*6 )
+!
+!      P1 = P1 - l3(i)*( wSurf*l1(1) + eSurf*l1(2) )
+!
+!      ! Now we need to compute the tensor product of the second and third computational direction
+!      ! interpolants and subtract from P2.
+!
+!      sSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), south + (iEl-1)*6 )
+!      nSurf = boundingsurfaces % Evaluate( (/a, ref(i)/), north + (iEl-1)*6 )
+!
+!      P2 = P2 - l3(i)*( sSurf*l2(1) + nSurf*l2(2) )
+!
+!    ENDDO
+!
+!    ! Next, the compounded tensor product is computed and added to P3.
+!    DO j = 1,2
+!      DO i = 1,2
+!
+!        wSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), west + (iEl-1)*6 )
+!        eSurf = boundingsurfaces % Evaluate( (/ref(i), ref(j)/), east + (iEl-1)*6 )
+!        P3 = P3 + l2(i)*l3(j)*( wSurf*l1(1) + eSurf*l1(2) )
+!
+!      ENDDO
+!    ENDDO
+!
+!    !Finally, the sum the interpolants is computed to yield the computational coordinate
+!    P = P1 + P2 + P3
+!
+!  END FUNCTION TransfiniteInterpolation
+  FUNCTION Unidirectional( valLeft, valRight, a ) RESULT( P )
+    !
+    ! =============================================================================================== !
+    ! DECLARATIONS
+    IMPLICIT NONE
+    REAL(prec) :: valLeft(1:3), valRight(1:3)
+    REAL(prec) :: a
+    REAL(prec) :: P(1:3)
+
+    P = 0.5_prec*( (1.0_prec - a)*valLeft + (1.0_prec + a)*valRight )
+
+  END FUNCTION Unidirectional
+  FUNCTION LinearBlend( a ) RESULT( weights )
+
+    IMPLICIT NONE
+    REAL(prec) :: a
+    REAL(prec) :: weights(1:2)
+
+    weights(1) = 0.5_prec*(1.0_prec - a)
+    weights(2) = 0.5_prec*(1.0_prec + a)
+
+  END FUNCTION LinearBlend
 
 
 END MODULE SELF_Mesh
