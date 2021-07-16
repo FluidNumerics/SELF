@@ -1675,8 +1675,20 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      ! TO DO ! 
-      PRINT*, 'Woopsie! GPU Acceleration not implemented yet for SideExchange'
+#ifdef GPU
+      CALL SideExchange_MapppedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
+                                                    vector % boundary % deviceData, &
+                                                    mesh % hopr_elemInfo % deviceData, &
+                                                    mesh % self_sideInfo % deviceData, &
+                                                    decomp % elemToRank % deviceData, &
+                                                    decomp % rankId, &
+                                                    vector % N, &
+                                                    vector % nvar, &
+                                                    vector % nElem)
+#else
+      msg = "GPU Acceleration is not currently enabled in SELF."
+      WARNING(msg)
+#endif
 
     ELSE
 
