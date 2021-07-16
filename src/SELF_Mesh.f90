@@ -717,6 +717,7 @@ CONTAINS
       END DO
     END DO
 
+    CALL myMesh % GenerateConnectivity()
 
     CALL myMesh % UpdateDevice()
 
@@ -804,7 +805,7 @@ CONTAINS
       ! variables. 
       ! `nSides` in HOHQMesh corresponds to nUniqueSides in HOPR and SELF 
       ! `nNodes` in HOHQMesh corresponds to nCornerNodes (unique) in HOPR and SELF
-      CALL myMesh % Init(nGeo,nElem,nElem*4,nElem*4*(nGeo+1)**2,self_nBCsDefault)
+      CALL myMesh % Init(nGeo,nElem,nElem*4,nElem*(nGeo+1)**2,self_nBCsDefault)
       myMesh % nUniqueSides = nSides
       myMesh % nCornerNodes = nNodes
 

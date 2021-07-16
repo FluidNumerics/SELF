@@ -357,13 +357,13 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,hopr_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,hopr_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
       INTEGER,VALUE :: rankId,N,nVar,nEl
-    END SUBROUTINE MapToTensorBoundary_MappedVector3D_gpu_wrapper
+    END SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
 #endif
@@ -482,7 +482,7 @@ CONTAINS
       CALL SideExchange_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % hopr_sideInfo % deviceData, &
+                                                    mesh % self_sideInfo % deviceData, &
                                                     decomp % elemToRank % deviceData, &
                                                     decomp % rankId, &
                                                     scalar % N, &
@@ -496,19 +496,17 @@ CONTAINS
 
 
       DO e1 = 1, mesh % nElem
-        s1 = 0
-        DO sid = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1) ! Loop over local sides 
-          s1 = s1 + 1 ! Increment local side ID 
-          globalSideId = mesh % hopr_sideInfo % hostData(2,sid)
-          e2 = mesh % hopr_sideInfo % hostData(3,sid)
-          s2 = mesh % hopr_sideInfo % hostData(4,sid)/10
-          flip = mesh % hopr_sideInfo % hostData(4,sid)-s2*10
-          bcid = mesh % hopr_sideInfo % hostData(5,sid)
+        DO s1 = 1,4 
+          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
           neighborRank = decomp % elemToRank % hostData(e2)
 
           IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
-            IF(flip == 1)THEN 
+            IF(flip == 0)THEN 
           
               DO ivar = 1, scalar % nvar
                 DO i1 = 0, scalar % N
@@ -517,7 +515,7 @@ CONTAINS
                 ENDDO
               ENDDO
 
-            ELSEIF(flip == 2)THEN
+            ELSEIF(flip == 1)THEN
 
               DO ivar = 1, scalar % nvar
                 DO i1 = 0, scalar % N
@@ -779,14 +777,12 @@ CONTAINS
     ELSE
 
       DO e1 = 1, mesh % nElem
-        s1 = 0
-        DO sid = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1) ! Loop over local sides 
-          s1 = s1 + 1 ! Increment local side ID 
-          globalSideId = mesh % hopr_sideInfo % hostData(2,sid)
-          e2 = mesh % hopr_sideInfo % hostData(3,sid)
-          s2 = mesh % hopr_sideInfo % hostData(4,sid)/10
-          flip = mesh % hopr_sideInfo % hostData(4,sid)-s2*10
-          bcid = mesh % hopr_sideInfo % hostData(5,sid)
+        DO s1 = 1,6
+          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF(bcid == 0)THEN   
 
@@ -1152,14 +1148,12 @@ CONTAINS
     ELSE
 
       DO e1 = 1, mesh % nElem
-        s1 = 0
-        DO sid = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1) ! Loop over local sides 
-          s1 = s1 + 1 ! Increment local side ID 
-          globalSideId = mesh % hopr_sideInfo % hostData(2,sid)
-          e2 = mesh % hopr_sideInfo % hostData(3,sid)
-          s2 = mesh % hopr_sideInfo % hostData(4,sid)/10
-          flip = mesh % hopr_sideInfo % hostData(4,sid)-s2*10
-          bcid = mesh % hopr_sideInfo % hostData(5,sid)
+        DO s1 = 1,4
+          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF(bcid == 0)THEN   
 
@@ -1613,14 +1607,12 @@ CONTAINS
     ELSE
 
       DO e1 = 1, mesh % nElem
-        s1 = 0
-        DO sid = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1) ! Loop over local sides 
-          s1 = s1 + 1 ! Increment local side ID 
-          globalSideId = mesh % hopr_sideInfo % hostData(2,sid)
-          e2 = mesh % hopr_sideInfo % hostData(3,sid)
-          s2 = mesh % hopr_sideInfo % hostData(4,sid)/10
-          flip = mesh % hopr_sideInfo % hostData(4,sid)-s2*10
-          bcid = mesh % hopr_sideInfo % hostData(5,sid)
+        DO s1 = 1, 6
+          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF(bcid == 0)THEN   
 
@@ -2145,14 +2137,12 @@ CONTAINS
     ELSE
 
       DO e1 = 1, mesh % nElem
-        s1 = 0
-        DO sid = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1) ! Loop over local sides 
-          s1 = s1 + 1 ! Increment local side ID 
-          globalSideId = mesh % hopr_sideInfo % hostData(2,sid)
-          e2 = mesh % hopr_sideInfo % hostData(3,sid)
-          s2 = mesh % hopr_sideInfo % hostData(4,sid)/10
-          flip = mesh % hopr_sideInfo % hostData(4,sid)-s2*10
-          bcid = mesh % hopr_sideInfo % hostData(5,sid)
+        DO s1 = 1,4
+          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF(bcid == 0)THEN   
 
@@ -2290,14 +2280,12 @@ CONTAINS
     ELSE
 
       DO e1 = 1, mesh % nElem
-        s1 = 0
-        DO sid = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1) ! Loop over local sides 
-          s1 = s1 + 1 ! Increment local side ID 
-          globalSideId = mesh % hopr_sideInfo % hostData(2,sid)
-          e2 = mesh % hopr_sideInfo % hostData(3,sid)
-          s2 = mesh % hopr_sideInfo % hostData(4,sid)/10
-          flip = mesh % hopr_sideInfo % hostData(4,sid)-s2*10
-          bcid = mesh % hopr_sideInfo % hostData(5,sid)
+        DO s1 = 1,6
+          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF(bcid == 0)THEN   
 
