@@ -1012,3 +1012,78 @@ extern "C"
   }
 
 }
+
+__global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+
+  size_t s1 = blockIdx.x
+  size_t e1 = blockIdx.y;
+  size_t i1 = threadIdx.x;
+  size_t j1 = threadIdx.y;
+  size_t ivar = threadIdx.z;
+  
+  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int neighborRank = elemToRank[e2];
+  int i2 = N-i1;
+  int j2 = N-j1;
+
+  if(bcid == 0 && neighborRank == rankId){
+    if(flip == 1){
+      extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s2,e2,N,nVar)];
+    }
+    else if(flip == 2){
+      extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,j2,i1,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,j2,i1,ivar,s2,e2,N,nVar)];
+    }
+    else if(flip == 3){
+      extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i2,j2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
+    }
+    else if(flip == 4){
+      extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,j1,i2,ivar,s2,e2,N,nVar)];
+      extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,j1,i2,ivar,s2,e2,N,nVar)];
+    }
+  }
+  
+}
+
+extern "C"
+{
+  void SideExchange_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int **elemInfo, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  {
+    SideExchange_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *elemInfo, *sideInfo, *elemToRank, rankId, N, nVar);
+  }
+
+}
