@@ -657,6 +657,7 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -886,6 +887,7 @@ CONTAINS
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, j1, j2, ivar
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -986,6 +988,7 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i, j
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -1277,6 +1280,7 @@ CONTAINS
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, ivar
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -1346,6 +1350,7 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -1756,6 +1761,7 @@ CONTAINS
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, j1, j2, ivar
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -1856,6 +1862,7 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i, j
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -2306,6 +2313,7 @@ CONTAINS
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, ivar
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 #ifdef GPU
@@ -2373,6 +2381,7 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
@@ -2467,6 +2476,7 @@ CONTAINS
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, j1, j2, ivar
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 #ifdef GPU
@@ -2565,6 +2575,7 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i, j
+    CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
