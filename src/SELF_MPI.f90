@@ -20,31 +20,44 @@ MODULE SELF_MPI
     INTEGER :: rankId
     INTEGER :: nRanks
     INTEGER :: nElem
+    INTEGER :: maxMsg
+    INTEGER :: msgCount
     TYPE(hfInt32_r1) :: elemToRank
     TYPE(hfInt32_r1) :: offSetElem
+    TYPE(hfInt32_r2) :: requests
+
 
     CONTAINS
 
       PROCEDURE :: Init => Init_MPILayer
-!      PROCEDURE :: Free => Free_MPILayer
+      PROCEDURE :: Free => Free_MPILayer
 
       PROCEDURE :: SetElemToRank
-!
-!      GENERIC, PUBLIC :: MPI_Exchange => MPIExchange_MappedScalar2D
-!      PROCEDURE, PUBLIC :: MPIExchange_MappedScalar2D
-!
-!      PROCEDURE :: Finalize_MPI_Exchange
-!
+      GENERIC,PUBLIC :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D,&
+                                            MPIExchangeAsync_MappedVector2D,&
+                                            MPIExchangeAsync_MappedTensor2D,&
+                                            MPIExchangeAsync_MappedScalar3D,&
+                                            MPIExchangeAsync_MappedVector3D,&
+                                            MPIExchangeAsync_MappedTensor3D
+      PROCEDURE,PRIVATE :: MPIExchangeAsync_MappedScalar2D
+      PROCEDURE,PRIVATE :: MPIExchangeAsync_MappedVector2D
+      PROCEDURE,PRIVATE :: MPIExchangeAsync_MappedTensor2D
+      PROCEDURE,PRIVATE :: MPIExchangeAsync_MappedScalar3D
+      PROCEDURE,PRIVATE :: MPIExchangeAsync_MappedVector3D
+      PROCEDURE,PRIVATE :: MPIExchangeAsync_MappedTensor3D
+      PROCEDURE,PUBLIC :: FinalizeMPIExchangeAsync
+
   END TYPE MPILayer
 
 
 CONTAINS
 
-  SUBROUTINE Init_MPILayer(this)
+  SUBROUTINE Init_MPILayer(this,maxMsg)
 #undef __FUNC__
 #define __FUNC__ "Init_MPILayer"
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(out) :: this
+    INTEGER, INTENT(in) :: maxMsg
     ! Local
     INTEGER       :: ierror
     CHARACTER(30) :: msg
@@ -58,11 +71,11 @@ CONTAINS
 #ifdef MPI
     this % mpiEnabled = .TRUE.
     this % mpiComm = MPI_COMM_WORLD
-    CALL MPI_INIT( ierror )
-    CALL MPI_COMM_RANK( this % mpiComm, this % rankId, ierror )
-    CALL MPI_COMM_SIZE( this % mpiComm, this % nRanks,  ierror )
+    CALL MPI_INIT(ierror)
+    CALL MPI_COMM_RANK(this % mpiComm, this % rankId, ierror)
+    CALL MPI_COMM_SIZE(this % mpiComm, this % nRanks,  ierror)
 
-    IF( prec == sp )THEN
+    IF(prec == sp)THEN
       this % mpiPrec=MPI_FLOAT
     ELSE
       this % mpiPrec=MPI_DOUBLE
@@ -70,12 +83,25 @@ CONTAINS
 #endif
 
     CALL this % offSetElem % Alloc(0,this % nRanks)
+    CALL this % requests % Alloc((/1,1/),&
+                                 (/maxMsg,2/))
+    this % requests % maxMsg = maxMsg
 
     WRITE(msg,'(I5)')this % rankId
     msg="Greetings from rank "//TRIM(msg)//"."
     INFO(TRIM(msg))
-      
+
   END SUBROUTINE Init_MPILayer
+
+  SUBROUTINE Free_MPILayer(this)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: this
+
+      CALL this % offSetElem % Free()
+      CALL this % requests % Free()
+      CALL this % elemToRank % Free()
+
+  END SUBROUTINE Free_MPILayer
 
   SUBROUTINE SetElemToRank(this, nElem)
     IMPLICIT NONE
@@ -162,70 +188,462 @@ CONTAINS
       ENDIF
 
   END SUBROUTINE ElemToRank
-!  SUBROUTINE MPIExchange_MappedScalar2D( mpiHandler, scalar, mesh, workScalar )
-!    IMPLICIT NONE
-!    CLASS(MPILayer), INTENT(inout) :: mpiHandler
-!    TYPE(MappedScalar2D), INTENT(in) :: scalar
-!    TYPE(Mesh2D), INTENT(in) :: mesh
-!    TYPE(MappedScalar2D), INTENT(inout) :: scalar
-!    ! Local
-!    INTEGER :: msgCnt, e1, s1, e2, s2
-!    INTEGER :: globalSideId, externalProcId
+  
+  SUBROUTINE MPIExchangeAsync_MappedScalar2D(mpiHandler,mesh,scalar,resetCount,useDevicePtr)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(MappedScalar2D), INTENT(inout) :: scalar
+    INTEGER, INTENT(in) :: resetCount
+    INTEGER, INTENT(in) :: useDevicePtr
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: globalSideId, externalProcId
+    INTEGER :: msgCount
+
+#ifdef MPI
+    IF(resetCount)THEN
+      msgCount = 0
+    ELSE
+      msgCount = mpiHandler % msgCount 
+    ENDIF
+
+    DO e1 = 1, mesh % nElem
+      DO s1 = 1, 4
+
+        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+        IF(r2 /= mpiHandler % rankId)THEN
+
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+
+          IF(useDevicePtr)THEN
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(scalar % extBoundary % deviceData(:,:,s1,e1), &
+                            (scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(scalar % boundary % deviceData(:,:,s1,e1), &
+                            (scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ELSE
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
+                            (scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
+                            (scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ENDIF
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+    mpiHandler % msgCount = msgCount
+#endif
+
+  END SUBROUTINE MPIExchangeAsync_MappedScalar2D
 !
-!    msgCnt = 0
-!    DO e1 = 1, mesh % nElem
-!      s1 = 1
-!      DO sideId = mesh % hopr_elemInfo % hostData(3,e1)+1, mesh % hopr_elemInfo % hostData(4,e1)
-!        ! Secondary element ID for this face
-!        e2 = mesh % hopr_sideInfo % hostData(3,sideId)
+  SUBROUTINE MPIExchangeAsync_MappedVector2D(mpiHandler,mesh,vector,resetCount,useDevicePtr)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(MappedVector2D), INTENT(inout) :: vector
+    INTEGER, INTENT(in) :: resetCount
+    INTEGER, INTENT(in) :: useDevicePtr
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: globalSideId, externalProcId
+    INTEGER :: msgCount
+
+#ifdef MPI
+    IF(resetCount)THEN
+      msgCount = 0
+    ELSE
+      msgCount = mpiHandler % msgCount 
+    ENDIF
+
+    DO e1 = 1, mesh % nElem
+      DO s1 = 1, 4
+
+        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+        IF(r2 /= mpiHandler % rankId)THEN
+
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+
+          IF(useDevicePtr)THEN
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(vector % extBoundary % deviceData(:,:,:,s1,e1), &
+                           2*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(vector % boundary % deviceData(:,:,:,s1,e1), &
+                            2*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ELSE
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
+                           2*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
+                            2*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ENDIF
+
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+    mpiHandler % msgCount = msgCount
+#endif
+
+  END SUBROUTINE MPIExchangeAsync_MappedVector2D
+
+  SUBROUTINE MPIExchangeAsync_MappedTensor2D(mpiHandler,mesh,tensor,resetCount,useDevicePtr)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(MappedTensor2D), INTENT(inout) :: tensor
+    INTEGER, INTENT(in) :: resetCount
+    INTEGER, INTENT(in) :: useDevicePtr
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: globalSideId, externalProcId
+    INTEGER :: msgCount
+
+#ifdef MPI
+    IF(resetCount)THEN
+      msgCount = 0
+    ELSE
+      msgCount = mpiHandler % msgCount 
+    ENDIF
+
+    DO e1 = 1, mesh % nElem
+      DO s1 = 1, 4
+
+        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+        IF(r2 /= mpiHandler % rankId)THEN
+
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+
+          IF(useDevicePtr)THEN
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(tensor % extBoundary % deviceData(:,:,:,:,s1,e1), &
+                           4*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(tensor % boundary % deviceData(:,:,:,:,s1,e1), &
+                            4*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ELSE
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
+                           4*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
+                            4*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ENDIF
+
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+    mpiHandler % msgCount = msgCount
+#endif
+
+  END SUBROUTINE MPIExchangeAsync_MappedTensor2D
+
+  SUBROUTINE MPIExchangeAsync_MappedScalar3D(mpiHandler,mesh,scalar,resetCount,useDevicePtr)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(MappedScalar3D), INTENT(inout) :: scalar
+    INTEGER, INTENT(in) :: resetCount
+    INTEGER, INTENT(in) :: useDevicePtr
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: globalSideId, externalProcId
+    INTEGER :: msgCount
+
+#ifdef MPI
+    IF(resetCount)THEN
+      msgCount = 0
+    ELSE
+      msgCount = mpiHandler % msgCount 
+    ENDIF
+
+    DO e1 = 1, mesh % nElem
+      DO s1 = 1, 6
+
+        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+        IF(r2 /= mpiHandler % rankId)THEN
+
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+
+          IF(useDevicePtr)THEN
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(scalar % extBoundary % deviceData(:,:,:,s1,e1), &
+                            (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(scalar % boundary % deviceData(:,:,:,s1,e1), &
+                            (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ELSE
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
+                            (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
+                            (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ENDIF
+
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+    mpiHandler % msgCount = msgCount
+#endif
+
+  END SUBROUTINE MPIExchangeAsync_MappedScalar3D
 !
-!        ! In SELF, we read in HOPR pre-processed mesh information. Upon reading in and
-!        ! performing data decomposition, we set e2 = -e2 if the neighboring element is
-!        ! owned by another rank
-!        IF( e2 < 0 )THEN
-!          s2 = mesh % hopr_sideInfo % hostData(4,sideId)/10
-!          globalSideId = ABS(mesh % hopr_sideInfo % hostdata(2,sideId))
-!
-!          ! Assume that mesh has been pre-processed with HOPR and
-!          ! elements are distributed to ranks by simply dividing the list [1:nElements]
-!          ! evenly and in order to all ranks
-!          ! TODO: externalProcId = GetRank( e2, mesh % nElem, mpiHandler % nRanks )
-!
-!          msgCnt = msgCnt + 1
-!          ! Receive data on this rank's workScalar
-!          CALL MPI_IRECV( workScalar % boundary % hostData(:,:,s1,e1), &
-!                          (scalar % N+1)*scalar % nVar, &
-!                          mpiHandler % mpiPrec, &
-!                          externalProcId, globalSideId,  &
-!                          mpiHandler % mpiComm, &
-!                          mpiHandler % requestHandle(msgCnt*2-1), iError )
-!
-!
-!          ! Send data from this rank's scalar
-!          CALL MPI_ISEND( workScalar % boundary % hostData(:,:,s1,e1), &
-!                          (scalar % N+1)*scalar % nVar, &
-!                          mpiHandler % mpiPrec, &
-!                          externalProcID, globalSideId, &
-!                          mpiHandler % mpiComm, &
-!                          mpiHandler % requestHandle(msgCnt*2), iError)
-!
-!        ENDIF
-!
-!      ENDDO
-!    ENDDO
-!
-!  END FUNCTION MPIExchange_MappedScalar2D
-!
-!  SUBROUTINE Finalize_MPIExchange( mpiHandler )
-!    CLASS( MPILayer ), INTENT(inout) :: mpiHandler
-!    ! Local
-!    INTEGER    :: ierror
-!
-!    CALL MPI_WaitAll( mpiHandler % nMessages*2, &
-!                      mpiHandler % requestHandle, &
-!                      mpiHandler % requestStats, &
-!                      iError)
-!
-!  END SUBROUTINE Finalize_MPI_Exchange
+  SUBROUTINE MPIExchangeAsync_MappedVector3D(mpiHandler,mesh,vector,resetCount,useDevicePtr)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(MappedVector3D), INTENT(inout) :: vector
+    INTEGER, INTENT(in) :: resetCount
+    INTEGER, INTENT(in) :: useDevicePtr
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: globalSideId, externalProcId
+    INTEGER :: msgCount
+
+#ifdef MPI
+    IF(resetCount)THEN
+      msgCount = 0
+    ELSE
+      msgCount = mpiHandler % msgCount 
+    ENDIF
+
+    DO e1 = 1, mesh % nElem
+      DO s1 = 1, 6
+
+        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+        IF(r2 /= mpiHandler % rankId)THEN
+
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+
+          IF(useDevicePtr)THEN
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(vector % extBoundary % deviceData(:,:,:,:,s1,e1), &
+                            3*(vector % N+1)*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(vector % boundary % deviceData(:,:,:,:,s1,e1), &
+                            3*(vector % N+1)*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ELSE
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
+                            3*(vector % N+1)*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(vector % boundary % hostData(:,:,:,:,s1,e1), &
+                            3*(vector % N+1)*(vector % N+1)*vector % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ENDIF
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+    mpiHandler % msgCount = msgCount
+#endif
+
+  END SUBROUTINE MPIExchangeAsync_MappedVector3D
+
+  SUBROUTINE MPIExchangeAsync_MappedTensor3D(mpiHandler,mesh,tensor,resetCount,useDevicePtr)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(MappedTensor3D), INTENT(inout) :: tensor
+    INTEGER, INTENT(in) :: resetCount
+    INTEGER, INTENT(in) :: useDevicePtr
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: globalSideId, externalProcId
+    INTEGER :: msgCount
+
+#ifdef MPI
+    IF(resetCount)THEN
+      msgCount = 0
+    ELSE
+      msgCount = mpiHandler % msgCount 
+    ENDIF
+
+    DO e1 = 1, mesh % nElem
+      DO s1 = 1, 6
+
+        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+        IF(r2 /= mpiHandler % rankId)THEN
+
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+
+          IF(useDevicePtr)THEN
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(tensor % extBoundary % deviceData(:,:,:,:,:,s1,e1), &
+                            9*(tensor % N +1)*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(tensor % boundary % deviceData(:,:,:,:,:,s1,e1), &
+                            9*(tensor % N+1)*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+          ELSE
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
+                            9*(tensor % N +1)*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcId, globalSideId,  &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+            msgCount = msgCount +1
+            CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,:,s1,e1), &
+                            9*(tensor % N+1)*(tensor % N+1)*tensor % nVar, &
+                            mpiHandler % mpiPrec, &
+                            externalProcID, globalSideId, &
+                            mpiHandler % mpiComm, &
+                            mpiHandler % requests(msgCount,1), iError)
+
+          ENDIF
+
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+    mpiHandler % msgCount = msgCount
+#endif
+
+  END SUBROUTINE MPIExchangeAsync_MappedTensor3D
+
+  SUBROUTINE FinalizeMPIExchangeAsync(mpiHandler)
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    ! Local
+    INTEGER :: ierror
+
+#ifdef MPI
+    CALL MPI_WaitAll(mpiHandler % msgCount, &
+                      mpiHandler % requests(1:mpiHandler % msgCount,1), &
+                      mpiHandler % requests(1:mpiHandler % msgCount,2), &
+                      iError)
+#endif
+
+  END SUBROUTINE FinalizeMPIExchangeAsync
 
 END MODULE SELF_MPI

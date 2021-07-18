@@ -585,10 +585,10 @@ CONTAINS
     INTEGER :: neighborRank
     CHARACTER(100) :: msg
 
-    ! TO DO : MPI_Exchange_Async (Begin) !
 
     IF(gpuAccel)THEN
 #ifdef GPU
+      CALL decomp % MPIExchangeAsync(mesh,scalar,resetCount=.TRUE.,useDevicePtr=.TRUE.)
       CALL SideExchange_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -604,7 +604,7 @@ CONTAINS
 #endif
     ELSE
 
-
+      CALL decomp % MPIExchangeAsync(mesh,scalar,resetCount=.TRUE.,useDevicePtr=.FALSE.)
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4 
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -644,7 +644,7 @@ CONTAINS
 
     END IF
     
-    ! TO DO : MPI_Exchange_Async (Finalize) !
+    CALL decomp % FinalizeMPIExchangeAsync()
     
   END SUBROUTINE SideExchange_MappedScalar2D
 
@@ -886,12 +886,15 @@ CONTAINS
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
+    INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
     CHARACTER(100) :: msg
 
     IF(gpuAccel)THEN
 
 #ifdef GPU
+      CALL decomp % MPIExchangeAsync(mesh,scalar,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+
       CALL SideExchange_MapppedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -908,6 +911,8 @@ CONTAINS
 
     ELSE
 
+      CALL decomp % MPIExchangeAsync(mesh,scalar,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+
       DO e1 = 1, mesh % nElem
         DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -915,8 +920,9 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0)THEN   
+          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           
@@ -976,6 +982,8 @@ CONTAINS
       ENDDO
 
     END IF
+
+    CALL decomp % FinalizeMPIExchangeAsync()
     
   END SUBROUTINE SideExchange_MappedScalar3D
 
@@ -1279,12 +1287,16 @@ CONTAINS
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
+    INTEGER :: neighborRank
     INTEGER :: i1, i2, ivar
     CHARACTER(100) :: msg
+
 
     IF(gpuAccel)THEN
 
 #ifdef GPU
+      CALL decomp % MPIExchangeAsync(mesh,vector,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+
       CALL SideExchange_MapppedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                     vector % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -1301,6 +1313,8 @@ CONTAINS
 
     ELSE
 
+      CALL decomp % MPIExchangeAsync(mesh,vector,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -1308,8 +1322,9 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0)THEN   
+          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           
@@ -1338,6 +1353,8 @@ CONTAINS
       ENDDO
 
     END IF
+
+    CALL decomp % FinalizeMPIExchangeAsync()
     
   END SUBROUTINE SideExchange_MappedVector2D
 
@@ -1760,12 +1777,16 @@ CONTAINS
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
+    INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
     CHARACTER(100) :: msg
+
 
     IF(gpuAccel)THEN
 
 #ifdef GPU
+      CALL decomp % MPIExchangeAsync(mesh,vector,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+
       CALL SideExchange_MapppedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                     vector % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -1782,6 +1803,8 @@ CONTAINS
 
     ELSE
 
+      CALL decomp % MPIExchangeAsync(mesh,vector,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+
       DO e1 = 1, mesh % nElem
         DO s1 = 1, 6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -1789,8 +1812,9 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0)THEN   
+          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           
@@ -1850,6 +1874,8 @@ CONTAINS
       ENDDO
 
     END IF
+
+    CALL decomp % FinalizeMPIExchangeAsync()
     
   END SUBROUTINE SideExchange_MappedVector3D
 
@@ -2312,11 +2338,15 @@ CONTAINS
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
+    INTEGER :: neighborRank
     INTEGER :: i1, i2, ivar
     CHARACTER(100) :: msg
 
+
     IF(gpuAccel)THEN
 #ifdef GPU
+      CALL decomp % MPIExchangeAsync(mesh,tensor,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+
       CALL SideExchange_MapppedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -2332,6 +2362,8 @@ CONTAINS
 #endif
     ELSE
 
+      CALL decomp % MPIExchangeAsync(mesh,tensor,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -2339,8 +2371,9 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0)THEN   
+          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           
@@ -2369,6 +2402,8 @@ CONTAINS
       ENDDO
 
     END IF
+
+    CALL decomp % FinalizeMPIExchangeAsync()
     
   END SUBROUTINE SideExchange_MappedTensor2D
 
@@ -2475,11 +2510,14 @@ CONTAINS
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
     INTEGER :: flip, bcid, globalSideId
+    INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
     CHARACTER(100) :: msg
 
+
     IF(gpuAccel)THEN
 #ifdef GPU
+      CALL decomp % MPIExchangeAsync(mesh,tensor,resetCount=.TRUE.,useDevicePtr=.TRUE.)
       CALL SideExchange_MapppedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -2495,6 +2533,7 @@ CONTAINS
 #endif
     ELSE
 
+      CALL decomp % MPIExchangeAsync(mesh,tensor,resetCount=.TRUE.,useDevicePtr=.FALSE.)
       DO e1 = 1, mesh % nElem
         DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -2502,8 +2541,9 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0)THEN   
+          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
 
             IF(flip == 1)THEN 
           
@@ -2563,7 +2603,9 @@ CONTAINS
       ENDDO
 
     END IF
-    
+
+    CALL decomp % FinalizeMPIExchangeAsync()
+
   END SUBROUTINE SideExchange_MappedTensor3D
 
   SUBROUTINE BassiRebaySides_MappedTensor3D(tensor,gpuAccel)
