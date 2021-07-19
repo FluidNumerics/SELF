@@ -34,6 +34,7 @@ MODULE SELF_MPI
       PROCEDURE :: Free => Free_MPILayer
 
       PROCEDURE :: SetElemToRank
+      PROCEDURE :: SetMaxMsg
 
       PROCEDURE,PUBLIC :: FinalizeMPIExchangeAsync
 
