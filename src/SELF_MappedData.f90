@@ -649,7 +649,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedScalar2D),INTENT(inout) :: scalar
     TYPE(Mesh2D),INTENT(in) :: mesh
-    TYPE(MPILayer),INTENT(in) :: decomp
+    TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -718,7 +718,7 @@ CONTAINS
     END IF
     
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL decomp % ApplyFlip(mesh % self_sideInfo,scalar,gpuAccel)
+    CALL scalar % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedScalar2D
 
@@ -955,7 +955,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(inout) :: scalar
     TYPE(Mesh3D),INTENT(in) :: mesh
-    TYPE(MPILayer),INTENT(in) :: decomp
+    TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -1059,7 +1059,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL decomp % ApplyFlip(mesh % self_sideInfo,scalar,gpuAccel)
+    CALL scalar % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedScalar3D
 
@@ -1358,7 +1358,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(Mesh2D),INTENT(in) :: mesh
-    TYPE(MPILayer),INTENT(in) :: decomp
+    TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -1431,7 +1431,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL decomp % ApplyFlip(mesh % self_sideInfo,vector,gpuAccel)
+    CALL vector % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedVector2D
 
@@ -1849,7 +1849,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(inout) :: vector
     TYPE(Mesh3D),INTENT(in) :: mesh
-    TYPE(MPILayer),INTENT(in) :: decomp
+    TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -1953,7 +1953,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL decomp % ApplyFlip(mesh % self_sideInfo,vector,gpuAccel)
+    CALL vector % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedVector3D
 
@@ -2411,7 +2411,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedTensor2D),INTENT(inout) :: tensor
     TYPE(Mesh2D),INTENT(in) :: mesh
-    TYPE(MPILayer),INTENT(in) :: decomp
+    TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -2482,7 +2482,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL decomp % ApplyFlip(mesh % self_sideInfo,tensor,gpuAccel)
+    CALL tensor % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedTensor2D
 
@@ -2584,7 +2584,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MappedTensor3D),INTENT(inout) :: tensor
     TYPE(Mesh3D),INTENT(in) :: mesh
-    TYPE(MPILayer),INTENT(in) :: decomp
+    TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1, e2, s1, s2, sid 
@@ -2684,7 +2684,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL decomp % ApplyFlip(mesh % self_sideInfo,tensor,gpuAccel)
+    CALL tensor % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
 
   END SUBROUTINE SideExchange_MappedTensor3D
 
@@ -2803,7 +2803,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: globalSideId, r2
     INTEGER :: msgCount
 
 #ifdef MPI
@@ -2829,7 +2829,7 @@ CONTAINS
             CALL MPI_IRECV(scalar % extBoundary % deviceData(:,:,s1,e1), &
                             (scalar % N+1)*scalar % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -2845,7 +2845,7 @@ CONTAINS
             CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
                             (scalar % N+1)*scalar % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -2877,7 +2877,8 @@ CONTAINS
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: i, i2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: r2, flip, ivar
+    INTEGER :: globalSideId
     REAL(prec) :: extBuff(0:scalar % N)
 
 
@@ -2938,7 +2939,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: globalSideId, r2
     INTEGER :: msgCount
 
 #ifdef MPI
@@ -2964,7 +2965,7 @@ CONTAINS
             CALL MPI_IRECV(vector % extBoundary % deviceData(:,:,:,s1,e1), &
                            2*(vector % N+1)*vector % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -2980,7 +2981,7 @@ CONTAINS
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
                            2*(vector % N+1)*vector % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3013,7 +3014,8 @@ CONTAINS
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: i, i2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: r2, flip, ivar
+    INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:2,0:vector % N)
 
 
@@ -3074,7 +3076,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: globalSideId, r2
     INTEGER :: msgCount
 
 #ifdef MPI
@@ -3100,7 +3102,7 @@ CONTAINS
             CALL MPI_IRECV(tensor % extBoundary % deviceData(:,:,:,:,s1,e1), &
                            4*(tensor % N+1)*tensor % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3116,7 +3118,7 @@ CONTAINS
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
                            4*(tensor % N+1)*tensor % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3149,7 +3151,8 @@ CONTAINS
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: i, i2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: r2, flip, ivar
+    INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:2,1:2,0:tensor % N)
 
 
@@ -3210,7 +3213,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: globalSideId, r2
     INTEGER :: msgCount
 
 #ifdef MPI
@@ -3236,7 +3239,7 @@ CONTAINS
             CALL MPI_IRECV(scalar % extBoundary % deviceData(:,:,:,s1,e1), &
                             (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3252,7 +3255,7 @@ CONTAINS
             CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
                             (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3285,7 +3288,8 @@ CONTAINS
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: i, i2, j, j2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: r2, flip, ivar
+    INTEGER :: globalSideId
     REAL(prec) :: extBuff(0:scalar % N,0:scalar % N)
 
 
@@ -3385,7 +3389,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: globalSideId, r2
     INTEGER :: msgCount
 
 #ifdef MPI
@@ -3411,7 +3415,7 @@ CONTAINS
             CALL MPI_IRECV(vector % extBoundary % deviceData(:,:,:,:,s1,e1), &
                             3*(vector % N+1)*(vector % N+1)*vector % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3427,7 +3431,7 @@ CONTAINS
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
                             3*(vector % N+1)*(vector % N+1)*vector % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3459,7 +3463,8 @@ CONTAINS
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: i, i2, j, j2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: r2, flip, ivar
+    INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:3,0:scalar % N,0:scalar % N)
 
 
@@ -3557,7 +3562,7 @@ CONTAINS
     LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, externalProcId
+    INTEGER :: globalSideId, r2
     INTEGER :: msgCount
 
 #ifdef MPI
@@ -3583,7 +3588,7 @@ CONTAINS
             CALL MPI_IRECV(tensor % extBoundary % deviceData(:,:,:,:,:,s1,e1), &
                             9*(tensor % N +1)*(tensor % N+1)*tensor % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3599,7 +3604,7 @@ CONTAINS
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
                             9*(tensor % N +1)*(tensor % N+1)*tensor % nVar, &
                             mpiHandler % mpiPrec, &
-                            externalProcId, globalSideId,  &
+                            r2, globalSideId,  &
                             mpiHandler % mpiComm, &
                             mpiHandler % requests(msgCount,1), iError)
 
@@ -3633,8 +3638,9 @@ CONTAINS
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: i, i2, j, j2
-    INTEGER :: globalSideId, externalProcId
-    REAL(prec) :: extBuff(1:3,1:3,0:scalar % N,0:scalar % N)
+    INTEGER :: r2, flip, ivar
+    INTEGER :: globalSideId
+    REAL(prec) :: extBuff(1:3,1:3,0:tensor % N,0:tensor % N)
 
 
     IF(mpiHandler % mpiEnabled)THEN
