@@ -48,7 +48,7 @@ CONTAINS
 #define __FUNC__ "Init_MPILayer"
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(out) :: this
-    INTEGER, INTENT(in) :: maxMsg
+    INTEGER, OPTIONAL, INTENT(in) :: maxMsg
     ! Local
     INTEGER       :: ierror
     CHARACTER(30) :: msg
@@ -74,9 +74,7 @@ CONTAINS
 #endif
 
     CALL this % offSetElem % Alloc(0,this % nRanks)
-    CALL this % requests % Alloc((/1,1/),&
-                                 (/maxMsg,2/))
-    this % maxMsg = maxMsg
+ 
 
     WRITE(msg,'(I5)')this % rankId
     msg="Greetings from rank "//TRIM(msg)//"."
@@ -93,6 +91,18 @@ CONTAINS
       CALL this % elemToRank % Free()
 
   END SUBROUTINE Free_MPILayer
+
+  SUBROUTINE SetMaxMsg(this, maxMsg)
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(out) :: this
+    INTEGER, INTENT(in) :: maxMsg
+
+    CALL this % requests % Free()
+    CALL this % requests % Alloc((/1,1/),&
+                                 (/maxMsg,2/))
+    this % maxMsg = maxMsg
+
+  END SUBROUTINE SetMaxMsg
 
   SUBROUTINE SetElemToRank(this, nElem)
     IMPLICIT NONE

@@ -696,10 +696,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r1),INTENT(inout) :: this
 
-    DEALLOCATE (this % hostData)
+    IF(ALLOCATED(this % hostData))THEN
+      DEALLOCATE (this % hostData)
 #ifdef GPU
-    CALL hipCheck(hipFree(this % deviceData))
+      CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r1
 
@@ -707,10 +709,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r2),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r2
 
@@ -718,10 +722,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r3),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r3
 
@@ -729,10 +735,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r4),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r4
 
@@ -740,10 +748,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r5),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r5
 
@@ -751,10 +761,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r6),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r6
 
@@ -762,10 +774,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r7),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfReal_r7
 
@@ -773,10 +787,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r1),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r1
 
@@ -784,10 +800,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r2),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r2
 
@@ -795,10 +813,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r3),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r3
 
@@ -806,10 +826,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r4),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r4
 
@@ -817,10 +839,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r5),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r5
 
@@ -828,10 +852,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r6),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r6
 
@@ -839,10 +865,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r7),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt32_r7
 
@@ -850,10 +878,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r1),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r1
 
@@ -861,10 +891,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r2),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r2
 
@@ -872,10 +904,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r3),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r3
 
@@ -883,10 +917,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r4),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r4
 
@@ -894,10 +930,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r5),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r5
 
@@ -905,10 +943,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r6),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r6
 
@@ -916,10 +956,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r7),INTENT(inout) :: this
 
+    IF(ALLOCATED(this % hostData))THEN
     DEALLOCATE (this % hostData)
 #ifdef GPU
     CALL hipCheck(hipFree(this % deviceData))
 #endif
+    ENDIF
 
   END SUBROUTINE Free_hfInt64_r7
 

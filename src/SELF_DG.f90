@@ -98,6 +98,8 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       ! Load Mesh
       CALL this % mesh % Load(spec,this % decomp)
 
+      CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
+
       ! Create geometry from mesh
       CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
@@ -289,6 +291,8 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
 
       ! Load Mesh
       CALL this % mesh % Load(spec,this % decomp)
+
+      CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
 
       ! Create geometry from mesh
       CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
