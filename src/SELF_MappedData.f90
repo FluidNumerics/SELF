@@ -661,7 +661,7 @@ CONTAINS
 
     IF(gpuAccel)THEN
 #ifdef GPU
-      CALL scalar % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
       CALL SideExchange_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -677,7 +677,7 @@ CONTAINS
 #endif
     ELSE
 
-      CALL scalar % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4 
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -718,7 +718,7 @@ CONTAINS
     END IF
     
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL scalar % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
+    CALL scalar % ApplyFlip(decomp,mesh,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedScalar2D
 
@@ -967,7 +967,7 @@ CONTAINS
     IF(gpuAccel)THEN
 
 #ifdef GPU
-      CALL scalar % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
@@ -986,7 +986,7 @@ CONTAINS
 
     ELSE
 
-      CALL scalar % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1,6
@@ -1059,7 +1059,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL scalar % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
+    CALL scalar % ApplyFlip(decomp,mesh,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedScalar3D
 
@@ -1371,7 +1371,7 @@ CONTAINS
     IF(gpuAccel)THEN
 
 #ifdef GPU
-      CALL vector % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                     vector % boundary % deviceData, &
@@ -1389,7 +1389,7 @@ CONTAINS
 
     ELSE
 
-      CALL vector % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4
@@ -1431,7 +1431,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL vector % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
+    CALL vector % ApplyFlip(decomp,mesh,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedVector2D
 
@@ -1862,7 +1862,7 @@ CONTAINS
     IF(gpuAccel)THEN
 
 #ifdef GPU
-      CALL vector % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                     vector % boundary % deviceData, &
@@ -1880,7 +1880,7 @@ CONTAINS
 
     ELSE
 
-      CALL vector % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1, 6
@@ -1953,7 +1953,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL vector % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
+    CALL vector % ApplyFlip(decomp,mesh,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedVector3D
 
@@ -2423,7 +2423,7 @@ CONTAINS
 
     IF(gpuAccel)THEN
 #ifdef GPU
-      CALL tensor % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
@@ -2440,7 +2440,7 @@ CONTAINS
 #endif
     ELSE
 
-      CALL tensor % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4
@@ -2482,7 +2482,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL tensor % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
+    CALL tensor % ApplyFlip(decomp,mesh,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedTensor2D
 
@@ -2596,7 +2596,7 @@ CONTAINS
 
     IF(gpuAccel)THEN
 #ifdef GPU
-      CALL tensor % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
       CALL SideExchange_MapppedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -2612,7 +2612,7 @@ CONTAINS
 #endif
     ELSE
 
-      CALL tensor % MPIExchangeAsync(decomp,mesh % self_sideInfo,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
       DO e1 = 1, mesh % nElem
         DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -2684,7 +2684,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
-    CALL tensor % ApplyFlip(decomp,mesh % self_sideInfo,gpuAccel)
+    CALL tensor % ApplyFlip(decomp,mesh,gpuAccel)
 
   END SUBROUTINE SideExchange_MappedTensor3D
 
