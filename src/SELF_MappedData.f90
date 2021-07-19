@@ -645,6 +645,7 @@ CONTAINS
     END IF
     
     CALL decomp % FinalizeMPIExchangeAsync()
+    CALL decomp % ApplyFlip(mesh % self_sideInfo,scalar,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedScalar2D
 
@@ -904,6 +905,7 @@ CONTAINS
                                                     scalar % N, &
                                                     scalar % nvar, &
                                                     scalar % nElem)
+
 #else
       msg = "GPU Acceleration is not currently enabled in SELF."
       WARNING(msg)
@@ -984,6 +986,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
+    CALL decomp % ApplyFlip(mesh % self_sideInfo,scalar,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedScalar3D
 
@@ -1355,6 +1358,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
+    CALL decomp % ApplyFlip(mesh % self_sideInfo,vector,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedVector2D
 
@@ -1876,6 +1880,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
+    CALL decomp % ApplyFlip(mesh % self_sideInfo,vector,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedVector3D
 
@@ -2404,6 +2409,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
+    CALL decomp % ApplyFlip(mesh % self_sideInfo,tensor,gpuAccel)
     
   END SUBROUTINE SideExchange_MappedTensor2D
 
@@ -2605,6 +2611,7 @@ CONTAINS
     END IF
 
     CALL decomp % FinalizeMPIExchangeAsync()
+    CALL decomp % ApplyFlip(mesh % self_sideInfo,tensor,gpuAccel)
 
   END SUBROUTINE SideExchange_MappedTensor3D
 
