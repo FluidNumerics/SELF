@@ -8,6 +8,7 @@ MODULE SELF_MPI
 
   USE SELF_Constants
   USE SELF_Memory
+  USE ISO_C_BINDING
 
   IMPLICIT NONE
 
@@ -48,6 +49,70 @@ MODULE SELF_MPI
       PROCEDURE,PUBLIC :: FinalizeMPIExchangeAsync
 
   END TYPE MPILayer
+
+#ifdef GPU
+
+  INTERFACE
+    SUBROUTINE ApplyFlip_MappedScalar2D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE ApplyFlip_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ApplyFlip_MappedVector2D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_MappedVector2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE ApplyFlip_MappedVector2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ApplyFlip_MappedTensor2D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_MappedTensor2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE ApplyFlip_MappedTensor2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ApplyFlip_MappedScalar3D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_MappedScalar3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE ApplyFlip_MappedScalar3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ApplyFlip_MappedVector3D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_MappedVector3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE ApplyFlip_MappedVector3D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+      bind(c,name="ApplyFlip_MappedTensor3D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
+      INTEGER,VALUE :: rankId,N,nVar,nEl
+    END SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper
+  END INTERFACE
+
+#endif
 
 
 CONTAINS
@@ -194,13 +259,12 @@ CONTAINS
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedScalar2D), INTENT(inout) :: scalar
-    INTEGER, INTENT(in) :: resetCount
-    INTEGER, INTENT(in) :: useDevicePtr
+    LOGICAL, INTENT(in) :: resetCount
+    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
-    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -209,8 +273,7 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    sDim = SHAPE(selfSideInfo % hostData)
-    DO e1 = 1, sDim(3)
+    DO e1 = 1, scalar % nElem
       DO s1 = 1, 4
 
         e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
@@ -264,18 +327,76 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar2D
 !
+  SUBROUTINE ApplyFlip_MappedScalar2D(mpiHandler,selfSideInfo,scalar,gpuAccel)
+  ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
+    TYPE(MappedScalar2D), INTENT(inout) :: scalar
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: i, i2
+    INTEGER :: globalSideId, externalProcId
+    REAL(prec) :: extBuff(0:scalar % N)
+
+
+    IF(gpuAccel)THEN
+
+      CALL ApplyFlip_MappedScalar2D_gpu_wrapper(selfSideInfo % deviceData, &
+                                                mpiHandler % elemToRank % deviceData, &
+                                                scalar % extBoundary % deviceData, &
+                                                mpiHandler % rankId, &
+                                                scalar % N, &
+                                                scalar % nVar, &
+                                                scalar % nElem)
+
+
+    ELSE
+      DO e1 = 1, scalar % nElem
+        DO s1 = 1, 4
+
+          e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
+          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+          IF(r2 /= mpiHandler % rankId)THEN
+
+            s2 = selfSideInfo % hostData(4,s1,e1)/10
+            flip = selfSideInfo % hostData(4,s1,e1) - s2*10
+            globalSideId = selfSideInfo % hostdata(2,s1,e1)
+
+            ! Need to update extBoundary with flip applied
+            IF(flip == 1)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO i = 0, scalar % N
+                  i2 = scalar % N - i
+                  extBuff(i) = scalar % extBoundary % hostData(i2,ivar,s1,e1)
+                ENDDO
+                DO i = 0, scalar % N
+                  scalar % extBoundary % hostData(i,ivar,s1,e1) = extBuff(i)
+                ENDDO
+              ENDDO
+  
+            ENDIF
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ApplyFlip_MappedScalar2D
+
   SUBROUTINE MPIExchangeAsync_MappedVector2D(mpiHandler,selfSideInfo,vector,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedVector2D), INTENT(inout) :: vector
-    INTEGER, INTENT(in) :: resetCount
-    INTEGER, INTENT(in) :: useDevicePtr
+    LOGICAL, INTENT(in) :: resetCount
+    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
-    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -284,8 +405,7 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    sDim = SHAPE(selfSideInfo % hostData)
-    DO e1 = 1, sDim(3)
+    DO e1 = 1, scalar % nElem
       DO s1 = 1, 4
 
         e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
@@ -340,18 +460,76 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedVector2D
 
+  SUBROUTINE ApplyFlip_MappedVector2D(mpiHandler,selfSideInfo,vector,gpuAccel)
+  ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
+    TYPE(MappedVector2D), INTENT(inout) :: vector
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: i, i2
+    INTEGER :: globalSideId, externalProcId
+    REAL(prec) :: extBuff(1:2,0:vector % N)
+
+
+    IF(gpuAccel)THEN
+
+      CALL ApplyFlip_MappedVector2D_gpu_wrapper(selfSideInfo % deviceData, &
+                                                mpiHandler % elemToRank % deviceData, &
+                                                vector % extBoundary % deviceData, &
+                                                mpiHandler % rankId, &
+                                                vector % N, &
+                                                vector % nVar, &
+                                                vector % nElem)
+
+
+    ELSE
+      DO e1 = 1, vector % nElem
+        DO s1 = 1, 4
+
+          e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
+          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+          IF(r2 /= mpiHandler % rankId)THEN
+
+            s2 = selfSideInfo % hostData(4,s1,e1)/10
+            flip = selfSideInfo % hostData(4,s1,e1) - s2*10
+            globalSideId = selfSideInfo % hostdata(2,s1,e1)
+
+            ! Need to update extBoundary with flip applied
+            IF(flip == 1)THEN
+
+              DO ivar = 1, vector % nvar
+                DO i = 0, vector % N
+                  i2 = vector % N - i
+                  extBuff(1:2,i) = vector % extBoundary % hostData(1:2,i2,ivar,s1,e1)
+                ENDDO
+                DO i = 0, vector % N
+                  vector % extBoundary % hostData(1:2,i,ivar,s1,e1) = extBuff(1:2,i)
+                ENDDO
+              ENDDO
+  
+            ENDIF
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ApplyFlip_MappedVector2D
+
   SUBROUTINE MPIExchangeAsync_MappedTensor2D(mpiHandler,selfSideInfo,tensor,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedTensor2D), INTENT(inout) :: tensor
-    INTEGER, INTENT(in) :: resetCount
-    INTEGER, INTENT(in) :: useDevicePtr
+    LOGICAL, INTENT(in) :: resetCount
+    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
-    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -360,8 +538,7 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    sDim = SHAPE(selfSideInfo % hostData)
-    DO e1 = 1, sDim(3)
+    DO e1 = 1, scalar % nElem
       DO s1 = 1, 4
 
         e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
@@ -416,18 +593,76 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor2D
 
+  SUBROUTINE ApplyFlip_MappedTensor2D(mpiHandler,selfSideInfo,tensor,gpuAccel)
+  ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
+    TYPE(MappedTensor2D), INTENT(inout) :: tensor
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: i, i2
+    INTEGER :: globalSideId, externalProcId
+    REAL(prec) :: extBuff(1:2,1:2,0:tensor % N)
+
+
+    IF(gpuAccel)THEN
+
+      CALL ApplyFlip_MappedTensor2D_gpu_wrapper(selfSideInfo % deviceData, &
+                                                mpiHandler % elemToRank % deviceData, &
+                                                tensor % extBoundary % deviceData, &
+                                                mpiHandler % rankId, &
+                                                tensor % N, &
+                                                tensor % nVar, &
+                                                tensor % nElem)
+
+
+    ELSE
+      DO e1 = 1, tensor % nElem
+        DO s1 = 1, 4
+
+          e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
+          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+          IF(r2 /= mpiHandler % rankId)THEN
+
+            s2 = selfSideInfo % hostData(4,s1,e1)/10
+            flip = selfSideInfo % hostData(4,s1,e1) - s2*10
+            globalSideId = selfSideInfo % hostdata(2,s1,e1)
+
+            ! Need to update extBoundary with flip applied
+            IF(flip == 1)THEN
+
+              DO ivar = 1, tensor % nvar
+                DO i = 0, tensor % N
+                  i2 = tensor % N - i
+                  extBuff(1:2,1:2,i) = tensor % extBoundary % hostData(1:2,1:2,i2,ivar,s1,e1)
+                ENDDO
+                DO i = 0, tensor % N
+                  tensor % extBoundary % hostData(1:2,1:2,i,ivar,s1,e1) = extBuff(1:2,1:2,i)
+                ENDDO
+              ENDDO
+  
+            ENDIF
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ApplyFlip_MappedTensor2D
+
   SUBROUTINE MPIExchangeAsync_MappedScalar3D(mpiHandler,selfSideInfo,scalar,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedScalar3D), INTENT(inout) :: scalar
-    INTEGER, INTENT(in) :: resetCount
-    INTEGER, INTENT(in) :: useDevicePtr
+    LOGICAL, INTENT(in) :: resetCount
+    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
-    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -436,8 +671,7 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    sDim = SHAPE(selfSideInfo % hostData)
-    DO e1 = 1, sDim(3)
+    DO e1 = 1, scalar % nElem
       DO s1 = 1, 6
 
         e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
@@ -492,18 +726,115 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar3D
 !
+  SUBROUTINE ApplyFlip_MappedScalar3D(mpiHandler,selfSideInfo,scalar,gpuAccel)
+  ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
+    TYPE(MappedScalar3D), INTENT(inout) :: scalar
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: i, i2, j, j2
+    INTEGER :: globalSideId, externalProcId
+    REAL(prec) :: extBuff(0:scalar % N,0:scalar % N)
+
+
+    IF(gpuAccel)THEN
+
+      CALL ApplyFlip_MappedScalar3D_gpu_wrapper(selfSideInfo % deviceData, &
+                                                mpiHandler % elemToRank % deviceData, &
+                                                scalar % extBoundary % deviceData, &
+                                                mpiHandler % rankId, &
+                                                scalar % N, &
+                                                scalar % nVar, &
+                                                scalar % nElem)
+
+
+    ELSE
+      DO e1 = 1, scalar % nElem
+        DO s1 = 1, 6
+
+          e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
+          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+          IF(r2 /= mpiHandler % rankId)THEN
+
+            s2 = selfSideInfo % hostData(4,s1,e1)/10
+            flip = selfSideInfo % hostData(4,s1,e1) - s2*10
+            globalSideId = selfSideInfo % hostdata(2,s1,e1)
+
+            ! Need to update extBoundary with flip applied
+            IF(flip == 2)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = scalar % N - j
+                    j2 = i
+                    extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 3)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = scalar % N - i
+                    j2 = scalar % N - j
+                    extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+                    
+            ELSEIF(flip == 4)THEN
+                    
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = j
+                    j2 = scalar % N - i
+                    extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+  
+            ENDIF
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ApplyFlip_MappedScalar3D
+
   SUBROUTINE MPIExchangeAsync_MappedVector3D(mpiHandler,selfSideInfo,vector,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedVector3D), INTENT(inout) :: vector
-    INTEGER, INTENT(in) :: resetCount
-    INTEGER, INTENT(in) :: useDevicePtr
+    LOGICAL, INTENT(in) :: resetCount
+    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
-    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -512,8 +843,7 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    sDim = SHAPE(selfSideInfo % hostData)
-    DO e1 = 1, sDim(3)
+    DO e1 = 1, scalar % nElem
       DO s1 = 1, 6
 
         e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
@@ -567,18 +897,113 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedVector3D
 
+  SUBROUTINE ApplyFlip_MappedVector3D(mpiHandler,selfSideInfo,scalar,gpuAccel)
+  ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
+    TYPE(MappedVector3D), INTENT(inout) :: scalar
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: i, i2, j, j2
+    INTEGER :: globalSideId, externalProcId
+    REAL(prec) :: extBuff(1:3,0:scalar % N,0:scalar % N)
+
+
+    IF(gpuAccel)THEN
+
+      CALL ApplyFlip_MappedVector3D_gpu_wrapper(selfSideInfo % deviceData, &
+                                                mpiHandler % elemToRank % deviceData, &
+                                                scalar % extBoundary % deviceData, &
+                                                mpiHandler % rankId, &
+                                                scalar % N, &
+                                                scalar % nVar, &
+                                                scalar % nElem)
+
+
+    ELSE
+      DO e1 = 1, scalar % nElem
+        DO s1 = 1, 6
+
+          e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
+          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+          IF(r2 /= mpiHandler % rankId)THEN
+
+            s2 = selfSideInfo % hostData(4,s1,e1)/10
+            flip = selfSideInfo % hostData(4,s1,e1) - s2*10
+            globalSideId = selfSideInfo % hostdata(2,s1,e1)
+
+            IF(flip == 2)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = scalar % N - j
+                    j2 = i
+                    extBuff(1:3,i,j) = scalar % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 3)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = scalar % N - i
+                    j2 = scalar % N - j
+                    extBuff(1:3,i,j) = scalar % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+                    
+            ELSEIF(flip == 4)THEN
+                    
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = j
+                    j2 = scalar % N - i
+                    extBuff(1:3,i,j) = scalar % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+  
+            ENDIF
+          ENDIF
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ApplyFlip_MappedVector3D
+
   SUBROUTINE MPIExchangeAsync_MappedTensor3D(mpiHandler,selfSideInfo,tensor,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedTensor3D), INTENT(inout) :: tensor
-    INTEGER, INTENT(in) :: resetCount
-    INTEGER, INTENT(in) :: useDevicePtr
+    LOGICAL, INTENT(in) :: resetCount
+    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
-    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -587,8 +1012,7 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    sDim = SHAPE(selfSideInfo % hostData)
-    DO e1 = 1, sDim(3)
+    DO e1 = 1, scalar % nElem
       DO s1 = 1, 6
 
         e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
@@ -643,6 +1067,103 @@ CONTAINS
 #endif
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor3D
+
+  SUBROUTINE ApplyFlip_MappedTensor3D(mpiHandler,selfSideInfo,scalar,gpuAccel)
+  ! Apply side flips to sides where MPI exchanges took place.
+    IMPLICIT NONE
+    CLASS(MPILayer), INTENT(inout) :: mpiHandler
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
+    TYPE(MappedTensor3D), INTENT(inout) :: scalar
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1, s1, e2, s2
+    INTEGER :: i, i2, j, j2
+    INTEGER :: globalSideId, externalProcId
+    REAL(prec) :: extBuff(1:3,1:3,0:scalar % N,0:scalar % N)
+
+
+    IF(gpuAccel)THEN
+
+      CALL ApplyFlip_MappedTensor3D_gpu_wrapper(selfSideInfo % deviceData, &
+                                                mpiHandler % elemToRank % deviceData, &
+                                                scalar % extBoundary % deviceData, &
+                                                mpiHandler % rankId, &
+                                                scalar % N, &
+                                                scalar % nVar, &
+                                                scalar % nElem)
+
+
+    ELSE
+      DO e1 = 1, scalar % nElem
+        DO s1 = 1, 6
+
+          e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
+          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+
+          IF(r2 /= mpiHandler % rankId)THEN
+
+            s2 = selfSideInfo % hostData(4,s1,e1)/10
+            flip = selfSideInfo % hostData(4,s1,e1) - s2*10
+            globalSideId = selfSideInfo % hostdata(2,s1,e1)
+
+            IF(flip == 2)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = scalar % N - j
+                    j2 = i
+                    extBuff(1:3,1:3,i,j) = scalar % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+
+            ELSEIF(flip == 3)THEN
+
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = scalar % N - i
+                    j2 = scalar % N - j
+                    extBuff(1:3,1:3,i,j) = scalar % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+                    
+            ELSEIF(flip == 4)THEN
+                    
+              DO ivar = 1, scalar % nvar
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    i2 = j
+                    j2 = scalar % N - i
+                    extBuff(1:3,1:3,i,j) = scalar % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                  ENDDO
+                ENDDO
+                DO j = 0, scalar % N
+                  DO i = 0, scalar % N
+                    scalar % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                  ENDDO
+                ENDDO
+              ENDDO
+  
+            ENDIF
+          ENDIF
+
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ApplyFlip_MappedTensor3D
 
   SUBROUTINE FinalizeMPIExchangeAsync(mpiHandler)
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
