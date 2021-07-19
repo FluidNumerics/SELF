@@ -97,7 +97,6 @@ CONTAINS
     CLASS(MPILayer), INTENT(out) :: this
     INTEGER, INTENT(in) :: maxMsg
 
-    CALL this % requests % Free()
     CALL this % requests % Alloc((/1,1/),&
                                  (/maxMsg,2/))
     this % maxMsg = maxMsg
