@@ -85,7 +85,7 @@ CONTAINS
     CALL this % offSetElem % Alloc(0,this % nRanks)
     CALL this % requests % Alloc((/1,1/),&
                                  (/maxMsg,2/))
-    this % requests % maxMsg = maxMsg
+    this % maxMsg = maxMsg
 
     WRITE(msg,'(I5)')this % rankId
     msg="Greetings from rank "//TRIM(msg)//"."
@@ -189,10 +189,10 @@ CONTAINS
 
   END SUBROUTINE ElemToRank
   
-  SUBROUTINE MPIExchangeAsync_MappedScalar2D(mpiHandler,mesh,scalar,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedScalar2D(mpiHandler,selfSideInfo,scalar,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedScalar2D), INTENT(inout) :: scalar
     INTEGER, INTENT(in) :: resetCount
     INTEGER, INTENT(in) :: useDevicePtr
@@ -200,6 +200,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
+    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -208,16 +209,17 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    DO e1 = 1, mesh % nElem
+    sDim = SHAPE(selfSideInfo % hostData)
+    DO e1 = 1, sDim(3)
       DO s1 = 1, 4
 
-        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
         r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
         IF(r2 /= mpiHandler % rankId)THEN
 
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+          s2 = selfSideInfo % hostData(4,s1,e1)/10
+          globalSideId = selfSideInfo % hostdata(2,s1,e1)
 
           IF(useDevicePtr)THEN
             msgCount = msgCount + 1
@@ -262,10 +264,10 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar2D
 !
-  SUBROUTINE MPIExchangeAsync_MappedVector2D(mpiHandler,mesh,vector,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedVector2D(mpiHandler,selfSideInfo,vector,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedVector2D), INTENT(inout) :: vector
     INTEGER, INTENT(in) :: resetCount
     INTEGER, INTENT(in) :: useDevicePtr
@@ -273,6 +275,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
+    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -281,16 +284,17 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    DO e1 = 1, mesh % nElem
+    sDim = SHAPE(selfSideInfo % hostData)
+    DO e1 = 1, sDim(3)
       DO s1 = 1, 4
 
-        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
         r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
         IF(r2 /= mpiHandler % rankId)THEN
 
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+          s2 = selfSideInfo % hostData(4,s1,e1)/10
+          globalSideId = selfSideInfo % hostdata(2,s1,e1)
 
           IF(useDevicePtr)THEN
             msgCount = msgCount + 1
@@ -336,10 +340,10 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedVector2D
 
-  SUBROUTINE MPIExchangeAsync_MappedTensor2D(mpiHandler,mesh,tensor,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedTensor2D(mpiHandler,selfSideInfo,tensor,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedTensor2D), INTENT(inout) :: tensor
     INTEGER, INTENT(in) :: resetCount
     INTEGER, INTENT(in) :: useDevicePtr
@@ -347,6 +351,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
+    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -355,16 +360,17 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    DO e1 = 1, mesh % nElem
+    sDim = SHAPE(selfSideInfo % hostData)
+    DO e1 = 1, sDim(3)
       DO s1 = 1, 4
 
-        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
         r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
         IF(r2 /= mpiHandler % rankId)THEN
 
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+          s2 = selfSideInfo % hostData(4,s1,e1)/10
+          globalSideId = selfSideInfo % hostdata(2,s1,e1)
 
           IF(useDevicePtr)THEN
             msgCount = msgCount + 1
@@ -410,10 +416,10 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor2D
 
-  SUBROUTINE MPIExchangeAsync_MappedScalar3D(mpiHandler,mesh,scalar,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedScalar3D(mpiHandler,selfSideInfo,scalar,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedScalar3D), INTENT(inout) :: scalar
     INTEGER, INTENT(in) :: resetCount
     INTEGER, INTENT(in) :: useDevicePtr
@@ -421,6 +427,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
+    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -429,16 +436,17 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    DO e1 = 1, mesh % nElem
+    sDim = SHAPE(selfSideInfo % hostData)
+    DO e1 = 1, sDim(3)
       DO s1 = 1, 6
 
-        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
         r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
         IF(r2 /= mpiHandler % rankId)THEN
 
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+          s2 = selfSideInfo % hostData(4,s1,e1)/10
+          globalSideId = selfSideInfo % hostdata(2,s1,e1)
 
           IF(useDevicePtr)THEN
             msgCount = msgCount + 1
@@ -484,10 +492,10 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar3D
 !
-  SUBROUTINE MPIExchangeAsync_MappedVector3D(mpiHandler,mesh,vector,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedVector3D(mpiHandler,selfSideInfo,vector,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedVector3D), INTENT(inout) :: vector
     INTEGER, INTENT(in) :: resetCount
     INTEGER, INTENT(in) :: useDevicePtr
@@ -495,6 +503,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
+    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -503,16 +512,17 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    DO e1 = 1, mesh % nElem
+    sDim = SHAPE(selfSideInfo % hostData)
+    DO e1 = 1, sDim(3)
       DO s1 = 1, 6
 
-        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
         r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
         IF(r2 /= mpiHandler % rankId)THEN
 
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+          s2 = selfSideInfo % hostData(4,s1,e1)/10
+          globalSideId = selfSideInfo % hostdata(2,s1,e1)
 
           IF(useDevicePtr)THEN
             msgCount = msgCount + 1
@@ -557,10 +567,10 @@ CONTAINS
 
   END SUBROUTINE MPIExchangeAsync_MappedVector3D
 
-  SUBROUTINE MPIExchangeAsync_MappedTensor3D(mpiHandler,mesh,tensor,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedTensor3D(mpiHandler,selfSideInfo,tensor,resetCount,useDevicePtr)
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
+    TYPE(hfInt32_r3), INTENT(in) :: selfSideInfo
     TYPE(MappedTensor3D), INTENT(inout) :: tensor
     INTEGER, INTENT(in) :: resetCount
     INTEGER, INTENT(in) :: useDevicePtr
@@ -568,6 +578,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, externalProcId
     INTEGER :: msgCount
+    INTEGER :: sDim(1:3)
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -576,16 +587,17 @@ CONTAINS
       msgCount = mpiHandler % msgCount 
     ENDIF
 
-    DO e1 = 1, mesh % nElem
+    sDim = SHAPE(selfSideInfo % hostData)
+    DO e1 = 1, sDim(3)
       DO s1 = 1, 6
 
-        e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+        e2 = selfSideInfo % hostData(3,s1,e1) ! Neighbor Element
         r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
         IF(r2 /= mpiHandler % rankId)THEN
 
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+          s2 = selfSideInfo % hostData(4,s1,e1)/10
+          globalSideId = selfSideInfo % hostdata(2,s1,e1)
 
           IF(useDevicePtr)THEN
             msgCount = msgCount + 1
