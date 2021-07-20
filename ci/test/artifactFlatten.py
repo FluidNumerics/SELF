@@ -3,6 +3,7 @@
 
 import json
 from datetime import datetime
+import os
 
 WORKSPACE=os.getenv('WORKSPACE')
 GIT_SHA=os.getenv('SHORT_SHA')

@@ -3,6 +3,7 @@
 
 import json
 import sys
+import os
 
 WORKSPACE=os.getenv('WORKSPACE')
 
