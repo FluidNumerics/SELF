@@ -109,8 +109,35 @@ steps:
           waitFor: ["Copy Artifacts from Cluster"]
 
 # Check for zero exit codes
+#      
+        - id: Flatten Test Output
+          name: 'python:3.7.11'
+          env: 
+          - 'WORKSPACE=/workspace'
+          - 'GIT_SHA=$COMMIT_SHA'
+          - 'BUILD_ID=$BUILD_ID'
+          args: 
+          - '/workspace/artifactFlatten.py' 
 
+# Load flat_results.json to bigquery
+        - id: Load flat results to gcs
+          name: 'gcr.io/cloud-builders/gsutil'
+          args: 
+          - 'cp'
+          - '/workspace/flat_results.json'
+          - 'gs://self-fluids-data/'
+       
+
+# Check for non-zero exit codes
+        - id: Check for non-zero exit codes
+          name: 'python:3.7.11'
+          env: 
+          - 'WORKSPACE=/workspace'
+          args: 
+          - '/workspace/exitCodeCheck.py' 
+#  
 # Check for correctness
+#
   
 
 

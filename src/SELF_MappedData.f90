@@ -371,7 +371,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
+                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -381,7 +382,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
+                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -391,7 +393,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
+                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -401,7 +404,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
+                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -411,7 +415,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
+                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -421,7 +426,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
+                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -436,7 +442,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -446,7 +452,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -456,7 +462,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
@@ -466,7 +472,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -476,7 +482,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -486,7 +492,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
