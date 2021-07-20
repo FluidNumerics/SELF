@@ -183,7 +183,7 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r1) :: hopr_CGNSCornerMap
     TYPE(hfInt32_r2) :: hopr_CGNSSideMap
     TYPE(hfInt32_r2) :: hopr_curveNodeMap
-    TYPE(hfInt32_r2) :: hopr_hopr_curveNodeMapInv
+    TYPE(hfInt32_r2) :: hopr_curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -226,7 +226,7 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r1) :: hopr_CGNSCornerMap
     TYPE(hfInt32_r2) :: hopr_CGNSSideMap
     TYPE(hfInt32_r2) :: hopr_curveNodeMap
-    TYPE(hfInt32_r3) :: hopr_hopr_curveNodeMapInv
+    TYPE(hfInt32_r3) :: hopr_curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
     CHARACTER(LEN=255),ALLOCATABLE :: BCNames(:)
 
@@ -558,7 +558,7 @@ CONTAINS
     CALL myMesh % hopr_curveNodeMap % Alloc(loBound=(/1,1/),&
                                        upBound=(/2,(nGeo+1)**2/))
 
-    CALL myMesh % hopr_hopr_curveNodeMapInv % Alloc(loBound=(/0,0/), &
+    CALL myMesh % hopr_curveNodeMapInv % Alloc(loBound=(/0,0/), &
                                           upBound=(/nGeo,nGeo/))
 
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
@@ -572,11 +572,12 @@ CONTAINS
     myMesh % hopr_CGNSCornerMap % hostData(3) = (nGeo+1)**2
     myMesh % hopr_CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
 
+    l = 0
     DO j = 0, nGeo
       DO i = 0, nGeo
         l = l+1
         myMesh % hopr_curveNodeMap % hostData(1:2,l) = (/i,j/)
-        myMesh % hopr_hopr_curveNodeMapInv % hostData(i,j) = l
+        myMesh % hopr_curveNodeMapInv % hostData(i,j) = l
       ENDDO
     ENDDO
 
@@ -1254,7 +1255,7 @@ CONTAINS
     CALL myMesh % hopr_curveNodeMap % Alloc(loBound=(/1,1/), &
                                        upBound=(/3,(nGeo+1)**3/))
 
-    CALL myMesh % hopr_hopr_curveNodeMapInv % Alloc(loBound=(/0,0,0/), &
+    CALL myMesh % hopr_curveNodeMapInv % Alloc(loBound=(/0,0,0/), &
                                           upBound=(/nGeo,nGeo,nGeo/))
 
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
@@ -1272,12 +1273,13 @@ CONTAINS
     myMesh % hopr_CGNSCornerMap % hostData(7) = (nGeo+1)**3
     myMesh % hopr_CGNSCornerMap % hostData(8) = nGeo*(nGeo+1)*(nGeo+2)+1
 
+    l = 0
     DO k = 0, nGeo
       DO j = 0, nGeo
         DO i = 0, nGeo
           l = l+1
           myMesh % hopr_curveNodeMap % hostData(1:3,l) = (/i,j,k/)
-          myMesh % hopr_hopr_curveNodeMapInv % hostData(i,j,k) = l
+          myMesh % hopr_curveNodeMapInv % hostData(i,j,k) = l
         ENDDO
       ENDDO
     ENDDO
