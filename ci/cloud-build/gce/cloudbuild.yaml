@@ -108,8 +108,14 @@ steps:
               terraform destroy --auto-approve
           waitFor: ["Copy Artifacts from Cluster"]
 
+        - id: Load results to gcs
+          name: 'gcr.io/cloud-builders/gsutil'
+          args: 
+          - 'cp'
+          - '/workspace/results.json'
+          - 'gs://self-fluids-data/'
+
 # Check for zero exit codes
-#      
         - id: Flatten Test Output
           name: 'python:3.7.11'
           env: 
