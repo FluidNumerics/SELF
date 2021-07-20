@@ -110,10 +110,13 @@ steps:
 
         - id: Load results to gcs
           name: 'gcr.io/cloud-builders/gsutil'
+          entrypoint: 'sh'
           args: 
-          - 'cp'
-          - '/workspace/results.json'
-          - 'gs://self-fluids-data/'
+          - '-c'
+          - | 
+              ls /workspace/
+              ls ./
+              gsutil cp -r ./ gs://self-fluids-data
 
 # Check for zero exit codes
         - id: Flatten Test Output
@@ -123,7 +126,7 @@ steps:
           - 'GIT_SHA=$COMMIT_SHA'
           - 'BUILD_ID=$BUILD_ID'
           args: 
-          - '/workspace/artifactFlatten.py' 
+          - '/workspace/ci/test/artifactFlatten.py' 
 
 # Load flat_results.json to bigquery
         - id: Load flat results to gcs
@@ -140,7 +143,7 @@ steps:
           env: 
           - 'WORKSPACE=/workspace'
           args: 
-          - '/workspace/exitCodeCheck.py' 
+          - '/workspace/ci/test/exitCodeCheck.py' 
 #  
 # Check for correctness
 #
