@@ -80,20 +80,12 @@ def main():
                                   'stdout': '',
                                   'stderr': '',
                                   'profile':{},
-                                  'system': {},
-                                  'benchmark_info':{
-                                    'gpu_accelerated':GPU_ACCEL,
-                                    'runtime_seconds':0.0,
-                                    'control_degree':cDeg,
-                                    'control_quadrature':cQuad,
-                                    'target_degree':tDeg,
-                                    'target_quadrature':tQuad,
-                                    'nelements':nel,
-                                    'nvar':nvar,
-                                    'cli_command':test['cli_command'],
-                                    'additional_opts':addlOpts,
-                                    'function_opts':funcOpts
-                                  }
+                                  'gpu_accelerated':GPU_ACCEL,
+                                  'runtime_seconds':0.0,
+                                  'execution_command': cmd,
+                                  'cli_command':test['cli_command'],
+                                  'additional_opts':addlOpts,
+                                  'function_opts':funcOpts
                                 })
 
     with open(INSTALL_ROOT+'/tests.json','w')as f:          

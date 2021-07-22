@@ -95,7 +95,7 @@ resource "google_cloudbuild_trigger" "main-serial" {
     _SELF_SINGULARITY_GPUFLAG = ""
     _SELF_TAGS = "self-ci"
   }
-  filename = "ci/cloud-build/gce/cloudbuild.yaml"
+  filename = "ci/cloudbuild.yaml"
 }
 
 resource "google_cloudbuild_trigger" "main-serial-x86-nvcc" {
@@ -125,7 +125,7 @@ resource "google_cloudbuild_trigger" "main-serial-x86-nvcc" {
     _SELF_SINGULARITY_GPUFLAG = "--nv"
     _SELF_TAGS = "self-ci"
   }
-  filename = "ci/cloud-build/gce/cloudbuild.yaml"
+  filename = "ci/cloudbuild.yaml"
 }
 
 resource "google_cloudbuild_trigger" "develop-serial" {
@@ -140,7 +140,7 @@ resource "google_cloudbuild_trigger" "develop-serial" {
     }
   }
   substitutions = {
-    _BUILD_TYPE = "release"
+    _BUILD_TYPE = "dev"
     _PLATFORM = "serial-x86"
     _SELF_NAME = "self"
     _SELF_ZONE = "us-west1-b"
@@ -155,7 +155,7 @@ resource "google_cloudbuild_trigger" "develop-serial" {
     _SELF_SINGULARITY_GPUFLAG = ""
     _SELF_TAGS = "self-ci"
   }
-  filename = "ci/cloud-build/gce/cloudbuild.yaml"
+  filename = "ci/cloudbuild.yaml"
 }
 
 resource "google_cloudbuild_trigger" "develop-serial-x86-nvcc" {
@@ -170,7 +170,7 @@ resource "google_cloudbuild_trigger" "develop-serial-x86-nvcc" {
     }
   }
   substitutions = {
-    _BUILD_TYPE = "release"
+    _BUILD_TYPE = "dev"
     _PLATFORM = "serial-x86-nvcc"
     _SELF_NAME = "self"
     _SELF_ZONE = "us-west1-b"
@@ -185,5 +185,133 @@ resource "google_cloudbuild_trigger" "develop-serial-x86-nvcc" {
     _SELF_SINGULARITY_GPUFLAG = "--nv"
     _SELF_TAGS = "self-ci"
   }
-  filename = "ci/cloud-build/gce/cloudbuild.yaml"
+  filename = "ci/cloudbuild.yaml"
+}
+
+// Big Query Dataset for SELF CI Data
+resource "google_bigquery_dataset" "self_ci" {
+  dataset_id = "self_ci"
+  friendly_name = "SELF CI/CB data"
+  description = "A dataset containing build information for SELF from our CI/CB pipeline."
+  location = var.bq_location
+  project = var.project
+}
+
+resource "google_bigquery_table" "benchmarks" {
+  dataset_id = google_bigquery_dataset.self_ci.dataset_id
+  table_id = "cloud_build_data"
+  project = var.project
+  deletion_protection=false
+  schema = <<EOF
+[
+  {
+    "name": "cli_command",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "The CLI command being executed. Usually maps to a subroutine being exercised during testing."
+  },
+  {
+    "name": "execution_command",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "The full command used to execute this benchmark"
+  },
+  {
+    "name": "build_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "The Cloud Build build ID associated with this build."
+  },
+  {
+    "name": "build_type",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "The build type passed to SELF make system during build. (_BUILD_TYPE Cloud Build Variable)"
+  },
+  {
+    "name": "compiler",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The compiler name and version (e.g. gcc@10.2.0) used to build SELF"
+  },
+  {
+    "name": "container_platform",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Name of the container platform used to build the application (e.g. docker, singularity). If not containerized, set to `none`"
+  },
+  {
+    "name": "container_platform_runtime",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Name of the container platform used to run the application (e.g. docker, singularity). If not containerized, set to `none`"
+  },
+  {
+    "name": "mpi_provider",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The MPI provider and version used to build the application (e.g. openmpi-4.0.2). If the application is not built with MPI, set to `none`."
+  },
+  {
+    "name": "target_platform",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Name of the target platform used in the build (_PLATFORM variable in Cloud Build)."
+  },
+  {
+    "name": "machine_type",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Node types as classified by the system provider."
+  },
+  {
+    "name": "gpu_type",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The vendor and model name of the GPU (e.g. nvidia-tesla-v100)"
+  },
+  {
+    "name": "gpu_count",
+    "type": "INT64",
+    "mode": "NULLABLE",
+    "description": "The number of GPUs, per compute node, on this compute system."
+  },
+  {
+    "name": "node_count",
+    "type": "INT64",
+    "mode": "NULLABLE",
+    "description": "The number of nodes used in testing SELF."
+  },
+  {
+    "name": "datetime",
+    "type": "DATETIME",
+    "mode": "REQUIRED",
+    "description" : "The UTC date and time of the build."
+  },
+  {
+    "name": "exit_code",
+    "type": "INT64",
+    "mode": "REQUIRED",
+    "description": "The system exit code thrown when executing benchmark_info.cli_command"
+  },
+  {
+    "name": "git_sha",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "The git SHA associated with the version / commit being tested." 
+  },
+  {
+    "name": "stderr",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Standard error." 
+  },
+  {
+    "name": "stdout",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Standard output." 
+  }
+]
+EOF
 }

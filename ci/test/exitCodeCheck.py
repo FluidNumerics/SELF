@@ -16,7 +16,7 @@ def main():
     results = {}
     sysExitCode = 0
     for test in tests :
-        cli_command = test['benchmark_info']['cli_command']
+        cli_command = ['cli_command']
         if cli_command in results.keys():
             if test['exit_code'] == 0:
                 results[cli_command]['npass'] += 1
@@ -43,7 +43,7 @@ def main():
       print('  {}'.format(cli))
       print('  > PASS : {}/{}'.format(str(npass),str(npass+nfail)))
       print('  > FAIL : {}/{}'.format(str(nfail),str(npass+nfail)))
-      print('  > FAILURE RATE : {}%'.format(str(nfail/(npass+nfail)*100)))
+      print('  > PASS RATE : {}%'.format(str(npass/(npass+nfail)*100)))
       print('                        ')
 
     print('============================')

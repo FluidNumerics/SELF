@@ -8,6 +8,18 @@ import os
 WORKSPACE=os.getenv('WORKSPACE')
 GIT_SHA=os.getenv('SHORT_SHA')
 BUILD_ID=os.getenv('BUILD_ID')
+PLATFORM=os.getenv('PLATFORM')
+NODE_COUNT=os.getenv('NODE_COUNT')
+MACHINE_TYPE=os.getenv('MACHINE_TYPE')
+GPU_COUNT=os.getenv('GPU_COUNT')
+GPU_TYPE=os.getenv('GPU_TYPE')
+BUILD_CONTAINER_PLATFORM=os.getenv('BUILD_CONTAINER_PLATFORM')
+RUN_CONTAINER_PLATFORM=os.getenv('RUN_CONTAINER_PLATFORM')
+BUILD_TYPE=os.getenv('BUILD_TYPE')
+TARGET_PLATFORM=os.getenv('TARGET_PLATFORM')
+COMPILER=os.getenv('COMPILER')
+MPI_PROVIDER=os.getenv('MPI_PROVIDER')
+
 
 
 def main():
@@ -19,26 +31,24 @@ def main():
 
     results = []
     for test in tests :
-        benchmark_info = test['benchmark_info']
-        funcOpts = benchmark_info['function_opts']
-        addlOpts = benchmark_info['additional_opts']
-        results.append({"benchmark_info.cli_command": benchmark_info['cli_command'],
-                         "benchmark_info.control_quadrature" : benchmark_info['control_quadrature'],
-                         "benchmark_info.control_degree" : benchmark_info['control_degree'],
-                         "benchmark_info.nelements": benchmark_info['nelements'],
-                         "benchmark_info.nvar": benchmark_info['nvar'],
-                         "benchmark_info.target_quadrature" : benchmark_info['target_quadrature'], 
-                         "benchmark_info.target_degree" : benchmark_info['target_degree'], 
-                         "benchmark_info.additional_opts.name" : addlOpts['name'],
-                         "benchmark_info.additional_opts.value" : addlOpts['value'],
-                         "benchmark_info.function_opts.name" : funcOpts['name'],
-                         "benchmark_info.function_opts.value" : funcOpts['value'],
-                         "git_sha": GIT_SHA,
-                         "build_id": BUILD_ID,
-                         "datetime": utc,
-                         "stdout": test['stdout'],
-                         "stderr": test['stderr'],
-                         "exit_code": test['exit_code']})
+        results.append({"cli_command": test['cli_command'],
+                        "execution_command": test['execution_command'],
+                        "exit_code": test['exit_code'],
+                        "stdout": test['stdout'],
+                        "stderr": test['stderr'],
+                        "build_id": BUILD_ID,
+                        "build_type": BUILD_TYPE,
+                        "compiler": COMPILER,
+                        "container_platform": BUILD_CONTAINER_PLATFORM,
+                        "container_platform_runtime": RUN_CONTAINER_PLATFORM,
+                        "mpi_provider": MPI_PROVIDER,
+                        "target_platform": TARGET_PLATFORM,
+                        "machine_type": MACHINE_TYPE,
+                        "gpu_type":GPU_TYPE,
+                        "gpu_count":int(GPU_COUNT),
+                        "node_count":int(NODE_COUNT),
+                        "git_sha": GIT_SHA,
+                        "datetime": utc})
 
     with open(WORKSPACE+'/flat_results.json','w')as f:          
         for res in results:
