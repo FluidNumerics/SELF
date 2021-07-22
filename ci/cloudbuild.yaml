@@ -108,32 +108,21 @@ steps:
               terraform destroy --auto-approve
           waitFor: ["Copy Artifacts from Cluster"]
 
-        - id: Load results to gcs
-          name: 'gcr.io/cloud-builders/gsutil'
-          entrypoint: 'sh'
-          args: 
-          - '-c'
-          - | 
-              ls /workspace/
-              ls ./
-              gsutil cp -r ./ gs://self-fluids-data
-
-# Check for zero exit codes
         - id: Flatten Test Output
           name: 'python:3.7.11'
           env: 
-          - 'WORKSPACE=/workspace'
+          - 'WORKSPACE=./'
           - 'GIT_SHA=$COMMIT_SHA'
           - 'BUILD_ID=$BUILD_ID'
           args: 
-          - '/workspace/ci/test/artifactFlatten.py' 
+          - './ci/test/artifactFlatten.py' 
 
 # Load flat_results.json to bigquery
         - id: Load flat results to gcs
           name: 'gcr.io/cloud-builders/gsutil'
           args: 
           - 'cp'
-          - '/workspace/flat_results.json'
+          - './flat_results.json'
           - 'gs://self-fluids-data/'
        
 
@@ -141,9 +130,9 @@ steps:
         - id: Check for non-zero exit codes
           name: 'python:3.7.11'
           env: 
-          - 'WORKSPACE=/workspace'
+          - 'WORKSPACE=./'
           args: 
-          - '/workspace/ci/test/exitCodeCheck.py' 
+          - './ci/test/exitCodeCheck.py' 
 #  
 # Check for correctness
 #
@@ -162,15 +151,14 @@ timeout: 9600s
 substitutions:
         _BUILD_TYPE: 'dev'
         _PLATFORM: 'serial-x86'
-        _SELF_NAME: 'self'
         _SELF_ZONE: 'us-west1-b'
         _SELF_MACHINE_TYPE: 'n1-standard-2'
         _SELF_NODE_COUNT: '1'
-        _SELF_IMAGE: 'projects/hpc-apps/global/images/singularity-fluid-gcp-latest'
+        _SELF_IMAGE: 'projects/hpc-apps/global/images/family/fluid-hpc-singularity-gcc-10-ompi-4'
         _SELF_GPU_TYPE: 'nvidia-tesla-v100'
         _SELF_GPU_TARGET: 'sm_72'
         _SELF_GPU_COUNT: '0'
-        _SELF_VPC_SUBNET: ''
+        _SELF_VPC_SUBNET: 'https://www.googleapis.com/compute/v1/projects/self-fluids/regions/us-west1/subnetworks/self-ci'
         _SELF_SINGULARITY_GPUFLAG: ''
-        _SELF_SERVICE_ACCOUNT: ''
+        _SELF_SERVICE_ACCOUNT: 'self-cibot@self-fluids.iam.gserviceaccount.com'
         _SELF_TAGS: 'self-ci'

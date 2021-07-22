@@ -17,34 +17,33 @@ def main():
 
     utc = datetime.utcnow().strftime("%Y-%m-%dT-%H:%M:%S")
 
-    flatFile = []
-    for test in ci_conf['tests'] :
-      for nel in test['nelems'] :
-        for nvar in test['nvars'] :
-          for cQuad in test['control_quadrature'] :
-            for cDeg in test['control_degree'] :
-              for tQuad in test['target_quadrature'] :
-                for tDeg in test['target_degree'] :
-                  for addlOpts in test['additional_opts'] :
-                    for funcOpts in test['function_opts'] :
+    results = []
+    for test in tests :
+        benchmark_info = test['benchmark_info']
+        funcOpts = benchmark_info['function_opts']
+        addlOpts = benchmark_info['additional_opts']
+        results.append({"benchmark_info.cli_command": benchmark_info['cli_command'],
+                         "benchmark_info.control_quadrature" : benchmark_info['control_quadrature'],
+                         "benchmark_info.control_degree" : benchmark_info['control_degree'],
+                         "benchmark_info.nelements": benchmark_info['nelements'],
+                         "benchmark_info.nvar": benchmark_info['nvar'],
+                         "benchmark_info.target_quadrature" : benchmark_info['target_quadrature'], 
+                         "benchmark_info.target_degree" : benchmark_info['target_degree'], 
+                         "benchmark_info.additional_opts.name" : addlOpts['name'],
+                         "benchmark_info.additional_opts.value" : addlOpts['value'],
+                         "benchmark_info.function_opts.name" : funcOpts['name'],
+                         "benchmark_info.function_opts.value" : funcOpts['value'],
+                         "git_sha": GIT_SHA,
+                         "build_id": BUILD_ID,
+                         "datetime": utc,
+                         "stdout": test['stdout'],
+                         "stderr": test['stderr'],
+                         "exit_code": test['exit_code']})
 
-                      flatFile.append({"cli_command": test['cli_command'],
-                                       "control_quadrature" : cQuad,
-                                       "control_degree" : cDeg,
-                                       "nelems": nel,
-                                       "nvars": nvar,
-                                       "target_quadrature" : tQuad, 
-                                       "target_degree" : tDeg, 
-                                       "additional_opts" : addlOpts,
-                                       "function_opts" : funcOpts,
-                                       "git_sha": GIT_SHA,
-                                       "build_id": BUILD_ID,
-                                       "datetime": utc,
-                                       "stdout": test['stdout'],
-                                       "stderr": test['stderr'],
-                                       "exit_code": test['exit_code']})
-
-    with open(WORKSPACE+'/flat_restuls.json','w')as f:          
-      f.write(json.dumps(tests,indent=2))
+    with open(WORKSPACE+'/flat_results.json','w')as f:          
+        for res in results:
+            f.write(json.dumps(res))
+            f.write('\n')
       
-    print(json.dumps(tests,indent=2))      
+if __name__ == '__main__':
+    main()
