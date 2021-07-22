@@ -691,28 +691,33 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
-          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0)THEN 
 
-            IF(flip == 0)THEN 
+            neighborRank = decomp % elemToRank % hostData(e2)
+
+            IF(neighborRank == decomp % rankId)THEN
+
+              IF(flip == 0)THEN 
           
-              DO ivar = 1, scalar % nvar
-                DO i1 = 0, scalar % N
-                  scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
-                      scalar % boundary % hostData(i1,ivar,s2,e2)
+                DO ivar = 1, scalar % nvar
+                  DO i1 = 0, scalar % N
+                    scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
+                        scalar % boundary % hostData(i1,ivar,s2,e2)
+                  ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 1)THEN
+              ELSEIF(flip == 1)THEN
 
-              DO ivar = 1, scalar % nvar
-                DO i1 = 0, scalar % N
-                  i2 = scalar % N - i1
-                  scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
-                     scalar % boundary % hostData(i2,ivar,s2,e2)
+                DO ivar = 1, scalar % nvar
+                  DO i1 = 0, scalar % N
+                    i2 = scalar % N - i1
+                    scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
+                       scalar % boundary % hostData(i2,ivar,s2,e2)
+                  ENDDO
                 ENDDO
-              ENDDO
+
+              ENDIF
 
             ENDIF
 
@@ -1001,60 +1006,65 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
-          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0)THEN 
 
-            IF(flip == 1)THEN 
+            neighborRank = decomp % elemToRank % hostData(e2)
+
+            IF(neighborRank == decomp % rankId)THEN
+
+              IF(flip == 1)THEN 
           
-              DO ivar = 1, scalar % nvar
-                DO j1 = 0, scalar % N
-                  DO i1 = 0, scalar % N
-                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
-                      scalar % boundary % hostData(i1,j1,ivar,s2,e2)
+                DO ivar = 1, scalar % nvar
+                  DO j1 = 0, scalar % N
+                    DO i1 = 0, scalar % N
+                      scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                        scalar % boundary % hostData(i1,j1,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 2)THEN
+              ELSEIF(flip == 2)THEN
 
-              DO ivar = 1, scalar % nvar
-                DO j1 = 0, scalar % N
-                  DO i1 = 0, scalar % N
-                    i2 = scalar % N - j1
-                    j2 = i1
-                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
-                      scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                DO ivar = 1, scalar % nvar
+                  DO j1 = 0, scalar % N
+                    DO i1 = 0, scalar % N
+                      i2 = scalar % N - j1
+                      j2 = i1
+                      scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                        scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 3)THEN
-                    
-              DO ivar = 1, scalar % nvar
-                DO j1 = 0, scalar % N
-                  DO i1 = 0, scalar % N
-                    i2 = scalar % N - i1
-                    j2 = scalar % N - j1 
-                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
-                      scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+              ELSEIF(flip == 3)THEN
+                      
+                DO ivar = 1, scalar % nvar
+                  DO j1 = 0, scalar % N
+                    DO i1 = 0, scalar % N
+                      i2 = scalar % N - i1
+                      j2 = scalar % N - j1 
+                      scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                        scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
           
-            ELSEIF(flip == 4)THEN
-                    
-              DO ivar = 1, scalar % nvar
-                DO j1 = 0, scalar % N
-                  DO i1 = 0, scalar % N
-                    i2 = j1
-                    j2 = scalar % N - i1
-                    scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
-                      scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+              ELSEIF(flip == 4)THEN
+                      
+                DO ivar = 1, scalar % nvar
+                  DO j1 = 0, scalar % N
+                    DO i1 = 0, scalar % N
+                      i2 = j1
+                      j2 = scalar % N - i1
+                      scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
+                        scalar % boundary % hostData(i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
           
+              ENDIF
+
             ENDIF
 
           ENDIF
@@ -1404,28 +1414,33 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
-          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0)THEN 
 
-            IF(flip == 1)THEN 
+            neighborRank = decomp % elemToRank % hostData(e2)
+
+            IF(neighborRank == decomp % rankId)THEN
+
+              IF(flip == 1)THEN 
           
-              DO ivar = 1, vector % nvar
-                DO i1 = 0, vector % N
-                  vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
-                      vector % boundary % hostData(1:2,i1,ivar,s2,e2)
+                DO ivar = 1, vector % nvar
+                  DO i1 = 0, vector % N
+                    vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
+                        vector % boundary % hostData(1:2,i1,ivar,s2,e2)
+                  ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 2)THEN
+              ELSEIF(flip == 2)THEN
 
-              DO ivar = 1, vector % nvar
-                DO i1 = 0, vector % N
-                  i2 = vector % N - i1
-                  vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
-                      vector % boundary % hostData(1:2,i2,ivar,s2,e2)
+                DO ivar = 1, vector % nvar
+                  DO i1 = 0, vector % N
+                    i2 = vector % N - i1
+                    vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
+                        vector % boundary % hostData(1:2,i2,ivar,s2,e2)
+                  ENDDO
                 ENDDO
-              ENDDO
+
+              ENDIF
 
             ENDIF
 
@@ -1895,60 +1910,65 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
-          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0)THEN 
 
-            IF(flip == 1)THEN 
+            neighborRank = decomp % elemToRank % hostData(e2)
+
+            IF(neighborRank == decomp % rankId)THEN
+
+              IF(flip == 1)THEN 
           
-              DO ivar = 1, vector % nvar
-                DO j1 = 0, vector % N
-                  DO i1 = 0, vector % N
-                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
-                      vector % boundary % hostData(1:3,i1,j1,ivar,s2,e2)
+                DO ivar = 1, vector % nvar
+                  DO j1 = 0, vector % N
+                    DO i1 = 0, vector % N
+                      vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                        vector % boundary % hostData(1:3,i1,j1,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 2)THEN
+              ELSEIF(flip == 2)THEN
 
-              DO ivar = 1, vector % nvar
-                DO j1 = 0, vector % N
-                  DO i1 = 0, vector % N
-                    i2 = vector % N - j1
-                    j2 = i1
-                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
-                      vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                DO ivar = 1, vector % nvar
+                  DO j1 = 0, vector % N
+                    DO i1 = 0, vector % N
+                      i2 = vector % N - j1
+                      j2 = i1
+                      vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                        vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 3)THEN
-                    
-              DO ivar = 1, vector % nvar
-                DO j1 = 0, vector % N
-                  DO i1 = 0, vector % N
-                    i2 = vector % N - i1
-                    j2 = vector % N - j1 
-                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
-                      vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+              ELSEIF(flip == 3)THEN
+                      
+                DO ivar = 1, vector % nvar
+                  DO j1 = 0, vector % N
+                    DO i1 = 0, vector % N
+                      i2 = vector % N - i1
+                      j2 = vector % N - j1 
+                      vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                        vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
           
-            ELSEIF(flip == 4)THEN
-                    
-              DO ivar = 1, vector % nvar
-                DO j1 = 0, vector % N
-                  DO i1 = 0, vector % N
-                    i2 = j1
-                    j2 = vector % N - i1
-                    vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
-                      vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+              ELSEIF(flip == 4)THEN
+                      
+                DO ivar = 1, vector % nvar
+                  DO j1 = 0, vector % N
+                    DO i1 = 0, vector % N
+                      i2 = j1
+                      j2 = vector % N - i1
+                      vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
+                        vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
           
+              ENDIF
+
             ENDIF
 
           ENDIF
@@ -2455,28 +2475,33 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
-          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0)THEN 
 
-            IF(flip == 1)THEN 
+            neighborRank = decomp % elemToRank % hostData(e2)
+
+            IF(neighborRank == decomp % rankId)THEN
+
+              IF(flip == 1)THEN 
           
-              DO ivar = 1, tensor % nvar
-                DO i1 = 0, tensor % N
-                  tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
-                      tensor % boundary % hostData(1:2,1:2,i1,ivar,s2,e2)
+                DO ivar = 1, tensor % nvar
+                  DO i1 = 0, tensor % N
+                    tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
+                        tensor % boundary % hostData(1:2,1:2,i1,ivar,s2,e2)
+                  ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 2)THEN
+              ELSEIF(flip == 2)THEN
 
-              DO ivar = 1, tensor % nvar
-                DO i1 = 0, tensor % N
-                  i2 = tensor % N - i1
-                  tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
-                      tensor % boundary % hostData(1:2,1:2,i2,ivar,s2,e2)
+                DO ivar = 1, tensor % nvar
+                  DO i1 = 0, tensor % N
+                    i2 = tensor % N - i1
+                    tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
+                        tensor % boundary % hostData(1:2,1:2,i2,ivar,s2,e2)
+                  ENDDO
                 ENDDO
-              ENDDO
+
+              ENDIF
 
             ENDIF
 
@@ -2626,60 +2651,65 @@ CONTAINS
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
-          neighborRank = decomp % elemToRank % hostData(e2)
 
-          IF(bcid == 0 .AND. neighborRank == decomp % rankId)THEN ! Boundary condition ID is zero for interior sides
+          IF(bcid == 0)THEN 
 
-            IF(flip == 1)THEN 
+            neighborRank = decomp % elemToRank % hostData(e2)
+
+            IF(neighborRank == decomp % rankId)THEN
+
+              IF(flip == 1)THEN 
           
-              DO ivar = 1, tensor % nvar
-                DO j1 = 0, tensor % N
-                  DO i1 = 0, tensor % N
-                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
-                      tensor % boundary % hostData(1:3,1:3,i1,j1,ivar,s2,e2)
+                DO ivar = 1, tensor % nvar
+                  DO j1 = 0, tensor % N
+                    DO i1 = 0, tensor % N
+                      tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                        tensor % boundary % hostData(1:3,1:3,i1,j1,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 2)THEN
+              ELSEIF(flip == 2)THEN
 
-              DO ivar = 1, tensor % nvar
-                DO j1 = 0, tensor % N
-                  DO i1 = 0, tensor % N
-                    i2 = tensor % N - j1
-                    j2 = i1
-                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
-                      tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                DO ivar = 1, tensor % nvar
+                  DO j1 = 0, tensor % N
+                    DO i1 = 0, tensor % N
+                      i2 = tensor % N - j1
+                      j2 = i1
+                      tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                        tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
 
-            ELSEIF(flip == 3)THEN
-                    
-              DO ivar = 1, tensor % nvar
-                DO j1 = 0, tensor % N
-                  DO i1 = 0, tensor % N
-                    i2 = tensor % N - i1
-                    j2 = tensor % N - j1 
-                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
-                      tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+              ELSEIF(flip == 3)THEN
+                      
+                DO ivar = 1, tensor % nvar
+                  DO j1 = 0, tensor % N
+                    DO i1 = 0, tensor % N
+                      i2 = tensor % N - i1
+                      j2 = tensor % N - j1 
+                      tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                        tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
           
-            ELSEIF(flip == 4)THEN
-                    
-              DO ivar = 1, tensor % nvar
-                DO j1 = 0, tensor % N
-                  DO i1 = 0, tensor % N
-                    i2 = j1
-                    j2 = tensor % N - i1
-                    tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
-                      tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+              ELSEIF(flip == 4)THEN
+                      
+                DO ivar = 1, tensor % nvar
+                  DO j1 = 0, tensor % N
+                    DO i1 = 0, tensor % N
+                      i2 = j1
+                      j2 = tensor % N - i1
+                      tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
+                        tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
+                    ENDDO
                   ENDDO
                 ENDDO
-              ENDDO
           
+              ENDIF
+
             ENDIF
 
           ENDIF

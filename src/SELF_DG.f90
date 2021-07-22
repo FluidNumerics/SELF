@@ -109,9 +109,9 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
       CALL this % fluxDivergence % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
 
-      CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
-      CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
-      CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
+      CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+      CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+      CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
       CALL this % compFlux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
 
       ALLOCATE(this % solutionMetaData(1:nvar))
@@ -176,7 +176,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
   SUBROUTINE CalculateSolutionGradient_DG2D(this,gpuAccel)
     IMPLICIT NONE
     CLASS(DG2D), INTENT(inout) :: this
-    LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
+    LOGICAL, INTENT(in) :: gpuAccel
 
     CALL this % solution % SideExchange(this % mesh,&
                                         this % decomp,&
@@ -194,7 +194,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
   SUBROUTINE CalculateFluxDivergence_DG2D(this,gpuAccel)
     IMPLICIT NONE
     CLASS(DG2D), INTENT(inout) :: this
-    LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
+    LOGICAL, INTENT(in) :: gpuAccel
 
     CALL this % flux % Divergence(this % compFlux, &
                                   this % geometry, &
@@ -303,9 +303,9 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
       CALL this % fluxDivergence % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
 
-      CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
-      CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
-      CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,3*nVar,this % mesh % nElem)
+      CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+      CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+      CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
       CALL this % compFlux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
 
       ALLOCATE(this % solutionMetaData(1:nvar))
@@ -370,7 +370,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
   SUBROUTINE CalculateSolutionGradient_DG3D(this,gpuAccel)
     IMPLICIT NONE
     CLASS(DG3D), INTENT(inout) :: this
-    LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
+    LOGICAL, INTENT(in) :: gpuAccel
 
     CALL this % solution % SideExchange(this % mesh,&
                                         this % decomp,&
@@ -388,7 +388,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
   SUBROUTINE CalculateFluxDivergence_DG3D(this,gpuAccel)
     IMPLICIT NONE
     CLASS(DG3D), INTENT(inout) :: this
-    LOGICAL, INTENT(in), OPTIONAL :: gpuAccel
+    LOGICAL, INTENT(in) :: gpuAccel
 
     CALL this % flux % Divergence(this % compFlux, &
                                   this % geometry, &

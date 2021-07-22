@@ -663,9 +663,10 @@ CONTAINS
     TYPE(Vector2D) :: xGeo
 
     nEl = nElem(1)*nElem(2)
-    nNodes = nel*(nGeo + 1)*(nGeo + 1)
-    nSides = (nElem(1) + 1)*nElem(2) + (nElem(2) + 1)*nElem(1)
+    nNodes = nEl*(nGeo + 1)*(nGeo + 1)
+    nSides = nEl*4
     CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
+    myMesh % nUniqueSides = (nElem(1) + 1)*nElem(2) + (nElem(2) + 1)*nElem(1)
 
     ! Set the hopr_nodeCoords
     xU = UniformPoints(x(1),x(2),1,nElem(1) + 1)
@@ -921,6 +922,8 @@ CONTAINS
   END SUBROUTINE Read_ISMv2_Mesh2D
 
   SUBROUTINE GenerateConnectivity_Mesh2D( myMesh )
+#undef __FUNC__
+#define __FUNC__ "GenerateConnectivity_Mesh2D"
     IMPLICIT NONE
     CLASS(Mesh2D), INTENT(inout) :: myMesh
     ! Local
@@ -930,6 +933,7 @@ CONTAINS
     INTEGER :: nUniqueSides,flip
     INTEGER :: side(1:2,1:myMesh % nUniqueSides)
     TYPE(HashTable) :: sideTable
+    CHARACTER(100) :: msg
 
       ! Set the globalNodeIDs
       !  > Nodes in the nodeCoords list are possibly repeated since elements may share common sides. When the sides are shared
@@ -940,7 +944,7 @@ CONTAINS
       DO nid = 2, myMesh % nNodes
 
         unid = myMesh % nUniqueNodes+1
-        DO rnid = 1, nid
+        DO rnid = 1, nid-1
           IF( AlmostEqual(myMesh % hopr_nodeCoords % hostData(1,nid),myMesh % hopr_nodeCoords % hostData(1,rnid)) .AND.& 
               AlmostEqual(myMesh % hopr_nodeCoords % hostData(2,nid),myMesh % hopr_nodeCoords % hostData(2,rnid)) )THEN
 
@@ -959,20 +963,9 @@ CONTAINS
 
       CALL sideTable % Init( myMesh % nUniqueNodes )
 
-      ! In this case, HOHQMesh information is provided before calling this routine
-      ! and we have a way to validate whether or not we created the correct side information
-      ! To validate, we temporarily store the number of unique sides and reset the number of
-      ! unique sides mesh attribute to 0. After we generate the side information, we can then
-      ! check that the number of unique sides matches the original number provided by HOHQMesh.
-      IF(myMesh % nUniqueSides > 0)THEN
-        nUniqueSides = myMesh % nUniqueSides
-        myMesh % nUniqueSides = 0
-      ELSE
-        nUniqueSides = 0
-      ENDIF
-
       ! Set the sideInfo
       sid = 1
+      nUniqueSides = 0
       DO eid = 1, myMesh % nElem
         DO lsid = 1, 4
 
@@ -1017,9 +1010,9 @@ CONTAINS
             ENDIF
 
             ! Populate information for this element
-            myMesh % self_sideInfo % hostData(2,sid,eid) = usid ! Global Side ID
-            myMesh % self_sideInfo % hostData(3,sid,eid) = e2 ! Neighbor Element ID
-            myMesh % self_sideInfo % hostData(4,sid,eid) = 10*s2+flip ! Neighbor Element ID
+            myMesh % self_sideInfo % hostData(2,lsid,eid) = usid ! Global Side ID
+            myMesh % self_sideInfo % hostData(3,lsid,eid) = e2 ! Neighbor Element ID
+            myMesh % self_sideInfo % hostData(4,lsid,eid) = 10*s2+flip ! Neighbor Element ID
 
             ! Population information for the other element
             myMesh % self_sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
