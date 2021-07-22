@@ -40,7 +40,7 @@ endif
 
 
 ifeq ($(findstring gfortran,$(FC))-$(BUILD), gfortran-dev)
-  SELF_FFLAGS += -cpp -g -O3 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
+  SELF_FFLAGS += -cpp -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
 else ifeq ($(findstring gfortran,$(FC))-$(BUILD), gfortran-release)
   SELF_FFLAGS += -cpp -O3
 else ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER))-$(BUILD), hipfc-gfortran-dev)
