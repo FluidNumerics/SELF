@@ -16,7 +16,7 @@ def main():
     results = {}
     sysExitCode = 0
     for test in tests :
-        cli_command = ['cli_command']
+        cli_command = test['cli_command']
         if cli_command in results.keys():
             if test['exit_code'] == 0:
                 results[cli_command]['npass'] += 1

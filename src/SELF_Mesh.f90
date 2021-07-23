@@ -702,19 +702,19 @@ CONTAINS
     elid = 1
     DO jel = 1,nElem(2)
       DO iel = 1,nElem(1)
-        myMesh % hopr_elemInfo % hostData(1,iel) = selfQuadLinear ! Element Type
-        myMesh % hopr_elemInfo % hostData(2,iel) = 1 ! Element Zone
-        myMesh % hopr_elemInfo % hostData(3,iel) = sid ! Side Index Start
+        myMesh % hopr_elemInfo % hostData(1,elid) = selfQuadLinear ! Element Type
+        myMesh % hopr_elemInfo % hostData(2,elid) = 1 ! Element Zone
+        myMesh % hopr_elemInfo % hostData(3,elid) = sid ! Side Index Start
         sid = sid+4
-        myMesh % hopr_elemInfo % hostData(4,iel) = sid ! Side Index End
-        myMesh % hopr_elemInfo % hostData(5,iel) = nid-1 ! Node Index Start
+        myMesh % hopr_elemInfo % hostData(4,elid) = sid ! Side Index End
+        myMesh % hopr_elemInfo % hostData(5,elid) = nid-1 ! Node Index Start
         DO j = 0,nGeo
           DO i = 0,nGeo
             myMesh % hopr_nodeCoords % hostData(1:2,nid) = xGeo % interior % hostData(1:2,i,j,1,elid)
             nid = nid + 1
           END DO
         END DO
-        myMesh % hopr_elemInfo % hostData(6,iel) = nid ! Node Index End
+        myMesh % hopr_elemInfo % hostData(6,elid) = nid ! Node Index End
         elid = elid + 1
       END DO
     END DO
@@ -1414,12 +1414,12 @@ CONTAINS
     DO kel = 1,nElem(3)
       DO jel = 1,nElem(2)
         DO iel = 1,nElem(1)
-          myMesh % hopr_elemInfo % hostData(1,iel) = selfQuadLinear ! Element Type
-          myMesh % hopr_elemInfo % hostData(2,iel) = 1 ! Element Zone
-          myMesh % hopr_elemInfo % hostData(3,iel) = sid ! Side Index Start
+          myMesh % hopr_elemInfo % hostData(1,elid) = selfQuadLinear ! Element Type
+          myMesh % hopr_elemInfo % hostData(2,elid) = 1 ! Element Zone
+          myMesh % hopr_elemInfo % hostData(3,elid) = sid ! Side Index Start
           sid = sid + 6
-          myMesh % hopr_elemInfo % hostData(4,iel) = sid ! Side Index End
-          myMesh % hopr_elemInfo % hostData(5,iel) = nid-1 ! Node Index Start
+          myMesh % hopr_elemInfo % hostData(4,elid) = sid ! Side Index End
+          myMesh % hopr_elemInfo % hostData(5,elid) = nid-1 ! Node Index Start
           DO k = 0,nGeo
             DO j = 0,nGeo
               DO i = 0,nGeo
@@ -1428,7 +1428,7 @@ CONTAINS
               END DO
             END DO
           END DO
-          myMesh % hopr_elemInfo % hostData(6,iel) = nid ! Node Index End
+          myMesh % hopr_elemInfo % hostData(6,elid) = nid ! Node Index End
           elid = elid + 1
         END DO
       END DO

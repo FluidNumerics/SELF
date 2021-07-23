@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 
 WORKSPACE=os.getenv('WORKSPACE')
-GIT_SHA=os.getenv('SHORT_SHA')
+GIT_SHA=os.getenv('GIT_SHA')
 BUILD_ID=os.getenv('BUILD_ID')
 PLATFORM=os.getenv('PLATFORM')
 NODE_COUNT=os.getenv('NODE_COUNT')
@@ -27,7 +27,7 @@ def main():
     with open(WORKSPACE+'/tests.json','r')as f:          
       tests = json.load(f)
 
-    utc = datetime.utcnow().strftime("%Y-%m-%dT-%H:%M:%S")
+    utc = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
 
     results = []
     for test in tests :
