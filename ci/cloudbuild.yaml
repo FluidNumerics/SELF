@@ -1,161 +1,147 @@
 
 steps:
-        # Add a step for formatting requirements
+- id: Build Docker Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
+         '--build-arg','GPU_TARGET=${_SELF_GPU_TARGET}',
+         '-f','docker/Dockerfile.${_PLATFORM}',
+         '.',
+         '-t',
+         'gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}'
+  ]
 
-        - id: Build Docker Image
-          name: 'gcr.io/cloud-builders/docker'
-          args: ['build',
-                 '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
-                 '--build-arg','GPU_TARGET=${_SELF_GPU_TARGET}',
-                 '-f','docker/Dockerfile.${_PLATFORM}',
-                 '.',
-                 '-t',
-                 'gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}'
-          ]
+- id: Build Singularity Image
+  name: 'quay.io/singularity/singularity:v3.7.1'
+  args: ['build',
+         'self_${_PLATFORM}.sif',
+         'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
+  waitFor: ["Build Docker Image"]
 
-        - id: Build Singularity Image
-          name: 'quay.io/singularity/singularity:v3.7.1'
-          args: ['build',
-                 'self_${_PLATFORM}.sif',
-                 'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
-          waitFor: ["Build Docker Image"]
+# Create CI Infrastructure
+- id: Provision Test Cluster
+  name: 'hashicorp/terraform:0.12.26'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - | 
+      cd tf/gce
+      cp fluid.tfvars.tmpl fluid.auto.tfvars
+      sed -i "s/<sha>/${SHORT_SHA}/g" fluid.auto.tfvars
+      sed -i "s/<project>/${PROJECT_ID}/g" fluid.auto.tfvars
+      sed -i "s/<zone>/${_SELF_ZONE}/g" fluid.auto.tfvars
+      sed -i "s/<machine_type>/${_SELF_MACHINE_TYPE}/g" fluid.auto.tfvars
+      sed -i "s/<node_count>/${_SELF_NODE_COUNT}/g" fluid.auto.tfvars
+      sed -i "s#<image>#${_SELF_IMAGE}#g" fluid.auto.tfvars
+      sed -i "s/<gpu_type>/${_SELF_GPU_TYPE}/g" fluid.auto.tfvars
+      sed -i "s/<gpu_count>/${_SELF_GPU_COUNT}/g" fluid.auto.tfvars
+      sed -i "s#<vpc_subnet>#${_SELF_VPC_SUBNET}#g" fluid.auto.tfvars
+      sed -i "s/<tags>/${_SELF_TAGS}/g" fluid.auto.tfvars
+      sed -i "s/<service_account>/${_SELF_SERVICE_ACCOUNT}/g" fluid.auto.tfvars
+      terraform init
+      terraform plan
+      terraform apply --auto-approve
+  waitFor: ["Build Singularity Image"]
 
-        # Create CI Infrastructure
-        - id: Provision Test Cluster
-          name: 'hashicorp/terraform:0.12.26'
-          entrypoint: 'sh'
-          args: 
-          - '-c'
-          - | 
-              cd tf/gce
-              cp fluid.tfvars.tmpl fluid.auto.tfvars
-              sed -i "s/<sha>/${SHORT_SHA}/g" fluid.auto.tfvars
-              sed -i "s/<project>/${PROJECT_ID}/g" fluid.auto.tfvars
-              sed -i "s/<zone>/${_SELF_ZONE}/g" fluid.auto.tfvars
-              sed -i "s/<machine_type>/${_SELF_MACHINE_TYPE}/g" fluid.auto.tfvars
-              sed -i "s/<node_count>/${_SELF_NODE_COUNT}/g" fluid.auto.tfvars
-              sed -i "s#<image>#${_SELF_IMAGE}#g" fluid.auto.tfvars
-              sed -i "s/<gpu_type>/${_SELF_GPU_TYPE}/g" fluid.auto.tfvars
-              sed -i "s/<gpu_count>/${_SELF_GPU_COUNT}/g" fluid.auto.tfvars
-              sed -i "s#<vpc_subnet>#${_SELF_VPC_SUBNET}#g" fluid.auto.tfvars
-              sed -i "s/<tags>/${_SELF_TAGS}/g" fluid.auto.tfvars
-              sed -i "s/<service_account>/${_SELF_SERVICE_ACCOUNT}/g" fluid.auto.tfvars
-              terraform init
-              terraform plan
-              terraform apply --auto-approve
-          waitFor: ["Build Singularity Image"]
+- id: Create SSH Key for Service Account
+  name: gcr.io/cloud-builders/gcloud
+  entrypoint: "/bin/bash"
+  args: 
+  - '-c'
+  - | 
+      ssh-keygen -b 2048 -t rsa -f /workspace/sshkey -q -N ""
+      sleep 30
+      gcloud compute ssh self${SHORT_SHA}-0 --zone=${_SELF_ZONE} \
+                                          --ssh-key-file=/workspace/sshkey \
+                                          --command="singularity --version"
+  waitFor: ["Provision Test Cluster"]
 
-        - id: Create SSH Key for Service Account
-          name: gcr.io/cloud-builders/gcloud
-          entrypoint: "/bin/bash"
-          args: 
-          - '-c'
-          - | 
-              ssh-keygen -b 2048 -t rsa -f /workspace/sshkey -q -N ""
-              sleep 30
-              gcloud compute ssh self${SHORT_SHA}-0 --zone=${_SELF_ZONE} \
-                                                  --ssh-key-file=/workspace/sshkey \
-                                                  --command="singularity --version"
-          waitFor: ["Provision Test Cluster"]
+# Copy Singularity image up to CI infrastructure
+- id: Copy Singularity Image to GCE Cluster
+  name: gcr.io/cloud-builders/gcloud
+  args: 
+  - compute 
+  - scp 
+  - self_${_PLATFORM}.sif 
+  - self${SHORT_SHA}-0:/tmp/self_${_PLATFORM}.sif 
+  - --zone=${_SELF_ZONE}
+  - --ssh-key-file=/workspace/sshkey
+  waitFor: ["Create SSH Key for Service Account"]
 
-        # Copy Singularity image up to CI infrastructure
-        - id: Copy Singularity Image to GCE Cluster
-          name: gcr.io/cloud-builders/gcloud
-          args: 
-          - compute 
-          - scp 
-          - self_${_PLATFORM}.sif 
-          - self${SHORT_SHA}-0:/tmp/self_${_PLATFORM}.sif 
-          - --zone=${_SELF_ZONE}
-          - --ssh-key-file=/workspace/sshkey
-          waitFor: ["Create SSH Key for Service Account"]
-
-        # Launch CI job on head node
-        - id: Run CI Tests
-          name: gcr.io/cloud-builders/gcloud
-          entrypoint: /bin/bash
-          args: 
-          - '-c'
-          - | 
-            sleep 10
-            gcloud compute ssh self${SHORT_SHA}-0 \
-              --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py || exit 0" \
-              --zone=${_SELF_ZONE} \
-              --ssh-key-file=/workspace/sshkey
-          waitFor: ["Copy Singularity Image to GCE Cluster"]
-          
-        # Copy Artifacts back from CI infrastructure
-        - id: Copy Artifacts from Cluster
-          name: gcr.io/cloud-builders/gcloud
-          args: 
-          - compute 
-          - scp 
-          - --recurse
-          - self${SHORT_SHA}-0:/workspace/*
-          - /workspace/ 
-          - --zone=${_SELF_ZONE}
-          - --ssh-key-file=/workspace/sshkey
-          waitFor: ["Run CI Tests"]
-
-        # Delete CI Infrastructure
-        - id: Delete Test Cluster
-          name: 'hashicorp/terraform:0.12.26'
-          entrypoint: 'sh'
-          args: 
-          - '-c'
-          - | 
-              cd tf/gce
-              terraform destroy --auto-approve
-          waitFor: ["Copy Artifacts from Cluster"]
-
-        - id: Flatten Test Output
-          name: 'python:3.7.11'
-          entrypoint: 'python3'
-          env: 
-          - 'WORKSPACE=./'
-          - 'GIT_SHA=$COMMIT_SHA'
-          - 'BUILD_ID=$BUILD_ID'
-          - 'PLATFORM=${_PLATFORM}'
-          - 'BUILD_TYPE=${_BUILD_TYPE}'
-          - 'NODE_COUNT=${_SELF_NODE_COUNT}'
-          - 'MACHINE_TYPE=${_SELF_MACHINE_TYPE}'
-          - 'GPU_COUNT=${_SELF_GPU_COUNT}'
-          - 'GPU_TYPE=${_SELF_GPU_TYPE}'
-          - 'BUILD_CONTAINER_PLATFORM=docker'
-          - 'RUN_CONTAINER_PLATFORM=singularity'
-          - 'BUILD_TYPE=${_BUILD_TYPE}'
-          - 'TARGET_PLATFORM=${_PLATFORM}'
-          args: 
-          - './ci/test/artifactFlatten.py'
-
-        - id: Load flat results to gcs
-          name: 'gcr.io/cloud-builders/gsutil'
-          args: 
-          - 'cp'
-          - './flat_results.json'
-          - 'gs://self-fluids-data/'
-
-        - id: Load results to BigQuery
-          name: 'gcr.io/cloud-builders/gcloud'
-          entrypoint: 'bq'
-          args: 
-          - 'load'
-          - '--source_format=NEWLINE_DELIMITED_JSON'
-          - '${PROJECT_ID}:self_ci.cloud_build_data'
-          - './flat_results.json'
-       
-        - id: Check for non-zero exit codes
-          name: 'python:3.7.11'
-          entrypoint: 'python3'
-          env: 
-          - 'WORKSPACE=./'
-          args: 
-              './ci/test/exitCodeCheck.py'
-
-#  
-# Check for correctness
-#
+# Launch CI job on head node
+- id: Run CI Tests
+  name: gcr.io/cloud-builders/gcloud
+  entrypoint: /bin/bash
+  args: 
+  - '-c'
+  - | 
+    sleep 10
+    gcloud compute ssh self${SHORT_SHA}-0 \
+      --command="singularity exec ${_SELF_SINGULARITY_GPUFLAG} --bind /workspace:/workspace /tmp/self_${_PLATFORM}.sif python3 /opt/self/test/ciRun.py || exit 0" \
+      --zone=${_SELF_ZONE} \
+      --ssh-key-file=/workspace/sshkey
+  waitFor: ["Copy Singularity Image to GCE Cluster"]
   
+# Copy Artifacts back from CI infrastructure
+- id: Copy Artifacts from Cluster
+  name: gcr.io/cloud-builders/gcloud
+  args: 
+  - compute 
+  - scp 
+  - --recurse
+  - self${SHORT_SHA}-0:/workspace/*
+  - /workspace/ 
+  - --zone=${_SELF_ZONE}
+  - --ssh-key-file=/workspace/sshkey
+  waitFor: ["Run CI Tests"]
+
+# Delete CI Infrastructure
+- id: Delete Test Cluster
+  name: 'hashicorp/terraform:0.12.26'
+  entrypoint: 'sh'
+  args: 
+  - '-c'
+  - | 
+      cd tf/gce
+      terraform destroy --auto-approve
+  waitFor: ["Copy Artifacts from Cluster"]
+
+- id: Flatten Test Output
+  name: 'python:3.7.11'
+  entrypoint: 'python3'
+  env: 
+  - 'WORKSPACE=./'
+  - 'GIT_SHA=$COMMIT_SHA'
+  - 'BUILD_ID=$BUILD_ID'
+  - 'PLATFORM=${_PLATFORM}'
+  - 'BUILD_TYPE=${_BUILD_TYPE}'
+  - 'NODE_COUNT=${_SELF_NODE_COUNT}'
+  - 'MACHINE_TYPE=${_SELF_MACHINE_TYPE}'
+  - 'GPU_COUNT=${_SELF_GPU_COUNT}'
+  - 'GPU_TYPE=${_SELF_GPU_TYPE}'
+  - 'BUILD_CONTAINER_PLATFORM=docker'
+  - 'RUN_CONTAINER_PLATFORM=singularity'
+  - 'BUILD_TYPE=${_BUILD_TYPE}'
+  - 'TARGET_PLATFORM=${_PLATFORM}'
+  args: 
+  - './ci/test/artifactFlatten.py'
+
+- id: Load results to BigQuery
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bq'
+  args: 
+  - 'load'
+  - '--source_format=NEWLINE_DELIMITED_JSON'
+  - '${PROJECT_ID}:self_ci.cloud_build_data'
+  - './flat_results.json'
+
+- id: Check for non-zero exit codes
+  name: 'python:3.7.11'
+  entrypoint: 'python3'
+  env: 
+  - 'WORKSPACE=./'
+  args: 
+  - './ci/test/exitCodeCheck.py'
 
 images: ['gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
 
