@@ -806,14 +806,13 @@ extern "C"
   }
 }
 
-__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
@@ -843,14 +842,13 @@ extern "C"
 
 }
 
-__global__ void SideExchange_MappedVector2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void SideExchange_MappedVector2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
@@ -882,14 +880,13 @@ extern "C"
 
 }
 
-__global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
@@ -925,7 +922,7 @@ extern "C"
 
 }
 
-__global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -933,7 +930,6 @@ __global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
@@ -970,7 +966,7 @@ extern "C"
 
 }
 
-__global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -978,7 +974,6 @@ __global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
@@ -1023,7 +1018,7 @@ extern "C"
 
 }
 
-__global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1031,7 +1026,6 @@ __global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int globalSideId = sideInfo[INDEX3(1,s1,e1,5,4)];
   int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
@@ -1100,7 +1094,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedScalar2D_gpu(real *extBoundary, real *boundary, int N, int nVar, int nEl){
+__global__ void BassiRebaySides_MappedScalar2D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1121,7 +1115,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedVector2D_gpu(real *extBoundary, real *boundary, int N, int nVar, int nEl){
+__global__ void BassiRebaySides_MappedVector2D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1144,7 +1138,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedTensor2D_gpu(real *extBoundary, real *boundary, int N, int nVar, int nEl){
+__global__ void BassiRebaySides_MappedTensor2D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1171,7 +1165,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedScalar3D_gpu(real *extBoundary, real *boundary, int N, int nVar, int nEl){
+__global__ void BassiRebaySides_MappedScalar3D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1193,7 +1187,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedVector3D_gpu(real *extBoundary, real *boundary, int N, int nVar, int nEl){
+__global__ void BassiRebaySides_MappedVector3D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1219,7 +1213,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedTensor3D_gpu(real *extBoundary, real *boundary, int N, int nVar, int nEl){
+__global__ void BassiRebaySides_MappedTensor3D_gpu(real *extBoundary, real *boundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1257,7 +1251,7 @@ extern "C"
 
 }
 
-__global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
   size_t s1 = blockIdx.y;
@@ -1292,7 +1286,7 @@ extern "C"
 
 }
 
-__global__ void ApplyFlip_MappedVector2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void ApplyFlip_MappedVector2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
   size_t s1 = blockIdx.y;
@@ -1328,7 +1322,7 @@ extern "C"
 
 }
 
-__global__ void ApplyFlip_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void ApplyFlip_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
   size_t s1 = blockIdx.y;
@@ -1365,7 +1359,7 @@ extern "C"
 
 }
 
-__global__ void ApplyFlip_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void ApplyFlip_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
   size_t s1 = blockIdx.y;
@@ -1411,7 +1405,7 @@ extern "C"
 
 }
 
-__global__ void ApplyFlip_MappedVector3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void ApplyFlip_MappedVector3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
   size_t s1 = blockIdx.y;
@@ -1459,7 +1453,7 @@ extern "C"
 
 }
 
-__global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar, int nEl){
+__global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
   size_t s1 = blockIdx.y;
