@@ -497,7 +497,7 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ApplyFlip_MappedScalar2D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+    SUBROUTINE ApplyFlip_MappedScalar2D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="ApplyFlip_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -507,7 +507,7 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ApplyFlip_MappedVector2D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+    SUBROUTINE ApplyFlip_MappedVector2D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="ApplyFlip_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -517,7 +517,7 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ApplyFlip_MappedTensor2D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+    SUBROUTINE ApplyFlip_MappedTensor2D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="ApplyFlip_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -527,7 +527,7 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ApplyFlip_MappedScalar3D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+    SUBROUTINE ApplyFlip_MappedScalar3D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="ApplyFlip_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -537,7 +537,7 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ApplyFlip_MappedVector3D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+    SUBROUTINE ApplyFlip_MappedVector3D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="ApplyFlip_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -547,7 +547,7 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper(selfSideInfo,elemToRank,extBoundary,rankId,N,nVar,nEl) &
+    SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper(extBoundary,selfSideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="ApplyFlip_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -2922,9 +2922,9 @@ CONTAINS
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
 #ifdef GPU
-        CALL ApplyFlip_MappedScalar2D_gpu_wrapper(mesh % self_sideInfo % deviceData, &
+        CALL ApplyFlip_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                  mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
-                                                  scalar % extBoundary % deviceData, &
                                                   mpiHandler % rankId, &
                                                   scalar % N, &
                                                   scalar % nVar, &
@@ -3064,9 +3064,9 @@ CONTAINS
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
 #ifdef GPU
-        CALL ApplyFlip_MappedVector2D_gpu_wrapper(mesh % self_sideInfo % deviceData, &
+        CALL ApplyFlip_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
+                                                  mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
-                                                  vector % extBoundary % deviceData, &
                                                   mpiHandler % rankId, &
                                                   vector % N, &
                                                   vector % nVar, &
@@ -3207,9 +3207,9 @@ CONTAINS
       IF(gpuAccel)THEN
 
 #ifdef GPU
-        CALL ApplyFlip_MappedTensor2D_gpu_wrapper(mesh % self_sideInfo % deviceData, &
+        CALL ApplyFlip_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
+                                                  mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
-                                                  tensor % extBoundary % deviceData, &
                                                   mpiHandler % rankId, &
                                                   tensor % N, &
                                                   tensor % nVar, &
@@ -3351,9 +3351,9 @@ CONTAINS
       IF(gpuAccel)THEN
 
 #ifdef GPU
-        CALL ApplyFlip_MappedScalar3D_gpu_wrapper(mesh % self_sideInfo % deviceData, &
+        CALL ApplyFlip_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                  mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
-                                                  scalar % extBoundary % deviceData, &
                                                   mpiHandler % rankId, &
                                                   scalar % N, &
                                                   scalar % nVar, &
@@ -3532,9 +3532,9 @@ CONTAINS
       IF(gpuAccel)THEN
 
 #ifdef GPU
-        CALL ApplyFlip_MappedVector3D_gpu_wrapper(mesh % self_sideInfo % deviceData, &
+        CALL ApplyFlip_MappedVector3D_gpu_wrapper(scalar % extBoundary % deviceData, &
+                                                  mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
-                                                  scalar % extBoundary % deviceData, &
                                                   mpiHandler % rankId, &
                                                   scalar % N, &
                                                   scalar % nVar, &
@@ -3713,9 +3713,9 @@ CONTAINS
       IF(gpuAccel)THEN
 
 #ifdef GPU
-        CALL ApplyFlip_MappedTensor3D_gpu_wrapper(mesh % self_sideInfo % deviceData, &
+        CALL ApplyFlip_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
+                                                  mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
-                                                  tensor % extBoundary % deviceData, &
                                                   mpiHandler % rankId, &
                                                   tensor % N, &
                                                   tensor % nVar, &
