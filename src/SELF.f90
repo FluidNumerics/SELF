@@ -270,14 +270,14 @@ CONTAINS
                    switch_ab="-cq", &
                    def="gauss", &
                    help="The quadrature type for control points."//NEW_LINE("A"), &
-                   choices="gauss, gauss-lobatto, uniform", &
+                   choices="gauss,gauss-lobatto,uniform", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--target-quadrature", &
                    switch_ab="-tq", &
                    def="gauss", &
                    help="The quadrature type for target points."//NEW_LINE("A"), &
-                   choices="gauss, gauss-lobatto, uniform", &
+                   choices="gauss,gauss-lobatto,uniform", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--nvar", &
