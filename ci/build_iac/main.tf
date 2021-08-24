@@ -1,7 +1,7 @@
 terraform {
   backend "gcs" {
     bucket  = "self-fluids-terraform"
-    prefix  = "self-ci"
+    prefix  = "fluid-cicb"
   }
 }
 
@@ -13,202 +13,99 @@ locals {
 }
 
 // Service account for CI tests
-resource "google_service_account" "self_ci" {
-  account_id = "self-cibot"
-  display_name = "SELF Continuous Integration Service account"
+resource "google_service_account" "fluid_cicb" {
+  account_id = "fluid-cicb"
+  display_name = "Continuous Integration Service account"
   project = var.project
 }
 
-// **** Create the Shared VPC Network **** //
-resource "google_compute_network" "vpc_network" {
-  name = "self-ci"
-  project = var.project
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "self-ci" {
-  name = "self-ci"
-  ip_cidr_range = var.subnet_cidr
-  region = local.region
-  network = google_compute_network.vpc_network.self_link
+// Service Accounts //
+resource "google_service_account" "slurm_controller" {
+  account_id = "slurm-gcp-controller"
+  display_name = "Slurm-GCP Controller Service Account"
   project = var.project
 }
 
-resource "google_compute_firewall" "default_ssh_firewall_rules" {
-  name = "self-ci-ssh"
-  network = google_compute_network.vpc_network.self_link
-  target_tags = ["self-ci"]
-  source_ranges = var.whitelist_ssh_ips
+resource "google_service_account" "slurm_compute" {
+  account_id = "slurm-gcp-compute"
+  display_name = "Slurm-GCP Compute Service Account"
   project = var.project
-
-  allow {
-    protocol = "tcp"
-    ports = ["22"]
-  }
 }
 
-resource "google_compute_firewall" "default_internal_firewall_rules" {
-  name = "self-ci-all-internal"
-  network = google_compute_network.vpc_network.self_link
-  source_tags = ["self-ci"]
-  target_tags = ["self-ci"]
+// **** IAM Permissions **** ///
+resource "google_project_iam_member" "project_compute_image_users" {
   project = var.project
-
-  allow {
-    protocol = "tcp"
-    ports = ["0-65535"]
-  }
-  allow {
-    protocol = "udp"
-    ports = ["0-65535"]
-  }
-  allow {
-    protocol = "icmp"
-    ports = []
-  }
+  role = "roles/compute.imageUser"
+  member = "serviceAccount:${google_service_account.slurm_controller.email}"
 }
 
-resource "google_cloudbuild_trigger" "main-serial" {
-  name = "self-main-serial-x86"
+resource "google_project_iam_member" "project_compute_admins" {
   project = var.project
-  description = "Builds the latest version of SELF from the main branch."
+  role = "roles/compute.admin"
+  member = "serviceAccount:${google_service_account.slurm_controller.email}"
+}
+
+resource "google_project_iam_member" "service_account_user" {
+  project = var.project
+  role = "roles/iam.serviceAccountUser"
+  member = "serviceAccount:${google_service_account.slurm_controller.email}"
+}
+
+resource "google_cloudbuild_trigger" "builds" {
+  count = length(var.builds)
+  name = var.builds[count.index].name
+  project = var.project
+  description = var.builds[count.index].description 
   github {
-    owner = "HigherOrderMethods"
-    name = "SELF"
+    owner = var.github_owner
+    name = var.github_repo
     push {
-      branch = "main"
+      branch = var.builds[count.index].branch
     }
   }
   substitutions = {
-    _BUILD_TYPE = "release"
-    _PLATFORM = "serial-x86"
-    _SELF_NAME = "self"
-    _SELF_ZONE = "us-west1-b"
-    _SELF_MACHINE_TYPE = "n1-standard-2"
-    _SELF_NODE_COUNT = "1"
-    _SELF_IMAGE = var.gce_image
-    _SELF_GPU_TYPE = "nvidia-tesla-v100"
-    _SELF_GPU_COUNT = "0"
-    _SELF_GPU_TARGET = "none"
-    _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
-    _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
-    _SELF_SINGULARITY_GPUFLAG = ""
-    _SELF_TAGS = "self-ci"
+  _ZONE = var.zone
+  _REGION = local.region
+  _SLURM_CONTROLLER = module.slurm_cluster_controller.controller_node_name
+  _BUILD_TYPE = var.builds[count.index].build_type
+  _PLATFORM = var.builds[count.index].platform
   }
-  filename = "ci/cloudbuild.yaml"
+  filename = var.cloudbuild_path
 }
 
-resource "google_cloudbuild_trigger" "main-serial-x86-nvcc" {
-  name = "self-main-serial-x86-nvcc"
-  project = var.project
-  description = "Builds the latest version of SELF from the main branch."
-  github {
-    owner = "HigherOrderMethods"
-    name = "SELF"
-    push {
-      branch = "main"
-    }
-  }
-  substitutions = {
-    _BUILD_TYPE = "release"
-    _PLATFORM = "serial-x86-nvcc"
-    _SELF_NAME = "self"
-    _SELF_ZONE = "us-west1-b"
-    _SELF_MACHINE_TYPE = "n1-standard-8"
-    _SELF_NODE_COUNT = "1"
-    _SELF_IMAGE = var.gce_image
-    _SELF_GPU_TYPE = "nvidia-tesla-v100"
-    _SELF_GPU_TARGET = "sm_72"
-    _SELF_GPU_COUNT = "1"
-    _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
-    _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
-    _SELF_SINGULARITY_GPUFLAG = "--nv"
-    _SELF_TAGS = "self-ci"
-  }
-  filename = "ci/cloudbuild.yaml"
-}
-
-resource "google_cloudbuild_trigger" "develop-serial" {
-  name = "self-develop-serial-x86"
-  project = var.project
-  description = "Builds the latest version of SELF from the develop branch."
-  github {
-    owner = "HigherOrderMethods"
-    name = "SELF"
-    push {
-      branch = "develop"
-    }
-  }
-  substitutions = {
-    _BUILD_TYPE = "dev"
-    _PLATFORM = "serial-x86"
-    _SELF_NAME = "self"
-    _SELF_ZONE = "us-west1-b"
-    _SELF_MACHINE_TYPE = "n1-standard-2"
-    _SELF_NODE_COUNT = "1"
-    _SELF_IMAGE = var.gce_image
-    _SELF_GPU_TYPE = "nvidia-tesla-v100"
-    _SELF_GPU_COUNT = "0"
-    _SELF_GPU_TARGET = "none"
-    _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
-    _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
-    _SELF_SINGULARITY_GPUFLAG = ""
-    _SELF_TAGS = "self-ci"
-  }
-  filename = "ci/cloudbuild.yaml"
-}
-
-resource "google_cloudbuild_trigger" "develop-serial-x86-nvcc" {
-  name = "self-develop-serial-x86-nvcc"
-  project = var.project
-  description = "Builds the latest version of SELF from the develop branch."
-  github {
-    owner = "HigherOrderMethods"
-    name = "SELF"
-    push {
-      branch = "develop"
-    }
-  }
-  substitutions = {
-    _BUILD_TYPE = "dev"
-    _PLATFORM = "serial-x86-nvcc"
-    _SELF_NAME = "self"
-    _SELF_ZONE = "us-west1-b"
-    _SELF_MACHINE_TYPE = "n1-standard-8"
-    _SELF_NODE_COUNT = "1"
-    _SELF_IMAGE = var.gce_image
-    _SELF_GPU_TYPE = "nvidia-tesla-v100"
-    _SELF_GPU_COUNT = "1"
-    _SELF_GPU_TARGET = "sm_72"
-    _SELF_VPC_SUBNET = google_compute_subnetwork.self-ci.self_link
-    _SELF_SERVICE_ACCOUNT = google_service_account.self_ci.email
-    _SELF_SINGULARITY_GPUFLAG = "--nv"
-    _SELF_TAGS = "self-ci"
-  }
-  filename = "ci/cloudbuild.yaml"
-}
-
-// Big Query Dataset for SELF CI Data
-resource "google_bigquery_dataset" "self_ci" {
-  dataset_id = "self_ci"
-  friendly_name = "SELF CI/CB data"
-  description = "A dataset containing build information for SELF from our CI/CB pipeline."
+// Big Query Dataset for CICB Data
+resource "google_bigquery_dataset" "fluid_cicb" {
+  dataset_id = "fluid_cicb"
+  friendly_name = "Fluid CI/CB data"
+  description = "A dataset containing build information for the Fluid CI/CB pipeline."
   location = var.bq_location
   project = var.project
 }
 
 resource "google_bigquery_table" "benchmarks" {
-  dataset_id = google_bigquery_dataset.self_ci.dataset_id
-  table_id = "cloud_build_data"
+  dataset_id = google_bigquery_dataset.fluid_cicb.dataset_id
+  table_id = "app_runs"
   project = var.project
   deletion_protection=false
   schema = <<EOF
 [
   {
-    "name": "cli_command",
+    "name": "allocated_cpus",
+    "type": "INT64",
+    "mode": "NULLABLE",
+    "description": "The number of CPUs that are allocated to run the execution_command."
+  },
+  {
+    "name": "allocated_gpus",
+    "type": "INT64",
+    "mode": "NULLABLE",
+    "description": "The number of GPUs that are allocated to run the execution_command."
+  },
+  {
+    "name": "command_group",
     "type": "STRING",
     "mode": "REQUIRED",
-    "description": "The CLI command being executed. Usually maps to a subroutine being exercised during testing."
+    "description": "An identifier to allow grouping of execution_commands in reporting. This is particularly useful if you are exercising multiple options for the same CLI command and want to be able to group results and profile metrics for multiple execution commands."
   },
   {
     "name": "execution_command",
@@ -221,42 +118,6 @@ resource "google_bigquery_table" "benchmarks" {
     "type": "STRING",
     "mode": "REQUIRED",
     "description": "The Cloud Build build ID associated with this build."
-  },
-  {
-    "name": "build_type",
-    "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "The build type passed to SELF make system during build. (_BUILD_TYPE Cloud Build Variable)"
-  },
-  {
-    "name": "compiler",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The compiler name and version (e.g. gcc@10.2.0) used to build SELF"
-  },
-  {
-    "name": "container_platform",
-    "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "Name of the container platform used to build the application (e.g. docker, singularity). If not containerized, set to `none`"
-  },
-  {
-    "name": "container_platform_runtime",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "Name of the container platform used to run the application (e.g. docker, singularity). If not containerized, set to `none`"
-  },
-  {
-    "name": "mpi_provider",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The MPI provider and version used to build the application (e.g. openmpi-4.0.2). If the application is not built with MPI, set to `none`."
-  },
-  {
-    "name": "target_platform",
-    "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "Name of the target platform used in the build (_PLATFORM variable in Cloud Build)."
   },
   {
     "name": "machine_type",
@@ -280,7 +141,7 @@ resource "google_bigquery_table" "benchmarks" {
     "name": "node_count",
     "type": "INT64",
     "mode": "NULLABLE",
-    "description": "The number of nodes used in testing SELF."
+    "description": "The number of nodes used in testing."
   },
   {
     "name": "datetime",
@@ -292,13 +153,19 @@ resource "google_bigquery_table" "benchmarks" {
     "name": "exit_code",
     "type": "INT64",
     "mode": "REQUIRED",
-    "description": "The system exit code thrown when executing benchmark_info.cli_command"
+    "description": "The system exit code thrown when executing the execution_command"
   },
   {
     "name": "git_sha",
     "type": "STRING",
     "mode": "REQUIRED",
     "description": "The git SHA associated with the version / commit being tested." 
+  },
+  {
+    "name": "max_memory_gb",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": "The maximum amount of memory used for the execution_command in GB."
   },
   {
     "name": "stderr",
@@ -311,7 +178,66 @@ resource "google_bigquery_table" "benchmarks" {
     "type": "STRING",
     "mode": "NULLABLE",
     "description": "Standard output." 
+  },
+  {
+    "name": "partition",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "(Optional) The name of the scheduler partition to run the job under. If provided, the execution_command is interpreted as the path to a batch script." 
+  },
+  {
+    "name": "runtime",
+    "type": "FLOAT64",
+    "mode": "NULLABLE",
+    "description": "The runtime for the execution_command in seconds."
   }
 ]
 EOF
+}
+
+module "slurm_cluster_network" {
+  source = "github.com/FluidNumerics/slurm-gcp//tf/modules/network"
+  cluster_name                  = "fluid-cicb"
+  disable_login_public_ips      = false
+  disable_controller_public_ips = var.disable_controller_public_ips
+  disable_compute_public_ips    = true
+  network_name                  = null
+  partitions                    = var.partitions
+  shared_vpc_host_project       = null
+  subnetwork_name               = null
+  project = var.project
+  region  = local.region
+}
+
+module "slurm_cluster_controller" {
+  source = "github.com/FluidNumerics/slurm-gcp//tf/modules/controller"
+  boot_disk_size                = var.controller_disk_size_gb
+  boot_disk_type                = var.controller_disk_type
+  image                         = var.controller_image
+  instance_template             = var.controller_instance_template
+  cluster_name                  = "fluid-cicb"
+  compute_node_scopes           = ["https://www.googleapis.com/auth/cloud-platform"]
+  compute_node_service_account  = google_service_account.slurm_compute.email
+  disable_compute_public_ips    = true
+  disable_controller_public_ips = var.disable_controller_public_ips
+  labels                        = var.controller_labels
+  login_network_storage         = []
+  login_node_count              = 0
+  machine_type                  = var.controller_machine_type
+  munge_key                     = null
+  jwt_key                       = null
+  network_storage               = []
+  partitions                    = var.partitions
+  project                       = var.project
+  region                        = local.region
+  secondary_disk                = var.controller_secondary_disk
+  secondary_disk_size           = var.controller_secondary_disk_size
+  secondary_disk_type           = var.controller_secondary_disk_type
+  shared_vpc_host_project       = var.project
+  scopes                        = ["https://www.googleapis.com/auth/cloud-platform"]
+  service_account               = google_service_account.slurm_controller.email
+  subnet_depend                 = module.slurm_cluster_network.subnet_depend
+  subnetwork_name               = null
+  suspend_time                  = var.suspend_time
+  zone                          = var.zone
 }

@@ -1,17 +1,15 @@
 #!/bin/bash
 
-source /etc/profile.d/z10_spack_environment.sh
-
 mkdir -p @OUTDIR@
 
-${INSTALL_ROOT}/bin/self --control-quadrature @CONTROL_QUADRATURE@ \
---control-degree @CONTROL_DEGREE@ \
---target-quadrature @TARGET_QUADRATURE@ \
---target-degree @TARGET_DEGREE@ \
---nelements @NELEMS@ \
---nvar @NVAR@ \
---gpu-accel @GPU_ACCEL@ \
-@FUNCTION_OPTS@ \
-@ADDITIONAL_OPTS@ \
---output @OUTPUT_FILE@ \
-@COMMAND@
+singularity exec ${WORKSPACE}/${SIMG} /opt/self/bin/self --control-quadrature @CONTROL_QUADRATURE@ \
+                                                         --control-degree @CONTROL_DEGREE@ \
+                                                         --target-quadrature @TARGET_QUADRATURE@ \
+                                                         --target-degree @TARGET_DEGREE@ \
+                                                         --nelements @NELEMS@ \
+                                                         --nvar @NVAR@ \
+                                                         --gpu-accel @GPU_ACCEL@ \
+                                                         @FUNCTION_OPTS@ \
+                                                         @ADDITIONAL_OPTS@ \
+                                                         --output @OUTPUT_FILE@ \
+                                                         @COMMAND@

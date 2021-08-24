@@ -30,15 +30,6 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     PREC=double \
     make
 
-RUN mkdir -p /opt/self/test &&\
-    cp /tmp/ci/test/ci.json /opt/self/test/ &&\
-    cp /tmp/ci/test/ciGenerator.py /opt/self/test/ &&\
-    cp /tmp/ci/test/ciRun.py /opt/self/test/ &&\
-    cp /tmp/ci/test/cmd.tmpl /opt/self/test/ &&\
-    export GPU_ACCEL=false && export INSTALL_ROOT="/opt/self" && export WORKSPACE=/workspace && \
-    cd /opt/self/test && python3 ciGenerator.py
-
-
 FROM gcr.io/cmg-build-env/cmg-gcc-10.2.0-serial-x86_hdf5
 
 COPY --from=devel /opt /opt
