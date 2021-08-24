@@ -123,6 +123,7 @@ variable "partitions" {
     cpu_platform         = string,
     gpu_type             = string,
     gpu_count            = number,
+    gvnic                = bool,
     network_storage = list(object({
       server_ip    = string,
       remote_mount = string,

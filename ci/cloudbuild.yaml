@@ -18,6 +18,14 @@ steps:
          'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
   waitFor: ["Build Docker Image"]
 
+- id: Generate test batch scripts
+  name: 'python:3.7-buster'
+  env:
+  - 'GPU_ACCEL=${_GPU_ACCEL}'
+  - 'PARTITIONS=${_PARTITIONS}'
+  args: ['ci/test/ciGenerator.py']
+  waitFor: ["-"]
+
 - id: Fluid CI/CB
   name: 'gcr.io/hpc-apps/fluid-cicb:latest'
   args: 
@@ -30,7 +38,7 @@ steps:
   - '--zone=${_ZONE}'
   - '--ci-file=.fluidci.json'
   - '--slurm-controller=${_SLURM_CONTROLLER}'
-  - '--bq-table=${PROJECT_ID}:fluid_cicb.cloud_build_data'
+  - '--bq-table=${PROJECT_ID}:fluid_cicb.app_runs'
 
 images: ['gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
 
@@ -47,4 +55,6 @@ substitutions:
   _SLURM_CONTROLLER: 'fluid-cicb-controller'
   _BUILD_TYPE: 'dev'
   _PLATFORM: 'serial-x86'
+  _PARTITIONS: 'c2-standard-8'
+  _GPU_ACCEL: 'false'
 

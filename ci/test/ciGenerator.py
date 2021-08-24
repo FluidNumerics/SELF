@@ -3,21 +3,21 @@
 import json
 import os
 
-INSTALL_ROOT=os.getenv('INSTALL_ROOT')
 WORKSPACE=os.getenv('WORKSPACE')
 GPU_ACCEL=os.getenv('GPU_ACCEL')
+PARTITIONS=os.getenv('PARTITIONS')
 
 
 def main():
 
-  with open(INSTALL_ROOT+'/test/ci.json','r') as f:
+  with open('ci/test/ci.json','r') as f:
     ci_conf = json.load(f)
         
-  with open(INSTALL_ROOT+'/test/cmd.tmpl') as f:
+  with open('ci/test/cmd.tmpl') as f:
     cmd_tmpl = f.read()
 
-
-  tests = []
+  ntests = 0
+  tests = {"tests":[]}
   # Create commands to test with
   for test in ci_conf['tests'] :
     for nel in test['nelems'] :
@@ -30,7 +30,7 @@ def main():
                   for funcOpts in test['function_opts'] :
 
 
-                    workdir = INSTALL_ROOT+'/test/'
+                    workdir = 'test/'
                     workdir += test['cli_command']+'/'
                     workdir += 'nel_{}'.format(nel)+'/'
                     workdir += 'nvar_{}'.format(nvar)+'/'
@@ -41,21 +41,9 @@ def main():
                     workdir += '{}'.format(addlOpts['name'])+'/'
                     workdir += '{}'.format(funcOpts['name'])+'/'
 
-                    outdir = WORKSPACE+'/test/'
-                    outdir += test['cli_command']+'/'
-                    outdir += 'nel_{}'.format(nel)+'/'
-                    outdir += 'nvar_{}'.format(nvar)+'/'
-                    outdir += 'cQuad_{}'.format(cQuad)+'/'
-                    outdir += 'cDeg_{}'.format(cDeg)+'/'
-                    outdir += 'tQuad_{}'.format(tQuad)+'/'
-                    outdir += 'tDeg_{}'.format(tDeg)+'/'
-                    outdir += '{}'.format(addlOpts['name'])+'/'
-                    outdir += '{}'.format(funcOpts['name'])+'/'
-
                     cmd = cmd_tmpl
 
                     cmd = cmd.replace('@PROFILER@','to-do')
-                    cmd = cmd.replace('@OUTDIR@',outdir)
                     cmd = cmd.replace('@GPU_ACCEL@',GPU_ACCEL)
                     cmd = cmd.replace('@CONTROL_QUADRATURE@',cQuad)
                     cmd = cmd.replace('@CONTROL_DEGREE@',str(cDeg))
@@ -65,8 +53,13 @@ def main():
                     cmd = cmd.replace('@NVAR@',str(nvar))
                     cmd = cmd.replace('@FUNCTION_OPTS@',funcOpts['value'])
                     cmd = cmd.replace('@ADDITIONAL_OPTS@',addlOpts['value'])
-                    cmd = cmd.replace('@OUTPUT_FILE@',outdir+'self.h5')
+                    cmd = cmd.replace('@OUTPUT_FILE@',workdir+'self.h5')
                     cmd = cmd.replace('@COMMAND@',test['cli_command'])
+
+                    if GPU_ACCEL == 'true':
+                        cmd = cmd.replace('@GPU_OPT@','--nv')
+                    else:
+                        cmd = cmd.replace('@GPU_OPT@','')
 
                     os.makedirs(workdir)
 
@@ -74,22 +67,17 @@ def main():
                       f.write(cmd)
                     os.chmod(workdir+'test.sh',0o755)
 
-                    tests.append({'test_script':workdir+'test.sh',
-                                  'status':'ready',
-                                  'exit_code':999,
-                                  'stdout': '',
-                                  'stderr': '',
-                                  'profile':{},
-                                  'gpu_accelerated':GPU_ACCEL,
-                                  'runtime_seconds':0.0,
-                                  'execution_command': cmd,
-                                  'cli_command':test['cli_command'],
-                                  'additional_opts':addlOpts,
-                                  'function_opts':funcOpts
-                                })
+                    for partition in PARTITIONS.split(','):
+                        tests["tests"].append({'command_group':test['cli_command'],
+                                               'execution_command': workdir+'test.sh',
+                                               'output_directory': workdir,
+                                               'partition': partition})
+                        ntests+=1
 
-    with open(INSTALL_ROOT+'/tests.json','w')as f:          
-      f.write(json.dumps(tests,indent=2))
+  with open('.fluidci.json','w')as f:          
+    f.write(json.dumps(tests,indent=2))
+
+  print('Generated {} tests for SELF'.format(ntests))
 
 if __name__=='__main__':
     main()
