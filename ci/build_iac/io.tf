@@ -6,6 +6,8 @@ variable "builds" {
     branch = string
     build_type = string
     platform = string
+    partitions = string
+    gpu_accel = string
     }))
   default = []
   description = "List of build triggers and their settings to configure"

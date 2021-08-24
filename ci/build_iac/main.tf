@@ -69,6 +69,8 @@ resource "google_cloudbuild_trigger" "builds" {
   _SLURM_CONTROLLER = module.slurm_cluster_controller.controller_node_name
   _BUILD_TYPE = var.builds[count.index].build_type
   _PLATFORM = var.builds[count.index].platform
+  _PARTITIONS = var.builds[count.index].partitions
+  _GPU_ACCEL = var.builds[count.index].gpu_accel
   }
   filename = var.cloudbuild_path
 }
