@@ -74,7 +74,7 @@ def main():
                                                'partition': partition})
                         ntests+=1
 
-  with open('.fluidci.json','w')as f:          
+  with open('fluidci.json','w')as f:          
     f.write(json.dumps(tests,indent=2))
 
   print('Generated {} tests for SELF'.format(ntests))

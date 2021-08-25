@@ -27,6 +27,17 @@ steps:
   args: ['ci/test/ciGenerator.py']
   waitFor: ["-"]
 
+- id: Check batch scripts
+  name: 'python:3.7-buster'
+  entrypoint: 'sh'
+  args:
+  - '-c'
+  - |
+          ls -a ./
+          cat fluidci.json
+
+  waitFor: ["Generate test batch scripts"]
+
 - id: Fluid CI/CB
   name: 'gcr.io/research-computing-cloud/fluid-cicb:latest'
   args: 
@@ -37,7 +48,7 @@ steps:
   - '--singularity-image=self_${_PLATFORM}.sif'
   - '--project=${PROJECT_ID}'
   - '--zone=${_ZONE}'
-  - '--ci-file=.fluidci.json'
+  - '--ci-file=fluidci.json'
   - '--slurm-controller=${_SLURM_CONTROLLER}'
   - '--bq-table=${PROJECT_ID}:fluid_cicb.app_runs'
 
