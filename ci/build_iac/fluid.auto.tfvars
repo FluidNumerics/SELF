@@ -10,7 +10,7 @@ builds = [{name="main-serial-x86",
            branch="main",
            build_type="release",
            platform="serial-x86",
-           partitions="c2-standard-8",
+           partitions="c2-standard-4",
            gpu_accel="false"},
           {name="main-serial-x86-nvcc",
            description="Serial CPU with single GPU accelerator release branch builds for x86+Nvidia platforms",
@@ -24,7 +24,7 @@ builds = [{name="main-serial-x86",
            branch="develop",
            build_type="dev",
            platform="serial-x86",
-           partitions="c2-standard-8",
+           partitions="c2-standard-4",
            gpu_accel="false"},
           {name="develop-serial-x86-nvcc",
            description="Serial CPU with single GPU accelerator dev branch builds for x86+Nvidia platforms",
@@ -38,10 +38,10 @@ builds = [{name="main-serial-x86",
 
 
 partitions = [
-  { name                 = "c2-standard-8"
-    machine_type         = "c2-standard-8"
+  { name                 = "c2-standard-4"
+    machine_type         = "c2-standard-4"
     static_node_count    = 0
-    max_node_count       = 10
+    max_node_count       = 20
     zone                 = "us-west1-b"
     image                = "projects/research-computing-cloud/global/images/family/rcc-centos-7-v3"
     image_hyperthreads   = true
@@ -62,7 +62,7 @@ partitions = [
     instance_template    = null
   },
   { name                 = "n1-standard-4-v100"
-    machine_type         = "n1-standard-4-v100"
+    machine_type         = "n1-standard-4"
     static_node_count    = 0
     max_node_count       = 10
     zone                 = "us-west1-b"
