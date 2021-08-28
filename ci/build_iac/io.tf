@@ -40,7 +40,7 @@ variable "controller_disk_type" {
 variable "controller_image" {
   description = "Slurm image to use for the controller instance"
   type        = string
-  default     = "projects/hpc-apps/global/images/family/fluid-cicb"
+  default     = "projects/research-computing-cloud/global/images/family/rcc-centos-7-v3"
 }
 
 variable "controller_instance_template" {
