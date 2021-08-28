@@ -5,7 +5,7 @@ From: gcc:10.2.0
 
    . /tmp
 
-% post
+%post
 
    export BUILD_TYPE=release
    export GPU_TARGET=none
@@ -22,23 +22,24 @@ From: gcc:10.2.0
    spack compiler find --scope=defaults
    
    # Install HDF5
-   mkdir /opt/spack-environment \
-   &&  (echo "spack:" \
-   &&   echo "  specs:" \
-   &&   echo "  - cmake@3.18.4 % gcc@10.2.0" \
-   &&   echo "  - hdf5@1.12.0+cxx+fortran~mpi % gcc@10.2.0" \
-   &&   echo "  concretization: together" \
-   &&   echo "  config:" \
-   &&   echo "    install_tree: /opt/software" \
-   &&   echo "  view: /opt/view") > /opt/spack-environment/spack.yaml
+   mkdir /opt/spack-environment
+   cat <<EOF > /opt/spack-environment/spack.yaml
+spack:
+  specs:
+  - cmake@3.18.4 % gcc@10.2.0
+  - hdf5@1.12.0+cxx+fortran~mpi % gcc@10.2.0
+  concretization: together
+  config:
+    install_tree: /opt/software
+  view: /opt/view
+EOF
    
-   # Install the software, remove unnecessary deps
-   . /opt/spack/share/spack/setup-env.sh && \ 
-   cd /opt/spack-environment && spack env activate . && spack install --fail-fast && spack gc -y
-   
-   # Modifications to the environment that are necessary to run
-   . /opt/spack/share/spack/setup-env.sh && \ 
-   cd /opt/spack-environment && \
+   # Install the required software
+   cd /opt/spack-environment
+   spack env activate .
+   spack install --fail-fast
+   spack gc -y
+   spack env deactivate
    spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
 
    # Install cuda-compiler
