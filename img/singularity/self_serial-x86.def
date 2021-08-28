@@ -1,0 +1,93 @@
+BootStrap: docker
+From: gcc:10.2.0
+
+%files
+
+   . /tmp
+
+% post
+
+   export BUILD_TYPE=release
+   export GPU_TARGET=none
+   export SPACK_VERSION="v0.16.1"
+   export HDF5_VERSION="1.12.0"
+   apt-get update -y
+   apt-get install git
+   
+   git clone https://github.com/spack/spack.git --branch ${SPACK_VERSION} /opt/spack
+   echo "#!/bin/bash" > /etc/profile.d/spack.sh
+   echo "SPACK_ROOT=/opt/spack" >> /etc/profile.d/spack.sh
+   echo ". \${SPACK_ROOT}/share/spack/setup-env.sh" >> /etc/profile.d/spack.sh
+   . /opt/spack/share/spack/setup-env.sh
+   spack compiler find --scope=defaults
+   
+   # Install HDF5
+   mkdir /opt/spack-environment \
+   &&  (echo "spack:" \
+   &&   echo "  specs:" \
+   &&   echo "  - cmake@3.18.4 % gcc@10.2.0" \
+   &&   echo "  - hdf5@1.12.0+cxx+fortran~mpi % gcc@10.2.0" \
+   &&   echo "  concretization: together" \
+   &&   echo "  config:" \
+   &&   echo "    install_tree: /opt/software" \
+   &&   echo "  view: /opt/view") > /opt/spack-environment/spack.yaml
+   
+   # Install the software, remove unnecessary deps
+   . /opt/spack/share/spack/setup-env.sh && \ 
+   cd /opt/spack-environment && spack env activate . && spack install --fail-fast && spack gc -y
+   
+   # Modifications to the environment that are necessary to run
+   . /opt/spack/share/spack/setup-env.sh && \ 
+   cd /opt/spack-environment && \
+   spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
+   
+   
+   mkdir -p /tmp/extern
+   
+   # FEQParse
+   . /etc/profile.d/z10_spack_environment.sh && \
+   git clone https://github.com/FluidNumerics/feq-parse.git /tmp/extern/feq-parse && \
+   mkdir -p /tmp/extern/feq-parse/build && \
+   cd /tmp/extern/feq-parse/build && \
+   cmake -DCMAKE_INSTALL_PREFIX="/opt/feqparse" /tmp/extern/feq-parse && \
+   make && make install
+   
+   # FLAP
+   . /etc/profile.d/z10_spack_environment.sh && \
+   git clone --recurse-submodules https://github.com/szaghi/FLAP.git /tmp/extern/FLAP && \
+   mkdir -p /tmp/extern/FLAP/build && \
+   cd /tmp/extern/FLAP/build && \
+   FFLAGS=-cpp cmake -DCMAKE_INSTALL_PREFIX="/opt/FLAP" /tmp/extern/FLAP && \
+   make && make install
+   
+   # Install SELF
+   . /etc/profile.d/z10_spack_environment.sh && \
+   cd /tmp && \
+   BUILD=${BUILD_TYPE} \
+   SELF_PREFIX=/opt/self \
+   FC=gfortran \
+   PREC=double \
+   make && \
+   cp -r /tmp/self/src /opt/self
+   
+   mkdir /workspace
+
+%labels
+   Author joe@fluidnumerics.com
+
+%environment
+   export LD_LIBRARY_PATH=/opt/view/lib:/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH
+   export PATH=/opt/self/bin:/opt/view/bin:$PATH
+   export INSTALL_ROOT=/opt/self
+   export GPU_ACCEL=false
+   export WORKSPACE=/workspace
+   export BUILD_TYPE=release
+   export GPU_TARGET=none
+   export SPACK_VERSION="v0.16.1"
+   export HDF5_VERSION="1.12.0"
+
+%help
+   The Spectral Element Library in Fortran is an OO Fortran library that is used to create PDE and ODE solvers
+   using Spectral Element Methods. This container includes the SELF library in addition to a command line interface
+   (self), that can be used to test drive interpolation and calculus operations using spectral element routines defined
+   by SELF.
