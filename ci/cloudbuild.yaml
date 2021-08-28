@@ -5,18 +5,19 @@ steps:
   args: ['build',
          '--build-arg','BUILD_TYPE=${_BUILD_TYPE}',
          '--build-arg','GPU_TARGET=${_SELF_GPU_TARGET}',
-         '-f','docker/Dockerfile.${_PLATFORM}',
+         '-f','img/docker/Dockerfile.${_PLATFORM}',
          '.',
          '-t',
          'gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}'
   ]
+  waitFor: ["-"]
 
 - id: Build Singularity Image
   name: 'quay.io/singularity/singularity:v3.7.1'
   args: ['build',
          'self_${_PLATFORM}.sif',
-         'docker-daemon://gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
-  waitFor: ["Build Docker Image"]
+         'img/singularity/self_${_PLATFORM}.def']
+  waitFor: ["-"]
 
 - id: Generate test batch scripts
   name: 'python:3.7-buster'
@@ -27,30 +28,19 @@ steps:
   args: ['ci/test/ciGenerator.py']
   waitFor: ["-"]
 
-- id: Check batch scripts
-  name: 'python:3.7-buster'
-  entrypoint: 'sh'
-  args:
-  - '-c'
-  - |
-          ls -a ./
-          cat fluidci.json
-
-  waitFor: ["Generate test batch scripts"]
-
-- id: Fluid CI/CB
-  name: 'gcr.io/research-computing-cloud/fluid-cicb:latest'
-  args: 
-  - '--build-id=${BUILD_ID}'
-  - '--git-sha=${COMMIT_SHA}'
-  - '--surface-nonzero-exit-code=True'
-  - '--artifact-type=singularity'
-  - '--singularity-image=self_${_PLATFORM}.sif'
-  - '--project=${PROJECT_ID}'
-  - '--zone=${_ZONE}'
-  - '--ci-file=fluidci.json'
-  - '--slurm-controller=${_SLURM_CONTROLLER}'
-  - '--bq-table=${PROJECT_ID}:fluid_cicb.app_runs'
+  #- id: Fluid CI/CB
+  #  name: 'gcr.io/research-computing-cloud/fluid-cicb:latest'
+  #  args: 
+  #  - '--build-id=${BUILD_ID}'
+  #  - '--git-sha=${COMMIT_SHA}'
+  #  - '--surface-nonzero-exit-code=True'
+  #  - '--artifact-type=singularity'
+  #  - '--singularity-image=self_${_PLATFORM}.sif'
+  #  - '--project=${PROJECT_ID}'
+  #  - '--zone=${_ZONE}'
+  #  - '--ci-file=fluidci.json'
+  #  - '--slurm-controller=${_SLURM_CONTROLLER}'
+  #  - '--bq-table=${PROJECT_ID}:fluid_cicb.app_runs'
 
 images: ['gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
 
