@@ -4,15 +4,13 @@ ARG BUILD_TYPE=release
 COPY . /tmp
 
 RUN . /etc/profile.d/z10_spack_environment.sh && \
-    ls /opt/view/lib && \
-    ls /opt/view/include && \
     cd /tmp && \
     BUILD=${BUILD_TYPE} \
     SELF_PREFIX=/opt/self \
     FC=gfortran \
     PREC=double \
-    make && \
-    cp -r /tmp/self/src /opt/self
+    make &&\
+    cp LICENSE /opt/self/
 
 FROM gcr.io/self-fluids/self-base_serial-x86
 

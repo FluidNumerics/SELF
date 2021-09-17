@@ -2,7 +2,7 @@ Bootstrap: docker
 From: gcr.io/self-fluids/self-base_serial-x86
 
 %files
-   . /tmp
+   ./* /workspace
 
 %environment
    export LD_LIBRARY_PATH=/opt/view/lib:/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH
@@ -20,15 +20,16 @@ From: gcr.io/self-fluids/self-base_serial-x86
    
    # Install SELF
    . /etc/profile.d/z10_spack_environment.sh && \
-   cd /tmp && \
+   cd /workspace/ && \
    BUILD=${BUILD_TYPE} \
    SELF_PREFIX=/opt/self \
    FC=gfortran \
    PREC=double \
-   make && \
-   cp -r /tmp/self/src /opt/self
+   make
+
+   cp /workspace/LICENSE /opt/self/
    
-   mkdir /workspace
+   rm -rf /workspace/*
 
 
 %labels

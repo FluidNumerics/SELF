@@ -33,7 +33,7 @@
 #     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/view/lib/ -lFLAP -lFACE -lPENF) 
 #     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/view/include/FLAP -I/opt/view/include/PENF -I/opt/view/include/FACE)
 #     SELF_HDF5_LIBS         Set the linker flags for hdf5 (Default: -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm)
-#     SELF_HDF5_INC          Set the includes flags for hdf5 (Default: -I/opt/view/include)
+#     SELF_HDF5_INC          Set the includes flags for hdf5 (Default: -I/opt/view/include/shared)
 #
 # ================================================================================================================================================= #
 

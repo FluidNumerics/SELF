@@ -1,7 +1,5 @@
 # Spectral Element Libraries in Fortran (SELF)
-Copyright 2020 Fluid Numerics LLC
-
-**SELF will be migrating to [HigherOrderMethods/SELF](https://github.com/HigherOrderMethods/SELF) in June 2021**
+Copyright 2020-2021 Fluid Numerics LLC
 
 SELF is licensed for use under the [Anti-Capitalist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
 
@@ -22,8 +20,10 @@ Before installing SELF, make sure your system has the following dependencies ins
 * [HIP](https://github.com/ROCm-Developer-Tools/HIP) (For GPU Accelerated Builds)
 * [HIPFort](https://github.com/ROCmSoftwarePlatform/hipfort) (For GPU Accelerated Builds)
 * [FLAP](https://github.com/szaghi/FLAP)
-* [feqparse](https://github.com/FluidNumerics/feqparse)
+* [feq-parse](https://github.com/FluidNumerics/feqparse)
+* [HDF5]()
 
+For GPU accelerated builds, we recommend installing `rocm-dev` on either CentOS or Ubuntu OS following the [ROCm installation guide](https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html). You should install HIPfort from source, using the Fortran compiler you will build SELF with.
 
 ### Building SELF
 
@@ -33,12 +33,14 @@ BUILD=release \
 FC=gfortran \
 make
 ```
-The SELF make system assumes that `feqparse` and `FLAP` are installed under `/opt/feqparse` and `/opt/FLAP` respectively. If these dependencies are installed elseswhere you can use the following environment variables specify the linker and includes flags.
+The SELF make system assumes that `feqparse`, `FLAP`, and `HDF5` are installed under `/opt/view`. If these dependencies are installed elseswhere you can use the following environment variables specify the linker and includes flags.
 ```
-     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/feqparse/lib -lfeqparse)
-     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/feqparse/include)
-     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF) 
-     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/self/include/FACE)
+     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/view/lib -lfeqparse)
+     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/view/include)
+     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/view/lib/ -lFLAP -lFACE -lPENF) 
+     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/view/include/FLAP -I/opt/view/include/PENF -I/opt/view/include/FACE)
+     SELF_HDF5_LIBS         Set the linker flags for HDF5 (Default: -L/opt/view/lib/ -lhdf5_fortran -lhdf5 -lz -lm) 
+     SELF_HDF5_INC          Set the includes flags for HDF5 (Default: -I/opt/view/include/shared)
 ```
 By default, self will install under `/opt/self`. To change the install path, use the `SELF_PREFIX` environment variable.
 
@@ -46,7 +48,7 @@ Upon installation, you will have
 * `${SELF_PREFIX}/lib/libself.a` : Static library for linking into other application
 * `${SELF_PREFIX}/include/*.mod` : Fortran module files required for building other applications that depend on SELF
 * `${SELF_PREFIX}/bin/self` : A test program that can be used to test each SELF routine
-* `${SELF_PREFIX}/bin/ci.sh` : A shell script to run all of the CI tests for SELF
+* `${SELF_PREFIX}/util` : A directory with useful utilities for pre and post-processing data produced by SELF
 
 ## Maintainers
 * [Joseph Schoonover, Fluid Numerics LLC](https://fluidnumerics.com/people/joe-schoonover)

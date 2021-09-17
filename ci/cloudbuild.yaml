@@ -28,19 +28,6 @@ steps:
   args: ['ci/test/ciGenerator.py']
   waitFor: ["-"]
 
-  #- id: Fluid CI/CB
-  #  name: 'gcr.io/research-computing-cloud/fluid-cicb:latest'
-  #  args: 
-  #  - '--build-id=${BUILD_ID}'
-  #  - '--git-sha=${COMMIT_SHA}'
-  #  - '--surface-nonzero-exit-code=True'
-  #  - '--artifact-type=singularity'
-  #  - '--singularity-image=self_${_PLATFORM}.sif'
-  #  - '--project=${PROJECT_ID}'
-  #  - '--zone=${_ZONE}'
-  #  - '--ci-file=fluidci.json'
-  #  - '--slurm-controller=${_SLURM_CONTROLLER}'
-  #  - '--bq-table=${PROJECT_ID}:fluid_cicb.app_runs'
 
 images: ['gcr.io/self-fluids/self_${_PLATFORM}:${SHORT_SHA}']
 
@@ -52,11 +39,11 @@ artifacts:
 timeout: 9600s
 
 substitutions:
-  _ZONE: 'us-west1-b'
-  _REGION: 'us-west1'
-  _SLURM_CONTROLLER: 'fluid-cicb-controller'
+        #_ZONE: 'us-west1-b'
+        #_REGION: 'us-west1'
   _BUILD_TYPE: 'dev'
   _PLATFORM: 'serial-x86'
-  _PARTITIONS: 'c2-standard-8'
+  _SELF_GPU_TARGET: 'none'
   _GPU_ACCEL: 'false'
+  _PARTITIONS: 'c2-standard-60'
 
