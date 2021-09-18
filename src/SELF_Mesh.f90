@@ -303,12 +303,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
-#ifdef GPU
+
     CALL myMesh % hopr_elemInfo % UpdateHost()
     CALL myMesh % hopr_nodeCoords % UpdateHost()
     CALL myMesh % hopr_globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Mesh1D
 
@@ -316,12 +316,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
-#ifdef GPU
+
     CALL myMesh % hopr_elemInfo % UpdateDevice()
     CALL myMesh % hopr_nodeCoords % UpdateDevice()
     CALL myMesh % hopr_globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Mesh1D
 
@@ -618,7 +618,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
-#ifdef GPU
+
     CALL myMesh % hopr_elemInfo % UpdateHost()
     CALL myMesh % hopr_sideInfo % UpdateHost()
     CALL myMesh % self_sideInfo % UpdateHost()
@@ -626,7 +626,7 @@ CONTAINS
     CALL myMesh % self_nodeCoords % UpdateHost()
     CALL myMesh % hopr_globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Mesh2D
 
@@ -634,7 +634,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
-#ifdef GPU
+
     CALL myMesh % hopr_elemInfo % UpdateDevice()
     CALL myMesh % hopr_sideInfo % UpdateDevice()
     CALL myMesh % self_sideInfo % UpdateDevice() 
@@ -642,7 +642,7 @@ CONTAINS
     CALL myMesh % self_nodeCoords % UpdateDevice()
     CALL myMesh % hopr_globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Mesh2D
 
@@ -1315,7 +1315,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
-#ifdef GPU
+
     CALL myMesh % hopr_elemInfo % UpdateHost()
     CALL myMesh % hopr_sideInfo % UpdateHost()
     CALL myMesh % self_sideInfo % UpdateHost()
@@ -1323,7 +1323,7 @@ CONTAINS
     CALL myMesh % self_nodeCoords % UpdateHost()
     CALL myMesh % hopr_globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Mesh3D
 
@@ -1331,7 +1331,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
-#ifdef GPU
+
     CALL myMesh % hopr_elemInfo % UpdateDevice()
     CALL myMesh % hopr_sideInfo % UpdateDevice()
     CALL myMesh % self_sideInfo % UpdateDevice()
@@ -1339,7 +1339,7 @@ CONTAINS
     CALL myMesh % self_nodeCoords % UpdateDevice()
     CALL myMesh % hopr_globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Mesh3D
 

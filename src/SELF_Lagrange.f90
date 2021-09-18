@@ -16,10 +16,10 @@ MODULE SELF_Lagrange
   USE SELF_SupportRoutines
   USE SELF_Quadrature
 
-#ifdef GPU
+
   USE hipfort
   USE hipfort_check
-#endif
+
   USE ISO_C_BINDING
   IMPLICIT NONE
 
@@ -190,7 +190,7 @@ MODULE SELF_Lagrange
 
   END TYPE Lagrange
 
-#ifdef GPU
+
   INTERFACE
     SUBROUTINE ScalarGridInterp_1D_gpu_wrapper(iMatrixT_dev,f_dev,fInterp_dev,N,M,nVar,nEl) &
       bind(c,name="ScalarGridInterp_1D_gpu_wrapper")
@@ -515,7 +515,7 @@ MODULE SELF_Lagrange
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE TensorDGDivergence_3D_gpu_wrapper
   END INTERFACE
-#endif
+
 
 CONTAINS
 
@@ -657,7 +657,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
 
-#ifdef GPU
+
     CALL myPoly % controlPoints % UpdateDevice()
     CALL myPoly % targetPoints % UpdateDevice()
     CALL myPoly % bWeights % UpdateDevice()
@@ -666,7 +666,7 @@ CONTAINS
     CALL myPoly % dMatrix % UpdateDevice()
     CALL myPoly % dgMatrix % UpdateDevice()
     CALL myPoly % bMatrix % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Lagrange
 
@@ -674,7 +674,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
 
-#ifdef GPU
+
     CALL myPoly % controlPoints % UpdateHost()
     CALL myPoly % targetPoints % UpdateHost()
     CALL myPoly % bWeights % UpdateHost()
@@ -683,7 +683,7 @@ CONTAINS
     CALL myPoly % dMatrix % UpdateHost()
     CALL myPoly % dgMatrix % UpdateHost()
     CALL myPoly % bMatrix % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Lagrange
 
@@ -760,12 +760,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif
+
 
   END SUBROUTINE ScalarGridInterp_1D_gpu
 ! ================================================================================================ !
@@ -851,12 +851,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif
+
 
   END SUBROUTINE ScalarGridInterp_2D_gpu
 
@@ -903,12 +903,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif
+
 
   END SUBROUTINE VectorGridInterp_2D_gpu
 
@@ -954,12 +954,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif
+
 
   END SUBROUTINE TensorGridInterp_2D_gpu
 
@@ -1052,12 +1052,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL ScalarGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif
+
 
   END SUBROUTINE ScalarGridInterp_3D_gpu
 
@@ -1105,12 +1105,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL VectorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif
+
 
   END SUBROUTINE VectorGridInterp_3D_gpu
 
@@ -1159,12 +1159,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
 
-#ifdef GPU
+
     CALL TensorGridInterp_3D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
                                          myPoly % N,myPoly % M, &
                                          nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorGridInterp_3D_gpu
 ! ================================================================================================ !
@@ -1243,12 +1243,12 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f_dev
     TYPE(c_ptr),INTENT(out) :: df_dev
 
-#ifdef GPU
+
     CALL Derivative_1D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                    f_dev,df_dev, &
                                    myPoly % N, &
                                    nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE Derivative_1D_gpu
   
@@ -1292,14 +1292,14 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: bf_dev
     TYPE(c_ptr),INTENT(out) :: df_dev
 
-#ifdef GPU
+
     CALL DGDerivative_1D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                      myPoly % bMatrix % deviceData, &
                                      myPoly % qWeights % deviceData, &
                                      f_dev,bf_dev,df_dev, &
                                      myPoly % N, &
                                      nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE DGDerivative_1D_gpu
 
@@ -1385,11 +1385,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
                                        nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE ScalarGradient_2D_gpu
 !
@@ -1442,13 +1442,13 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL ScalarDGGradient_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                          myPoly % bMatrix % deviceData, &
                                          myPoly % qWeights % deviceData, &
                                          f_dev,bf_dev,gradF_dev,myPoly % N, &
                                          nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE ScalarDGGradient_2D_gpu
 
@@ -1500,11 +1500,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
                                        nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorGradient_2D_gpu
 
@@ -1573,13 +1573,13 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorDGGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        myPoly % bMatrix % deviceData, &
                                        myPoly % qWeights % deviceData, &
                                        f_dev,bf_dev,gradF_dev,myPoly % N, &
                                        nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorDGGradient_2D_gpu
 
@@ -1619,11 +1619,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
                                          nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorDivergence_2D_gpu
 
@@ -1674,13 +1674,13 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
                                            myPoly % qWeights % deviceData, &
                                            f_dev,bF_dev,dF_dev,myPoly % N, &
                                            nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorDGDivergence_2D_gpu
 
@@ -1720,11 +1720,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                    f_dev,dF_dev,myPoly % N, &
                                    nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorCurl_2D_gpu
 
@@ -1768,11 +1768,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL TensorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
                                          nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorDivergence_2D_gpu
 
@@ -1831,13 +1831,13 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
                                            myPoly % qWeights % deviceData, &
                                            f_dev,bF_dev,dF_dev,myPoly % N, &
                                            nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorDGDivergence_2D_gpu
 
@@ -1882,11 +1882,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
                                        nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE ScalarGradient_3D_gpu
 !
@@ -1970,11 +1970,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
                                        nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorGradient_3D_gpu
 
@@ -2017,11 +2017,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
                                          nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorDivergence_3D_gpu
 
@@ -2077,13 +2077,13 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
                                            myPoly % qWeights % deviceData, &
                                            f_dev,bF_dev,dF_dev,myPoly % N, &
                                            nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorDGDivergence_3D_gpu
 
@@ -2131,11 +2131,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                    f_dev,dF_dev,myPoly % N, &
                                    nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorCurl_3D_gpu
 
@@ -2192,11 +2192,11 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL TensorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
                                          nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorDivergence_3D_gpu
 
@@ -2285,13 +2285,13 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-#ifdef GPU
+
     CALL TensorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
                                            myPoly % qWeights % deviceData, &
                                            f_dev,bF_dev,dF_dev,myPoly % N, &
                                            nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorDGDivergence_3D_gpu
   ! /////////////////////////////// !
@@ -2327,10 +2327,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL ScalarBoundaryInterp_1D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE ScalarBoundaryInterp_1D_gpu
 
@@ -2372,10 +2372,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL ScalarBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE ScalarBoundaryInterp_2D_gpu
 
@@ -2420,10 +2420,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL VectorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorBoundaryInterp_2D_gpu
 
@@ -2472,10 +2472,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL TensorBoundaryInterp_2D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorBoundaryInterp_2D_gpu
 
@@ -2521,10 +2521,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL ScalarBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE ScalarBoundaryInterp_3D_gpu
 
@@ -2573,10 +2573,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL VectorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE VectorBoundaryInterp_3D_gpu
 
@@ -2629,10 +2629,10 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)  :: f
     TYPE(c_ptr),INTENT(out)  :: fBound
 
-#ifdef GPU
+
     CALL TensorBoundaryInterp_3D_gpu_wrapper(myPoly % bMatrix % deviceData, &
                                              f,fBound,myPoly % N,nVariables,nElements)
-#endif                                     
+                                     
 
   END SUBROUTINE TensorBoundaryInterp_3D_gpu
 

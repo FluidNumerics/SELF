@@ -4,7 +4,6 @@ import json
 import os
 
 WORKSPACE=os.getenv('WORKSPACE')
-GPU_ACCEL=os.getenv('GPU_ACCEL')
 PARTITIONS=os.getenv('PARTITIONS')
 
 
@@ -18,6 +17,8 @@ def main():
 
   ntests = 0
   tests = {"tests":[]}
+  GPU_ACCEL == 'false'
+
   # Create commands to test with
   for test in ci_conf['tests'] :
     for nel in test['nelems'] :
@@ -28,7 +29,6 @@ def main():
               for tDeg in test['target_degree'] :
                 for addlOpts in test['additional_opts'] :
                   for funcOpts in test['function_opts'] :
-
 
                     workdir = 'test/'
                     workdir += test['cli_command']+'/'

@@ -78,20 +78,20 @@ CONTAINS
        ENDDO
      ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
     
     ! To do : file IO for fInterp, targetMesh, targetGeometry
 
@@ -156,20 +156,20 @@ CONTAINS
        ENDDO
      ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file IO for f
 
@@ -249,20 +249,20 @@ CONTAINS
        ENDDO
      ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % Derivative(controlGeometry,dfInterp,dForm,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for dfInterp
 
@@ -341,20 +341,20 @@ CONTAINS
     ENDDO
 
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file IO for fInterp, targetMesh, targetGeometry
     
@@ -426,20 +426,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for f
 
@@ -496,19 +496,19 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dgsol % solution % UpdateDevice()
     END IF
-#endif
+
 
     CALL dgsol % CalculateSolutionGradient(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dgsol % solutionGradient % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for dfInterp
     CALL dgsol % Write(outputFile)
@@ -589,20 +589,20 @@ CONTAINS
     ENDDO
 
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for fInterp
 
@@ -679,19 +679,19 @@ CONTAINS
     ENDDO
 
     ! Run the grid interpolation
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for f
 
@@ -799,20 +799,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for dfInterp
 
@@ -916,20 +916,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost( )
     END IF
-#endif
+
 
     ! To do : file io for dfInterp
 
@@ -1018,20 +1018,20 @@ CONTAINS
     ENDDO
 
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for fInterp
 
@@ -1112,20 +1112,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for f
 
@@ -1206,20 +1206,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for fInterp, targetMesh, targetGeometry
 
@@ -1292,20 +1292,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for f
 
@@ -1397,20 +1397,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for dfInterp and controlGeometry
 
@@ -1497,20 +1497,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for fInterp, targetMesh, targetGeometry
 
@@ -1589,20 +1589,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for f, controlGeometry
 
@@ -1711,20 +1711,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for dfInterp, controlGeometry
 
@@ -1798,20 +1798,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dgsol % flux % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL dgsol % CalculateFluxDivergence(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL dgsol % fluxDivergence % UpdateHost()
     END IF
-#endif
+
  
     CALL dgsol % Write(outputFile)
 
@@ -1899,20 +1899,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for finterp, targetMesh, targetGeometry
 
@@ -1996,20 +1996,20 @@ CONTAINS
       ENDDO
     ENDDO
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
-#endif
+
 
     ! Run the grid interpolation
      CALL f % BoundaryInterp(gpuAccel)
 
-#ifdef GPU     
+     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-#endif
+
 
     ! To do : file io for f and controlGeometry
 

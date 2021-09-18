@@ -304,7 +304,7 @@ MODULE SELF_Data
   INTEGER, PARAMETER :: selfWeakDGForm = 1
   INTEGER, PARAMETER :: selfWeakCGForm = 2
 
-#ifdef GPU
+
   INTERFACE
     SUBROUTINE Determinant_Tensor2D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &
       bind(c,name="Determinant_Tensor2D_gpu_wrapper")
@@ -324,7 +324,7 @@ MODULE SELF_Data
       INTEGER,VALUE :: N,nVar,nEl
     END SUBROUTINE Determinant_Tensor3D_gpu_wrapper
   END INTERFACE
-#endif
+
 
 CONTAINS
 
@@ -381,12 +381,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Scalar1D
 
@@ -394,12 +394,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Scalar1D
 
@@ -601,12 +601,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Scalar2D
 
@@ -614,13 +614,13 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
 
-#endif
+
 
   END SUBROUTINE UpdateDevice_Scalar2D
 
@@ -826,12 +826,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Scalar3D
 
@@ -839,12 +839,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Scalar3D
 
@@ -1054,12 +1054,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Vector2D
 
@@ -1067,12 +1067,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Vector2D
 
@@ -1343,12 +1343,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Vector3D
 
@@ -1356,12 +1356,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Vector3D
 
@@ -1615,12 +1615,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Tensor2D
 
@@ -1628,12 +1628,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Tensor2D
 
@@ -1708,7 +1708,7 @@ CONTAINS
     CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL Determinant_Tensor2D_gpu_wrapper(SELFStorage % interior % deviceData, &
                                             SELFOut % interior % deviceData, &
                                             SELFStorage % N, &
@@ -1717,7 +1717,7 @@ CONTAINS
 #else
      msg = "GPU Acceleration currently not enabled in SELF"
      WARNING(msg)
-#endif
+
 
     ELSE
 
@@ -1891,12 +1891,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateHost_Tensor3D
 
@@ -1904,12 +1904,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(inout) :: SELFStorage
 
-#ifdef GPU
+
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateHost()
-#endif
+
 
   END SUBROUTINE UpdateDevice_Tensor3D
 
@@ -1984,7 +1984,7 @@ CONTAINS
     CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL Determinant_Tensor3D_gpu_wrapper(SELFStorage % interior % deviceData, &
                                             SELFOut % interior % deviceData, &
                                             SELFStorage % N, &
@@ -1993,7 +1993,7 @@ CONTAINS
 #else
      msg = "GPU Acceleration currently not enabled in SELF"
      WARNING(msg)
-#endif
+
 
     ELSE
 

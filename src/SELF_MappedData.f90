@@ -139,7 +139,7 @@ MODULE SELF_MappedData
 
   END TYPE MappedTensor3D
 
-#ifdef GPU
+
   INTERFACE
     SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
       bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
@@ -555,7 +555,7 @@ MODULE SELF_MappedData
       INTEGER,VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper
   END INTERFACE
-#endif
+
 
 CONTAINS
 
@@ -623,19 +623,15 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl, iVar, i
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL JacobianWeight_MappedScalar1D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
                                                      scalar % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
 
       DO iEl = 1,scalar % nElem
@@ -662,11 +658,11 @@ CONTAINS
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, ivar
     INTEGER :: neighborRank
-    CHARACTER(100) :: msg
+    
 
 
     IF(gpuAccel)THEN
-#ifdef GPU
+
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
       CALL SideExchange_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
@@ -677,10 +673,6 @@ CONTAINS
                                                     scalar % N, &
                                                     scalar % nvar, &
                                                     scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
@@ -742,20 +734,16 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL BassiRebay_MapppedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   scalar % boundary % deviceData, &
                                                   scalar % N, &
                                                   scalar % nvar, &
                                                   scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -839,10 +827,10 @@ CONTAINS
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i,j,iVar,iEl,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
@@ -856,10 +844,6 @@ CONTAINS
                                                           scalar % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
 
       DO iEl = 1,scalar % nElem
@@ -928,19 +912,15 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
                                                      scalar % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
 
       DO iEl = 1,scalar % nElem
@@ -973,11 +953,11 @@ CONTAINS
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
@@ -990,10 +970,6 @@ CONTAINS
                                                     scalar % nvar, &
                                                     scalar % nElem)
 
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -1088,20 +1064,16 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i, j
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL BassiRebay_MapppedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   scalar % boundary % deviceData, &
                                                   scalar % N, &
                                                   scalar % nvar, &
                                                   scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -1186,10 +1158,10 @@ CONTAINS
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
@@ -1203,10 +1175,7 @@ CONTAINS
                                                           scalar % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
+
     ELSE
 
       DO iEl = 1,scalar % nElem
@@ -1332,19 +1301,15 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL JacobianWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
                                                      scalar % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -1381,12 +1346,12 @@ CONTAINS
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, ivar
-    CHARACTER(100) :: msg
+    
 
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
@@ -1398,10 +1363,6 @@ CONTAINS
                                                     vector % N, &
                                                     vector % nvar, &
                                                     vector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -1465,20 +1426,16 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL BassiRebay_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                  vector % boundary % deviceData, &
                                                  vector % N, &
                                                  vector % nvar, &
                                                  vector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -1618,10 +1575,10 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,i,j,ivar,jvar,iel,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL MapToScalar_MappedVector2D_gpu_wrapper( scalar % interior % deviceData,&
                                                    vector % interior % deviceData,&
                                                    vector % N, &
@@ -1633,10 +1590,6 @@ CONTAINS
                                                    vector % N, &
                                                    vector % nVar, &
                                                    vector % nelem )
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
@@ -1678,10 +1631,10 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,col,i,j,ivar,jvar,iel,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL MapToTensor_MappedVector2D_gpu_wrapper( tensor % interior % deviceData,&
                                                    vector % interior % deviceData,&
                                                    tensor % N, &
@@ -1693,10 +1646,6 @@ CONTAINS
                                                    tensor % N, &
                                                    tensor % nVar, &
                                                    tensor % nelem )
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
@@ -1745,10 +1694,10 @@ CONTAINS
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
     INTEGER :: i,j,ivar,iel,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
@@ -1762,11 +1711,6 @@ CONTAINS
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
@@ -1828,21 +1772,16 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
 
-#ifdef GPU
+
       CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
                                                      vector % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
 
       DO iEl = 1,vector % nElem
@@ -1877,12 +1816,12 @@ CONTAINS
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
-    CHARACTER(100) :: msg
+    
 
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
@@ -1894,11 +1833,6 @@ CONTAINS
                                                     vector % N, &
                                                     vector % nvar, &
                                                     vector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
 
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
@@ -1992,21 +1926,16 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i, j
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL BassiRebay_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                  vector % boundary % deviceData, &
                                                  vector % N, &
                                                  vector % nvar, &
                                                  vector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
 
       DO iel = 1, vector % nElem
@@ -2145,10 +2074,10 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,i,j,k,ivar,jvar,iel,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL MapToScalar_MappedVector3D_gpu_wrapper( scalar % interior % deviceData,&
                                                    vector % interior % deviceData,&
                                                    vector % N, &
@@ -2160,10 +2089,6 @@ CONTAINS
                                                    vector % N, &
                                                    vector % nVar, &
                                                    vector % nelem )
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
@@ -2208,10 +2133,10 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL MapToTensor_MappedVector3D_gpu_wrapper( tensor % interior % deviceData,&
                                                    vector % interior % deviceData,&
                                                    tensor % N, &
@@ -2223,10 +2148,6 @@ CONTAINS
                                                    tensor % N, &
                                                    tensor % nVar, &
                                                    tensor % nelem )
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
@@ -2279,10 +2200,10 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iDir,iside
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
-#ifdef GPU
+
       CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
@@ -2296,11 +2217,6 @@ CONTAINS
                                                               physVector % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
-#else
-     msg = "GPU Acceleration currently not enabled in SELF"
-     WARNING(msg)
-#endif
-
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension to
@@ -2390,21 +2306,16 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
 
-#ifdef GPU
+
       CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
                                                      vector % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
-#else
-      msg = "GPU Acceleration currently not enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
 
       DO iEl = 1,vector % nElem
@@ -2444,11 +2355,11 @@ CONTAINS
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, ivar
-    CHARACTER(100) :: msg
+    
 
 
     IF(gpuAccel)THEN
-#ifdef GPU
+
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
 
       CALL SideExchange_MapppedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
@@ -2460,10 +2371,6 @@ CONTAINS
                                                     tensor % N, &
                                                     tensor % nvar, &
                                                     tensor % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
@@ -2526,21 +2433,16 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL BassiRebay_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                  tensor % boundary % deviceData, &
                                                  tensor % N, &
                                                  tensor % nvar, &
                                                  tensor % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
 
       DO iel = 1, tensor % nElem
@@ -2569,21 +2471,16 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
 
-#ifdef GPU
+
       CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
                                                      tensor % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
-#else
-      msg = "GPU Acceleration currently not enabled in SELF."
-      WARNING(msg)
-#endif
-
     ELSE
 
       DO iEl = 1,tensor % nElem
@@ -2622,11 +2519,11 @@ CONTAINS
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
-    CHARACTER(100) :: msg
+    
 
 
     IF(gpuAccel)THEN
-#ifdef GPU
+
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
       CALL SideExchange_MapppedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
@@ -2637,10 +2534,6 @@ CONTAINS
                                                     tensor % N, &
                                                     tensor % nvar, &
                                                     tensor % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
@@ -2733,20 +2626,16 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i, j
-    CHARACTER(100) :: msg
+    
 
     IF(gpuAccel)THEN
 
-#ifdef GPU
+
       CALL BassiRebay_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                  tensor % boundary % deviceData, &
                                                  tensor % N, &
                                                  tensor % nvar, &
                                                  tensor % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -2778,20 +2667,16 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    CHARACTER(100) :: msg
+    
 
     IF (gpuAccel) THEN
 
-#ifdef GPU
+
       CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
                                                      tensor % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
-#else
-      msg = "GPU Acceleration currently not enabled in SELF."
-      WARNING(msg)
-#endif
 
     ELSE
 
@@ -2899,7 +2784,7 @@ CONTAINS
     ENDDO
 
     mpiHandler % msgCount = msgCount
-#endif
+
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar2D
 !
@@ -2916,12 +2801,12 @@ CONTAINS
     INTEGER :: r2, flip, ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(0:scalar % N)
-    CHARACTER(100) :: msg
+    
 
 
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
-#ifdef GPU
+
         CALL ApplyFlip_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
@@ -2929,12 +2814,6 @@ CONTAINS
                                                   scalar % N, &
                                                   scalar % nVar, &
                                                   scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-  
-  
       ELSE
         DO e1 = 1, scalar % nElem
           DO s1 = 1, 4
@@ -3041,7 +2920,7 @@ CONTAINS
     ENDDO
 
     mpiHandler % msgCount = msgCount
-#endif
+
 
   END SUBROUTINE MPIExchangeAsync_MappedVector2D
 
@@ -3058,12 +2937,12 @@ CONTAINS
     INTEGER :: r2, flip, ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:2,0:vector % N)
-    CHARACTER(100) :: msg
+    
 
 
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
-#ifdef GPU
+
         CALL ApplyFlip_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
@@ -3071,12 +2950,6 @@ CONTAINS
                                                   vector % N, &
                                                   vector % nVar, &
                                                   vector % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
-
       ELSE
         DO e1 = 1, vector % nElem
           DO s1 = 1, 4
@@ -3183,7 +3056,7 @@ CONTAINS
     ENDDO
 
     mpiHandler % msgCount = msgCount
-#endif
+
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor2D
 
@@ -3200,13 +3073,13 @@ CONTAINS
     INTEGER :: r2, flip, ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:2,1:2,0:tensor % N)
-    CHARACTER(100) :: msg
+    
 
 
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
 
-#ifdef GPU
+
         CALL ApplyFlip_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
@@ -3214,12 +3087,6 @@ CONTAINS
                                                   tensor % N, &
                                                   tensor % nVar, &
                                                   tensor % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
-
       ELSE
         DO e1 = 1, tensor % nElem
           DO s1 = 1, 4
@@ -3267,7 +3134,7 @@ CONTAINS
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2
     INTEGER :: msgCount
-    CHARACTER(100) :: msg
+    
 
 #ifdef MPI
     IF(resetCount)THEN
@@ -3327,7 +3194,7 @@ CONTAINS
     ENDDO
 
     mpiHandler % msgCount = msgCount
-#endif
+
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar3D
 !
@@ -3344,13 +3211,13 @@ CONTAINS
     INTEGER :: r2, flip, ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(0:scalar % N,0:scalar % N)
-    CHARACTER(100) :: msg
+    
 
 
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
 
-#ifdef GPU
+
         CALL ApplyFlip_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
@@ -3358,12 +3225,6 @@ CONTAINS
                                                   scalar % N, &
                                                   scalar % nVar, &
                                                   scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
-
       ELSE
         DO e1 = 1, scalar % nElem
           DO s1 = 1, 6
@@ -3508,7 +3369,7 @@ CONTAINS
     ENDDO
 
     mpiHandler % msgCount = msgCount
-#endif
+
 
   END SUBROUTINE MPIExchangeAsync_MappedVector3D
 
@@ -3525,13 +3386,13 @@ CONTAINS
     INTEGER :: r2, flip, ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:3,0:scalar % N,0:scalar % N)
-    CHARACTER(100) :: msg
+    
 
 
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
 
-#ifdef GPU
+
         CALL ApplyFlip_MappedVector3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
@@ -3539,12 +3400,6 @@ CONTAINS
                                                   scalar % N, &
                                                   scalar % nVar, &
                                                   scalar % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
-
       ELSE
         DO e1 = 1, scalar % nElem
           DO s1 = 1, 6
@@ -3689,7 +3544,7 @@ CONTAINS
     ENDDO
 
     mpiHandler % msgCount = msgCount
-#endif
+
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor3D
 
@@ -3706,13 +3561,13 @@ CONTAINS
     INTEGER :: r2, flip, ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:3,1:3,0:tensor % N,0:tensor % N)
-    CHARACTER(100) :: msg
+    
 
 
     IF(mpiHandler % mpiEnabled)THEN
       IF(gpuAccel)THEN
 
-#ifdef GPU
+
         CALL ApplyFlip_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
@@ -3720,12 +3575,6 @@ CONTAINS
                                                   tensor % N, &
                                                   tensor % nVar, &
                                                   tensor % nElem)
-#else
-      msg = "GPU Acceleration is not currently enabled in SELF."
-      WARNING(msg)
-#endif
-
-
       ELSE
         DO e1 = 1, tensor % nElem
           DO s1 = 1, 6

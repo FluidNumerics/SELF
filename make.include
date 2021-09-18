@@ -27,13 +27,8 @@ SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry
 
 SELF_LIBS = self
             
-#src/SELF_HIP_Macros.h
-#src/SELF_Macros.h
-
 SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
-ifeq ($(GPU_ACCELERATED),true)
-  SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
-endif
+SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
 SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_DEV_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR)
