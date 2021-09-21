@@ -44,11 +44,12 @@ MODULE SELF_MPI
 
 CONTAINS
 
-  SUBROUTINE Init_MPILayer(this,maxMsg)
+  SUBROUTINE Init_MPILayer(this,enableMPI,maxMsg)
 #undef __FUNC__
 #define __FUNC__ "Init_MPILayer"
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(out) :: this
+    LOGICAL, INTENT(in) :: enableMPI
     INTEGER, OPTIONAL, INTENT(in) :: maxMsg
     ! Local
     INTEGER       :: ierror
@@ -59,20 +60,20 @@ CONTAINS
     this % rankId = 0
     this % nRanks = 1
     this % nElem = 0
-    this % mpiEnabled = .FALSE.
-#ifdef MPI
-    this % mpiEnabled = .TRUE.
-    this % mpiComm = MPI_COMM_WORLD
-    CALL MPI_INIT(ierror)
-    CALL MPI_COMM_RANK(this % mpiComm, this % rankId, ierror)
-    CALL MPI_COMM_SIZE(this % mpiComm, this % nRanks,  ierror)
+    this % mpiEnabled = enableMPI
 
-    IF(prec == sp)THEN
+    IF(enableMPI)THEN
+      this % mpiComm = MPI_COMM_WORLD
+      CALL MPI_INIT(ierror)
+      CALL MPI_COMM_RANK(this % mpiComm, this % rankId, ierror)
+      CALL MPI_COMM_SIZE(this % mpiComm, this % nRanks,  ierror)
+    ENDIF
+
+    IF(prec == real32)THEN
       this % mpiPrec=MPI_FLOAT
     ELSE
       this % mpiPrec=MPI_DOUBLE
     ENDIF
-#endif
 
     CALL this % offSetElem % Alloc(0,this % nRanks)
  
@@ -124,10 +125,8 @@ CONTAINS
                         this % elemToRank % hostData(iel))
       ENDDO
 
-#ifdef GPU
       CALL this % offSetElem % UpdateDevice()
       CALL this % elemToRank % UpdateDevice()
-#endif
 
   END SUBROUTINE SetElemToRank
 
@@ -195,12 +194,10 @@ CONTAINS
     ! Local
     INTEGER :: ierror
 
-#ifdef MPI
     CALL MPI_WaitAll(mpiHandler % msgCount, &
-                      mpiHandler % requests(1:mpiHandler % msgCount,1), &
-                      mpiHandler % requests(1:mpiHandler % msgCount,2), &
+                      mpiHandler % requests % hostData(1:mpiHandler % msgCount,1), &
+                      mpiHandler % requests % hostData(1:mpiHandler % msgCount,2), &
                       iError)
-#endif
 
   END SUBROUTINE FinalizeMPIExchangeAsync
 

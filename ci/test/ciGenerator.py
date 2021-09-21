@@ -17,7 +17,7 @@ def main():
 
   ntests = 0
   tests = {"tests":[]}
-  GPU_ACCEL == 'false'
+  GPU_ACCEL = 'false'
 
   # Create commands to test with
   for test in ci_conf['tests'] :

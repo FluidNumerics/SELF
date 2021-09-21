@@ -1285,7 +1285,7 @@ extern "C"
 {
   void ApplyFlip_MappedScalar2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedScalar2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, *extBoundary, rankId, N, nVar);
+    ApplyFlip_MappedScalar2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
@@ -1325,7 +1325,7 @@ extern "C"
 {
   void ApplyFlip_MappedVector2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedVector2D_gpu<<<dim3(nVar,4,nEl), dim3(2,N+1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, *extBoundary, rankId, N, nVar);
+    ApplyFlip_MappedVector2D_gpu<<<dim3(nVar,4,nEl), dim3(2,N+1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
@@ -1366,7 +1366,7 @@ extern "C"
 {
   void ApplyFlip_MappedTensor2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedTensor2D_gpu<<<dim3(nVar,4,nEl), dim3(2,2,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, *extBoundary, rankId, N, nVar);
+    ApplyFlip_MappedTensor2D_gpu<<<dim3(nVar,4,nEl), dim3(2,2,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
@@ -1416,7 +1416,7 @@ extern "C"
 {
   void ApplyFlip_MappedScalar3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedScalar3D_gpu<<<dim3(nVar,6,nEl), dim3(N+1,N+1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, *extBoundary, rankId, N, nVar);
+    ApplyFlip_MappedScalar3D_gpu<<<dim3(nVar,6,nEl), dim3(N+1,N+1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
@@ -1468,7 +1468,7 @@ extern "C"
 {
   void ApplyFlip_MappedVector3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedVector3D_gpu<<<dim3(nVar,6,nEl), dim3(3,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, *extBoundary, rankId, N, nVar);
+    ApplyFlip_MappedVector3D_gpu<<<dim3(nVar,6,nEl), dim3(3,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
@@ -1484,6 +1484,7 @@ __global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, int *sideInfo, i
   size_t row = dir/3;
   size_t col = dir - dir*row;
   
+  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
   int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
@@ -1500,17 +1501,17 @@ __global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, int *sideInfo, i
       if(flip == 2){
         int i2 = N-j1;
         int j2 = i1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i1+(N+1)*j1))];
+        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
       }
       else if(flip == 3){
         int i2 = N-i1;
         int j2 = N-j1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i1+(N+1)*j1))];
+        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
       }
       else if(flip == 4){
         int i2 = j1;
         int j2 = N-i1;
-        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i1+(N+1)*j1))];
+        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
       }
     }
   }
@@ -1521,7 +1522,7 @@ extern "C"
 {
   void ApplyFlip_MappedTensor3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedTensor3D_gpu<<<dim3(nVar,6,nEl), dim3(9,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, *extBoundary, rankId, N, nVar);
+    ApplyFlip_MappedTensor3D_gpu<<<dim3(nVar,6,nEl), dim3(9,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }

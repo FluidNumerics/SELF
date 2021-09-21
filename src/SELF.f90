@@ -26,6 +26,7 @@ PROGRAM SELF
   CHARACTER(240) :: outputFile
   CHARACTER(10) :: dFormChar
   CHARACTER(5) :: gpuAccelChar
+  CHARACTER(5) :: enableMPIChar
   INTEGER :: dForm
   INTEGER :: cqType
   INTEGER :: tqType
@@ -34,6 +35,7 @@ PROGRAM SELF
   INTEGER :: nElem
   INTEGER :: nVar
   LOGICAL :: gpuAccel
+  LOGICAL :: enableMPI
 
   CALL Parse_CLI(selfCLI)
 
@@ -48,6 +50,7 @@ PROGRAM SELF
   CALL selfCLI % get(val=dFormChar,switch='--derivative-type')
   CALL selfCLI % get(val=derivativeChar,switch='--derivative')
   CALL selfCLI % get(val=gpuAccelChar,switch='--gpu-accel')
+  CALL selfCLI % get(val=enableMPIChar,switch='--mpi')
   CALL selfCLI % get(val=vectorChar(1),switch='--vector-x')
   CALL selfCLI % get(val=vectorChar(2),switch='--vector-y')
   CALL selfCLI % get(val=vectorChar(3),switch='--vector-z')
@@ -104,6 +107,12 @@ PROGRAM SELF
     gpuAccel = .TRUE.
   ELSE
     gpuAccel = .FALSE.
+  END IF
+
+  IF (TRIM(UpperCase(enableMPIChar)) == 'TRUE') THEN
+    enableMPI = .TRUE.
+  ELSE
+    enableMPI = .FALSE.
   END IF
 
   IF (selfCLI % run_command(group="s1d_interp")) THEN
@@ -199,7 +208,7 @@ PROGRAM SELF
   ELSEIF (selfCLI % run_command(group="s2d_gradient")) THEN
 
     CALL ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                          spec,functionChar,vectorChar(1:2),TRIM(outputFile),gpuAccel)
+                          spec,functionChar,vectorChar(1:2),TRIM(outputFile),enableMPI,gpuAccel)
     
 
   ELSEIF (selfCLI % run_command(group="s3d_gradient")) THEN
@@ -229,7 +238,7 @@ PROGRAM SELF
   ELSEIF (selfCLI % run_command(group="v3d_divergence")) THEN
 
     CALL VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nVar,&
-                            spec,vectorChar,functionChar,TRIM(outputFile),gpuAccel)
+                            spec,vectorChar,functionChar,TRIM(outputFile),enableMPI,gpuAccel)
     
 
   END IF
@@ -296,6 +305,13 @@ CONTAINS
     CALL cli % add(switch="--gpu-accel", &
                    switch_ab="-gpu", &
                    help="Boolean flag for enabling or disabling GPU acceleration in tests."//NEW_LINE("A"), &
+                   def="false", &
+                   choices="true,false", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--mpi", &
+                   switch_ab="-mpi", &
+                   help="Boolean flag for enabling or disabling MPI in tests."//NEW_LINE("A"), &
                    def="false", &
                    choices="true,false", &
                    required=.FALSE.)

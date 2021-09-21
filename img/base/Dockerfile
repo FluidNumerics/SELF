@@ -1,7 +1,5 @@
 FROM ubuntu:focal as builder
 
-COPY . /tmp
-
 RUN export DEBIAN_FRONTEND=noninteractive &&\
     apt-get update -y && \
     apt-get install -y git software-properties-common build-essential gfortran wget cmake
@@ -18,6 +16,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 && FC=$(which gfortran) cmake -DCMAKE_INSTALL_PREFIX=/opt/rocm /tmp/hipfort \
 && make -j install \
 && echo "PATH=\${PATH}:/opt/rocm/bin" >> /etc/profile.d/z10_spack_environment.sh
+&& echo "PATH=\${PATH}:/opt/rocm/hipfort/bin" >> /etc/profile.d/z10_spack_environment.sh
 
 # Install cuda-compiler
 RUN export DEBIAN_FRONTEND=noninteractive \
@@ -28,7 +27,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 && apt-key add /var/cuda-repo-ubuntu2004-11-4-local/7fa2af80.pub \
 && apt-get update \
 && apt-get -y install cuda
-
 
 RUN git clone https://github.com/FluidNumerics/spack.git /opt/spack && \
     echo "#!/bin/bash" > /etc/profile.d/spack.sh && \
@@ -60,22 +58,6 @@ RUN . /opt/spack/share/spack/setup-env.sh && \
     cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
 
-
-
-RUN mkdir -p /tmp/extern
-
-FROM ubuntu:focal
-
-COPY --from=builder /opt /opt
-COPY --from=builder /etc/profile.d /etc/profile.d
-COPY --from=builder /usr/local/cuda-11.4 /usr/local/cuda-11.4
-COPY --from=builder /usr/local/cuda /usr/local/cuda
 LABEL maintainer="joe@fluidnumerics.com"
-
-ENV LD_LIBRARY_PATH=/opt/view/lib:/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH \
-    PATH=/opt/self/bin:/opt/view/bin:$PATH \
-    INSTALL_ROOT=/opt/self \
-    GPU_ACCEL=false \
-    WORKSPACE=/workspace
 
 RUN mkdir /workspace

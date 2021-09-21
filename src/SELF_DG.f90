@@ -83,7 +83,7 @@ USE HDF5
 
 CONTAINS
 
-SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
+SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
     IMPLICIT NONE
     CLASS(DG2D), INTENT(out) :: this
     INTEGER,INTENT(in) :: cqType
@@ -91,9 +91,10 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nvar
+    LOGICAL,INTENT(in) :: enableMPI
     TYPE(MeshSpec), INTENT(in) :: spec
 
-      CALL this % decomp % Init()
+      CALL this % decomp % Init(enableMPI)
 
       ! Load Mesh
       CALL this % mesh % Load(spec,this % decomp)
@@ -211,14 +212,13 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: solOffset(1:4)
     INTEGER(HID_T) :: xOffset(1:5)
+    INTEGER(HID_T) :: solGlobalDims(1:4)
+    INTEGER(HID_T) :: xGlobalDims(1:5)
     INTEGER :: firstElem, nLocalElems
     INTEGER :: nGeo, nBCs
 
-      IF(this % decomp % mpiEnabled)THEN
-        CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, this % decomp % mpiComm)
-      ELSE
-        CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId)
-      ENDIF
+      CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, &
+              this % decomp % mpiComm, this % decomp % mpiEnabled)
 
       IF(this % decomp % mpiEnabled)THEN
         firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)+1
@@ -227,16 +227,35 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       ENDIF
 
       solOffset(1:4) = (/0,0,1,firstElem/)
-      CALL WriteArray_HDF5(fileId, '/solution', solOffset, this % solution % interior)
+      solGlobalDims(1:4) = (/this % solution % N,&
+                             this % solution % N,&
+                             this % solution % nVar,&
+                             this % decomp % nElem/)
+      CALL WriteArray_HDF5(fileId, '/solution', solOffset, &
+              this % solution % interior, solGlobalDims, &
+              this % decomp % mpiEnabled)
 
-      CALL WriteArray_HDF5(fileId, '/fluxDivergence', solOffset, this % fluxDivergence % interior)
+      CALL WriteArray_HDF5(fileId, '/fluxDivergence', solOffset,&
+              this % fluxDivergence % interior, solGlobalDims, &
+              this % decomp % mpiEnabled)
 
       xOffset(1:5) = (/1,0,0,1,firstElem/)
-      CALL WriteArray_HDF5(fileId, '/flux', xOffset, this % flux % interior)
+      xGlobalDims(1:5) = (/2,&
+                           this % solution % N,&
+                           this % solution % N,&
+                           this % solution % nVar,&
+                           this % decomp % nElem/)
+      CALL WriteArray_HDF5(fileId, '/flux', xOffset, &
+              this % flux % interior, xGlobalDims, &
+              this % decomp % mpiEnabled)
 
-      CALL WriteArray_HDF5(fileId, '/solutionGradient', xOffset, this % solutionGradient % interior)
+      CALL WriteArray_HDF5(fileId, '/solutionGradient', xOffset, &
+              this % solutionGradient % interior, xGlobalDims, &
+              this % decomp % mpiEnabled)
 
-      CALL WriteArray_HDF5(fileId, '/x', xOffset, this % geometry % x % interior)
+      CALL WriteArray_HDF5(fileId, '/x', xOffset, &
+              this % geometry % x % interior, xGlobalDims, &
+              this % decomp % mpiEnabled)
 
       CALL Close_HDF5(fileId)
 
@@ -252,11 +271,8 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     INTEGER :: firstElem
     INTEGER :: N
 
-      IF(this % decomp % mpiEnabled)THEN
-        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, this % decomp % mpiComm)
-      ELSE
-        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId)
-      ENDIF
+      CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, &
+              this % decomp % mpiComm, this % decomp % mpiEnabled)
 
       CALL ReadAttribute_HDF5(fileId, 'N', N)
 
@@ -271,13 +287,14 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       ENDIF
 
       solOffset(1:4) = (/0,0,1,firstElem/)
-      CALL ReadArray_HDF5(fileId, 'solution', solOffset, this % solution % interior)
+      CALL ReadArray_HDF5(fileId, 'solution', solOffset, &
+              this % solution % interior, this % decomp % mpiEnabled)
 
       CALL Close_HDF5(fileId)
 
   END SUBROUTINE Read_DG2D
 
-  SUBROUTINE Init_DG3D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
+  SUBROUTINE Init_DG3D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
     IMPLICIT NONE
     CLASS(DG3D), INTENT(out) :: this
     INTEGER,INTENT(in) :: cqType
@@ -285,9 +302,10 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: nvar
+    LOGICAL,INTENT(in) :: enableMPI
     TYPE(MeshSpec), INTENT(in) :: spec
 
-      CALL this % decomp % Init()
+      CALL this % decomp % Init(enableMPI)
 
       ! Load Mesh
       CALL this % mesh % Load(spec,this % decomp)
@@ -405,14 +423,13 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: solOffset(1:5)
     INTEGER(HID_T) :: xOffset(1:6)
+    INTEGER(HID_T) :: solGlobalDims(1:5)
+    INTEGER(HID_T) :: xGlobalDims(1:6)
     INTEGER :: firstElem, nLocalElems
     INTEGER :: nGeo, nBCs
 
-      IF(this % decomp % mpiEnabled)THEN
-        CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, this % decomp % mpiComm)
-      ELSE
-        CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId)
-      ENDIF
+      CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, &
+              this % decomp % mpiComm, this % decomp % mpiEnabled)
 
       IF(this % decomp % mpiEnabled)THEN
         firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)+1
@@ -421,17 +438,37 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       ENDIF
 
       solOffset(1:5) = (/0,0,0,1,firstElem/)
-      CALL WriteArray_HDF5(fileId, '/solution', solOffset, this % solution % interior)
+      solGlobalDims(1:5) = (/this % solution % N,&
+                             this % solution % N,&
+                             this % solution % N,&
+                             this % solution % nVar,&
+                             this % decomp % nElem/)
+      CALL WriteArray_HDF5(fileId, '/solution', solOffset, &
+              this % solution % interior, solGlobalDims, &
+              this % decomp % mpiEnabled)
 
-      CALL WriteArray_HDF5(fileId, '/fluxDivergence', solOffset, this % fluxDivergence % interior)
+      CALL WriteArray_HDF5(fileId, '/fluxDivergence', solOffset, &
+              this % fluxDivergence % interior, solGlobalDims, &
+              this % decomp % mpiEnabled)
 
       xOffset(1:6) = (/1,0,0,0,1,firstElem/)
-      CALL WriteArray_HDF5(fileId, '/flux', xOffset, this % flux % interior)
+      xGlobalDims(1:6) = (/3,&
+                           this % solution % N,&
+                           this % solution % N,&
+                           this % solution % N,&
+                           this % solution % nVar,&
+                           this % decomp % nElem/)
+      CALL WriteArray_HDF5(fileId, '/flux', xOffset, &
+              this % flux % interior, xGlobalDims, &
+              this % decomp % mpiEnabled)
 
-      CALL WriteArray_HDF5(fileId, '/solutionGradient', xOffset, this % solutionGradient % interior)
+      CALL WriteArray_HDF5(fileId, '/solutionGradient', xOffset, &
+              this % solutionGradient % interior, xGlobalDims, &
+              this % decomp % mpiEnabled)
 
-
-      CALL WriteArray_HDF5(fileId, '/x', xOffset, this % geometry % x % interior)
+      CALL WriteArray_HDF5(fileId, '/x', xOffset, &
+              this % geometry % x % interior, xGlobalDims, &
+              this % decomp % mpiEnabled)
 
       CALL Close_HDF5(fileId)
 
@@ -447,11 +484,8 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
     INTEGER :: firstElem
     INTEGER :: N
 
-      IF(this % decomp % mpiEnabled)THEN
-        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, this % decomp % mpiComm)
-      ELSE
-        CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId)
-      ENDIF
+      CALL Open_HDF5(fileName, H5F_ACC_RDWR_F, fileId, &
+              this % decomp % mpiComm, this % decomp % mpiEnabled)
 
       CALL ReadAttribute_HDF5(fileId, 'N', N)
 
@@ -466,7 +500,8 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,spec)
       ENDIF
 
       solOffset(1:5) = (/0,0,0,1,firstElem/)
-      CALL ReadArray_HDF5(fileId, 'solution', solOffset, this % solution % interior)
+      CALL ReadArray_HDF5(fileId, 'solution', solOffset, &
+              this % solution % interior, this % decomp % mpiEnabled)
 
       CALL Close_HDF5(fileId)
 

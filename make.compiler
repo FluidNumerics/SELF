@@ -1,7 +1,7 @@
 # Compiler
 
-HIPFORT ?= hipfc
-FC ?= gfortran
+HIPFC ?= /opt/rocm/bin/hipfc
+HIPFORT_COMPILER ?= gfortran
 HIPFORT_GPU ?= gfx900
 ROCM_DIR ?= /opt/rocm
 CUDA_PATH ?= /usr/local/cuda
@@ -15,19 +15,20 @@ ifeq ($(PREC),double)
 endif
 
  
-CXX = $(HIPFORT) 
+FC = $(HIPFC) 
+CXX = $(HIPFC) 
 AR = gcc-ar
-SELF_FFLAGS += -hipfort-compiler $(FC) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
-SELF_CXXFLAGS += -hipfort-compiler $(FC) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+SELF_CXXFLAGS += -v -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET) -I$(ROCM_DIR)/include
 
 #  ifeq ($(findstring gfx, $(OFFLOAD_ARCH)), gfx)
-#    SELF_SELF_FFLAGS += -hipfort-compiler $(FC) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
-#    SELF_SELF_CXXFLAGS += -hipfort-compiler $(FC) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+#    SELF_SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+#    SELF_SELF_CXXFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
 #  else ifeq ($(findstring sm, $(OFFLOAD_ARCH)), sm)
-#    SELF_SELF_FFLAGS += -hipfort-compiler $(FC) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+#    SELF_SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
 #    SELF_SELF_CXXFLAGS += --gpu-architecture $(GPU_TARGET)
 #  endif
 
-$(info HIPFORT : $(HIPFORT))
-$(info Fortran Compiler : $(FC))
+$(info HIPFC : $(HIPFC))
+$(info Fortran Compiler : $(HIPFORT_COMPILER))
 $(GPU Target : $(HIPFORT_GPU))

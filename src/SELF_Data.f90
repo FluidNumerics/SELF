@@ -1714,10 +1714,6 @@ CONTAINS
                                             SELFStorage % N, &
                                             SELFStorage % nVar, &
                                             SELFStorage % nElem)
-#else
-     msg = "GPU Acceleration currently not enabled in SELF"
-     WARNING(msg)
-
 
     ELSE
 
@@ -1990,10 +1986,6 @@ CONTAINS
                                             SELFStorage % N, &
                                             SELFStorage % nVar, &
                                             SELFStorage % nElem)
-#else
-     msg = "GPU Acceleration currently not enabled in SELF"
-     WARNING(msg)
-
 
     ELSE
 

@@ -12,9 +12,7 @@ MODULE SELF_Constants
 
   IMPLICIT NONE
 
-#ifdef HAVE_MPI
   INCLUDE 'mpif.h'
-#endif
 
 #ifdef DOUBLE_PRECISION
   INTEGER,PARAMETER :: prec = real64

@@ -451,7 +451,7 @@ CONTAINS
   END SUBROUTINE ScalarBoundaryInterp2D
 
   SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   spec,fChar,gradientChar,outputFile,gpuAccel)
+                                   spec,fChar,gradientChar,outputFile,enableMPI,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D"
     IMPLICIT NONE
@@ -465,6 +465,7 @@ CONTAINS
     TYPE(MeshSpec), INTENT(in) :: spec
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:2)
+    LOGICAL,INTENT(in) :: enableMPI
     LOGICAL,INTENT(in) :: gpuAccel
     CHARACTER(*),INTENT(in) :: outputFile
     ! Local
@@ -473,7 +474,7 @@ CONTAINS
     TYPE(EquationParser)  :: feq,gxeq,gyeq
     INTEGER :: iel,i,j,ivar,iside
 
-    CALL dgsol % Init(cqType,tqType,cqDegree,tqDegree,nvar,spec)
+    CALL dgsol % Init(cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
 
     ! Create the equation parser object
     feq = EquationParser(fChar, (/'x','y'/))
@@ -1740,7 +1741,7 @@ CONTAINS
   END SUBROUTINE VectorGradient3D
 
   SUBROUTINE VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nvar,&
-                                     spec,vectorChar,scalarChar,outputFile,gpuAccel)
+                                     spec,vectorChar,scalarChar,outputFile,enableMPI,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence3D"
     IMPLICIT NONE
@@ -1754,6 +1755,7 @@ CONTAINS
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: scalarChar
     CHARACTER(*),INTENT(in) :: outputFile
+    LOGICAL,INTENT(in) :: enableMPI
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     CHARACTER(240) :: msg
@@ -1763,7 +1765,7 @@ CONTAINS
     TYPE(EquationParser)  :: feq(1:3),dfeqChar
     INTEGER :: iel,i,j,k,ivar,idir,iside
 
-    CALL dgsol % Init(cqType,tqType,cqDegree,tqDegree,nvar,spec)
+    CALL dgsol % Init(cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
 
     ! Create the equation parser object
     DO idir = 1,3
