@@ -844,18 +844,6 @@ CONTAINS
     END IF
 
   END FUNCTION TimeStamp
-  LOGICAL FUNCTION IsNaN(a)
-    IMPLICIT NONE
-    REAL(prec) ::  a
-
-    IF (a .ne. a) THEN
-      IsNaN = .TRUE.
-    ELSE
-      IsNaN = .FALSE.
-    END IF
-    RETURN
-
-  END FUNCTION IsNaN
   LOGICAL FUNCTION IsInf(a)
     IMPLICIT NONE
     REAL(prec) :: a
