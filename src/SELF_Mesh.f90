@@ -1665,7 +1665,7 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh3D_serial
 
-  SUBROUTINE Read_HOPr_Mesh3D( myMesh, meshFile, decomp )
+  SUBROUTINE Read_HOPr_Mesh3D_parallel( myMesh, meshFile, decomp )
   ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     IMPLICIT NONE
     CLASS(Mesh3D), INTENT(out) :: myMesh
