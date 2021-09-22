@@ -214,8 +214,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
     INTEGER(HID_T) :: xOffset(1:5)
     INTEGER(HID_T) :: solGlobalDims(1:4)
     INTEGER(HID_T) :: xGlobalDims(1:5)
-    INTEGER :: firstElem, nLocalElems
-    INTEGER :: nGeo, nBCs
+    INTEGER :: firstElem
 
       CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, &
               this % decomp % mpiComm, this % decomp % mpiEnabled)
@@ -425,8 +424,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
     INTEGER(HID_T) :: xOffset(1:6)
     INTEGER(HID_T) :: solGlobalDims(1:5)
     INTEGER(HID_T) :: xGlobalDims(1:6)
-    INTEGER :: firstElem, nLocalElems
-    INTEGER :: nGeo, nBCs
+    INTEGER :: firstElem
 
       CALL Open_HDF5(fileName, H5F_ACC_TRUNC_F, fileId, &
               this % decomp % mpiComm, this % decomp % mpiEnabled)

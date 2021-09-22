@@ -1705,7 +1705,6 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 
@@ -1977,7 +1976,6 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    CHARACTER(100) :: msg
 
     IF (gpuAccel) THEN
 

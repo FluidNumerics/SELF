@@ -207,7 +207,7 @@ PROGRAM SELF
 
   ELSEIF (selfCLI % run_command(group="s2d_gradient")) THEN
 
-    CALL ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
+    CALL ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nVar,&
                           spec,functionChar,vectorChar(1:2),TRIM(outputFile),enableMPI,gpuAccel)
     
 

@@ -336,7 +336,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
-    INTEGER :: iel,jel,elid
+    INTEGER :: iel
     INTEGER :: i,j,nid
     TYPE(Vector2D) :: xMesh
     INTEGER :: quadrature
@@ -557,7 +557,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
-    INTEGER :: iel,jel,kel,elid
+    INTEGER :: iel
     INTEGER :: i,j,k,nid
     TYPE(Vector3D) :: xMesh
     INTEGER :: quadrature

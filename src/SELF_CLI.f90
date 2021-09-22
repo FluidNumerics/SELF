@@ -124,7 +124,7 @@ CONTAINS
     TYPE(Geometry1D) :: controlGeometry
     TYPE(EquationParser)  :: feq
     TYPE(Scalar1D) :: f
-    INTEGER :: iel,i,ivar,iSide
+    INTEGER :: iel,i,ivar
 
     
     msg = 'Number of elements : '//Int2Str(nElem)
@@ -293,7 +293,7 @@ CONTAINS
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: feq
     TYPE(Scalar2D) :: f,fInterp
-    INTEGER :: nel,iel,jel
+    INTEGER :: nel,iel
     INTEGER :: i,j,ivar
 
     nel = nElem*nElem
@@ -387,8 +387,8 @@ CONTAINS
     TYPE(SEMQuad) :: controlGeometry
     TYPE(EquationParser)  :: feq
     TYPE(Scalar2D) :: f
-    INTEGER :: nel,iel,jel
-    INTEGER :: i,j,ivar,iside
+    INTEGER :: nel,iel
+    INTEGER :: i,j,ivar
 
     nel = nElem*nElem
     
@@ -450,7 +450,7 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp2D
 
-  SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
+  SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nvar,&
                                    spec,fChar,gradientChar,outputFile,enableMPI,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D"
@@ -460,7 +460,6 @@ CONTAINS
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: dForm
-    INTEGER,INTENT(in) :: nElem
     INTEGER,INTENT(in) :: nVar
     TYPE(MeshSpec), INTENT(in) :: spec
     CHARACTER(*),INTENT(in) :: fChar
@@ -469,7 +468,6 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     CHARACTER(*),INTENT(in) :: outputFile
     ! Local
-    CHARACTER(240) :: msg
     TYPE(DG2D) :: dgsol
     TYPE(EquationParser)  :: feq,gxeq,gyeq
     INTEGER :: iel,i,j,ivar,iside
@@ -538,7 +536,7 @@ CONTAINS
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: vEq(1:2)
     TYPE(Vector2D) :: f,fInterp
-    INTEGER :: nel,iel,jel
+    INTEGER :: nel,iel
     INTEGER :: i,j,ivar,idir
 
     nel = nElem*nElem
@@ -636,8 +634,8 @@ CONTAINS
     TYPE(SEMQuad) :: controlGeometry
     TYPE(EquationParser)  :: vEq(1:2)
     TYPE(Vector2D) :: f
-    INTEGER :: nel,iel,jel
-    INTEGER :: i,j,ivar,iside,idir
+    INTEGER :: nel,iel
+    INTEGER :: i,j,ivar,idir
 
     nel = nElem*nElem
     
@@ -851,7 +849,7 @@ CONTAINS
     TYPE(MappedVector2D) :: f
     TYPE(MappedVector2D) :: workVector
     TYPE(MappedScalar2D) :: dfInterp
-    INTEGER :: iel,i,j,ivar,row,col,iside
+    INTEGER :: iel,i,j,ivar,row,iside
 
     
     IF (dForm == selfStrongForm ) THEN
@@ -962,7 +960,7 @@ CONTAINS
     TYPE(SEMQuad) :: controlGeometry,targetGeometry
     TYPE(EquationParser)  :: tensorEq(1:2,1:2)
     TYPE(Tensor2D) :: f,fInterp
-    INTEGER :: nel,iel,jel
+    INTEGER :: nel,iel
     INTEGER :: i,j,ivar
     INTEGER :: row,col
 
@@ -1065,8 +1063,8 @@ CONTAINS
     TYPE(SEMQuad) :: controlGeometry
     TYPE(EquationParser)  :: tensorEq(1:2,1:2)
     TYPE(Tensor2D) :: f
-    INTEGER :: nel,iel,jel
-    INTEGER :: i,j,ivar,iside
+    INTEGER :: nel,iel
+    INTEGER :: i,j,ivar
     INTEGER :: row,col
 
     nel = nElem*nElem
@@ -1247,12 +1245,12 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     CHARACTER(240) :: msg
-    TYPE(Mesh3D) :: controlMesh,targetMesh
-    TYPE(SEMHex) :: controlGeometry,targetGeometry
+    TYPE(Mesh3D) :: controlMesh
+    TYPE(SEMHex) :: controlGeometry
     TYPE(EquationParser)  :: feq
     TYPE(Scalar3D) :: f
     INTEGER :: nel,iel
-    INTEGER :: i,j,k,ivar,iside
+    INTEGER :: i,j,k,ivar
 
     nel = nElem*nElem*nElem
     
@@ -1545,7 +1543,7 @@ CONTAINS
     TYPE(EquationParser)  :: vEq(1:3)
     TYPE(Vector3D) :: f
     INTEGER :: nel,iel
-    INTEGER :: i,j,k,ivar,iside,idir
+    INTEGER :: i,j,k,ivar,idir
 
     nel = nElem*nElem*nElem
     
@@ -1758,7 +1756,6 @@ CONTAINS
     LOGICAL,INTENT(in) :: enableMPI
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    CHARACTER(240) :: msg
     TYPE(DG3D) :: dgsol
     !TYPE(CG3D) :: cgsol
     !TYPE(Collocation3D) :: collosol
@@ -1946,9 +1943,9 @@ CONTAINS
     TYPE(Mesh3D) :: controlMesh
     TYPE(SEMHex) :: controlGeometry
     TYPE(EquationParser)  :: tensorEq(1:3,1:3)
-    TYPE(Tensor3D) :: f,fInterp
+    TYPE(Tensor3D) :: f
     INTEGER :: nel,iel
-    INTEGER :: i,j,k,ivar,iside
+    INTEGER :: i,j,k,ivar
     INTEGER :: row,col
 
     nel = nElem*nElem*nElem

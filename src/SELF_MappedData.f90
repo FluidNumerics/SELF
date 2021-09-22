@@ -654,16 +654,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: e1, e2, s1, s2
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: i1, i2, ivar
     INTEGER :: neighborRank
     
-
-
     IF(gpuAccel)THEN
 
-      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       CALL SideExchange_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -675,7 +673,7 @@ CONTAINS
                                                     scalar % nElem)
     ELSE
 
-      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4 
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -949,7 +947,7 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: e1, e2, s1, s2
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
@@ -958,7 +956,7 @@ CONTAINS
     IF(gpuAccel)THEN
 
 
-      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       CALL SideExchange_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                     scalar % boundary % deviceData, &
@@ -973,7 +971,7 @@ CONTAINS
 
     ELSE
 
-      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1,6
@@ -1342,7 +1340,7 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: e1, e2, s1, s2
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, ivar
@@ -1352,7 +1350,7 @@ CONTAINS
     IF(gpuAccel)THEN
 
 
-      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       CALL SideExchange_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                     vector % boundary % deviceData, &
@@ -1366,7 +1364,7 @@ CONTAINS
 
     ELSE
 
-      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4
@@ -1812,7 +1810,7 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: e1, e2, s1, s2
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
@@ -1822,7 +1820,7 @@ CONTAINS
     IF(gpuAccel)THEN
 
 
-      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       CALL SideExchange_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                     vector % boundary % deviceData, &
@@ -1835,7 +1833,7 @@ CONTAINS
                                                     vector % nElem)
     ELSE
 
-      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1, 6
@@ -2199,7 +2197,7 @@ CONTAINS
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: i,j,k,iVar,iEl,iDir,iside
+    INTEGER :: i,j,k,iVar,iEl,iside
     
 
     IF (gpuAccel) THEN
@@ -2351,7 +2349,7 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: e1, e2, s1, s2
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, ivar
@@ -2360,7 +2358,7 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       CALL SideExchange_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
@@ -2373,7 +2371,7 @@ CONTAINS
                                                     tensor % nElem)
     ELSE
 
-      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
       DO e1 = 1, mesh % nElem
         DO s1 = 1,4
@@ -2515,7 +2513,7 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL, INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2, sid 
+    INTEGER :: e1, e2, s1, s2 
     INTEGER :: flip, bcid, globalSideId
     INTEGER :: neighborRank
     INTEGER :: i1, i2, j1, j2, ivar
@@ -2524,7 +2522,7 @@ CONTAINS
 
     IF(gpuAccel)THEN
 
-      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.TRUE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       CALL SideExchange_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                     tensor % boundary % deviceData, &
                                                     mesh % hopr_elemInfo % deviceData, &
@@ -2536,7 +2534,7 @@ CONTAINS
                                                     tensor % nElem)
     ELSE
 
-      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.,useDevicePtr=.FALSE.)
+      CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1, mesh % nElem
         DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
@@ -2715,13 +2713,12 @@ CONTAINS
 
   ! --- MPI Routines --- !
 
-  SUBROUTINE MPIExchangeAsync_MappedScalar2D(scalar,mpiHandler,mesh,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedScalar2D(scalar,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
     CLASS(MappedScalar2D), INTENT(inout) :: scalar
     TYPE(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(Mesh2D), INTENT(in) :: mesh
     LOGICAL, INTENT(in) :: resetCount
-    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2
@@ -2834,13 +2831,12 @@ CONTAINS
 
   END SUBROUTINE ApplyFlip_MappedScalar2D
 
-  SUBROUTINE MPIExchangeAsync_MappedVector2D(vector,mpiHandler,mesh,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedVector2D(vector,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
     CLASS(MappedVector2D), INTENT(inout) :: vector
     TYPE(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(Mesh2D), INTENT(in) :: mesh
     LOGICAL, INTENT(in) :: resetCount
-    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2
@@ -2953,13 +2949,12 @@ CONTAINS
 
   END SUBROUTINE ApplyFlip_MappedVector2D
 
-  SUBROUTINE MPIExchangeAsync_MappedTensor2D(tensor,mpiHandler,mesh,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedTensor2D(tensor,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
     CLASS(MappedTensor2D), INTENT(inout) :: tensor
     TYPE(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(Mesh2D), INTENT(in) :: mesh
     LOGICAL, INTENT(in) :: resetCount
-    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2
@@ -3074,13 +3069,12 @@ CONTAINS
 
   END SUBROUTINE ApplyFlip_MappedTensor2D
 
-  SUBROUTINE MPIExchangeAsync_MappedScalar3D(scalar,mpiHandler,mesh,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedScalar3D(scalar,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
     CLASS(MappedScalar3D), INTENT(inout) :: scalar
     TYPE(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(Mesh3D), INTENT(in) :: mesh
     LOGICAL, INTENT(in) :: resetCount
-    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2
@@ -3234,13 +3228,12 @@ CONTAINS
 
   END SUBROUTINE ApplyFlip_MappedScalar3D
 
-  SUBROUTINE MPIExchangeAsync_MappedVector3D(vector,mpiHandler,mesh,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedVector3D(vector,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
     CLASS(MappedVector3D), INTENT(inout) :: vector
     TYPE(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(Mesh3D), INTENT(in) :: mesh
     LOGICAL, INTENT(in) :: resetCount
-    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2
@@ -3390,13 +3383,12 @@ CONTAINS
 
   END SUBROUTINE ApplyFlip_MappedVector3D
 
-  SUBROUTINE MPIExchangeAsync_MappedTensor3D(tensor,mpiHandler,mesh,resetCount,useDevicePtr)
+  SUBROUTINE MPIExchangeAsync_MappedTensor3D(tensor,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
     CLASS(MappedTensor3D), INTENT(inout) :: tensor
     TYPE(MPILayer), INTENT(inout) :: mpiHandler
     TYPE(Mesh3D), INTENT(in) :: mesh
     LOGICAL, INTENT(in) :: resetCount
-    LOGICAL, INTENT(in) :: useDevicePtr
     ! Local
     INTEGER :: e1, s1, e2, s2
     INTEGER :: globalSideId, r2

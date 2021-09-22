@@ -470,12 +470,8 @@ CONTAINS
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: offset(1:2), gOffset(1) 
-    INTEGER :: nGlobalElem
     INTEGER :: firstElem, nLocalElems
     INTEGER :: firstNode, nLocalNodes
-    INTEGER :: firstSide, nLocalSides
-    INTEGER :: nGeo, nBCs
-
  
     CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, 0, .FALSE.)
  
@@ -753,17 +749,15 @@ CONTAINS
     
   END SUBROUTINE Load_Mesh2D
 
-  SUBROUTINE Read_ISMv2_Mesh2D( myMesh, meshFile, decomp )
+  SUBROUTINE Read_ISMv2_Mesh2D( myMesh, meshFile )
 #undef __FUNC__
 #define __FUNC__ "Read_ISMv2_Mesh2D"
     IMPLICIT NONE
     CLASS(Mesh2D), INTENT(out) :: myMesh
     CHARACTER(*), INTENT(in) :: meshFile
-    TYPE(MPILayer), INTENT(inout) :: decomp
     ! Local
     INTEGER :: nNodes, nSides, nElem, nGeo
-    INTEGER :: nRanks, myRank
-    INTEGER :: unid, lnid, nid, usid, lsid, sid, eid
+    INTEGER :: lnid, nid, usid, lsid, sid, eid
     INTEGER :: fUnit
     INTEGER :: i, j
     CHARACTER(100) :: line
@@ -922,11 +916,10 @@ CONTAINS
     ! Local
     INTEGER :: nid,unid,cnid,lnid,rnid
     INTEGER :: eid,sid,lsid,usid,gn1,gn2
-    INTEGER :: key1,key2,e1,e2,s2,e2gn1
+    INTEGER :: key1,key2,e2,s2,e2gn1
     INTEGER :: nUniqueSides,flip
     INTEGER :: side(1:2,1:myMesh % nUniqueSides)
     TYPE(HashTable) :: sideTable
-    CHARACTER(100) :: msg
 
       ! Set the globalNodeIDs
       !  > Nodes in the nodeCoords list are possibly repeated since elements may share common sides. When the sides are shared
@@ -1145,11 +1138,9 @@ CONTAINS
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: offset(1:2), gOffset(1) 
-    INTEGER :: nGlobalElem
     INTEGER :: firstElem, nLocalElems
     INTEGER :: firstNode, nLocalNodes
     INTEGER :: firstSide, nLocalSides
-    INTEGER :: nGeo, nBCs
 
     CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, 0, .FALSE.)
     CALL WriteAttribute_HDF5(fileId, 'nElems', myMesh % nElem)
@@ -1570,12 +1561,9 @@ CONTAINS
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: offset(1:2), gOffset(1) 
-    INTEGER :: nGlobalElem
-    INTEGER :: firstElem, nLocalElems
+    INTEGER :: nLocalElems
     INTEGER :: firstNode, nLocalNodes
     INTEGER :: firstSide, nLocalSides
-    INTEGER :: nGeo, nBCs
-
 
     CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, 0, .FALSE.)
 

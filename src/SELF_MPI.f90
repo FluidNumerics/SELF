@@ -44,13 +44,12 @@ MODULE SELF_MPI
 
 CONTAINS
 
-  SUBROUTINE Init_MPILayer(this,enableMPI,maxMsg)
+  SUBROUTINE Init_MPILayer(this,enableMPI)
 #undef __FUNC__
 #define __FUNC__ "Init_MPILayer"
     IMPLICIT NONE
     CLASS(MPILayer), INTENT(out) :: this
     LOGICAL, INTENT(in) :: enableMPI
-    INTEGER, OPTIONAL, INTENT(in) :: maxMsg
     ! Local
     INTEGER       :: ierror
     CHARACTER(30) :: msg

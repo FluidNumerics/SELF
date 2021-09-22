@@ -819,7 +819,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out) :: fNew(0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,jj,p,iEl,iVar
+    INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi,fij
 
     DO iEl = 1,nElements
@@ -867,7 +867,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out) :: fNew(1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,jj,p,iEl,iVar
+    INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi(1:2)
 
     DO iEl = 1,nElements
@@ -919,7 +919,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out) :: fNew(1:2,1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,jj,p,iEl,iVar
+    INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi(1:2,1:2)
 
     DO iEl = 1,nElements
@@ -1382,9 +1382,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL ScalarGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
@@ -1439,9 +1436,6 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(in)     :: bf_dev
     TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL ScalarDGGradient_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                          myPoly % bMatrix % deviceData, &
@@ -1497,9 +1491,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
@@ -1570,9 +1561,6 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(in)     :: bf_dev
     TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorDGGradient_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        myPoly % bMatrix % deviceData, &
@@ -1616,9 +1604,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
@@ -1671,9 +1656,6 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(in)     :: bF_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
@@ -1717,9 +1699,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorCurl_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                    f_dev,dF_dev,myPoly % N, &
@@ -1765,9 +1744,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL TensorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
@@ -1828,9 +1804,6 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(in)     :: bf_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL TensorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
@@ -1879,9 +1852,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL ScalarGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
@@ -1967,9 +1937,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: gradF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorGradient_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                        f_dev,gradF_dev,myPoly % N, &
@@ -2014,9 +1981,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
@@ -2074,9 +2038,6 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(in)     :: bF_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
                                            myPoly % bMatrix % deviceData, &
@@ -2128,9 +2089,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL VectorCurl_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                    f_dev,dF_dev,myPoly % N, &
@@ -2189,9 +2147,6 @@ CONTAINS
     INTEGER,INTENT(in)         :: nVariables,nElements
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-
 
     CALL TensorDivergence_3D_gpu_wrapper(myPoly % dMatrix % deviceData, &
                                          f_dev,dF_dev,myPoly % N, &
@@ -2282,8 +2237,6 @@ CONTAINS
     TYPE(c_ptr),INTENT(in)     :: f_dev
     TYPE(c_ptr),INTENT(in)     :: bF_dev
     TYPE(c_ptr),INTENT(out)    :: dF_dev
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
 
 
     CALL TensorDGDivergence_3D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
@@ -2304,7 +2257,7 @@ CONTAINS
     REAL(prec),INTENT(in)      :: f(0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)     :: fBound(1:nVariables,1:2,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,iVar,iEl
+    INTEGER :: i,ii,iVar,iEl
     REAL(prec) :: fb(1:2)
 
     DO iEl = 1,nElements
@@ -2341,7 +2294,7 @@ CONTAINS
     REAL(prec),INTENT(in)      :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)     :: fBound(0:myPoly % N,1:nVariables,1:4,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,iVar,iEl
+    INTEGER :: i,ii,iVar,iEl
     REAL(prec) :: fb(1:4)
 
     DO iEl = 1,nElements
@@ -2386,7 +2339,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)  :: fBound(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,idir,iVar,iEl
+    INTEGER :: i,ii,idir,iVar,iEl
     REAL(prec) :: fb(1:2,1:4)
 
     DO iEl = 1,nElements
@@ -2434,7 +2387,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)  :: fBound(1:2,1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
     ! Local
-    INTEGER :: i,j,ii,idir,jdir,iVar,iEl
+    INTEGER :: i,ii,idir,jdir,iVar,iEl
     REAL(prec) :: fb(1:2,1:2,1:4)
 
     DO iEl = 1,nElements

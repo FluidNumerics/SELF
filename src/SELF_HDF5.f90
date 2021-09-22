@@ -226,7 +226,6 @@ SUBROUTINE WriteAttribute_HDF5_int32( fileId, attributeName, attribute )
   ! Local
   INTEGER(HID_T) :: aspaceId
   INTEGER(HID_T) :: attrId
-  INTEGER(HID_T) :: typeId
   INTEGER(HSIZE_T) :: dims(1:1)
   INTEGER :: error
 
@@ -248,7 +247,6 @@ SUBROUTINE WriteAttribute_HDF5_real( fileId, attributeName, attribute )
   ! Local
   INTEGER(HID_T) :: aspaceId
   INTEGER(HID_T) :: attrId
-  INTEGER(HID_T) :: typeId
   INTEGER(HSIZE_T) :: dims(1:1)
   INTEGER :: error
 
@@ -270,7 +268,6 @@ SUBROUTINE WriteAttribute_HDF5_character( fileId, attributeName, attribute )
   ! Local
   INTEGER(HID_T) :: aspaceId
   INTEGER(HID_T) :: attrId
-  INTEGER(HID_T) :: typeId
   INTEGER(HSIZE_T) :: dims(1:1)
   INTEGER :: error
 
@@ -295,7 +292,6 @@ SUBROUTINE WriteArray_HDF5_real_r1( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1)
@@ -355,7 +351,6 @@ SUBROUTINE WriteArray_HDF5_real_r2( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:2)
@@ -415,7 +410,6 @@ SUBROUTINE WriteArray_HDF5_real_r3( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:3)
@@ -475,7 +469,6 @@ SUBROUTINE WriteArray_HDF5_real_r4( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:4)
@@ -593,7 +586,6 @@ SUBROUTINE WriteArray_HDF5_real_r6( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:6)
@@ -652,7 +644,6 @@ SUBROUTINE WriteArray_HDF5_real_r7( fileId, arrayName, offset, hfArray, globalDi
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:7)
@@ -712,7 +703,6 @@ SUBROUTINE WriteArray_HDF5_int32_r1( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1)
@@ -773,7 +763,6 @@ SUBROUTINE WriteArray_HDF5_int32_r2( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:2)
@@ -834,7 +823,6 @@ SUBROUTINE WriteArray_HDF5_int32_r3( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:3)
@@ -895,7 +883,6 @@ SUBROUTINE WriteArray_HDF5_int32_r4( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:4)
@@ -954,7 +941,6 @@ SUBROUTINE WriteArray_HDF5_int32_r5( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:5)
@@ -1014,7 +1000,6 @@ SUBROUTINE WriteArray_HDF5_int32_r6( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:6)
@@ -1134,7 +1119,6 @@ SUBROUTINE WriteArray_HDF5_int64_r1( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1)
@@ -1194,7 +1178,6 @@ SUBROUTINE WriteArray_HDF5_int64_r2( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:2)
@@ -1254,7 +1237,6 @@ SUBROUTINE WriteArray_HDF5_int64_r3( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:3)
@@ -1314,7 +1296,6 @@ SUBROUTINE WriteArray_HDF5_int64_r4( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:4)
@@ -1374,7 +1355,6 @@ SUBROUTINE WriteArray_HDF5_int64_r5( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:5)
@@ -1434,7 +1414,6 @@ SUBROUTINE WriteArray_HDF5_int64_r6( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:6)
@@ -1494,7 +1473,6 @@ SUBROUTINE WriteArray_HDF5_int64_r7( fileId, arrayName, offset, hfArray, globalD
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:7)
