@@ -751,7 +751,6 @@ SUBROUTINE WriteArray_HDF5_int32_r7_serial( fileId, arrayName, hfArray )
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:7)
@@ -1528,7 +1527,6 @@ SUBROUTINE WriteArray_HDF5_int32_r7_parallel( fileId, arrayName, hfArray, offset
   ! Local
   INTEGER(HID_T) :: plistId
   INTEGER(HID_T) :: dsetId
-  INTEGER(HID_T) :: dtypeId
   INTEGER(HID_T) :: filespace
   INTEGER(HID_T) :: memspace
   INTEGER(HSIZE_T) :: dims(1:7)

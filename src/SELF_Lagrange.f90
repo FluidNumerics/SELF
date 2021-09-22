@@ -2257,7 +2257,7 @@ CONTAINS
     REAL(prec),INTENT(in)      :: f(0:myPoly % N,1:nVariables,1:nElements)
     REAL(prec),INTENT(out)     :: fBound(1:nVariables,1:2,1:nElements)
     ! Local
-    INTEGER :: i,ii,iVar,iEl
+    INTEGER :: ii,iVar,iEl
     REAL(prec) :: fb(1:2)
 
     DO iEl = 1,nElements
