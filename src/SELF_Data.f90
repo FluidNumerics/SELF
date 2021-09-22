@@ -311,7 +311,7 @@ MODULE SELF_Data
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor_dev,detTensor_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE Determinant_Tensor2D_gpu_wrapper
   END INTERFACE
 
@@ -321,7 +321,7 @@ MODULE SELF_Data
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor_dev,detTensor_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE Determinant_Tensor3D_gpu_wrapper
   END INTERFACE
 

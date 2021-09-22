@@ -82,7 +82,7 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dxds,dsdx
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper
   END INTERFACE
 
@@ -92,7 +92,7 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dsdx,J
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper
   END INTERFACE
 
@@ -102,7 +102,7 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dxds,dsdx
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper
   END INTERFACE
 
@@ -112,7 +112,7 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dsdx,J
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper
   END INTERFACE
 

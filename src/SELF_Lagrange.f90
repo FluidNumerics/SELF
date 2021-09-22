@@ -197,7 +197,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE ScalarGridInterp_1D_gpu_wrapper
   END INTERFACE
 
@@ -207,7 +207,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE ScalarGridInterp_2D_gpu_wrapper
   END INTERFACE
 
@@ -217,7 +217,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE VectorGridInterp_2D_gpu_wrapper
   END INTERFACE
 
@@ -227,7 +227,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE TensorGridInterp_2D_gpu_wrapper
   END INTERFACE
 
@@ -237,7 +237,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE ScalarGridInterp_3D_gpu_wrapper
   END INTERFACE
 
@@ -247,7 +247,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE VectorGridInterp_3D_gpu_wrapper
   END INTERFACE
 
@@ -257,7 +257,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: iMatrixT_dev,f_dev,fInterp_dev
-      INTEGER,VALUE :: N,M,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,M,nVar,nEl
     END SUBROUTINE TensorGridInterp_3D_gpu_wrapper
   END INTERFACE
 
@@ -270,7 +270,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ScalarBoundaryInterp_1D_gpu_wrapper
   END INTERFACE
 
@@ -280,7 +280,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ScalarBoundaryInterp_2D_gpu_wrapper
   END INTERFACE
 
@@ -290,7 +290,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorBoundaryInterp_2D_gpu_wrapper
   END INTERFACE
 
@@ -300,7 +300,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE TensorBoundaryInterp_2D_gpu_wrapper
   END INTERFACE
 
@@ -310,7 +310,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ScalarBoundaryInterp_3D_gpu_wrapper
   END INTERFACE
 
@@ -320,7 +320,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorBoundaryInterp_3D_gpu_wrapper
   END INTERFACE
 
@@ -330,7 +330,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: bMatrix_dev,f_dev,fBound_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE TensorBoundaryInterp_3D_gpu_wrapper
   END INTERFACE
 
@@ -342,7 +342,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE Derivative_1D_gpu_wrapper
   END INTERFACE
 
@@ -352,7 +352,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE DGDerivative_1D_gpu_wrapper
   END INTERFACE
 
@@ -362,7 +362,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ScalarGradient_2D_gpu_wrapper
   END INTERFACE
 
@@ -372,7 +372,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ScalarDGGradient_2D_gpu_wrapper
   END INTERFACE
 
@@ -382,7 +382,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorGradient_2D_gpu_wrapper
   END INTERFACE
 
@@ -392,7 +392,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDGGradient_2D_gpu_wrapper
   END INTERFACE
 
@@ -402,7 +402,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDivergence_2D_gpu_wrapper
   END INTERFACE
 
@@ -412,7 +412,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
   END INTERFACE
 
@@ -422,7 +422,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorCurl_2D_gpu_wrapper
   END INTERFACE
 
@@ -432,7 +432,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE TensorDivergence_2D_gpu_wrapper
   END INTERFACE
 
@@ -442,7 +442,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE TensorDGDivergence_2D_gpu_wrapper
   END INTERFACE
 
@@ -452,7 +452,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ScalarGradient_3D_gpu_wrapper
   END INTERFACE
 
@@ -462,7 +462,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorGradient_3D_gpu_wrapper
   END INTERFACE
 
@@ -472,7 +472,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDivergence_3D_gpu_wrapper
   END INTERFACE
 
@@ -482,7 +482,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDGDivergence_3D_gpu_wrapper
   END INTERFACE
 
@@ -492,7 +492,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorCurl_3D_gpu_wrapper
   END INTERFACE
 
@@ -502,7 +502,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE TensorDivergence_3D_gpu_wrapper
   END INTERFACE
 
@@ -512,7 +512,7 @@ MODULE SELF_Lagrange
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE TensorDGDivergence_3D_gpu_wrapper
   END INTERFACE
 

@@ -146,7 +146,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,dxds
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper
   END INTERFACE
 
@@ -156,7 +156,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,jacobian
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -166,7 +166,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,jacobian
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -176,7 +176,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantWeight_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -186,7 +186,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -196,7 +196,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantWeight_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -206,7 +206,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,workTensor,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -216,7 +216,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: physVector,compVector,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -226,7 +226,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: physVector,compVector,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -236,7 +236,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: vector,jacobian
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -246,7 +246,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: physVector,compVector,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -256,7 +256,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: physVector,compVector,dsdx
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -266,7 +266,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: vector,jacobian
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -276,7 +276,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor,jacobian
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
@@ -286,7 +286,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor,jacobian
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE JacobianWeight_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
@@ -296,7 +296,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToScalar_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -306,7 +306,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToScalarBoundary_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -316,7 +316,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToTensor_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -326,7 +326,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToTensorBoundary_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -336,7 +336,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToScalar_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -346,7 +346,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToScalarBoundary_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -356,7 +356,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToTensor_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -366,7 +366,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: tensor,vector
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE MapToTensorBoundary_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -377,7 +377,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -388,7 +388,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -399,7 +399,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
@@ -410,7 +410,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -421,7 +421,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -432,7 +432,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
@@ -442,7 +442,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -452,7 +452,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -462,7 +462,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
@@ -472,7 +472,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -482,7 +482,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -492,7 +492,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
-      INTEGER,VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
@@ -502,7 +502,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
@@ -512,7 +512,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedVector2D_gpu_wrapper
   END INTERFACE
 
@@ -522,7 +522,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
@@ -532,7 +532,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
@@ -542,7 +542,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedVector3D_gpu_wrapper
   END INTERFACE
 
@@ -552,7 +552,7 @@ MODULE SELF_MappedData
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: selfSideInfo,elemToRank,extBoundary
-      INTEGER,VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
