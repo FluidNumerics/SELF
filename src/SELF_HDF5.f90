@@ -2095,7 +2095,6 @@ SUBROUTINE ReadArray_HDF5_int32_r3_serial( fileId, arrayName, hfArray )
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(in) :: fileId
   CHARACTER(*), INTENT(in) :: arrayName
-  INTEGER(HID_T), INTENT(in) :: offset(1:3)
   TYPE(hfInt32_r3), INTENT(inout) :: hfArray
   ! Local
   INTEGER(HID_T) :: plistId
