@@ -482,8 +482,8 @@ CONTAINS
     CALL ReadArray_HDF5(fileId, 'BCType', bcType, offset)
 
     ! Read local subarray of ElemInfo
-    firstElem = decomp % offsetElem(myRank)+1
-    nLocalElems = decomp % offsetElem(myRank+1)-decomp % offsetElem(myRank)
+    firstElem = decomp % offsetElem % hostData(myRank)+1
+    nLocalElems = decomp % offsetElem % hostData(myRank+1)-decomp % offsetElem % hostData(myRank)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1262,7 +1262,7 @@ CONTAINS
     CALL hopr_globalNodeIDs % Free()
     CALL hopr_sideInfo % Free()
 
-  END SUBROUTINE Read_HOPr_Mesh2D
+  END SUBROUTINE Read_HOPr_Mesh2D_parallel
 
   SUBROUTINE Write_HOPr_Mesh2D( myMesh, meshFile)
   ! Writes mesh output in HOPR format (serial only)
