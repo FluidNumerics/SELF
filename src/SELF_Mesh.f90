@@ -482,9 +482,9 @@ CONTAINS
     CALL ReadArray_HDF5(fileId, 'BCType', bcType, offset)
 
     ! Read local subarray of ElemInfo
-    firstElem = decomp % offsetElem % hostData(decomp % myRank)+1
-    nLocalElems = decomp % offsetElem % hostData(decomp % myRank+1)-&
-            decomp % offsetElem % hostData(decomp % myRank)
+    firstElem = decomp % offsetElem % hostData(decomp % rankId)+1
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-&
+            decomp % offsetElem % hostData(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1208,9 +1208,9 @@ CONTAINS
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
-    firstElem = decomp % offsetElem % hostData(decomp % myRank)+1
-    nLocalElems = decomp % offsetElem % hostData(decomp % myRank+1)-&
-            decomp % offsetElem % hostData(decomp % myRank)
+    firstElem = decomp % offsetElem % hostData(decomp % rankId)+1
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-&
+            decomp % offsetElem % hostData(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1600,7 +1600,6 @@ CONTAINS
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
     INTEGER :: nGeo, nBCs
-    INTEGER :: nRanks, myRank
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
@@ -1701,9 +1700,9 @@ CONTAINS
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
-    firstElem = decomp % offsetElem % hostData(decomp % myRank)+1
-    nLocalElems = decomp % offsetElem % hostData(decomp % myRank+1)-&
-            decomp % offsetElem % hostData(decomp % myRank)
+    firstElem = decomp % offsetElem % hostData(decomp % rankId)+1
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-&
+            decomp % offsetElem % hostData(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
