@@ -12,7 +12,7 @@ steps:
 - id: Build Singularity Image
   name: 'quay.io/singularity/singularity:v3.7.1'
   args: ['build',
-         'self_${_GPU_TARGET}',
+         'self_${_GPU_TARGET}.sif',
          'docker-daemon://gcr.io/${PROJECT_ID}/self_${_GPU_TARGET}:${SHORT_SHA}']
   waitFor: ["Build Docker Image"]
 
@@ -32,9 +32,15 @@ artifacts:
     location: 'gs://self-fluids-singularity/${SHORT_SHA}'
     paths: ['self_${_GPU_TARGET}.sif']
 
+
+options:
+ machineType: 'E2_HIGHCPU_8'
+
 timeout: 9600s
 
 
 substitutions:
   _GPU_TARGET: 'sm_72'
   _PARTITIONS: 'c2-standard-8'
+
+
