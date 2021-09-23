@@ -238,7 +238,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
         CALL WriteArray_HDF5(fileId, '/solution', &
                 this % solution % interior, solOffset, solGlobalDims)
   
-        CALL WriteArray_HDF5(fileId, '/fluxDivergence',
+        CALL WriteArray_HDF5(fileId, '/fluxDivergence',&
                 this % fluxDivergence % interior, solOffset, solGlobalDims)
   
         CALL WriteArray_HDF5(fileId, '/flux', &
@@ -468,7 +468,7 @@ SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
         CALL WriteArray_HDF5(fileId, '/solution', &
                 this % solution % interior, solOffset, solGlobalDims)
   
-        CALL WriteArray_HDF5(fileId, '/fluxDivergence',
+        CALL WriteArray_HDF5(fileId, '/fluxDivergence', &
                 this % fluxDivergence % interior, solOffset, solGlobalDims)
   
         CALL WriteArray_HDF5(fileId, '/flux', &
