@@ -419,7 +419,7 @@ CONTAINS
     CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems)-hopr_elemInfo % hostData(5,1)
+    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem)-hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=1, &
@@ -433,7 +433,7 @@ CONTAINS
 
     CALL Close_HDF5(fileID)
 
-    CALL myMesh % Init(nGeo,nGlobalElems,nLocalNodes,nBCs)
+    CALL myMesh % Init(nGeo,nGlobalElem,nLocalNodes,nBCs)
 
     ! Copy data from local arrays into myMesh
     myMesh % hopr_elemInfo = hopr_elemInfo
@@ -482,8 +482,9 @@ CONTAINS
     CALL ReadArray_HDF5(fileId, 'BCType', bcType, offset)
 
     ! Read local subarray of ElemInfo
-    firstElem = decomp % offsetElem % hostData(myRank)+1
-    nLocalElems = decomp % offsetElem % hostData(myRank+1)-decomp % offsetElem % hostData(myRank)
+    firstElem = decomp % offsetElem % hostData(decomp % myRank)+1
+    nLocalElems = decomp % offsetElem % hostData(decomp % myRank+1)-&
+            decomp % offsetElem % hostData(decomp % myRank)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1207,8 +1208,9 @@ CONTAINS
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
-    firstElem = decomp % offsetElem % hostData(myRank)+1
-    nLocalElems = decomp % offsetElem % hostData(myRank+1)-decomp % offsetElem % hostData(myRank)
+    firstElem = decomp % offsetElem % hostData(decomp % myRank)+1
+    nLocalElems = decomp % offsetElem % hostData(decomp % myRank+1)-&
+            decomp % offsetElem % hostData(decomp % myRank)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1699,8 +1701,9 @@ CONTAINS
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
-    firstElem = decomp % offsetElem % hostData(myRank)+1
-    nLocalElems = decomp % offsetElem % hostData(myRank+1)-decomp % offsetElem % hostData(myRank)
+    firstElem = decomp % offsetElem % hostData(decomp % myRank)+1
+    nLocalElems = decomp % offsetElem % hostData(decomp % myRank+1)-&
+            decomp % offsetElem % hostData(decomp % myRank)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -1771,11 +1774,11 @@ CONTAINS
     CALL WriteAttribute_HDF5(fileId, 'Ngeo', myMesh % nGeo)
     CALL WriteAttribute_HDF5(fileId, 'nBCs', myMesh % nBCs)
 
-    CALL WriteArray_HDF5(fileId, 'BCType', myMesh % bcType, offset)
+    CALL WriteArray_HDF5(fileId, 'BCType', myMesh % bcType)
     CALL WriteArray_HDF5(fileId, 'ElemInfo', myMesh % hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId, 'NodeCoords', myMesh % hopr_nodeCoords, offset)
+    CALL WriteArray_HDF5(fileId, 'NodeCoords', myMesh % hopr_nodeCoords)
     CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', myMesh % hopr_globalNodeIDs)
 
     ! Read local subarray of SideInfo
