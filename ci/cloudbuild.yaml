@@ -24,6 +24,22 @@ steps:
   args: ['ci/test/ciGenerator.py']
   waitFor: ["-"]
 
+- id: CI/CB
+  name: 'gcr.io/research-computing-cloud/fluid-run'
+  args: 
+  - '--build-id=${BUILD_ID}'
+  - '--git-sha=${COMMIT_SHA}'
+  - '--project=${PROJECT_ID}'
+  - '--zone=${_ZONE}'
+  - '--artifact-type=singularity'
+  - '--compiler="gcc@9.3.0"'
+  - '--target-arch=""'
+  - '--singularity-image=self_${_GPU_TARGET}.sif'
+  - '--ci-file=fluid-run.json'
+  - '--rcc-tfvars=ci/fluid.auto.tfvars'
+  - '--save-results'
+  - '--ignore-job-dependencies'
+
 
 images: ['gcr.io/self-fluids/self_${_GPU_TARGET}:${SHORT_SHA}']
 
@@ -41,6 +57,7 @@ timeout: 9600s
 
 substitutions:
   _GPU_TARGET: 'sm_72'
+  _ZONE: 'us-west1-b'
   _PARTITIONS: 'c2-standard-8'
 
 
