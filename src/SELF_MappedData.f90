@@ -34,8 +34,8 @@ MODULE SELF_MappedData
 
   CONTAINS
 
-    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar2D 
-    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar2D 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar2D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar2D
 
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
@@ -85,7 +85,6 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedVector2D
 
-
   END TYPE MappedVector2D
 
   TYPE,EXTENDS(Vector3D),PUBLIC :: MappedVector3D
@@ -93,7 +92,7 @@ MODULE SELF_MappedData
   CONTAINS
 
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedVector3D
-    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedVector3D 
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedVector3D
 
     GENERIC,PUBLIC :: Divergence => Divergence_MappedVector3D
 !    GENERIC,PUBLIC :: Curl => Curl_MappedVector3D
@@ -129,7 +128,7 @@ MODULE SELF_MappedData
 
   CONTAINS
 
-    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor3D 
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor3D
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedTensor3D
 
     PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor3D
@@ -138,7 +137,6 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedTensor3D
 
   END TYPE MappedTensor3D
-
 
   INTERFACE
     SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
@@ -371,8 +369,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
-                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -382,8 +380,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
-                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -393,8 +391,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
-                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -404,8 +402,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
-                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -415,8 +413,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
-                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -426,8 +424,8 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo,&
-                    self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+    SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
@@ -556,7 +554,6 @@ MODULE SELF_MappedData
     END SUBROUTINE ApplyFlip_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
-
 CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
@@ -607,7 +604,7 @@ CONTAINS
                                              scalar % nElem)
       END IF
 
-    ENDIF
+    END IF
 
     CALL df % JacobianWeight(geometry,gpuAccel)
 
@@ -616,14 +613,13 @@ CONTAINS
   SUBROUTINE JacobianWeight_MappedScalar1D(scalar,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedScalar1D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedScalar1D),INTENT(inout) :: scalar
     TYPE(Geometry1D),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: iEl, iVar, i
-    
+    INTEGER :: iEl,iVar,i
 
     IF (gpuAccel) THEN
 
@@ -637,13 +633,13 @@ CONTAINS
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
           DO i = 0,scalar % N
-            scalar % interior % hostData(i,iVar,iEl) = scalar % interior % hostData(i,iVar,iEl)/&
+            scalar % interior % hostData(i,iVar,iEl) = scalar % interior % hostData(i,iVar,iEl)/ &
                                                        geometry % dxds % interior % hostData(i,1,iEl)
-          ENDDO
-        ENDDO
-      ENDDO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedScalar1D
 
@@ -652,75 +648,78 @@ CONTAINS
     CLASS(MappedScalar2D),INTENT(inout) :: scalar
     TYPE(Mesh2D),INTENT(in) :: mesh
     TYPE(MPILayer),INTENT(inout) :: decomp
-    LOGICAL, INTENT(in) :: gpuAccel
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2
-    INTEGER :: flip, bcid, globalSideId
-    INTEGER :: i1, i2, ivar
+    INTEGER :: e1,e2,s1,s2
+    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: i1,i2,ivar
     INTEGER :: neighborRank
-    
-    IF(gpuAccel)THEN
 
+    IF (gpuAccel) THEN
+
+      CALL scalar % boundary % UpdateHost()
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL scalar % extBoundary % UpdateDevice()
       CALL SideExchange_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
-                                                    scalar % boundary % deviceData, &
-                                                    mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % self_sideInfo % deviceData, &
-                                                    decomp % elemToRank % deviceData, &
-                                                    decomp % rankId, &
-                                                    scalar % N, &
-                                                    scalar % nvar, &
-                                                    scalar % nElem)
+                                                   scalar % boundary % deviceData, &
+                                                   mesh % hopr_elemInfo % deviceData, &
+                                                   mesh % self_sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   scalar % N, &
+                                                   scalar % nvar, &
+                                                   scalar % nElem)
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      DO e1 = 1, mesh % nElem
-        DO s1 = 1,4 
+      DO e1 = 1,mesh % nElem
+        DO s1 = 1,4
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF(bcid == 0)THEN 
+          IF (bcid == 0) THEN
 
             neighborRank = decomp % elemToRank % hostData(e2)
 
-            IF(neighborRank == decomp % rankId)THEN
+            IF (neighborRank == decomp % rankId) THEN
 
-              IF(flip == 0)THEN 
-          
-                DO ivar = 1, scalar % nvar
-                  DO i1 = 0, scalar % N
+              IF (flip == 0) THEN
+
+                DO ivar = 1,scalar % nvar
+                  DO i1 = 0,scalar % N
                     scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
-                        scalar % boundary % hostData(i1,ivar,s2,e2)
-                  ENDDO
-                ENDDO
+                      scalar % boundary % hostData(i1,ivar,s2,e2)
+                  END DO
+                END DO
 
-              ELSEIF(flip == 1)THEN
+              ELSEIF (flip == 1) THEN
 
-                DO ivar = 1, scalar % nvar
-                  DO i1 = 0, scalar % N
+                DO ivar = 1,scalar % nvar
+                  DO i1 = 0,scalar % N
                     i2 = scalar % N - i1
                     scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
-                       scalar % boundary % hostData(i2,ivar,s2,e2)
-                  ENDDO
-                ENDDO
+                      scalar % boundary % hostData(i2,ivar,s2,e2)
+                  END DO
+                END DO
 
-              ENDIF
+              END IF
 
-            ENDIF
+            END IF
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     END IF
-    
-    CALL decomp % FinalizeMPIExchangeAsync()
+
     CALL scalar % ApplyFlip(decomp,mesh,gpuAccel)
-    
+
   END SUBROUTINE SideExchange_MappedScalar2D
 
   SUBROUTINE BassiRebaySides_MappedScalar2D(scalar,gpuAccel)
@@ -732,31 +731,29 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
-    
 
-    IF(gpuAccel)THEN
-
+    IF (gpuAccel) THEN
 
       CALL BassiRebaySides_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
-                                                  scalar % boundary % deviceData, &
-                                                  scalar % N, &
-                                                  scalar % nvar, &
-                                                  scalar % nElem)
+                                                      scalar % boundary % deviceData, &
+                                                      scalar % N, &
+                                                      scalar % nvar, &
+                                                      scalar % nElem)
 
     ELSE
 
-      DO iel = 1, scalar % nElem
-        DO iside = 1, 4
-          DO ivar = 1, scalar % nVar
-            DO i = 0, scalar % N
-              scalar % boundary % hostData(i,ivar,iside,iel) = 0.5_prec*(&
-                scalar % boundary % hostData(i,ivar,iside,iel) +&
-                scalar % extBoundary % hostData(i,ivar,iside,iel))
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDIF
+      DO iel = 1,scalar % nElem
+        DO iside = 1,4
+          DO ivar = 1,scalar % nVar
+            DO i = 0,scalar % N
+              scalar % boundary % hostData(i,ivar,iside,iel) = 0.5_prec*( &
+                                                               scalar % boundary % hostData(i,ivar,iside,iel) + &
+                                                               scalar % extBoundary % hostData(i,ivar,iside,iel))
+            END DO
+          END DO
+        END DO
+      END DO
+    END IF
 
   END SUBROUTINE BassiRebaySides_MappedScalar2D
 
@@ -809,7 +806,7 @@ CONTAINS
                                                        workTensor % nElem)
       END IF
 
-    ENDIF
+    END IF
 
     CALL gradF % JacobianWeight(geometry,gpuAccel)
 
@@ -825,7 +822,6 @@ CONTAINS
     TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i,j,iVar,iEl,iside
-    
 
     IF (gpuAccel) THEN
 
@@ -837,11 +833,11 @@ CONTAINS
                                                           scalar % nElem)
 
       CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % boundary % deviceData, &
-                                                          workTensor % boundary % deviceData, &
-                                                          geometry % dsdx % boundary % deviceData, &
-                                                          scalar % N, &
-                                                          scalar % nVar, &
-                                                          scalar % nElem)
+                                                                  workTensor % boundary % deviceData, &
+                                                                  geometry % dsdx % boundary % deviceData, &
+                                                                  scalar % N, &
+                                                                  scalar % nVar, &
+                                                                  scalar % nElem)
     ELSE
 
       DO iEl = 1,scalar % nElem
@@ -876,25 +872,25 @@ CONTAINS
           DO iVar = 1,scalar % nVar
             DO j = 0,scalar % N
               workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                   hostData(1,1,j,1,iside,iEl)* &
-                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                       hostData(1,1,j,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
 
               workTensor % boundary % hostData(2,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                   hostData(1,2,j,1,iside,iEl)* &
-                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                       hostData(1,2,j,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
 
               workTensor % boundary % hostData(1,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                   hostData(2,1,j,1,iside,iEl)* &
-                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                       hostData(2,1,j,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
 
               workTensor % boundary % hostData(2,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                   hostData(2,2,j,1,iside,iEl)* &
-                                                                   scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                       hostData(2,2,j,1,iside,iEl)* &
+                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
 
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+            END DO
+          END DO
+        END DO
+      END DO
 
     END IF
 
@@ -903,14 +899,13 @@ CONTAINS
   SUBROUTINE JacobianWeight_MappedScalar2D(scalar,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedScalar2D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedScalar2D),INTENT(inout) :: scalar
     TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    
 
     IF (gpuAccel) THEN
 
@@ -925,14 +920,14 @@ CONTAINS
         DO iVar = 1,scalar % nVar
           DO j = 0,scalar % N
             DO i = 0,scalar % N
-              scalar % interior % hostData(i,j,iVar,iEl) = scalar % interior % hostData(i,j,iVar,iEl)/&
+              scalar % interior % hostData(i,j,iVar,iEl) = scalar % interior % hostData(i,j,iVar,iEl)/ &
                                                            geometry % J % interior % hostData(i,j,1,iEl)
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedScalar2D
 
@@ -945,112 +940,113 @@ CONTAINS
     CLASS(MappedScalar3D),INTENT(inout) :: scalar
     TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(MPILayer),INTENT(inout) :: decomp
-    LOGICAL, INTENT(in) :: gpuAccel
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2
-    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: e1,e2,s1,s2
+    INTEGER :: flip,bcid,globalSideId
     INTEGER :: neighborRank
-    INTEGER :: i1, i2, j1, j2, ivar
-    
+    INTEGER :: i1,i2,j1,j2,ivar
 
-    IF(gpuAccel)THEN
+    IF (gpuAccel) THEN
 
-
+      CALL scalar % boundary % UpdateHost()
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL scalar % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
-                                                    scalar % boundary % deviceData, &
-                                                    mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % self_sideInfo % deviceData, &
-                                                    decomp % elemToRank % deviceData, &
-                                                    decomp % rankId, &
-                                                    scalar % N, &
-                                                    scalar % nvar, &
-                                                    scalar % nElem)
-
+                                                   scalar % boundary % deviceData, &
+                                                   mesh % hopr_elemInfo % deviceData, &
+                                                   mesh % self_sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   scalar % N, &
+                                                   scalar % nvar, &
+                                                   scalar % nElem)
 
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
-      DO e1 = 1, mesh % nElem
+      DO e1 = 1,mesh % nElem
         DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF(bcid == 0)THEN 
+          IF (bcid == 0) THEN
 
             neighborRank = decomp % elemToRank % hostData(e2)
 
-            IF(neighborRank == decomp % rankId)THEN
+            IF (neighborRank == decomp % rankId) THEN
 
-              IF(flip == 1)THEN 
-          
-                DO ivar = 1, scalar % nvar
-                  DO j1 = 0, scalar % N
-                    DO i1 = 0, scalar % N
+              IF (flip == 1) THEN
+
+                DO ivar = 1,scalar % nvar
+                  DO j1 = 0,scalar % N
+                    DO i1 = 0,scalar % N
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i1,j1,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 2)THEN
+              ELSEIF (flip == 2) THEN
 
-                DO ivar = 1, scalar % nvar
-                  DO j1 = 0, scalar % N
-                    DO i1 = 0, scalar % N
+                DO ivar = 1,scalar % nvar
+                  DO j1 = 0,scalar % N
+                    DO i1 = 0,scalar % N
                       i2 = scalar % N - j1
                       j2 = i1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 3)THEN
-                      
-                DO ivar = 1, scalar % nvar
-                  DO j1 = 0, scalar % N
-                    DO i1 = 0, scalar % N
+              ELSEIF (flip == 3) THEN
+
+                DO ivar = 1,scalar % nvar
+                  DO j1 = 0,scalar % N
+                    DO i1 = 0,scalar % N
                       i2 = scalar % N - i1
-                      j2 = scalar % N - j1 
+                      j2 = scalar % N - j1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
-          
-              ELSEIF(flip == 4)THEN
-                      
-                DO ivar = 1, scalar % nvar
-                  DO j1 = 0, scalar % N
-                    DO i1 = 0, scalar % N
+                    END DO
+                  END DO
+                END DO
+
+              ELSEIF (flip == 4) THEN
+
+                DO ivar = 1,scalar % nvar
+                  DO j1 = 0,scalar % N
+                    DO i1 = 0,scalar % N
                       i2 = j1
                       j2 = scalar % N - i1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
-          
-              ENDIF
+                    END DO
+                  END DO
+                END DO
 
-            ENDIF
+              END IF
 
-          ENDIF
+            END IF
 
-        ENDDO
-      ENDDO
+          END IF
+
+        END DO
+      END DO
+
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     END IF
 
-    CALL decomp % FinalizeMPIExchangeAsync()
     CALL scalar % ApplyFlip(decomp,mesh,gpuAccel)
-    
+
   END SUBROUTINE SideExchange_MappedScalar3D
 
   SUBROUTINE BassiRebaySides_MappedScalar3D(scalar,gpuAccel)
@@ -1061,35 +1057,33 @@ CONTAINS
     INTEGER :: iel
     INTEGER :: iside
     INTEGER :: ivar
-    INTEGER :: i, j
-    
+    INTEGER :: i,j
 
-    IF(gpuAccel)THEN
-
+    IF (gpuAccel) THEN
 
       CALL BassiRebaySides_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
-                                                  scalar % boundary % deviceData, &
-                                                  scalar % N, &
-                                                  scalar % nvar, &
-                                                  scalar % nElem)
+                                                      scalar % boundary % deviceData, &
+                                                      scalar % N, &
+                                                      scalar % nvar, &
+                                                      scalar % nElem)
 
     ELSE
 
-      DO iel = 1, scalar % nElem
-        DO iside = 1, 6
-          DO ivar = 1, scalar % nVar
-            DO j = 0, scalar % N
-              DO i = 0, scalar % N
-                scalar % boundary % hostData(i,j,ivar,iside,iel) = 0.5_prec*(&
-                  scalar % boundary % hostData(i,j,ivar,iside,iel) +&
-                  scalar % extBoundary % hostData(i,j,ivar,iside,iel))
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+      DO iel = 1,scalar % nElem
+        DO iside = 1,6
+          DO ivar = 1,scalar % nVar
+            DO j = 0,scalar % N
+              DO i = 0,scalar % N
+                scalar % boundary % hostData(i,j,ivar,iside,iel) = 0.5_prec*( &
+                                                                   scalar % boundary % hostData(i,j,ivar,iside,iel) + &
+                                                                   scalar % extBoundary % hostData(i,j,ivar,iside,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE BassiRebaySides_MappedScalar3D
 
@@ -1156,7 +1150,6 @@ CONTAINS
     TYPE(MappedTensor3D),INTENT(inout) :: workTensor
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iside
-    
 
     IF (gpuAccel) THEN
 
@@ -1168,11 +1161,11 @@ CONTAINS
                                                           scalar % nElem)
 
       CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % boundary % deviceData, &
-                                                          workTensor % boundary % deviceData, &
-                                                          geometry % dsdx % boundary % deviceData, &
-                                                          scalar % N, &
-                                                          scalar % nVar, &
-                                                          scalar % nElem)
+                                                                  workTensor % boundary % deviceData, &
+                                                                  geometry % dsdx % boundary % deviceData, &
+                                                                  scalar % N, &
+                                                                  scalar % nVar, &
+                                                                  scalar % nElem)
 
     ELSE
 
@@ -1239,51 +1232,50 @@ CONTAINS
                 ! Get the x-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(1,1,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(1,1,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(2,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(1,2,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(1,2,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(3,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(1,3,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(1,3,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 ! Get the y-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(2,1,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(2,1,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(2,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(2,2,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(2,2,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(3,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(2,3,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(2,3,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 ! Get the z-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(3,1,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(3,1,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(2,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(3,2,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(3,2,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(3,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
-                                                                       hostData(3,3,j,k,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                           hostData(3,3,j,k,1,iside,iEl)* &
+                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
 
-
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
     END IF
 
@@ -1292,14 +1284,13 @@ CONTAINS
   SUBROUTINE JacobianWeight_MappedScalar3D(scalar,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedScalar3D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedScalar3D),INTENT(inout) :: scalar
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    
 
     IF (gpuAccel) THEN
 
@@ -1316,15 +1307,15 @@ CONTAINS
           DO k = 0,scalar % N
             DO j = 0,scalar % N
               DO i = 0,scalar % N
-                scalar % interior % hostData(i,j,k,iVar,iEl) = scalar % interior % hostData(i,j,k,iVar,iEl)/&
+                scalar % interior % hostData(i,j,k,iVar,iEl) = scalar % interior % hostData(i,j,k,iVar,iEl)/ &
                                                                geometry % J % interior % hostData(i,j,k,1,iEl)
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedScalar3D
 
@@ -1338,81 +1329,82 @@ CONTAINS
     CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(Mesh2D),INTENT(in) :: mesh
     TYPE(MPILayer),INTENT(inout) :: decomp
-    LOGICAL, INTENT(in) :: gpuAccel
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2
-    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: e1,e2,s1,s2
+    INTEGER :: flip,bcid,globalSideId
     INTEGER :: neighborRank
-    INTEGER :: i1, i2, ivar
-    
+    INTEGER :: i1,i2,ivar
 
+    IF (gpuAccel) THEN
 
-    IF(gpuAccel)THEN
-
-
+      CALL vector % boundary % UpdateHost()
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL vector % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
-                                                    vector % boundary % deviceData, &
-                                                    mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % self_sideInfo % deviceData, &
-                                                    decomp % elemToRank % deviceData, &
-                                                    decomp % rankId, &
-                                                    vector % N, &
-                                                    vector % nvar, &
-                                                    vector % nElem)
+                                                   vector % boundary % deviceData, &
+                                                   mesh % hopr_elemInfo % deviceData, &
+                                                   mesh % self_sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   vector % N, &
+                                                   vector % nvar, &
+                                                   vector % nElem)
 
     ELSE
 
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
-      DO e1 = 1, mesh % nElem
+      DO e1 = 1,mesh % nElem
         DO s1 = 1,4
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF(bcid == 0)THEN 
+          IF (bcid == 0) THEN
 
             neighborRank = decomp % elemToRank % hostData(e2)
 
-            IF(neighborRank == decomp % rankId)THEN
+            IF (neighborRank == decomp % rankId) THEN
 
-              IF(flip == 1)THEN 
-          
-                DO ivar = 1, vector % nvar
-                  DO i1 = 0, vector % N
+              IF (flip == 1) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO i1 = 0,vector % N
                     vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
-                        vector % boundary % hostData(1:2,i1,ivar,s2,e2)
-                  ENDDO
-                ENDDO
+                      vector % boundary % hostData(1:2,i1,ivar,s2,e2)
+                  END DO
+                END DO
 
-              ELSEIF(flip == 2)THEN
+              ELSEIF (flip == 2) THEN
 
-                DO ivar = 1, vector % nvar
-                  DO i1 = 0, vector % N
+                DO ivar = 1,vector % nvar
+                  DO i1 = 0,vector % N
                     i2 = vector % N - i1
                     vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
-                        vector % boundary % hostData(1:2,i2,ivar,s2,e2)
-                  ENDDO
-                ENDDO
+                      vector % boundary % hostData(1:2,i2,ivar,s2,e2)
+                  END DO
+                END DO
 
-              ENDIF
+              END IF
 
-            ENDIF
+            END IF
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
+
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     END IF
 
-    CALL decomp % FinalizeMPIExchangeAsync()
     CALL vector % ApplyFlip(decomp,mesh,gpuAccel)
-    
+
   END SUBROUTINE SideExchange_MappedVector2D
 
   SUBROUTINE BassiRebaySides_MappedVector2D(vector,gpuAccel)
@@ -1424,33 +1416,31 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
-    
 
-    IF(gpuAccel)THEN
-
+    IF (gpuAccel) THEN
 
       CALL BassiRebaySides_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
-                                                 vector % boundary % deviceData, &
-                                                 vector % N, &
-                                                 vector % nvar, &
-                                                 vector % nElem)
+                                                      vector % boundary % deviceData, &
+                                                      vector % N, &
+                                                      vector % nvar, &
+                                                      vector % nElem)
 
     ELSE
 
-      DO iel = 1, vector % nElem
-        DO iside = 1, 4
-          DO ivar = 1, vector % nVar
-            DO i = 0, vector % N
-              vector % boundary % hostData(1:2,i,ivar,iside,iel) = 0.5_prec*(&
-                vector % boundary % hostData(1:2,i,ivar,iside,iel) +&
-                vector % extBoundary % hostData(1:2,i,ivar,iside,iel))
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+      DO iel = 1,vector % nElem
+        DO iside = 1,4
+          DO ivar = 1,vector % nVar
+            DO i = 0,vector % N
+              vector % boundary % hostData(1:2,i,ivar,iside,iel) = 0.5_prec*( &
+                                                                  vector % boundary % hostData(1:2,i,ivar,iside,iel) + &
+                                                                  vector % extBoundary % hostData(1:2,i,ivar,iside,iel))
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
-           
+    END IF
+
   END SUBROUTINE BassiRebaySides_MappedVector2D
 
   SUBROUTINE Divergence_MappedVector2D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
@@ -1481,7 +1471,7 @@ CONTAINS
                                                          divVector % interior % hostData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
-      ENDIF
+      END IF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
@@ -1495,7 +1485,7 @@ CONTAINS
                                                        divVector % interior % hostData, &
                                                        compVector % nvar, &
                                                        compVector % nelem)
-      ENDIF
+      END IF
 
     END IF
 
@@ -1573,34 +1563,33 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,i,j,ivar,jvar,iel,iside
-    
 
     IF (gpuAccel) THEN
 
-      CALL MapToScalar_MappedVector2D_gpu_wrapper( scalar % interior % deviceData,&
-                                                   vector % interior % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nelem )
+      CALL MapToScalar_MappedVector2D_gpu_wrapper(scalar % interior % deviceData, &
+                                                  vector % interior % deviceData, &
+                                                  vector % N, &
+                                                  vector % nVar, &
+                                                  vector % nelem)
 
-      CALL MapToScalarBoundary_MappedVector2D_gpu_wrapper( scalar % boundary % deviceData,&
-                                                   vector % boundary % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nelem )
+      CALL MapToScalarBoundary_MappedVector2D_gpu_wrapper(scalar % boundary % deviceData, &
+                                                          vector % boundary % deviceData, &
+                                                          vector % N, &
+                                                          vector % nVar, &
+                                                          vector % nelem)
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
           DO j = 0,vector % N
             DO i = 0,vector % N
               DO row = 1,2
-                jvar = row + 2*(ivar-1)
+                jvar = row + 2*(ivar - 1)
                 scalar % interior % hostData(i,j,jvar,iel) = vector % interior % hostData(row,i,j,ivar,iel)
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
       ! Boundary Terms
       DO iel = 1,vector % nelem
@@ -1608,15 +1597,15 @@ CONTAINS
           DO ivar = 1,vector % nvar
             DO j = 0,vector % N
               DO row = 1,2
-                jvar = row + 2*(ivar-1)
+                jvar = row + 2*(ivar - 1)
                 scalar % boundary % hostData(j,jvar,iside,iel) = vector % boundary % hostData(row,j,ivar,iside,iel)
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE MapToScalar_MappedVector2D
 
@@ -1629,21 +1618,20 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,col,i,j,ivar,jvar,iel,iside
-    
 
     IF (gpuAccel) THEN
 
-      CALL MapToTensor_MappedVector2D_gpu_wrapper( tensor % interior % deviceData,&
-                                                   vector % interior % deviceData,&
-                                                   tensor % N, &
-                                                   tensor % nVar, &
-                                                   tensor % nelem )
+      CALL MapToTensor_MappedVector2D_gpu_wrapper(tensor % interior % deviceData, &
+                                                  vector % interior % deviceData, &
+                                                  tensor % N, &
+                                                  tensor % nVar, &
+                                                  tensor % nelem)
 
-      CALL MapToTensorBoundary_MappedVector2D_gpu_wrapper( tensor % boundary % deviceData,&
-                                                   vector % boundary % deviceData,&
-                                                   tensor % N, &
-                                                   tensor % nVar, &
-                                                   tensor % nelem )
+      CALL MapToTensorBoundary_MappedVector2D_gpu_wrapper(tensor % boundary % deviceData, &
+                                                          vector % boundary % deviceData, &
+                                                          tensor % N, &
+                                                          tensor % nVar, &
+                                                          tensor % nelem)
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
@@ -1651,14 +1639,14 @@ CONTAINS
             DO i = 0,tensor % N
               DO col = 1,2
                 DO row = 1,2
-                  jvar = row + 2*(ivar-1)
+                  jvar = row + 2*(ivar - 1)
                   tensor % interior % hostData(row,col,i,j,ivar,iel) = vector % interior % hostData(col,i,j,jvar,iel)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
       ! Boundary Terms
       DO iel = 1,tensor % nelem
@@ -1667,16 +1655,16 @@ CONTAINS
             DO j = 0,tensor % N
               DO col = 1,2
                 DO row = 1,2
-                  jvar = row + 2*(ivar-1)
-                  tensor % boundary % hostData(row,col,j,ivar,iside,iel) = vector % boundary % hostData(col,j,jvar,iside,iel)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                  jvar = row + 2*(ivar - 1)
+             tensor % boundary % hostData(row,col,j,ivar,iside,iel) = vector % boundary % hostData(col,j,jvar,iside,iel)
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
   END SUBROUTINE MapToTensor_MappedVector2D
 
   SUBROUTINE ContravariantProjection_MappedVector2D(physVector,geometry,compVector,gpuAccel)
@@ -1692,7 +1680,6 @@ CONTAINS
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
     INTEGER :: i,j,ivar,iel,iside
-    
 
     IF (gpuAccel) THEN
 
@@ -1704,11 +1691,11 @@ CONTAINS
                                                               physVector % nElem)
 
       CALL ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector % boundary % deviceData, &
-                                                              compVector % boundary % deviceData, &
-                                                              geometry % dsdx % boundary % deviceData, &
-                                                              physVector % N, &
-                                                              physVector % nVar, &
-                                                              physVector % nElem)
+                                                                      compVector % boundary % deviceData, &
+                                                                      geometry % dsdx % boundary % deviceData, &
+                                                                      physVector % N, &
+                                                                      physVector % nVar, &
+                                                                      physVector % nElem)
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
@@ -1751,10 +1738,10 @@ CONTAINS
                 physVector % boundary % hostData(1,j,ivar,iside,iel) + &
                 geometry % dsdx % boundary % hostData(2,2,j,1,iside,iel)* &
                 physVector % boundary % hostData(2,j,ivar,iside,iel)
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+            END DO
+          END DO
+        END DO
+      END DO
 
     END IF
 
@@ -1763,17 +1750,15 @@ CONTAINS
   SUBROUTINE JacobianWeight_MappedVector2D(vector,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedVector2D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    
 
     IF (gpuAccel) THEN
-
 
       CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
@@ -1786,16 +1771,16 @@ CONTAINS
         DO iVar = 1,vector % nVar
           DO j = 0,vector % N
             DO i = 0,vector % N
-              vector % interior % hostData(1,i,j,iVar,iEl) = vector % interior % hostData(1,i,j,iVar,iEl)/&
+              vector % interior % hostData(1,i,j,iVar,iEl) = vector % interior % hostData(1,i,j,iVar,iEl)/ &
                                                              geometry % J % interior % hostData(i,j,1,iEl)
-              vector % interior % hostData(2,i,j,iVar,iEl) = vector % interior % hostData(2,i,j,iVar,iEl)/&
+              vector % interior % hostData(2,i,j,iVar,iEl) = vector % interior % hostData(2,i,j,iVar,iEl)/ &
                                                              geometry % J % interior % hostData(i,j,1,iEl)
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedVector2D
 
@@ -1808,111 +1793,112 @@ CONTAINS
     CLASS(MappedVector3D),INTENT(inout) :: vector
     TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(MPILayer),INTENT(inout) :: decomp
-    LOGICAL, INTENT(in) :: gpuAccel
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2
-    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: e1,e2,s1,s2
+    INTEGER :: flip,bcid,globalSideId
     INTEGER :: neighborRank
-    INTEGER :: i1, i2, j1, j2, ivar
-    
+    INTEGER :: i1,i2,j1,j2,ivar
 
+    IF (gpuAccel) THEN
 
-    IF(gpuAccel)THEN
-
-
+      CALL vector % boundary % UpdateHost()
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL vector % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
-                                                    vector % boundary % deviceData, &
-                                                    mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % self_sideInfo % deviceData, &
-                                                    decomp % elemToRank % deviceData, &
-                                                    decomp % rankId, &
-                                                    vector % N, &
-                                                    vector % nvar, &
-                                                    vector % nElem)
+                                                   vector % boundary % deviceData, &
+                                                   mesh % hopr_elemInfo % deviceData, &
+                                                   mesh % self_sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   vector % N, &
+                                                   vector % nvar, &
+                                                   vector % nElem)
     ELSE
 
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
-      DO e1 = 1, mesh % nElem
-        DO s1 = 1, 6
+      DO e1 = 1,mesh % nElem
+        DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF(bcid == 0)THEN 
+          IF (bcid == 0) THEN
 
             neighborRank = decomp % elemToRank % hostData(e2)
 
-            IF(neighborRank == decomp % rankId)THEN
+            IF (neighborRank == decomp % rankId) THEN
 
-              IF(flip == 1)THEN 
-          
-                DO ivar = 1, vector % nvar
-                  DO j1 = 0, vector % N
-                    DO i1 = 0, vector % N
+              IF (flip == 1) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO j1 = 0,vector % N
+                    DO i1 = 0,vector % N
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i1,j1,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 2)THEN
+              ELSEIF (flip == 2) THEN
 
-                DO ivar = 1, vector % nvar
-                  DO j1 = 0, vector % N
-                    DO i1 = 0, vector % N
+                DO ivar = 1,vector % nvar
+                  DO j1 = 0,vector % N
+                    DO i1 = 0,vector % N
                       i2 = vector % N - j1
                       j2 = i1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 3)THEN
-                      
-                DO ivar = 1, vector % nvar
-                  DO j1 = 0, vector % N
-                    DO i1 = 0, vector % N
+              ELSEIF (flip == 3) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO j1 = 0,vector % N
+                    DO i1 = 0,vector % N
                       i2 = vector % N - i1
-                      j2 = vector % N - j1 
+                      j2 = vector % N - j1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
-          
-              ELSEIF(flip == 4)THEN
-                      
-                DO ivar = 1, vector % nvar
-                  DO j1 = 0, vector % N
-                    DO i1 = 0, vector % N
+                    END DO
+                  END DO
+                END DO
+
+              ELSEIF (flip == 4) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO j1 = 0,vector % N
+                    DO i1 = 0,vector % N
                       i2 = j1
                       j2 = vector % N - i1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
-          
-              ENDIF
+                    END DO
+                  END DO
+                END DO
 
-            ENDIF
+              END IF
 
-          ENDIF
+            END IF
 
-        ENDDO
-      ENDDO
+          END IF
+
+        END DO
+      END DO
+
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     END IF
 
-    CALL decomp % FinalizeMPIExchangeAsync()
     CALL vector % ApplyFlip(decomp,mesh,gpuAccel)
-    
+
   END SUBROUTINE SideExchange_MappedVector3D
 
   SUBROUTINE BassiRebaySides_MappedVector3D(vector,gpuAccel)
@@ -1923,35 +1909,33 @@ CONTAINS
     INTEGER :: iel
     INTEGER :: iside
     INTEGER :: ivar
-    INTEGER :: i, j
-    
+    INTEGER :: i,j
 
-    IF(gpuAccel)THEN
-
+    IF (gpuAccel) THEN
 
       CALL BassiRebaySides_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
-                                                 vector % boundary % deviceData, &
-                                                 vector % N, &
-                                                 vector % nvar, &
-                                                 vector % nElem)
+                                                      vector % boundary % deviceData, &
+                                                      vector % N, &
+                                                      vector % nvar, &
+                                                      vector % nElem)
     ELSE
 
-      DO iel = 1, vector % nElem
-        DO iside = 1, 6
-          DO ivar = 1, vector % nVar
-            DO j = 0, vector % N
-              DO i = 0, vector % N
-                vector % boundary % hostData(1:3,i,j,ivar,iside,iel) = 0.5_prec*(&
-                  vector % boundary % hostData(1:3,i,j,ivar,iside,iel) +&
-                  vector % extBoundary % hostData(1:3,i,j,ivar,iside,iel))
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+      DO iel = 1,vector % nElem
+        DO iside = 1,6
+          DO ivar = 1,vector % nVar
+            DO j = 0,vector % N
+              DO i = 0,vector % N
+                vector % boundary % hostData(1:3,i,j,ivar,iside,iel) = 0.5_prec*( &
+                                                                vector % boundary % hostData(1:3,i,j,ivar,iside,iel) + &
+                                                                vector % extBoundary % hostData(1:3,i,j,ivar,iside,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
-           
+    END IF
+
   END SUBROUTINE BassiRebaySides_MappedVector3D
 
   SUBROUTINE Divergence_MappedVector3D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
@@ -1980,7 +1964,7 @@ CONTAINS
                                                          divVector % interior % hostData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
-      ENDIF
+      END IF
 
     ELSE IF (dForm == selfStrongForm) THEN
 
@@ -1994,7 +1978,7 @@ CONTAINS
                                                        divVector % interior % hostData, &
                                                        compVector % nvar, &
                                                        compVector % nelem)
-      ENDIF
+      END IF
 
     END IF
 
@@ -2072,21 +2056,20 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,i,j,k,ivar,jvar,iel,iside
-    
 
     IF (gpuAccel) THEN
 
-      CALL MapToScalar_MappedVector3D_gpu_wrapper( scalar % interior % deviceData,&
-                                                   vector % interior % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nelem )
+      CALL MapToScalar_MappedVector3D_gpu_wrapper(scalar % interior % deviceData, &
+                                                  vector % interior % deviceData, &
+                                                  vector % N, &
+                                                  vector % nVar, &
+                                                  vector % nelem)
 
-      CALL MapToScalarBoundary_MappedVector3D_gpu_wrapper( scalar % boundary % deviceData,&
-                                                   vector % boundary % deviceData,&
-                                                   vector % N, &
-                                                   vector % nVar, &
-                                                   vector % nelem )
+      CALL MapToScalarBoundary_MappedVector3D_gpu_wrapper(scalar % boundary % deviceData, &
+                                                          vector % boundary % deviceData, &
+                                                          vector % N, &
+                                                          vector % nVar, &
+                                                          vector % nelem)
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
@@ -2094,14 +2077,14 @@ CONTAINS
             DO j = 0,vector % N
               DO i = 0,vector % N
                 DO row = 1,3
-                  jvar = row + 3*(ivar-1)
+                  jvar = row + 3*(ivar - 1)
                   scalar % interior % hostData(i,j,k,jvar,iel) = vector % interior % hostData(row,i,j,k,ivar,iel)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
       ! Boundary Terms
       DO iel = 1,vector % nelem
@@ -2110,16 +2093,16 @@ CONTAINS
             DO k = 0,vector % N
               DO j = 0,vector % N
                 DO row = 1,3
-                  jvar = row + 3*(ivar-1)
-                  scalar % boundary % hostData(j,k,jvar,iside,iel) = vector % boundary % hostData(row,j,k,ivar,iside,iel)
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                  jvar = row + 3*(ivar - 1)
+                 scalar % boundary % hostData(j,k,jvar,iside,iel) = vector % boundary % hostData(row,j,k,ivar,iside,iel)
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
   END SUBROUTINE MapToScalar_MappedVector3D
 
   SUBROUTINE MapToTensor_MappedVector3D(vector,tensor,gpuAccel)
@@ -2131,21 +2114,20 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: row,col,i,j,k,ivar,jvar,iel,iside
-    
 
     IF (gpuAccel) THEN
 
-      CALL MapToTensor_MappedVector3D_gpu_wrapper( tensor % interior % deviceData,&
-                                                   vector % interior % deviceData,&
-                                                   tensor % N, &
-                                                   tensor % nVar, &
-                                                   tensor % nelem )
+      CALL MapToTensor_MappedVector3D_gpu_wrapper(tensor % interior % deviceData, &
+                                                  vector % interior % deviceData, &
+                                                  tensor % N, &
+                                                  tensor % nVar, &
+                                                  tensor % nelem)
 
-      CALL MapToTensorBoundary_MappedVector3D_gpu_wrapper( tensor % boundary % deviceData,&
-                                                   vector % boundary % deviceData,&
-                                                   tensor % N, &
-                                                   tensor % nVar, &
-                                                   tensor % nelem )
+      CALL MapToTensorBoundary_MappedVector3D_gpu_wrapper(tensor % boundary % deviceData, &
+                                                          vector % boundary % deviceData, &
+                                                          tensor % N, &
+                                                          tensor % nVar, &
+                                                          tensor % nelem)
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
@@ -2154,15 +2136,15 @@ CONTAINS
               DO i = 0,tensor % N
                 DO col = 1,3
                   DO row = 1,3
-                    jvar = row + 3*(ivar-1)
-                    tensor % interior % hostData(row,col,i,j,k,ivar,iel) = vector % interior % hostData(col,i,j,k,jvar,iel)
-                  ENDDO
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                    jvar = row + 3*(ivar - 1)
+                 tensor % interior % hostData(row,col,i,j,k,ivar,iel) = vector % interior % hostData(col,i,j,k,jvar,iel)
+                  END DO
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
       ! Boundary Terms
       DO iel = 1,tensor % nelem
@@ -2172,17 +2154,17 @@ CONTAINS
               DO j = 0,tensor % N
                 DO col = 1,3
                   DO row = 1,3
-                    jvar = row + 3*(ivar-1)
-                    tensor % boundary % hostData(row,col,j,k,ivar,iside,iel) = vector % boundary % hostData(col,j,k,jvar,iside,iel)
-                  ENDDO
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                    jvar = row + 3*(ivar - 1)
+         tensor % boundary % hostData(row,col,j,k,ivar,iside,iel) = vector % boundary % hostData(col,j,k,jvar,iside,iel)
+                  END DO
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
   END SUBROUTINE MapToTensor_MappedVector3D
 
   SUBROUTINE ContravariantProjection_MappedVector3D(physVector,geometry,compVector,gpuAccel)
@@ -2198,7 +2180,6 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iside
-    
 
     IF (gpuAccel) THEN
 
@@ -2210,11 +2191,11 @@ CONTAINS
                                                               physVector % nElem)
 
       CALL ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector % boundary % deviceData, &
-                                                              compVector % boundary % deviceData, &
-                                                              geometry % dsdx % boundary % deviceData, &
-                                                              physVector % N, &
-                                                              physVector % nVar, &
-                                                              physVector % nElem)
+                                                                      compVector % boundary % deviceData, &
+                                                                      geometry % dsdx % boundary % deviceData, &
+                                                                      physVector % N, &
+                                                                      physVector % nVar, &
+                                                                      physVector % nElem)
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension to
@@ -2226,28 +2207,28 @@ CONTAINS
               DO i = 0,physVector % N
 
                 compVector % interior % hostData(1,i,j,k,iVar,iEl) = &
-                        geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
-                        geometry % dsdx % interior % hostData(2,1,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
-                        geometry % dsdx % interior % hostData(3,1,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                  geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
+                  geometry % dsdx % interior % hostData(2,1,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
+                  geometry % dsdx % interior % hostData(3,1,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
                 compVector % interior % hostData(2,i,j,k,iVar,iEl) = &
-                        geometry % dsdx % interior % hostData(1,2,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
-                        geometry % dsdx % interior % hostData(2,2,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
-                        geometry % dsdx % interior % hostData(3,2,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                  geometry % dsdx % interior % hostData(1,2,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
+                  geometry % dsdx % interior % hostData(2,2,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
+                  geometry % dsdx % interior % hostData(3,2,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
                 compVector % interior % hostData(3,i,j,k,iVar,iEl) = &
-                        geometry % dsdx % interior % hostData(1,3,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
-                        geometry % dsdx % interior % hostData(2,3,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
-                        geometry % dsdx % interior % hostData(3,3,i,j,k,1,iEl)* &
-                        physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                  geometry % dsdx % interior % hostData(1,3,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
+                  geometry % dsdx % interior % hostData(2,3,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
+                  geometry % dsdx % interior % hostData(3,3,i,j,k,1,iEl)* &
+                  physVector % interior % hostData(3,i,j,k,iVar,iEl)
 
               END DO
             END DO
@@ -2262,34 +2243,34 @@ CONTAINS
             DO k = 0,physVector % N
               DO j = 0,physVector % N
                 compVector % boundary % hostData(1,j,k,iVar,iside,iEl) = &
-                        geometry % dsdx % boundary % hostData(1,1,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                        geometry % dsdx % boundary % hostData(2,1,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                        geometry % dsdx % boundary % hostData(3,1,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+                  geometry % dsdx % boundary % hostData(1,1,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                  geometry % dsdx % boundary % hostData(2,1,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                  geometry % dsdx % boundary % hostData(3,1,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
 
                 compVector % boundary % hostData(2,j,k,iVar,iside,iEl) = &
-                        geometry % dsdx % boundary % hostData(1,2,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                        geometry % dsdx % boundary % hostData(2,2,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                        geometry % dsdx % boundary % hostData(3,2,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+                  geometry % dsdx % boundary % hostData(1,2,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                  geometry % dsdx % boundary % hostData(2,2,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                  geometry % dsdx % boundary % hostData(3,2,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
 
                 compVector % boundary % hostData(3,j,k,iVar,iside,iEl) = &
-                        geometry % dsdx % boundary % hostData(1,3,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                        geometry % dsdx % boundary % hostData(2,3,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                        geometry % dsdx % boundary % hostData(3,3,j,k,1,iside,iEl)* &
-                        physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-      
+                  geometry % dsdx % boundary % hostData(1,3,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                  geometry % dsdx % boundary % hostData(2,3,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                  geometry % dsdx % boundary % hostData(3,3,j,k,1,iside,iEl)* &
+                  physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+
     END IF
 
   END SUBROUTINE ContravariantProjection_MappedVector3D
@@ -2297,17 +2278,15 @@ CONTAINS
   SUBROUTINE JacobianWeight_MappedVector3D(vector,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedVector3D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedVector3D),INTENT(inout) :: vector
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    
 
     IF (gpuAccel) THEN
-
 
       CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
@@ -2321,19 +2300,19 @@ CONTAINS
           DO k = 0,vector % N
             DO j = 0,vector % N
               DO i = 0,vector % N
-                vector % interior % hostData(1,i,j,k,iVar,iEl) = vector % interior % hostData(1,i,j,k,iVar,iEl)/&
+                vector % interior % hostData(1,i,j,k,iVar,iEl) = vector % interior % hostData(1,i,j,k,iVar,iEl)/ &
                                                                  geometry % J % interior % hostData(i,j,k,1,iEl)
-                vector % interior % hostData(2,i,j,k,iVar,iEl) = vector % interior % hostData(2,i,j,k,iVar,iEl)/&
+                vector % interior % hostData(2,i,j,k,iVar,iEl) = vector % interior % hostData(2,i,j,k,iVar,iEl)/ &
                                                                  geometry % J % interior % hostData(i,j,k,1,iEl)
-                vector % interior % hostData(3,i,j,k,iVar,iEl) = vector % interior % hostData(3,i,j,k,iVar,iEl)/&
+                vector % interior % hostData(3,i,j,k,iVar,iEl) = vector % interior % hostData(3,i,j,k,iVar,iEl)/ &
                                                                  geometry % J % interior % hostData(i,j,k,1,iEl)
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedVector3D
 
@@ -2347,79 +2326,81 @@ CONTAINS
     CLASS(MappedTensor2D),INTENT(inout) :: tensor
     TYPE(Mesh2D),INTENT(in) :: mesh
     TYPE(MPILayer),INTENT(inout) :: decomp
-    LOGICAL, INTENT(in) :: gpuAccel
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2
-    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: e1,e2,s1,s2
+    INTEGER :: flip,bcid,globalSideId
     INTEGER :: neighborRank
-    INTEGER :: i1, i2, ivar
-    
+    INTEGER :: i1,i2,ivar
 
+    IF (gpuAccel) THEN
 
-    IF(gpuAccel)THEN
-
+      CALL tensor % boundary % UpdateHost()
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL tensor % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
-                                                    tensor % boundary % deviceData, &
-                                                    mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % self_sideInfo % deviceData, &
-                                                    decomp % elemToRank % deviceData, &
-                                                    decomp % rankId, &
-                                                    tensor % N, &
-                                                    tensor % nvar, &
-                                                    tensor % nElem)
+                                                   tensor % boundary % deviceData, &
+                                                   mesh % hopr_elemInfo % deviceData, &
+                                                   mesh % self_sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   tensor % N, &
+                                                   tensor % nvar, &
+                                                   tensor % nElem)
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
 
-      DO e1 = 1, mesh % nElem
+      DO e1 = 1,mesh % nElem
         DO s1 = 1,4
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF(bcid == 0)THEN 
+          IF (bcid == 0) THEN
 
             neighborRank = decomp % elemToRank % hostData(e2)
 
-            IF(neighborRank == decomp % rankId)THEN
+            IF (neighborRank == decomp % rankId) THEN
 
-              IF(flip == 1)THEN 
-          
-                DO ivar = 1, tensor % nvar
-                  DO i1 = 0, tensor % N
+              IF (flip == 1) THEN
+
+                DO ivar = 1,tensor % nvar
+                  DO i1 = 0,tensor % N
                     tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
-                        tensor % boundary % hostData(1:2,1:2,i1,ivar,s2,e2)
-                  ENDDO
-                ENDDO
+                      tensor % boundary % hostData(1:2,1:2,i1,ivar,s2,e2)
+                  END DO
+                END DO
 
-              ELSEIF(flip == 2)THEN
+              ELSEIF (flip == 2) THEN
 
-                DO ivar = 1, tensor % nvar
-                  DO i1 = 0, tensor % N
+                DO ivar = 1,tensor % nvar
+                  DO i1 = 0,tensor % N
                     i2 = tensor % N - i1
                     tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
-                        tensor % boundary % hostData(1:2,1:2,i2,ivar,s2,e2)
-                  ENDDO
-                ENDDO
+                      tensor % boundary % hostData(1:2,1:2,i2,ivar,s2,e2)
+                  END DO
+                END DO
 
-              ENDIF
+              END IF
 
-            ENDIF
+            END IF
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
+
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     END IF
 
-    CALL decomp % FinalizeMPIExchangeAsync()
     CALL tensor % ApplyFlip(decomp,mesh,gpuAccel)
-    
+
   END SUBROUTINE SideExchange_MappedTensor2D
 
   SUBROUTINE BassiRebaySides_MappedTensor2D(tensor,gpuAccel)
@@ -2431,48 +2412,44 @@ CONTAINS
     INTEGER :: iside
     INTEGER :: ivar
     INTEGER :: i
-    
 
-    IF(gpuAccel)THEN
-
+    IF (gpuAccel) THEN
 
       CALL BassiRebaySides_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
-                                                 tensor % boundary % deviceData, &
-                                                 tensor % N, &
-                                                 tensor % nvar, &
-                                                 tensor % nElem)
+                                                      tensor % boundary % deviceData, &
+                                                      tensor % N, &
+                                                      tensor % nvar, &
+                                                      tensor % nElem)
     ELSE
 
-      DO iel = 1, tensor % nElem
-        DO iside = 1, 4
-          DO ivar = 1, tensor % nVar
-            DO i = 0, tensor % N
-              tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) = 0.5_prec*(&
-                tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) +&
-                tensor % extBoundary % hostData(1:2,1:2,i,ivar,iside,iel))
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+      DO iel = 1,tensor % nElem
+        DO iside = 1,4
+          DO ivar = 1,tensor % nVar
+            DO i = 0,tensor % N
+              tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) = 0.5_prec*( &
+                                                              tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) + &
+                                                              tensor % extBoundary % hostData(1:2,1:2,i,ivar,iside,iel))
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
-           
+    END IF
+
   END SUBROUTINE BassiRebaySides_MappedTensor2D
 
   SUBROUTINE JacobianWeight_MappedTensor2D(tensor,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedTensor2D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedTensor2D),INTENT(inout) :: tensor
     TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j
-    
 
     IF (gpuAccel) THEN
-
 
       CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
@@ -2485,20 +2462,20 @@ CONTAINS
         DO iVar = 1,tensor % nVar
           DO j = 0,tensor % N
             DO i = 0,tensor % N
-              tensor % interior % hostData(1,1,i,j,iVar,iEl) = tensor % interior % hostData(1,1,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,1,iEl)
-              tensor % interior % hostData(2,1,i,j,iVar,iEl) = tensor % interior % hostData(2,1,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,1,iEl)
-              tensor % interior % hostData(1,2,i,j,iVar,iEl) = tensor % interior % hostData(1,2,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,1,iEl)
-              tensor % interior % hostData(2,2,i,j,iVar,iEl) = tensor % interior % hostData(2,2,i,j,iVar,iEl)/&
-                                                             geometry % J % interior % hostData(i,j,1,iEl)
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+              tensor % interior % hostData(1,1,i,j,iVar,iEl) = tensor % interior % hostData(1,1,i,j,iVar,iEl)/ &
+                                                               geometry % J % interior % hostData(i,j,1,iEl)
+              tensor % interior % hostData(2,1,i,j,iVar,iEl) = tensor % interior % hostData(2,1,i,j,iVar,iEl)/ &
+                                                               geometry % J % interior % hostData(i,j,1,iEl)
+              tensor % interior % hostData(1,2,i,j,iVar,iEl) = tensor % interior % hostData(1,2,i,j,iVar,iEl)/ &
+                                                               geometry % J % interior % hostData(i,j,1,iEl)
+              tensor % interior % hostData(2,2,i,j,iVar,iEl) = tensor % interior % hostData(2,2,i,j,iVar,iEl)/ &
+                                                               geometry % J % interior % hostData(i,j,1,iEl)
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedTensor2D
 
@@ -2511,106 +2488,109 @@ CONTAINS
     CLASS(MappedTensor3D),INTENT(inout) :: tensor
     TYPE(Mesh3D),INTENT(in) :: mesh
     TYPE(MPILayer),INTENT(inout) :: decomp
-    LOGICAL, INTENT(in) :: gpuAccel
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, e2, s1, s2 
-    INTEGER :: flip, bcid, globalSideId
+    INTEGER :: e1,e2,s1,s2
+    INTEGER :: flip,bcid,globalSideId
     INTEGER :: neighborRank
-    INTEGER :: i1, i2, j1, j2, ivar
-    
+    INTEGER :: i1,i2,j1,j2,ivar
 
+    IF (gpuAccel) THEN
 
-    IF(gpuAccel)THEN
-
+      CALL tensor % boundary % UpdateHost()
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL tensor % extBoundary % UpdateDevice()
+
       CALL SideExchange_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
-                                                    tensor % boundary % deviceData, &
-                                                    mesh % hopr_elemInfo % deviceData, &
-                                                    mesh % self_sideInfo % deviceData, &
-                                                    decomp % elemToRank % deviceData, &
-                                                    decomp % rankId, &
-                                                    tensor % N, &
-                                                    tensor % nvar, &
-                                                    tensor % nElem)
+                                                   tensor % boundary % deviceData, &
+                                                   mesh % hopr_elemInfo % deviceData, &
+                                                   mesh % self_sideInfo % deviceData, &
+                                                   decomp % elemToRank % deviceData, &
+                                                   decomp % rankId, &
+                                                   tensor % N, &
+                                                   tensor % nvar, &
+                                                   tensor % nElem)
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      DO e1 = 1, mesh % nElem
+      DO e1 = 1,mesh % nElem
         DO s1 = 1,6
           globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1)-s2*10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF(bcid == 0)THEN 
+          IF (bcid == 0) THEN
 
             neighborRank = decomp % elemToRank % hostData(e2)
 
-            IF(neighborRank == decomp % rankId)THEN
+            IF (neighborRank == decomp % rankId) THEN
 
-              IF(flip == 1)THEN 
-          
-                DO ivar = 1, tensor % nvar
-                  DO j1 = 0, tensor % N
-                    DO i1 = 0, tensor % N
+              IF (flip == 1) THEN
+
+                DO ivar = 1,tensor % nvar
+                  DO j1 = 0,tensor % N
+                    DO i1 = 0,tensor % N
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i1,j1,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 2)THEN
+              ELSEIF (flip == 2) THEN
 
-                DO ivar = 1, tensor % nvar
-                  DO j1 = 0, tensor % N
-                    DO i1 = 0, tensor % N
+                DO ivar = 1,tensor % nvar
+                  DO j1 = 0,tensor % N
+                    DO i1 = 0,tensor % N
                       i2 = tensor % N - j1
                       j2 = i1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 3)THEN
-                      
-                DO ivar = 1, tensor % nvar
-                  DO j1 = 0, tensor % N
-                    DO i1 = 0, tensor % N
+              ELSEIF (flip == 3) THEN
+
+                DO ivar = 1,tensor % nvar
+                  DO j1 = 0,tensor % N
+                    DO i1 = 0,tensor % N
                       i2 = tensor % N - i1
-                      j2 = tensor % N - j1 
+                      j2 = tensor % N - j1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
-          
-              ELSEIF(flip == 4)THEN
-                      
-                DO ivar = 1, tensor % nvar
-                  DO j1 = 0, tensor % N
-                    DO i1 = 0, tensor % N
+                    END DO
+                  END DO
+                END DO
+
+              ELSEIF (flip == 4) THEN
+
+                DO ivar = 1,tensor % nvar
+                  DO j1 = 0,tensor % N
+                    DO i1 = 0,tensor % N
                       i2 = j1
                       j2 = tensor % N - i1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
-                    ENDDO
-                  ENDDO
-                ENDDO
-          
-              ENDIF
+                    END DO
+                  END DO
+                END DO
 
-            ENDIF
+              END IF
 
-          ENDIF
+            END IF
 
-        ENDDO
-      ENDDO
+          END IF
+
+        END DO
+      END DO
+
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     END IF
 
-    CALL decomp % FinalizeMPIExchangeAsync()
     CALL tensor % ApplyFlip(decomp,mesh,gpuAccel)
 
   END SUBROUTINE SideExchange_MappedTensor3D
@@ -2623,52 +2603,48 @@ CONTAINS
     INTEGER :: iel
     INTEGER :: iside
     INTEGER :: ivar
-    INTEGER :: i, j
-    
+    INTEGER :: i,j
 
-    IF(gpuAccel)THEN
-
+    IF (gpuAccel) THEN
 
       CALL BassiRebaySides_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
-                                                 tensor % boundary % deviceData, &
-                                                 tensor % N, &
-                                                 tensor % nvar, &
-                                                 tensor % nElem)
+                                                      tensor % boundary % deviceData, &
+                                                      tensor % N, &
+                                                      tensor % nvar, &
+                                                      tensor % nElem)
 
     ELSE
 
-      DO iel = 1, tensor % nElem
-        DO iside = 1, 6
-          DO ivar = 1, tensor % nVar
-            DO j = 0, tensor % N
-              DO i = 0, tensor % N
-                tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) = 0.5_prec*(&
-                  tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) +&
-                  tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,iside,iel))
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+      DO iel = 1,tensor % nElem
+        DO iside = 1,6
+          DO ivar = 1,tensor % nVar
+            DO j = 0,tensor % N
+              DO i = 0,tensor % N
+                tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) = 0.5_prec*( &
+                                                            tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) + &
+                                                            tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,iside,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
-           
+    END IF
+
   END SUBROUTINE BassiRebaySides_MappedTensor3D
 
   SUBROUTINE JacobianWeight_MappedTensor3D(tensor,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "JacobianWeight_MappedTensor3D"
-  ! Applies the inverse jacobian
+    ! Applies the inverse jacobian
     IMPLICIT NONE
     CLASS(MappedTensor3D),INTENT(inout) :: tensor
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: iEl,iVar,i,j,k
-    
 
     IF (gpuAccel) THEN
-
 
       CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
@@ -2683,31 +2659,31 @@ CONTAINS
           DO k = 0,tensor % N
             DO j = 0,tensor % N
               DO i = 0,tensor % N
-                tensor % interior % hostData(1,1,i,j,k,iVar,iEl) = tensor % interior % hostData(1,1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(2,1,i,j,k,iVar,iEl) = tensor % interior % hostData(2,1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(3,1,i,j,k,iVar,iEl) = tensor % interior % hostData(3,1,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(1,2,i,j,k,iVar,iEl) = tensor % interior % hostData(1,2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(2,2,i,j,k,iVar,iEl) = tensor % interior % hostData(2,2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(3,2,i,j,k,iVar,iEl) = tensor % interior % hostData(3,2,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(1,3,i,j,k,iVar,iEl) = tensor % interior % hostData(1,3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(2,3,i,j,k,iVar,iEl) = tensor % interior % hostData(2,3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-                tensor % interior % hostData(3,3,i,j,k,iVar,iEl) = tensor % interior % hostData(3,3,i,j,k,iVar,iEl)/&
-                                                                 geometry % J % interior % hostData(i,j,k,1,iEl)
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+                tensor % interior % hostData(1,1,i,j,k,iVar,iEl) = tensor % interior % hostData(1,1,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(2,1,i,j,k,iVar,iEl) = tensor % interior % hostData(2,1,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(3,1,i,j,k,iVar,iEl) = tensor % interior % hostData(3,1,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(1,2,i,j,k,iVar,iEl) = tensor % interior % hostData(1,2,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(2,2,i,j,k,iVar,iEl) = tensor % interior % hostData(2,2,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(3,2,i,j,k,iVar,iEl) = tensor % interior % hostData(3,2,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(1,3,i,j,k,iVar,iEl) = tensor % interior % hostData(1,3,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(2,3,i,j,k,iVar,iEl) = tensor % interior % hostData(2,3,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+                tensor % interior % hostData(3,3,i,j,k,iVar,iEl) = tensor % interior % hostData(3,3,i,j,k,iVar,iEl)/ &
+                                                                   geometry % J % interior % hostData(i,j,k,1,iEl)
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE JacobianWeight_MappedTensor3D
 
@@ -2715,78 +2691,75 @@ CONTAINS
 
   SUBROUTINE MPIExchangeAsync_MappedScalar2D(scalar,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
-    CLASS(MappedScalar2D), INTENT(inout) :: scalar
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: resetCount
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, r2
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
     INTEGER :: iError
     INTEGER :: msgCount
 
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(resetCount)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
         msgCount = 0
       ELSE
-        msgCount = mpiHandler % msgCount 
-      ENDIF
+        msgCount = mpiHandler % msgCount
+      END IF
 
-      DO e1 = 1, scalar % nElem
-        DO s1 = 1, 4
+      DO e1 = 1,scalar % nElem
+        DO s1 = 1,4
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF(r2 /= mpiHandler % rankId)THEN
+          IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
             globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
-                              (scalar % N+1)*scalar % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId,  &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
+                           (scalar % N + 1)*scalar % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-              msgCount = msgCount +1
-              CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
-                              (scalar % N+1)*scalar % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId, &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
-          ENDIF
+            msgCount = msgCount + 1
+            CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
+                           (scalar % N + 1)*scalar % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
 
       mpiHandler % msgCount = msgCount
-    ENDIF
-
+    END IF
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar2D
 !
   SUBROUTINE ApplyFlip_MappedScalar2D(scalar,mpiHandler,mesh,gpuAccel)
-  ! Apply side flips to sides where MPI exchanges took place.
+    ! Apply side flips to sides where MPI exchanges took place.
     IMPLICIT NONE
-    CLASS(MappedScalar2D), INTENT(inout) :: scalar
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: i, i2
-    INTEGER :: r2, flip, ivar
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2
+    INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(0:scalar % N)
-    
 
-
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(gpuAccel)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
@@ -2796,115 +2769,113 @@ CONTAINS
                                                   scalar % nVar, &
                                                   scalar % nElem)
       ELSE
-        DO e1 = 1, scalar % nElem
-          DO s1 = 1, 4
-  
+        DO e1 = 1,scalar % nElem
+          DO s1 = 1,4
+
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
-  
-            IF(r2 /= mpiHandler % rankId)THEN
-  
+
+            IF (r2 /= mpiHandler % rankId) THEN
+
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
               globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
-  
+
               ! Need to update extBoundary with flip applied
-              IF(flip == 1)THEN
-  
-                DO ivar = 1, scalar % nvar
-                  DO i = 0, scalar % N
+              IF (flip == 1) THEN
+
+                DO ivar = 1,scalar % nvar
+                  DO i = 0,scalar % N
                     i2 = scalar % N - i
                     extBuff(i) = scalar % extBoundary % hostData(i2,ivar,s1,e1)
-                  ENDDO
-                  DO i = 0, scalar % N
+                  END DO
+                  DO i = 0,scalar % N
                     scalar % extBoundary % hostData(i,ivar,s1,e1) = extBuff(i)
-                  ENDDO
-                ENDDO
-    
-              ENDIF
-            ENDIF
-  
-          ENDDO
-        ENDDO
-      ENDIF
-    ENDIF
+                  END DO
+                END DO
+
+              END IF
+            END IF
+
+          END DO
+        END DO
+      END IF
+    END IF
 
   END SUBROUTINE ApplyFlip_MappedScalar2D
 
   SUBROUTINE MPIExchangeAsync_MappedVector2D(vector,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
-    CLASS(MappedVector2D), INTENT(inout) :: vector
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: resetCount
+    CLASS(MappedVector2D),INTENT(inout) :: vector
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, r2
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
     INTEGER :: iError
     INTEGER :: msgCount
 
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(resetCount)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
         msgCount = 0
       ELSE
-        msgCount = mpiHandler % msgCount 
-      ENDIF
+        msgCount = mpiHandler % msgCount
+      END IF
 
-      DO e1 = 1, vector % nElem
-        DO s1 = 1, 4
+      DO e1 = 1,vector % nElem
+        DO s1 = 1,4
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF(r2 /= mpiHandler % rankId)THEN
+          IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
             globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
-                             2*(vector % N+1)*vector % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId,  &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
+                           2*(vector % N + 1)*vector % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-              msgCount = msgCount +1
-              CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
-                              2*(vector % N+1)*vector % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId, &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
+                           2*(vector % N + 1)*vector % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
 
       mpiHandler % msgCount = msgCount
-    ENDIF
+    END IF
 
   END SUBROUTINE MPIExchangeAsync_MappedVector2D
 
   SUBROUTINE ApplyFlip_MappedVector2D(vector,mpiHandler,mesh,gpuAccel)
-  ! Apply side flips to sides where MPI exchanges took place.
+    ! Apply side flips to sides where MPI exchanges took place.
     IMPLICIT NONE
-    CLASS(MappedVector2D), INTENT(inout) :: vector
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedVector2D),INTENT(inout) :: vector
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: i, i2
-    INTEGER :: r2, flip, ivar
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2
+    INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:2,0:vector % N)
-    
 
-
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(gpuAccel)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
@@ -2914,117 +2885,113 @@ CONTAINS
                                                   vector % nVar, &
                                                   vector % nElem)
       ELSE
-        DO e1 = 1, vector % nElem
-          DO s1 = 1, 4
+        DO e1 = 1,vector % nElem
+          DO s1 = 1,4
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF(r2 /= mpiHandler % rankId)THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
               globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
               ! Need to update extBoundary with flip applied
-              IF(flip == 1)THEN
+              IF (flip == 1) THEN
 
-                DO ivar = 1, vector % nvar
-                  DO i = 0, vector % N
+                DO ivar = 1,vector % nvar
+                  DO i = 0,vector % N
                     i2 = vector % N - i
                     extBuff(1:2,i) = vector % extBoundary % hostData(1:2,i2,ivar,s1,e1)
-                  ENDDO
-                  DO i = 0, vector % N
+                  END DO
+                  DO i = 0,vector % N
                     vector % extBoundary % hostData(1:2,i,ivar,s1,e1) = extBuff(1:2,i)
-                  ENDDO
-                ENDDO
-  
-              ENDIF
-            ENDIF
+                  END DO
+                END DO
 
-          ENDDO
-        ENDDO
-      ENDIF
-    ENDIF
+              END IF
+            END IF
+
+          END DO
+        END DO
+      END IF
+    END IF
 
   END SUBROUTINE ApplyFlip_MappedVector2D
 
   SUBROUTINE MPIExchangeAsync_MappedTensor2D(tensor,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
-    CLASS(MappedTensor2D), INTENT(inout) :: tensor
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: resetCount
+    CLASS(MappedTensor2D),INTENT(inout) :: tensor
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, r2
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
     INTEGER :: iError
     INTEGER :: msgCount
 
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(resetCount)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
         msgCount = 0
       ELSE
-        msgCount = mpiHandler % msgCount 
-      ENDIF
+        msgCount = mpiHandler % msgCount
+      END IF
 
-      DO e1 = 1, tensor % nElem
-        DO s1 = 1, 4
+      DO e1 = 1,tensor % nElem
+        DO s1 = 1,4
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF(r2 /= mpiHandler % rankId)THEN
+          IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
             globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
-                             4*(tensor % N+1)*tensor % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId,  &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
+                           4*(tensor % N + 1)*tensor % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-              msgCount = msgCount +1
-              CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
-                              4*(tensor % N+1)*tensor % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId, &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
+                           4*(tensor % N + 1)*tensor % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
 
       mpiHandler % msgCount = msgCount
-    ENDIF
-
+    END IF
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor2D
 
   SUBROUTINE ApplyFlip_MappedTensor2D(tensor,mpiHandler,mesh,gpuAccel)
-  ! Apply side flips to sides where MPI exchanges took place.
+    ! Apply side flips to sides where MPI exchanges took place.
     IMPLICIT NONE
-    CLASS(MappedTensor2D), INTENT(inout) :: tensor
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh2D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedTensor2D),INTENT(inout) :: tensor
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh2D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: i, i2
-    INTEGER :: r2, flip, ivar
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2
+    INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:2,1:2,0:tensor % N)
-    
 
-
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(gpuAccel)THEN
-
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
@@ -3034,117 +3001,113 @@ CONTAINS
                                                   tensor % nVar, &
                                                   tensor % nElem)
       ELSE
-        DO e1 = 1, tensor % nElem
-          DO s1 = 1, 4
+        DO e1 = 1,tensor % nElem
+          DO s1 = 1,4
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF(r2 /= mpiHandler % rankId)THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
               globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
               ! Need to update extBoundary with flip applied
-              IF(flip == 1)THEN
+              IF (flip == 1) THEN
 
-                DO ivar = 1, tensor % nvar
-                  DO i = 0, tensor % N
+                DO ivar = 1,tensor % nvar
+                  DO i = 0,tensor % N
                     i2 = tensor % N - i
                     extBuff(1:2,1:2,i) = tensor % extBoundary % hostData(1:2,1:2,i2,ivar,s1,e1)
-                  ENDDO
-                  DO i = 0, tensor % N
+                  END DO
+                  DO i = 0,tensor % N
                     tensor % extBoundary % hostData(1:2,1:2,i,ivar,s1,e1) = extBuff(1:2,1:2,i)
-                  ENDDO
-                ENDDO
-  
-              ENDIF
-            ENDIF
+                  END DO
+                END DO
 
-          ENDDO
-        ENDDO
-      ENDIF
-    ENDIF
+              END IF
+            END IF
+
+          END DO
+        END DO
+      END IF
+    END IF
 
   END SUBROUTINE ApplyFlip_MappedTensor2D
 
   SUBROUTINE MPIExchangeAsync_MappedScalar3D(scalar,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
-    CLASS(MappedScalar3D), INTENT(inout) :: scalar
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: resetCount
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, r2
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
     INTEGER :: iError
     INTEGER :: msgCount
-    
 
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(resetCount)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
         msgCount = 0
       ELSE
-        msgCount = mpiHandler % msgCount 
-      ENDIF
+        msgCount = mpiHandler % msgCount
+      END IF
 
-      DO e1 = 1, scalar % nElem
-        DO s1 = 1, 6
+      DO e1 = 1,scalar % nElem
+        DO s1 = 1,6
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF(r2 /= mpiHandler % rankId)THEN
+          IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
             globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
-                              (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId,  &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
+                           (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-              msgCount = msgCount +1
-              CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
-                              (scalar % N+1)*(scalar % N+1)*scalar % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId, &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
+                           (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
 
       mpiHandler % msgCount = msgCount
-    ENDIF
+    END IF
 
   END SUBROUTINE MPIExchangeAsync_MappedScalar3D
 !
   SUBROUTINE ApplyFlip_MappedScalar3D(scalar,mpiHandler,mesh,gpuAccel)
-  ! Apply side flips to sides where MPI exchanges took place.
+    ! Apply side flips to sides where MPI exchanges took place.
     IMPLICIT NONE
-    CLASS(MappedScalar3D), INTENT(inout) :: scalar
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedScalar3D),INTENT(inout) :: scalar
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: i, i2, j, j2
-    INTEGER :: r2, flip, ivar
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2,j,j2
+    INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(0:scalar % N,0:scalar % N)
-    
 
-
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(gpuAccel)THEN
-
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
@@ -3154,154 +3117,151 @@ CONTAINS
                                                   scalar % nVar, &
                                                   scalar % nElem)
       ELSE
-        DO e1 = 1, scalar % nElem
-          DO s1 = 1, 6
+        DO e1 = 1,scalar % nElem
+          DO s1 = 1,6
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF(r2 /= mpiHandler % rankId)THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
               globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
               ! Need to update extBoundary with flip applied
-              IF(flip == 2)THEN
+              IF (flip == 2) THEN
 
-                DO ivar = 1, scalar % nvar
-                  DO j = 0, scalar % N
-                    DO i = 0, scalar % N
+                DO ivar = 1,scalar % nvar
+                  DO j = 0,scalar % N
+                    DO i = 0,scalar % N
                       i2 = scalar % N - j
                       j2 = i
                       extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, scalar % N
-                    DO i = 0, scalar % N
+                    END DO
+                  END DO
+                  DO j = 0,scalar % N
+                    DO i = 0,scalar % N
                       scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 3)THEN
+              ELSEIF (flip == 3) THEN
 
-                DO ivar = 1, scalar % nvar
-                  DO j = 0, scalar % N
-                    DO i = 0, scalar % N
+                DO ivar = 1,scalar % nvar
+                  DO j = 0,scalar % N
+                    DO i = 0,scalar % N
                       i2 = scalar % N - i
                       j2 = scalar % N - j
                       extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, scalar % N
-                    DO i = 0, scalar % N
+                    END DO
+                  END DO
+                  DO j = 0,scalar % N
+                    DO i = 0,scalar % N
                       scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
-                      
-              ELSEIF(flip == 4)THEN
-                      
-                DO ivar = 1, scalar % nvar
-                  DO j = 0, scalar % N
-                    DO i = 0, scalar % N
+                    END DO
+                  END DO
+                END DO
+
+              ELSEIF (flip == 4) THEN
+
+                DO ivar = 1,scalar % nvar
+                  DO j = 0,scalar % N
+                    DO i = 0,scalar % N
                       i2 = j
                       j2 = scalar % N - i
                       extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, scalar % N
-                    DO i = 0, scalar % N
+                    END DO
+                  END DO
+                  DO j = 0,scalar % N
+                    DO i = 0,scalar % N
                       scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
-  
-              ENDIF
-            ENDIF
+                    END DO
+                  END DO
+                END DO
 
-          ENDDO
-        ENDDO
-      ENDIF
-    ENDIF
+              END IF
+            END IF
+
+          END DO
+        END DO
+      END IF
+    END IF
 
   END SUBROUTINE ApplyFlip_MappedScalar3D
 
   SUBROUTINE MPIExchangeAsync_MappedVector3D(vector,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
-    CLASS(MappedVector3D), INTENT(inout) :: vector
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: resetCount
+    CLASS(MappedVector3D),INTENT(inout) :: vector
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, r2
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
     INTEGER :: iError
     INTEGER :: msgCount
 
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(resetCount)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
         msgCount = 0
       ELSE
-        msgCount = mpiHandler % msgCount 
-      ENDIF
+        msgCount = mpiHandler % msgCount
+      END IF
 
-      DO e1 = 1, vector % nElem
-        DO s1 = 1, 6
+      DO e1 = 1,vector % nElem
+        DO s1 = 1,6
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF(r2 /= mpiHandler % rankId)THEN
+          IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
             globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
-                              3*(vector % N+1)*(vector % N+1)*vector % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId,  &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
+                           3*(vector % N + 1)*(vector % N + 1)*vector % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-              msgCount = msgCount +1
-              CALL MPI_ISEND(vector % boundary % hostData(:,:,:,:,s1,e1), &
-                              3*(vector % N+1)*(vector % N+1)*vector % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId, &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
-          ENDIF
+            msgCount = msgCount + 1
+            CALL MPI_ISEND(vector % boundary % hostData(:,:,:,:,s1,e1), &
+                           3*(vector % N + 1)*(vector % N + 1)*vector % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
 
       mpiHandler % msgCount = msgCount
-    ENDIF
+    END IF
 
   END SUBROUTINE MPIExchangeAsync_MappedVector3D
 
   SUBROUTINE ApplyFlip_MappedVector3D(vector,mpiHandler,mesh,gpuAccel)
-  ! Apply side flips to sides where MPI exchanges took place.
+    ! Apply side flips to sides where MPI exchanges took place.
     IMPLICIT NONE
-    CLASS(MappedVector3D), INTENT(inout) :: vector
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedVector3D),INTENT(inout) :: vector
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: i, i2, j, j2
-    INTEGER :: r2, flip, ivar
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2,j,j2
+    INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:3,0:vector % N,0:vector % N)
-    
 
-
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(gpuAccel)THEN
-
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
@@ -3311,153 +3271,150 @@ CONTAINS
                                                   vector % nVar, &
                                                   vector % nElem)
       ELSE
-        DO e1 = 1, vector % nElem
-          DO s1 = 1, 6
+        DO e1 = 1,vector % nElem
+          DO s1 = 1,6
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF(r2 /= mpiHandler % rankId)THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
               globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              IF(flip == 2)THEN
+              IF (flip == 2) THEN
 
-                DO ivar = 1, vector % nvar
-                  DO j = 0, vector % N
-                    DO i = 0, vector % N
+                DO ivar = 1,vector % nvar
+                  DO j = 0,vector % N
+                    DO i = 0,vector % N
                       i2 = vector % N - j
                       j2 = i
                       extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, vector % N
-                    DO i = 0, vector % N
+                    END DO
+                  END DO
+                  DO j = 0,vector % N
+                    DO i = 0,vector % N
                       vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 3)THEN
+              ELSEIF (flip == 3) THEN
 
-                DO ivar = 1, vector % nvar
-                  DO j = 0, vector % N
-                    DO i = 0, vector % N
+                DO ivar = 1,vector % nvar
+                  DO j = 0,vector % N
+                    DO i = 0,vector % N
                       i2 = vector % N - i
                       j2 = vector % N - j
                       extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, vector % N
-                    DO i = 0, vector % N
+                    END DO
+                  END DO
+                  DO j = 0,vector % N
+                    DO i = 0,vector % N
                       vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
-                      
-              ELSEIF(flip == 4)THEN
-                      
-                DO ivar = 1, vector % nvar
-                  DO j = 0, vector % N
-                    DO i = 0, vector % N
+                    END DO
+                  END DO
+                END DO
+
+              ELSEIF (flip == 4) THEN
+
+                DO ivar = 1,vector % nvar
+                  DO j = 0,vector % N
+                    DO i = 0,vector % N
                       i2 = j
                       j2 = vector % N - i
                       extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, vector % N
-                    DO i = 0, vector % N
+                    END DO
+                  END DO
+                  DO j = 0,vector % N
+                    DO i = 0,vector % N
                       vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
-  
-              ENDIF
-            ENDIF
-          ENDDO
-        ENDDO
-      ENDIF
-    ENDIF
+                    END DO
+                  END DO
+                END DO
+
+              END IF
+            END IF
+          END DO
+        END DO
+      END IF
+    END IF
 
   END SUBROUTINE ApplyFlip_MappedVector3D
 
   SUBROUTINE MPIExchangeAsync_MappedTensor3D(tensor,mpiHandler,mesh,resetCount)
     IMPLICIT NONE
-    CLASS(MappedTensor3D), INTENT(inout) :: tensor
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: resetCount
+    CLASS(MappedTensor3D),INTENT(inout) :: tensor
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: resetCount
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: globalSideId, r2
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: globalSideId,r2
     INTEGER :: iError
     INTEGER :: msgCount
 
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(resetCount)THEN
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (resetCount) THEN
         msgCount = 0
       ELSE
-        msgCount = mpiHandler % msgCount 
-      ENDIF
+        msgCount = mpiHandler % msgCount
+      END IF
 
-      DO e1 = 1, tensor % nElem
-        DO s1 = 1, 6
+      DO e1 = 1,tensor % nElem
+        DO s1 = 1,6
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF(r2 /= mpiHandler % rankId)THEN
+          IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
             globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              msgCount = msgCount + 1
-              CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
-                              9*(tensor % N +1)*(tensor % N+1)*tensor % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId,  &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
+                           9*(tensor % N + 1)*(tensor % N + 1)*tensor % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-              msgCount = msgCount +1
-              CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,:,s1,e1), &
-                              9*(tensor % N+1)*(tensor % N+1)*tensor % nVar, &
-                              mpiHandler % mpiPrec, &
-                              r2, globalSideId, &
-                              mpiHandler % mpiComm, &
-                              mpiHandler % requests % hostData(msgCount,1), iError)
+            msgCount = msgCount + 1
+            CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,:,s1,e1), &
+                           9*(tensor % N + 1)*(tensor % N + 1)*tensor % nVar, &
+                           mpiHandler % mpiPrec, &
+                           r2,globalSideId, &
+                           mpiHandler % mpiComm, &
+                           mpiHandler % requests % hostData(msgCount,1),iError)
 
-          ENDIF
+          END IF
 
-        ENDDO
-      ENDDO
+        END DO
+      END DO
 
       mpiHandler % msgCount = msgCount
-    ENDIF
+    END IF
 
   END SUBROUTINE MPIExchangeAsync_MappedTensor3D
 
   SUBROUTINE ApplyFlip_MappedTensor3D(tensor,mpiHandler,mesh,gpuAccel)
-  ! Apply side flips to sides where MPI exchanges took place.
+    ! Apply side flips to sides where MPI exchanges took place.
     IMPLICIT NONE
-    CLASS(MappedTensor3D), INTENT(inout) :: tensor
-    TYPE(MPILayer), INTENT(inout) :: mpiHandler
-    TYPE(Mesh3D), INTENT(in) :: mesh
-    LOGICAL, INTENT(in) :: gpuAccel
+    CLASS(MappedTensor3D),INTENT(inout) :: tensor
+    TYPE(MPILayer),INTENT(inout) :: mpiHandler
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1, s1, e2, s2
-    INTEGER :: i, i2, j, j2
-    INTEGER :: r2, flip, ivar
+    INTEGER :: e1,s1,e2,s2
+    INTEGER :: i,i2,j,j2
+    INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     REAL(prec) :: extBuff(1:3,1:3,0:tensor % N,0:tensor % N)
-    
 
-
-    IF(mpiHandler % mpiEnabled)THEN
-      IF(gpuAccel)THEN
-
+    IF (mpiHandler % mpiEnabled) THEN
+      IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                   mesh % self_sideInfo % deviceData, &
@@ -3467,76 +3424,76 @@ CONTAINS
                                                   tensor % nVar, &
                                                   tensor % nElem)
       ELSE
-        DO e1 = 1, tensor % nElem
-          DO s1 = 1, 6
+        DO e1 = 1,tensor % nElem
+          DO s1 = 1,6
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF(r2 /= mpiHandler % rankId)THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
               globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              IF(flip == 2)THEN
+              IF (flip == 2) THEN
 
-                DO ivar = 1, tensor % nvar
-                  DO j = 0, tensor % N
-                    DO i = 0, tensor % N
+                DO ivar = 1,tensor % nvar
+                  DO j = 0,tensor % N
+                    DO i = 0,tensor % N
                       i2 = tensor % N - j
                       j2 = i
                       extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, tensor % N
-                    DO i = 0, tensor % N
+                    END DO
+                  END DO
+                  DO j = 0,tensor % N
+                    DO i = 0,tensor % N
                       tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
+                    END DO
+                  END DO
+                END DO
 
-              ELSEIF(flip == 3)THEN
+              ELSEIF (flip == 3) THEN
 
-                DO ivar = 1, tensor % nvar
-                  DO j = 0, tensor % N
-                    DO i = 0, tensor % N
+                DO ivar = 1,tensor % nvar
+                  DO j = 0,tensor % N
+                    DO i = 0,tensor % N
                       i2 = tensor % N - i
                       j2 = tensor % N - j
                       extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, tensor % N
-                    DO i = 0, tensor % N
+                    END DO
+                  END DO
+                  DO j = 0,tensor % N
+                    DO i = 0,tensor % N
                       tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
-                      
-              ELSEIF(flip == 4)THEN
-                      
-                DO ivar = 1, tensor % nvar
-                  DO j = 0, tensor % N
-                    DO i = 0, tensor % N
+                    END DO
+                  END DO
+                END DO
+
+              ELSEIF (flip == 4) THEN
+
+                DO ivar = 1,tensor % nvar
+                  DO j = 0,tensor % N
+                    DO i = 0,tensor % N
                       i2 = j
                       j2 = tensor % N - i
                       extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
-                    ENDDO
-                  ENDDO
-                  DO j = 0, tensor % N
-                    DO i = 0, tensor % N
+                    END DO
+                  END DO
+                  DO j = 0,tensor % N
+                    DO i = 0,tensor % N
                       tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
-                    ENDDO
-                  ENDDO
-                ENDDO
-  
-              ENDIF
-            ENDIF
+                    END DO
+                  END DO
+                END DO
 
-          ENDDO
-        ENDDO
-      ENDIF
-    ENDIF
+              END IF
+            END IF
+
+          END DO
+        END DO
+      END IF
+    END IF
 
   END SUBROUTINE ApplyFlip_MappedTensor3D
 
