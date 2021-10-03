@@ -67,7 +67,6 @@ CONTAINS
     REAL(real64) :: weightsLocal(0:N)
     INTEGER :: i
 
-
     IF (QuadType == GAUSS_LOBATTO) THEN
 
       CALL LegendreGaussLobatto(N,nodesLocal,weightsLocal)
@@ -78,10 +77,10 @@ CONTAINS
 
     END IF
 
-    DO i = 0, N
+    DO i = 0,N
       nodes(i) = REAL(nodesLocal(i),prec)
       weights(i) = REAL(weightsLocal(i),prec)
-    ENDDO
+    END DO
 
   END SUBROUTINE LegendreQuadrature
 
@@ -137,10 +136,10 @@ CONTAINS
 
     END IF
 
-    DO i = 0, N
+    DO i = 0,N
       nodes(i) = REAL(nodesLocal(i),prec)
       weights(i) = REAL(weightsLocal(i),prec)
-    ENDDO
+    END DO
 
   END SUBROUTINE ChebyshevQuadrature
 

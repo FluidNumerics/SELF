@@ -8,10 +8,8 @@ MODULE SELF_Memory
 
   USE SELF_Constants
 
-
   USE hipfort
   USE hipfort_check
-
 
   USE ISO_FORTRAN_ENV
   USE ISO_C_BINDING
@@ -342,12 +340,12 @@ CONTAINS
     INTEGER :: gpuCount
     INTEGER(KIND(hipSuccess)) :: err
 
-      err = hipGetDeviceCount(gpuCount)
-      IF(gpuCount > 0 .AND. err == hipSuccess)THEN
-        avail = .TRUE.
-      ELSE
-        avail = .FALSE.
-      ENDIF
+    err = hipGetDeviceCount(gpuCount)
+    IF (gpuCount > 0 .AND. err == hipSuccess) THEN
+      avail = .TRUE.
+    ELSE
+      avail = .FALSE.
+    END IF
 
   END FUNCTION GPUAvailable
 
@@ -359,10 +357,9 @@ CONTAINS
 
     ALLOCATE (this % hostData(loBound:upBound))
 
-    IF( GPUAvailable() )THEN
-        CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    IF (GPUAvailable()) THEN
+      CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r1
 
@@ -375,11 +372,9 @@ CONTAINS
     ALLOCATE (this % hostData(loBound(1):upBound(1), &
                               loBound(2):upBound(2)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r2
 
@@ -393,11 +388,9 @@ CONTAINS
                               loBound(2):upBound(2), &
                               loBound(3):upBound(3)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r3
 
@@ -412,11 +405,9 @@ CONTAINS
                               loBound(3):upBound(3), &
                               loBound(4):upBound(4)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r4
 
@@ -432,11 +423,9 @@ CONTAINS
                               loBound(4):upBound(4), &
                               loBound(5):upBound(5)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r5
 
@@ -453,11 +442,9 @@ CONTAINS
                               loBound(5):upBound(5), &
                               loBound(6):upBound(6)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r6
 
@@ -475,11 +462,9 @@ CONTAINS
                               loBound(6):upBound(6), &
                               loBound(7):upBound(7)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfReal_r7
 
@@ -491,11 +476,9 @@ CONTAINS
 
     ALLOCATE (this % hostData(loBound:upBound))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r1
 
@@ -508,11 +491,9 @@ CONTAINS
     ALLOCATE (this % hostData(loBound(1):upBound(1), &
                               loBound(2):upBound(2)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r2
 
@@ -526,11 +507,9 @@ CONTAINS
                               loBound(2):upBound(2), &
                               loBound(3):upBound(3)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r3
 
@@ -545,11 +524,9 @@ CONTAINS
                               loBound(3):upBound(3), &
                               loBound(4):upBound(4)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r4
 
@@ -565,11 +542,9 @@ CONTAINS
                               loBound(4):upBound(4), &
                               loBound(5):upBound(5)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r5
 
@@ -586,11 +561,9 @@ CONTAINS
                               loBound(5):upBound(5), &
                               loBound(6):upBound(6)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r6
 
@@ -608,11 +581,9 @@ CONTAINS
                               loBound(6):upBound(6), &
                               loBound(7):upBound(7)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt32_r7
 
@@ -624,11 +595,9 @@ CONTAINS
 
     ALLOCATE (this % hostData(loBound:upBound))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r1
 
@@ -641,11 +610,9 @@ CONTAINS
     ALLOCATE (this % hostData(loBound(1):upBound(1), &
                               loBound(2):upBound(2)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r2
 
@@ -659,11 +626,9 @@ CONTAINS
                               loBound(2):upBound(2), &
                               loBound(3):upBound(3)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r3
 
@@ -678,11 +643,9 @@ CONTAINS
                               loBound(3):upBound(3), &
                               loBound(4):upBound(4)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r4
 
@@ -698,11 +661,9 @@ CONTAINS
                               loBound(4):upBound(4), &
                               loBound(5):upBound(5)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r5
 
@@ -719,11 +680,9 @@ CONTAINS
                               loBound(5):upBound(5), &
                               loBound(6):upBound(6)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r6
 
@@ -741,11 +700,9 @@ CONTAINS
                               loBound(6):upBound(6), &
                               loBound(7):upBound(7)))
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Alloc_hfInt64_r7
 
@@ -755,10 +712,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r1
 
@@ -768,10 +724,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r2
 
@@ -781,10 +736,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r3
 
@@ -794,10 +748,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r4
 
@@ -807,10 +760,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r5
 
@@ -820,10 +772,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r6
 
@@ -833,10 +784,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfReal_r7
 
@@ -846,10 +796,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r1
 
@@ -859,10 +808,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r2
 
@@ -872,10 +820,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r3
 
@@ -885,10 +832,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r4
 
@@ -898,10 +844,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r5
 
@@ -911,10 +856,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r6
 
@@ -924,10 +868,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt32_r7
 
@@ -937,10 +880,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r1
 
@@ -950,10 +892,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r2
 
@@ -963,10 +904,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r3
 
@@ -976,10 +916,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r4
 
@@ -989,10 +928,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r5
 
@@ -1002,10 +940,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r6
 
@@ -1015,10 +952,9 @@ CONTAINS
 
     DEALLOCATE (this % hostData)
 
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipFree(this % deviceData))
-    ENDIF
-
+    END IF
 
   END SUBROUTINE Free_hfInt64_r7
 
@@ -1026,14 +962,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r1),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r1
 
@@ -1041,14 +975,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r2),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r2
 
@@ -1056,14 +988,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r3),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r3
 
@@ -1071,14 +1001,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r4),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r4
 
@@ -1086,14 +1014,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r5),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r5
 
@@ -1101,14 +1027,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r6),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r6
 
@@ -1116,14 +1040,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r7),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfReal_r7
 
@@ -1131,14 +1053,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r1),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r1
 
@@ -1146,14 +1066,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r2),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r2
 
@@ -1161,14 +1079,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r3),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r3
 
@@ -1176,14 +1092,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r4),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r4
 
@@ -1191,14 +1105,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r5),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r5
 
@@ -1206,14 +1118,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r6),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r6
 
@@ -1221,14 +1131,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r7),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt32_r7
 
@@ -1236,14 +1144,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r1),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r1
 
@@ -1251,14 +1157,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r2),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r2
 
@@ -1266,14 +1170,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r3),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r3
 
@@ -1281,14 +1183,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r4),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r4
 
@@ -1296,14 +1196,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r5),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r5
 
@@ -1311,14 +1209,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r6),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r6
 
@@ -1326,14 +1222,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r7),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(c_loc(this % hostData), &
-                            this % deviceData, &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyDeviceToHost))
-    ENDIF
-
+                              this % deviceData, &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyDeviceToHost))
+    END IF
 
   END SUBROUTINE UpdateHost_hfInt64_r7
 
@@ -1341,14 +1235,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r1),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r1
 
@@ -1356,14 +1248,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r2),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r2
 
@@ -1371,14 +1261,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r3),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r3
 
@@ -1386,14 +1274,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r4),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r4
 
@@ -1401,14 +1287,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r5),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r5
 
@@ -1416,14 +1300,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r6),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r6
 
@@ -1431,14 +1313,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfReal_r7),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfReal_r7
 
@@ -1446,14 +1326,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r1),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r1
 
@@ -1461,14 +1339,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r2),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r2
 
@@ -1476,14 +1352,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r3),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r3
 
@@ -1491,14 +1365,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r4),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r4
 
@@ -1506,14 +1378,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r5),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r5
 
@@ -1521,14 +1391,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r6),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r6
 
@@ -1536,14 +1404,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt32_r7),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt32_r7
 
@@ -1551,14 +1417,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r1),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r1
 
@@ -1566,14 +1430,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r2),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r2
 
@@ -1581,14 +1443,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r3),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r3
 
@@ -1596,14 +1456,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r4),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r4
 
@@ -1611,14 +1469,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r5),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r5
 
@@ -1626,14 +1482,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r6),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r6
 
@@ -1641,14 +1495,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(hfInt64_r7),INTENT(inout) :: this
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL hipCheck(hipMemcpy(this % deviceData, &
-                            c_loc(this % hostData), &
-                            SIZEOF(this % hostData), &
-                            hipMemcpyHostToDevice))
-    ENDIF
-
+                              c_loc(this % hostData), &
+                              SIZEOF(this % hostData), &
+                              hipMemcpyHostToDevice))
+    END IF
 
   END SUBROUTINE UpdateDevice_hfInt64_r7
 

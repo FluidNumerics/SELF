@@ -43,7 +43,6 @@ CONTAINS
     TYPE(Scalar1D) :: f,fInterp
     INTEGER :: iel,i,ivar
 
-    
     msg = 'Number of elements : '//Int2Str(nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -54,11 +53,11 @@ CONTAINS
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
-    CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
+    CALL controlMesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
     CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
 
     ! Create the target mesh and geometry
-    CALL targetMesh % UniformBlockMesh(tqDegree,nElem,(/0.0_prec,1.0_prec/))
+    CALL targetMesh % UniformBlockMesh(tqDegree,nElem, (/0.0_prec,1.0_prec/))
     CALL targetGeometry % GenerateFromMesh(targetMesh,tqType,tqType,tqDegree,tqDegree)
 
     ! Create the scalar1d objects
@@ -69,30 +68,26 @@ CONTAINS
     feq = EquationParser(functionChar, (/'x'/))
 
     ! Load the control function
-     DO iel = 1, controlGeometry % nElem
-       DO ivar = 1, nvar
-         DO i = 0, cqDegree
-           f % interior % hostData(i,ivar,iel) = &
-             feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
-         ENDDO
-       ENDDO
-     ENDDO
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO i = 0,cqDegree
+          f % interior % hostData(i,ivar,iel) = &
+            feq % Evaluate((/controlGeometry % x % interior % hostData(i,1,iel)/))
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
 
-    
     ! To do : file IO for fInterp, targetMesh, targetGeometry
 
     ! Clean up
@@ -105,8 +100,8 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp1D
 
-  SUBROUTINE ScalarBoundaryInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         functionChar,gpuAccel)
+  SUBROUTINE ScalarBoundaryInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp1D"
     IMPLICIT NONE
@@ -126,7 +121,6 @@ CONTAINS
     TYPE(Scalar1D) :: f
     INTEGER :: iel,i,ivar
 
-    
     msg = 'Number of elements : '//Int2Str(nElem)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -137,7 +131,7 @@ CONTAINS
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
-    CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
+    CALL controlMesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
     CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
 
     ! Create the scalar1d objects
@@ -147,29 +141,25 @@ CONTAINS
     feq = EquationParser(functionChar, (/'x'/))
 
     ! Load the control function
-     DO iel = 1, controlGeometry % nElem
-       DO ivar = 1, nvar
-         DO i = 0, cqDegree
-           f % interior % hostData(i,ivar,iel) = &
-             feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
-         ENDDO
-       ENDDO
-     ENDDO
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO i = 0,cqDegree
+          f % interior % hostData(i,ivar,iel) = &
+            feq % Evaluate((/controlGeometry % x % interior % hostData(i,1,iel)/))
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file IO for f
 
@@ -180,8 +170,8 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp1D
 
-  SUBROUTINE ScalarDerivative1D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                     fChar,dfChar,gpuAccel)
+  SUBROUTINE ScalarDerivative1D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar, &
+                                fChar,dfChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarDerivative1D"
     IMPLICIT NONE
@@ -203,14 +193,13 @@ CONTAINS
     TYPE(MappedScalar1D) :: f,dfInterp
     INTEGER :: iel,i,ivar
 
-    
-    IF (dForm == selfStrongForm ) THEN
+    IF (dForm == selfStrongForm) THEN
       msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
+    ELSEIF (dForm == selfWeakDGForm) THEN
       msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
+    ELSEIF (dForm == selfWeakCGForm) THEN
       msg = 'Formulation Type : Weak CG Form'
-    ENDIF
+    END IF
     INFO(TRIM(msg))
     msg = 'Number of elements : '//Int2Str(nElem)
     INFO(TRIM(msg))
@@ -222,7 +211,7 @@ CONTAINS
     INFO(TRIM(msg))
 
     ! Create the control mesh and geometry
-    CALL controlMesh % UniformBlockMesh(cqDegree,nElem,(/0.0_prec,1.0_prec/))
+    CALL controlMesh % UniformBlockMesh(cqDegree,nElem, (/0.0_prec,1.0_prec/))
     CALL controlGeometry % GenerateFromMesh(controlMesh,cqType,tqType,cqDegree,tqDegree)
 
     ! Create the scalar1d objects
@@ -234,35 +223,31 @@ CONTAINS
     dfeq = EquationParser(dfChar, (/'x'/))
 
     ! Load the control function
-     DO iel = 1, controlGeometry % nElem
-       DO ivar = 1, nvar
-         DO i = 0, cqDegree
-           f % interior % hostData(i,ivar,iel) = &
-             feq % Evaluate( (/controlGeometry % x % interior % hostData(i,1,iel)/) )
-         ENDDO
-         ! Left Boundary
-         f % boundary % hostData(ivar,1,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,1,iel)/) )
-         ! Right boundary
-         f % boundary % hostData(ivar,2,iel) = &
-             feq % Evaluate( (/controlGeometry % x % boundary % hostData(1,2,iel)/) )
-       ENDDO
-     ENDDO
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO i = 0,cqDegree
+          f % interior % hostData(i,ivar,iel) = &
+            feq % Evaluate((/controlGeometry % x % interior % hostData(i,1,iel)/))
+        END DO
+        ! Left Boundary
+        f % boundary % hostData(ivar,1,iel) = &
+          feq % Evaluate((/controlGeometry % x % boundary % hostData(1,1,iel)/))
+        ! Right boundary
+        f % boundary % hostData(ivar,2,iel) = &
+          feq % Evaluate((/controlGeometry % x % boundary % hostData(1,2,iel)/))
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % Derivative(controlGeometry,dfInterp,dForm,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for dfInterp
 
@@ -274,8 +259,8 @@ CONTAINS
 
   END SUBROUTINE ScalarDerivative1D
 
-  SUBROUTINE ScalarInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 functionChar,gpuAccel)
+  SUBROUTINE ScalarInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                            functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp2D"
     IMPLICIT NONE
@@ -297,7 +282,7 @@ CONTAINS
     INTEGER :: i,j,ivar
 
     nel = nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -329,35 +314,30 @@ CONTAINS
     feq = EquationParser(functionChar, (/'x','y'/))
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
-             f % interior % hostData(i,j,ivar,iel) = &
-               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
+            f % interior % hostData(i,j,ivar,iel) = &
+              feq % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+          END DO
+        END DO
+      END DO
+    END DO
 
-
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
 
-
     ! To do : file IO for fInterp, targetMesh, targetGeometry
-    
+
     ! Clean up
     CALL controlMesh % Free()
     CALL controlGeometry % Free()
@@ -368,8 +348,8 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp2D
 
-  SUBROUTINE ScalarBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         functionChar,gpuAccel)
+  SUBROUTINE ScalarBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp2D"
     IMPLICIT NONE
@@ -391,7 +371,7 @@ CONTAINS
     INTEGER :: i,j,ivar
 
     nel = nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -415,31 +395,27 @@ CONTAINS
     feq = EquationParser(functionChar, (/'x','y'/))
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
-             f % interior % hostData(i,j,ivar,iel) = &
-               feq % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
+            f % interior % hostData(i,j,ivar,iel) = &
+              feq % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file io for f
 
@@ -450,8 +426,8 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp2D
 
-  SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nvar,&
-                                   spec,fChar,gradientChar,outputFile,enableMPI,gpuAccel)
+  SUBROUTINE ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nvar, &
+                              spec,fChar,gradientChar,outputFile,enableMPI,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient2D"
     IMPLICIT NONE
@@ -461,7 +437,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nVar
-    TYPE(MeshSpec), INTENT(in) :: spec
+    TYPE(MeshSpec),INTENT(in) :: spec
     CHARACTER(*),INTENT(in) :: fChar
     CHARACTER(240),INTENT(in) :: gradientChar(1:2)
     LOGICAL,INTENT(in) :: enableMPI
@@ -480,34 +456,30 @@ CONTAINS
     gyeq = EquationParser(gradientChar(2), (/'x','y'/))
 
     ! Load the control function
-    DO iel = 1, dgsol % geometry % nElem
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
+    DO iel = 1,dgsol % geometry % nElem
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
             dgsol % solution % interior % hostData(i,j,ivar,iel) = &
-              feq % Evaluate( dgsol % geometry % x % interior % hostData(1:2,i,j,1,iel) )
-          ENDDO
+              feq % Evaluate(dgsol % geometry % x % interior % hostData(1:2,i,j,1,iel))
+          END DO
           DO iside = 1,4
             dgsol % solution % boundary % hostData(j,ivar,iside,iel) = &
-               feq % Evaluate( dgsol % geometry % x % boundary % hostData(1:2,j,1,iside,iel) )
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+              feq % Evaluate(dgsol % geometry % x % boundary % hostData(1:2,j,1,iside,iel))
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL dgsol % solution % UpdateDevice()
     END IF
 
-
     CALL dgsol % CalculateSolutionGradient(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL dgsol % solutionGradient % UpdateHost()
     END IF
-
 
     ! To do : file io for dfInterp
     CALL dgsol % Write(outputFile)
@@ -517,8 +489,8 @@ CONTAINS
 
   END SUBROUTINE ScalarGradient2D
 
-  SUBROUTINE VectorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 vectorChar,gpuAccel)
+  SUBROUTINE VectorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                            vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp2D"
     IMPLICIT NONE
@@ -540,7 +512,7 @@ CONTAINS
     INTEGER :: i,j,ivar,idir
 
     nel = nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -571,37 +543,32 @@ CONTAINS
     ! Create the equation parser object
     DO idir = 1,2
       vEq(idir) = EquationParser(vectorChar(idir), (/'x','y'/))
-    ENDDO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
-            DO idir=1,2
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
+            DO idir = 1,2
               f % interior % hostData(idir,i,j,ivar,iel) = &
-                vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                vEq(idir) % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for fInterp
 
@@ -615,8 +582,8 @@ CONTAINS
 
   END SUBROUTINE VectorInterp2D
 
-  SUBROUTINE VectorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         vectorChar,gpuAccel)
+  SUBROUTINE VectorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp2D"
     IMPLICIT NONE
@@ -638,7 +605,7 @@ CONTAINS
     INTEGER :: i,j,ivar,idir
 
     nel = nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -661,36 +628,33 @@ CONTAINS
     ! Create the equation parser object
     DO idir = 1,2
       vEq(idir) = EquationParser(vectorChar(idir), (/'x','y'/))
-    ENDDO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
             DO idir = 1,2
               f % interior % hostData(idir,i,j,ivar,iel) = &
-                vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                vEq(idir) % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
     ! Run the grid interpolation
-     
+
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file io for f
 
@@ -701,8 +665,8 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp2D
 
-  SUBROUTINE VectorGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   vectorChar,tensorChar,gpuAccel)
+  SUBROUTINE VectorGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar, &
+                              vectorChar,tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient2D"
     IMPLICIT NONE
@@ -728,14 +692,13 @@ CONTAINS
     TYPE(MappedTensor2D) :: dfInterp
     INTEGER :: iel,i,j,ivar,row,col,iside
 
-    
-    IF (dForm == selfStrongForm ) THEN
+    IF (dForm == selfStrongForm) THEN
       msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
+    ELSEIF (dForm == selfWeakDGForm) THEN
       msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
+    ELSEIF (dForm == selfWeakCGForm) THEN
       msg = 'Formulation Type : Weak CG Form'
-    ENDIF
+    END IF
     INFO(TRIM(msg))
     msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
@@ -764,54 +727,50 @@ CONTAINS
     CALL workTensor % Init(cqDegree,cqType,tqDegree,tqType,2*nvar,controlGeometry % nElem)
 
     ! Create the equation parser object
-    DO row = 1, 2
+    DO row = 1,2
       feq(row) = EquationParser(vectorChar(row), (/'x','y'/))
-    ENDDO
+    END DO
 
     DO col = 1,2
       DO row = 1,2
         dfeqChar(row,col) = EquationParser(tensorChar(row,col), (/'x','y'/))
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Load the control function
-    DO iel = 1, controlGeometry % nElem
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
 
             DO row = 1,2
               f % interior % hostData(row,i,j,ivar,iel) = &
-                feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
+                feq(row) % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+            END DO
 
-          ENDDO
+          END DO
 
           DO iside = 1,4
             DO row = 1,2
               f % boundary % hostData(row,j,ivar,iside,iel) = &
-                fEq(row) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
-            ENDDO
-          ENDDO
+                fEq(row) % Evaluate(controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel))
+            END DO
+          END DO
 
-        ENDDO
-      ENDDO
-    ENDDO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for dfInterp
 
@@ -826,8 +785,8 @@ CONTAINS
 
   END SUBROUTINE VectorGradient2D
 
-  SUBROUTINE VectorDivergence2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                     vectorChar,scalarChar,gpuAccel)
+  SUBROUTINE VectorDivergence2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar, &
+                                vectorChar,scalarChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence2D"
     IMPLICIT NONE
@@ -851,14 +810,13 @@ CONTAINS
     TYPE(MappedScalar2D) :: dfInterp
     INTEGER :: iel,i,j,ivar,row,iside
 
-    
-    IF (dForm == selfStrongForm ) THEN
+    IF (dForm == selfStrongForm) THEN
       msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
+    ELSEIF (dForm == selfWeakDGForm) THEN
       msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
+    ELSEIF (dForm == selfWeakCGForm) THEN
       msg = 'Formulation Type : Weak CG Form'
-    ENDIF
+    END IF
     INFO(TRIM(msg))
     msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem)
@@ -885,50 +843,46 @@ CONTAINS
     CALL workVector % Init(cqDegree,cqType,tqDegree,tqType,nvar,controlGeometry % nElem)
 
     ! Create the equation parser object
-    DO row = 1, 2
+    DO row = 1,2
       feq(row) = EquationParser(vectorChar(row), (/'x','y'/))
-    ENDDO
+    END DO
 
     dfeqChar = EquationParser(scalarChar, (/'x','y'/))
 
     ! Load the control function
-    DO iel = 1, controlGeometry % nElem
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
 
             DO row = 1,2
               f % interior % hostData(row,i,j,ivar,iel) = &
-                feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-            ENDDO
+                feq(row) % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+            END DO
 
-          ENDDO
+          END DO
 
           DO iside = 1,4
             DO row = 1,2
               f % boundary % hostData(row,j,ivar,iside,iel) = &
-                feq(row) % Evaluate( controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel) )
-            ENDDO
-          ENDDO
+                feq(row) % Evaluate(controlGeometry % x % boundary % hostData(1:2,j,1,iside,iel))
+            END DO
+          END DO
 
-        ENDDO
-      ENDDO
-    ENDDO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % Divergence(workVector,controlGeometry,dfInterp,dForm,gpuAccel)
 
-     
     IF (gpuAccel) THEN
-      CALL dfInterp % UpdateHost( )
+      CALL dfInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for dfInterp
 
@@ -941,8 +895,8 @@ CONTAINS
 
   END SUBROUTINE VectorDivergence2D
 
-  SUBROUTINE TensorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 tensorChar,gpuAccel)
+  SUBROUTINE TensorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                            tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp2D"
     IMPLICIT NONE
@@ -965,7 +919,7 @@ CONTAINS
     INTEGER :: row,col
 
     nel = nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -997,40 +951,35 @@ CONTAINS
     DO col = 1,2
       DO row = 1,2
         tensorEq(row,col) = EquationParser(TRIM(tensorChar(row,col)), (/'x','y'/))
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
             DO col = 1,2
               DO row = 1,2
                 f % interior % hostData(row,col,i,j,ivar,iel) = &
-                  tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                  tensorEq(row,col) % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for fInterp
 
@@ -1044,8 +993,8 @@ CONTAINS
 
   END SUBROUTINE TensorInterp2D
 
-  SUBROUTINE TensorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         tensorChar,gpuAccel)
+  SUBROUTINE TensorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorBoundaryInterp2D"
     IMPLICIT NONE
@@ -1068,7 +1017,7 @@ CONTAINS
     INTEGER :: row,col
 
     nel = nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1092,39 +1041,35 @@ CONTAINS
     DO col = 1,2
       DO row = 1,2
         tensorEq(row,col) = EquationParser(TRIM(tensorChar(row,col)), (/'x','y'/))
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO j = 0, cqDegree
-          DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO j = 0,cqDegree
+          DO i = 0,cqDegree
             DO col = 1,2
               DO row = 1,2
                 f % interior % hostData(row,col,i,j,ivar,iel) = &
-                  tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:2,i,j,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                  tensorEq(row,col) % Evaluate(controlGeometry % x % interior % hostData(1:2,i,j,1,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file io for f
 
@@ -1135,8 +1080,8 @@ CONTAINS
 
   END SUBROUTINE TensorBoundaryInterp2D
 
-  SUBROUTINE ScalarInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 functionChar,gpuAccel)
+  SUBROUTINE ScalarInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                            functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarInterp3D"
     IMPLICIT NONE
@@ -1158,7 +1103,7 @@ CONTAINS
     INTEGER :: i,j,k,ivar
 
     nel = nElem*nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1192,33 +1137,29 @@ CONTAINS
     feq = EquationParser(functionChar, (/'x','y','z'/))
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
-               f % interior % hostData(i,j,k,ivar,iel) = &
-                 feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
+              f % interior % hostData(i,j,k,ivar,iel) = &
+                feq % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for fInterp, targetMesh, targetGeometry
 
@@ -1230,8 +1171,8 @@ CONTAINS
 
   END SUBROUTINE ScalarInterp3D
 
-  SUBROUTINE ScalarBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         functionChar,gpuAccel)
+  SUBROUTINE ScalarBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    functionChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarBoundaryInterp3D"
     IMPLICIT NONE
@@ -1253,7 +1194,7 @@ CONTAINS
     INTEGER :: i,j,k,ivar
 
     nel = nElem*nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1278,33 +1219,29 @@ CONTAINS
     feq = EquationParser(functionChar, (/'x','y','z'/))
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
-               f % interior % hostData(i,j,k,ivar,iel) = &
-                 feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
+              f % interior % hostData(i,j,k,ivar,iel) = &
+                feq % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file io for f
 
@@ -1315,8 +1252,8 @@ CONTAINS
 
   END SUBROUTINE ScalarBoundaryInterp3D
 
-  SUBROUTINE ScalarGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   fChar,gradientChar,gpuAccel)
+  SUBROUTINE ScalarGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar, &
+                              fChar,gradientChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ScalarGradient3D"
     IMPLICIT NONE
@@ -1340,14 +1277,13 @@ CONTAINS
     TYPE(MappedVector3D) :: dfInterp
     INTEGER :: iel,i,j,k,ivar,iside
 
-    
-    IF (dForm == selfStrongForm ) THEN
+    IF (dForm == selfStrongForm) THEN
       msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
+    ELSEIF (dForm == selfWeakDGForm) THEN
       msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
+    ELSEIF (dForm == selfWeakCGForm) THEN
       msg = 'Formulation Type : Weak CG Form'
-    ENDIF
+    END IF
     INFO(TRIM(msg))
     msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
@@ -1379,37 +1315,33 @@ CONTAINS
     gzeq = EquationParser(gradientChar(3), (/'x','y','z'/))
 
     ! Load the control function
-    DO iel = 1, controlGeometry % nElem
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
               f % interior % hostData(i,j,k,ivar,iel) = &
-                feq % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-            ENDDO
+                feq % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+            END DO
             DO iside = 1,6
-             f % boundary % hostData(j,k,ivar,iside,iel) = &
-               feq % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+              f % boundary % hostData(j,k,ivar,iside,iel) = &
+                feq % Evaluate(controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel))
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % Gradient(workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for dfInterp and controlGeometry
 
@@ -1422,8 +1354,8 @@ CONTAINS
 
   END SUBROUTINE ScalarGradient3D
 
-  SUBROUTINE VectorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 vectorChar,gpuAccel)
+  SUBROUTINE VectorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                            vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorInterp3D"
     IMPLICIT NONE
@@ -1445,7 +1377,7 @@ CONTAINS
     INTEGER :: i,j,k,ivar,idir
 
     nel = nElem*nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1478,38 +1410,34 @@ CONTAINS
     ! Create the equation parser object
     DO idir = 1,3
       vEq(idir) = EquationParser(vectorChar(idir), (/'x','y','z'/))
-    ENDDO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
               DO idir = 1,3
                 f % interior % hostData(idir,i,j,k,ivar,iel) = &
-                  vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                  vEq(idir) % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for fInterp, targetMesh, targetGeometry
 
@@ -1523,8 +1451,8 @@ CONTAINS
 
   END SUBROUTINE VectorInterp3D
 
-  SUBROUTINE VectorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         vectorChar,gpuAccel)
+  SUBROUTINE VectorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    vectorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorBoundaryInterp3D"
     IMPLICIT NONE
@@ -1546,7 +1474,7 @@ CONTAINS
     INTEGER :: i,j,k,ivar,idir
 
     nel = nElem*nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1570,38 +1498,34 @@ CONTAINS
     ! Create the equation parser object
     DO idir = 1,3
       vEq(idir) = EquationParser(vectorChar(idir), (/'x','y','z'/))
-    ENDDO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
               DO idir = 1,3
                 f % interior % hostData(idir,i,j,k,ivar,iel) = &
-                  vEq(idir) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                  vEq(idir) % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file io for f, controlGeometry
 
@@ -1612,8 +1536,8 @@ CONTAINS
 
   END SUBROUTINE VectorBoundaryInterp3D
 
-  SUBROUTINE VectorGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar,&
-                                   vectorChar,tensorChar,gpuAccel)
+  SUBROUTINE VectorGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nvar, &
+                              vectorChar,tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorGradient3D"
     IMPLICIT NONE
@@ -1639,14 +1563,13 @@ CONTAINS
     TYPE(MappedTensor3D) :: dfInterp
     INTEGER :: iel,i,j,k,ivar,row,col,iside
 
-    
-    IF (dForm == selfStrongForm ) THEN
+    IF (dForm == selfStrongForm) THEN
       msg = 'Formulation Type : Strong Form'
-    ELSEIF (dForm == selfWeakDGForm ) THEN
+    ELSEIF (dForm == selfWeakDGForm) THEN
       msg = 'Formulation Type : Weak DG Form'
-    ELSEIF (dForm == selfWeakCGForm ) THEN
+    ELSEIF (dForm == selfWeakCGForm) THEN
       msg = 'Formulation Type : Weak CG Form'
-    ENDIF
+    END IF
     INFO(TRIM(msg))
     msg = 'Number of elements : '//Int2Str(nElem)
     msg = 'Number of elements : '//Int2Str(nElem*nElem*nElem)
@@ -1678,52 +1601,48 @@ CONTAINS
     ! Create the equation parser object
     DO row = 1,3
       feq(row) = EquationParser(vectorChar(row), (/'x','y','z'/))
-    ENDDO
+    END DO
 
     DO col = 1,3
       DO row = 1,3
         dfeqChar(row,col) = EquationParser(tensorChar(row,col), (/'x','y','z'/))
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Load the control function
-    DO iel = 1, controlGeometry % nElem
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,controlGeometry % nElem
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
 
               DO row = 1,3
                 f % interior % hostData(row,i,j,k,ivar,iel) = &
-                  feq(row) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              ENDDO
+                  feq(row) % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+              END DO
 
-            ENDDO
+            END DO
             DO iside = 1,6
               DO row = 1,3
                 f % boundary % hostData(row,j,k,ivar,iside,iel) = &
-                  feq(row) % Evaluate( controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                  feq(row) % Evaluate(controlGeometry % x % boundary % hostData(1:3,j,k,1,iside,iel))
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % Gradient(workScalar,workVector,workTensor,controlGeometry,dfInterp,dForm,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL dfInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for dfInterp, controlGeometry
 
@@ -1738,8 +1657,8 @@ CONTAINS
 
   END SUBROUTINE VectorGradient3D
 
-  SUBROUTINE VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nvar,&
-                                     spec,vectorChar,scalarChar,outputFile,enableMPI,gpuAccel)
+  SUBROUTINE VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nvar, &
+                                spec,vectorChar,scalarChar,outputFile,enableMPI,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "VectorDivergence3D"
     IMPLICIT NONE
@@ -1749,7 +1668,7 @@ CONTAINS
     INTEGER,INTENT(in) :: tqDegree
     INTEGER,INTENT(in) :: dForm
     INTEGER,INTENT(in) :: nVar
-    TYPE(MeshSpec), INTENT(in) :: spec
+    TYPE(MeshSpec),INTENT(in) :: spec
     CHARACTER(240),INTENT(in) :: vectorChar(1:3)
     CHARACTER(240),INTENT(in) :: scalarChar
     CHARACTER(*),INTENT(in) :: outputFile
@@ -1767,51 +1686,47 @@ CONTAINS
     ! Create the equation parser object
     DO idir = 1,3
       feq(idir) = EquationParser(vectorChar(idir), (/'x','y','z'/))
-    ENDDO
+    END DO
 
     dfeqChar = EquationParser(scalarChar, (/'x','y','z'/))
 
     ! Load the control function
-    DO iel = 1, dgsol % mesh % nElem
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,dgsol % mesh % nElem
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
 
               DO idir = 1,3
                 dgsol % flux % interior % hostData(idir,i,j,k,ivar,iel) = &
-                  feq(idir) % Evaluate( dgsol % geometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-              ENDDO
+                  feq(idir) % Evaluate(dgsol % geometry % x % interior % hostData(1:3,i,j,k,1,iel))
+              END DO
 
-            ENDDO
+            END DO
 
             DO iside = 1,6
               DO idir = 1,3
                 dgsol % flux % boundary % hostData(idir,j,k,ivar,iside,iel) = &
-                  feq(idir) % Evaluate( dgsol % geometry % x % boundary % hostData(1:3,j,k,1,iside,iel) )
-              ENDDO
-            ENDDO
+                  feq(idir) % Evaluate(dgsol % geometry % x % boundary % hostData(1:3,j,k,1,iside,iel))
+              END DO
+            END DO
 
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL dgsol % flux % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL dgsol % CalculateFluxDivergence(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL dgsol % fluxDivergence % UpdateHost()
     END IF
 
- 
     CALL dgsol % Write(outputFile)
 
     ! Clean up
@@ -1819,8 +1734,8 @@ CONTAINS
 
   END SUBROUTINE VectorDivergence3D
 
-  SUBROUTINE TensorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                 tensorChar,gpuAccel)
+  SUBROUTINE TensorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                            tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorInterp3D"
     IMPLICIT NONE
@@ -1843,7 +1758,7 @@ CONTAINS
     INTEGER :: row,col
 
     nel = nElem*nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1877,41 +1792,37 @@ CONTAINS
     DO col = 1,3
       DO row = 1,3
         tensorEq(row,col) = EquationParser(TRIM(tensorChar(row,col)), (/'x','y','z'/))
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
               DO col = 1,3
                 DO row = 1,3
                   f % interior % hostData(row,col,i,j,k,ivar,iel) = &
-                    tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                    tensorEq(row,col) % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
     CALL f % GridInterp(fInterp,gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL fInterp % UpdateHost()
     END IF
-
 
     ! To do : file io for finterp, targetMesh, targetGeometry
 
@@ -1925,8 +1836,8 @@ CONTAINS
 
   END SUBROUTINE TensorInterp3D
 
-  SUBROUTINE TensorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar,&
-                                         tensorChar,gpuAccel)
+  SUBROUTINE TensorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nvar, &
+                                    tensorChar,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "TensorBoundaryInterp3D"
     IMPLICIT NONE
@@ -1949,7 +1860,7 @@ CONTAINS
     INTEGER :: row,col
 
     nel = nElem*nElem*nElem
-    
+
     msg = 'Number of elements : '//Int2Str(nEl)
     INFO(TRIM(msg))
     msg = 'Number of control points : '//Int2Str(cqDegree)
@@ -1974,41 +1885,37 @@ CONTAINS
     DO col = 1,3
       DO row = 1,3
         tensorEq(row,col) = EquationParser(TRIM(tensorChar(row,col)), (/'x','y','z'/))
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Load the control function
-    DO iel = 1, nel
-      DO ivar = 1, nvar
-        DO k = 0, cqDegree
-          DO j = 0, cqDegree
-            DO i = 0, cqDegree
+    DO iel = 1,nel
+      DO ivar = 1,nvar
+        DO k = 0,cqDegree
+          DO j = 0,cqDegree
+            DO i = 0,cqDegree
               DO col = 1,3
                 DO row = 1,3
                   f % interior % hostData(row,col,i,j,k,ivar,iel) = &
-                    tensorEq(row,col) % Evaluate( controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel) )
-                ENDDO
-              ENDDO
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
-    ENDDO
+                    tensorEq(row,col) % Evaluate(controlGeometry % x % interior % hostData(1:3,i,j,k,1,iel))
+                END DO
+              END DO
+            END DO
+          END DO
+        END DO
+      END DO
+    END DO
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateDevice()
     END IF
 
-
     ! Run the grid interpolation
-     CALL f % BoundaryInterp(gpuAccel)
+    CALL f % BoundaryInterp(gpuAccel)
 
-     
     IF (gpuAccel) THEN
       CALL f % UpdateHost()
     END IF
-
 
     ! To do : file io for f and controlGeometry
 

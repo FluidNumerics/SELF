@@ -116,8 +116,6 @@ MODULE SELF_Geometry
     END SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper
   END INTERFACE
 
-
-
 CONTAINS
 
   SUBROUTINE Init_Geometry1D(myGeom,cqType,tqType,cqDegree,tqDegree,nElem)
@@ -162,10 +160,8 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
-
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
-
 
   END SUBROUTINE UpdateHost_Geometry1D
 
@@ -173,10 +169,8 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
-
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
-
 
   END SUBROUTINE UpdateDevice_Geometry1D
 
@@ -196,11 +190,11 @@ CONTAINS
     TYPE(Scalar1D) :: xMesh
     INTEGER :: quadrature
 
-    IF(PRESENT(meshQuadrature))THEN
+    IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
       quadrature = GAUSS_LOBATTO
-    ENDIF
+    END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
@@ -300,12 +294,10 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
     CALL myGeom % J % UpdateHost()
-
 
   END SUBROUTINE UpdateHost_SEMQuad
 
@@ -313,12 +305,10 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
-
 
   END SUBROUTINE UpdateDevice_SEMQuad
   SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
@@ -341,12 +331,11 @@ CONTAINS
     TYPE(Vector2D) :: xMesh
     INTEGER :: quadrature
 
-    IF(PRESENT(meshQuadrature))THEN
+    IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
       quadrature = GAUSS_LOBATTO
-    ENDIF
-
+    END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
@@ -367,8 +356,7 @@ CONTAINS
       END DO
     END DO
 
-
-    IF( GPUAvailable() )THEN
+    IF (GPUAvailable()) THEN
       CALL xMesh % UpdateDevice()
       CALL xMesh % GridInterp(myGeom % x,.TRUE.)
       CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
@@ -378,8 +366,7 @@ CONTAINS
       CALL xMesh % GridInterp(myGeom % x,.FALSE.)
       CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateMetricTerms()
-    ENDIF
-
+    END IF
 
     CALL xMesh % Free()
 
@@ -392,18 +379,17 @@ CONTAINS
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
 
-
-    IF(GPUAvailable())THEN
+    IF (GPUAvailable()) THEN
       CALL CalculateContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dxds % interior % deviceData, &
-                                                          myGeom % dsdx % interior % deviceData, &
-                                                          myGeom % dxds % N, &
-                                                          myGeom % dxds % nElem)
+                                                           myGeom % dsdx % interior % deviceData, &
+                                                           myGeom % dxds % N, &
+                                                           myGeom % dxds % nElem)
       ! Interpolate the contravariant tensor to the boundaries
       CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
       CALL AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
-                                                               myGeom % J % boundary % deviceData, &
-                                                               myGeom % J % N, &
-                                                               myGeom % J % nElem)
+                                                                myGeom % J % boundary % deviceData, &
+                                                                myGeom % J % N, &
+                                                                myGeom % J % nElem)
     ELSE
       ! Now calculate the contravariant basis vectors
       ! In this convention, dsdx(j,i) is contravariant vector i, component j
@@ -442,7 +428,7 @@ CONTAINS
         END DO
       END DO
 
-    ENDIF
+    END IF
 
   END SUBROUTINE CalculateContravariantBasis_SEMQuad
 
@@ -450,7 +436,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-    IF(GPUAvailable())THEN         
+    IF (GPUAvailable()) THEN
       CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
@@ -462,7 +448,7 @@ CONTAINS
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateContravariantBasis()
-    ENDIF
+    END IF
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
 
@@ -562,12 +548,11 @@ CONTAINS
     TYPE(Vector3D) :: xMesh
     INTEGER :: quadrature
 
-    IF(PRESENT(meshQuadrature))THEN
+    IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
       quadrature = GAUSS_LOBATTO
-    ENDIF
-
+    END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
@@ -591,7 +576,7 @@ CONTAINS
     END DO
 
     ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    IF(GPUAvailable())THEN
+    IF (GPUAvailable()) THEN
       CALL xMesh % UpdateDevice()
       CALL xMesh % GridInterp(myGeom % x,.TRUE.)
       CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
@@ -601,7 +586,7 @@ CONTAINS
       CALL xMesh % GridInterp(myGeom % x,.FALSE.)
       CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateMetricTerms()
-    ENDIF
+    END IF
 
     CALL xMesh % Free()
 
@@ -614,8 +599,7 @@ CONTAINS
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
 
-
-    IF(GPUAvailable())THEN
+    IF (GPUAvailable()) THEN
       CALL CalculateContravariantBasis_SEMHex_gpu_wrapper(myGeom % dxds % interior % deviceData, &
                                                           myGeom % dsdx % interior % deviceData, &
                                                           myGeom % dxds % N, &
@@ -719,8 +703,7 @@ CONTAINS
         END DO
       END DO
 
-    ENDIF
-
+    END IF
 
   END SUBROUTINE CalculateContravariantBasis_SEMHex
 
@@ -728,7 +711,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
-    IF(GPUAvailable())THEN           
+    IF (GPUAvailable()) THEN
       CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
@@ -740,7 +723,7 @@ CONTAINS
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateContravariantBasis()
-    ENDIF
+    END IF
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 

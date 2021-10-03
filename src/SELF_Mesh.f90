@@ -15,7 +15,6 @@ MODULE SELF_Mesh
   USE SELF_HDF5
   USE HDF5
 
-
   USE ISO_C_BINDING
 
   IMPLICIT NONE
@@ -104,7 +103,6 @@ MODULE SELF_Mesh
   INTEGER,PARAMETER :: selfMaxNodalValence2D = 6
   INTEGER,PARAMETER :: selfMaxNodalValence3D = 10
 
-
   ! Side Ordering
   INTEGER,PARAMETER :: selfSide2D_South = 1
   INTEGER,PARAMETER :: selfSide2D_East = 2
@@ -127,9 +125,9 @@ MODULE SELF_Mesh
     INTEGER :: blockMesh_nElemX
     INTEGER :: blockMesh_nElemY
     INTEGER :: blockMesh_nElemZ
-    REAL(prec) :: blockMesh_x0, blockMesh_x1
-    REAL(prec) :: blockMesh_y0, blockMesh_y1
-    REAL(prec) :: blockMesh_z0, blockMesh_z1
+    REAL(prec) :: blockMesh_x0,blockMesh_x1
+    REAL(prec) :: blockMesh_y0,blockMesh_y1
+    REAL(prec) :: blockMesh_z0,blockMesh_z1
 
   END TYPE MeshSpec
 
@@ -153,8 +151,8 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh1D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh1D
 
-    GENERIC,PUBLIC  :: Read_HOPr => Read_HOPr_Mesh1D_serial, Read_HOPr_Mesh1D_parallel
-    PROCEDURE,PRIVATE :: Read_HOPr_Mesh1D_serial, Read_HOPr_Mesh1D_parallel
+    GENERIC,PUBLIC  :: Read_HOPr => Read_HOPr_Mesh1D_serial,Read_HOPr_Mesh1D_parallel
+    PROCEDURE,PRIVATE :: Read_HOPr_Mesh1D_serial,Read_HOPr_Mesh1D_parallel
     PROCEDURE,PUBLIC  :: Write_HOPr => Write_HOPr_Mesh1D
 
   END TYPE Mesh1D
@@ -195,10 +193,10 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh2D
 
-    GENERIC,PUBLIC :: Load => Load_Mesh2D_serial, Load_Mesh2D_parallel
-    PROCEDURE,PRIVATE :: Load_Mesh2D_serial, Load_Mesh2D_parallel
-    GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D_serial, Read_HOPr_Mesh2D_parallel
-    PROCEDURE,PRIVATE :: Read_HOPr_Mesh2D_serial, Read_HOPr_Mesh2D_parallel
+    GENERIC,PUBLIC :: Load => Load_Mesh2D_serial,Load_Mesh2D_parallel
+    PROCEDURE,PRIVATE :: Load_Mesh2D_serial,Load_Mesh2D_parallel
+    GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D_serial,Read_HOPr_Mesh2D_parallel
+    PROCEDURE,PRIVATE :: Read_HOPr_Mesh2D_serial,Read_HOPr_Mesh2D_parallel
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh2D
 
     PROCEDURE,PUBLIC :: Read_ISMv2 => Read_ISMv2_Mesh2D
@@ -241,18 +239,15 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh3D
     PROCEDURE,PUBLIC :: UniformBlockMesh => UniformBlockMesh_Mesh3D
 
-    GENERIC,PUBLIC :: Load => Load_Mesh3D_serial, Load_Mesh3D_parallel
-    PROCEDURE,PRIVATE :: Load_Mesh3D_serial, Load_Mesh3D_parallel
-    GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D_serial, Read_HOPr_Mesh3D_parallel
-    PROCEDURE,PRIVATE :: Read_HOPr_Mesh3D_serial, Read_HOPr_Mesh3D_parallel
+    GENERIC,PUBLIC :: Load => Load_Mesh3D_serial,Load_Mesh3D_parallel
+    PROCEDURE,PRIVATE :: Load_Mesh3D_serial,Load_Mesh3D_parallel
+    GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D_serial,Read_HOPr_Mesh3D_parallel
+    PROCEDURE,PRIVATE :: Read_HOPr_Mesh3D_serial,Read_HOPr_Mesh3D_parallel
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh3D
 
   END TYPE Mesh3D
 
 CONTAINS
-
-
-
 
   SUBROUTINE Init_Mesh1D(myMesh,nGeo,nElem,nNodes,nBCs)
     IMPLICIT NONE
@@ -270,13 +265,13 @@ CONTAINS
     myMesh % nBCs = nBCs
 
     CALL myMesh % hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                                   upBound=(/4,nElem/))
+                                        upBound=(/4,nElem/))
 
     CALL myMesh % hopr_nodeCoords % Alloc(loBound=1, &
-                                     upBound=nNodes)
+                                          upBound=nNodes)
 
     CALL myMesh % hopr_globalNodeIDs % Alloc(loBound=1, &
-                                        upBound=nNodes)
+                                             upBound=nNodes)
 
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
@@ -303,17 +298,15 @@ CONTAINS
     DEALLOCATE (myMesh % BCNames)
 
   END SUBROUTINE Free_Mesh1D
-  
+
   SUBROUTINE UpdateHost_Mesh1D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
-
 
     CALL myMesh % hopr_elemInfo % UpdateHost()
     CALL myMesh % hopr_nodeCoords % UpdateHost()
     CALL myMesh % hopr_globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
-
 
   END SUBROUTINE UpdateHost_Mesh1D
 
@@ -321,12 +314,10 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh1D),INTENT(inout) :: myMesh
 
-
     CALL myMesh % hopr_elemInfo % UpdateDevice()
     CALL myMesh % hopr_nodeCoords % UpdateDevice()
     CALL myMesh % hopr_globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
-
 
   END SUBROUTINE UpdateDevice_Mesh1D
 
@@ -384,52 +375,52 @@ CONTAINS
 
   END SUBROUTINE UniformBlockMesh_Mesh1D
 
-  SUBROUTINE Read_HOPr_Mesh1D_serial( myMesh, meshFile )
-  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-  ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
+  SUBROUTINE Read_HOPr_Mesh1D_serial(myMesh,meshFile)
+    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+    ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
     IMPLICIT NONE
-    CLASS(Mesh1D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh1D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER :: nGlobalElem
     INTEGER :: nLocalNodes
-    INTEGER :: nGeo, nBCs
+    INTEGER :: nGeo,nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfReal_r1) :: hopr_nodeCoords
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
-    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
-    CALL ReadArray_HDF5(fileId, 'BCType', bcType)
+    CALL ReadArray_HDF5(fileId,'BCType',bcType)
 
     ! Read local subarray of ElemInfo
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/6,nGlobalElem/))
+                               upBound=(/6,nGlobalElem/))
 
-    CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo)
+    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem)-hopr_elemInfo % hostData(5,1)
+    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem) - hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=1, &
-                            upBound=nLocalNodes)
+                                 upBound=nLocalNodes)
 
     CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                               upBound=nLocalNodes)
+                                    upBound=nLocalNodes)
 
-    CALL ReadArray_HDF5(fileId, 'NodeCoords', hopr_nodeCoords)
-    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', hopr_globalNodeIDs)
+    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
+    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
 
     CALL Close_HDF5(fileID)
 
@@ -448,30 +439,30 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh1D_serial
 
-  SUBROUTINE Read_HOPr_Mesh1D_parallel( myMesh, meshFile, decomp )
-  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-  ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
+  SUBROUTINE Read_HOPr_Mesh1D_parallel(myMesh,meshFile,decomp)
+    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+    ! Adapted for 1D Mesh : Note that HOPR does not have 1D mesh output.
     IMPLICIT NONE
-    CLASS(Mesh1D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
-    TYPE(MPILayer), INTENT(inout) :: decomp
+    CLASS(Mesh1D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
+    TYPE(MPILayer),INTENT(inout) :: decomp
     ! Local
     INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER(HID_T) :: offset(1:2),gOffset(1)
     INTEGER :: nGlobalElem
-    INTEGER :: firstElem, nLocalElems
-    INTEGER :: firstNode, nLocalNodes
-    INTEGER :: nGeo, nBCs
+    INTEGER :: firstElem,nLocalElems
+    INTEGER :: firstNode,nLocalNodes
+    INTEGER :: nGeo,nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfReal_r1) :: hopr_nodeCoords
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, decomp % mpiComm)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
 
-    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
-    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
 
     CALL decomp % SetElemToRank(nGlobalElem)
 
@@ -479,34 +470,34 @@ CONTAINS
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
     offset(:) = 0
-    CALL ReadArray_HDF5(fileId, 'BCType', bcType, offset)
+    CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
 
     ! Read local subarray of ElemInfo
-    firstElem = decomp % offsetElem % hostData(decomp % rankId)+1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-&
-            decomp % offsetElem % hostData(decomp % rankId)
+    firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
+                  decomp % offsetElem % hostData(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/6,nLocalElems/))
+                               upBound=(/6,nLocalElems/))
 
-    offset = (/0, firstElem-1/)
-    CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo, offset )
+    offset = (/0,firstElem - 1/)
+    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode= hopr_elemInfo % hostData(5,1)+1
-    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems)-hopr_elemInfo % hostData(5,1)
+    firstNode = hopr_elemInfo % hostData(5,1) + 1
+    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems) - hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=1, &
-                            upBound=nLocalNodes)
+                                 upBound=nLocalNodes)
 
     CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                               upBound=nLocalNodes)
+                                    upBound=nLocalNodes)
 
-    gOffset = (/firstNode-1/)
-    CALL ReadArray_HDF5(fileId, 'NodeCoords', hopr_nodeCoords, gOffset)
-    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', hopr_globalNodeIDs, gOffset)
+    gOffset = (/firstNode - 1/)
+    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,gOffset)
+    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
 
     CALL Close_HDF5(fileID)
 
@@ -525,28 +516,28 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh1D_parallel
 
-  SUBROUTINE Write_HOPr_Mesh1D( myMesh, meshFile )
-  ! Writes mesh output in HOPR format (serial IO only)
+  SUBROUTINE Write_HOPr_Mesh1D(myMesh,meshFile)
+    ! Writes mesh output in HOPR format (serial IO only)
     IMPLICIT NONE
-    CLASS(Mesh1D), INTENT(inout) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh1D),INTENT(inout) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
- 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
- 
-    CALL WriteAttribute_HDF5(fileId, 'nElems', myMesh % nElem)
-    CALL WriteAttribute_HDF5(fileId, 'Ngeo', myMesh % nGeo )
-    CALL WriteAttribute_HDF5(fileId, 'nBCs', myMesh % nBCs)
 
-    CALL WriteArray_HDF5(fileId, 'BCType', myMesh % bcType)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+
+    CALL WriteAttribute_HDF5(fileId,'nElems',myMesh % nElem)
+    CALL WriteAttribute_HDF5(fileId,'Ngeo',myMesh % nGeo)
+    CALL WriteAttribute_HDF5(fileId,'nBCs',myMesh % nBCs)
+
+    CALL WriteArray_HDF5(fileId,'BCType',myMesh % bcType)
 
     ! Read local subarray of ElemInfo
-    CALL WriteArray_HDF5(fileId, 'ElemInfo', myMesh % hopr_elemInfo )
+    CALL WriteArray_HDF5(fileId,'ElemInfo',myMesh % hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId, 'NodeCoords', myMesh % hopr_nodeCoords)
-    CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', myMesh % hopr_globalNodeIDs)
+    CALL WriteArray_HDF5(fileId,'NodeCoords',myMesh % hopr_nodeCoords)
+    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',myMesh % hopr_globalNodeIDs)
 
     CALL Close_HDF5(fileID)
 
@@ -573,34 +564,34 @@ CONTAINS
     myMesh % nBCs = nBCs
 
     CALL myMesh % hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                                   upBound=(/6,nElem/))
+                                        upBound=(/6,nElem/))
 
     CALL myMesh % self_sideInfo % Alloc(loBound=(/1,1,1/), &
-                                   upBound=(/5,4,nElem/))
+                                        upBound=(/5,4,nElem/))
 
     CALL myMesh % hopr_sideInfo % Alloc(loBound=(/1,1/), &
-                                   upBound=(/5,nSides/))
+                                        upBound=(/5,nSides/))
 
     CALL myMesh % hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                                     upBound=(/2,nNodes/))
+                                          upBound=(/2,nNodes/))
 
     CALL myMesh % self_nodeCoords % Alloc(loBound=(/1,1,1/), &
-                                     upBound=(/2,(nGeo+1)**2,nElem/))
+                                          upBound=(/2, (nGeo + 1)**2,nElem/))
 
     CALL myMesh % hopr_globalNodeIDs % Alloc(loBound=1, &
-                                        upBound=nNodes)
+                                             upBound=nNodes)
 
     CALL myMesh % hopr_CGNSCornerMap % Alloc(loBound=1, &
-                                        upBound=4)
+                                             upBound=4)
 
     CALL myMesh % hopr_CGNSSideMap % Alloc(loBound=(/1,1/), &
-                                      upBound=(/2,4/))
+                                           upBound=(/2,4/))
 
-    CALL myMesh % hopr_curveNodeMap % Alloc(loBound=(/1,1/),&
-                                       upBound=(/2,(nGeo+1)**2/))
+    CALL myMesh % hopr_curveNodeMap % Alloc(loBound=(/1,1/), &
+                                            upBound=(/2, (nGeo + 1)**2/))
 
     CALL myMesh % hopr_curveNodeMapInv % Alloc(loBound=(/0,0/), &
-                                          upBound=(/nGeo,nGeo/))
+                                               upBound=(/nGeo,nGeo/))
 
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
@@ -609,18 +600,18 @@ CONTAINS
 
     ! Create lookup tables to assist with connectivity generation
     myMesh % hopr_CGNSCornerMap % hostData(1) = 1
-    myMesh % hopr_CGNSCornerMap % hostData(2) = nGeo+1
-    myMesh % hopr_CGNSCornerMap % hostData(3) = (nGeo+1)**2
-    myMesh % hopr_CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
+    myMesh % hopr_CGNSCornerMap % hostData(2) = nGeo + 1
+    myMesh % hopr_CGNSCornerMap % hostData(3) = (nGeo + 1)**2
+    myMesh % hopr_CGNSCornerMap % hostData(4) = nGeo*(nGeo + 1) + 1
 
     l = 0
-    DO j = 0, nGeo
-      DO i = 0, nGeo
-        l = l+1
+    DO j = 0,nGeo
+      DO i = 0,nGeo
+        l = l + 1
         myMesh % hopr_curveNodeMap % hostData(1:2,l) = (/i,j/)
         myMesh % hopr_curveNodeMapInv % hostData(i,j) = l
-      ENDDO
-    ENDDO
+      END DO
+    END DO
 
     ! Maps from local corner node id to CGNS side
     myMesh % hopr_CGNSSideMap % hostData(1:2,1) = (/1,2/)
@@ -659,7 +650,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
-
     CALL myMesh % hopr_elemInfo % UpdateHost()
     CALL myMesh % hopr_sideInfo % UpdateHost()
     CALL myMesh % self_sideInfo % UpdateHost()
@@ -668,22 +658,19 @@ CONTAINS
     CALL myMesh % hopr_globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
 
-
   END SUBROUTINE UpdateHost_Mesh2D
 
   SUBROUTINE UpdateDevice_Mesh2D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(inout) :: myMesh
 
-
     CALL myMesh % hopr_elemInfo % UpdateDevice()
     CALL myMesh % hopr_sideInfo % UpdateDevice()
-    CALL myMesh % self_sideInfo % UpdateDevice() 
+    CALL myMesh % self_sideInfo % UpdateDevice()
     CALL myMesh % hopr_nodeCoords % UpdateDevice()
     CALL myMesh % self_nodeCoords % UpdateDevice()
     CALL myMesh % hopr_globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
-
 
   END SUBROUTINE UpdateDevice_Mesh2D
 
@@ -746,9 +733,9 @@ CONTAINS
         myMesh % hopr_elemInfo % hostData(1,elid) = selfQuadLinear ! Element Type
         myMesh % hopr_elemInfo % hostData(2,elid) = 1 ! Element Zone
         myMesh % hopr_elemInfo % hostData(3,elid) = sid ! Side Index Start
-        sid = sid+4
+        sid = sid + 4
         myMesh % hopr_elemInfo % hostData(4,elid) = sid ! Side Index End
-        myMesh % hopr_elemInfo % hostData(5,elid) = nid-1 ! Node Index Start
+        myMesh % hopr_elemInfo % hostData(5,elid) = nid - 1 ! Node Index Start
         DO j = 0,nGeo
           DO i = 0,nGeo
             myMesh % hopr_nodeCoords % hostData(1:2,nid) = xGeo % interior % hostData(1:2,i,j,1,elid)
@@ -768,70 +755,70 @@ CONTAINS
     CALL xGeo % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh2D
-  
+
   SUBROUTINE Load_Mesh2D_serial(myMesh,myMeshSpec)
 #undef __FUNC__
 #define __FUNC__ "Load_Mesh2D"
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(out) :: myMesh
-    TYPE(MeshSpec), INTENT(in) :: myMeshSpec
+    CLASS(Mesh2D),INTENT(out) :: myMesh
+    TYPE(MeshSpec),INTENT(in) :: myMeshSpec
 
-      IF(myMeshSpec % blockMesh)THEN
+    IF (myMeshSpec % blockMesh) THEN
 
-          CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo,&
-                (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY/),&
-                (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1,&
-                  myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
-      ELSE
+      CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo, &
+                                     (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY/), &
+                                     (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1, &
+                                       myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
+    ELSE
 
-        CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
+      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
 
-      ENDIF
-    
+    END IF
+
   END SUBROUTINE Load_Mesh2D_serial
 
   SUBROUTINE Load_Mesh2D_parallel(myMesh,myMeshSpec,decomp)
 #undef __FUNC__
 #define __FUNC__ "Load_Mesh2D"
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(out) :: myMesh
-    TYPE(MeshSpec), INTENT(in) :: myMeshSpec
-    TYPE(MPILayer), INTENT(inout) :: decomp
+    CLASS(Mesh2D),INTENT(out) :: myMesh
+    TYPE(MeshSpec),INTENT(in) :: myMeshSpec
+    TYPE(MPILayer),INTENT(inout) :: decomp
 
-      IF(myMeshSpec % blockMesh)THEN
+    IF (myMeshSpec % blockMesh) THEN
 
-        IF(decomp % nRanks > 1)THEN ! Error out
-          ERROR("Block Mesh only supported in serial")
-          STOP ! TO DO : Safe exit 
-        ELSE
-          CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo,&
-                (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY/),&
-                (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1,&
-                  myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
-        ENDIF
-
+      IF (decomp % nRanks > 1) THEN ! Error out
+        ERROR("Block Mesh only supported in serial")
+        STOP ! TO DO : Safe exit
       ELSE
+        CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo, &
+                                       (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY/), &
+                                       (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1, &
+                                         myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
+      END IF
 
-        CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+    ELSE
 
-      ENDIF
-    
+      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+
+    END IF
+
   END SUBROUTINE Load_Mesh2D_parallel
 
-  SUBROUTINE Read_ISMv2_Mesh2D( myMesh, meshFile )
+  SUBROUTINE Read_ISMv2_Mesh2D(myMesh,meshFile)
 #undef __FUNC__
 #define __FUNC__ "Read_ISMv2_Mesh2D"
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh2D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
-    INTEGER :: nNodes, nSides, nElem, nGeo
-    INTEGER :: lnid, nid, usid, lsid, sid, eid
+    INTEGER :: nNodes,nSides,nElem,nGeo
+    INTEGER :: lnid,nid,usid,lsid,sid,eid
     INTEGER :: fUnit
-    INTEGER :: i, j
+    INTEGER :: i,j
     CHARACTER(100) :: line
     CHARACTER(500) :: msg
-    REAL(prec) :: x(1:3), x0(1:2), x1(1:2)
+    REAL(prec) :: x(1:3),x0(1:2),x1(1:2)
     REAL(prec) :: wSurf(1:2),eSurf(1:2),nSurf(1:2),sSurf(1:2)
     REAL(prec) :: P1(1:2),P2(1:2)
     REAL(prec) :: l1(1:2),l2(1:2)
@@ -839,149 +826,149 @@ CONTAINS
     INTEGER :: bCurveFlag(1:4)
     TYPE(Lagrange) :: interp
 
-      OPEN(UNIT=NEWUNIT(fUnit),&
-           FILE=TRIM(meshFile),&
-           FORM='FORMATTED',&
-           STATUS='OLD',&
-           ACCESS='SEQUENTIAL')
+    OPEN (UNIT=NEWUNIT(fUnit), &
+          FILE=TRIM(meshFile), &
+          FORM='FORMATTED', &
+          STATUS='OLD', &
+          ACCESS='SEQUENTIAL')
 
-      READ(fUnit,*) line
-      IF( TRIM(line) /= ' ISM-v2' )THEN
-        msg='Unrecognized file format : '//TRIM(line)
-        ERROR(msg)
-        STOP
-      ENDIF
+    READ (fUnit,*) line
+    IF (TRIM(line) /= ' ISM-v2') THEN
+      msg = 'Unrecognized file format : '//TRIM(line)
+      ERROR(msg)
+      STOP
+    END IF
 
-      READ(fUnit,*) nNodes, nSides, nElem, nGeo
+    READ (fUnit,*) nNodes,nSides,nElem,nGeo
 
-      ! TO DO : Need to check if HOHQMesh places boundary curves on Gauss Lobatto points or uniform points
-      CALL interp % Init(nGeo,GAUSS_LOBATTO,nGeo,GAUSS_LOBATTO)
+    ! TO DO : Need to check if HOHQMesh places boundary curves on Gauss Lobatto points or uniform points
+    CALL interp % Init(nGeo,GAUSS_LOBATTO,nGeo,GAUSS_LOBATTO)
 
-      ! When we initialize the mesh, we set nNodes=nElem*4*(nGeo+1)**2 and
-      ! nSides = nElem*4 since we still use `nNodes` and `nSides`
-      ! in the input correspond to the HOPR definitions of these
-      ! variables. 
-      ! `nSides` in HOHQMesh corresponds to nUniqueSides in HOPR and SELF 
-      ! `nNodes` in HOHQMesh corresponds to nCornerNodes (unique) in HOPR and SELF
-      CALL myMesh % Init(nGeo,nElem,nElem*4,nElem*(nGeo+1)**2,self_nBCsDefault)
-      myMesh % nUniqueSides = nSides
-      myMesh % nCornerNodes = nNodes
+    ! When we initialize the mesh, we set nNodes=nElem*4*(nGeo+1)**2 and
+    ! nSides = nElem*4 since we still use `nNodes` and `nSides`
+    ! in the input correspond to the HOPR definitions of these
+    ! variables.
+    ! `nSides` in HOHQMesh corresponds to nUniqueSides in HOPR and SELF
+    ! `nNodes` in HOHQMesh corresponds to nCornerNodes (unique) in HOPR and SELF
+    CALL myMesh % Init(nGeo,nElem,nElem*4,nElem*(nGeo + 1)**2,self_nBCsDefault)
+    myMesh % nUniqueSides = nSides
+    myMesh % nCornerNodes = nNodes
 
-      CALL myMesh % hohq_cornerNodes % Alloc((/1,1/), &
-                                             (/2,nNodes/))
-      CALL myMesh % hohq_sideInfo % Alloc((/1,1/), &
-                                          (/6,nSides/))
-      CALL myMesh % hohq_elemInfo % Alloc((/1,1/), &
-                                          (/4,nElem/))
-      CALL myMesh % hohq_sideCurves % Alloc((/1,0,1,1/), &
+    CALL myMesh % hohq_cornerNodes % Alloc((/1,1/), &
+                                           (/2,nNodes/))
+    CALL myMesh % hohq_sideInfo % Alloc((/1,1/), &
+                                        (/6,nSides/))
+    CALL myMesh % hohq_elemInfo % Alloc((/1,1/), &
+                                        (/4,nElem/))
+    CALL myMesh % hohq_sideCurves % Alloc((/1,0,1,1/), &
                                           (/2,nGeo,4,nElem/))
 
-      DO nid = 1, myMesh % nCornerNodes
-        READ(fUnit,*) x
-        myMesh % hohq_cornerNodes % hostData(1:2,nid) = x(1:2)
-      ENDDO
+    DO nid = 1,myMesh % nCornerNodes
+      READ (fUnit,*) x
+      myMesh % hohq_cornerNodes % hostData(1:2,nid) = x(1:2)
+    END DO
 
-      DO usid = 1, myMesh % nUniqueSides
-        READ(fUnit,*) myMesh % hohq_sideInfo % hostData(1:6,usid)
-      ENDDO
+    DO usid = 1,myMesh % nUniqueSides
+      READ (fUnit,*) myMesh % hohq_sideInfo % hostData(1:6,usid)
+    END DO
 
-      DO eid = 1, myMesh % nElem
-        READ(fUnit,*) myMesh % hohq_elemInfo % hostData(1:4,eid)
-        READ(fUnit,*) bCurveFlag(1:4)
-        DO lsid = 1, 4
-          IF(bCurveFlag(lsid) == 1)THEN
-            DO i = 0, nGeo
-              READ(fUnit,*) x
-              myMesh % hohq_sideCurves % hostData(1:2,i,lsid,eid) = x(1:2)
-            ENDDO
-          ELSE
+    DO eid = 1,myMesh % nElem
+      READ (fUnit,*) myMesh % hohq_elemInfo % hostData(1:4,eid)
+      READ (fUnit,*) bCurveFlag(1:4)
+      DO lsid = 1,4
+        IF (bCurveFlag(lsid) == 1) THEN
+          DO i = 0,nGeo
+            READ (fUnit,*) x
+            myMesh % hohq_sideCurves % hostData(1:2,i,lsid,eid) = x(1:2)
+          END DO
+        ELSE
 
-            ! For non-polynomial sides, create the side curve through interpolation between corner nodes
-            lnid = myMesh % hopr_CGNSSideMap % hostData(1,lsid)
-            nid = myMesh % hohq_elemInfo % hostData(lnid,eid)
-            x0(1:2) = myMesh % hohq_cornerNodes % hostData(1:2,nid)
+          ! For non-polynomial sides, create the side curve through interpolation between corner nodes
+          lnid = myMesh % hopr_CGNSSideMap % hostData(1,lsid)
+          nid = myMesh % hohq_elemInfo % hostData(lnid,eid)
+          x0(1:2) = myMesh % hohq_cornerNodes % hostData(1:2,nid)
 
-            lnid = myMesh % hopr_CGNSSideMap % hostData(2,lsid)
-            nid = myMesh % hohq_elemInfo % hostData(lnid,eid)
-            x1(1:2) = myMesh % hohq_cornerNodes % hostData(1:2,nid)
+          lnid = myMesh % hopr_CGNSSideMap % hostData(2,lsid)
+          nid = myMesh % hohq_elemInfo % hostData(lnid,eid)
+          x1(1:2) = myMesh % hohq_cornerNodes % hostData(1:2,nid)
 
-            DO i = 0, nGeo
-              myMesh % hohq_sideCurves % hostData(1:2,i,lsid,eid) = 0.5_prec*(&
-                       x0(1:2)*(1.0_prec-interp % controlPoints % hostData(i))+&
-                       x1(1:2)*(interp % controlPoints % hostData(i)+1.0_prec))
-            ENDDO
+          DO i = 0,nGeo
+            myMesh % hohq_sideCurves % hostData(1:2,i,lsid,eid) = 0.5_prec*( &
+                                                           x0(1:2)*(1.0_prec - interp % controlPoints % hostData(i)) + &
+                                                              x1(1:2)*(interp % controlPoints % hostData(i) + 1.0_prec))
+          END DO
 
-          ENDIF
-        ENDDO
-        READ(fUnit,*) line
-        ! TO DO : Parse line for boundary conditions
-      ENDDO
+        END IF
+      END DO
+      READ (fUnit,*) line
+      ! TO DO : Parse line for boundary conditions
+    END DO
 
-      CLOSE(fUnit)
+    CLOSE (fUnit)
 
-      ! Fill in hopr_elemInfo
-      ! To fill in the element info, we apply the assumption of a mesh with all quadrilateral elements
-      ! with uniform polynomial order
-      sid = 1
-      nid = 1
-      DO eid = 1, myMesh % nElem
-        myMesh % hopr_elemInfo % hostData(1,eid) = selfQuadLinear ! Element Type
-        myMesh % hopr_elemInfo % hostData(2,eid) = 1 ! Element Zone
-        myMesh % hopr_elemInfo % hostData(3,eid) = sid ! Side Index Start
-        sid = sid+4
-        myMesh % hopr_elemInfo % hostData(4,eid) = sid ! Side Index End
-        myMesh % hopr_elemInfo % hostData(5,eid) = nid-1 ! Node Index Start
-        nid = nid + (nGeo+1)**2
-        myMesh % hopr_elemInfo % hostData(6,eid) = nid ! Node Index End
-      ENDDO
+    ! Fill in hopr_elemInfo
+    ! To fill in the element info, we apply the assumption of a mesh with all quadrilateral elements
+    ! with uniform polynomial order
+    sid = 1
+    nid = 1
+    DO eid = 1,myMesh % nElem
+      myMesh % hopr_elemInfo % hostData(1,eid) = selfQuadLinear ! Element Type
+      myMesh % hopr_elemInfo % hostData(2,eid) = 1 ! Element Zone
+      myMesh % hopr_elemInfo % hostData(3,eid) = sid ! Side Index Start
+      sid = sid + 4
+      myMesh % hopr_elemInfo % hostData(4,eid) = sid ! Side Index End
+      myMesh % hopr_elemInfo % hostData(5,eid) = nid - 1 ! Node Index Start
+      nid = nid + (nGeo + 1)**2
+      myMesh % hopr_elemInfo % hostData(6,eid) = nid ! Node Index End
+    END DO
 
-      ! Generate the self_nodeCoords through transfinite interpolation with linear blending
-      nid = 1
-      DO eid = 1, myMesh % nElem
-        lnid = 1
-        ! Evaluate for corner points of mapping. This requires computational coordinates
-        ! that include -1 and 1 in each computational direction (e.g. Gauss Lobatto)
-        sw = myMesh % hohq_sideCurves % hostData(1:2,0,1,eid)
-        se = myMesh % hohq_sideCurves % hostData(1:2,nGeo,1,eid)
-        ne = myMesh % hohq_sideCurves % hostData(1:2,nGeo,3,eid)
-        nw = myMesh % hohq_sideCurves % hostData(1:2,0,3,eid)
-        DO j = 0, nGeo
-          wSurf = myMesh % hohq_sideCurves % hostData(1:2,j,4,eid)
-          eSurf = myMesh % hohq_sideCurves % hostData(1:2,j,2,eid)
-          l2 = LinearBlend(interp % controlPoints % hostData(j))
-          DO i = 0, nGeo
-            sSurf = myMesh % hohq_sideCurves % hostData(1:2,i,1,eid)
-            nSurf = myMesh % hohq_sideCurves % hostData(1:2,i,3,eid)
-            l1 = LinearBlend(interp % controlPoints % hostData(i))
+    ! Generate the self_nodeCoords through transfinite interpolation with linear blending
+    nid = 1
+    DO eid = 1,myMesh % nElem
+      lnid = 1
+      ! Evaluate for corner points of mapping. This requires computational coordinates
+      ! that include -1 and 1 in each computational direction (e.g. Gauss Lobatto)
+      sw = myMesh % hohq_sideCurves % hostData(1:2,0,1,eid)
+      se = myMesh % hohq_sideCurves % hostData(1:2,nGeo,1,eid)
+      ne = myMesh % hohq_sideCurves % hostData(1:2,nGeo,3,eid)
+      nw = myMesh % hohq_sideCurves % hostData(1:2,0,3,eid)
+      DO j = 0,nGeo
+        wSurf = myMesh % hohq_sideCurves % hostData(1:2,j,4,eid)
+        eSurf = myMesh % hohq_sideCurves % hostData(1:2,j,2,eid)
+        l2 = LinearBlend(interp % controlPoints % hostData(j))
+        DO i = 0,nGeo
+          sSurf = myMesh % hohq_sideCurves % hostData(1:2,i,1,eid)
+          nSurf = myMesh % hohq_sideCurves % hostData(1:2,i,3,eid)
+          l1 = LinearBlend(interp % controlPoints % hostData(i))
 
-            P1 = l1(1)*wSurf + l1(2)*eSurf
-            P2 = l2(1)*sSurf + l2(2)*nSurf
+          P1 = l1(1)*wSurf + l1(2)*eSurf
+          P2 = l2(1)*sSurf + l2(2)*nSurf
 
-            ! Apply transfinite interpolation with linear blending
-            myMesh % self_nodeCoords % hostData(1:2,lnid,eid) = P1+P2-&
-                    l1(1)*(l2(1)*sw + l2(2)*nw) - l1(2)*(l2(1)*se + l2(2)*ne)
+          ! Apply transfinite interpolation with linear blending
+          myMesh % self_nodeCoords % hostData(1:2,lnid,eid) = P1 + P2 - &
+                                                              l1(1)*(l2(1)*sw + l2(2)*nw) - l1(2)*(l2(1)*se + l2(2)*ne)
 
-            myMesh % hopr_nodeCoords % hostData(1:2,nid) = myMesh % self_nodeCoords % hostData(1:2,lnid,eid)
+          myMesh % hopr_nodeCoords % hostData(1:2,nid) = myMesh % self_nodeCoords % hostData(1:2,lnid,eid)
 
-            ! Increment node ids
-            nid = nid+1
-            lnid = lnid+1
+          ! Increment node ids
+          nid = nid + 1
+          lnid = lnid + 1
 
-          ENDDO
-        ENDDO
-      ENDDO
+        END DO
+      END DO
+    END DO
 
-      CALL myMesh % GenerateConnectivity()
+    CALL myMesh % GenerateConnectivity()
 
-      CALL interp % Free()
+    CALL interp % Free()
 
   END SUBROUTINE Read_ISMv2_Mesh2D
 
-  SUBROUTINE GenerateConnectivity_Mesh2D( myMesh )
+  SUBROUTINE GenerateConnectivity_Mesh2D(myMesh)
 #undef __FUNC__
 #define __FUNC__ "GenerateConnectivity_Mesh2D"
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(inout) :: myMesh
+    CLASS(Mesh2D),INTENT(inout) :: myMesh
     ! Local
     INTEGER :: nid,unid,cnid,lnid,rnid
     INTEGER :: eid,sid,lsid,usid,gn1,gn2
@@ -990,167 +977,166 @@ CONTAINS
     INTEGER :: side(1:2,1:myMesh % nUniqueSides)
     TYPE(HashTable) :: sideTable
 
-      ! Set the globalNodeIDs
-      !  > Nodes in the nodeCoords list are possibly repeated since elements may share common sides. When the sides are shared
-      !    the nodeCoords have the same x,y values (to machine precision)
+    ! Set the globalNodeIDs
+    !  > Nodes in the nodeCoords list are possibly repeated since elements may share common sides. When the sides are shared
+    !    the nodeCoords have the same x,y values (to machine precision)
 
-      myMesh % nUniqueNodes = 1
-      myMesh % hopr_globalNodeIDs % hostData(1) = 1
-      DO nid = 2, myMesh % nNodes
+    myMesh % nUniqueNodes = 1
+    myMesh % hopr_globalNodeIDs % hostData(1) = 1
+    DO nid = 2,myMesh % nNodes
 
-        unid = myMesh % nUniqueNodes+1
-        DO rnid = 1, nid-1
-          IF( AlmostEqual(myMesh % hopr_nodeCoords % hostData(1,nid),myMesh % hopr_nodeCoords % hostData(1,rnid)) .AND.& 
-              AlmostEqual(myMesh % hopr_nodeCoords % hostData(2,nid),myMesh % hopr_nodeCoords % hostData(2,rnid)) )THEN
+      unid = myMesh % nUniqueNodes + 1
+      DO rnid = 1,nid - 1
+        IF (AlmostEqual(myMesh % hopr_nodeCoords % hostData(1,nid),myMesh % hopr_nodeCoords % hostData(1,rnid)) .AND. &
+            AlmostEqual(myMesh % hopr_nodeCoords % hostData(2,nid),myMesh % hopr_nodeCoords % hostData(2,rnid))) THEN
 
-            unid = myMesh % hopr_globalNodeIDs % hostData(rnid)
-            EXIT
+          unid = myMesh % hopr_globalNodeIDs % hostData(rnid)
+          EXIT
 
-          ENDIF
-        ENDDO 
+        END IF
+      END DO
 
-        myMesh % hopr_globalNodeIDs % hostData(nid) = unid
-        IF( unid == myMesh % nUniqueNodes + 1 )THEN
-          myMesh % nUniqueNodes = myMesh % nUniqueNodes + 1
-        ENDIF
+      myMesh % hopr_globalNodeIDs % hostData(nid) = unid
+      IF (unid == myMesh % nUniqueNodes + 1) THEN
+        myMesh % nUniqueNodes = myMesh % nUniqueNodes + 1
+      END IF
 
-      ENDDO
+    END DO
 
-      CALL sideTable % Init( myMesh % nUniqueNodes )
+    CALL sideTable % Init(myMesh % nUniqueNodes)
 
-      ! Set the sideInfo
-      sid = 1
-      nUniqueSides = 0
-      DO eid = 1, myMesh % nElem
-        DO lsid = 1, 4
+    ! Set the sideInfo
+    sid = 1
+    nUniqueSides = 0
+    DO eid = 1,myMesh % nElem
+      DO lsid = 1,4
 
-          cnid = myMesh % hopr_CGNSSideMap % hostData(1,lsid) ! Local Corner ID
+        cnid = myMesh % hopr_CGNSSideMap % hostData(1,lsid) ! Local Corner ID
+        lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
+        nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
+        gn1 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+
+        cnid = myMesh % hopr_CGNSSideMap % hostData(2,lsid) ! Local Corner ID
+        lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
+        nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
+        gn2 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+
+        ! Fill side info for eid
+        myMesh % self_sideInfo % hostData(1,lsid,eid) = selfLineNonlinear ! SideType
+        myMesh % self_sideInfo % hostData(2,lsid,eid) = 0 ! Global Side ID
+        myMesh % self_sideInfo % hostData(3,lsid,eid) = 0 ! Neighbor Element ID
+        myMesh % self_sideInfo % hostData(4,lsid,eid) = 0 ! Encoding for neighbor side ID and flip (10*s2+flip)
+        myMesh % self_sideInfo % hostData(5,lsid,eid) = 1 ! Boundary Condition ID
+
+        key1 = MIN(gn1,gn2)
+        key2 = MAX(gn1,gn2)
+
+        IF (sideTable % ContainsKeys(key1,key2)) THEN
+
+          ! Get e2, s2, and flip
+          CALL sideTable % GetDataForKeys(usid,key1,key2)
+
+          e2 = side(1,usid)
+          s2 = side(2,usid)
+
+          ! Calculate flip
+          ! > Get the starting global node ID for the other element
+          cnid = myMesh % hopr_CGNSSideMap % hostData(1,s2) ! Local Corner ID
           lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
-          nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
-          gn1 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+          nid = myMesh % hopr_elemInfo % hostData(5,e2) + lnid ! Add the offSetIndNODE to get the hopr node id
+          e2gn1 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
 
-          cnid = myMesh % hopr_CGNSSideMap % hostData(2,lsid) ! Local Corner ID
-          lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
-          nid = myMesh % hopr_elemInfo % hostData(5,eid) + lnid ! Add the offSetIndNODE to get the hopr node id
-          gn2 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+          flip = 0
+          IF (e2gn1 /= gn1) THEN
+            flip = 1
+          END IF
 
-          ! Fill side info for eid
-          myMesh % self_sideInfo % hostData(1,lsid,eid) = selfLineNonlinear ! SideType
-          myMesh % self_sideInfo % hostData(2,lsid,eid) = 0 ! Global Side ID
-          myMesh % self_sideInfo % hostData(3,lsid,eid) = 0 ! Neighbor Element ID
-          myMesh % self_sideInfo % hostData(4,lsid,eid) = 0 ! Encoding for neighbor side ID and flip (10*s2+flip)
-          myMesh % self_sideInfo % hostData(5,lsid,eid) = 1 ! Boundary Condition ID
+          ! Populate information for this element
+          myMesh % self_sideInfo % hostData(2,lsid,eid) = usid ! Global Side ID
+          myMesh % self_sideInfo % hostData(3,lsid,eid) = e2 ! Neighbor Element ID
+          myMesh % self_sideInfo % hostData(4,lsid,eid) = 10*s2 + flip ! Neighbor Element ID
 
-          key1 = MIN(gn1,gn2)
-          key2 = MAX(gn1,gn2)
+          ! Population information for the other element
+          myMesh % self_sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
+          myMesh % self_sideInfo % hostData(3,s2,e2) = eid ! Neighbor Element ID
+          myMesh % self_sideInfo % hostData(4,s2,e2) = 10*lsid + flip ! Neighbor Element ID
 
-          IF(sideTable % ContainsKeys(key1,key2))THEN
+        ELSE
 
-            ! Get e2, s2, and flip
-            CALL sideTable % GetDataForKeys(usid,key1,key2)
+          nUniqueSides = nUniqueSides + 1
+          side(1,nUniqueSides) = eid ! Store the element ID
+          side(2,nUniqueSides) = lsid ! Store the local side ID
+          ! Add the side to the hash table
 
-            e2 = side(1,usid)
-            s2 = side(2,usid)
+          CALL sideTable % AddDataForKeys(nUniqueSides,key1,key2)
 
-            ! Calculate flip
-            ! > Get the starting global node ID for the other element
-            cnid = myMesh % hopr_CGNSSideMap % hostData(1,s2) ! Local Corner ID
-            lnid = myMesh % hopr_CGNSCornerMap % hostData(cnid) ! Reference to Local Node ID
-            nid = myMesh % hopr_elemInfo % hostData(5,e2) + lnid ! Add the offSetIndNODE to get the hopr node id
-            e2gn1 = myMesh % hopr_globalNodeIDs % hostData(nid) ! Get the global Node ID for n1
+        END IF
 
-            flip = 0
-            IF(e2gn1 /= gn1)THEN
-              flip = 1
-            ENDIF
+        sid = sid + 1
 
-            ! Populate information for this element
-            myMesh % self_sideInfo % hostData(2,lsid,eid) = usid ! Global Side ID
-            myMesh % self_sideInfo % hostData(3,lsid,eid) = e2 ! Neighbor Element ID
-            myMesh % self_sideInfo % hostData(4,lsid,eid) = 10*s2+flip ! Neighbor Element ID
+      END DO
+    END DO
 
-            ! Population information for the other element
-            myMesh % self_sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
-            myMesh % self_sideInfo % hostData(3,s2,e2) = eid ! Neighbor Element ID
-            myMesh % self_sideInfo % hostData(4,s2,e2) = 10*lsid+flip ! Neighbor Element ID
-
-
-          ELSE
-
-            nUniqueSides = nUniqueSides + 1
-            side(1,nUniqueSides) = eid ! Store the element ID
-            side(2,nUniqueSides) = lsid ! Store the local side ID
-            ! Add the side to the hash table
-
-            CALL sideTable % AddDataForKeys(nUniqueSides,key1,key2)
-
-          ENDIF
-
-          sid = sid + 1
-
-        ENDDO
-      ENDDO
-
-      CALL sideTable % Free()
+    CALL sideTable % Free()
 
   END SUBROUTINE GenerateConnectivity_Mesh2D
 
-  SUBROUTINE Read_HOPr_Mesh2D_serial( myMesh, meshFile )
-  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-  ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
+  SUBROUTINE Read_HOPr_Mesh2D_serial(myMesh,meshFile)
+    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+    ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh2D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER :: nGlobalElem
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
-    INTEGER :: nGeo, nBCs
+    INTEGER :: nGeo,nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
-    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
-    CALL ReadArray_HDF5(fileId, 'BCType', bcType)
+    CALL ReadArray_HDF5(fileId,'BCType',bcType)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/6,nGlobalElem/))
+                               upBound=(/6,nGlobalElem/))
 
-    CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo)
+    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem)-hopr_elemInfo % hostData(5,1)
+    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem) - hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                            upBound=(/2,nLocalNodes/))
+                                 upBound=(/2,nLocalNodes/))
 
     CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                               upBound=nLocalNodes)
+                                    upBound=nLocalNodes)
 
-    CALL ReadArray_HDF5(fileId, 'NodeCoords', hopr_nodeCoords)
-    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', hopr_globalNodeIDs)
+    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
+    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
 
     ! Read local subarray of SideInfo
-    nLocalSides = hopr_elemInfo % hostData(4,nGlobalElem)-hopr_elemInfo % hostData(3,1)
+    nLocalSides = hopr_elemInfo % hostData(4,nGlobalElem) - hopr_elemInfo % hostData(3,1)
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
                                upBound=(/5,nLocalSides/))
 
-    CALL ReadArray_HDF5(fileId, 'SideInfo', hopr_sideInfo)
+    CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
 
     CALL Close_HDF5(fileID)
 
@@ -1173,77 +1159,77 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh2D_serial
 
-  SUBROUTINE Read_HOPr_Mesh2D_parallel( myMesh, meshFile, decomp )
-  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-  ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
+  SUBROUTINE Read_HOPr_Mesh2D_parallel(myMesh,meshFile,decomp)
+    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+    ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
-    TYPE(MPILayer), INTENT(inout) :: decomp
+    CLASS(Mesh2D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
+    TYPE(MPILayer),INTENT(inout) :: decomp
     ! Local
     INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER(HID_T) :: offset(1:2),gOffset(1)
     INTEGER :: nGlobalElem
-    INTEGER :: firstElem, nLocalElems
-    INTEGER :: firstNode, nLocalNodes
-    INTEGER :: firstSide, nLocalSides
-    INTEGER :: nGeo, nBCs
+    INTEGER :: firstElem,nLocalElems
+    INTEGER :: firstNode,nLocalNodes
+    INTEGER :: firstSide,nLocalSides
+    INTEGER :: nGeo,nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, decomp % mpiComm)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
 
-    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
-    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
     offset(:) = 0
-    CALL ReadArray_HDF5(fileId, 'BCType', bcType, offset)
+    CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
-    firstElem = decomp % offsetElem % hostData(decomp % rankId)+1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-&
-            decomp % offsetElem % hostData(decomp % rankId)
+    firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
+                  decomp % offsetElem % hostData(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/6,nLocalElems/))
+                               upBound=(/6,nLocalElems/))
 
-    offset = (/0, firstElem-1/)
-    CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo, offset)
+    offset = (/0,firstElem - 1/)
+    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode= hopr_elemInfo % hostData(5,1)+1
-    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems)-hopr_elemInfo % hostData(5,1)
+    firstNode = hopr_elemInfo % hostData(5,1) + 1
+    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems) - hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                            upBound=(/2,nLocalNodes/))
+                                 upBound=(/2,nLocalNodes/))
 
     CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                               upBound=nLocalNodes)
+                                    upBound=nLocalNodes)
 
-    offset = (/0, firstNode-1/)
-    CALL ReadArray_HDF5(fileId, 'NodeCoords', hopr_nodeCoords, offset)
-    gOffset = (/firstNode-1/)
-    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', hopr_globalNodeIDs, gOffset)
+    offset = (/0,firstNode - 1/)
+    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
+    gOffset = (/firstNode - 1/)
+    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
 
     ! Read local subarray of SideInfo
-    firstSide= hopr_elemInfo % hostData(3,1)+1
-    nLocalSides = hopr_elemInfo % hostData(4,nLocalElems)-hopr_elemInfo % hostData(3,1)
+    firstSide = hopr_elemInfo % hostData(3,1) + 1
+    nLocalSides = hopr_elemInfo % hostData(4,nLocalElems) - hopr_elemInfo % hostData(3,1)
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
                                upBound=(/5,nLocalSides/))
-    offset = (/0, firstSide-1/)
-    CALL ReadArray_HDF5(fileId, 'SideInfo', hopr_sideInfo, offset)
+    offset = (/0,firstSide - 1/)
+    CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
 
     CALL Close_HDF5(fileID)
 
@@ -1266,30 +1252,30 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh2D_parallel
 
-  SUBROUTINE Write_HOPr_Mesh2D( myMesh, meshFile)
-  ! Writes mesh output in HOPR format (serial only)
+  SUBROUTINE Write_HOPr_Mesh2D(myMesh,meshFile)
+    ! Writes mesh output in HOPR format (serial only)
     IMPLICIT NONE
-    CLASS(Mesh2D), INTENT(inout) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
-    CALL WriteAttribute_HDF5(fileId, 'nElems', myMesh % nElem)
-    CALL WriteAttribute_HDF5(fileId, 'Ngeo', myMesh % nGeo)
-    CALL WriteAttribute_HDF5(fileId, 'nBCs', myMesh % nBCs)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    CALL WriteAttribute_HDF5(fileId,'nElems',myMesh % nElem)
+    CALL WriteAttribute_HDF5(fileId,'Ngeo',myMesh % nGeo)
+    CALL WriteAttribute_HDF5(fileId,'nBCs',myMesh % nBCs)
 
-    CALL WriteArray_HDF5(fileId, 'BCType',myMesh % bcType)
+    CALL WriteArray_HDF5(fileId,'BCType',myMesh % bcType)
 
     ! Write local subarray of ElemInfo
-    CALL WriteArray_HDF5(fileId, 'ElemInfo',myMesh % hopr_elemInfo)
+    CALL WriteArray_HDF5(fileId,'ElemInfo',myMesh % hopr_elemInfo)
 
     ! Write local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId, 'NodeCoords', myMesh % hopr_nodeCoords)
-    CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', myMesh % hopr_globalNodeIDs)
+    CALL WriteArray_HDF5(fileId,'NodeCoords',myMesh % hopr_nodeCoords)
+    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',myMesh % hopr_globalNodeIDs)
 
     ! Write local subarray of SideInfo
-    CALL WriteArray_HDF5(fileId, 'SideInfo', myMesh % hopr_sideInfo )
+    CALL WriteArray_HDF5(fileId,'SideInfo',myMesh % hopr_sideInfo)
 
     CALL Close_HDF5(fileID)
 
@@ -1316,34 +1302,34 @@ CONTAINS
     myMesh % nBCs = nBCs
 
     CALL myMesh % hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                                   upBound=(/6,nElem/))
+                                        upBound=(/6,nElem/))
 
     CALL myMesh % hopr_sideInfo % Alloc(loBound=(/1,1/), &
-                                   upBound=(/5,nSides/))
+                                        upBound=(/5,nSides/))
 
     CALL myMesh % self_sideInfo % Alloc(loBound=(/1,1,1/), &
                                         upBound=(/5,6,nElem/))
 
     CALL myMesh % hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                                     upBound=(/3,nNodes/))
+                                          upBound=(/3,nNodes/))
 
     CALL myMesh % self_nodeCoords % Alloc(loBound=(/1,1,1/), &
-                                     upBound=(/3,(nGeo+1)**3,nElem/))
+                                          upBound=(/3, (nGeo + 1)**3,nElem/))
 
     CALL myMesh % hopr_globalNodeIDs % Alloc(loBound=1, &
-                                        upBound=nNodes)
+                                             upBound=nNodes)
 
     CALL myMesh % hopr_CGNSCornerMap % Alloc(loBound=1, &
-                                        upBound=8)
+                                             upBound=8)
 
     CALL myMesh % hopr_CGNSSideMap % Alloc(loBound=(/1,1/), &
-                                      upBound=(/4,6/))
+                                           upBound=(/4,6/))
 
     CALL myMesh % hopr_curveNodeMap % Alloc(loBound=(/1,1/), &
-                                       upBound=(/3,(nGeo+1)**3/))
+                                            upBound=(/3, (nGeo + 1)**3/))
 
     CALL myMesh % hopr_curveNodeMapInv % Alloc(loBound=(/0,0,0/), &
-                                          upBound=(/nGeo,nGeo,nGeo/))
+                                               upBound=(/nGeo,nGeo,nGeo/))
 
     CALL myMesh % BCType % Alloc(loBound=(/1,1/), &
                                  upBound=(/4,nBCs/))
@@ -1352,24 +1338,24 @@ CONTAINS
 
     ! Create lookup tables to assist with connectivity generation
     myMesh % hopr_CGNSCornerMap % hostData(1) = 1
-    myMesh % hopr_CGNSCornerMap % hostData(2) = nGeo+1
-    myMesh % hopr_CGNSCornerMap % hostData(3) = (nGeo+1)**2
-    myMesh % hopr_CGNSCornerMap % hostData(4) = nGeo*(nGeo+1)+1
-    myMesh % hopr_CGNSCornerMap % hostData(5) = nGeo*(nGeo+1)**2+1
-    myMesh % hopr_CGNSCornerMap % hostData(6) = nGeo*(nGeo+1)**2+(nGeo+1)
-    myMesh % hopr_CGNSCornerMap % hostData(7) = (nGeo+1)**3
-    myMesh % hopr_CGNSCornerMap % hostData(8) = nGeo*(nGeo+1)*(nGeo+2)+1
+    myMesh % hopr_CGNSCornerMap % hostData(2) = nGeo + 1
+    myMesh % hopr_CGNSCornerMap % hostData(3) = (nGeo + 1)**2
+    myMesh % hopr_CGNSCornerMap % hostData(4) = nGeo*(nGeo + 1) + 1
+    myMesh % hopr_CGNSCornerMap % hostData(5) = nGeo*(nGeo + 1)**2 + 1
+    myMesh % hopr_CGNSCornerMap % hostData(6) = nGeo*(nGeo + 1)**2 + (nGeo + 1)
+    myMesh % hopr_CGNSCornerMap % hostData(7) = (nGeo + 1)**3
+    myMesh % hopr_CGNSCornerMap % hostData(8) = nGeo*(nGeo + 1)*(nGeo + 2) + 1
 
     l = 0
-    DO k = 0, nGeo
-      DO j = 0, nGeo
-        DO i = 0, nGeo
-          l = l+1
+    DO k = 0,nGeo
+      DO j = 0,nGeo
+        DO i = 0,nGeo
+          l = l + 1
           myMesh % hopr_curveNodeMap % hostData(1:3,l) = (/i,j,k/)
           myMesh % hopr_curveNodeMapInv % hostData(i,j,k) = l
-        ENDDO
-      ENDDO
-    ENDDO
+        END DO
+      END DO
+    END DO
 
     ! Maps from local corner node id to CGNS side
     myMesh % hopr_CGNSSideMap % hostData(1:4,1) = (/1,4,3,2/)
@@ -1409,7 +1395,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
 
-
     CALL myMesh % hopr_elemInfo % UpdateHost()
     CALL myMesh % hopr_sideInfo % UpdateHost()
     CALL myMesh % self_sideInfo % UpdateHost()
@@ -1418,13 +1403,11 @@ CONTAINS
     CALL myMesh % hopr_globalNodeIDs % UpdateHost()
     CALL myMesh % BCType % UpdateHost()
 
-
   END SUBROUTINE UpdateHost_Mesh3D
 
   SUBROUTINE UpdateDevice_Mesh3D(myMesh)
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
-
 
     CALL myMesh % hopr_elemInfo % UpdateDevice()
     CALL myMesh % hopr_sideInfo % UpdateDevice()
@@ -1433,7 +1416,6 @@ CONTAINS
     CALL myMesh % self_nodeCoords % UpdateDevice()
     CALL myMesh % hopr_globalNodeIDs % UpdateDevice()
     CALL myMesh % BCType % UpdateDevice()
-
 
   END SUBROUTINE UpdateDevice_Mesh3D
 
@@ -1513,7 +1495,7 @@ CONTAINS
           myMesh % hopr_elemInfo % hostData(3,elid) = sid ! Side Index Start
           sid = sid + 6
           myMesh % hopr_elemInfo % hostData(4,elid) = sid ! Side Index End
-          myMesh % hopr_elemInfo % hostData(5,elid) = nid-1 ! Node Index Start
+          myMesh % hopr_elemInfo % hostData(5,elid) = nid - 1 ! Node Index Start
           DO k = 0,nGeo
             DO j = 0,nGeo
               DO i = 0,nGeo
@@ -1541,109 +1523,109 @@ CONTAINS
 #undef __FUNC__
 #define __FUNC__ "Load_Mesh3D"
     IMPLICIT NONE
-    CLASS(Mesh3D), INTENT(out) :: myMesh
-    TYPE(MeshSpec), INTENT(in) :: myMeshSpec
+    CLASS(Mesh3D),INTENT(out) :: myMesh
+    TYPE(MeshSpec),INTENT(in) :: myMeshSpec
 
-      IF(myMeshSpec % blockMesh)THEN
+    IF (myMeshSpec % blockMesh) THEN
 
-        CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo,&
-                (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY,myMeshSpec % blockMesh_nElemZ/),&
-                (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1,&
-                  myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1,&
-                  myMeshSpec % blockMesh_z0,myMeshSpec % blockMesh_z1/))
+      CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo, &
+                        (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY,myMeshSpec % blockMesh_nElemZ/), &
+                                     (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1, &
+                                       myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1, &
+                                       myMeshSpec % blockMesh_z0,myMeshSpec % blockMesh_z1/))
 
-      ELSE
+    ELSE
 
-        CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
+      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
 
-      ENDIF
-    
+    END IF
+
   END SUBROUTINE Load_Mesh3D_serial
 
   SUBROUTINE Load_Mesh3D_parallel(myMesh,myMeshSpec,decomp)
 #undef __FUNC__
 #define __FUNC__ "Load_Mesh3D"
     IMPLICIT NONE
-    CLASS(Mesh3D), INTENT(out) :: myMesh
-    TYPE(MeshSpec), INTENT(in) :: myMeshSpec
-    TYPE(MPILayer), INTENT(inout) :: decomp
+    CLASS(Mesh3D),INTENT(out) :: myMesh
+    TYPE(MeshSpec),INTENT(in) :: myMeshSpec
+    TYPE(MPILayer),INTENT(inout) :: decomp
 
-      IF(myMeshSpec % blockMesh)THEN
+    IF (myMeshSpec % blockMesh) THEN
 
-        IF(decomp % nRanks > 1)THEN ! Error out
-          ERROR("Block Mesh only supported in serial")
-          STOP ! TO DO : Safe exit for serial and parallel
-        ELSE
-          CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo,&
-                (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY,myMeshSpec % blockMesh_nElemZ/),&
-                (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1,&
-                  myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1,&
-                  myMeshSpec % blockMesh_z0,myMeshSpec % blockMesh_z1/))
-        ENDIF
-
+      IF (decomp % nRanks > 1) THEN ! Error out
+        ERROR("Block Mesh only supported in serial")
+        STOP ! TO DO : Safe exit for serial and parallel
       ELSE
+        CALL myMesh % UniformBlockMesh(myMeshSpec % blockMesh_nGeo, &
+                        (/myMeshSpec % blockMesh_nElemX,myMeshSpec % blockMesh_nElemY,myMeshSpec % blockMesh_nElemZ/), &
+                                       (/myMeshSpec % blockMesh_x0,myMeshSpec % blockMesh_x1, &
+                                         myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1, &
+                                         myMeshSpec % blockMesh_z0,myMeshSpec % blockMesh_z1/))
+      END IF
 
-        CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+    ELSE
 
-      ENDIF
-    
+      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+
+    END IF
+
   END SUBROUTINE Load_Mesh3D_parallel
 
-  SUBROUTINE Read_HOPr_Mesh3D_serial( myMesh, meshFile )
-  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+  SUBROUTINE Read_HOPr_Mesh3D_serial(myMesh,meshFile)
+    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     IMPLICIT NONE
-    CLASS(Mesh3D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh3D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER :: nGlobalElem
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
-    INTEGER :: nGeo, nBCs
+    INTEGER :: nGeo,nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
-    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
-    CALL ReadArray_HDF5(fileId, 'BCType', bcType)
+    CALL ReadArray_HDF5(fileId,'BCType',bcType)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/6,nGlobalElem/))
+                               upBound=(/6,nGlobalElem/))
 
-    CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo)
+    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem)-hopr_elemInfo % hostData(5,1)
+    nLocalNodes = hopr_elemInfo % hostData(6,nGlobalElem) - hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                            upBound=(/3,nLocalNodes/))
+                                 upBound=(/3,nLocalNodes/))
 
     CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                               upBound=nLocalNodes)
+                                    upBound=nLocalNodes)
 
-    CALL ReadArray_HDF5(fileId, 'NodeCoords', hopr_nodeCoords)
-    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', hopr_globalNodeIDs)
+    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
+    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
 
     ! Read local subarray of SideInfo
-    nLocalSides = hopr_elemInfo % hostData(4,nGlobalElem)-hopr_elemInfo % hostData(3,1)
+    nLocalSides = hopr_elemInfo % hostData(4,nGlobalElem) - hopr_elemInfo % hostData(3,1)
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/5,nLocalSides/))
+                               upBound=(/5,nLocalSides/))
 
-    CALL ReadArray_HDF5(fileId, 'SideInfo', hopr_sideInfo)
+    CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo)
 
     CALL Close_HDF5(fileID)
 
@@ -1666,77 +1648,77 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh3D_serial
 
-  SUBROUTINE Read_HOPr_Mesh3D_parallel( myMesh, meshFile, decomp )
-  ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+  SUBROUTINE Read_HOPr_Mesh3D_parallel(myMesh,meshFile,decomp)
+    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     IMPLICIT NONE
-    CLASS(Mesh3D), INTENT(out) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
-    TYPE(MPILayer), INTENT(inout) :: decomp
+    CLASS(Mesh3D),INTENT(out) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
+    TYPE(MPILayer),INTENT(inout) :: decomp
     ! Local
     INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: offset(1:2), gOffset(1) 
+    INTEGER(HID_T) :: offset(1:2),gOffset(1)
     INTEGER :: nGlobalElem
-    INTEGER :: firstElem, nLocalElems
-    INTEGER :: firstNode, nLocalNodes
-    INTEGER :: firstSide, nLocalSides
-    INTEGER :: nGeo, nBCs
+    INTEGER :: firstElem,nLocalElems
+    INTEGER :: firstNode,nLocalNodes
+    INTEGER :: firstSide,nLocalSides
+    INTEGER :: nGeo,nBCs
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId, decomp % mpiComm)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
 
-    CALL ReadAttribute_HDF5(fileId, 'nElems', nGlobalElem)
-    CALL ReadAttribute_HDF5(fileId, 'Ngeo', nGeo)
-    CALL ReadAttribute_HDF5(fileId, 'nBCs', nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
+    CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
+    CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
     offset(:) = 0
-    CALL ReadArray_HDF5(fileId, 'BCType', bcType, offset)
+    CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
-    firstElem = decomp % offsetElem % hostData(decomp % rankId)+1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-&
-            decomp % offsetElem % hostData(decomp % rankId)
+    firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
+                  decomp % offsetElem % hostData(decomp % rankId)
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/6,nLocalElems/))
+                               upBound=(/6,nLocalElems/))
 
-    offset = (/0, firstElem-1/)
-    CALL ReadArray_HDF5(fileId, 'ElemInfo', hopr_elemInfo, offset)
+    offset = (/0,firstElem - 1/)
+    CALL ReadArray_HDF5(fileId,'ElemInfo',hopr_elemInfo,offset)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    firstNode= hopr_elemInfo % hostData(5,1)+1
-    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems)-hopr_elemInfo % hostData(5,1)
+    firstNode = hopr_elemInfo % hostData(5,1) + 1
+    nLocalNodes = hopr_elemInfo % hostData(6,nLocalElems) - hopr_elemInfo % hostData(5,1)
 
     ! Allocate Space for hopr_nodeCoords and hopr_globalNodeIDs !
     CALL hopr_nodeCoords % Alloc(loBound=(/1,1/), &
-                            upBound=(/3,nLocalNodes/))
+                                 upBound=(/3,nLocalNodes/))
 
     CALL hopr_globalNodeIDs % Alloc(loBound=1, &
-                               upBound=nLocalNodes)
+                                    upBound=nLocalNodes)
 
-    offset = (/0, firstNode-1/)
-    CALL ReadArray_HDF5(fileId, 'NodeCoords', hopr_nodeCoords, offset)
-    gOffset = (/firstNode-1/)
-    CALL ReadArray_HDF5(fileId, 'GlobalNodeIDs', hopr_globalNodeIDs, gOffset)
+    offset = (/0,firstNode - 1/)
+    CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords,offset)
+    gOffset = (/firstNode - 1/)
+    CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs,gOffset)
 
     ! Read local subarray of SideInfo
-    firstSide= hopr_elemInfo % hostData(3,1)+1
-    nLocalSides = hopr_elemInfo % hostData(4,nLocalElems)-hopr_elemInfo % hostData(3,1)
+    firstSide = hopr_elemInfo % hostData(3,1) + 1
+    nLocalSides = hopr_elemInfo % hostData(4,nLocalElems) - hopr_elemInfo % hostData(3,1)
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
-                          upBound=(/5,nLocalSides/))
+                               upBound=(/5,nLocalSides/))
 
-    offset = (/0, firstSide-1/)
-    CALL ReadArray_HDF5(fileId, 'SideInfo', hopr_sideInfo, offset)
+    offset = (/0,firstSide - 1/)
+    CALL ReadArray_HDF5(fileId,'SideInfo',hopr_sideInfo,offset)
 
     CALL Close_HDF5(fileID)
 
@@ -1759,29 +1741,29 @@ CONTAINS
 
   END SUBROUTINE Read_HOPr_Mesh3D_parallel
 
-  SUBROUTINE Write_HOPr_Mesh3D( myMesh, meshFile )
-  ! Writes mesh output in HOPR format (serial only)
+  SUBROUTINE Write_HOPr_Mesh3D(myMesh,meshFile)
+    ! Writes mesh output in HOPR format (serial only)
     IMPLICIT NONE
-    CLASS(Mesh3D), INTENT(inout) :: myMesh
-    CHARACTER(*), INTENT(in) :: meshFile
+    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    CHARACTER(*),INTENT(in) :: meshFile
     ! Local
     INTEGER(HID_T) :: fileId
 
-    CALL Open_HDF5(meshFile, H5F_ACC_RDWR_F, fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
 
-    CALL WriteAttribute_HDF5(fileId, 'nElems', myMesh % nElem)
-    CALL WriteAttribute_HDF5(fileId, 'Ngeo', myMesh % nGeo)
-    CALL WriteAttribute_HDF5(fileId, 'nBCs', myMesh % nBCs)
+    CALL WriteAttribute_HDF5(fileId,'nElems',myMesh % nElem)
+    CALL WriteAttribute_HDF5(fileId,'Ngeo',myMesh % nGeo)
+    CALL WriteAttribute_HDF5(fileId,'nBCs',myMesh % nBCs)
 
-    CALL WriteArray_HDF5(fileId, 'BCType', myMesh % bcType)
-    CALL WriteArray_HDF5(fileId, 'ElemInfo', myMesh % hopr_elemInfo)
+    CALL WriteArray_HDF5(fileId,'BCType',myMesh % bcType)
+    CALL WriteArray_HDF5(fileId,'ElemInfo',myMesh % hopr_elemInfo)
 
     ! Read local subarray of NodeCoords and GlobalNodeIDs
-    CALL WriteArray_HDF5(fileId, 'NodeCoords', myMesh % hopr_nodeCoords)
-    CALL WriteArray_HDF5(fileId, 'GlobalNodeIDs', myMesh % hopr_globalNodeIDs)
+    CALL WriteArray_HDF5(fileId,'NodeCoords',myMesh % hopr_nodeCoords)
+    CALL WriteArray_HDF5(fileId,'GlobalNodeIDs',myMesh % hopr_globalNodeIDs)
 
     ! Read local subarray of SideInfo
-    CALL WriteArray_HDF5(fileId, 'SideInfo', myMesh % hopr_sideInfo )
+    CALL WriteArray_HDF5(fileId,'SideInfo',myMesh % hopr_sideInfo)
 
     CALL Close_HDF5(fileID)
 
@@ -1983,19 +1965,19 @@ CONTAINS
 !    P = P1 + P2 + P3
 !
 !  END FUNCTION TransfiniteInterpolation
-  FUNCTION Unidirectional( valLeft, valRight, a ) RESULT( P )
+  FUNCTION Unidirectional(valLeft,valRight,a) RESULT(P)
     !
     ! =============================================================================================== !
     ! DECLARATIONS
     IMPLICIT NONE
-    REAL(prec) :: valLeft(1:3), valRight(1:3)
+    REAL(prec) :: valLeft(1:3),valRight(1:3)
     REAL(prec) :: a
     REAL(prec) :: P(1:3)
 
-    P = 0.5_prec*( (1.0_prec - a)*valLeft + (1.0_prec + a)*valRight )
+    P = 0.5_prec*((1.0_prec - a)*valLeft + (1.0_prec + a)*valRight)
 
   END FUNCTION Unidirectional
-  FUNCTION LinearBlend( a ) RESULT( weights )
+  FUNCTION LinearBlend(a) RESULT(weights)
 
     IMPLICIT NONE
     REAL(prec) :: a
@@ -2005,6 +1987,5 @@ CONTAINS
     weights(2) = 0.5_prec*(1.0_prec + a)
 
   END FUNCTION LinearBlend
-
 
 END MODULE SELF_Mesh

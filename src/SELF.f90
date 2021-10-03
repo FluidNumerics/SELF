@@ -83,7 +83,7 @@ PROGRAM SELF
     cqType = GAUSS_LOBATTO
   ELSE
     PRINT *, 'Invalid Control Quadrature'
-    STOP -1
+    STOP - 1
   END IF
 
   IF (TRIM(UpperCase(tqTypeChar)) == 'GAUSS') THEN
@@ -92,7 +92,7 @@ PROGRAM SELF
     tqType = GAUSS_LOBATTO
   ELSE
     PRINT *, 'Invalid Target Quadrature'
-    STOP -1
+    STOP - 1
   END IF
 
   IF (TRIM(UpperCase(dFormChar)) == 'STRONG') THEN
@@ -101,7 +101,7 @@ PROGRAM SELF
     dForm = selfWeakDGForm
   ELSEIF (TRIM(UpperCase(dFormChar)) == 'CG') THEN
     dForm = selfWeakCGForm
-  ENDIF
+  END IF
 
   IF (TRIM(UpperCase(gpuAccelChar)) == 'TRUE') THEN
     gpuAccel = .TRUE.
@@ -117,129 +117,107 @@ PROGRAM SELF
 
   IF (selfCLI % run_command(group="s1d_interp")) THEN
 
-    CALL ScalarInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,gpuAccel)
-    
+    CALL ScalarInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s2d_interp")) THEN
 
-    CALL ScalarInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,gpuAccel)
-    
+    CALL ScalarInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s3d_interp")) THEN
 
-    CALL ScalarInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              functionChar,gpuAccel)
-    
+    CALL ScalarInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v2d_interp")) THEN
 
-    CALL VectorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              vectorChar(1:2),gpuAccel)
-    
+    CALL VectorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        vectorChar(1:2),gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="t2d_interp")) THEN
 
-    CALL TensorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              tensorChar(1:2,1:2),gpuAccel)
-    
+    CALL TensorInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        tensorChar(1:2,1:2),gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v3d_interp")) THEN
 
-    CALL VectorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              vectorChar,gpuAccel)
-    
+    CALL VectorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        vectorChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="t3d_interp")) THEN
 
-    CALL TensorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                              tensorChar,gpuAccel)
-    
+    CALL TensorInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                        tensorChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s1d_binterp")) THEN
 
-    CALL ScalarBoundaryInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,gpuAccel)
-    
+    CALL ScalarBoundaryInterp1D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s2d_binterp")) THEN
 
-    CALL ScalarBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,gpuAccel)
-    
+    CALL ScalarBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s3d_binterp")) THEN
 
-    CALL ScalarBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      functionChar,gpuAccel)
-    
+    CALL ScalarBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v2d_binterp")) THEN
 
-    CALL VectorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      vectorChar(1:2),gpuAccel)
-    
+    CALL VectorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                vectorChar(1:2),gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="t2d_binterp")) THEN
 
-    CALL TensorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      tensorChar(1:2,1:2),gpuAccel)
-    
+    CALL TensorBoundaryInterp2D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                tensorChar(1:2,1:2),gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v3d_binterp")) THEN
 
-    CALL VectorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      vectorChar,gpuAccel)
-    
+    CALL VectorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                vectorChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="t3d_binterp")) THEN
 
-    CALL TensorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar,&
-                                      tensorChar,gpuAccel)
-    
+    CALL TensorBoundaryInterp3D(cqType,tqType,cqDegree,tqDegree,nElem,nVar, &
+                                tensorChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s1d_derivative")) THEN
 
-    CALL ScalarDerivative1D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                  functionChar,derivativeChar,gpuAccel)
-    
+    CALL ScalarDerivative1D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar, &
+                            functionChar,derivativeChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="s2d_gradient")) THEN
 
-    CALL ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nVar,&
+    CALL ScalarGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nVar, &
                           spec,functionChar,vectorChar(1:2),TRIM(outputFile),enableMPI,gpuAccel)
-    
 
   ELSEIF (selfCLI % run_command(group="s3d_gradient")) THEN
 
-    CALL ScalarGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                functionChar,vectorChar,gpuAccel)
-    
+    CALL ScalarGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar, &
+                          functionChar,vectorChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v2d_gradient")) THEN
 
-    CALL VectorGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar(1:2),tensorChar(1:2,1:2),gpuAccel)
-    
+    CALL VectorGradient2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar, &
+                          vectorChar(1:2),tensorChar(1:2,1:2),gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v2d_divergence")) THEN
 
-    CALL VectorDivergence2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,&
-                                vectorChar(1:2),functionChar,gpuAccel)
-    
-
+    CALL VectorDivergence2D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar, &
+                            vectorChar(1:2),functionChar,gpuAccel)
 
   ELSEIF (selfCLI % run_command(group="v3d_gradient")) THEN
 
     CALL VectorGradient3D(cqType,tqType,cqDegree,tqDegree,dForm,nElem,nVar,vectorChar,tensorChar,gpuAccel)
-    
 
   ELSEIF (selfCLI % run_command(group="v3d_divergence")) THEN
 
-    CALL VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nVar,&
+    CALL VectorDivergence3D(cqType,tqType,cqDegree,tqDegree,dForm,nVar, &
                             spec,vectorChar,functionChar,TRIM(outputFile),enableMPI,gpuAccel)
-    
 
   END IF
 
@@ -262,7 +240,7 @@ CONTAINS
                    help="Path to a mesh file for control mesh."//NEW_LINE("A"), &
                    def="", &
                    required=.FALSE.)
-    
+
     CALL cli % add(switch="--control-degree", &
                    switch_ab="-c", &
                    help="The polynomial degree of the control points."//NEW_LINE("A"), &
@@ -493,7 +471,6 @@ CONTAINS
 
     CALL cli % add_group(group="v3d_curl", &
                          description="Vector 3D Curl")
-
 
     CALL cli % parse()
 
