@@ -8,7 +8,7 @@ suspend_time = 2
 
 controller_image = "<image>"
 disable_controller_public_ips = false
-controller_machine_type = "n1-standard-16"
+controller_machine_type = "n1-standard-8"
 controller_disk_size_gb = 1024
 controller_disk_type = "pd-ssd"
 
@@ -38,7 +38,7 @@ partitions = [
     gvnic                = false
     network_storage      = []
     preemptible_bursting = false
-    vpc_subnet           = "hpc-apps-ci"
+    vpc_subnet           = "fluid-run"
     exclusive            = false
     enable_placement     = false
     regional_capacity    = false
