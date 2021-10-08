@@ -22,8 +22,8 @@ compute_node_scopes          = [
   "https://www.googleapis.com/auth/cloud-platform"
 ]
 partitions = [
-  { name                 = "c2-standard-8"
-    machine_type         = "c2-standard-8"
+  { name                 = "c2-standard-4"
+    machine_type         = "c2-standard-4"
     image                = "<image>"
     image_hyperthreads   = true
     static_node_count    = 0
