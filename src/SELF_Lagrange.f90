@@ -514,49 +514,25 @@ MODULE SELF_Lagrange
 
 CONTAINS
 
-! ================================================================================================ !
-!
-! Init_Lagrange
-!
-!   A manual constructor for the Lagrange class that allocates memory and fills in data
-!   for the attributes of the Lagrange class.
-!
-!   The Init subroutine allocates memory for the interpolation and target points, barycentric
-!   weights, interpolation matrix, and derivative matrix.
-!
-!   Usage :
-!
-!     TYPE(Lagrange) :: interp
-!     INTEGER        :: N, M
-!     REAL(prec)     :: interpNodes(0:N), targetNodes(0:M+1)
-!
-!     CALL interp % Init( N, M, interpNodes, targetNodes )
-!
-!   Input/Output :
-!
-!     myPoly  (out)
-!       The Lagrange data structure to be constructed
-!
-!     N (in)
-!       The degree of the polynomial interpolant
-!
-!     M (in)
-!       M+1 is the number of target grid points. The upper bound of the targetNodes array
-!
-!     interpNodes(0:N) (in)
-!       The interpolation nodes.
-!
-!     targetNodes(0:M) (in)
-!       The target nodes. The iMatrix will map the a function at the interpolation
-!       nodes onto the target nodes.
-!
-! =============================================================================================== !
-
   SUBROUTINE Init_Lagrange(myPoly,N,controlNodeType,M,targetNodeType)
+    !! Initialize an instance of the Lagrange class
+    !! On output, all of the attributes for the Lagrange class are allocated and values are initialized according to the number of
+    !! control points, number of target points, and the types for the control and target nodes.
+    !! If a GPU is available, device pointers for the Lagrange attributes are allocated and initialized.
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(out) :: myPoly
-    INTEGER,INTENT(in)          :: N,M
-    INTEGER,INTENT(in)          :: controlNodeType,targetNodeType
+    !! Lagrange class instance
+    INTEGER,INTENT(in)          :: N
+    !! The number of control points for interpolant
+    INTEGER,INTENT(in)          :: M
+    !! The number of target points for the interpolant
+    INTEGER,INTENT(in)          :: controlNodeType
+    !! The integer code specifying the type of control points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
+    !! GAUSS_LOBATTO(=2), or UNIFORM(=3)
+    INTEGER,INTENT(in)          :: targetNodeType
+    !! The integer code specifying the type of target points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
+    !! GAUSS_LOBATTO(=2), or UNIFORM(=3)
+    ! -------!
     ! Local
     REAL(prec) :: q(0:M)
 
@@ -625,17 +601,11 @@ CONTAINS
 
   END SUBROUTINE Init_Lagrange
 
-! ================================================================================================ !
-!
-! Free_Lagrange
-!
-!   A manual destructor for the Lagrange class that deallocates the memory held by its attributes.
-!
-! ================================================================================================ !
-
   SUBROUTINE Free_Lagrange(myPoly)
+    !! Frees all memory (host and device) associated with an instance of the Lagrange class
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
+    !! Lagrange class instance
 
     CALL myPoly % controlPoints % Free()
     CALL myPoly % targetPoints % Free()
@@ -649,8 +619,10 @@ CONTAINS
   END SUBROUTINE Free_Lagrange
 
   SUBROUTINE UpdateDevice_Lagrange(myPoly)
+    !! Copy the Lagrange attributes from the host (CPU) to the device (GPU)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
+    !! Lagrange class instance
 
     CALL myPoly % controlPoints % UpdateDevice()
     CALL myPoly % targetPoints % UpdateDevice()
@@ -664,8 +636,10 @@ CONTAINS
   END SUBROUTINE UpdateDevice_Lagrange
 
   SUBROUTINE UpdateHost_Lagrange(myPoly)
+    !! Copy the Lagrange attributes from the device (GPU) to the host (CPU)
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(inout) :: myPoly
+    !! Lagrange class instance
 
     CALL myPoly % controlPoints % UpdateHost()
     CALL myPoly % targetPoints % UpdateHost()
@@ -678,56 +652,30 @@ CONTAINS
 
   END SUBROUTINE UpdateHost_Lagrange
 
-! ================================================================================================ !
-!
-! ScalarGridInterp_1D
-!
-!   Interpolates an array of nodal values at the native nodes to nodal values at the target nodes.
-!
-!   We can write the operations of interpolating data from one set of points to another (in this
-!   case from "controlPoints" to "targetPoints") as
-!
-!              fnew_a = \sum_{i=0}^N f_i l_i(\xi_a),   a=0,1,2,...,M
-!
-!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!   The interpolation matrix is T_{a,i} = l_i(\xi_a) maps an array of nodal values from the native
-!   interpolation nodes to the target nodes. This routine serves as a wrapper to call either the CUDA
-!   kernel (if CUDA is enabled) or the CPU version.
-!
-!   Usage :
-!
-!     TYPE(Lagrange) :: interp
-!     INTEGER        :: nVariables, nElements
-!     REAL(prec)     :: f(0:interp % N,1:nVariables,1:nElements)
-!     REAL(prec)     :: fNew(0:interp % M,1:nVariables,1:nElements)
-!
-!       CALL interp % GridInterpolation_1D( fnative, fNew, nVariables, nElements )
-!
-!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!
-!   Parameters :
-!
-!     interp (in)
-!       A previously constructed Lagrange data-structure.
-!
-!     f (in)
-!       Array of function nodal values at the native interpolation nodes.
-!
-!     nVariables (in)
-!
-!     nElements (in)
-!
-!     fNew (out)
-!      Array of function nodal values at the target interpolation nodes.
-!
-! ================================================================================================ !
-
   SUBROUTINE ScalarGridInterp_1D_cpu(myPoly,f,fInterp,nVariables,nElements)
+    !! Host (CPU) implementation of the ScalarGridInterp_1D interface.
+    !! In most cases, you should use the `ScalarGridInterp_1D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a scalar-1D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,ivar,iel} = \sum_{i=0}^N f_{i,ivar,iel} I_{i,m} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in)     :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in)     :: nElements
+    !! The number of spectral elements in the SEM grid
     REAL(prec),INTENT(in)  :: f(0:myPoly % N,1:nVariables,1:nElements)
+    !! (Input) Array of function values, defined on the control grid
     REAL(prec),INTENT(out) :: fInterp(0:myPoly % M,1:nVariables,1:nElements)
+    !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: iVar,iEl,i,ii
 
@@ -745,11 +693,30 @@ CONTAINS
   END SUBROUTINE ScalarGridInterp_1D_cpu
 
   SUBROUTINE ScalarGridInterp_1D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
+    !! Device (GPU) implementation of the ScalarGridInterp_1D interface.
+    !! In most cases, you should use the `ScalarGridInterp_1D` generic interface,
+    !! rather than calling this routine directly.
+    !! This routine calls hip/SELF_Lagrange.cpp:ScalarGridInterp_1D_gpu_wrapper
+    !! Interpolate a scalar-1D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,ivar,iel} = \sum_{i=0}^N f_{i,ivar,iel} I_{i,m} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in) :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in) :: nElements
+    !! The number of spectral elements in the SEM grid
     TYPE(c_ptr),INTENT(in)  :: f_dev
+    !! (Input) Array of function values, defined on the control grid
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
+    !! (Output) Array of function values, defined on the target grid
 
     CALL ScalarGridInterp_1D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
@@ -757,56 +724,31 @@ CONTAINS
                                          nVariables,nElements)
 
   END SUBROUTINE ScalarGridInterp_1D_gpu
-! ================================================================================================ !
-!
-! ScalarGridInterp_2D
-!
-!   Interpolates an array of nodal values at the native nodes to nodal values at the target nodes.
-!
-!   We can write the operations of interpolating data from one set of points to another (in this
-!   case from "controlPoints" to "targetPoints") as
-!
-!              fnew_{a,b} = \sum_{i,j=0}^N f_{i,j} l_i(\xi_a) l_j(\xi_b),   a,b=0,1,2,...,M
-!
-!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!   The interpolation matrix is T_{a,i} = l_i(\xi_a) maps an array of nodal values from the native
-!   interpolation nodes to the target nodes. This routine serves as a wrapper to call either the CUDA
-!   kernel (if CUDA is enabled) or the CPU version.
-!
-!   Usage :
-!
-!     TYPE(Lagrange) :: interp
-!     INTEGER        :: nVariables, nElements
-!     REAL(prec)     :: f(0:interp % N,0:interp % N,1:nVariables,1:nElements)
-!     REAL(prec)     :: fNew(0:interp % M,0:interp % M,1:nVariables,1:nElements)
-!
-!       CALL interp % GridInterpolation_2D( fnative, fNew, nVariables, nElements )
-!
-!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!
-!   Parameters :
-!
-!     interp (in)
-!       A previously constructed Lagrange data-structure.
-!
-!     f (in)
-!       Array of function nodal values at the native interpolation nodes.
-!
-!     nVariables (in)
-!
-!     nElements (in)
-!
-!     fNew (out)
-!      Array of function nodal values at the target interpolation nodes.
-!
-! ================================================================================================ !
 
   SUBROUTINE ScalarGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
+    !! Host (CPU) implementation of the ScalarGridInterp_2D interface.
+    !! In most cases, you should use the `ScalarGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a scalar-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,ivar,iel} I_{i,m} I_{j,n} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in)     :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in)     :: nElements
+    !! The number of spectral elements in the SEM grid
     REAL(prec),INTENT(in)  :: f(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    !! (Input) Array of function values, defined on the control grid
     REAL(prec),INTENT(out) :: fNew(0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
+    !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi,fij
@@ -832,13 +774,32 @@ CONTAINS
     END DO
 
   END SUBROUTINE ScalarGridInterp_2D_cpu
-!
+
   SUBROUTINE ScalarGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
+    !! Device (GPU) implementation of the ScalarGridInterp_2D interface.
+    !! In most cases, you should use the `ScalarGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! This routine calls hip/SELF_Lagrange.cpp:ScalarGridInterp_2D_gpu_wrapper
+    !! Interpolate a scalar-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{i,j,ivar,iel} I_{i,m} I_{j,n} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in) :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in) :: nElements
+    !! The number of spectral elements in the SEM grid
     TYPE(c_ptr),INTENT(in)  :: f_dev
+    !! (Input) Array of function values, defined on the control grid
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
+    !! (Output) Array of function values, defined on the target grid
 
     CALL ScalarGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
@@ -848,11 +809,29 @@ CONTAINS
   END SUBROUTINE ScalarGridInterp_2D_gpu
 
   SUBROUTINE VectorGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
+    !! Host (CPU) implementation of the VectorGridInterp_2D interface.
+    !! In most cases, you should use the `VectorGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a vector-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{dir,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,ivar,iel} I_{i,m} I_{j,n} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in)     :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in)     :: nElements
+    !! The number of spectral elements in the SEM grid
     REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    !! (Input) Array of function values, defined on the control grid
     REAL(prec),INTENT(out) :: fNew(1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
+    !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi(1:2)
@@ -884,11 +863,30 @@ CONTAINS
   END SUBROUTINE VectorGridInterp_2D_cpu
 !
   SUBROUTINE VectorGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
+    !! Device (GPU) implementation of the VectorGridInterp_2D interface.
+    !! In most cases, you should use the `VectorGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! This routine calls hip/SELF_Lagrange.cpp:VectorGridInterp_2D_gpu_wrapper
+    !! Interpolate a vector-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{dir,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{dir,i,j,ivar,iel} I_{i,m} I_{j,n} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in) :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in) :: nElements
+    !! The number of spectral elements in the SEM grid
     TYPE(c_ptr),INTENT(in)  :: f_dev
+    !! (Input) Array of function values, defined on the control grid
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
+    !! (Output) Array of function values, defined on the target grid
 
     CALL VectorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
@@ -898,11 +896,29 @@ CONTAINS
   END SUBROUTINE VectorGridInterp_2D_gpu
 
   SUBROUTINE TensorGridInterp_2D_cpu(myPoly,f,fNew,nVariables,nElements)
+    !! Host (CPU) implementation of the TensorGridInterp_2D interface.
+    !! In most cases, you should use the `TensorGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! Interpolate a tensor-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-tensor multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in)     :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in)     :: nElements
+    !! The number of spectral elements in the SEM grid
     REAL(prec),INTENT(in)  :: f(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    !! (Input) Array of function values, defined on the control grid
     REAL(prec),INTENT(out) :: fNew(1:2,1:2,0:myPoly % M,0:myPoly % M,1:nVariables,1:nElements)
+    !! (Output) Array of function values, defined on the target grid
     ! Local
     INTEGER :: i,j,ii,jj,iEl,iVar
     REAL(prec) :: fi(1:2,1:2)
@@ -933,11 +949,30 @@ CONTAINS
   END SUBROUTINE TensorGridInterp_2D_cpu
 !
   SUBROUTINE TensorGridInterp_2D_gpu(myPoly,f_dev,fInterp_dev,nVariables,nElements)
+    !! Device (GPU) implementation of the TensorGridInterp_2D interface.
+    !! In most cases, you should use the `TensorGridInterp_2D` generic interface,
+    !! rather than calling this routine directly.
+    !! This routine calls hip/SELF_Lagrange.cpp:TensorGridInterp_2D_gpu_wrapper
+    !! Interpolate a tensor-2D (real) array from the control grid to the target grid.
+    !! The control and target grids are the ones associated with an initialized 
+    !! Lagrange instance.
+    !!
+    !! Interpolation is applied using a series of matrix-vector multiplications, using
+    !! the Lagrange class's interpolation matrix
+    !!
+    !! $$ \tilde{f}_{row,col,m,n,ivar,iel} = \sum_{j=0}^N \sum_{i=0}^N f_{row,col,i,j,ivar,iel} I_{i,m} I_{j,n} $$
+    !! 
     IMPLICIT NONE
     CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in) :: nVariables,nElements
+    !! Lagrange class instance
+    INTEGER,INTENT(in) :: nVariables
+    !! The number of variables/functions that are interpolated
+    INTEGER,INTENT(in) :: nElements
+    !! The number of spectral elements in the SEM grid
     TYPE(c_ptr),INTENT(in)  :: f_dev
+    !! (Input) Array of function values, defined on the control grid
     TYPE(c_ptr),INTENT(out) :: fInterp_dev
+    !! (Output) Array of function values, defined on the target grid
 
     CALL TensorGridInterp_2D_gpu_wrapper(myPoly % iMatrix % deviceData, &
                                          f_dev,fInterp_dev, &
@@ -945,50 +980,6 @@ CONTAINS
                                          nVariables,nElements)
 
   END SUBROUTINE TensorGridInterp_2D_gpu
-
-! ================================================================================================ !
-!
-! GridInterpolate_3D
-!
-!   Interpolates an array of nodal values at the native nodes to nodal values at the target nodes.
-!
-!   We can write the operations of interpolating data from one set of points to another (in this
-!   case from "controlPoints" to "targetPoints") as
-!
-!   fnew_{a,b,c} = \sum_{i,j,k=0}^N f_{i,j,k} l_i(\xi_a) l_j(\xi_b) l_k(\xi_c),   a,b,c=0,1,2,...,M
-!
-!   where l_i(\xi) are the Lagrange interpolating polynomials through the interpolation points.
-!   The interpolation matrix is T_{a,i} = l_i(\xi_a) maps an array of nodal values from the native
-!   interpolation nodes to the target nodes. This routine serves as a wrapper to call either the CUDA
-!   kernel (if CUDA is enabled) or the CPU version.
-!
-!   Usage :
-!
-!     TYPE(Lagrange) :: interp
-!     INTEGER        :: nVariables, nElements
-!     REAL(prec)     :: f(0:interp % N,0:interp % N,0:interp % N,1:nVariables,1:nElements)
-!     REAL(prec)     :: fNew(0:interp % M,0:interp % M,0:interp % M,1:nVariables,1:nElements)
-!
-!       CALL interp % GridInterpolation_3D( fnative, fNew, nVariables, nElements )
-!
-!     * If CUDA is enabled, the fnative and ftarget arrays must be CUDA device variables.
-!
-!   Parameters :
-!
-!     interp (in)
-!       A previously constructed Lagrange data-structure.
-!
-!     f (in)
-!       Array of function nodal values at the native interpolation nodes.
-!
-!     nVariables (in)
-!
-!     nElements (in)
-!
-!     fNew (out)
-!      Array of function nodal values at the target interpolation nodes.
-!
-! ================================================================================================ !
 
   SUBROUTINE ScalarGridInterp_3D_cpu(myPoly,f,fInterp,nVariables,nElements)
     IMPLICIT NONE
