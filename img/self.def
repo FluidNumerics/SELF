@@ -1,5 +1,5 @@
 BootStrap: docker
-From: gcr.io/self-fluids/self-base_serial-x86-nvcc
+From: gcr.io/self-fluids/self-base:latest
 
 %files
 
@@ -8,9 +8,7 @@ From: gcr.io/self-fluids/self-base_serial-x86-nvcc
 %post
 
    export BUILD_TYPE=release
-   export GPU_TARGET=sm70
-   apt-get update -y
-   apt-get install git
+   export GPU_TARGET=sm72
    
    # Install SELF
    . /etc/profile.d/z10_spack_environment.sh && \
@@ -19,6 +17,7 @@ From: gcr.io/self-fluids/self-base_serial-x86-nvcc
    SELF_PREFIX=/opt/self \
    FC=hipfort \
    HIPFORT_GPU=${GPU_TARGET} \
+   HIPFORT_COMPILER=h5pfc \
    PREC=double \
    make && \
    cp -r /tmp/self/src /opt/self
