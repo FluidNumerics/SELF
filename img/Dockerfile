@@ -13,8 +13,12 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     HIPFORT_GPU=${GPU_TARGET} \
     make
 
-FROM ubuntu:focal
+FROM gcr.io/self-fluids/self-base:latest
 
 COPY --from=builder /opt /opt
+COPY --from=builder /etc/profile.d /etc/profile.d
+
+ENV PATH=$PATH:/opt/view/bin
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/view/lib
 
 LABEL maintainer="joe@fluidnumerics.com"
