@@ -8,7 +8,8 @@ From: gcr.io/self-fluids/self-base:latest
 %post
 
    export BUILD_TYPE=release
-   export GPU_TARGET=sm72
+   export GPU_TARGET=sm_72
+   export HIP_PLATFORM=nvidia
    
    # Install SELF
    . /etc/profile.d/z10_spack_environment.sh && \
@@ -20,7 +21,8 @@ From: gcr.io/self-fluids/self-base:latest
    HIPFORT_COMPILER=h5pfc \
    PREC=double \
    make && \
-   cp -r /tmp/self/src /opt/self
+   cp -r /workspace/build/src /opt/self && \
+   rm -rf /workspace/build
    
    
 %labels
@@ -36,6 +38,7 @@ From: gcr.io/self-fluids/self-base:latest
    export GPU_TARGET=sm70
    export SPACK_VERSION="v0.16.1"
    export HDF5_VERSION="1.12.0"
+   export HIP_PLATFORM=nvidia
 
 %help
    The Spectral Element Library in Fortran is an OO Fortran library that is used to create PDE and ODE solvers

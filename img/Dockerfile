@@ -5,6 +5,7 @@ COPY . /tmp
 
 RUN . /etc/profile.d/z10_spack_environment.sh && \
     cd /tmp && \
+    HIP_PLATFORM=nvidia \
     BUILD=${BUILD_TYPE} \
     SELF_PREFIX=/opt/self \
     HIPFC=/opt/rocm/bin/hipfc \
