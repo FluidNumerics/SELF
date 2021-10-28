@@ -27,6 +27,12 @@ From: gcr.io/self-fluids/self-base:latest
    
 %labels
    Author joe@fluidnumerics.com
+   OS Ubuntu
+   Compiler gcc@9.2.0
+   MPI openmpi@4.0.5
+   Dependencies "hdf5@1.12.0+cxx+fortran+mpi, feq-parse@v1.1.0, flap@master"
+   Platform amd
+   GPU sm_72
 
 %environment
    export LD_LIBRARY_PATH=/opt/view/lib:/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH
@@ -35,7 +41,7 @@ From: gcr.io/self-fluids/self-base:latest
    export GPU_ACCEL=false
    export WORKSPACE=/workspace
    export BUILD_TYPE=release
-   export GPU_TARGET=sm70
+   export GPU_TARGET=sm_72
    export SPACK_VERSION="v0.16.1"
    export HDF5_VERSION="1.12.0"
    export HIP_PLATFORM=nvidia
