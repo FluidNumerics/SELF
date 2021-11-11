@@ -3,16 +3,18 @@
 import json
 import os
 
-WORKSPACE=os.getenv('WORKSPACE')
-PARTITIONS=os.getenv('PARTITIONS')
+# Get the path to this script's directory
+cipath = '/'.join(os.path.abspath(__file__).split('/')[:-1])+'/'
+
+PARTITIONS=['c2-standard-4','v100']
 
 
 def main():
 
-  with open('ci/test/ci.json','r') as f:
+  with open(cipath+'ci.json','r') as f:
     ci_conf = json.load(f)
         
-  with open('ci/test/cmd.tmpl') as f:
+  with open(cipath+'cmd.tmpl') as f:
     cmd_tmpl = f.read()
 
   ntests = 0
@@ -61,13 +63,16 @@ def main():
                     else:
                         cmd = cmd.replace('@GPU_OPT@','')
 
-                    os.makedirs(workdir)
+                    try:
+                        os.makedirs(workdir)
+                    except:
+                        print(workdir + ' already exists. Overwriting tests')
 
                     with open(workdir+'test.sh','w') as f:
                       f.write(cmd)
                     os.chmod(workdir+'test.sh',0o755)
 
-                    for partition in PARTITIONS.split(','):
+                    for partition in PARTITIONS:
                         tests["tests"].append({'command_group':test['cli_command'],
                                                'execution_command': workdir+'test.sh',
                                                'output_directory': workdir,

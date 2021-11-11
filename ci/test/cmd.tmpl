@@ -1,17 +1,13 @@
 #!/bin/bash
 
-source /etc/profile.d/z10_spack_environment.sh
-
-spack load singularity
-
-singularity exec ${SINGULARITY_IMAGE} @GPU_OPT@ /opt/self/bin/self --control-quadrature @CONTROL_QUADRATURE@ \
-                                                                      --control-degree @CONTROL_DEGREE@ \
-                                                                      --target-quadrature @TARGET_QUADRATURE@ \
-                                                                      --target-degree @TARGET_DEGREE@ \
-                                                                      --nelements @NELEMS@ \
-                                                                      --nvar @NVAR@ \
-                                                                      --gpu-accel @GPU_ACCEL@ \
-                                                                      @FUNCTION_OPTS@ \
-                                                                      @ADDITIONAL_OPTS@ \
-                                                                      --output ${WORKSPACE}/@OUTPUT_FILE@ \
-                                                                      @COMMAND@
+/opt/self/bin/self --control-quadrature @CONTROL_QUADRATURE@ \
+                   --control-degree @CONTROL_DEGREE@ \
+                   --target-quadrature @TARGET_QUADRATURE@ \
+                   --target-degree @TARGET_DEGREE@ \
+                   --nelements @NELEMS@ \
+                   --nvar @NVAR@ \
+                   --gpu-accel @GPU_ACCEL@ \
+                   @FUNCTION_OPTS@ \
+                   @ADDITIONAL_OPTS@ \
+                   --output ${WORKSPACE}/@OUTPUT_FILE@ \
+                   @COMMAND@

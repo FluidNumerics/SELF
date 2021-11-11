@@ -1,5 +1,5 @@
 { 
-  "test_root" : "/workspace",
+  "test_root" : "./",
   "tests" : [
     { 
       "cli_command": "s1d_interp",
@@ -41,6 +41,18 @@
                          {"name": "sinusoid", "value":"--function \"f=sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)\"","exact":{"iovar":"solution","function":["sin(2.0*pi*x)*cos(2.0*pi*y)*sin(2.0*pi*z)"]}}]
     },
     { 
+      "cli_command": "v2d_divergence",
+      "control_quadrature" : ["gauss","gauss-lobatto"],
+      "control_degree" : [7],
+      "nelems": [5],
+      "nvars": [1],
+      "target_quadrature" : ["gauss"], 
+      "target_degree" : [7], 
+      "additional_opts" : [{"name":"dg","value":"--derivative-type dg"}],
+      "function_opts" : [{"name": "constant", "value":"--vector-x fx=1.0 --vector-y fy=1.0","exact":{"iovar":"fluxDivergence","function":["0.0"]}},
+                         {"name": "linear", "value":"--vector-x fx=x --vector-y fy=y","exact":{"iovar":"fluxDivergence","function":["2.0"]}}]
+    },
+    { 
       "cli_command": "v3d_divergence",
       "control_quadrature" : ["gauss"],
       "control_degree" : [7],
@@ -63,6 +75,18 @@
       "additional_opts" : [{"name":"dg","value":"--derivative-type dg"}],
       "function_opts" : [{"name": "constant", "value":"--function f=1.0","exact":{"iovar":"solutionGradient","function":["0.0","0.0"]}},
                          {"name": "linear", "value":"--function f=x+y","exact":{"iovar":"solutionGradient","function":["1.0","1.0"]}}]
+    },
+    { 
+      "cli_command": "s3d_gradient",
+      "control_quadrature" : ["gauss"],
+      "control_degree" : [7],
+      "nelems": [5],
+      "nvars": [1],
+      "target_quadrature" : ["gauss"], 
+      "target_degree" : [7], 
+      "additional_opts" : [{"name":"dg","value":"--derivative-type dg"}],
+      "function_opts" : [{"name": "constant", "value":"--function f=1.0","exact":{"iovar":"solutionGradient","function":["0.0","0.0","0.0"]}},
+                         {"name": "linear", "value":"--function f=x+y+z","exact":{"iovar":"solutionGradient","function":["1.0","1.0","1.0"]}}]
     }
   ]
 }
