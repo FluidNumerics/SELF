@@ -3,7 +3,7 @@ From: gcr.io/self-fluids/self-base:latest
 
 %files
 
-   . /workspace/build
+   . /build
 
 %post
 
@@ -13,7 +13,7 @@ From: gcr.io/self-fluids/self-base:latest
    
    # Install SELF
    . /etc/profile.d/z10_spack_environment.sh && \
-   cd /workspace/build && \
+   cd /build && \
    BUILD=${BUILD_TYPE} \
    SELF_PREFIX=/opt/self \
    FC=hipfort \
@@ -21,8 +21,7 @@ From: gcr.io/self-fluids/self-base:latest
    HIPFORT_COMPILER=h5pfc \
    PREC=double \
    make && \
-   cp -r /workspace/build/src /opt/self && \
-   rm -rf /workspace/build
+   cp -r /build/src /opt/self
    
    
 %labels
