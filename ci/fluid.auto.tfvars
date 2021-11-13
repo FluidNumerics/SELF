@@ -44,6 +44,29 @@ partitions = [
     regional_capacity    = false
     regional_policy      = null
     instance_template    = null
+  },
+  { name                 = "v100"
+    machine_type         = "n1-standard-8"
+    image                = "<image>"
+    image_hyperthreads   = true
+    static_node_count    = 0
+    max_node_count       = 25
+    zone                 = "<zone>"
+    compute_disk_type    = "pd-standard"
+    compute_disk_size_gb = 100
+    compute_labels       = {}
+    cpu_platform         = null
+    gpu_count            = 1
+    gpu_type             = "nvidia-tesla-v100"
+    gvnic                = false
+    network_storage      = []
+    preemptible_bursting = false
+    vpc_subnet           = "fluid-run"
+    exclusive            = false
+    enable_placement     = false
+    regional_capacity    = false
+    regional_policy      = null
+    instance_template    = null
   }
 ]
 

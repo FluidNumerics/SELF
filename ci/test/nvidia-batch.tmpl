@@ -1,0 +1,18 @@
+#!/bin/bash
+
+source /etc/profile.d/z10_spack_environment.sh
+spack load singularity
+
+singularity run --nv --bind ${WORKSPACE}/ci/test/codecov:/build \
+                   ${SINGULARITY_IMAGE} /opt/self/bin/self \
+                   --control-quadrature @CONTROL_QUADRATURE@ \
+                   --control-degree @CONTROL_DEGREE@ \
+                   --target-quadrature @TARGET_QUADRATURE@ \
+                   --target-degree @TARGET_DEGREE@ \
+                   --nelements @NELEMS@ \
+                   --nvar @NVAR@ \
+                   --gpu-accel true \
+                   @FUNCTION_OPTS@ \
+                   @ADDITIONAL_OPTS@ \
+                   --output ${WORKSPACE}/@OUTPUT_FILE@ \
+                   @COMMAND@
