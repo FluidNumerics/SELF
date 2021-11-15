@@ -39,8 +39,6 @@ steps:
 - id: Generate test batch scripts
   name: 'python:3.7-buster'
   entrypoint: '/usr/local/bin/python'
-  env:
-  - 'PARTITIONS=${_PARTITIONS}'
   args: ['ci/test/ciGenerator.py']
   waitFor: ["-"]
 
@@ -80,6 +78,5 @@ timeout: 9600s
 
 substitutions:
   _ZONE: 'us-west1-b'
-  _PARTITIONS: 'c2-standard-4'
 
 
