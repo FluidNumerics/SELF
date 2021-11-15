@@ -73,7 +73,7 @@ MODULE SELF_Mesh
 ! Notes:
 !  * cornerNode attributes have not been implemented yet
 !
-!  * For line segments, quads, and hexes, Gauss-Lobatto quadrature is required
+!  * For line segments, quads, and hexes, SELF uses Legendre-Gauss-Lobatto quadrature
 !
 ! ========================================================================= !
 
@@ -116,6 +116,7 @@ MODULE SELF_Mesh
   INTEGER,PARAMETER :: selfSide3D_Top = 6
   !
   INTEGER,PARAMETER :: self_nBCsDefault = 5
+  INTEGER,PARAMETER :: self_BCDefault = 1
 
   TYPE MeshSpec
     CHARACTER(self_FileNameLength) :: hoprFile
@@ -841,8 +842,9 @@ CONTAINS
 
     READ (fUnit,*) nNodes,nSides,nElem,nGeo
 
-    ! TO DO : Need to check if HOHQMesh places boundary curves on Gauss Lobatto points or uniform points
-    CALL interp % Init(nGeo,GAUSS_LOBATTO,nGeo,GAUSS_LOBATTO)
+    ! HOHQMesh reports interpolant data on Chebyshev Lobatto points
+    ! We want data to be interpolated to Legendre Gauss Lobatto points
+    CALL interp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,nGeo,GAUSS_LOBATTO)
 
     ! When we initialize the mesh, we set nNodes=nElem*4*(nGeo+1)**2 and
     ! nSides = nElem*4 since we still use `nNodes` and `nSides`
@@ -1093,6 +1095,7 @@ CONTAINS
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
     INTEGER :: nGeo,nBCs
+    INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
@@ -1148,7 +1151,13 @@ CONTAINS
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
 
-    ! TO DO : Set SELF Side Info from HOPR side info
+    iSide = 0 
+    DO eid = 1,myMesh % nElem
+      DO lsid = 1,4
+        iSide = iSide + 1
+        myMesh % self_sideInfo % hostData(1:5,lsid,eid) = myMesh % hopr_sideInfo % hostData(1:5,iSide)
+      ENDDO
+    ENDDO
 
     CALL myMesh % UpdateDevice()
 
@@ -1174,6 +1183,7 @@ CONTAINS
     INTEGER :: firstNode,nLocalNodes
     INTEGER :: firstSide,nLocalSides
     INTEGER :: nGeo,nBCs
+    INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
@@ -1241,7 +1251,13 @@ CONTAINS
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
 
-    ! TO DO : Set SELF Side Info from HOPR side info
+    iSide = 0 
+    DO eid = 1,myMesh % nElem
+      DO lsid = 1,4
+        iSide = iSide + 1
+        myMesh % self_sideInfo % hostData(1:5,lsid,eid) = myMesh % hopr_sideInfo % hostData(1:5,iSide)
+      ENDDO
+    ENDDO
 
     CALL myMesh % UpdateDevice()
 
@@ -1430,6 +1446,7 @@ CONTAINS
     INTEGER :: sid,nid,nNodes
     INTEGER :: nSides
     INTEGER :: i,j,k
+    INTEGER :: nbeid, nbsid, usid
     REAL(prec) :: xU(1:nElem(1) + 1)
     REAL(prec) :: yU(1:nElem(2) + 1)
     REAL(prec) :: zU(1:nElem(3) + 1)
@@ -1510,7 +1527,136 @@ CONTAINS
       END DO
     END DO
 
-    ! TO DO: Add Side information !
+    ! Set up the side info
+    elid = 1
+    sid = 0
+    usid = 0
+    DO kel = 1,nElem(3)
+      DO jel = 1,nElem(2)
+        DO iel = 1,nElem(1)
+
+          ! Bottom Face ! Local Side = 1
+          IF (kel == 1) THEN
+
+             sid = sid + 1
+             usid = usid + 1 ! unique side id
+             myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+             myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+             myMesh % hopr_sideInfo % hostData(3,sid) = 0 ! Neighbor Element ID (0=boundary)
+             myMesh % hopr_sideInfo % hostData(4,sid) = 0 ! 10*nbLocalSide + flip
+             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ELSE
+
+             sid = sid + 1
+             nbeid = iel + nElem(1)*(jel-1 + nElem(2)*(kel-2)) ! Get the element id for the element below
+             nbsid = myMesh % hopr_elemInfo % hostData(3,nbeid) + selfSide3D_Top-1 ! Get sid for the top face of the element below
+             usid = myMesh % hopr_sideInfo % hostData(2,nbsid) ! Get the unique side address 
+             myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+             myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+             myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
+             myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_Top ! 10*nbLocalSide + flip
+             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ENDIF
+
+          ! South Face ! Local Side = 2
+          IF (jel == 1) THEN
+
+             sid = sid + 1
+             usid = usid + 1 ! unique side id
+             myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+             myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+             myMesh % hopr_sideInfo % hostData(3,sid) = 0 ! Neighbor Element ID (0=boundary)
+             myMesh % hopr_sideInfo % hostData(4,sid) = 0 ! 10*nbLocalSide + flip
+             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ELSE
+
+             sid = sid + 1
+             nbeid = iel + nElem(1)*(jel-2 + nElem(2)*(kel-1)) ! Get the element id for the element to the south
+             nbsid = myMesh % hopr_elemInfo % hostData(3,nbeid) + selfSide3D_North-1 ! Get sid for the north face of the element to  the south
+             usid = myMesh % hopr_sideInfo % hostData(2,nbsid) ! Get the unique side address 
+             myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+             myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+             myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
+             myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_North ! 10*nbLocalSide + flip
+             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ENDIF
+
+          ! East Face ! Local Side = 3
+          sid = sid + 1
+          IF (iel == nElem(1)) THEN
+            nbeid = 0
+          ELSE   
+            nbeid = iel + 1 + nElem(1)*(jel-1 + nElem(2)*(kel-1)) ! Get the element id for the element to the east
+          ENDIF
+          usid = usid + 1 ! unique side id
+          myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+          myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+          myMesh % hopr_sideInfo % hostData(3,sid) = 0 ! Neighbor Element ID (0=boundary)
+          myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_West ! 10*nbLocalSide + flip
+          myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ! North Face ! Local Side = 4
+          sid = sid + 1
+          IF (jel == nElem(2)) THEN
+            nbeid = 0
+          ELSE   
+            nbeid = iel + nElem(1)*(jel + nElem(2)*(kel-1)) ! Get the element id for the element to the north
+          ENDIF
+          usid = usid + 1 ! unique side id
+          myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+          myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+          myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
+          myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_South ! 10*nbLocalSide + flip
+          myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ! West Face ! Local Side = 5
+          IF (iel == 1) THEN
+
+             sid = sid + 1
+             usid = usid + 1 ! unique side id
+             myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+             myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+             myMesh % hopr_sideInfo % hostData(3,sid) = 0 ! Neighbor Element ID (0=boundary)
+             myMesh % hopr_sideInfo % hostData(4,sid) = 0 ! 10*nbLocalSide + flip
+             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ELSE
+
+             sid = sid + 1
+             nbeid = iel - 1 + nElem(1)*(jel-1 + nElem(2)*(kel-1)) ! Get the element id for the element to the west
+             nbsid = myMesh % hopr_elemInfo % hostData(3,nbeid) + selfSide3D_East-1 ! Get sid for the east face of the element to the west
+             usid = myMesh % hopr_sideInfo % hostData(2,nbsid) ! Get the unique side address 
+             myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+             myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+             myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
+             myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_East ! 10*nbLocalSide + flip
+             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+          ENDIF
+
+          ! Top Face ! Local Side = 6
+          sid = sid + 1
+          IF (kel == nElem(3)) THEN
+            nbeid = 0
+          ELSE   
+            nbeid = iel + nElem(1)*(jel-1 + nElem(2)*(kel)) ! Get the element id for the element above
+          ENDIF
+          usid = usid + 1 ! unique side id
+          myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
+          myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
+          myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
+          myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_Bottom ! 10*nbLocalSide + flip
+          myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+
+
+        ENDDO
+      ENDDO
+    ENDDO
+
 
     CALL myMesh % UpdateDevice()
 
@@ -1582,6 +1728,7 @@ CONTAINS
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
     INTEGER :: nGeo,nBCs
+    INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
@@ -1637,7 +1784,13 @@ CONTAINS
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
 
-    ! TO DO : Copy SELF side info from HOPR side info
+    iSide = 0 
+    DO eid = 1,myMesh % nElem
+      DO lsid = 1,6
+        iSide = iSide + 1
+        myMesh % self_sideInfo % hostData(1:5,lsid,eid) = myMesh % hopr_sideInfo % hostData(1:5,iSide)
+      ENDDO
+    ENDDO
 
     CALL myMesh % UpdateDevice()
 
@@ -1662,6 +1815,7 @@ CONTAINS
     INTEGER :: firstNode,nLocalNodes
     INTEGER :: firstSide,nLocalSides
     INTEGER :: nGeo,nBCs
+    INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
     TYPE(hfInt32_r2) :: hopr_sideInfo
     TYPE(hfReal_r2) :: hopr_nodeCoords
@@ -1730,7 +1884,13 @@ CONTAINS
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
 
-    ! TO DO : Copy SELF side info from HOPR side info
+    iSide = 0 
+    DO eid = 1,myMesh % nElem
+      DO lsid = 1,6
+        iSide = iSide + 1
+        myMesh % self_sideInfo % hostData(1:5,lsid,eid) = myMesh % hopr_sideInfo % hostData(1:5,iSide)
+      ENDDO
+    ENDDO
 
     CALL myMesh % UpdateDevice()
 

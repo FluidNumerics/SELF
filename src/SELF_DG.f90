@@ -19,6 +19,7 @@ MODULE SELF_DG
     TYPE(MappedVector2D),PUBLIC :: flux
     TYPE(MappedScalar2D),PUBLIC :: source
     TYPE(MappedScalar2D),PUBLIC :: fluxDivergence
+    TYPE(MappedScalar2D),PUBLIC :: dSdt
     TYPE(MPILayer),PUBLIC :: decomp
     TYPE(Mesh2D),PUBLIC :: mesh
     TYPE(SEMQuad),PUBLIC :: geometry
@@ -40,6 +41,7 @@ MODULE SELF_DG
 
     PROCEDURE,PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG2D
     PROCEDURE,PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG2D
+    PROCEDURE,PUBLIC :: CalculateDSDt => CalculateDSDt_DG2D
 
     PROCEDURE,PUBLIC :: Read => Read_DG2D
     PROCEDURE,PUBLIC :: Write => Write_DG2D
@@ -52,6 +54,7 @@ MODULE SELF_DG
     TYPE(MappedVector3D),PUBLIC :: flux
     TYPE(MappedScalar3D),PUBLIC :: source
     TYPE(MappedScalar3D),PUBLIC :: fluxDivergence
+    TYPE(MappedScalar3D),PUBLIC :: dSdt
     TYPE(MPILayer),PUBLIC :: decomp
     TYPE(Mesh3D),PUBLIC :: mesh
     TYPE(SEMHex),PUBLIC :: geometry
@@ -73,6 +76,7 @@ MODULE SELF_DG
 
     PROCEDURE,PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG3D
     PROCEDURE,PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG3D
+    PROCEDURE,PUBLIC :: CalculateDSDt => CalculateDSDt_DG3D
 
     PROCEDURE,PUBLIC :: Read => Read_DG3D
     PROCEDURE,PUBLIC :: Write => Write_DG3D
@@ -80,6 +84,26 @@ MODULE SELF_DG
   END TYPE DG3D
 
   INTEGER,PARAMETER :: SELF_DG_BASSIREBAY = 100
+
+  INTERFACE
+    SUBROUTINE CalculateDSDt_DG2D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
+      bind(c,name="CalculateDSDt_DG2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: fluxDivergence, source, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE CalculateDSDt_DG2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateDSDt_DG3D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
+      bind(c,name="CalculateDSDt_DG3D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: fluxDivergence, source, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE CalculateDSDt_DG3D_gpu_wrapper
+  END INTERFACE
 
 CONTAINS
 
@@ -105,6 +129,7 @@ CONTAINS
     CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
     CALL this % solution % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % dSdt % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % flux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
@@ -126,6 +151,7 @@ CONTAINS
     CALL this % mesh % Free()
     CALL this % geometry % Free()
     CALL this % solution % Free()
+    CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
     CALL this % source % Free()
@@ -145,6 +171,7 @@ CONTAINS
     CALL this % mesh % UpdateHost()
     CALL this % geometry % UpdateHost()
     CALL this % solution % UpdateHost()
+    CALL this % dSdt % UpdateHost()
     CALL this % solutionGradient % UpdateHost()
     CALL this % flux % UpdateHost()
     CALL this % source % UpdateHost()
@@ -163,6 +190,7 @@ CONTAINS
     CALL this % mesh % UpdateDevice()
     CALL this % geometry % UpdateDevice()
     CALL this % solution % UpdateDevice()
+    CALL this % dSdt % UpdateDevice()
     CALL this % solutionGradient % UpdateDevice()
     CALL this % flux % UpdateDevice()
     CALL this % source % UpdateDevice()
@@ -203,6 +231,42 @@ CONTAINS
                                   selfWeakDGForm,gpuAccel)
 
   END SUBROUTINE CalculateFluxDivergence_DG2D
+
+  SUBROUTINE CalculateDSDt_DG2D(this,gpuAccel)
+    IMPLICIT NONE
+    CLASS(DG2D),INTENT(inout) :: this
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+
+    IF( gpuAccel )THEN
+
+      CALL CalculateDSDt_DG3D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
+                                      this % source % interior % deviceData, &
+                                      this % dSdt % interior % deviceData, &
+                                      this % solution % N, &
+                                      this % solution % nVar, &
+                                      this % solution % nElem ) 
+                                      
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO j = 0, this % solution % N
+            DO i = 0, this % solution % N
+
+              this % dSdt % interior % hostData(i,j,iVar,iEl) = &
+                      this % source % interior % hostData(i,j,iVar,iEl) -&
+                      this % fluxDivergence % interior % hostData(i,j,iVar,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE CalculateDSDt_DG2D
 
   SUBROUTINE Write_DG2D(this,fileName)
     IMPLICIT NONE
@@ -329,6 +393,7 @@ CONTAINS
     CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
     CALL this % solution % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % dSdt % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % flux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
@@ -350,6 +415,7 @@ CONTAINS
     CALL this % mesh % Free()
     CALL this % geometry % Free()
     CALL this % solution % Free()
+    CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
     CALL this % source % Free()
@@ -369,6 +435,7 @@ CONTAINS
     CALL this % mesh % UpdateHost()
     CALL this % geometry % UpdateHost()
     CALL this % solution % UpdateHost()
+    CALL this % dSdt % UpdateHost()
     CALL this % solutionGradient % UpdateHost()
     CALL this % flux % UpdateHost()
     CALL this % source % UpdateHost()
@@ -387,6 +454,7 @@ CONTAINS
     CALL this % mesh % UpdateDevice()
     CALL this % geometry % UpdateDevice()
     CALL this % solution % UpdateDevice()
+    CALL this % dSdt % UpdateDevice()
     CALL this % solutionGradient % UpdateDevice()
     CALL this % flux % UpdateDevice()
     CALL this % source % UpdateDevice()
@@ -427,6 +495,45 @@ CONTAINS
                                   selfWeakDGForm,gpuAccel)
 
   END SUBROUTINE CalculateFluxDivergence_DG3D
+
+  SUBROUTINE CalculateDSDt_DG3D(this,gpuAccel)
+    !! Adds the flux convergence and source terms together and assigns to dSdt
+    IMPLICIT NONE
+    CLASS(DG3D),INTENT(inout) :: this
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: i, j, k, iVar, iEl
+
+    IF( gpuAccel )THEN
+
+      CALL CalculateDSDt_DG3D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
+                                      this % source % interior % deviceData, &
+                                      this % dSdt % interior % deviceData, &
+                                      this % solution % N, &
+                                      this % solution % nVar, &
+                                      this % solution % nElem ) 
+                                      
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO k = 0, this % solution % N
+            DO j = 0, this % solution % N
+              DO i = 0, this % solution % N
+
+                this % dSdt % interior % hostData(i,j,k,iVar,iEl) = &
+                        this % source % interior % hostData(i,j,k,iVar,iEl) -&
+                        this % fluxDivergence % interior % hostData(i,j,k,iVar,iEl)
+
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE CalculateDSDt_DG3D
 
   SUBROUTINE Write_DG3D(this,fileName)
     IMPLICIT NONE

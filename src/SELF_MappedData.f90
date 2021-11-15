@@ -1828,7 +1828,7 @@ CONTAINS
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
-          IF (bcid == 0) THEN
+          IF (bcid == 0) THEN ! Interior
 
             neighborRank = decomp % elemToRank % hostData(e2)
 

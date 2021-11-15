@@ -21,6 +21,13 @@ MODULE SELF_Constants
 #endif
 
 !*************************************************************!
+! ------------------ CHARACTER LENGTHS----- ------------------!
+! ************************************************************!
+!                                                             !
+INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
+
+! ------------------------------------------------------------!
+!*************************************************************!
 ! ------------------ MATHEMATICAL CONSTANTS ------------------!
 ! ************************************************************!
 !                                                             !
@@ -69,6 +76,8 @@ MODULE SELF_Constants
 !==============================================!
   INTEGER,PARAMETER :: GAUSS = 1
   INTEGER,PARAMETER :: GAUSS_LOBATTO = 2
+  INTEGER,PARAMETER :: CHEBYSHEV_GAUSS = 3
+  INTEGER,PARAMETER :: CHEBYSHEV_GAUSS_LOBATTO = 4
   INTEGER,PARAMETER :: UNIFORM = 3
   INTEGER,PARAMETER :: DG = 2000
   INTEGER,PARAMETER :: CG = 2001

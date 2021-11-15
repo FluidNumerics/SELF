@@ -570,6 +570,13 @@ CONTAINS
                               myPoly % qWeights % hostData, &
                               controlNodeType)
 
+    ELSEIF (controlNodeType == CHEBYSHEV_GAUSS .OR. controlNodeType == CHEBYSHEV_GAUSS_LOBATTO) THEN
+
+      CALL ChebyshevQuadrature(N, &
+                               myPoly % controlPoints % hostData, &
+                               myPoly % qWeights % hostData, &
+                               controlNodeType)
+
     ELSEIF (controlNodeType == UNIFORM) THEN
 
       myPoly % controlPoints % hostData = UniformPoints(-1.0_prec,1.0_prec,0,N)

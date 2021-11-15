@@ -115,7 +115,7 @@ CONTAINS
 !
 ! ================================================================================================ !
 
-  SUBROUTINE ChebyshevQuadrature(N,quadType,nodes,weights)
+  SUBROUTINE ChebyshevQuadrature(N,nodes,weights,quadType)
     IMPLICIT NONE
     INTEGER,INTENT(in)     :: N
     REAL(real64),INTENT(out) :: nodes(0:N)
@@ -126,11 +126,11 @@ CONTAINS
     REAL(real64) :: weightsLocal(0:N)
     INTEGER :: i
 
-    IF (QuadType == GAUSS_LOBATTO) then
+    IF (QuadType == CHEBYSHEV_GAUSS_LOBATTO) then
 
       CALL ChebyshevGaussLobatto(N,nodesLocal,weightsLocal)
 
-    ELSEIF (QuadType == GAUSS) then
+    ELSEIF (QuadType == CHEBYSHEV_GAUSS) then
 
       CALL ChebyshevGauss(N,nodesLocal,weightsLocal)
 

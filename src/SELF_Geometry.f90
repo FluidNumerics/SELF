@@ -41,6 +41,8 @@ MODULE SELF_Geometry
     TYPE(Vector2D) :: x ! Physical positions
     TYPE(Tensor2D) :: dxds ! Covariant basis vectors
     TYPE(Tensor2D) :: dsdx ! Contavariant basis vectors
+    TYPE(Vector2D) :: nHat ! Normal Vectors pointing across coordinate lines
+    TYPE(Scalar2D) :: nScale ! Boundary scale
     TYPE(Scalar2D) :: J ! Jacobian of the transformation
 
   CONTAINS
@@ -62,6 +64,8 @@ MODULE SELF_Geometry
     TYPE(Vector3D) :: x ! Physical positions
     TYPE(Tensor3D) :: dxds ! Covariant basis vectors
     TYPE(Tensor3D) :: dsdx ! Contavariant basis vectors
+    TYPE(Vector3D) :: nHat ! Normal Vectors pointing across coordinate lines
+    TYPE(Scalar3D) :: nScale ! Boundary scale
     TYPE(Scalar3D) :: J ! Jacobian of the transformation
 
   CONTAINS
@@ -270,6 +274,20 @@ CONTAINS
                               nVar=1, &
                               nElem=nElem)
 
+    CALL myGeom % nHat % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
+    CALL myGeom % nScale % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
     CALL myGeom % J % Init(N=cqDegree, &
                            quadratureType=cqType, &
                            M=tqDegree, &
@@ -286,6 +304,8 @@ CONTAINS
     CALL myGeom % x % Free()
     CALL myGeom % dxds % Free()
     CALL myGeom % dsdx % Free()
+    CALL myGeom % nHat % Free()
+    CALL myGeom % nScale % Free()
     CALL myGeom % J % Free()
 
   END SUBROUTINE Free_SEMQuad
@@ -297,6 +317,8 @@ CONTAINS
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
+    CALL myGeom % nHat % UpdateHost()
+    CALL myGeom % nScale % UpdateHost()
     CALL myGeom % J % UpdateHost()
 
   END SUBROUTINE UpdateHost_SEMQuad
@@ -308,9 +330,12 @@ CONTAINS
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
+    CALL myGeom % nHat % UpdateDevice()
+    CALL myGeom % nScale % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_SEMQuad
+
   SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
@@ -378,57 +403,86 @@ CONTAINS
     ! Local
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
+    REAL(prec) :: mag
 
-    IF (GPUAvailable()) THEN
-      CALL CalculateContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dxds % interior % deviceData, &
-                                                           myGeom % dsdx % interior % deviceData, &
-                                                           myGeom % dxds % N, &
-                                                           myGeom % dxds % nElem)
-      ! Interpolate the contravariant tensor to the boundaries
-      CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
-                                                                myGeom % J % boundary % deviceData, &
-                                                                myGeom % J % N, &
-                                                                myGeom % J % nElem)
-    ELSE
-      ! Now calculate the contravariant basis vectors
-      ! In this convention, dsdx(j,i) is contravariant vector i, component j
-      ! To project onto contravariant vector i, dot vector along the first dimension
-      DO iEl = 1,myGeom % nElem
-        DO j = 0,myGeom % dxds % N
-          DO i = 0,myGeom % dxds % N
+    ! Now calculate the contravariant basis vectors
+    ! In this convention, dsdx(j,i) is contravariant vector i, component j
+    ! To project onto contravariant vector i, dot vector along the first dimension
+    DO iEl = 1,myGeom % nElem
+      DO j = 0,myGeom % dxds % N
+        DO i = 0,myGeom % dxds % N
 
-            myGeom % dsdx % interior % hostData(1,1,i,j,1,iEl) = myGeom % dxds % interior % hostData(2,2,i,j,1,iEl)
-            myGeom % dsdx % interior % hostData(2,1,i,j,1,iEl) = -myGeom % dxds % interior % hostData(1,2,i,j,1,iEl)
-            myGeom % dsdx % interior % hostData(1,2,i,j,1,iEl) = -myGeom % dxds % interior % hostData(2,1,i,j,1,iEl)
-            myGeom % dsdx % interior % hostData(2,2,i,j,1,iEl) = myGeom % dxds % interior % hostData(1,1,i,j,1,iEl)
+          myGeom % dsdx % interior % hostData(1,1,i,j,1,iEl) = myGeom % dxds % interior % hostData(2,2,i,j,1,iEl)
+          myGeom % dsdx % interior % hostData(2,1,i,j,1,iEl) = -myGeom % dxds % interior % hostData(1,2,i,j,1,iEl)
+          myGeom % dsdx % interior % hostData(1,2,i,j,1,iEl) = -myGeom % dxds % interior % hostData(2,1,i,j,1,iEl)
+          myGeom % dsdx % interior % hostData(2,2,i,j,1,iEl) = myGeom % dxds % interior % hostData(1,1,i,j,1,iEl)
 
-          END DO
         END DO
       END DO
+    END DO
 
-      ! Interpolate the contravariant tensor to the boundaries
-      CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
+    ! Interpolate the contravariant tensor to the boundaries
+    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
 
-      ! Now, modify the sign of dsdx so that
-      ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-      DO iEl = 1,myGeom % nElem
-        DO k = 1,4
-          DO i = 0,myGeom % J % N
-            IF (k == selfSide2D_East .OR. k == selfSide2D_North) THEN
-              fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
-            ELSE
-              fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
-            END IF
+    ! Now, modify the sign of dsdx so that
+    ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
+    DO iEl = 1,myGeom % nElem
+      DO k = 1,4
+        DO i = 0,myGeom % J % N
+          IF (k == selfSide2D_East .OR. k == selfSide2D_North) THEN
+            fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
+          ELSE
+            fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
+          END IF
 
-            myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = &
-              fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
+          myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = &
+            fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
 
-          END DO
+          IF( k == 1 )THEN ! South
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,2,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              -fac*myGeom % dsdx % boundary % hostData(1:2,2,i,1,k,iEl)/mag
+
+          ELSEIF( k == 2 )THEN ! East
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,1,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
+
+          ELSEIF( k == 3 )THEN ! North
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,2,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              fac*myGeom % dsdx % boundary % hostData(1:2,2,i,1,k,iEl)/mag
+
+          ELSEIF( k == 4 )THEN ! West
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,1,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              -fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
+
+          ENDIF
+
         END DO
       END DO
-
-    END IF
+    END DO
 
   END SUBROUTINE CalculateContravariantBasis_SEMQuad
 
@@ -441,14 +495,20 @@ CONTAINS
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % CalculateContravariantBasis()
+      CALL myGeom % UpdateHost()
     ELSE
       CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-      CALL myGeom % CalculateContravariantBasis()
     END IF
+
+    CALL myGeom % CalculateContravariantBasis()
+    IF (GPUAvailable()) THEN
+      CALL myGeom % dsdx % UpdateDevice()
+      CALL myGeom % nHat % UpdateDevice()
+      CALL myGeom % nScale % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
 
@@ -486,6 +546,20 @@ CONTAINS
                               nVar=1, &
                               nElem=nElem)
 
+    CALL myGeom % nHat % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
+    CALL myGeom % nScale % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
     CALL myGeom % J % Init(N=cqDegree, &
                            quadratureType=cqType, &
                            M=tqDegree, &
@@ -502,6 +576,8 @@ CONTAINS
     CALL myGeom % x % Free()
     CALL myGeom % dxds % Free()
     CALL myGeom % dsdx % Free()
+    CALL myGeom % nHat % Free()
+    CALL myGeom % nScale % Free()
     CALL myGeom % J % Free()
 
   END SUBROUTINE Free_SEMHex
@@ -513,6 +589,8 @@ CONTAINS
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
+    CALL myGeom % nHat % UpdateHost()
+    CALL myGeom % nScale % UpdateHost()
     CALL myGeom % J % UpdateHost()
 
   END SUBROUTINE UpdateHost_SEMHex
@@ -524,6 +602,8 @@ CONTAINS
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
+    CALL myGeom % nHat % UpdateDevice()
+    CALL myGeom % nScale % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_SEMHex
@@ -598,112 +678,165 @@ CONTAINS
     ! Local
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
+    REAL(prec) :: mag
 
-    IF (GPUAvailable()) THEN
-      CALL CalculateContravariantBasis_SEMHex_gpu_wrapper(myGeom % dxds % interior % deviceData, &
-                                                          myGeom % dsdx % interior % deviceData, &
-                                                          myGeom % dxds % N, &
-                                                          myGeom % dxds % nElem)
-      ! Interpolate the contravariant tensor to the boundaries
-      CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
-                                                               myGeom % J % boundary % deviceData, &
-                                                               myGeom % J % N, &
-                                                               myGeom % J % nElem)
-    ELSE
-      ! Now calculate the contravariant basis vectors
-      ! In this convention, dsdx(j,i) is contravariant vector i, component j
-      ! To project onto contravariant vector i, dot vector along the first dimension
-      DO iEl = 1,myGeom % nElem
-        DO k = 0,myGeom % dxds % N
-          DO j = 0,myGeom % dxds % N
-            DO i = 0,myGeom % dxds % N
+    ! Now calculate the contravariant basis vectors
+    ! In this convention, dsdx(j,i) is contravariant vector i, component j
+    ! To project onto contravariant vector i, dot vector along the first dimension
+    DO iEl = 1,myGeom % nElem
+      DO k = 0,myGeom % dxds % N
+        DO j = 0,myGeom % dxds % N
+          DO i = 0,myGeom % dxds % N
 
-              ! Ja1
-              myGeom % dsdx % interior % hostData(1,1,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)
+            ! Ja1
+            myGeom % dsdx % interior % hostData(1,1,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)
 
-              myGeom % dsdx % interior % hostData(2,1,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(2,1,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)
 
-              myGeom % dsdx % interior % hostData(3,1,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(3,1,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)
 
-              ! Ja2
-              myGeom % dsdx % interior % hostData(1,2,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)
+            ! Ja2
+            myGeom % dsdx % interior % hostData(1,2,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)
 
-              myGeom % dsdx % interior % hostData(2,2,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(2,2,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,3,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)
 
-              myGeom % dsdx % interior % hostData(3,2,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(3,2,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(2,3,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)
 
-              ! Ja3
-              myGeom % dsdx % interior % hostData(1,3,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)
+            ! Ja3
+            myGeom % dsdx % interior % hostData(1,3,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl)
 
-              myGeom % dsdx % interior % hostData(2,3,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(2,3,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(3,1,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(3,2,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)
 
-              myGeom % dsdx % interior % hostData(3,3,i,j,k,1,iEl) = &
-                myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl) - &
-                myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)* &
-                myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)
+            myGeom % dsdx % interior % hostData(3,3,i,j,k,1,iEl) = &
+              myGeom % dxds % interior % hostData(1,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(2,2,i,j,k,1,iEl) - &
+              myGeom % dxds % interior % hostData(2,1,i,j,k,1,iEl)* &
+              myGeom % dxds % interior % hostData(1,2,i,j,k,1,iEl)
 
-            END DO
           END DO
         END DO
       END DO
+    END DO
 
-      ! Interpolate the contravariant tensor to the boundaries
-      CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
+    ! Interpolate the contravariant tensor to the boundaries
+    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
 
-      ! Now, modify the sign of dsdx so that
-      ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
-      DO iEl = 1,myGeom % nElem
-        DO k = 1,6
-          DO j = 0,myGeom % J % N
-            DO i = 0,myGeom % J % N
-              IF (k == selfSide3D_Top .OR. k == selfSide3D_East .OR. k == selfSide3D_North) THEN
-                fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
-              ELSE
-                fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
-              END IF
+    ! Now, calculate nHat (outward pointing normal)
+    DO iEl = 1,myGeom % nElem
+      DO k = 1,6
+        DO j = 0,myGeom % J % N
+          DO i = 0,myGeom % J % N
+            IF (k == selfSide3D_Top .OR. k == selfSide3D_East .OR. k == selfSide3D_North) THEN
+              fac = SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
+            ELSE
+              fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
+            END IF
 
-              myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = &
-                fac*myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)
-            END DO
+            IF( k == 1 )THEN ! Bottom
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,3,i,j,1,k,iEl)**2 )
+ 
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                -fac*myGeom % dsdx % boundary % hostData(1:3,3,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 2 )THEN  ! South
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,2,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                -fac*myGeom % dsdx % boundary % hostData(1:3,2,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 3 )THEN  ! East
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,1,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,1,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 4 )THEN  ! North
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,2,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,2,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 5 )THEN  ! West
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,1,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                -fac*myGeom % dsdx % boundary % hostData(1:3,1,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 6 )THEN  ! Top
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,3,i,j,1,k,iEl)**2 )
+ 
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,3,i,j,1,k,iEl)/mag
+
+            ENDIF
+
+            
           END DO
         END DO
       END DO
-
-    END IF
+    END DO
 
   END SUBROUTINE CalculateContravariantBasis_SEMHex
 
@@ -716,14 +849,20 @@ CONTAINS
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % CalculateContravariantBasis()
+      CALL myGeom % UpdateHost()
     ELSE
       CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-      CALL myGeom % CalculateContravariantBasis()
     END IF
+
+    CALL myGeom % CalculateContravariantBasis()
+    IF (GPUAvailable()) THEN
+      CALL myGeom % dsdx % UpdateDevice()
+      CALL myGeom % nHat % UpdateDevice()
+      CALL myGeom % nScale % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 
