@@ -42,6 +42,7 @@ RUN mkdir /opt/spack-environment \
 &&   echo "  - cmake@3.18.4" \
 &&   echo "  - openmpi@4.0.2" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
+&&   echo "  - json-fortran@7.1.0" \
 &&   echo "  - feq-parse@v1.1.0" \
 &&   echo "  - flap@master" \
 &&   echo "  concretization: together" \
