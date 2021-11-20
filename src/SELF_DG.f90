@@ -26,10 +26,12 @@ MODULE SELF_DG
     TYPE(Metadata),ALLOCATABLE,PUBLIC :: solutionMetaData(:)
 
     ! Work arrays
-    TYPE(MappedScalar2D),PRIVATE :: workScalar
-    TYPE(MappedVector2D),PRIVATE :: workVector
-    TYPE(MappedVector2D),PRIVATE :: compFlux
-    TYPE(MappedTensor2D),PRIVATE :: workTensor
+    ! Can't be private to be accessible by type extensions
+    ! TO DO : Really need to figure out the reuse business for the initializer...
+    TYPE(MappedScalar2D) :: workScalar
+    TYPE(MappedVector2D) :: workVector
+    TYPE(MappedVector2D) :: compFlux
+    TYPE(MappedTensor2D) :: workTensor
 
   CONTAINS
 

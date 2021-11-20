@@ -19,22 +19,24 @@ vpath %.h $(SELF_DIR)/src $(SELF_DIR)/src/hip
 
 SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_LinkedList SELF_HashTable SELF_Memory \
                 SELF_HDF5 SELF_Metadata SELF_MPI SELF_Quadrature SELF_Lagrange SELF_Data \
-                SELF_Mesh SELF_Geometry SELF_MappedData SELF_DG
+                SELF_Mesh SELF_Geometry SELF_MappedData SELF_DG \
+                SELF_Advection2D
 
 SELF_DEV_SRCS = SELF_CLI SELF
 
-SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_DG
+SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_DG SELF_Advection2D
 
 SELF_LIBS = self
-            
+
 SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
 SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
 SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_DEV_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR)
 
-
 # Recipes
+#
+	
 self: $(SELF_BINDIR)self
 
 self_clean:

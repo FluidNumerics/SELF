@@ -15,7 +15,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
 && cd /tmp/hipfort/build \
 && FC=$(which gfortran) cmake -DCMAKE_INSTALL_PREFIX=/opt/rocm /tmp/hipfort \
 && make -j install \
-&& echo "PATH=\${PATH}:/opt/rocm/bin" >> /etc/profile.d/z10_spack_environment.sh
+&& echo "PATH=\${PATH}:/opt/rocm/bin" >> /etc/profile.d/z10_spack_environment.sh \
 && echo "PATH=\${PATH}:/opt/rocm/hipfort/bin" >> /etc/profile.d/z10_spack_environment.sh
 
 # Install cuda-compiler
@@ -40,10 +40,10 @@ RUN mkdir /opt/spack-environment \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
 &&   echo "  - cmake@3.18.4" \
-&&   echo "  - openmpi@4.0.2" \
+&&   echo "  - openmpi@4.0.2 +internal-hwloc" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
-&&   echo "  - feq-parse@v1.1.0" \
+&&   echo "  - feq-parse@1.1.0" \
 &&   echo "  - flap@master" \
 &&   echo "  concretization: together" \
 &&   echo "  config:" \
