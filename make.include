@@ -20,9 +20,7 @@ vpath %.h $(SELF_DIR)/src $(SELF_DIR)/src/hip
 SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_LinkedList SELF_HashTable SELF_Memory \
                 SELF_HDF5 SELF_Metadata SELF_MPI SELF_Quadrature SELF_Lagrange SELF_Data \
                 SELF_Mesh SELF_Geometry SELF_MappedData SELF_DG \
-                SELF_Advection2D
-
-SELF_DEV_SRCS = SELF_CLI SELF
+                SELF_CLI SELF_Advection2D
 
 SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_DG SELF_Advection2D
 
@@ -30,14 +28,13 @@ SELF_LIBS = self
 
 SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
 SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
-SELF_TEST_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_DEV_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR)
 
 # Recipes
 #
 	
-self: $(SELF_BINDIR)self
+self: $(SELF_BINDIR)self $(SELF_BINDIR)sadv2d
 
 self_clean:
 	rm -f $(SELF_OBJDIR)*
@@ -45,8 +42,12 @@ self_clean:
 	rm -f $(SELF_LIBDIR)*.a
 	rm -f $(SELF_MODDIR)*.mod
 
-$(SELF_BINDIR)self: $(SELF_LIB_OBJS) $(SELF_TEST_OBJS)
-	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_FLIBS) -o $@
+$(SELF_BINDIR)sadv2d: $(SELF_LIB_OBJS)
+	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_DIR)/src/models/sadv2d.f90 $(SELF_FLIBS) -o $@
+
+
+$(SELF_BINDIR)self: $(SELF_LIB_OBJS)
+	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_DIR)/src/SELF.f90 $(SELF_FLIBS) -o $@
 
 $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
 	rm -f $@

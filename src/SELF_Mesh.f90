@@ -119,7 +119,8 @@ MODULE SELF_Mesh
   INTEGER,PARAMETER :: self_BCDefault = 1
 
   TYPE MeshSpec
-    CHARACTER(self_FileNameLength) :: hoprFile
+    CHARACTER(self_FileNameLength) :: filename
+    INTEGER :: fileType
 
     LOGICAL :: blockMesh
     INTEGER :: blockMesh_nGeo
@@ -772,7 +773,7 @@ CONTAINS
                                        myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
     ELSE
 
-      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
+      CALL myMesh % Read_HOPr(myMeshSpec % filename)
 
     END IF
 
@@ -800,7 +801,7 @@ CONTAINS
 
     ELSE
 
-      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+      CALL myMesh % Read_HOPr(myMeshSpec % filename,decomp)
 
     END IF
 
@@ -1682,7 +1683,7 @@ CONTAINS
 
     ELSE
 
-      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile)
+      CALL myMesh % Read_HOPr(myMeshSpec % filename)
 
     END IF
 
@@ -1711,7 +1712,7 @@ CONTAINS
 
     ELSE
 
-      CALL myMesh % Read_HOPr(myMeshSpec % hoprFile,decomp)
+      CALL myMesh % Read_HOPr(myMeshSpec % filename,decomp)
 
     END IF
 

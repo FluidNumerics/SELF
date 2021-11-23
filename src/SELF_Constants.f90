@@ -57,6 +57,8 @@ INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
   REAL(prec),PARAMETER :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
   REAL(prec),PARAMETER :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
   REAL(prec),PARAMETER :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
+  INTEGER, PARAMETER :: EULER = 100
+  INTEGER, PARAMETER :: RK3 = 203
 
 !*************************************************************!
 ! ------------------- PHYSICAL CONSTANTS ---------------------!
@@ -71,6 +73,13 @@ INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
   REAL(prec),PARAMETER   :: monthsToYears = 1.0_prec/12.0_prec                   ! conversion for months to years
   REAL(prec),PARAMETER   :: daysToSeconds = 86400.0_prec
 
+!==============================================!
+! --------------- File Types------------------ !
+!==============================================!
+  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_2D = 1
+  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_3D = 2
+  INTEGER, PARAMETER :: SELF_MESH_HOPR_2D = 3
+  INTEGER, PARAMETER :: SELF_MESH_HOPR_3D = 4
 !==============================================!
 ! --------------- Quadrature------------------ !
 !==============================================!
@@ -87,5 +96,7 @@ INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
   CHARACTER(6),PARAMETER :: MsgFmt = '(2x,A)'
   INTEGER,PARAMETER :: self_FileNameLength = 500
   INTEGER,PARAMETER :: self_EquationLength = 210
+  INTEGER,PARAMETER :: self_QuadratureTypeCharLength = 50
+  INTEGER,PARAMETER :: self_IntegratorTypeCharLength = 50
 
 END MODULE SELF_Constants

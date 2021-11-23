@@ -15,6 +15,7 @@ MODULE SELF_DG
 
   TYPE,PUBLIC :: DG2D
     TYPE(MappedScalar2D),PUBLIC :: solution
+    TYPE(Scalar2D),PUBLIC :: plotSolution
     TYPE(MappedVector2D),PUBLIC :: solutionGradient
     TYPE(MappedVector2D),PUBLIC :: flux
     TYPE(MappedScalar2D),PUBLIC :: source
@@ -131,6 +132,7 @@ CONTAINS
     CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
     CALL this % solution % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % plotSolution % Init(tqDegree,tqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % dSdt % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
     CALL this % flux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
@@ -153,6 +155,7 @@ CONTAINS
     CALL this % mesh % Free()
     CALL this % geometry % Free()
     CALL this % solution % Free()
+    CALL this % plotSolution % Free()
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
@@ -173,6 +176,7 @@ CONTAINS
     CALL this % mesh % UpdateHost()
     CALL this % geometry % UpdateHost()
     CALL this % solution % UpdateHost()
+    CALL this % plotSolution % UpdateHost()
     CALL this % dSdt % UpdateHost()
     CALL this % solutionGradient % UpdateHost()
     CALL this % flux % UpdateHost()
@@ -191,7 +195,7 @@ CONTAINS
 
     CALL this % mesh % UpdateDevice()
     CALL this % geometry % UpdateDevice()
-    CALL this % solution % UpdateDevice()
+    CALL this % plotSolution % UpdateDevice()
     CALL this % dSdt % UpdateDevice()
     CALL this % solutionGradient % UpdateDevice()
     CALL this % flux % UpdateDevice()

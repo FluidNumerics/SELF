@@ -14,6 +14,8 @@ USE ISO_C_BINDING
   TYPE,EXTENDS(DG2D), PUBLIC :: Advection2D
 
     TYPE(MappedVector2D),PUBLIC :: velocity
+    TYPE(Vector2D),PUBLIC :: plotVelocity
+    TYPE(Vector2D),PUBLIC :: plotX
 
     ! Model Settings !
     REAL(prec) :: Lx, Ly ! Domain lengths
@@ -25,7 +27,7 @@ USE ISO_C_BINDING
     CHARACTER(LEN=self_FileNameLength) :: meshFile
     INTEGER :: nxElements
     INTEGER :: nyElements
-    INTEGER :: timeIntegrator ! ENUMS needed in SELF_Constants.f90 !! TO DO !!
+    INTEGER :: integrator ! ENUMS needed in SELF_Constants.f90 !! TO DO !!
     CHARACTER(LEN=self_EquationLength) :: velEqnX ! Velocity Equation (x-direction)
     CHARACTER(LEN=self_EquationLength) :: velEqnY ! Velocity Equation (y-direction)
     CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
@@ -54,7 +56,7 @@ USE ISO_C_BINDING
 !                                        SetBoundaryConditionFromFile
       PROCEDURE, PRIVATE :: SetBoundaryConditionFromEquation!, &
 
- !     PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection2D
+      PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection2D
 
  !     PROCEDURE, PUBLIC :: TimeStepRK3 => TimeStepRK3_Advection2D
       PROCEDURE, PUBLIC :: Tendency => Tendency_Advection2D
@@ -63,6 +65,7 @@ USE ISO_C_BINDING
 
   END TYPE Advection2D
 
+  PRIVATE :: GetCLIParameters
 
   ! Interfaces to GPU kernels !
   INTERFACE
@@ -109,6 +112,10 @@ CONTAINS
     CALL this % geometry % GenerateFromMesh(&
             this % mesh,cqType,tqType,cqDegree,tqDegree)
 
+    CALL this % plotSolution % Init(&
+            tqDegree,tqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
     CALL this % solution % Init(&
             cqDegree,cqType,tqDegree,tqType,nVar,&
             this % mesh % nElem)
@@ -123,6 +130,14 @@ CONTAINS
 
     CALL this % velocity % Init(&
             cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % plotVelocity % Init(&
+            tqDegree,tqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % plotX % Init(&
+            tqDegree,tqType,tqDegree,tqType,1,&
             this % mesh % nElem)
 
     CALL this % source % Init(&
@@ -157,15 +172,160 @@ CONTAINS
   SUBROUTINE InitFromCLI_Advection2D(this)
     IMPLICIT NONE
     CLASS(Advection2D),INTENT(inout) :: this
-
     ! Local
     TYPE(COMMAND_LINE_INTERFACE) :: cli
+    TYPE(MeshSpec) :: spec
+    CHARACTER(self_QuadratureTypeCharLength) :: cqTypeChar
+    CHARACTER(self_QuadratureTypeCharLength) :: tqTypeChar
+    CHARACTER(self_IntegratorTypeCharLength) :: integratorChar
+    REAL(prec) :: Lx, Ly ! Domain lengths
+    REAL(prec) :: dt ! Default time step size
+    INTEGER :: controlDegree
+    INTEGER :: targetDegree
+    INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
+    INTEGER :: targetQuadrature ! ENUMS in SELF_Constants.f90
+    CHARACTER(LEN=self_FileNameLength) :: meshFile
+    INTEGER :: nxElements
+    INTEGER :: nyElements
+    INTEGER :: integrator ! ENUMS needed in SELF_Constants.f90 !! TO DO !!
+    CHARACTER(LEN=self_EquationLength) :: velEqnX ! Velocity Equation (x-direction)
+    CHARACTER(LEN=self_EquationLength) :: velEqnY ! Velocity Equation (y-direction)
+    CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
+    CHARACTER(LEN=self_EquationLength) :: bcEqn ! Boundary condition Equation
+    LOGICAL :: enableMPI
+    TYPE(EquationParser) :: eqn(1)
+    TYPE(EquationParser) :: velEqn(1:2)
+
+    ! Get the CLI parameters !
+    CALL GetCLIParameters(cli)
+
+    ! Set the CLI parameters !
+    CALL cli % get(val=enableMPI,switch='--mpi')
+    CALL cli % get(val=meshfile,switch='--mesh')
+    CALL cli % get(val=dt,switch="--time-step")
+    CALL cli % get(val=controlDegree,switch="--control-degree")
+    CALL cli % get(val=targetDegree,switch="--target-degree")
+    CALL cli % get(val=cqTypeChar,switch="--control-quadrature")
+    CALL cli % get(val=tqTypeChar,switch="--target-quadrature")
+    CALL cli % get(val=meshFile,switch="--mesh")
+    CALL cli % get(val=nxElements,switch="--nxelements")
+    CALL cli % get(val=nyElements,switch="--nyelements")
+    CALL cli % get(val=Lx, switch="--xlength")
+    CALL cli % get(val=Ly, switch="--ylength")
+    CALL cli % get(val=velEqnX,switch="--velocity-x")
+    CALL cli % get(val=velEqnY,switch="--velocity-y")
+    CALL cli % get(val=icEqn,switch="--initial-condition")
+    CALL cli % get(val=bcEqn,switch="--boundary-condition")
+    CALL cli % get(val=integratorChar,switch="--integrator")
+
+    IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
+      controlQuadrature = GAUSS
+    ELSEIF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS-LOBATTO') THEN
+      controlQuadrature = GAUSS_LOBATTO
+    ELSEIF (TRIM(UpperCase(cqTypeChar)) == 'CHEBYSHEV-GAUSS') THEN
+      controlQuadrature = CHEBYSHEV_GAUSS
+    ELSEIF (TRIM(UpperCase(cqTypeChar)) == 'CHEBYSHEV-GAUSS-LOBATTO') THEN
+      controlQuadrature = CHEBYSHEV_GAUSS_LOBATTO
+    ELSE
+      PRINT *, 'Invalid Control Quadrature'
+      STOP - 1
+    END IF
+
+    IF (TRIM(UpperCase(tqTypeChar)) == 'UNIFORM') THEN
+      targetQuadrature = UNIFORM
+    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'GAUSS') THEN
+      targetQuadrature = GAUSS
+    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'GAUSS-LOBATTO') THEN
+      targetQuadrature = GAUSS_LOBATTO
+    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'CHEBYSHEV-GAUSS') THEN
+      targetQuadrature = CHEBYSHEV_GAUSS
+    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'CHEBYSHEV-GAUSS-LOBATTO') THEN
+      targetQuadrature = CHEBYSHEV_GAUSS_LOBATTO
+    ELSE
+      PRINT *, 'Invalid Target Quadrature'
+      STOP - 1
+    END IF
+
+    IF (TRIM(UpperCase(integratorChar)) == 'EULER') THEN
+      integrator = EULER
+    ELSEIF (TRIM(UpperCase(integratorChar)) == 'WILLIAMSON_RK3') THEN
+      integrator = RK3
+    ELSE
+      PRINT *, 'Invalid time integrator'
+      STOP - 1
+    END IF
+
+    IF( TRIM(meshfile) == "" )THEN
+      spec % blockMesh = .TRUE.
+    ELSE
+      spec % blockMesh = .FALSE.     
+    ENDIF
+    spec % filename = meshfile
+    spec % filetype = SELF_MESH_ISM_V2_2D
+
+    spec % blockMesh_nGeo = 1
+    spec % blockMesh_x0 = 0.0_prec
+    spec % blockMesh_x1 = Lx
+    spec % blockMesh_y0 = 0.0_prec
+    spec % blockMesh_y1 = Ly
+    spec % blockMesh_z0 = 0.0_prec
+    spec % blockMesh_z1 = 0.0_prec
+    spec % blockMesh_nElemX = nxElements
+    spec % blockMesh_nElemY = nyElements
+    spec % blockMesh_nElemZ = 0 ! 2-D mesh !
+
+    CALL this % Init(controlQuadrature, &
+                     targetQuadrature, &
+                     controlDegree, &
+                     targetDegree, &
+                     1,enableMPI, &
+                     spec)
+
+    this % Lx = Lx
+    this % Ly = Ly ! Domain lengths
+    this % dt = dt ! Default time step size
+    this % controlDegree = controlDegree
+    this % targetDegree = targetDegree
+    this % controlQuadrature = controlQuadrature ! ENUMS in SELF_Constants.f90
+    this % targetQuadrature = targetQuadrature ! ENUMS in SELF_Constants.f90
+    this % meshFile = meshFile
+    this % nxElements = nxElements
+    this % nyElements = nyElements
+    this % integrator = integrator ! ENUMS needed in SELF_Constants.f90 !! TO DO !!
+    this % velEqnX = velEqnX ! Velocity Equation (x-direction)
+    this % velEqnY = velEqnY ! Velocity Equation (y-direction)
+    this % icEqn = icEqn ! Initial condition Equation
+    this % bcEqn = bcEqn ! Boundary condition Equation
+
+    eqn(1) = EquationParser( icEqn, (/'x','y'/))
+    CALL this % setSolution( eqn )
+
+    velEqn(1) = EquationParser(velEqnX, (/'x','y'/))
+    velEqn(2) = EquationParser(velEqnY, (/'x','y'/))
+    CALL this % setVelocity( velEqn )
+
+  END SUBROUTINE InitFromCLI_Advection2D
+
+  SUBROUTINE GetCLIParameters( cli )
+    TYPE(COMMAND_LINE_INTERFACE), INTENT(inout) :: cli
 
     CALL cli % init(progname="sadv2d", &
                     version="v0.0.0", &
                     description="SELF Advection in 2-D", &
                     license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
                     authors="Joseph Schoonover (Fluid Numerics LLC)")
+
+    CALL cli % add(switch="--mpi", &
+                   help="Enable MPI", &
+                   act="store_true", &
+                   def="false", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--time-step", &
+                   switch_ab="-dt", &
+                   help="The time step size for the time integrator", &
+                   def="0.1", &
+                   required=.FALSE.)
 
     ! Get the control degree
     CALL cli % add(switch="--control-degree", &
@@ -259,13 +419,13 @@ CONTAINS
     CALL cli % add(switch="--initial-condition", &
                    switch_ab="-ic", &
                    help="Equation for the initial tracer distributions (x,y dependent only!)",&
-                   def="f = exp( -( x^2 + y^2)/0.01 )", &
+                   def="f = exp( -( (x-0.5)^2 + (y-0.5)^2)/0.01 )", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--boundary-condition", &
-                   switch_ab="-ic", &
+                   switch_ab="-bc", &
                    help="Equation for the boundary tracer distributions (can be time dependent!)", &
-                   def="f = exp( -( (x-t)^2 + (y-t)^2)/0.01 )", &
+                   def="f = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2)/0.01 )", &
                    required=.FALSE.)
 
     ! Give me a time integrator
@@ -275,15 +435,7 @@ CONTAINS
                    def="williamson_rk3", &
                    required=.FALSE.)
 
-    ! Set the CLI parameters !
-    ! All of these need to go to character variables and then
-    ! be converted... TO DO !!
-    ! I won't bore  you all with this part...
-    ! 
-    CALL cli % get(val=this % meshfile,switch='--mesh')
-
-
-  END SUBROUTINE InitFromCLI_Advection2D
+  END SUBROUTINE GetCLIParameters
 
   SUBROUTINE Free_Advection2D(this)
     IMPLICIT NONE
@@ -292,6 +444,7 @@ CONTAINS
     CALL this % mesh % Free()
     CALL this % geometry % Free()
     CALL this % solution % Free()
+    CALL this % plotSolution % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
     CALL this % source % Free()
@@ -301,6 +454,8 @@ CONTAINS
     CALL this % workTensor % Free()
     CALL this % compFlux % Free()
     CALL this % velocity % Free()
+    CALL this % plotVelocity % Free()
+    CALL this % plotX % Free()
     DEALLOCATE (this % solutionMetaData)
 
   END SUBROUTINE Free_Advection2D
@@ -392,7 +547,7 @@ CONTAINS
              eqn(1) % Evaluate((/x, y/))
 
            ! Set the velocity in the y-direction
-           this % velocity % interior % hostData(2,i,1,iSide,iEl) = &
+           this % velocity % boundary % hostData(2,i,1,iSide,iEl) = &
              eqn(2) % Evaluate((/x, y/))
 
 
@@ -576,5 +731,60 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE InternalFlux_Advection2D
+
+  SUBROUTINE WriteTecplot_Advection2D(self, filename)
+    IMPLICIT NONE
+    CLASS(Advection2D), INTENT(inout) :: self
+    CHARACTER(*), INTENT(in) :: filename
+    ! Local
+    CHARACTER(8) :: zoneID
+    INTEGER :: fUnit
+    INTEGER :: iEl, i, j
+                      
+    ! Copy data to the CPU
+    CALL self % solution % interior % UpdateHost()
+
+    ! Map the mesh positions to the target grid
+    CALL self % geometry % x % GridInterp(self % plotX, gpuAccel=.FALSE.)
+
+    ! Map the solution to the target grid
+    CALL self % solution % GridInterp(self % plotSolution,gpuAccel=.FALSE.)
+
+    ! Map the velocity to the target grid 
+    CALL self % velocity % GridInterp(self % plotVelocity,gpuAccel=.FALSE.)
+   
+    ! Let's write some tecplot!! 
+     OPEN( UNIT=NEWUNIT(fUnit), &
+      FILE= TRIM(filename), &
+      FORM='formatted', &
+      STATUS='replace')
+
+    ! TO DO :: Adjust for multiple tracer fields
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y", "tracer","u","v"'
+
+    DO iEl = 1, self % solution % nElem
+
+      ! TO DO :: Get the global element ID 
+      WRITE(zoneID,'(I8.8)') iEl
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',self % solution % M+1,&
+                                                 ', J=',self % solution % M+1,',F=POINT'
+
+      DO j = 0, self % solution % M
+        DO i = 0, self % solution % M
+
+          WRITE(fUnit,'(5(E15.7,1x))') self % plotX % interior % hostData(1,i,j,1,iEl), &
+                                       self % plotX % interior % hostData(2,i,j,1,iEl), &
+                                       self % plotSolution % interior % hostData(i,j,1,iEl),&
+                                       self % plotVelocity % interior % hostData(1,i,j,1,iEl),&
+                                       self % plotVelocity % interior % hostData(2,i,j,1,iEl)
+
+        ENDDO
+      ENDDO
+
+    ENDDO
+
+    CLOSE(UNIT=fUnit)
+
+  END SUBROUTINE WriteTecplot_Advection2D
 
 END MODULE SELF_Advection2D
