@@ -368,7 +368,7 @@ CONTAINS
     CALL cli % add(switch="--time-step", &
                    switch_ab="-dt", &
                    help="The time step size for the time integrator", &
-                   def="0.1", &
+                   def="0.001", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--initial-time", &
@@ -480,14 +480,14 @@ CONTAINS
     !  > How to handle multiple tracer fields ??
     CALL cli % add(switch="--initial-condition", &
                    switch_ab="-ic", &
-                   help="Equation for the initial tracer distributions (x,y dependent only!)",&
-                   def="f = exp( -( (x-0.5)^2 + (y-0.5)^2)/0.01 )", &
+                   help="Equation for the initial tracer distributions",&
+                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2)/0.01 )", &
                    required=.FALSE.)
 
     CALL cli % add(switch="--boundary-condition", &
                    switch_ab="-bc", &
                    help="Equation for the boundary tracer distributions (can be time dependent!)", &
-                   def="f = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2)/0.01 )", &
+                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2)/0.01 )", &
                    required=.FALSE.)
 
     ! Give me a time integrator

@@ -36,12 +36,6 @@ steps:
          'img/Singularity.amd']
   waitFor: ["-"]
 
-- id: Generate test batch scripts
-  name: 'python:3.7-buster'
-  entrypoint: '/usr/local/bin/python'
-  args: ['ci/test/ciGenerator.py']
-  waitFor: ["-"]
-
 - id: CI/CB (Singularity Nvidia)
   name: 'gcr.io/research-computing-cloud/fluid-run'
   args: 
