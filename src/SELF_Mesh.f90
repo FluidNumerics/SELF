@@ -1058,11 +1058,13 @@ CONTAINS
           myMesh % self_sideInfo % hostData(2,lsid,eid) = usid ! Global Side ID
           myMesh % self_sideInfo % hostData(3,lsid,eid) = e2 ! Neighbor Element ID
           myMesh % self_sideInfo % hostData(4,lsid,eid) = 10*s2 + flip ! Neighbor Element ID
+          myMesh % self_sideInfo % hostData(5,lsid,eid) = 0 ! boundary condition id
 
           ! Population information for the other element
           myMesh % self_sideInfo % hostData(2,s2,e2) = usid ! Global Side ID
           myMesh % self_sideInfo % hostData(3,s2,e2) = eid ! Neighbor Element ID
           myMesh % self_sideInfo % hostData(4,s2,e2) = 10*lsid + flip ! Neighbor Element ID
+          myMesh % self_sideInfo % hostData(5,s2,e2) = 0 ! boundary condition id
 
         ELSE
 

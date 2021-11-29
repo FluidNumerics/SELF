@@ -1,6 +1,7 @@
 MODULE SELF_Advection2D
 
 USE SELF_Constants
+USE SELF_SupportRoutines
 USE SELF_Mesh
 USE SELF_DG
 USE FEQParse
@@ -17,13 +18,22 @@ USE ISO_C_BINDING
     TYPE(Vector2D),PUBLIC :: plotVelocity
     TYPE(Vector2D),PUBLIC :: plotX
 
+    TYPE(EquationParser) :: boundaryConditionEqn(1)
+    TYPE(EquationParser) :: solutionEqn(1)
+
+    REAL(prec) :: simulationTime
+
     ! Model Settings !
     REAL(prec) :: Lx, Ly ! Domain lengths
     REAL(prec) :: dt ! Default time step size
+    REAL(prec) :: outputInterval
+    REAL(prec) :: initialTime
+    REAL(prec) :: endTime
     INTEGER :: controlDegree
     INTEGER :: targetDegree
     INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
     INTEGER :: targetQuadrature ! ENUMS in SELF_Constants.f90
+    CHARACTER(LEN=self_FileNameLength) :: icFile
     CHARACTER(LEN=self_FileNameLength) :: meshFile
     INTEGER :: nxElements
     INTEGER :: nyElements
@@ -32,7 +42,8 @@ USE ISO_C_BINDING
     CHARACTER(LEN=self_EquationLength) :: velEqnY ! Velocity Equation (y-direction)
     CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
     CHARACTER(LEN=self_EquationLength) :: bcEqn ! Boundary condition Equation
-
+    LOGICAL :: enableMPI
+    LOGICAL :: gpuAccel
     
 
     CONTAINS
@@ -58,7 +69,9 @@ USE ISO_C_BINDING
 
       PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection2D
 
- !     PROCEDURE, PUBLIC :: TimeStepRK3 => TimeStepRK3_Advection2D
+      PROCEDURE, PUBLIC :: ForwardStep => ForwardStep_Advection2D
+      PROCEDURE, PUBLIC :: TimeStepRK3 => TimeStepRK3_Advection2D
+
       PROCEDURE, PUBLIC :: Tendency => Tendency_Advection2D
       PROCEDURE, PUBLIC :: InternalFlux => InternalFlux_Advection2D
       PROCEDURE, PUBLIC :: SideFlux => SideFlux_Advection2D
@@ -108,12 +121,18 @@ CONTAINS
 
     CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
 
+    CALL this % decomp % setElemToRank(this % mesh % nElem)
+
     ! Create geometry from mesh
     CALL this % geometry % GenerateFromMesh(&
             this % mesh,cqType,tqType,cqDegree,tqDegree)
 
     CALL this % plotSolution % Init(&
             tqDegree,tqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % dSdt % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
             this % mesh % nElem)
 
     CALL this % solution % Init(&
@@ -193,6 +212,10 @@ CONTAINS
     CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
     CHARACTER(LEN=self_EquationLength) :: bcEqn ! Boundary condition Equation
     LOGICAL :: enableMPI
+    LOGICAL :: enableGPU
+    REAL(prec) :: outputInterval
+    REAL(prec) :: initialTime
+    REAL(prec) :: endTime
     TYPE(EquationParser) :: eqn(1)
     TYPE(EquationParser) :: velEqn(1:2)
 
@@ -201,8 +224,12 @@ CONTAINS
 
     ! Set the CLI parameters !
     CALL cli % get(val=enableMPI,switch='--mpi')
+    CALL cli % get(val=enableGPU,switch='--gpu')
     CALL cli % get(val=meshfile,switch='--mesh')
     CALL cli % get(val=dt,switch="--time-step")
+    CALL cli % get(val=outputInterval,switch="--output-interval")
+    CALL cli % get(val=initialTime,switch="--initial-time")
+    CALL cli % get(val=endTime,switch="--end-time")
     CALL cli % get(val=controlDegree,switch="--control-degree")
     CALL cli % get(val=targetDegree,switch="--target-degree")
     CALL cli % get(val=cqTypeChar,switch="--control-quadrature")
@@ -281,9 +308,14 @@ CONTAINS
                      1,enableMPI, &
                      spec)
 
+    this % simulationTime = 0.0_prec
     this % Lx = Lx
     this % Ly = Ly ! Domain lengths
     this % dt = dt ! Default time step size
+    this % initialTime = initialTime
+    this % simulationTime = initialTime
+    this % endTime = endTime
+    this % outputInterval = outputInterval
     this % controlDegree = controlDegree
     this % targetDegree = targetDegree
     this % controlQuadrature = controlQuadrature ! ENUMS in SELF_Constants.f90
@@ -296,13 +328,19 @@ CONTAINS
     this % velEqnY = velEqnY ! Velocity Equation (y-direction)
     this % icEqn = icEqn ! Initial condition Equation
     this % bcEqn = bcEqn ! Boundary condition Equation
+    this % enableMPI = enableMPI
+    this % gpuAccel = enableGPU
 
-    eqn(1) = EquationParser( icEqn, (/'x','y'/))
-    CALL this % setSolution( eqn )
+    eqn(1) = EquationParser( icEqn, (/'x','y', 't'/))
+    CALL this % SetSolution( eqn )
+    this % solutionEqn(1) = EquationParser( icEqn, (/'x','y', 't'/))
 
     velEqn(1) = EquationParser(velEqnX, (/'x','y'/))
     velEqn(2) = EquationParser(velEqnY, (/'x','y'/))
     CALL this % setVelocity( velEqn )
+
+    this % boundaryConditionEqn(1) = EquationParser( bcEqn, (/'x','y','t'/))
+    CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
 
   END SUBROUTINE InitFromCLI_Advection2D
 
@@ -321,10 +359,34 @@ CONTAINS
                    def="false", &
                    required=.FALSE.)
 
+    CALL cli % add(switch="--gpu", &
+                   help="Enable GPU acceleration", &
+                   act="store_true", &
+                   def="false", &
+                   required=.FALSE.)
+
     CALL cli % add(switch="--time-step", &
                    switch_ab="-dt", &
                    help="The time step size for the time integrator", &
                    def="0.1", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--initial-time", &
+                   switch_ab="-t0", &
+                   help="The initial time level", &
+                   def="0.0", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--output-interval", &
+                   switch_ab="-oi", &
+                   help="The time between file output", &
+                   def="0.5", &
+                   required=.FALSE.)
+
+    CALL cli % add(switch="--end-time", &
+                   switch_ab="-tn", &
+                   help="The final time level", &
+                   def="1.0", &
                    required=.FALSE.)
 
     ! Get the control degree
@@ -444,6 +506,7 @@ CONTAINS
     CALL this % mesh % Free()
     CALL this % geometry % Free()
     CALL this % solution % Free()
+    CALL this % dSdt % Free()
     CALL this % plotSolution % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
@@ -468,6 +531,7 @@ CONTAINS
     INTEGER :: i, j, iEl, iVar
     REAL(prec) :: x
     REAL(prec) :: y
+    REAL(prec) :: t
 
 
     DO iEl = 1,this % solution % nElem
@@ -478,9 +542,10 @@ CONTAINS
              ! Get the mesh positions
              x = this % geometry % x % interior % hostData(1,i,j,1,iEl)
              y = this % geometry % x % interior % hostData(2,i,j,1,iEl)
+             t = this % simulationTime
 
              this % solution % interior % hostData(i,j,iVar,iEl) = &
-               eqn(iVar) % Evaluate((/x, y/))
+               eqn(iVar) % Evaluate((/x, y, t/))
 
 
           ENDDO
@@ -559,7 +624,6 @@ CONTAINS
     CALL this % solution % interior % UpdateDevice()
     CALL this % solution % boundary % UpdateDevice()
 
-
   END SUBROUTINE SetVelocityFromEquation
 
   SUBROUTINE SetBoundaryConditionFromEquation( this, eqn )
@@ -573,8 +637,8 @@ CONTAINS
 
 
     DO iEl = 1,this % solution % nElem
-      DO iVar = 1, this % solution % nvar
-        DO iSide = 1, 4
+      DO iSide = 1, 4
+        DO iVar = 1, this % solution % nvar
           DO i = 0, this % solution % N
 
              ! If this element's side has no neighbor assigned
@@ -587,12 +651,8 @@ CONTAINS
                y = this % geometry % x % boundary % hostData(2,i,1,iSide,iEl)
 
                ! Set the external boundary condition
-               ! .... TO DO ... 
-               !  > Set time tracking mechanism to set time 
-               !    varying boundary conditions... 
-               !    wouldn't that be slick ?
-               this % solution % extBoundary % hostData(i,1,iSide,iEl) = &
-                 eqn(iVar) % Evaluate((/x, y/))
+               this % solution % extBoundary % hostData(i,iVar,iSide,iEl) = &
+                 eqn(iVar) % Evaluate((/x, y, this % simulationTime/))
              ENDIF
 
 
@@ -607,11 +667,106 @@ CONTAINS
 
   END SUBROUTINE SetBoundaryConditionFromEquation
 
+  SUBROUTINE ForwardStep_Advection2D( this, endTime )
+    IMPLICIT NONE
+    CLASS(Advection2D), INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: endTime
+    ! Local
+    INTEGER :: nSteps
+    REAL(prec) :: dt
+
+    IF( this % integrator == RK3 )THEN
+    
+      ! Step forward
+      dt = this % dt
+      nSteps = INT(( endTime - this % simulationTime )/dt)
+      CALL this % TimeStepRK3( nSteps, this % gpuAccel )
+
+      ! Take any additional steps to reach desired endTime
+      this % dt = endTime - this % simulationTime
+      IF( this % dt > 0 )THEN
+        nSteps = 1
+        CALL this % TimeStepRK3( nSteps, this % gpuAccel )
+      ENDIF
+
+      ! Reset the time step
+      this % dt = dt
+
+    ENDIF
+
+  END SUBROUTINE ForwardStep_Advection2D
+
+  SUBROUTINE TimeStepRK3_Advection2D( this, nSteps, gpuAccel )
+    IMPLICIT NONE
+    CLASS(Advection2D), INTENT(inout) :: this
+    INTEGER, INTENT(in) :: nSteps
+    LOGICAL, INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: m, iStep
+    INTEGER :: iEl
+    INTEGER :: iVar
+    INTEGER :: i, j
+    REAL(prec) :: gRK3(0:this % solution % N, &
+                       0:this % solution % N, &
+                       1:this % solution % nVar, &
+                       1:this % solution % nElem)
+    REAL(prec) :: t0
+    REAL(prec) :: dt
+   
+      gRK3 = 0.0_prec
+      dt = this % dt
+
+      DO iStep = 1, nSteps
+
+        t0 = this % simulationTime
+
+        DO m = 1, 3 ! Loop over RK3 steps
+
+          CALL this % Tendency( gpuAccel )
+
+          !IF( gpuAccel )THEN
+
+          !  ! UpdateG3D Kernel needed
+
+          !ELSE
+
+            DO iEl = 1, this % solution % nElem
+              DO iVar = 1, this % solution % nVar
+                DO j = 0, this % solution % N
+                  DO i = 0, this % solution % N
+
+                    gRK3(i,j,iVar,iEl) = rk3_a(m)*gRK3(i,j,iVar,iEl) + &
+                            this % dSdt % interior % hostData(i,j,iVar,iEl)
+
+
+                    this % solution % interior % hostData(i,j,iVar,iEl) = &
+                            this % solution % interior % hostData(i,j,iVar,iEl) + &
+                            rk3_g(m)*dt*gRK3(i,j,iVar,iEl)
+
+                  ENDDO
+                ENDDO
+              ENDDO
+            ENDDO
+
+          !ENDIF
+
+          this % simulationTime = this % simulationTime + rk3_b(m)*dt
+
+        ENDDO
+
+        this % simulationTime = t0 + dt
+
+      ENDDO
+
+  END SUBROUTINE TimeStepRK3_Advection2D
+
   SUBROUTINE Tendency_Advection2D( this, gpuAccel ) 
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
     LOGICAL, INTENT(in) :: gpuAccel
 
+      CALL this % solution % BoundaryInterp( gpuAccel )
+      CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
       CALL this % InternalFlux( gpuAccel )
       CALL this % SideFlux( gpuAccel )
       CALL this % CalculateFluxDivergence( gpuAccel )
@@ -659,7 +814,7 @@ CONTAINS
               DO i = 0, this % solution % N
 
                  ! Get the boundary normals on cell edges from the mesh geometry
-                 nhat(1:2) = this % geometry % nHat % boundary % hostData(2,i,1,iSide,iEl)
+                 nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
 
                  ! Calculate the normal velocity at the cell edges
                  un = this % velocity % boundary % hostData(1,i,1,iSide,iEl)*nHat(1)+&
@@ -668,7 +823,7 @@ CONTAINS
                  ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
                  extState = this % solution % extBoundary % hostData(i,iVar,iSide,iEl)
                  intState = this % solution % boundary % hostData(i,iVar,iSide,iEl)
-                 nmag = this % geometry % nScale % boundary % hostData(i,iVar,iSide,iEl)
+                 nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
 
                  ! Calculate the flux
                  ! Since the flux is a vector, we need to store the normal flux somewhere...
@@ -696,12 +851,15 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,iVar,iEl
+    REAL(prec) :: Fx, Fy
 
     IF( gpuAccel )THEN
 
       ! When GPU acceleration is enabled (requested by the user)
       ! we call the gpu wrapper interface, which will call the
       ! HIP kernel "under the hood"
+      ! 
+      ! TO DO : Pass the contravariant basis vector to GPU kernel
       CALL InternalFlux_Advection2D_gpu_wrapper(this % flux % interior % deviceData,&
                                                 this % solution % interior % deviceData, &
                                                 this % velocity % interior % deviceData, &
@@ -716,13 +874,21 @@ CONTAINS
           DO j = 0, this % solution % N
             DO i = 0, this % solution % N
 
+              Fx = this % velocity % interior % hostData(1,i,j,1,iEl)*&
+                   this % solution % interior % hostData(i,j,iVar,iEl)
+
+              Fy = this % velocity % interior % hostData(2,i,j,1,iEl)*&
+                   this % solution % interior % hostData(i,j,iVar,iEl)
+
               this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                      this % velocity % interior % hostData(1,i,j,1,iEl)*&
-                      this % solution % interior % hostData(i,j,iVar,iEl)
+                this % geometry % dsdx % interior % hostData(1,1,i,j,1,iel)*Fx + &
+                this % geometry % dsdx % interior % hostData(2,1,i,j,1,iel)*Fy 
 
               this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                      this % velocity % interior % hostData(2,i,j,1,iEl)*&
-                      this % solution % interior % hostData(i,j,iVar,iEl)
+                this % geometry % dsdx % interior % hostData(1,2,i,j,1,iel)*Fx + &
+                this % geometry % dsdx % interior % hostData(2,2,i,j,1,iel)*Fy 
+
+
             ENDDO
           ENDDO
         ENDDO
@@ -735,11 +901,20 @@ CONTAINS
   SUBROUTINE WriteTecplot_Advection2D(self, filename)
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: self
-    CHARACTER(*), INTENT(in) :: filename
+    CHARACTER(*), INTENT(in), OPTIONAL :: filename
     ! Local
     CHARACTER(8) :: zoneID
     INTEGER :: fUnit
     INTEGER :: iEl, i, j
+    CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(13) :: timeStampString
+
+    IF( PRESENT(filename) )THEN
+      tecFile = filename
+    ELSE
+      timeStampString = TimeStamp(self % simulationTime, 's')
+      tecFile = 'solution.'//timeStampString//'.tec'
+    ENDIF
                       
     ! Copy data to the CPU
     CALL self % solution % interior % UpdateHost()
@@ -755,7 +930,7 @@ CONTAINS
    
     ! Let's write some tecplot!! 
      OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(filename), &
+      FILE= TRIM(tecFile), &
       FORM='formatted', &
       STATUS='replace')
 

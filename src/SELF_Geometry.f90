@@ -435,9 +435,6 @@ CONTAINS
             fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
           END IF
 
-          myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = &
-            fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
-
           IF( k == 1 )THEN ! South
 
             mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,1,k,iEl)**2 +&
@@ -446,7 +443,8 @@ CONTAINS
             myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
 
             myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
-              -fac*myGeom % dsdx % boundary % hostData(1:2,2,i,1,k,iEl)/mag
+              fac*myGeom % dsdx % boundary % hostData(1:2,2,i,1,k,iEl)/mag
+
 
           ELSEIF( k == 2 )THEN ! East
 
@@ -476,7 +474,7 @@ CONTAINS
             myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
 
             myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
-              -fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
+              fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
 
           ENDIF
 

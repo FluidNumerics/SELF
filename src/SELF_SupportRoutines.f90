@@ -805,7 +805,7 @@ CONTAINS
     CHARACTER(4) :: dayStamp
     CHARACTER(2) :: hourStamp,minuteStamp,secondStamp
     CHARACTER(3) :: milliSecondStamp
-    REAL(real64)     :: time_real64
+    REAL(real64) :: time_real64
 
     time_real64 = REAL(time,real64)
     ! Units in "seconds"
@@ -844,6 +844,7 @@ CONTAINS
     END IF
 
   END FUNCTION TimeStamp
+
   LOGICAL FUNCTION IsInf(a)
     IMPLICIT NONE
     REAL(prec) :: a

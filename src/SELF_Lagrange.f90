@@ -1589,6 +1589,7 @@ CONTAINS
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
+    ! TO DO : Need to make the boundary vector F a scalar that is interpreted as the boundary normal vector
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
         DO j = 0,myPoly % N
@@ -1603,8 +1604,8 @@ CONTAINS
             dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,iVar,2,iEl) + &
                                                    myPoly % bMatrix % hostData(i,0)*bF(1,j,iVar,4,iEl))/ &
                                myPoly % qWeights % hostData(i) + &
-                               (myPoly % bMatrix % hostData(j,1)*bF(2,i,iVar,3,iEl) + &
-                                myPoly % bMatrix % hostData(j,0)*bF(2,i,iVar,1,iEl))/ &
+                               (myPoly % bMatrix % hostData(j,1)*bF(1,i,iVar,3,iEl) + &
+                                myPoly % bMatrix % hostData(j,0)*bF(1,i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
 
           END DO

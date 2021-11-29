@@ -91,7 +91,7 @@ CONTAINS
 
   SUBROUTINE SetMaxMsg(this,maxMsg)
     IMPLICIT NONE
-    CLASS(MPILayer),INTENT(out) :: this
+    CLASS(MPILayer),INTENT(inout) :: this
     INTEGER,INTENT(in) :: maxMsg
 
     CALL this % requests % Alloc((/1,1/), &

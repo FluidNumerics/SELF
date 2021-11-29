@@ -26,7 +26,7 @@ MODULE SELF_MappedData
   CONTAINS
     GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
     PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar1D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar1D
 
   END TYPE MappedScalar1D
 
@@ -40,7 +40,7 @@ MODULE SELF_MappedData
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar2D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar2D
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedScalar2D
@@ -56,7 +56,7 @@ MODULE SELF_MappedData
     GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: Gradient_MappedScalar3D
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar3D
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedScalar3D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar3D
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar3D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedScalar3D
@@ -78,7 +78,7 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: Gradient_MappedVector2D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector2D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedVector2D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector2D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector2D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector2D
 
@@ -101,7 +101,7 @@ MODULE SELF_MappedData
 !    PROCEDURE,PRIVATE :: Curl_MappedVector3D
     PROCEDURE,PRIVATE :: Gradient_MappedVector3D
     PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedVector3D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector3D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector3D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector3D
 
@@ -117,7 +117,7 @@ MODULE SELF_MappedData
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor2D
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedTensor2D
 
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor2D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedTensor2D
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedTensor2D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedTensor2D
@@ -131,7 +131,7 @@ MODULE SELF_MappedData
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedTensor3D
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedTensor3D
 
-    PROCEDURE,PRIVATE :: JacobianWeight => JacobianWeight_MappedTensor3D
+    PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedTensor3D
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedTensor3D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedTensor3D
