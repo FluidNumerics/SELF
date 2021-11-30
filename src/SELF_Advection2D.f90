@@ -826,13 +826,7 @@ CONTAINS
                  nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
 
                  ! Calculate the flux
-                 ! Since the flux is a vector, we need to store the normal flux somewhere...
-                 ! Although this is not ideal (unused memory for other vector components)
-                 ! we'll store the boundary flux in the first dimension 
-                 ! This will need to be addressed in the SELF_MappedData class..
-                 ! maybe put a "normalFlux" attribute.
-                 ! TO DO :: Log this in a ticket..
-                 this % flux % boundary % hostData(1,i,iVar,iSide,iEl) = 0.5_prec*&
+                 this % flux % boundaryNormal % hostData(i,iVar,iSide,iEl) = 0.5_prec*&
                      ( un*(intState + extState) - abs(un)*(extState - intState) )*nmag
 
               ENDDO

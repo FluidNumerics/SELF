@@ -233,26 +233,9 @@ CONTAINS
     CLASS(DG2D),INTENT(inout) :: this
     LOGICAL,INTENT(in) :: gpuAccel
 
-!    CALL this % flux % Divergence(this % compFlux, &
- !                                 this % geometry, &
-!                                  this % fluxDivergence, &
-!                                  selfWeakDGForm,gpuAccel)
-
-      IF (gpuAccel) THEN
-        CALL this % flux % interp % VectorDGDivergence_2D(this % flux % interior % deviceData, &
-                                                          this % flux % boundary % deviceData, &
-                                                          this % fluxDivergence % interior % deviceData, &
-                                                          this % flux % nvar, &
-                                                          this % flux % nelem)
-      ELSE
-        CALL this % flux % interp % VectorDGDivergence_2D(this % flux % interior % hostData, &
-                                                          this % flux % boundary % hostData, &
-                                                          this % fluxDivergence % interior % hostData, &
-                                                          this % flux % nvar, &
-                                                          this % flux % nelem)
-      END IF
-
-      CALL this % fluxDivergence % JacobianWeight(this % geometry, gpuAccel)
+    CALL this % flux % Divergence(this % geometry, &
+                                  this % fluxDivergence, &
+                                  selfWeakDGForm,gpuAccel)
 
   END SUBROUTINE CalculateFluxDivergence_DG2D
 
@@ -280,9 +263,8 @@ CONTAINS
             DO i = 0, this % solution % N
 
               this % dSdt % interior % hostData(i,j,iVar,iEl) = &
-                      -this % fluxDivergence % interior % hostData(i,j,iVar,iEl)
-                     ! this % source % interior % hostData(i,j,iVar,iEl) -&
-                     ! this % fluxDivergence % interior % hostData(i,j,iVar,iEl)
+                      this % source % interior % hostData(i,j,iVar,iEl) -&
+                      this % fluxDivergence % interior % hostData(i,j,iVar,iEl)
 
             ENDDO
           ENDDO
@@ -514,8 +496,7 @@ CONTAINS
     CLASS(DG3D),INTENT(inout) :: this
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL this % flux % Divergence(this % compFlux, &
-                                  this % geometry, &
+    CALL this % flux % Divergence(this % geometry, &
                                   this % fluxDivergence, &
                                   selfWeakDGForm,gpuAccel)
 

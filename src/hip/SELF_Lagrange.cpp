@@ -812,11 +812,11 @@ __global__ void VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *q
              f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
   }
 
-  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += (bf[VEB_2D_INDEX(1,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
-            bf[VEB_2D_INDEX(1,j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += (bf[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
+            bf[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
            qWeights[i] +
-           (bf[VEB_2D_INDEX(2,i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
-            bf[VEB_2D_INDEX(2,i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
+           (bf[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
+            bf[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
            qWeights[j];
 
 
@@ -1032,14 +1032,14 @@ __global__ void VectorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *q
              f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]+
              f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+k*(N+1)];
   }
-  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += (bf[VEB_3D_INDEX(1,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
-            bf[VEB_3D_INDEX(1,j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
+  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += (bf[SCB_3D_INDEX(j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
+            bf[SCB_3D_INDEX(j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
            qWeights[i]+
-           (bf[VEB_3D_INDEX(2,i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
-            bf[VEB_3D_INDEX(2,i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
+           (bf[SCB_3D_INDEX(i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
+            bf[SCB_3D_INDEX(i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
            qWeights[j]+
-           (bf[VEB_3D_INDEX(3,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
-            bf[VEB_3D_INDEX(3,i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
+           (bf[SCB_3D_INDEX(i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
+            bf[SCB_3D_INDEX(i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
            qWeights[k];
 
 

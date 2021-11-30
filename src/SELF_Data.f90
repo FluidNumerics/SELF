@@ -145,6 +145,7 @@ MODULE SELF_Data
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
+    TYPE(hfReal_r4) :: boundaryNormal
 
   CONTAINS
 
@@ -188,6 +189,7 @@ MODULE SELF_Data
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
     TYPE(hfReal_r6) :: extBoundary
+    TYPE(hfReal_r5) :: boundaryNormal
 
   CONTAINS
 
@@ -1015,6 +1017,9 @@ CONTAINS
     CALL SELFStorage % boundary % Alloc(loBound=(/1,0,1,1,1/), &
                                         upBound=(/2,N,nVar,4,nElem/))
 
+    CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
+                                        upBound=(/N,nVar,4,nElem/))
+
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
                                            upBound=(/2,N,nVar,4,nElem/))
 
@@ -1030,6 +1035,7 @@ CONTAINS
     CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
+    CALL SELFStorage % boundaryNormal % Free()
     CALL SELFStorage % extBoundary % Free()
 
   END SUBROUTINE Free_Vector2D
@@ -1041,6 +1047,7 @@ CONTAINS
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
+    CALL SELFStorage % boundaryNormal % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Vector2D
@@ -1052,6 +1059,7 @@ CONTAINS
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
+    CALL SELFStorage % boundaryNormal % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Vector2D
@@ -1126,13 +1134,13 @@ CONTAINS
 
       IF (gpuAccel) THEN
         CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
-                                                          SELFStorage % boundary % deviceData, &
+                                                          SELFStorage % boundaryNormal % deviceData, &
                                                           SELFout % interior % deviceData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
       ELSE
         CALL SELFStorage % interp % VectorDGDivergence_2D(SELFStorage % interior % hostData, &
-                                                          SELFStorage % boundary % hostData, &
+                                                          SELFStorage % boundaryNormal % hostData, &
                                                           SELFout % interior % hostData, &
                                                           SELFStorage % nVar, &
                                                           SELFStorage % nElem)
@@ -1300,6 +1308,9 @@ CONTAINS
     CALL SELFStorage % boundary % Alloc(loBound=(/1,0,0,1,1,1/), &
                                         upBound=(/3,N,N,nVar,6,nElem/))
 
+    CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,0,1,1,1/), &
+                                        upBound=(/N,N,nVar,6,nElem/))
+
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,0,1,1,1/), &
                                            upBound=(/3,N,N,nVar,6,nElem/))
 
@@ -1315,6 +1326,7 @@ CONTAINS
     CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
+    CALL SELFStorage % boundaryNormal % Free()
     CALL SELFStorage % extBoundary % Free()
 
   END SUBROUTINE Free_Vector3D
@@ -1326,6 +1338,7 @@ CONTAINS
     CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
+    CALL SELFStorage % boundaryNormal % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Vector3D
@@ -1337,6 +1350,7 @@ CONTAINS
     CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
+    CALL SELFStorage % boundaryNormal % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Vector3D

@@ -296,30 +296,24 @@ extern "C"
   } 
 }
 
-__global__ void ContravariantProjectionBoundary_MappedVector2D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
+__global__ void ContravariantProjectionBoundary_MappedVector2D_gpu(real *physVector, real *boundaryNormal, real *nhat, int N, int nVar){
 
   size_t iSide = blockIdx.x+1;
   size_t iVar = blockIdx.y;
   size_t iEl = blockIdx.z;
   size_t i = threadIdx.x;
 
-    compVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_2D_INDEX(1,1,i,0,iSide,iEl,N,1)]*
+    boundaryNormal[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)] = nhat[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)]+ 
-						     dsdx[TEB_2D_INDEX(2,1,i,0,iSide,iEl,N,1)]*
+						     nhat[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_2D_INDEX(2,i,iVar,iSide,iEl,N,nVar)];
-
-    compVector[VEB_2D_INDEX(2,i,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_2D_INDEX(1,2,i,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_2D_INDEX(1,i,iVar,iSide,iEl,N,nVar)]+ 
-						     dsdx[TEB_2D_INDEX(2,2,i,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_2D_INDEX(2,i,iVar,iSide,iEl,N,nVar)];
-
 }
 
 extern "C"
 {
-  void ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
+  void ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(real **physVector, real **boundaryNormal, real **nhat, int N, int nVar, int nEl)
   {
-    ContravariantProjectionBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjectionBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*physVector, *boundaryNormal, *nhat, N, nVar);
   } 
 }
 
@@ -386,7 +380,7 @@ extern "C"
   } 
 }
 
-__global__ void ContravariantProjectionBoundary_MappedVector3D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
+__global__ void ContravariantProjectionBoundary_MappedVector3D_gpu(real *physVector, real *boundaryNormal, real *nHat, int N, int nVar){
 
   size_t iSide = blockIdx.x+1;
   size_t iVar = blockIdx.y;
@@ -394,34 +388,20 @@ __global__ void ContravariantProjectionBoundary_MappedVector3D_gpu(real *physVec
   size_t i = threadIdx.x;
   size_t j = threadIdx.y;
 
-  compVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,1,i,j,0,iSide,iEl,N,1)]*
+  boundaryNormal[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)] = nHat[VEB_3D_INDEX(1,i,j,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
-                                                     dsdx[TEB_3D_INDEX(2,1,i,j,0,iSide,iEl,N,1)]*
+                                                     nHat[VEB_3D_INDEX(2,i,j,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)]+
-                                                     dsdx[TEB_3D_INDEX(3,1,i,j,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)];
-
-  compVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,2,i,j,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
-                                                     dsdx[TEB_3D_INDEX(2,2,i,j,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)]+
-                                                     dsdx[TEB_3D_INDEX(3,2,i,j,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)];
-
-  compVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)] = dsdx[TEB_3D_INDEX(1,3,i,j,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_3D_INDEX(1,i,j,iVar,iSide,iEl,N,nVar)]+ 
-                                                     dsdx[TEB_3D_INDEX(2,3,i,j,0,iSide,iEl,N,1)]*
-                                                     physVector[VEB_3D_INDEX(2,i,j,iVar,iSide,iEl,N,nVar)]+
-                                                     dsdx[TEB_3D_INDEX(3,3,i,j,0,iSide,iEl,N,1)]*
+                                                     nHat[VEB_3D_INDEX(3,i,j,0,iSide,iEl,N,1)]*
                                                      physVector[VEB_3D_INDEX(3,i,j,iVar,iSide,iEl,N,nVar)];
 
 }
 
 extern "C"
 {
-  void ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
+  void ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(real **physVector, real **boundaryNormal, real **nHat, int N, int nVar, int nEl)
   {
-    ContravariantProjectionBoundary_MappedVector3D_gpu<<<dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjectionBoundary_MappedVector3D_gpu<<<dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0>>>(*physVector, *boundaryNormal, *nHat, N, nVar);
   } 
 }
 

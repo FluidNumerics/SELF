@@ -1584,12 +1584,11 @@ CONTAINS
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
     REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bF(1:2,0:myPoly % N,1:nVariables,1:4,1:nElements)
+    REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
     REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
 
-    ! TO DO : Need to make the boundary vector F a scalar that is interpreted as the boundary normal vector
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
         DO j = 0,myPoly % N
@@ -1601,11 +1600,11 @@ CONTAINS
                                  myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
-            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,iVar,2,iEl) + &
-                                                   myPoly % bMatrix % hostData(i,0)*bF(1,j,iVar,4,iEl))/ &
+            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
+                                                   myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
                                myPoly % qWeights % hostData(i) + &
-                               (myPoly % bMatrix % hostData(j,1)*bF(1,i,iVar,3,iEl) + &
-                                myPoly % bMatrix % hostData(j,0)*bF(1,i,iVar,1,iEl))/ &
+                               (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
+                                myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
 
           END DO
@@ -1954,7 +1953,7 @@ CONTAINS
     CLASS(Lagrange),INTENT(in) :: myPoly
     INTEGER,INTENT(in)     :: nVariables,nElements
     REAL(prec),INTENT(in)  :: f(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bf(1:3,0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
+    REAL(prec),INTENT(in)  :: bf(0:myPoly % N,0:myPoly % N,1:nVariables,1:6,1:nElements)
     REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,k,ii,iVar,iEl
@@ -1972,14 +1971,14 @@ CONTAINS
                                      myPoly % dgMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
 
-              dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(1,j,k,iVar,3,iEl) + & ! east
-                                                         myPoly % bMatrix % hostData(i,0)*bF(1,j,k,iVar,5,iEl))/ &  ! west
+              dF(i,j,k,iVar,iEl) = dF(i,j,k,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(j,k,iVar,3,iEl) + & ! east
+                                                         myPoly % bMatrix % hostData(i,0)*bF(j,k,iVar,5,iEl))/ &  ! west
                                    myPoly % qWeights % hostData(i) + &
-                                   (myPoly % bMatrix % hostData(j,1)*bF(2,i,k,iVar,4,iEl) + & ! north
-                                    myPoly % bMatrix % hostData(j,0)*bF(2,i,k,iVar,2,iEl))/ &  ! south
+                                   (myPoly % bMatrix % hostData(j,1)*bF(i,k,iVar,4,iEl) + & ! north
+                                    myPoly % bMatrix % hostData(j,0)*bF(i,k,iVar,2,iEl))/ &  ! south
                                    myPoly % qWeights % hostData(j) + &
-                                   (myPoly % bMatrix % hostData(k,1)*bF(3,i,j,iVar,6,iEl) + & ! top
-                                    myPoly % bMatrix % hostData(k,0)*bF(3,i,j,iVar,1,iEl))/ &  ! bottom
+                                   (myPoly % bMatrix % hostData(k,1)*bF(i,j,iVar,6,iEl) + & ! top
+                                    myPoly % bMatrix % hostData(k,0)*bF(i,j,iVar,1,iEl))/ &  ! bottom
                                    myPoly % qWeights % hostData(k)
 
             END DO

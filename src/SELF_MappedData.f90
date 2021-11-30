@@ -1443,31 +1443,34 @@ CONTAINS
 
   END SUBROUTINE BassiRebaySides_MappedVector2D
 
-  SUBROUTINE Divergence_MappedVector2D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
+  SUBROUTINE Divergence_MappedVector2D(compVector,geometry,divVector,dForm,gpuAccel)
     ! Strong Form Operator
     !
     ! DG Weak Form Operator
     !
+    ! Assumes vector has been projected to computational coordinates
+    !
     IMPLICIT NONE
-    CLASS(MappedVector2D),INTENT(in) :: physVector
-    TYPE(MappedVector2D),INTENT(inout) :: compVector
+    CLASS(MappedVector2D),INTENT(in) :: compVector
+    !TYPE(MappedVector2D),INTENT(inout) :: compVector
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(MappedScalar2D),INTENT(inout) :: divVector
     INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
+    !CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
+
     IF (dForm == selfWeakDGForm) THEN
 
       IF (gpuAccel) THEN
         CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % deviceData, &
-                                                         compVector % boundary % deviceData, &
+                                                         compVector % boundaryNormal % deviceData, &
                                                          divVector % interior % deviceData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
       ELSE
         CALL compVector % interp % VectorDGDivergence_2D(compVector % interior % hostData, &
-                                                         compVector % boundary % hostData, &
+                                                         compVector % boundaryNormal % hostData, &
                                                          divVector % interior % hostData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
@@ -1680,6 +1683,8 @@ CONTAINS
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
     INTEGER :: i,j,ivar,iel,iside
+    REAL(prec) :: nhat(1:2)
+    REAL(prec) :: nmag
 
     IF (gpuAccel) THEN
 
@@ -1691,8 +1696,8 @@ CONTAINS
                                                               physVector % nElem)
 
       CALL ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector % boundary % deviceData, &
-                                                                      compVector % boundary % deviceData, &
-                                                                      geometry % dsdx % boundary % deviceData, &
+                                                                      compVector % boundaryNormal % deviceData, &
+                                                                      geometry % nHat % boundary % deviceData, &
                                                                       physVector % N, &
                                                                       physVector % nVar, &
                                                                       physVector % nElem)
@@ -1727,17 +1732,14 @@ CONTAINS
         DO iside = 1,4
           DO ivar = 1,physVector % nVar
             DO j = 0,physVector % N
-              compVector % boundary % hostData(1,j,ivar,iside,iel) = &
-                geometry % dsdx % boundary % hostData(1,1,j,1,iside,iel)* &
-                physVector % boundary % hostData(1,j,ivar,iside,iel) + &
-                geometry % dsdx % boundary % hostData(2,1,j,1,iside,iel)* &
-                physVector % boundary % hostData(2,j,ivar,iside,iel)
 
-              compVector % boundary % hostData(2,j,ivar,iside,iel) = &
-                geometry % dsdx % boundary % hostData(1,2,j,1,iside,iel)* &
-                physVector % boundary % hostData(1,j,ivar,iside,iel) + &
-                geometry % dsdx % boundary % hostData(2,2,j,1,iside,iel)* &
-                physVector % boundary % hostData(2,j,ivar,iside,iel)
+              nhat(1:2) = geometry % nHat % boundary % hostData(1:2,j,1,iSide,iEl)
+              nmag = geometry % nScale % boundary % hostData(j,1,iSide,iEl)
+
+              compVector % boundaryNormal % hostData(j,ivar,iside,iel) = & 
+                ( nhat(1)*physVector % boundary % hostData(1,j,ivar,iside,iel) + &
+                  nhat(2)*physVector % boundary % hostData(2,j,ivar,iside,iel) )*nmag
+
             END DO
           END DO
         END DO
@@ -1938,29 +1940,28 @@ CONTAINS
 
   END SUBROUTINE BassiRebaySides_MappedVector3D
 
-  SUBROUTINE Divergence_MappedVector3D(physVector,compVector,geometry,divVector,dForm,gpuAccel)
+  SUBROUTINE Divergence_MappedVector3D(compVector,geometry,divVector,dForm,gpuAccel)
     !
     IMPLICIT NONE
-    CLASS(MappedVector3D),INTENT(in) :: physVector
-    TYPE(MappedVector3D),INTENT(inout) :: compVector
+    CLASS(MappedVector3D),INTENT(in) :: compVector
     TYPE(SEMHex),INTENT(in) :: geometry
     TYPE(MappedScalar3D),INTENT(inout) :: divVector
     INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
+    !CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
 
     IF (dForm == selfWeakDGForm) THEN
 
       IF (gpuAccel) THEN
         CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % deviceData, &
-                                                         compVector % boundary % deviceData, &
+                                                         compVector % boundaryNormal % deviceData, &
                                                          divVector % interior % deviceData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
       ELSE
         CALL compVector % interp % VectorDGDivergence_3D(compVector % interior % hostData, &
-                                                         compVector % boundary % hostData, &
+                                                         compVector % boundaryNormal % hostData, &
                                                          divVector % interior % hostData, &
                                                          compVector % nvar, &
                                                          compVector % nelem)
@@ -2180,6 +2181,8 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,k,iVar,iEl,iside
+    REAL(prec) :: nHat(1:3)
+    REAL(prec) :: nmag
 
     IF (gpuAccel) THEN
 
@@ -2191,8 +2194,8 @@ CONTAINS
                                                               physVector % nElem)
 
       CALL ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector % boundary % deviceData, &
-                                                                      compVector % boundary % deviceData, &
-                                                                      geometry % dsdx % boundary % deviceData, &
+                                                                      compVector % boundaryNormal % deviceData, &
+                                                                      geometry % nHat % boundary % deviceData, &
                                                                       physVector % N, &
                                                                       physVector % nVar, &
                                                                       physVector % nElem)
@@ -2242,29 +2245,15 @@ CONTAINS
           DO iVar = 1,physVector % nVar
             DO k = 0,physVector % N
               DO j = 0,physVector % N
-                compVector % boundary % hostData(1,j,k,iVar,iside,iEl) = &
-                  geometry % dsdx % boundary % hostData(1,1,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                  geometry % dsdx % boundary % hostData(2,1,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                  geometry % dsdx % boundary % hostData(3,1,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
 
-                compVector % boundary % hostData(2,j,k,iVar,iside,iEl) = &
-                  geometry % dsdx % boundary % hostData(1,2,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                  geometry % dsdx % boundary % hostData(2,2,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                  geometry % dsdx % boundary % hostData(3,2,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+                nHat(1:3) = geometry % nHat % boundary % hostData(1:3,j,k,1,iSide,iEl)
+                nmag = geometry % nScale % boundary % hostData(j,k,1,iSide,iEl)
 
-                compVector % boundary % hostData(3,j,k,iVar,iside,iEl) = &
-                  geometry % dsdx % boundary % hostData(1,3,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                  geometry % dsdx % boundary % hostData(2,3,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                  geometry % dsdx % boundary % hostData(3,3,j,k,1,iside,iEl)* &
-                  physVector % boundary % hostData(3,j,k,iVar,iside,iEl)
+                compVector % boundaryNormal % hostData(j,k,iVar,iside,iEl) = &
+                  ( nHat(1)*physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
+                    nHat(2)*physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
+                    nHat(3)*physVector % boundary % hostData(3,j,k,iVar,iside,iEl) )*nmag
+
               END DO
             END DO
           END DO
