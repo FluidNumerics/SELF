@@ -18,8 +18,9 @@ USE ISO_C_BINDING
     TYPE(Vector2D),PUBLIC :: plotVelocity
     TYPE(Vector2D),PUBLIC :: plotX
 
-    TYPE(EquationParser) :: boundaryConditionEqn(1)
-    TYPE(EquationParser) :: solutionEqn(1)
+    TYPE(EquationParser), ALLOCATABLE :: boundaryConditionEqn(:)
+    TYPE(EquationParser), ALLOCATABLE :: solutionEqn(:)
+    TYPE(EquationParser), ALLOCATABLE :: sourceEqn(:)
 
     REAL(prec) :: simulationTime
 
@@ -55,17 +56,17 @@ USE ISO_C_BINDING
       PROCEDURE,PUBLIC :: Free => Free_Advection2D
 
 
-      GENERIC, PUBLIC :: SetSolution => SetSolutionFromEquation!, &
-!                                        SetSolutionFromFile
-      PROCEDURE, PRIVATE :: SetSolutionFromEquation!, &
-!                            SetSolutionFromFile
+      GENERIC, PUBLIC :: SetSolution => SetSolutionFromEquation_Advection2D
+      PROCEDURE, PRIVATE :: SetSolutionFromEquation_Advection2D
 
-      GENERIC, PUBLIC :: SetVelocity => SetVelocityFromEquation
-      PROCEDURE, PRIVATE :: SetVelocityFromEquation
+      GENERIC, PUBLIC :: SetSource => SetSourceFromEquation_Advection2D
+      PROCEDURE, PRIVATE :: SetSourceFromEquation_Advection2D
 
-      GENERIC, PUBLIC :: SetBoundaryCondition => SetBoundaryConditionFromEquation!, &
-!                                        SetBoundaryConditionFromFile
-      PROCEDURE, PRIVATE :: SetBoundaryConditionFromEquation!, &
+      GENERIC, PUBLIC :: SetVelocity => SetVelocityFromEquation_Advection2D
+      PROCEDURE, PRIVATE :: SetVelocityFromEquation_Advection2D
+
+      GENERIC, PUBLIC :: SetBoundaryCondition => SetBoundaryConditionFromEquation_Advection2D
+      PROCEDURE, PRIVATE :: SetBoundaryConditionFromEquation_Advection2D
 
       PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection2D
 
@@ -99,6 +100,28 @@ USE ISO_C_BINDING
       TYPE(c_ptr) :: flux, boundarySol, extSol, velocity, nHat, nScale
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE SideFlux_Advection2D_gpu_wrapper 
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE UpdateGRK3_Advection2D_gpu_wrapper(gRK3, solution, dSdt, rk3A, rk3G, N, nVar, nEl) &
+      BIND(c,name="UpdateGRK3_Advection2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: gRK3, solution, dSdt
+      REAL(c_prec),VALUE :: rk3A, rk3G
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE UpdateGRK3_Advection2D_gpu_wrapper 
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE InitializeGRK3_Advection2D_gpu_wrapper(gRK3, N, nVar, nEl) &
+      BIND(c,name="InitializeGRK3_Advection2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: gRK3
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE InitializeGRK3_Advection2D_gpu_wrapper 
   END INTERFACE
 
 CONTAINS
@@ -184,6 +207,9 @@ CONTAINS
             this % mesh % nElem)
 
     ALLOCATE (this % solutionMetaData(1:nvar))
+    ALLOCATE (this % boundaryConditionEqn(1:nvar))
+    ALLOCATE (this % solutionEqn(1:nvar))
+    ALLOCATE (this % sourceEqn(1:nvar))
 
 
   END SUBROUTINE Init_Advection2D
@@ -211,6 +237,7 @@ CONTAINS
     CHARACTER(LEN=self_EquationLength) :: velEqnY ! Velocity Equation (y-direction)
     CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
     CHARACTER(LEN=self_EquationLength) :: bcEqn ! Boundary condition Equation
+    CHARACTER(LEN=self_EquationLength) :: sourceEqn ! Boundary condition Equation
     LOGICAL :: enableMPI
     LOGICAL :: enableGPU
     REAL(prec) :: outputInterval
@@ -243,6 +270,7 @@ CONTAINS
     CALL cli % get(val=velEqnY,switch="--velocity-y")
     CALL cli % get(val=icEqn,switch="--initial-condition")
     CALL cli % get(val=bcEqn,switch="--boundary-condition")
+    CALL cli % get(val=sourceEqn,switch="--source")
     CALL cli % get(val=integratorChar,switch="--integrator")
 
     IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
@@ -333,7 +361,7 @@ CONTAINS
 
     eqn(1) = EquationParser( icEqn, (/'x','y', 't'/))
     CALL this % SetSolution( eqn )
-    this % solutionEqn(1) = EquationParser( icEqn, (/'x','y', 't'/))
+    this % solutionEqn(1) = EquationParser( icEqn, (/'x','y','t'/))
 
     velEqn(1) = EquationParser(velEqnX, (/'x','y'/))
     velEqn(2) = EquationParser(velEqnY, (/'x','y'/))
@@ -341,6 +369,8 @@ CONTAINS
 
     this % boundaryConditionEqn(1) = EquationParser( bcEqn, (/'x','y','t'/))
     CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
+
+    this % sourceEqn(1) = EquationParser( sourceEqn, (/'x','y','t'/))
 
   END SUBROUTINE InitFromCLI_Advection2D
 
@@ -490,6 +520,12 @@ CONTAINS
                    def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2)/0.01 )", &
                    required=.FALSE.)
 
+    CALL cli % add(switch="--source", &
+                   switch_ab="-s", &
+                   help="Equation for the source term (can be time dependent!)", &
+                   def="s = 0.0", &
+                   required=.FALSE.)
+
     ! Give me a time integrator
     CALL cli % add(switch="--integrator", &
                    switch_ab="-int", &
@@ -520,10 +556,13 @@ CONTAINS
     CALL this % plotVelocity % Free()
     CALL this % plotX % Free()
     DEALLOCATE (this % solutionMetaData)
+    DEALLOCATE (this % boundaryConditionEqn)
+    DEALLOCATE (this % solutionEqn)
+    DEALLOCATE (this % sourceEqn)
 
   END SUBROUTINE Free_Advection2D
 
-  SUBROUTINE SetSolutionFromEquation( this, eqn )
+  SUBROUTINE SetSolutionFromEquation_Advection2D( this, eqn )
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
     TYPE(EquationParser), INTENT(in) :: eqn(1:this % solution % nVar)
@@ -555,7 +594,41 @@ CONTAINS
 
     CALL this % solution % interior % UpdateDevice()
 
-  END SUBROUTINE SetSolutionFromEquation
+  END SUBROUTINE SetSolutionFromEquation_Advection2D
+
+  SUBROUTINE SetSourceFromEquation_Advection2D( this, eqn )
+    IMPLICIT NONE
+    CLASS(Advection2D), INTENT(inout) :: this
+    TYPE(EquationParser), INTENT(in) :: eqn(1:this % solution % nVar)
+    ! Local
+    INTEGER :: i, j, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: t
+
+
+    DO iEl = 1,this % source % nElem
+      DO iVar = 1, this % source % nVar
+        DO j = 0, this % source % N
+          DO i = 0, this % source % N
+
+             ! Get the mesh positions
+             x = this % geometry % x % interior % hostData(1,i,j,1,iEl)
+             y = this % geometry % x % interior % hostData(2,i,j,1,iEl)
+             t = this % simulationTime
+
+             this % source % interior % hostData(i,j,iVar,iEl) = &
+               eqn(iVar) % Evaluate((/x, y, t/))
+
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    CALL this % solution % interior % UpdateDevice()
+
+  END SUBROUTINE SetSourceFromEquation_Advection2D
 
 !  SUBROUTINE SetSolutionFromFile( this, filename )
 !    IMPLICIT NONE
@@ -567,7 +640,7 @@ CONTAINS
 !
 !  END SUBROUTINE SetSolutionFromEquation
 
-  SUBROUTINE SetVelocityFromEquation( this, eqn )
+  SUBROUTINE SetVelocityFromEquation_Advection2D( this, eqn )
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
     TYPE(EquationParser), INTENT(in) :: eqn(1:2)
@@ -624,9 +697,9 @@ CONTAINS
     CALL this % velocity % interior % UpdateDevice()
     CALL this % velocity % boundary % UpdateDevice()
 
-  END SUBROUTINE SetVelocityFromEquation
+  END SUBROUTINE SetVelocityFromEquation_Advection2D
 
-  SUBROUTINE SetBoundaryConditionFromEquation( this, eqn )
+  SUBROUTINE SetBoundaryConditionFromEquation_Advection2D( this, eqn )
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
     TYPE(EquationParser), INTENT(in) :: eqn(1:this % solution % nVar)
@@ -665,7 +738,7 @@ CONTAINS
     CALL this % solution % extBoundary % UpdateDevice()
 
 
-  END SUBROUTINE SetBoundaryConditionFromEquation
+  END SUBROUTINE SetBoundaryConditionFromEquation_Advection2D
 
   SUBROUTINE ForwardStep_Advection2D( this, endTime )
     IMPLICIT NONE
@@ -706,57 +779,89 @@ CONTAINS
     INTEGER :: iEl
     INTEGER :: iVar
     INTEGER :: i, j
-    REAL(prec) :: gRK3(0:this % solution % N, &
-                       0:this % solution % N, &
-                       1:this % solution % nVar, &
-                       1:this % solution % nElem)
+    TYPE(hfReal_r4) :: gRK3
     REAL(prec) :: t0
     REAL(prec) :: dt
    
-      gRK3 = 0.0_prec
-      dt = this % dt
+      CALL gRK3 % Alloc(loBound=(/0,0,1,1/), &
+                        upBound=(/this % solution % N,&
+                                  this % solution % N,&
+                                  this % solution % nVar, &
+                                  this % solution % nElem/))
 
-      DO iStep = 1, nSteps
+      IF( gpuAccel )THEN
 
-        t0 = this % simulationTime
+        CALL InitializeGRK3_Advection2D_gpu_wrapper( gRK3 % deviceData, &
+                             this % solution % N, &
+                             this % solution % nVar, &
+                             this % solution % nElem )
+        dt = this % dt
 
-        DO m = 1, 3 ! Loop over RK3 steps
+        DO iStep = 1, nSteps
 
-          CALL this % Tendency( gpuAccel )
+          t0 = this % simulationTime
 
-          !IF( gpuAccel )THEN
+          DO m = 1, 3 ! Loop over RK3 steps
 
-          !  ! UpdateG3D Kernel needed
+            CALL this % Tendency( gpuAccel )
 
-          !ELSE
+            CALL UpdateGRK3_Advection2D_gpu_wrapper( gRK3 % deviceData, &
+                             this % solution % interior % deviceData, &
+                             this % dSdt % interior % deviceData, &
+                             rk3_a(m), rk3_g(m), &
+                             this % solution % N, &
+                             this % solution % nVar, &
+                             this % solution % nElem )
+
+            this % simulationTime = this % simulationTime + rk3_b(m)*dt
+
+          ENDDO
+
+          this % simulationTime = t0 + dt
+
+        ENDDO
+      ELSE
+
+        gRK3 % hostData = 0.0_prec
+        dt = this % dt
+
+        DO iStep = 1, nSteps
+
+          t0 = this % simulationTime
+
+          DO m = 1, 3 ! Loop over RK3 steps
+
+            CALL this % Tendency( gpuAccel )
 
             DO iEl = 1, this % solution % nElem
               DO iVar = 1, this % solution % nVar
                 DO j = 0, this % solution % N
                   DO i = 0, this % solution % N
 
-                    gRK3(i,j,iVar,iEl) = rk3_a(m)*gRK3(i,j,iVar,iEl) + &
+                    gRK3 % hostData(i,j,iVar,iEl) = rk3_a(m)*gRK3 % hostData(i,j,iVar,iEl) + &
                             this % dSdt % interior % hostData(i,j,iVar,iEl)
 
 
                     this % solution % interior % hostData(i,j,iVar,iEl) = &
                             this % solution % interior % hostData(i,j,iVar,iEl) + &
-                            rk3_g(m)*dt*gRK3(i,j,iVar,iEl)
+                            rk3_g(m)*dt*gRK3 % hostData(i,j,iVar,iEl)
 
                   ENDDO
                 ENDDO
               ENDDO
             ENDDO
 
-          !ENDIF
+            this % simulationTime = this % simulationTime + rk3_b(m)*dt
 
-          this % simulationTime = this % simulationTime + rk3_b(m)*dt
+          ENDDO
+
+          this % simulationTime = t0 + dt
 
         ENDDO
 
-        this % simulationTime = t0 + dt
+      ENDIF
 
-      ENDDO
+      CALL gRK3 % Free()
 
   END SUBROUTINE TimeStepRK3_Advection2D
 
@@ -767,6 +872,7 @@ CONTAINS
 
       CALL this % solution % BoundaryInterp( gpuAccel )
       CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
+      CALL this % SetSource( this % sourceEqn )
       CALL this % InternalFlux( gpuAccel )
       CALL this % SideFlux( gpuAccel )
       CALL this % CalculateFluxDivergence( gpuAccel )

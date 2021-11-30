@@ -1,6 +1,58 @@
 #include <hip/hip_runtime.h>
 #include "SELF_HIP_Macros.h"
 
+__global__ void InitializeGRK3_Advection2D_gpu(real *gRK3, int N, int nVar){
+
+  // Get the array indices from the GPU thread IDs
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+    gRK3[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] =  0.0; 
+
+}
+
+extern "C"
+{
+  void InitializeGRK3_Advection2D_gpu_wrapper(real **gRK3, int N, int nVar, int nEl)
+  {
+
+    // Block size is set to match the size of the element exactly
+    // Grid size is set to ( number of tracers X number of elements )
+    // DGSEM is beautiful
+    InitializeGRK3_Advection2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*gRK3, N, nVar);
+  }
+}
+
+__global__ void UpdateGRK3_Advection2D_gpu(real *gRK3, real *solution, real *dSdt, int rk3_a, int rk3_g, real dt, int N, int nVar){
+
+  // Get the array indices from the GPU thread IDs
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+    gRK3[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] =  rk3_a*gRK3[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]+
+	    dSdt[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] =  solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]+
+	    rk3_g*dt*gRK3[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+}
+
+extern "C"
+{
+  void UpdateGRK3_Advection2D_gpu_wrapper(real **gRK3, real **solution, real **dSdt, int rk3_a, int rk3_g, real dt, int N, int nVar, int nEl)
+  {
+
+    // Block size is set to match the size of the element exactly
+    // Grid size is set to ( number of tracers X number of elements )
+    // DGSEM is beautiful
+    UpdateGRK3_Advection2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*gRK3, *solution, *dSdt, rk3_a, rk3_g, dt, N, nVar);
+  }
+}
+
 __global__ void InternalFlux_Advection2D_gpu(real *flux, real *solution, real *velocity, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs
