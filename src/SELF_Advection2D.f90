@@ -621,8 +621,8 @@ CONTAINS
 
     ENDDO
 
-    CALL this % solution % interior % UpdateDevice()
-    CALL this % solution % boundary % UpdateDevice()
+    CALL this % velocity % interior % UpdateDevice()
+    CALL this % velocity % boundary % UpdateDevice()
 
   END SUBROUTINE SetVelocityFromEquation
 
