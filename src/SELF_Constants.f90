@@ -8,6 +8,7 @@
 
 MODULE SELF_Constants
 
+  USE ISO_C_BINDING
   USE ISO_FORTRAN_ENV
 
   IMPLICIT NONE
@@ -16,8 +17,10 @@ MODULE SELF_Constants
 
 #ifdef DOUBLE_PRECISION
   INTEGER,PARAMETER :: prec = real64
+  INTEGER,PARAMETER :: c_prec = C_DOUBLE
 #else
   INTEGER,PARAMETER :: prec = real32
+  INTEGER,PARAMETER :: c_prec = C_FLOAT 
 #endif
 
 !*************************************************************!
