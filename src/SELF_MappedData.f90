@@ -380,56 +380,56 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+    SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary, &
                                                        self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+    SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary, &
                                                        self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+    SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary, &
                                                        self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+    SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary, &
                                                        self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+    SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary, &
                                                        self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper
   END INTERFACE
@@ -945,20 +945,17 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL scalar % boundary % UpdateHost()
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      CALL decomp % FinalizeMPIExchangeAsync()
-      CALL scalar % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                    scalar % boundary % deviceData, &
-                                                   mesh % hopr_elemInfo % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    scalar % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     ELSE
 
@@ -1334,20 +1331,17 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL vector % boundary % UpdateHost()
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      CALL decomp % FinalizeMPIExchangeAsync()
-      CALL vector % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                    vector % boundary % deviceData, &
-                                                   mesh % hopr_elemInfo % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    vector % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
+      CALL decomp % FinalizeMPIExchangeAsync()
 
     ELSE
 
@@ -1797,20 +1791,18 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL vector % boundary % UpdateHost()
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      CALL decomp % FinalizeMPIExchangeAsync()
-      CALL vector % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                    vector % boundary % deviceData, &
-                                                   mesh % hopr_elemInfo % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    vector % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
+      CALL decomp % FinalizeMPIExchangeAsync()
+
     ELSE
 
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
@@ -2315,20 +2307,17 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL tensor % boundary % UpdateHost()
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      CALL decomp % FinalizeMPIExchangeAsync()
-      CALL tensor % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                    tensor % boundary % deviceData, &
-                                                   mesh % hopr_elemInfo % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    tensor % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
+      CALL decomp % FinalizeMPIExchangeAsync()
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
@@ -2477,20 +2466,17 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL tensor % boundary % UpdateHost()
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      CALL decomp % FinalizeMPIExchangeAsync()
-      CALL tensor % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                    tensor % boundary % deviceData, &
-                                                   mesh % hopr_elemInfo % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    tensor % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
+      CALL decomp % FinalizeMPIExchangeAsync()
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
