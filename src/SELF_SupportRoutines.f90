@@ -828,6 +828,26 @@ CONTAINS
                            - 86400.0_real64*day) &
                           - REAL(second,real64))*1000.0_real64)
 
+      IF( milliSecond >= 1000 )THEN
+        milliSecond = milliSecond - 1000
+        second = second + 1
+      ENDIF
+
+      IF( second >= 60 )THEN
+        second = second - 60
+        minute = minute + 1
+      ENDIF
+
+      IF( minute >= 60 )THEN
+        minute = minute - 60
+        hour = hour + 1
+      ENDIF
+
+      IF( hour >= 24 )THEN
+        hour = hour - 24
+        day = day + 1
+      ENDIF
+
       WRITE (dayStamp,'(I4.4)') day
       WRITE (hourStamp,'(I2.2)') hour
       WRITE (minuteStamp,'(I2.2)') minute
