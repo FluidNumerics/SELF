@@ -381,18 +381,19 @@ CONTAINS
       END DO
     END DO
 
-    IF (GPUAvailable()) THEN
-      CALL xMesh % UpdateDevice()
-      CALL xMesh % GridInterp(myGeom % x,.TRUE.)
-      CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % CalculateMetricTerms()
-      CALL myGeom % UpdateHost()
-    ELSE
+    !IF (GPUAvailable()) THEN
+    !  CALL xMesh % UpdateDevice()
+    !  CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    !  CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % CalculateMetricTerms()
+    !  CALL myGeom % UpdateHost()
+    !ELSE
       CALL xMesh % GridInterp(myGeom % x,.FALSE.)
       CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateMetricTerms()
-    END IF
+    !END IF
 
+    CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
 
   END SUBROUTINE GenerateFromMesh_SEMQuad
@@ -488,18 +489,18 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-    IF (GPUAvailable()) THEN
-      CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
-      CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
-      CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % UpdateHost()
-    ELSE
+!    IF (GPUAvailable()) THEN
+!      CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+!      CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+!      CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+!      CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+!      CALL myGeom % UpdateHost()
+!    ELSE
       CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-    END IF
+!    END IF
 
     CALL myGeom % CalculateContravariantBasis()
     IF (GPUAvailable()) THEN

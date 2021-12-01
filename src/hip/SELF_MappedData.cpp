@@ -786,26 +786,26 @@ extern "C"
   }
 }
 
-__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *elemInfo, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)]-1;
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
-  int i2 = N-i1;
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
 
   if(bcid == 0){
     int neighborRank = elemToRank[e2];
     if( neighborRank == rankId ){
-      if(flip == 1){
+      if(flip == 0){
         extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = boundary[SCB_2D_INDEX(i1,ivar,s2,e2,N,nVar)];
       }
-      else if(flip == 2){
+      else if(flip == 1){
+        int i2 = N-i1;
         extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = boundary[SCB_2D_INDEX(i2,ivar,s2,e2,N,nVar)];
       }
     }
@@ -815,9 +815,9 @@ __global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **elemInfo, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *elemInfo, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }

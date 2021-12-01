@@ -369,12 +369,12 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary,hopr_elemInfo, &
+    SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary, &
                                                        self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper
   END INTERFACE
@@ -651,31 +651,27 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: e1,e2,s1,s2
-    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: flip,bcid
     INTEGER :: i1,i2,ivar
     INTEGER :: neighborRank
 
     IF (gpuAccel) THEN
 
-      CALL scalar % boundary % UpdateHost()
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
-      CALL decomp % FinalizeMPIExchangeAsync()
-      CALL scalar % extBoundary % UpdateDevice()
       CALL SideExchange_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                    scalar % boundary % deviceData, &
-                                                   mesh % hopr_elemInfo % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    scalar % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
+      CALL decomp % FinalizeMPIExchangeAsync()
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
           e2 = mesh % self_sideInfo % hostData(3,s1,e1)
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
@@ -1457,8 +1453,6 @@ CONTAINS
     TYPE(MappedScalar2D),INTENT(inout) :: divVector
     INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
-
-    !CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
 
     IF (dForm == selfWeakDGForm) THEN
 

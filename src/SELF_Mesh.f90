@@ -777,6 +777,8 @@ CONTAINS
 
     END IF
 
+    CALL myMesh % UpdateDevice()
+
   END SUBROUTINE Load_Mesh2D_serial
 
   SUBROUTINE Load_Mesh2D_parallel(myMesh,myMeshSpec,decomp)
@@ -804,6 +806,8 @@ CONTAINS
       CALL myMesh % Read_HOPr(myMeshSpec % filename,decomp)
 
     END IF
+
+    CALL myMesh % UpdateDevice()
 
   END SUBROUTINE Load_Mesh2D_parallel
 

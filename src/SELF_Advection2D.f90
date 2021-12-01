@@ -83,11 +83,11 @@ USE ISO_C_BINDING
 
   ! Interfaces to GPU kernels !
   INTERFACE
-    SUBROUTINE InternalFlux_Advection2D_gpu_wrapper(flux, solution, velocity, N, nVar, nEl) &
+    SUBROUTINE InternalFlux_Advection2D_gpu_wrapper(flux, solution, velocity, dsdx, N, nVar, nEl) &
       BIND(c,name="InternalFlux_Advection2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: flux, solution, velocity
+      TYPE(c_ptr) :: flux, solution, velocity, dsdx
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE InternalFlux_Advection2D_gpu_wrapper 
   END INTERFACE
@@ -103,25 +103,15 @@ USE ISO_C_BINDING
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK3_Advection2D_gpu_wrapper(gRK3, solution, dSdt, rk3A, rk3G, N, nVar, nEl) &
+    SUBROUTINE UpdateGRK3_Advection2D_gpu_wrapper(gRK3, solution, dSdt, rk3A, rk3G, dt, N, nVar, nEl) &
       BIND(c,name="UpdateGRK3_Advection2D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(c_ptr) :: gRK3, solution, dSdt
-      REAL(c_prec),VALUE :: rk3A, rk3G
+      REAL(c_prec),VALUE :: rk3A, rk3G, dt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE UpdateGRK3_Advection2D_gpu_wrapper 
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE InitializeGRK3_Advection2D_gpu_wrapper(gRK3, N, nVar, nEl) &
-      BIND(c,name="InitializeGRK3_Advection2D_gpu_wrapper")
-      USE ISO_C_BINDING
-      IMPLICIT NONE
-      TYPE(c_ptr) :: gRK3
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE InitializeGRK3_Advection2D_gpu_wrapper 
   END INTERFACE
 
 CONTAINS
@@ -365,7 +355,7 @@ CONTAINS
 
     velEqn(1) = EquationParser(velEqnX, (/'x','y'/))
     velEqn(2) = EquationParser(velEqnY, (/'x','y'/))
-    CALL this % setVelocity( velEqn )
+    CALL this % SetVelocity( velEqn )
 
     this % boundaryConditionEqn(1) = EquationParser( bcEqn, (/'x','y','t'/))
     CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
@@ -592,7 +582,9 @@ CONTAINS
       ENDDO
     ENDDO
 
-    CALL this % solution % interior % UpdateDevice()
+    IF( this % gpuAccel )THEN
+      CALL this % solution % interior % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE SetSolutionFromEquation_Advection2D
 
@@ -626,19 +618,11 @@ CONTAINS
       ENDDO
     ENDDO
 
-    CALL this % solution % interior % UpdateDevice()
+    IF( this % gpuAccel )THEN
+      CALL this % source % interior % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE SetSourceFromEquation_Advection2D
-
-!  SUBROUTINE SetSolutionFromFile( this, filename )
-!    IMPLICIT NONE
-!    CLASS(Advection2D), INTENT(inout) :: this
-!    CHARACTER(*), INTENT(in) :: filename
-!    ! Local
-!
-!
-!
-!  END SUBROUTINE SetSolutionFromEquation
 
   SUBROUTINE SetVelocityFromEquation_Advection2D( this, eqn )
     IMPLICIT NONE
@@ -694,8 +678,10 @@ CONTAINS
 
     ENDDO
 
-    CALL this % velocity % interior % UpdateDevice()
-    CALL this % velocity % boundary % UpdateDevice()
+    IF( this % gpuAccel )THEN
+      CALL this % velocity % interior % UpdateDevice()
+      CALL this % velocity % boundary % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE SetVelocityFromEquation_Advection2D
 
@@ -734,9 +720,10 @@ CONTAINS
       ENDDO
     ENDDO
 
-    ! Copy data to the GPU
-    CALL this % solution % extBoundary % UpdateDevice()
-
+    IF( this % gpuAccel )THEN
+      ! Copy data to the GPU
+      CALL this % solution % extBoundary % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE SetBoundaryConditionFromEquation_Advection2D
 
@@ -753,13 +740,13 @@ CONTAINS
       ! Step forward
       dt = this % dt
       nSteps = INT(( endTime - this % simulationTime )/dt)
-      CALL this % TimeStepRK3( nSteps, this % gpuAccel )
+      CALL this % TimeStepRK3( nSteps )
 
       ! Take any additional steps to reach desired endTime
       this % dt = endTime - this % simulationTime
       IF( this % dt > 0 )THEN
         nSteps = 1
-        CALL this % TimeStepRK3( nSteps, this % gpuAccel )
+        CALL this % TimeStepRK3( nSteps )
       ENDIF
 
       ! Reset the time step
@@ -769,11 +756,10 @@ CONTAINS
 
   END SUBROUTINE ForwardStep_Advection2D
 
-  SUBROUTINE TimeStepRK3_Advection2D( this, nSteps, gpuAccel )
+  SUBROUTINE TimeStepRK3_Advection2D( this, nSteps )
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
     INTEGER, INTENT(in) :: nSteps
-    LOGICAL, INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: m, iStep
     INTEGER :: iEl
@@ -782,6 +768,8 @@ CONTAINS
     TYPE(hfReal_r4) :: gRK3
     REAL(prec) :: t0
     REAL(prec) :: dt
+    REAL(prec) :: rk3A
+    REAL(prec) :: rk3G
    
       CALL gRK3 % Alloc(loBound=(/0,0,1,1/), &
                         upBound=(/this % solution % N,&
@@ -789,49 +777,31 @@ CONTAINS
                                   this % solution % nVar, &
                                   this % solution % nElem/))
 
-      IF( gpuAccel )THEN
+      dt = this % dt
 
-        CALL InitializeGRK3_Advection2D_gpu_wrapper( gRK3 % deviceData, &
-                             this % solution % N, &
-                             this % solution % nVar, &
-                             this % solution % nElem )
-        dt = this % dt
+      DO iStep = 1, nSteps
 
-        DO iStep = 1, nSteps
+        t0 = this % simulationTime
 
-          t0 = this % simulationTime
+        gRK3 % hostData = 0.0_prec
+        DO m = 1, 3 ! Loop over RK3 steps
 
-          DO m = 1, 3 ! Loop over RK3 steps
+          CALL this % Tendency( )
 
-            CALL this % Tendency( gpuAccel )
+          IF( this % gpuAccel )THEN
+
+            rk3A = rk3_a(m)
+            rk3G = rk3_g(m)
 
             CALL UpdateGRK3_Advection2D_gpu_wrapper( gRK3 % deviceData, &
                              this % solution % interior % deviceData, &
                              this % dSdt % interior % deviceData, &
-                             rk3_a(m), rk3_g(m), &
+                             rk3A, rk3G, dt, &
                              this % solution % N, &
                              this % solution % nVar, &
                              this % solution % nElem )
+          ELSE
 
-            this % simulationTime = this % simulationTime + rk3_b(m)*dt
-
-          ENDDO
-
-          this % simulationTime = t0 + dt
-
-        ENDDO
-      ELSE
-
-        gRK3 % hostData = 0.0_prec
-        dt = this % dt
-
-        DO iStep = 1, nSteps
-
-          t0 = this % simulationTime
-
-          DO m = 1, 3 ! Loop over RK3 steps
-
-            CALL this % Tendency( gpuAccel )
 
             DO iEl = 1, this % solution % nElem
               DO iVar = 1, this % solution % nVar
@@ -851,40 +821,49 @@ CONTAINS
               ENDDO
             ENDDO
 
-            this % simulationTime = this % simulationTime + rk3_b(m)*dt
+          ENDIF
 
-          ENDDO
-
-          this % simulationTime = t0 + dt
+          this % simulationTime = this % simulationTime + rk3_b(m)*dt
 
         ENDDO
 
-      ENDIF
+        this % simulationTime = t0 + dt
+
+      ENDDO
 
       CALL gRK3 % Free()
 
   END SUBROUTINE TimeStepRK3_Advection2D
 
-  SUBROUTINE Tendency_Advection2D( this, gpuAccel ) 
+  SUBROUTINE Tendency_Advection2D( this ) 
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
-    LOGICAL, INTENT(in) :: gpuAccel
 
-      CALL this % solution % BoundaryInterp( gpuAccel )
       CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
+
       CALL this % SetSource( this % sourceEqn )
-      CALL this % InternalFlux( gpuAccel )
-      CALL this % SideFlux( gpuAccel )
-      CALL this % CalculateFluxDivergence( gpuAccel )
-      CALL this % CalculatedSdt( gpuAccel )
+
+      CALL this % solution % BoundaryInterp( this % gpuAccel )
+
+      CALL this % InternalFlux( )
+
+      ! Exchange side information between neighboring cells
+      CALL this % solution % SideExchange( this % mesh, &
+                                           this % decomp, &
+                                           this % gpuAccel )
+
+      CALL this % SideFlux( )
+
+      CALL this % CalculateFluxDivergence( this % gpuAccel )
+
+      CALL this % CalculatedSdt( this % gpuAccel )
 
   END SUBROUTINE Tendency_Advection2D
 
-  SUBROUTINE SideFlux_Advection2D( this, gpuAccel )
+  SUBROUTINE SideFlux_Advection2D( this )
     !! Calculates the Advective Flux on element sides using a Lax-Friedrich's upwind Riemann Solver
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
-    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,iSide,iVar,iEl
     REAL(prec) :: nhat(1:2)
@@ -893,16 +872,10 @@ CONTAINS
     REAL(prec) :: extState
     REAL(prec) :: intState
 
-      ! Exchange side information between neighboring cells
-      ! If GPU acceleration is enabled, SideExchange runs on the GPU
-      ! and device pointers are updated.
-      CALL this % solution % SideExchange( this % mesh, &
-                                           this % decomp, &
-                                           gpuAccel )
 
-      IF(gpuAccel)THEN
+      IF( this % gpuAccel )THEN
 
-        CALL SideFlux_Advection2D_gpu_wrapper( this % flux % boundary % deviceData, &
+        CALL SideFlux_Advection2D_gpu_wrapper( this % flux % boundaryNormal % deviceData, &
                                                this % solution % boundary % deviceData, &
                                                this % solution % extBoundary % deviceData, &
                                                this % velocity % boundary % deviceData, &
@@ -944,16 +917,15 @@ CONTAINS
 
   END SUBROUTINE SideFlux_Advection2D
 
-  SUBROUTINE InternalFlux_Advection2D( this, gpuAccel )
+  SUBROUTINE InternalFlux_Advection2D( this )
     !! Calculates the advective flux using the provided velocity
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
-    LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER :: i,j,iVar,iEl
     REAL(prec) :: Fx, Fy
 
-    IF( gpuAccel )THEN
+    IF( this % gpuAccel )THEN
 
       ! When GPU acceleration is enabled (requested by the user)
       ! we call the gpu wrapper interface, which will call the
@@ -963,6 +935,7 @@ CONTAINS
       CALL InternalFlux_Advection2D_gpu_wrapper(this % flux % interior % deviceData,&
                                                 this % solution % interior % deviceData, &
                                                 this % velocity % interior % deviceData, &
+                                                this % geometry % dsdx % interior % deviceData, &
                                                 this % solution % N, & 
                                                 this % solution % nVar, &
                                                 this % solution % nElem )
@@ -1016,8 +989,10 @@ CONTAINS
       tecFile = 'solution.'//timeStampString//'.tec'
     ENDIF
                       
-    ! Copy data to the CPU
-    CALL self % solution % interior % UpdateHost()
+    IF( self % gpuAccel )THEN
+      ! Copy data to the CPU
+      CALL self % solution % interior % UpdateHost()
+    ENDIF
 
     ! Map the mesh positions to the target grid
     CALL self % geometry % x % GridInterp(self % plotX, gpuAccel=.FALSE.)

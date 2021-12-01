@@ -248,7 +248,7 @@ CONTAINS
 
     IF( gpuAccel )THEN
 
-      CALL CalculateDSDt_DG3D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
+      CALL CalculateDSDt_DG2D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
                                       this % source % interior % deviceData, &
                                       this % dSdt % interior % deviceData, &
                                       this % solution % N, &
