@@ -839,10 +839,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Advection2D), INTENT(inout) :: this
 
-      CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
-
-      CALL this % SetSource( this % sourceEqn )
-
       CALL this % solution % BoundaryInterp( this % gpuAccel )
 
       CALL this % InternalFlux( )
