@@ -439,7 +439,7 @@ MODULE SELF_MappedData
       bind(c,name="BassiRebaySides_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper
   END INTERFACE
@@ -449,7 +449,7 @@ MODULE SELF_MappedData
       bind(c,name="BassiRebaySides_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedVector2D_gpu_wrapper
   END INTERFACE
@@ -459,7 +459,7 @@ MODULE SELF_MappedData
       bind(c,name="BassiRebaySides_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedTensor2D_gpu_wrapper
   END INTERFACE
@@ -469,7 +469,7 @@ MODULE SELF_MappedData
       bind(c,name="BassiRebaySides_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper
   END INTERFACE
@@ -479,7 +479,7 @@ MODULE SELF_MappedData
       bind(c,name="BassiRebaySides_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedVector3D_gpu_wrapper
   END INTERFACE
@@ -489,7 +489,7 @@ MODULE SELF_MappedData
       bind(c,name="BassiRebaySides_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,hopr_elemInfo,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedTensor3D_gpu_wrapper
   END INTERFACE
