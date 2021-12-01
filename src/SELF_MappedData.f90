@@ -1448,7 +1448,6 @@ CONTAINS
     !
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(in) :: compVector
-    !TYPE(MappedVector2D),INTENT(inout) :: compVector
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(MappedScalar2D),INTENT(inout) :: divVector
     INTEGER,INTENT(in) :: dForm
@@ -1942,8 +1941,6 @@ CONTAINS
     TYPE(MappedScalar3D),INTENT(inout) :: divVector
     INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
-
-    !CALL physVector % ContravariantProjection(geometry,compVector,gpuAccel)
 
     IF (dForm == selfWeakDGForm) THEN
 
