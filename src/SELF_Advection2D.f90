@@ -30,6 +30,7 @@ USE ISO_C_BINDING
     REAL(prec) :: outputInterval
     REAL(prec) :: initialTime
     REAL(prec) :: endTime
+    REAL(prec) :: viscosity
     INTEGER :: controlDegree
     INTEGER :: targetDegree
     INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
@@ -130,7 +131,11 @@ CONTAINS
     CALL this % decomp % Init(enableMPI)
 
     ! Load Mesh
-    CALL this % mesh % Load(spec,this % decomp)
+    IF (enableMPI)THEN
+      CALL this % mesh % Load(spec,this % decomp)
+    ELSE
+      CALL this % mesh % Load(spec)
+    ENDIF
 
     CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
 
@@ -215,6 +220,7 @@ CONTAINS
     CHARACTER(self_IntegratorTypeCharLength) :: integratorChar
     REAL(prec) :: Lx, Ly ! Domain lengths
     REAL(prec) :: dt ! Default time step size
+    REAL(prec) :: viscosity
     INTEGER :: controlDegree
     INTEGER :: targetDegree
     INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
@@ -262,6 +268,7 @@ CONTAINS
     CALL cli % get(val=bcEqn,switch="--boundary-condition")
     CALL cli % get(val=sourceEqn,switch="--source")
     CALL cli % get(val=integratorChar,switch="--integrator")
+!    CALL cli % get(val=viscosity,switch="--viscosity")
 
     IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
       controlQuadrature = GAUSS
@@ -348,6 +355,8 @@ CONTAINS
     this % bcEqn = bcEqn ! Boundary condition Equation
     this % enableMPI = enableMPI
     this % gpuAccel = enableGPU
+!    this % viscosity = viscosity
+
 
     eqn(1) = EquationParser( icEqn, (/'x','y', 't'/))
     CALL this % SetSolution( eqn )

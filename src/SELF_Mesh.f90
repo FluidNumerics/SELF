@@ -115,8 +115,16 @@ MODULE SELF_Mesh
   INTEGER,PARAMETER :: selfSide3D_West = 5
   INTEGER,PARAMETER :: selfSide3D_Top = 6
   !
-  INTEGER,PARAMETER :: self_nBCsDefault = 5
   INTEGER,PARAMETER :: self_BCDefault = 1
+  INTEGER,PARAMETER :: self_nBCsDefault = 5
+
+  !==============================================!
+  ! --------------- File Types------------------ !
+  !==============================================!
+  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_2D = 1
+  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_3D = 2
+  INTEGER, PARAMETER :: SELF_MESH_HOPR_2D = 3
+  INTEGER, PARAMETER :: SELF_MESH_HOPR_3D = 4
 
   TYPE MeshSpec
     CHARACTER(self_FileNameLength) :: filename
@@ -773,7 +781,16 @@ CONTAINS
                                        myMeshSpec % blockMesh_y0,myMeshSpec % blockMesh_y1/))
     ELSE
 
-      CALL myMesh % Read_HOPr(myMeshSpec % filename)
+      IF (myMeshSpec % fileType == SELF_MESH_ISM_V2_2D)THEN
+
+        CALL myMesh % Read_ISMv2(myMeshSpec % filename)
+
+      ELSEIF (myMeshSpec % fileType == SELF_MESH_HOPR_2D)THEN
+
+        CALL myMesh % Read_HOPr(myMeshSpec % filename)
+
+      ENDIF
+
 
     END IF
 
@@ -839,7 +856,7 @@ CONTAINS
           ACCESS='SEQUENTIAL')
 
     READ (fUnit,*) line
-    IF (TRIM(line) /= ' ISM-v2') THEN
+    IF (TRIM(line) /= 'ISM-V2') THEN
       msg = 'Unrecognized file format : '//TRIM(line)
       ERROR(msg)
       STOP

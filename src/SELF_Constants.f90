@@ -77,13 +77,6 @@ INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
   REAL(prec),PARAMETER   :: daysToSeconds = 86400.0_prec
 
 !==============================================!
-! --------------- File Types------------------ !
-!==============================================!
-  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_2D = 1
-  INTEGER, PARAMETER :: SELF_MESH_ISM_V2_3D = 2
-  INTEGER, PARAMETER :: SELF_MESH_HOPR_2D = 3
-  INTEGER, PARAMETER :: SELF_MESH_HOPR_3D = 4
-!==============================================!
 ! --------------- Quadrature------------------ !
 !==============================================!
   INTEGER,PARAMETER :: GAUSS = 1
