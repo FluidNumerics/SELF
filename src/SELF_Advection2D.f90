@@ -895,7 +895,9 @@ CONTAINS
 
       CALL this % solution % BoundaryInterp( this % gpuAccel )
       
-      CALL this % CalculateSolutionGradient( this % gpuAccel )
+      IF (this % diffusiveFlux) THEN
+        CALL this % CalculateSolutionGradient( this % gpuAccel )
+      ENDIF
 
       ! Internal Flux calculates both the advective and diffusive flux -- need diffusivity 
       CALL this % InternalFlux( )
@@ -905,12 +907,14 @@ CONTAINS
                                            this % decomp, &
                                            this % gpuAccel )
 
-      CALL this % solutionGradient % SideExchange( this % mesh, &
-                                                   this % decomp, &
-                                                   this % gpuAccel )
- 
-       CALL this % SideFlux( )
+      IF (this % diffusiveFlux) THEN
+        CALL this % solutionGradient % SideExchange( this % mesh, &
+                                                     this % decomp, &
+                                                     this % gpuAccel )
+   
+      ENDIF
 
+      CALL this % SideFlux( )
 
       CALL this % CalculateFluxDivergence( this % gpuAccel )
 
