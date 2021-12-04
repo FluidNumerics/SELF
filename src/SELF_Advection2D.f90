@@ -30,7 +30,8 @@ USE ISO_C_BINDING
     REAL(prec) :: outputInterval
     REAL(prec) :: initialTime
     REAL(prec) :: endTime
-    REAL(prec) :: viscosity
+    REAL(prec) :: diffusivity
+    LOGICAL :: diffusiveFlux
     INTEGER :: controlDegree
     INTEGER :: targetDegree
     INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
@@ -94,6 +95,18 @@ USE ISO_C_BINDING
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE InternalDiffusiveFlux_Advection2D_gpu_wrapper(flux, solutionGradient, dsdx, diffusivity, N, nVar, nEl) &
+      BIND(c,name="InternalDiffusiveFlux_Advection2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: flux, solutionGradient, dsdx
+      REAL(c_prec), VALUE :: diffusivity
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE InternalDiffusiveFlux_Advection2D_gpu_wrapper 
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE SideFlux_Advection2D_gpu_wrapper(flux, boundarySol, extSol, velocity, nHat, nScale, N, nVar, nEl) &
       BIND(c,name="SideFlux_Advection2D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -101,6 +114,19 @@ USE ISO_C_BINDING
       TYPE(c_ptr) :: flux, boundarySol, extSol, velocity, nHat, nScale
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE SideFlux_Advection2D_gpu_wrapper 
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE SideDiffusiveFlux_Advection2D_gpu_wrapper(flux, boundarySolGradient, extSolGradient, &
+                                                         nHat, nScale, diffusivity, N, nVar, nEl) &
+      BIND(c,name="SideDiffusiveFlux_Advection2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: flux, boundarySolGradient, extSolGradient, nHat, nScale
+      REAL(c_prec), VALUE :: diffusivity
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE SideDiffusiveFlux_Advection2D_gpu_wrapper 
   END INTERFACE
 
   INTERFACE
@@ -220,7 +246,7 @@ CONTAINS
     CHARACTER(self_IntegratorTypeCharLength) :: integratorChar
     REAL(prec) :: Lx, Ly ! Domain lengths
     REAL(prec) :: dt ! Default time step size
-    REAL(prec) :: viscosity
+    REAL(prec) :: diffusivity
     INTEGER :: controlDegree
     INTEGER :: targetDegree
     INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
@@ -236,6 +262,7 @@ CONTAINS
     CHARACTER(LEN=self_EquationLength) :: sourceEqn ! Boundary condition Equation
     LOGICAL :: enableMPI
     LOGICAL :: enableGPU
+    LOGICAL :: diffusiveFlux
     REAL(prec) :: outputInterval
     REAL(prec) :: initialTime
     REAL(prec) :: endTime
@@ -268,7 +295,18 @@ CONTAINS
     CALL cli % get(val=bcEqn,switch="--boundary-condition")
     CALL cli % get(val=sourceEqn,switch="--source")
     CALL cli % get(val=integratorChar,switch="--integrator")
-!    CALL cli % get(val=viscosity,switch="--viscosity")
+    CALL cli % get(val=diffusivity,switch="--diffusivity")
+
+    diffusiveFlux = .TRUE.
+    IF( diffusivity == 0.0_prec ) THEN
+      diffusiveFlux = .FALSE.
+    ELSEIF( diffusivity < 0.0_prec ) THEN
+      IF( dt > 0.0_prec )THEN
+        PRINT*, 'Negative diffusivity provably unstable for forward stepping'
+        PRINT*, 'Invalid diffusivity value. Stopping'
+        STOP
+      ENDIF
+    ENDIF
 
     IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
       controlQuadrature = GAUSS
@@ -355,8 +393,8 @@ CONTAINS
     this % bcEqn = bcEqn ! Boundary condition Equation
     this % enableMPI = enableMPI
     this % gpuAccel = enableGPU
-!    this % viscosity = viscosity
-
+    this % diffusivity = diffusivity
+    this % diffusiveFlux = diffusiveFlux        
 
     eqn(1) = EquationParser( icEqn, (/'x','y', 't'/))
     CALL this % SetSolution( eqn )
@@ -502,6 +540,13 @@ CONTAINS
                    switch_ab="-vy", &
                    help="Equation for the y-component of the velocity field (x,y dependent only!)",&
                    def="vy=1.0", &
+                   required=.FALSE.)
+
+    ! Tracer diffusivity
+    CALL cli % add(switch="--diffusivity", &
+                   switch_ab="-nu", &
+                   help="Tracer diffusivity (applied to all tracers)", &
+                   def="0.0", &
                    required=.FALSE.)
 
     ! Set the initial conditions
@@ -849,7 +894,10 @@ CONTAINS
     CLASS(Advection2D), INTENT(inout) :: this
 
       CALL this % solution % BoundaryInterp( this % gpuAccel )
+      
+      CALL this % CalculateSolutionGradient( this % gpuAccel )
 
+      ! Internal Flux calculates both the advective and diffusive flux -- need diffusivity 
       CALL this % InternalFlux( )
 
       ! Exchange side information between neighboring cells
@@ -857,7 +905,12 @@ CONTAINS
                                            this % decomp, &
                                            this % gpuAccel )
 
-      CALL this % SideFlux( )
+      CALL this % solutionGradient % SideExchange( this % mesh, &
+                                                   this % decomp, &
+                                                   this % gpuAccel )
+ 
+       CALL this % SideFlux( )
+
 
       CALL this % CalculateFluxDivergence( this % gpuAccel )
 
@@ -889,6 +942,17 @@ CONTAINS
                                                this % solution % N, &
                                                this % solution % nVar, &
                                                this % solution % nElem )
+        IF (this % diffusiveFlux) THEN
+          CALL SideDiffusiveFlux_Advection2D_gpu_wrapper( this % flux % boundaryNormal % deviceData, &
+                                                 this % solutionGradient % boundary % deviceData, &
+                                                 this % solutionGradient % extBoundary % deviceData, &
+                                                 this % geometry % nHat % boundary % deviceData, &
+                                                 this % geometry % nScale % boundary % deviceData, &
+                                                 this % diffusivity, &
+                                                 this % solution % N, &
+                                                 this % solution % nVar, &
+                                                 this % solution % nElem )
+        ENDIF
 
       ELSE
 
@@ -918,7 +982,35 @@ CONTAINS
           ENDDO
         ENDDO
 
-      ENDIF
+        IF (this % diffusiveFlux) THEN
+          DO iEl = 1, this % solution % nElem
+            DO iSide = 1, 4
+              DO iVar = 1, this % solution % nVar
+                DO i = 0, this % solution % N
+
+                  nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+                  nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
+
+                  !  Calculate \nabla{f} \cdot \hat{n} on the cell sides
+                  extState = this % solutionGradient % extBoundary % hostData(1,i,iVar,iSide,iEl)*nHat(1)+&
+                             this % solutionGradient % extBoundary % hostData(2,i,iVar,iSide,iEl)*nHat(2)
+
+                  intState = this % solutionGradient % boundary % hostData(1,i,iVar,iSide,iEl)*nHat(1)+&
+                             this % solutionGradient % boundary % hostData(2,i,iVar,iSide,iEl)*nHat(2)
+
+                  ! Bassi-Rebay flux is the average of the internal and external diffusive flux vectors.
+                  this % flux % boundaryNormal % hostData(i,iVar,iSide,iEl) = &
+                    this % flux % boundaryNormal % hostData(i,iVar,iSide,iEl) +&
+                    0.5_prec*this % diffusivity*(extState + intState)*nmag
+
+                ENDDO
+              ENDDO
+            ENDDO
+          ENDDO
+
+        ENDIF ! Diffusivity
+
+      ENDIF ! GPU Acceleration
 
   END SUBROUTINE SideFlux_Advection2D
 
@@ -944,6 +1036,16 @@ CONTAINS
                                                 this % solution % N, & 
                                                 this % solution % nVar, &
                                                 this % solution % nElem )
+
+      IF (this % diffusiveFlux) THEN
+        CALL InternalDiffusiveFlux_Advection2D_gpu_wrapper(this % flux % interior % deviceData,&
+                                                  this % solutionGradient % interior % deviceData, &
+                                                  this % geometry % dsdx % interior % deviceData, &
+                                                  this % diffusivity, &
+                                                  this % solution % N, & 
+                                                  this % solution % nVar, &
+                                                  this % solution % nElem )
+      ENDIF
 
     ELSE
 
@@ -972,7 +1074,42 @@ CONTAINS
         ENDDO
       ENDDO
 
-    ENDIF
+      ! When diffusivity == 0, then we don't bother calculating the diffusive flux
+      IF (this % diffusiveFlux) THEN
+        ! Otherwise, we add the diffusive flux to to the flux vector
+
+        DO iEl = 1,this % solution % nElem
+          DO iVar = 1, this % solution % nVar
+            DO j = 0, this % solution % N
+              DO i = 0, this % solution % N
+
+                ! Diffusive flux is diffusivity coefficient mulitplied by 
+                ! solution gradient
+                Fx = this % solutionGradient % interior % hostData(1,i,j,iVar,iEl)*&
+                     this % diffusivity
+
+                Fy = this % solutionGradient % interior % hostData(2,i,j,iVar,iEl)*&
+                     this % diffusivity
+
+                ! Project the diffusive flux vector onto computational coordinates
+                this % flux % interior % hostData(1,i,j,iVar,iEl) = &
+                  this % flux % interior % hostData(1,i,j,iVar,iEl) + &
+                  this % geometry % dsdx % interior % hostData(1,1,i,j,1,iel)*Fx + &
+                  this % geometry % dsdx % interior % hostData(2,1,i,j,1,iel)*Fy 
+
+                this % flux % interior % hostData(2,i,j,iVar,iEl) = &
+                  this % flux % interior % hostData(2,i,j,iVar,iEl) + &
+                  this % geometry % dsdx % interior % hostData(1,2,i,j,1,iel)*Fx + &
+                  this % geometry % dsdx % interior % hostData(2,2,i,j,1,iel)*Fy 
+  
+              ENDDO
+            ENDDO
+          ENDDO
+        ENDDO
+
+      ENDIF   ! DiffusiveFlux
+
+    ENDIF ! GPU Acceleration
 
   END SUBROUTINE InternalFlux_Advection2D
 

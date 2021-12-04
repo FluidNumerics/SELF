@@ -69,6 +69,7 @@ MODULE SELF_Data
     TYPE(hfReal_r4) :: interior
     TYPE(hfReal_r4) :: boundary
     TYPE(hfReal_r4) :: extBoundary
+    TYPE(hfReal_r4) :: avgBoundary
 
   CONTAINS
 
@@ -106,6 +107,7 @@ MODULE SELF_Data
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
+    TYPE(hfReal_r5) :: avgBoundary
 
   CONTAINS
 
@@ -576,6 +578,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/0,1,1,1/), &
                                            upBound=(/N,nVar,4,nElem/))
 
+    CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,1,1,1/), &
+                                           upBound=(/N,nVar,4,nElem/))
+
   END SUBROUTINE Init_Scalar2D
 
   SUBROUTINE Free_Scalar2D(SELFStorage)
@@ -589,6 +594,7 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+    CALL SELFStorage % avgBoundary % Free()
 
   END SUBROUTINE Free_Scalar2D
 
@@ -600,6 +606,7 @@ CONTAINS
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
+    CALL SELFStorage % avgBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Scalar2D
 
@@ -611,6 +618,7 @@ CONTAINS
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
+    CALL SELFStorage % avgBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Scalar2D
 
@@ -796,6 +804,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/0,0,1,1,1/), &
                                            upBound=(/N,N,nVar,6,nElem/))
 
+    CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,0,1,1,1/), &
+                                           upBound=(/N,N,nVar,6,nElem/))
+
   END SUBROUTINE Init_Scalar3D
 
   SUBROUTINE Free_Scalar3D(SELFStorage)
@@ -809,6 +820,7 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+    CALL SELFStorage % avgBoundary % Free()
 
   END SUBROUTINE Free_Scalar3D
 
@@ -820,6 +832,7 @@ CONTAINS
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
+    CALL SELFStorage % avgBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Scalar3D
 
@@ -831,6 +844,7 @@ CONTAINS
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
+    CALL SELFStorage % avgBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Scalar3D
 

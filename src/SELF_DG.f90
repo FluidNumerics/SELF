@@ -215,10 +215,6 @@ CONTAINS
     CLASS(DG2D),INTENT(inout) :: this
     LOGICAL,INTENT(in) :: gpuAccel
 
-    CALL this % solution % SideExchange(this % mesh, &
-                                        this % decomp, &
-                                        gpuAccel)
-
     CALL this % solution % BassiRebaySides(gpuAccel)
 
     CALL this % solution % Gradient(this % workTensor, &
@@ -477,10 +473,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(DG3D),INTENT(inout) :: this
     LOGICAL,INTENT(in) :: gpuAccel
-
-    CALL this % solution % SideExchange(this % mesh, &
-                                        this % decomp, &
-                                        gpuAccel)
 
     CALL this % solution % BassiRebaySides(gpuAccel)
 

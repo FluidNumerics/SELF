@@ -1074,23 +1074,23 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedScalar2D_gpu(real *extBoundary, real *boundary, int N, int nVar){
+__global__ void BassiRebaySides_MappedScalar2D_gpu(real* avgBoundary, real *boundary, real *extBoundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  boundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] =0.5*(extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)]+
+  avgBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] =0.5*(extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)]+
 		                                     boundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)]);
   
 }
 
 extern "C"
 {
-  void BassiRebaySides_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
+  void BassiRebaySides_MappedScalar2D_gpu_wrapper(real **avgBoundary, real **boundary, real **extBoundary, int N, int nVar, int nEl)
   {
-    BassiRebaySides_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, N, nVar);
+    BassiRebaySides_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*avgBoundary, *boundary, *extBoundary, N, nVar);
   }
 
 }
@@ -1145,7 +1145,7 @@ extern "C"
 
 }
 
-__global__ void BassiRebaySides_MappedScalar3D_gpu(real *extBoundary, real *boundary, int N, int nVar){
+__global__ void BassiRebaySides_MappedScalar3D_gpu(real *avgBoundary, real *boundary, real *extBoundary, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1153,16 +1153,16 @@ __global__ void BassiRebaySides_MappedScalar3D_gpu(real *extBoundary, real *boun
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  boundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)]+
+  avgBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = 0.5*(extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)]+
                                                          boundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)]);
   
 }
 
 extern "C"
 {
-  void BassiRebaySides_MappedScalar3D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
+  void BassiRebaySides_MappedScalar3D_gpu_wrapper(real **avgBoundary, real **boundary, real **extBoundary, int N, int nVar, int nEl)
   {
-    BassiRebaySides_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, N, nVar);
+    BassiRebaySides_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*avgBoundary, *boundary, *extBoundary, N, nVar);
   }
 
 }

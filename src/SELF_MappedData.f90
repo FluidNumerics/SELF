@@ -435,11 +435,11 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+    SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper(avgBoundary,boundary,extBoundary,N,nVar,nEl) &
       bind(c,name="BassiRebaySides_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary
+      TYPE(c_ptr) :: extBoundary,boundary,avgBoundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar2D_gpu_wrapper
   END INTERFACE
@@ -465,11 +465,11 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper(extBoundary,boundary,N,nVar,nEl) &
+    SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper(avgBoundary,boundary,extBoundary,N,nVar,nEl) &
       bind(c,name="BassiRebaySides_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary
+      TYPE(c_ptr) :: avgBoundary,extBoundary,boundary
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE BassiRebaySides_MappedScalar3D_gpu_wrapper
   END INTERFACE
@@ -730,8 +730,9 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL BassiRebaySides_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
+      CALL BassiRebaySides_MappedScalar2D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                       scalar % boundary % deviceData, &
+                                                      scalar % extBoundary % deviceData, &
                                                       scalar % N, &
                                                       scalar % nvar, &
                                                       scalar % nElem)
@@ -742,7 +743,7 @@ CONTAINS
         DO iside = 1,4
           DO ivar = 1,scalar % nVar
             DO i = 0,scalar % N
-              scalar % boundary % hostData(i,ivar,iside,iel) = 0.5_prec*( &
+              scalar % avgBoundary % hostData(i,ivar,iside,iel) = 0.5_prec*( &
                                                                scalar % boundary % hostData(i,ivar,iside,iel) + &
                                                                scalar % extBoundary % hostData(i,ivar,iside,iel))
             END DO
@@ -828,7 +829,7 @@ CONTAINS
                                                           scalar % nVar, &
                                                           scalar % nElem)
 
-      CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % boundary % deviceData, &
+      CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                                   workTensor % boundary % deviceData, &
                                                                   geometry % dsdx % boundary % deviceData, &
                                                                   scalar % N, &
@@ -869,15 +870,15 @@ CONTAINS
             DO j = 0,scalar % N
               workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                        hostData(1,1,j,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
 
               workTensor % boundary % hostData(2,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                        hostData(1,2,j,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
 
               workTensor % boundary % hostData(1,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                        hostData(2,1,j,1,iside,iEl)* &
-                                                                       scalar % boundary % hostData(j,iVar,iside,iEl)
+                                                                        scalar % avgBoundary % hostData(j,iVar,iside,iEl)
 
               workTensor % boundary % hostData(2,2,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                        hostData(2,2,j,1,iside,iEl)* &
@@ -1054,8 +1055,9 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
-      CALL BassiRebaySides_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
+      CALL BassiRebaySides_MappedScalar3D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                       scalar % boundary % deviceData, &
+                                                      scalar % extBoundary % deviceData, &
                                                       scalar % N, &
                                                       scalar % nvar, &
                                                       scalar % nElem)
@@ -1067,7 +1069,7 @@ CONTAINS
           DO ivar = 1,scalar % nVar
             DO j = 0,scalar % N
               DO i = 0,scalar % N
-                scalar % boundary % hostData(i,j,ivar,iside,iel) = 0.5_prec*( &
+                scalar % avgBoundary % hostData(i,j,ivar,iside,iel) = 0.5_prec*( &
                                                                    scalar % boundary % hostData(i,j,ivar,iside,iel) + &
                                                                    scalar % extBoundary % hostData(i,j,ivar,iside,iel))
               END DO
@@ -1153,7 +1155,7 @@ CONTAINS
                                                           scalar % nVar, &
                                                           scalar % nElem)
 
-      CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % boundary % deviceData, &
+      CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                                   workTensor % boundary % deviceData, &
                                                                   geometry % dsdx % boundary % deviceData, &
                                                                   scalar % N, &
@@ -1230,39 +1232,39 @@ CONTAINS
 
                 workTensor % boundary % hostData(2,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(1,2,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(3,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(1,3,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 ! Get the y-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(2,1,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(2,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(2,2,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(3,2,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(2,3,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 ! Get the z-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(3,1,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(2,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(3,2,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
                 workTensor % boundary % hostData(3,3,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                            hostData(3,3,j,k,1,iside,iEl)* &
-                                                                        scalar % boundary % hostData(j,k,iVar,iside,iEl)
+                                                                         scalar % avgBoundary % hostData(j,k,iVar,iside,iEl)
 
               END DO
             END DO
