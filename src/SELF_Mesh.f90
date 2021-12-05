@@ -1474,8 +1474,9 @@ CONTAINS
     INTEGER :: iel,jel,kel,nEl,elid
     INTEGER :: sid,nid,nNodes
     INTEGER :: nSides
+    INTEGER :: bcid
     INTEGER :: i,j,k
-    INTEGER :: nbeid, nbsid, usid
+    INTEGER :: nbeid, nbsid, usid, lsid
     REAL(prec) :: xU(1:nElem(1) + 1)
     REAL(prec) :: yU(1:nElem(2) + 1)
     REAL(prec) :: zU(1:nElem(3) + 1)
@@ -1483,11 +1484,12 @@ CONTAINS
     TYPE(Vector3D) :: xGeo
 
     nEl = nElem(1)*nElem(2)*nElem(3)
-    nNodes = nel*(nGeo + 1)*(nGeo + 1)*(nGeo + 1)
-    nSides = (nElem(1) + 1)*nElem(2)*nElem(3) + &
+    nNodes = nEl*(nGeo + 1)*(nGeo + 1)*(nGeo + 1)
+    nSides = nEl*6
+    CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
+    myMesh % nUniqueSides = (nElem(1) + 1)*nElem(2)*nElem(3) + &
              (nElem(2) + 1)*nElem(1)*nElem(3) + &
              (nElem(3) + 1)*nElem(1)*nElem(2)
-    CALL myMesh % Init(nGeo,nEl,nSides,nNodes,1)
 
     ! Set the hopr_nodeCoords
     xU = UniformPoints(x(1),x(2),1,nElem(1) + 1)
@@ -1585,7 +1587,7 @@ CONTAINS
              myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
              myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
              myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_Top ! 10*nbLocalSide + flip
-             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+             myMesh % hopr_sideInfo % hostData(5,sid) = 0 ! Boundary condition ID
 
           ENDIF
 
@@ -1610,7 +1612,7 @@ CONTAINS
              myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
              myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
              myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_North ! 10*nbLocalSide + flip
-             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+             myMesh % hopr_sideInfo % hostData(5,sid) = 0 ! Boundary condition ID
 
           ENDIF
 
@@ -1618,29 +1620,34 @@ CONTAINS
           sid = sid + 1
           IF (iel == nElem(1)) THEN
             nbeid = 0
+            bcid = self_BCDefault
           ELSE   
             nbeid = iel + 1 + nElem(1)*(jel-1 + nElem(2)*(kel-1)) ! Get the element id for the element to the east
+            bcid = 0
           ENDIF
           usid = usid + 1 ! unique side id
           myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
           myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
-          myMesh % hopr_sideInfo % hostData(3,sid) = 0 ! Neighbor Element ID (0=boundary)
+          myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
           myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_West ! 10*nbLocalSide + flip
-          myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+          myMesh % hopr_sideInfo % hostData(5,sid) = bcid ! Boundary condition ID
+
 
           ! North Face ! Local Side = 4
           sid = sid + 1
           IF (jel == nElem(2)) THEN
             nbeid = 0
+            bcid = self_BCDefault
           ELSE   
             nbeid = iel + nElem(1)*(jel + nElem(2)*(kel-1)) ! Get the element id for the element to the north
+            bcid = 0
           ENDIF
           usid = usid + 1 ! unique side id
           myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
           myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
           myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
           myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_South ! 10*nbLocalSide + flip
-          myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+          myMesh % hopr_sideInfo % hostData(5,sid) = bcid ! Boundary condition ID
 
           ! West Face ! Local Side = 5
           IF (iel == 1) THEN
@@ -1663,7 +1670,7 @@ CONTAINS
              myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
              myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
              myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_East ! 10*nbLocalSide + flip
-             myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+             myMesh % hopr_sideInfo % hostData(5,sid) = 0 ! Boundary condition ID
 
           ENDIF
 
@@ -1671,17 +1678,33 @@ CONTAINS
           sid = sid + 1
           IF (kel == nElem(3)) THEN
             nbeid = 0
+            bcid = self_BCDefault
           ELSE   
             nbeid = iel + nElem(1)*(jel-1 + nElem(2)*(kel)) ! Get the element id for the element above
+            bcid = 0
           ENDIF
           usid = usid + 1 ! unique side id
           myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
           myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
           myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
           myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_Bottom ! 10*nbLocalSide + flip
-          myMesh % hopr_sideInfo % hostData(5,sid) = self_BCDefault ! Boundary condition ID
+          myMesh % hopr_sideInfo % hostData(5,sid) = bcid ! Boundary condition ID
 
 
+        ENDDO
+      ENDDO
+    ENDDO
+
+    elid = 0
+    sid = 0
+    DO kel = 1,nElem(3)
+      DO jel = 1,nElem(2)
+        DO iel = 1,nElem(1)
+          elid = elid + 1
+          DO lsid = 1, 6
+            sid = sid + 1
+            myMesh % self_sideInfo % hostData(1:5,lsid,elid) = myMesh % hopr_sideInfo % hostData(1:5,sid)
+          ENDDO
         ENDDO
       ENDDO
     ENDDO

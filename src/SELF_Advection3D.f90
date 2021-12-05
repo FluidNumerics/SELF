@@ -1069,7 +1069,7 @@ CONTAINS
 
                     ! Bassi-Rebay flux is the average of the internal and external diffusive flux vectors.
                     this % flux % boundaryNormal % hostData(i,j,iVar,iSide,iEl) = &
-                      this % flux % boundaryNormal % hostData(i,j,iVar,iSide,iEl) +&
+                      this % flux % boundaryNormal % hostData(i,j,iVar,iSide,iEl) -&
                       0.5_prec*this % diffusivity*(extState + intState)*nmag
 
                   ENDDO
@@ -1179,22 +1179,22 @@ CONTAINS
 
                   ! Project the diffusive flux vector onto computational coordinates
                   this % flux % interior % hostData(1,i,j,k,iVar,iEl) = &
-                    this % flux % interior % hostData(1,i,j,k,iVar,iEl) + &
-                    this % geometry % dsdx % interior % hostData(1,1,i,j,k,1,iel)*Fx + &
-                    this % geometry % dsdx % interior % hostData(2,1,i,j,k,1,iel)*Fy + & 
-                    this % geometry % dsdx % interior % hostData(3,1,i,j,k,1,iel)*Fz 
+                    this % flux % interior % hostData(1,i,j,k,iVar,iEl) - &
+                    ( this % geometry % dsdx % interior % hostData(1,1,i,j,k,1,iel)*Fx + &
+                      this % geometry % dsdx % interior % hostData(2,1,i,j,k,1,iel)*Fy + & 
+                      this % geometry % dsdx % interior % hostData(3,1,i,j,k,1,iel)*Fz) 
 
                   this % flux % interior % hostData(2,i,j,k,iVar,iEl) = &
-                    this % flux % interior % hostData(2,i,j,k,iVar,iEl) + &
-                    this % geometry % dsdx % interior % hostData(1,2,i,j,k,1,iel)*Fx + &
-                    this % geometry % dsdx % interior % hostData(2,2,i,j,k,1,iel)*Fy + & 
-                    this % geometry % dsdx % interior % hostData(3,2,i,j,k,1,iel)*Fz
+                    this % flux % interior % hostData(2,i,j,k,iVar,iEl) - &
+                    ( this % geometry % dsdx % interior % hostData(1,2,i,j,k,1,iel)*Fx + &
+                      this % geometry % dsdx % interior % hostData(2,2,i,j,k,1,iel)*Fy + & 
+                      this % geometry % dsdx % interior % hostData(3,2,i,j,k,1,iel)*Fz)
 
                   this % flux % interior % hostData(3,i,j,k,iVar,iEl) = &
-                    this % flux % interior % hostData(3,i,j,k,iVar,iEl) + &
-                    this % geometry % dsdx % interior % hostData(1,3,i,j,k,1,iel)*Fx + &
-                    this % geometry % dsdx % interior % hostData(2,3,i,j,k,1,iel)*Fy + & 
-                    this % geometry % dsdx % interior % hostData(3,3,i,j,k,1,iel)*Fz
+                    this % flux % interior % hostData(3,i,j,k,iVar,iEl) - &
+                    ( this % geometry % dsdx % interior % hostData(1,3,i,j,k,1,iel)*Fx + &
+                      this % geometry % dsdx % interior % hostData(2,3,i,j,k,1,iel)*Fy + & 
+                      this % geometry % dsdx % interior % hostData(3,3,i,j,k,1,iel)*Fz )
   
                 ENDDO
               ENDDO

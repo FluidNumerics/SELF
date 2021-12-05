@@ -660,18 +660,19 @@ CONTAINS
     END DO
 
     ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    IF (GPUAvailable()) THEN
-      CALL xMesh % UpdateDevice()
-      CALL xMesh % GridInterp(myGeom % x,.TRUE.)
-      CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % CalculateMetricTerms()
-      CALL myGeom % UpdateHost()
-    ELSE
+    !IF (GPUAvailable()) THEN
+    !  CALL xMesh % UpdateDevice()
+    !  CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    !  CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % CalculateMetricTerms()
+    !  CALL myGeom % UpdateHost()
+    !ELSE
       CALL xMesh % GridInterp(myGeom % x,.FALSE.)
       CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateMetricTerms()
-    END IF
+    !END IF
 
+    CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
 
   END SUBROUTINE GenerateFromMesh_SEMHex
@@ -777,7 +778,7 @@ CONTAINS
               myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
 
               myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
-                -fac*myGeom % dsdx % boundary % hostData(1:3,3,i,j,1,k,iEl)/mag
+                fac*myGeom % dsdx % boundary % hostData(1:3,3,i,j,1,k,iEl)/mag
 
             ELSEIF( k == 2 )THEN  ! South
 
@@ -788,7 +789,7 @@ CONTAINS
               myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
 
               myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
-                -fac*myGeom % dsdx % boundary % hostData(1:3,2,i,j,1,k,iEl)/mag
+                fac*myGeom % dsdx % boundary % hostData(1:3,2,i,j,1,k,iEl)/mag
 
             ELSEIF( k == 3 )THEN  ! East
 
@@ -821,7 +822,7 @@ CONTAINS
               myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
 
               myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
-                -fac*myGeom % dsdx % boundary % hostData(1:3,1,i,j,1,k,iEl)/mag
+                fac*myGeom % dsdx % boundary % hostData(1:3,1,i,j,1,k,iEl)/mag
 
             ELSEIF( k == 6 )THEN  ! Top
 
@@ -848,18 +849,18 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
-    IF (GPUAvailable()) THEN
-      CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
-      CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
-      CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-      CALL myGeom % UpdateHost()
-    ELSE
+    !IF (GPUAvailable()) THEN
+    !  CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+    !  CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+    !  CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % UpdateHost()
+    !ELSE
       CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
       CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
       CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-    END IF
+    !END IF
 
     CALL myGeom % CalculateContravariantBasis()
     IF (GPUAvailable()) THEN

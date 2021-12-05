@@ -92,24 +92,21 @@ __global__ void InternalDiffusiveFlux_Advection3D_gpu(real *flux, real *solution
               solutionGradient[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
 
     // xi-component of the advective flux
-    flux[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = 
-                flux[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)]+
-                dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*Fx+
-                dsdx[TE_3D_INDEX(2,1,i,j,k,0,iEl,N,1)]*Fy+ 
-                dsdx[TE_3D_INDEX(3,1,i,j,k,0,iEl,N,1)]*Fz; 
+    flux[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] += 
+                -(dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*Fx+
+                  dsdx[TE_3D_INDEX(2,1,i,j,k,0,iEl,N,1)]*Fy+ 
+                  dsdx[TE_3D_INDEX(3,1,i,j,k,0,iEl,N,1)]*Fz); 
 
     // eta-component of the advective flux
-    flux[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = 
-                flux[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)]+
-                dsdx[TE_3D_INDEX(1,2,i,j,k,0,iEl,N,1)]*Fx+
-                dsdx[TE_3D_INDEX(2,2,i,j,k,0,iEl,N,1)]*Fy+
-                dsdx[TE_3D_INDEX(3,2,i,j,k,0,iEl,N,1)]*Fz;
+    flux[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] += 
+                -(dsdx[TE_3D_INDEX(1,2,i,j,k,0,iEl,N,1)]*Fx+
+                  dsdx[TE_3D_INDEX(2,2,i,j,k,0,iEl,N,1)]*Fy+
+                  dsdx[TE_3D_INDEX(3,2,i,j,k,0,iEl,N,1)]*Fz);
 
-    flux[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = 
-                flux[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)]+
-                dsdx[TE_3D_INDEX(1,3,i,j,k,0,iEl,N,1)]*Fx+
-                dsdx[TE_3D_INDEX(2,3,i,j,k,0,iEl,N,1)]*Fy+
-                dsdx[TE_3D_INDEX(3,3,i,j,k,0,iEl,N,1)]*Fz;
+    flux[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] += 
+                -(dsdx[TE_3D_INDEX(1,3,i,j,k,0,iEl,N,1)]*Fx+
+                  dsdx[TE_3D_INDEX(2,3,i,j,k,0,iEl,N,1)]*Fy+
+                  dsdx[TE_3D_INDEX(3,3,i,j,k,0,iEl,N,1)]*Fz);
 
 }
 
@@ -194,7 +191,7 @@ __global__ void SideDiffusiveFlux_Advection3D_gpu(real *flux, real *boundarySolG
 
   // Calculate the normal flux at the cell sides/edges
   flux[SCB_3D_INDEX(i,j,iVar,iSide,iEl,N,nVar)] +=
-                    0.5*diffusivity*(intState + extState)*nmag;
+                    -0.5*diffusivity*(intState + extState)*nmag;
 
 
 }

@@ -14,15 +14,15 @@ USE SELF_Constants
 
   CALL model %  WriteTecplot()
 
-  !nDumps = INT(( model % endTime - model % initialTime )/( model % outputInterval ) )
-  !DO i = 1, nDumps
-  !
-  !  endTime = model % simulationTime + model % outputInterval
-  !      
-  !  CALL model % ForwardStep( endTime )
-  !  CALL model % WriteTecplot()
+  nDumps = INT(( model % endTime - model % initialTime )/( model % outputInterval ) )
+  DO i = 1, nDumps
+  
+    endTime = model % simulationTime + model % outputInterval
+        
+    CALL model % ForwardStep( endTime )
+    CALL model % WriteTecplot()
 
-  !ENDDO
+  ENDDO
 
   CALL model % Free()
 

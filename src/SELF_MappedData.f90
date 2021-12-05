@@ -976,7 +976,7 @@ CONTAINS
 
             IF (neighborRank == decomp % rankId) THEN
 
-              IF (flip == 1) THEN
+              IF (flip == 0) THEN
 
                 DO ivar = 1,scalar % nvar
                   DO j1 = 0,scalar % N
@@ -987,7 +987,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 2) THEN
+              ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,scalar % nvar
                   DO j1 = 0,scalar % N
@@ -1000,7 +1000,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 3) THEN
+              ELSEIF (flip == 2) THEN
 
                 DO ivar = 1,scalar % nvar
                   DO j1 = 0,scalar % N
@@ -1013,7 +1013,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 4) THEN
+              ELSEIF (flip == 3) THEN
 
                 DO ivar = 1,scalar % nvar
                   DO j1 = 0,scalar % N
@@ -1363,7 +1363,7 @@ CONTAINS
 
             IF (neighborRank == decomp % rankId) THEN
 
-              IF (flip == 1) THEN
+              IF (flip == 0) THEN
 
                 DO ivar = 1,vector % nvar
                   DO i1 = 0,vector % N
@@ -1372,7 +1372,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 2) THEN
+              ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,vector % nvar
                   DO i1 = 0,vector % N
@@ -1823,7 +1823,7 @@ CONTAINS
 
             IF (neighborRank == decomp % rankId) THEN
 
-              IF (flip == 1) THEN
+              IF (flip == 0) THEN
 
                 DO ivar = 1,vector % nvar
                   DO j1 = 0,vector % N
@@ -1834,7 +1834,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 2) THEN
+              ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,vector % nvar
                   DO j1 = 0,vector % N
@@ -1847,7 +1847,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 3) THEN
+              ELSEIF (flip == 2) THEN
 
                 DO ivar = 1,vector % nvar
                   DO j1 = 0,vector % N
@@ -1860,7 +1860,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 4) THEN
+              ELSEIF (flip == 3) THEN
 
                 DO ivar = 1,vector % nvar
                   DO j1 = 0,vector % N
@@ -2338,7 +2338,7 @@ CONTAINS
 
             IF (neighborRank == decomp % rankId) THEN
 
-              IF (flip == 1) THEN
+              IF (flip == 0) THEN
 
                 DO ivar = 1,tensor % nvar
                   DO i1 = 0,tensor % N
@@ -2347,7 +2347,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 2) THEN
+              ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,tensor % nvar
                   DO i1 = 0,tensor % N
@@ -2496,7 +2496,7 @@ CONTAINS
 
             IF (neighborRank == decomp % rankId) THEN
 
-              IF (flip == 1) THEN
+              IF (flip == 0) THEN
 
                 DO ivar = 1,tensor % nvar
                   DO j1 = 0,tensor % N
@@ -2507,7 +2507,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 2) THEN
+              ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,tensor % nvar
                   DO j1 = 0,tensor % N
@@ -2520,7 +2520,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 3) THEN
+              ELSEIF (flip == 2) THEN
 
                 DO ivar = 1,tensor % nvar
                   DO j1 = 0,tensor % N
@@ -2533,7 +2533,7 @@ CONTAINS
                   END DO
                 END DO
 
-              ELSEIF (flip == 4) THEN
+              ELSEIF (flip == 3) THEN
 
                 DO ivar = 1,tensor % nvar
                   DO j1 = 0,tensor % N
