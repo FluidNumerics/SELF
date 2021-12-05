@@ -78,16 +78,14 @@ __global__ void InternalDiffusiveFlux_Advection2D_gpu(real *flux, real *solution
               solutionGradient[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
 
     // xi-component of the advective flux
-    flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
-                flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)]+
-                dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*Fx+
-                dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*Fy; 
+    flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] += 
+                -(dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*Fx+
+                  dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*Fy); 
 
     // eta-component of the advective flux
-    flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
-                flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)]+
-                dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*Fx+
-                dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*Fy;
+    flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] += 
+                -(dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*Fx+
+                  dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*Fy);
 
 }
 
@@ -164,7 +162,7 @@ __global__ void SideDiffusiveFlux_Advection2D_gpu(real *flux, real *boundarySolG
 
   // Calculate the normal flux at the cell sides/edges
   flux[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)] +=
-                    0.5*diffusivity*(intState + extState)*nmag;
+                    -0.5*diffusivity*(intState + extState)*nmag;
 
 
 }

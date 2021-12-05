@@ -478,6 +478,11 @@ CONTAINS
               fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
 
           ENDIF
+          ! Set the directionality for dsdx on the boundaries
+          ! This is primarily used for DG gradient calculations,
+          ! which do not use nHat for the boundary terms.
+          myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = & 
+              myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)*fac
 
         END DO
       END DO

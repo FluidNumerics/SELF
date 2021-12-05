@@ -862,6 +862,7 @@ CONTAINS
       STOP
     END IF
 
+    ! Number of Nodes, Number of Edges (sides; unique!), number of elements, polynomial degree of elements
     READ (fUnit,*) nNodes,nSides,nElem,nGeo
 
     ! HOHQMesh reports interpolant data on Chebyshev Lobatto points
@@ -982,7 +983,11 @@ CONTAINS
       END DO
     END DO
 
-    CALL myMesh % GenerateConnectivity()
+    ! Need to convert hohq_sideInfo to hopr/self_sideInfo
+    ! For each edge 
+    !  > start node ID, end node ID, element ID on left, element ID on right, side of left element, side of right element    ! 
+
+    !CALL myMesh % GenerateConnectivity()
 
     CALL interp % Free()
 

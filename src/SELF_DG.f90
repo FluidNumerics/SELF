@@ -53,6 +53,7 @@ MODULE SELF_DG
 
   TYPE,PUBLIC :: DG3D
     TYPE(MappedScalar3D),PUBLIC :: solution
+    TYPE(Scalar3D),PUBLIC :: plotSolution
     TYPE(MappedVector3D),PUBLIC :: solutionGradient
     TYPE(MappedVector3D),PUBLIC :: flux
     TYPE(MappedScalar3D),PUBLIC :: source
@@ -64,10 +65,10 @@ MODULE SELF_DG
     TYPE(Metadata),ALLOCATABLE,PUBLIC :: solutionMetaData(:)
 
     ! Work arrays
-    TYPE(MappedScalar3D),PRIVATE :: workScalar
-    TYPE(MappedVector3D),PRIVATE :: workVector
-    TYPE(MappedVector3D),PRIVATE :: compFlux
-    TYPE(MappedTensor3D),PRIVATE :: workTensor
+    TYPE(MappedScalar3D) :: workScalar
+    TYPE(MappedVector3D) :: workVector
+    TYPE(MappedVector3D) :: compFlux
+    TYPE(MappedTensor3D) :: workTensor
 
   CONTAINS
 

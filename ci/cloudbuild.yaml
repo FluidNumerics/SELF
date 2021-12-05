@@ -36,22 +36,22 @@ steps:
          'img/Singularity.amd']
   waitFor: ["-"]
 
-    #- id: CI/CB (Singularity Nvidia)
-    #  name: 'gcr.io/research-computing-cloud/fluid-run'
-    #  args: 
-    #  - '--build-id=${BUILD_ID}'
-    #  - '--git-sha=${COMMIT_SHA}'
-    #  - '--project=${PROJECT_ID}'
-    #  - '--zone=${_ZONE}'
-    #  - '--gce-image=projects/fluid-cluster-ops/global/images/family/rcc-centos-7-v300'
-    #  - '--artifact-type=singularity'
-    #  - '--compiler="gcc@9.3.0"'
-    #  - '--target-arch=""'
-    #  - '--singularity-image=self-nvidia.sif'
-    #  - '--rcc-tfvars=ci/fluid.auto.tfvars'
-    #  - '--ci-file=fluid-run.json'
-    #  - '--save-results'
-    #  - '--ignore-job-dependencies'
+- id: CI/CB (Singularity Nvidia)
+  name: 'gcr.io/research-computing-cloud/fluid-run'
+  args: 
+  - '--build-id=${BUILD_ID}'
+  - '--git-sha=${COMMIT_SHA}'
+  - '--project=${PROJECT_ID}'
+  - '--zone=${_ZONE}'
+  - '--gce-image=projects/fluid-cluster-ops/global/images/family/rcc-centos-7-v300'
+  - '--artifact-type=singularity'
+  - '--compiler="gcc@9.3.0"'
+  - '--target-arch=""'
+  - '--singularity-image=self-nvidia.sif'
+  - '--rcc-tfvars=ci/fluid.auto.tfvars'
+  - '--ci-file=fluid-run.yaml'
+  - '--save-results'
+  - '--ignore-job-dependencies'
 
 
 images: ['gcr.io/${PROJECT_ID}/self-nvidia:${SHORT_SHA}',
