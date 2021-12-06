@@ -983,11 +983,7 @@ CONTAINS
       END DO
     END DO
 
-    ! Need to convert hohq_sideInfo to hopr/self_sideInfo
-    ! For each edge 
-    !  > start node ID, end node ID, element ID on left, element ID on right, side of left element, side of right element    ! 
-
-    !CALL myMesh % GenerateConnectivity()
+    CALL myMesh % GenerateConnectivity()
 
     CALL interp % Free()
 
