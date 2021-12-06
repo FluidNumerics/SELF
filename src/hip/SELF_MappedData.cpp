@@ -862,7 +862,7 @@ extern "C"
 
 __global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
-  size_t s1 = blockIdx.x;
+  size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
