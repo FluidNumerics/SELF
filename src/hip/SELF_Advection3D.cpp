@@ -159,7 +159,7 @@ extern "C"
     // Block size is set to match the size of the element exactly
     // Grid size is set to ( number of tracers X number of elements )
     // DGSEM is beautiful
-    SideFlux_Advection3D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,N+1,1), 0, 0>>>(*flux, *boundarySol, *extSol, *velocity, *nhat, *nscale, N, nVar);
+    SideFlux_Advection3D_gpu<<<dim3(nVar,6,nEl), dim3(N+1,N+1,1), 0, 0>>>(*flux, *boundarySol, *extSol, *velocity, *nhat, *nscale, N, nVar);
   }
 }
 
@@ -201,7 +201,7 @@ extern "C"
   void SideDiffusiveFlux_Advection3D_gpu_wrapper(real **flux, real **boundarySolGrad, real **extSolGrad, real **nhat, real **nscale, real diffusivity, int N, int nVar, int nEl)
   {
 
-    SideDiffusiveFlux_Advection3D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,N+1,1), 0, 0>>>(*flux, *boundarySolGrad, *extSolGrad, *nhat, *nscale, diffusivity, N, nVar);
+    SideDiffusiveFlux_Advection3D_gpu<<<dim3(nVar,6,nEl), dim3(N+1,N+1,1), 0, 0>>>(*flux, *boundarySolGrad, *extSolGrad, *nhat, *nscale, diffusivity, N, nVar);
 
   }
 }
