@@ -16,4 +16,4 @@ singularity run --nv --bind ${WORKSPACE}/codecov:/build \
 			    -vy "vy=0.0" \
 			    -ic "f=exp( -(x^2 + (y-2.5)^2)/0.5 )" \
                             -bc "f=0.0" \
-                            --mesh "${WORKSPACE}/test/sadv2d/gaussian_spline_hohqmesh/SplineMesh.mesh"
+                            --mesh "${WORKSPACE}/SplineMesh.mesh"

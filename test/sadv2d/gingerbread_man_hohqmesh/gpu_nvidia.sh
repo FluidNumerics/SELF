@@ -16,4 +16,4 @@ singularity run --nv --bind ${WORKSPACE}/codecov:/build \
 			    -vy "vy=0.0" \
 			    -ic "f=exp( -((x+5.0)^2 + (y-38.0)^2)/5.0 )" \
                             -bc "f=0.0" \
-                            --mesh "${WORKSPACE}/test/sadv2d/gingerbread_man_hohqmesh/GingerBreadManMesh.mesh"
+                            --mesh "${WORKSPACE}/GingerBreadManMesh.mesh"
