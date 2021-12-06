@@ -910,10 +910,10 @@ __global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
   int i2 = N-i1;
   int j2 = N-j1;
 
@@ -954,10 +954,10 @@ __global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
   int i2 = N-i1;
   int j2 = N-j1;
 
@@ -1006,10 +1006,10 @@ __global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
-  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
   int i2 = N-i1;
   int j2 = N-j1;
 
