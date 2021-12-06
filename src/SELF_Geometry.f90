@@ -837,7 +837,12 @@ CONTAINS
 
             ENDIF
 
-            
+            ! Set the directionality for dsdx on the boundaries
+            ! This is primarily used for DG gradient calculations,
+            ! which do not use nHat for the boundary terms.
+            myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = & 
+                myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)*fac
+
           END DO
         END DO
       END DO
@@ -864,9 +869,7 @@ CONTAINS
 
     CALL myGeom % CalculateContravariantBasis()
     IF (GPUAvailable()) THEN
-      CALL myGeom % dsdx % UpdateDevice()
-      CALL myGeom % nHat % UpdateDevice()
-      CALL myGeom % nScale % UpdateDevice()
+      CALL myGeom % UpdateDevice()
     ENDIF
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
