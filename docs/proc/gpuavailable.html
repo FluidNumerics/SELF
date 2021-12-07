@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    
+    <meta name="author" content="Joe Schoonover" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>GPUAvailable &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
+        
+            </ul>
+        
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>GPUAvailable
+      <small>Function</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.1% of total for procedures.">12 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Memory.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/self_memory.f90.html'>SELF_Memory.f90</a></li>
+    
+     <li><a href='../module/self_memory.html'>SELF_Memory</a></li>
+    
+  
+     <li class="active">GPUAvailable</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/gpuavailable.html#src">GPUAvailable</a>
+  </div>
+</div>
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <h2>
+public function GPUAvailable() result(avail)
+    
+    
+   
+</h2>
+    
+  
+
+
+    
+
+    <h3>Arguments</h3>
+    
+    <em>None</em>
+    <br>
+    
+    
+    
+    
+    
+    
+    
+   <h3>Return Value <small><span class="anchor" id="variable-avail"></span>logical
+  </small></h3>
+    
+    
+    
+    <br>
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~gpuavailable~~CallsGraph Pages: 1 -->
+<svg id="procgpuavailableCallsGraph" width="239pt" height="32pt"
+ viewBox="0.00 0.00 239.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~gpuavailable~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>proc~~gpuavailable~~CallsGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 235,-28 235,4 -4,4"/>
+<!-- proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CallsGraph_node1" class="node">
+<title>proc~gpuavailable</title>
+<polygon fill="none" stroke="black" points="83,-24 0,-24 0,0 83,0 83,-24"/>
+<text text-anchor="middle" x="41.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">GPUAvailable</text>
+</g>
+<!-- hipgetdevicecount -->
+<g id="proc~~gpuavailable~~CallsGraph_node2" class="node">
+<title>hipgetdevicecount</title>
+<polygon fill="#777777" stroke="#777777" points="231,-24 119,-24 119,0 231,0 231,-24"/>
+<text text-anchor="middle" x="175" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hipgetdevicecount</text>
+</g>
+<!-- proc~gpuavailable&#45;&gt;hipgetdevicecount -->
+<g id="proc~~gpuavailable~~CallsGraph_edge1" class="edge">
+<title>proc~gpuavailable&#45;&gt;hipgetdevicecount</title>
+<path fill="none" stroke="#ff0000" d="M83.03,-12C91.16,-12 99.91,-12 108.64,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="108.85,-15.5 118.85,-12 108.85,-8.5 108.85,-15.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="594pt" height="32pt"
+ viewBox="0.00 0.00 594.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 590,-28 590,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388,-24 244,-24 244,0 388,0 388,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463.5,-24 406.5,-24 406.5,0 463.5,0 463.5,-24"/>
+<text text-anchor="middle" x="435" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="586,-24 482,-24 482,0 586,0 586,-24"/>
+<text text-anchor="middle" x="534" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+     
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Called by</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: proc~~gpuavailable~~CalledByGraph Pages: 1 -->
+<svg id="procgpuavailableCalledByGraph" width="274pt" height="3518pt"
+ viewBox="0.00 0.00 274.00 3518.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~gpuavailable~~CalledByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 3514)">
+<title>proc~~gpuavailable~~CalledByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-3514 270,-3514 270,4 -4,4"/>
+<!-- proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_node1" class="node">
+<title>proc~gpuavailable</title>
+<polygon fill="none" stroke="black" points="266,-1767 183,-1767 183,-1743 266,-1743 266,-1767"/>
+<text text-anchor="middle" x="224.5" y="-1752.6" font-family="Helvetica,sans-Serif" font-size="10.50">GPUAvailable</text>
+</g>
+<!-- proc~updatedevice_hfreal_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node2" class="node">
+<title>proc~updatedevice_hfreal_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node2"><a xlink:href=".././proc/updatedevice_hfreal_r6.html" xlink:title="UpdateDevice_hfReal_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-3510 2.5,-3510 2.5,-3486 144.5,-3486 144.5,-3510"/>
+<text text-anchor="middle" x="73.5" y="-3495.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge3" class="edge">
+<title>proc~updatedevice_hfreal_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.29,-3485.91C140.94,-3483.44 144.25,-3480.5 147,-3477 202.14,-3406.92 220.92,-1974.33 223.25,-1777.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.75,-1777.36 223.36,-1767.32 219.75,-1777.28 226.75,-1777.36"/>
+</g>
+<!-- proc~alloc_hfreal_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node3" class="node">
+<title>proc~alloc_hfreal_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node3"><a xlink:href=".././proc/alloc_hfreal_r2.html" xlink:title="Alloc_hfReal_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-3468 26.5,-3468 26.5,-3444 120.5,-3444 120.5,-3468"/>
+<text text-anchor="middle" x="73.5" y="-3453.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge1" class="edge">
+<title>proc~alloc_hfreal_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.61,-3451.67C130.76,-3448.5 140.43,-3443.34 147,-3435 200.8,-3366.69 220.72,-1970.37 223.22,-1777.12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.72,-1777.06 223.35,-1767.02 219.73,-1776.97 226.72,-1777.06"/>
+</g>
+<!-- proc~alloc_hfint32_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node4" class="node">
+<title>proc~alloc_hfint32_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node4"><a xlink:href=".././proc/alloc_hfint32_r5.html" xlink:title="Alloc_hfInt32_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-3426 24.5,-3426 24.5,-3402 122.5,-3402 122.5,-3426"/>
+<text text-anchor="middle" x="73.5" y="-3411.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge2" class="edge">
+<title>proc~alloc_hfint32_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.85,-3408.92C132.17,-3405.71 140.91,-3400.72 147,-3393 199.42,-3326.53 220.48,-1969.15 223.19,-1777.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.7,-1777.21 223.34,-1767.16 219.7,-1777.11 226.7,-1777.21"/>
+</g>
+<!-- proc~updatedevice_hfreal_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node5" class="node">
+<title>proc~updatedevice_hfreal_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node5"><a xlink:href=".././proc/updatedevice_hfreal_r4.html" xlink:title="UpdateDevice_hfReal_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-3384 2.5,-3384 2.5,-3360 144.5,-3360 144.5,-3384"/>
+<text text-anchor="middle" x="73.5" y="-3369.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge4" class="edge">
+<title>proc~updatedevice_hfreal_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.27,-3359.9C140.93,-3357.44 144.24,-3354.5 147,-3351 198.07,-3286.33 220.25,-1966.38 223.16,-1777.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.67,-1777.35 223.32,-1767.3 219.67,-1777.24 226.67,-1777.35"/>
+</g>
+<!-- proc~alloc_hfreal_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node6" class="node">
+<title>proc~alloc_hfreal_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node6"><a xlink:href=".././proc/alloc_hfreal_r5.html" xlink:title="Alloc_hfReal_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-3342 26.5,-3342 26.5,-3318 120.5,-3318 120.5,-3342"/>
+<text text-anchor="middle" x="73.5" y="-3327.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge5" class="edge">
+<title>proc~alloc_hfreal_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.59,-3325.65C130.74,-3322.49 140.42,-3317.33 147,-3309 196.72,-3246.12 220.01,-1963.47 223.13,-1777.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.63,-1777.47 223.3,-1767.41 219.64,-1777.35 226.63,-1777.47"/>
+</g>
+<!-- proc~updatedevice_hfreal_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node7" class="node">
+<title>proc~updatedevice_hfreal_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node7"><a xlink:href=".././proc/updatedevice_hfreal_r3.html" xlink:title="UpdateDevice_hfReal_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-3300 2.5,-3300 2.5,-3276 144.5,-3276 144.5,-3300"/>
+<text text-anchor="middle" x="73.5" y="-3285.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge6" class="edge">
+<title>proc~updatedevice_hfreal_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.26,-3275.89C140.92,-3273.43 144.23,-3270.49 147,-3267 195.39,-3205.88 219.8,-1959.09 223.11,-1777.09"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.61,-1777.14 223.29,-1767.08 219.61,-1777.01 226.61,-1777.14"/>
+</g>
+<!-- proc~updatedevice_hfint32_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node8" class="node">
+<title>proc~updatedevice_hfint32_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node8"><a xlink:href=".././proc/updatedevice_hfint32_r6.html" xlink:title="UpdateDevice_hfInt32_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-3258 0,-3258 0,-3234 147,-3234 147,-3258"/>
+<text text-anchor="middle" x="73.5" y="-3243.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge7" class="edge">
+<title>proc~updatedevice_hfint32_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.26,-3233.89C140.92,-3231.43 144.23,-3228.49 147,-3225 194.02,-3165.7 219.53,-1957.13 223.07,-1777.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.57,-1777.23 223.27,-1767.16 219.58,-1777.09 226.57,-1777.23"/>
+</g>
+<!-- proc~updatedevice_hfint64_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node9" class="node">
+<title>proc~updatedevice_hfint64_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node9"><a xlink:href=".././proc/updatedevice_hfint64_r2.html" xlink:title="UpdateDevice_hfInt64_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-3216 0,-3216 0,-3192 147,-3192 147,-3216"/>
+<text text-anchor="middle" x="73.5" y="-3201.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge8" class="edge">
+<title>proc~updatedevice_hfint64_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.25,-3191.88C140.92,-3189.42 144.23,-3186.49 147,-3183 192.66,-3125.51 219.26,-1954.95 223.03,-1777.47"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.54,-1777.31 223.25,-1767.24 219.54,-1777.16 226.54,-1777.31"/>
+</g>
+<!-- proc~free_hfint32_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node10" class="node">
+<title>proc~free_hfint32_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node10"><a xlink:href=".././proc/free_hfint32_r7.html" xlink:title="Free_hfInt32_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-3174 26.5,-3174 26.5,-3150 120.5,-3150 120.5,-3174"/>
+<text text-anchor="middle" x="73.5" y="-3159.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge9" class="edge">
+<title>proc~free_hfint32_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.55,-3157.62C130.71,-3154.46 140.39,-3149.31 147,-3141 191.32,-3085.29 219,-1951.42 223,-1777.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.5,-1777.36 223.23,-1767.29 219.5,-1777.21 226.5,-1777.36"/>
+</g>
+<!-- proc~free_hfint32_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node11" class="node">
+<title>proc~free_hfint32_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node11"><a xlink:href=".././proc/free_hfint32_r5.html" xlink:title="Free_hfInt32_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-3132 26.5,-3132 26.5,-3108 120.5,-3108 120.5,-3132"/>
+<text text-anchor="middle" x="73.5" y="-3117.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge10" class="edge">
+<title>proc~free_hfint32_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.54,-3115.61C130.7,-3112.45 140.38,-3107.3 147,-3099 189.96,-3045.09 218.72,-1948.85 222.96,-1777.45"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.46,-1777.41 223.2,-1767.32 219.46,-1777.23 226.46,-1777.41"/>
+</g>
+<!-- proc~updatehost_hfint32_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node12" class="node">
+<title>proc~updatehost_hfint32_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node12"><a xlink:href=".././proc/updatehost_hfint32_r5.html" xlink:title="UpdateHost_hfInt32_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-3090 6.5,-3090 6.5,-3066 140.5,-3066 140.5,-3090"/>
+<text text-anchor="middle" x="73.5" y="-3075.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge11" class="edge">
+<title>proc~updatehost_hfint32_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.23,-3065.87C140.9,-3063.41 144.22,-3060.48 147,-3057 230.04,-2952.99 225.08,-1941.87 223.71,-1777.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.21,-1777.15 223.62,-1767.18 220.21,-1777.21 227.21,-1777.15"/>
+</g>
+<!-- proc~updatehost_hfint64_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node13" class="node">
+<title>proc~updatehost_hfint64_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node13"><a xlink:href=".././proc/updatehost_hfint64_r4.html" xlink:title="UpdateHost_hfInt64_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-3048 6.5,-3048 6.5,-3024 140.5,-3024 140.5,-3048"/>
+<text text-anchor="middle" x="73.5" y="-3033.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge12" class="edge">
+<title>proc~updatehost_hfint64_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.22,-3023.86C140.89,-3021.4 144.22,-3018.48 147,-3015 227.38,-2914.52 224.66,-1937.88 223.67,-1777.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.16,-1777.14 223.6,-1767.17 220.16,-1777.19 227.16,-1777.14"/>
+</g>
+<!-- proc~alloc_hfint64_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node14" class="node">
+<title>proc~alloc_hfint64_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node14"><a xlink:href=".././proc/alloc_hfint64_r5.html" xlink:title="Alloc_hfInt64_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-3006 24.5,-3006 24.5,-2982 122.5,-2982 122.5,-3006"/>
+<text text-anchor="middle" x="73.5" y="-2991.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge13" class="edge">
+<title>proc~alloc_hfint64_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.76,-2988.85C132.08,-2985.65 140.85,-2980.67 147,-2973 224.66,-2876.14 224.24,-1935.64 223.62,-1777.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.12,-1777.12 223.57,-1767.14 220.12,-1777.15 227.12,-1777.12"/>
+</g>
+<!-- proc~updatehost_hfint64_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node15" class="node">
+<title>proc~updatehost_hfint64_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node15"><a xlink:href=".././proc/updatehost_hfint64_r5.html" xlink:title="UpdateHost_hfInt64_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-2964 6.5,-2964 6.5,-2940 140.5,-2940 140.5,-2964"/>
+<text text-anchor="middle" x="73.5" y="-2949.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge16" class="edge">
+<title>proc~updatehost_hfint64_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.21,-2939.85C140.88,-2937.39 144.21,-2934.47 147,-2931 222.02,-2837.64 223.8,-1931.32 223.56,-1777.22"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.06,-1777.08 223.54,-1767.09 220.06,-1777.09 227.06,-1777.08"/>
+</g>
+<!-- proc~free_hfreal_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node16" class="node">
+<title>proc~free_hfreal_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node16"><a xlink:href=".././proc/free_hfreal_r4.html" xlink:title="Free_hfReal_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-2922 28.5,-2922 28.5,-2898 118.5,-2898 118.5,-2922"/>
+<text text-anchor="middle" x="73.5" y="-2907.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge15" class="edge">
+<title>proc~free_hfreal_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.6,-2906.13C129.43,-2903.03 139.93,-2897.78 147,-2889 219.31,-2799.23 223.35,-1928.6 223.51,-1777.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.01,-1777.02 223.51,-1767.01 220.01,-1777.01 227.01,-1777.02"/>
+</g>
+<!-- proc~updatehost_hfint64_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node17" class="node">
+<title>proc~updatehost_hfint64_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node17"><a xlink:href=".././proc/updatehost_hfint64_r3.html" xlink:title="UpdateHost_hfInt64_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-2880 6.5,-2880 6.5,-2856 140.5,-2856 140.5,-2880"/>
+<text text-anchor="middle" x="73.5" y="-2865.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge14" class="edge">
+<title>proc~updatehost_hfint64_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.19,-2855.83C140.87,-2853.38 144.2,-2850.47 147,-2847 216.61,-2760.81 222.88,-1925.67 223.44,-1777.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.94,-1777.29 223.48,-1767.28 219.94,-1777.27 226.94,-1777.29"/>
+</g>
+<!-- proc~updatedevice_hfint64_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node18" class="node">
+<title>proc~updatedevice_hfint64_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node18"><a xlink:href=".././proc/updatedevice_hfint64_r5.html" xlink:title="UpdateDevice_hfInt64_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-2838 0,-2838 0,-2814 147,-2814 147,-2838"/>
+<text text-anchor="middle" x="73.5" y="-2823.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge17" class="edge">
+<title>proc~updatedevice_hfint64_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.18,-2813.82C140.86,-2811.38 144.2,-2808.46 147,-2805 213.92,-2722.37 222.39,-1922.41 223.38,-1777.46"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.88,-1777.18 223.44,-1767.15 219.88,-1777.13 226.88,-1777.18"/>
+</g>
+<!-- proc~free_hfreal_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node19" class="node">
+<title>proc~free_hfreal_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node19"><a xlink:href=".././proc/free_hfreal_r7.html" xlink:title="Free_hfReal_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-2796 28.5,-2796 28.5,-2772 118.5,-2772 118.5,-2796"/>
+<text text-anchor="middle" x="73.5" y="-2781.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge18" class="edge">
+<title>proc~free_hfreal_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.55,-2780.09C129.38,-2776.99 139.89,-2771.75 147,-2763 211.25,-2683.92 221.88,-1918.87 223.31,-1777.43"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.81,-1777.04 223.4,-1767.01 219.81,-1776.97 226.81,-1777.04"/>
+</g>
+<!-- proc~alloc_hfint32_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node20" class="node">
+<title>proc~alloc_hfint32_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node20"><a xlink:href=".././proc/alloc_hfint32_r1.html" xlink:title="Alloc_hfInt32_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-2754 24.5,-2754 24.5,-2730 122.5,-2730 122.5,-2754"/>
+<text text-anchor="middle" x="73.5" y="-2739.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge19" class="edge">
+<title>proc~alloc_hfint32_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.67,-2736.78C132,-2733.57 140.79,-2728.62 147,-2721 208.58,-2645.46 221.36,-1915.12 223.23,-1777.35"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.73,-1777.21 223.36,-1767.17 219.73,-1777.12 226.73,-1777.21"/>
+</g>
+<!-- proc~updatehost_hfint32_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node21" class="node">
+<title>proc~updatehost_hfint32_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node21"><a xlink:href=".././proc/updatehost_hfint32_r3.html" xlink:title="UpdateHost_hfInt32_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-2712 6.5,-2712 6.5,-2688 140.5,-2688 140.5,-2712"/>
+<text text-anchor="middle" x="73.5" y="-2697.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge20" class="edge">
+<title>proc~updatehost_hfint32_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.14,-2687.79C140.83,-2685.35 144.18,-2682.45 147,-2679 205.87,-2607.05 220.79,-1912.5 223.14,-1777.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.64,-1777.35 223.31,-1767.29 219.64,-1777.23 226.64,-1777.35"/>
+</g>
+<!-- proc~alloc_hfint64_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node22" class="node">
+<title>proc~alloc_hfint64_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node22"><a xlink:href=".././proc/alloc_hfint64_r6.html" xlink:title="Alloc_hfInt64_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-2670 24.5,-2670 24.5,-2646 122.5,-2646 122.5,-2670"/>
+<text text-anchor="middle" x="73.5" y="-2655.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge21" class="edge">
+<title>proc~alloc_hfint64_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.62,-2652.74C131.96,-2649.54 140.76,-2644.59 147,-2637 203.23,-2568.55 220.23,-1908.08 223.05,-1777.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.56,-1777.12 223.27,-1767.05 219.56,-1776.97 226.56,-1777.12"/>
+</g>
+<!-- proc~free_hfint32_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node23" class="node">
+<title>proc~free_hfint32_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node23"><a xlink:href=".././proc/free_hfint32_r3.html" xlink:title="Free_hfInt32_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-2628 26.5,-2628 26.5,-2604 120.5,-2604 120.5,-2628"/>
+<text text-anchor="middle" x="73.5" y="-2613.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge22" class="edge">
+<title>proc~free_hfint32_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.72,-2611.34C130.75,-2608.17 140.33,-2603.09 147,-2595 200.6,-2530.04 219.64,-1903.46 222.95,-1777.13"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.45,-1777.17 223.21,-1767.09 219.46,-1777 226.45,-1777.17"/>
+</g>
+<!-- proc~updatedevice_hfreal_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node24" class="node">
+<title>proc~updatedevice_hfreal_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node24"><a xlink:href=".././proc/updatedevice_hfreal_r1.html" xlink:title="UpdateDevice_hfReal_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-2586 2.5,-2586 2.5,-2562 144.5,-2562 144.5,-2586"/>
+<text text-anchor="middle" x="73.5" y="-2571.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge23" class="edge">
+<title>proc~updatedevice_hfreal_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.76,-2561.96C140.59,-2559.49 144.07,-2556.53 147,-2553 197.93,-2491.57 219,-1899.76 222.84,-1777.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.34,-1777.19 223.15,-1767.08 219.35,-1776.97 226.34,-1777.19"/>
+</g>
+<!-- proc~free_hfreal_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node25" class="node">
+<title>proc~free_hfreal_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node25"><a xlink:href=".././proc/free_hfreal_r3.html" xlink:title="Free_hfReal_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-2544 28.5,-2544 28.5,-2520 118.5,-2520 118.5,-2544"/>
+<text text-anchor="middle" x="73.5" y="-2529.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge24" class="edge">
+<title>proc~free_hfreal_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.78,-2527.86C129.48,-2524.75 139.87,-2519.56 147,-2511 195.28,-2453.08 218.34,-1895.65 222.72,-1777.1"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.22,-1777.15 223.08,-1767.03 219.22,-1776.89 226.22,-1777.15"/>
+</g>
+<!-- proc~free_hfint64_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node26" class="node">
+<title>proc~free_hfint64_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node26"><a xlink:href=".././proc/free_hfint64_r6.html" xlink:title="Free_hfInt64_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-2502 26.5,-2502 26.5,-2478 120.5,-2478 120.5,-2502"/>
+<text text-anchor="middle" x="73.5" y="-2487.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge25" class="edge">
+<title>proc~free_hfint64_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.63,-2485.26C130.66,-2482.1 140.26,-2477.03 147,-2469 192.59,-2414.63 217.6,-1892.26 222.57,-1777.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.07,-1777.34 223,-1767.2 219.08,-1777.05 226.07,-1777.34"/>
+</g>
+<!-- proc~updatehost_hfint32_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node27" class="node">
+<title>proc~updatehost_hfint32_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node27"><a xlink:href=".././proc/updatehost_hfint32_r1.html" xlink:title="UpdateHost_hfInt32_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-2460 6.5,-2460 6.5,-2436 140.5,-2436 140.5,-2460"/>
+<text text-anchor="middle" x="73.5" y="-2445.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge26" class="edge">
+<title>proc~updatehost_hfint32_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.69,-2435.91C140.54,-2433.44 144.04,-2430.5 147,-2427 189.93,-2376.14 216.82,-1888.27 222.41,-1777.36"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="225.92,-1777.2 222.93,-1767.03 218.93,-1776.85 225.92,-1777.2"/>
+</g>
+<!-- proc~updatedevice_hfint64_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node28" class="node">
+<title>proc~updatedevice_hfint64_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node28"><a xlink:href=".././proc/updatedevice_hfint64_r3.html" xlink:title="UpdateDevice_hfInt64_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-2418 0,-2418 0,-2394 147,-2394 147,-2418"/>
+<text text-anchor="middle" x="73.5" y="-2403.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge27" class="edge">
+<title>proc~updatedevice_hfint64_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.66,-2393.88C140.51,-2391.42 144.03,-2388.49 147,-2385 226.99,-2290.96 225.56,-1878.74 223.96,-1777.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.45,-1777.17 223.78,-1767.23 220.45,-1777.29 227.45,-1777.17"/>
+</g>
+<!-- proc~alloc_hfint32_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node29" class="node">
+<title>proc~alloc_hfint32_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node29"><a xlink:href=".././proc/alloc_hfint32_r7.html" xlink:title="Alloc_hfInt32_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-2376 24.5,-2376 24.5,-2352 122.5,-2352 122.5,-2376"/>
+<text text-anchor="middle" x="73.5" y="-2361.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge28" class="edge">
+<title>proc~alloc_hfint32_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.75,-2358.41C131.96,-2355.22 140.69,-2350.36 147,-2343 221.8,-2255.82 224.32,-1873.8 223.74,-1777.24"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="227.24,-1777.12 223.66,-1767.15 220.24,-1777.17 227.24,-1777.12"/>
+</g>
+<!-- proc~free_hfint32_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node30" class="node">
+<title>proc~free_hfint32_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node30"><a xlink:href=".././proc/free_hfint32_r2.html" xlink:title="Free_hfInt32_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-2334 26.5,-2334 26.5,-2310 120.5,-2310 120.5,-2334"/>
+<text text-anchor="middle" x="73.5" y="-2319.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge29" class="edge">
+<title>proc~free_hfint32_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.83,-2316.99C130.72,-2313.82 140.22,-2308.82 147,-2301 216.5,-2220.8 223,-1869.86 223.49,-1777.4"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.99,-1777.23 223.53,-1767.21 219.99,-1777.2 226.99,-1777.23"/>
+</g>
+<!-- proc~alloc_hfint64_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node31" class="node">
+<title>proc~alloc_hfint64_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node31"><a xlink:href=".././proc/alloc_hfint64_r1.html" xlink:title="Alloc_hfInt64_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-2292 24.5,-2292 24.5,-2268 122.5,-2268 122.5,-2292"/>
+<text text-anchor="middle" x="73.5" y="-2277.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge30" class="edge">
+<title>proc~alloc_hfint64_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.64,-2274.31C131.85,-2271.12 140.61,-2266.29 147,-2259 211.27,-2185.68 221.58,-1865.2 223.2,-1777.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.7,-1777.23 223.37,-1767.17 219.71,-1777.11 226.7,-1777.23"/>
+</g>
+<!-- proc~updatehost_hfint32_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node32" class="node">
+<title>proc~updatehost_hfint32_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node32"><a xlink:href=".././proc/updatehost_hfint32_r4.html" xlink:title="UpdateHost_hfInt32_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-2250 6.5,-2250 6.5,-2226 140.5,-2226 140.5,-2250"/>
+<text text-anchor="middle" x="73.5" y="-2235.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge31" class="edge">
+<title>proc~updatehost_hfint32_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.16,-2225.94C140.18,-2223.48 143.87,-2220.53 147,-2217 206.12,-2150.47 220.07,-1859.83 222.87,-1777.06"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.37,-1777.12 223.19,-1767.01 219.37,-1776.9 226.37,-1777.12"/>
+</g>
+<!-- proc~free_hfreal_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node33" class="node">
+<title>proc~free_hfreal_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node33"><a xlink:href=".././proc/free_hfreal_r1.html" xlink:title="Free_hfReal_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-2208 28.5,-2208 28.5,-2184 118.5,-2184 118.5,-2208"/>
+<text text-anchor="middle" x="73.5" y="-2193.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge32" class="edge">
+<title>proc~free_hfreal_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.71,-2191.36C129.28,-2188.24 139.62,-2183.17 147,-2175 200.86,-2115.36 218.36,-1855.43 222.46,-1777.29"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="225.96,-1777.29 222.97,-1767.13 218.97,-1776.94 225.96,-1777.29"/>
+</g>
+<!-- proc~free_hfint32_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node34" class="node">
+<title>proc~free_hfint32_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node34"><a xlink:href=".././proc/free_hfint32_r1.html" xlink:title="Free_hfInt32_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-2166 26.5,-2166 26.5,-2142 120.5,-2142 120.5,-2166"/>
+<text text-anchor="middle" x="73.5" y="-2151.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge33" class="edge">
+<title>proc~free_hfint32_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.87,-2148.57C130.64,-2145.41 140.08,-2140.52 147,-2133 195.65,-2080.17 216.48,-1850.44 221.96,-1777.39"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="225.47,-1777.29 222.71,-1767.06 218.49,-1776.78 225.47,-1777.29"/>
+</g>
+<!-- proc~free_hfreal_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node35" class="node">
+<title>proc~free_hfreal_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node35"><a xlink:href=".././proc/free_hfreal_r2.html" xlink:title="Free_hfReal_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-2124 28.5,-2124 28.5,-2100 118.5,-2100 118.5,-2124"/>
+<text text-anchor="middle" x="73.5" y="-2109.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge34" class="edge">
+<title>proc~free_hfreal_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.85,-2107.03C129.29,-2103.9 139.54,-2098.91 147,-2091 190.47,-2044.93 214.37,-1845.19 221.33,-1777.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="224.85,-1777.45 222.37,-1767.15 217.89,-1776.75 224.85,-1777.45"/>
+</g>
+<!-- proc~updatehost_hfreal_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node36" class="node">
+<title>proc~updatehost_hfreal_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node36"><a xlink:href=".././proc/updatehost_hfreal_r3.html" xlink:title="UpdateHost_hfReal_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-2082 8.5,-2082 8.5,-2058 138.5,-2058 138.5,-2082"/>
+<text text-anchor="middle" x="73.5" y="-2067.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge35" class="edge">
+<title>proc~updatehost_hfreal_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M135.47,-2057.82C139.7,-2055.38 143.62,-2052.48 147,-2049 185.35,-2009.59 211.98,-1839.32 220.54,-1777.52"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="224.05,-1777.68 221.93,-1767.3 217.11,-1776.74 224.05,-1777.68"/>
+</g>
+<!-- proc~free_hfint32_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node37" class="node">
+<title>proc~free_hfint32_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node37"><a xlink:href=".././proc/free_hfint32_r6.html" xlink:title="Free_hfInt32_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-2040 26.5,-2040 26.5,-2016 120.5,-2016 120.5,-2040"/>
+<text text-anchor="middle" x="73.5" y="-2025.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge36" class="edge">
+<title>proc~free_hfint32_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.74,-2021.95C130.4,-2018.81 139.82,-2014.09 147,-2007 211.9,-1942.93 222.11,-1825.72 223.45,-1777.07"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="226.95,-1777.07 223.62,-1767.01 219.95,-1776.94 226.95,-1777.07"/>
+</g>
+<!-- proc~free_hfreal_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node38" class="node">
+<title>proc~free_hfreal_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node38"><a xlink:href=".././proc/free_hfreal_r5.html" xlink:title="Free_hfReal_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-1998 28.5,-1998 28.5,-1974 118.5,-1974 118.5,-1998"/>
+<text text-anchor="middle" x="73.5" y="-1983.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge37" class="edge">
+<title>proc~free_hfreal_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.57,-1980.25C128.89,-1977.13 139.15,-1972.34 147,-1965 201.9,-1913.68 217.52,-1819.8 221.87,-1777.14"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="225.37,-1777.28 222.78,-1767 218.4,-1776.65 225.37,-1777.28"/>
+</g>
+<!-- proc~updatedevice_hfint32_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node39" class="node">
+<title>proc~updatedevice_hfint32_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node39"><a xlink:href=".././proc/updatedevice_hfint32_r1.html" xlink:title="UpdateDevice_hfInt32_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1956 0,-1956 0,-1932 147,-1932 147,-1956"/>
+<text text-anchor="middle" x="73.5" y="-1941.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge38" class="edge">
+<title>proc~updatedevice_hfint32_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M133.42,-1931.88C138.31,-1929.44 142.94,-1926.51 147,-1923 192.05,-1884.07 212,-1813.16 219.56,-1777.2"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="223.02,-1777.72 221.52,-1767.23 216.15,-1776.37 223.02,-1777.72"/>
+</g>
+<!-- proc~updatedevice_hfint64_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node40" class="node">
+<title>proc~updatedevice_hfint64_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node40"><a xlink:href=".././proc/updatedevice_hfint64_r7.html" xlink:title="UpdateDevice_hfInt64_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1914 0,-1914 0,-1890 147,-1890 147,-1914"/>
+<text text-anchor="middle" x="73.5" y="-1899.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge39" class="edge">
+<title>proc~updatedevice_hfint64_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M131.89,-1889.86C137.28,-1887.43 142.42,-1884.51 147,-1881 182.49,-1853.82 205.17,-1805.07 215.99,-1776.84"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.4,-1777.7 219.56,-1767.11 212.83,-1775.29 219.4,-1777.7"/>
+</g>
+<!-- proc~updatedevice_hfint64_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node41" class="node">
+<title>proc~updatedevice_hfint64_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node41"><a xlink:href=".././proc/updatedevice_hfint64_r1.html" xlink:title="UpdateDevice_hfInt64_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1872 0,-1872 0,-1848 147,-1848 147,-1872"/>
+<text text-anchor="middle" x="73.5" y="-1857.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge40" class="edge">
+<title>proc~updatedevice_hfint64_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M128.6,-1847.97C135.04,-1845.49 141.33,-1842.53 147,-1839 173.31,-1822.62 196.14,-1794.7 209.85,-1775.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="212.82,-1777.45 215.66,-1767.24 207.07,-1773.45 212.82,-1777.45"/>
+</g>
+<!-- proc~updatehost_hfreal_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node42" class="node">
+<title>proc~updatehost_hfreal_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node42"><a xlink:href=".././proc/updatehost_hfreal_r1.html" xlink:title="UpdateHost_hfReal_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-1830 8.5,-1830 8.5,-1806 138.5,-1806 138.5,-1830"/>
+<text text-anchor="middle" x="73.5" y="-1815.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge41" class="edge">
+<title>proc~updatehost_hfreal_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M121.82,-1805.93C130.32,-1803.3 139.01,-1800.3 147,-1797 163.65,-1790.11 181.35,-1780.56 195.52,-1772.3"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="197.46,-1775.22 204.28,-1767.11 193.89,-1769.2 197.46,-1775.22"/>
+</g>
+<!-- proc~free_hfint64_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node43" class="node">
+<title>proc~free_hfint64_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node43"><a xlink:href=".././proc/free_hfint64_r7.html" xlink:title="Free_hfInt64_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-1788 26.5,-1788 26.5,-1764 120.5,-1764 120.5,-1788"/>
+<text text-anchor="middle" x="73.5" y="-1773.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge42" class="edge">
+<title>proc~free_hfint64_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.83,-1769.47C137.24,-1767.16 155.79,-1764.54 172.57,-1762.18"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="173.33,-1765.6 182.75,-1760.74 172.36,-1758.67 173.33,-1765.6"/>
+</g>
+<!-- proc~alloc_hfint32_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node44" class="node">
+<title>proc~alloc_hfint32_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node44"><a xlink:href=".././proc/alloc_hfint32_r3.html" xlink:title="Alloc_hfInt32_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-1746 24.5,-1746 24.5,-1722 122.5,-1722 122.5,-1746"/>
+<text text-anchor="middle" x="73.5" y="-1731.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge43" class="edge">
+<title>proc~alloc_hfint32_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.88,-1740.82C138.77,-1743.06 156.48,-1745.55 172.56,-1747.82"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="172.46,-1751.34 182.85,-1749.27 173.44,-1744.41 172.46,-1751.34"/>
+</g>
+<!-- proc~updatehost_hfreal_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node45" class="node">
+<title>proc~updatehost_hfreal_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node45"><a xlink:href=".././proc/updatehost_hfreal_r2.html" xlink:title="UpdateHost_hfReal_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-1704 8.5,-1704 8.5,-1680 138.5,-1680 138.5,-1704"/>
+<text text-anchor="middle" x="73.5" y="-1689.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge44" class="edge">
+<title>proc~updatehost_hfreal_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M121.82,-1704.07C130.32,-1706.7 139.01,-1709.7 147,-1713 163.65,-1719.89 181.35,-1729.44 195.52,-1737.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="193.89,-1740.8 204.28,-1742.89 197.46,-1734.78 193.89,-1740.8"/>
+</g>
+<!-- proc~alloc_hfreal_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node46" class="node">
+<title>proc~alloc_hfreal_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node46"><a xlink:href=".././proc/alloc_hfreal_r3.html" xlink:title="Alloc_hfReal_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-1662 26.5,-1662 26.5,-1638 120.5,-1638 120.5,-1662"/>
+<text text-anchor="middle" x="73.5" y="-1647.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge45" class="edge">
+<title>proc~alloc_hfreal_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.61,-1659.22C129.75,-1662.17 138.99,-1666.01 147,-1671 173.31,-1687.38 196.14,-1715.3 209.85,-1734.42"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="207.07,-1736.55 215.66,-1742.76 212.82,-1732.55 207.07,-1736.55"/>
+</g>
+<!-- proc~free_hfint64_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node47" class="node">
+<title>proc~free_hfint64_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node47"><a xlink:href=".././proc/free_hfint64_r5.html" xlink:title="Free_hfInt64_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-1620 26.5,-1620 26.5,-1596 120.5,-1596 120.5,-1620"/>
+<text text-anchor="middle" x="73.5" y="-1605.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge46" class="edge">
+<title>proc~free_hfint64_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.65,-1615.81C130,-1618.86 139.3,-1623.1 147,-1629 182.49,-1656.18 205.17,-1704.93 215.99,-1733.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="212.83,-1734.71 219.56,-1742.89 219.4,-1732.3 212.83,-1734.71"/>
+</g>
+<!-- proc~updatehost_hfreal_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node48" class="node">
+<title>proc~updatehost_hfreal_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node48"><a xlink:href=".././proc/updatehost_hfreal_r4.html" xlink:title="UpdateHost_hfReal_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-1578 8.5,-1578 8.5,-1554 138.5,-1554 138.5,-1578"/>
+<text text-anchor="middle" x="73.5" y="-1563.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge47" class="edge">
+<title>proc~updatehost_hfreal_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M133.42,-1578.12C138.31,-1580.56 142.94,-1583.49 147,-1587 192.05,-1625.93 212,-1696.84 219.56,-1732.8"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="216.15,-1733.63 221.52,-1742.77 223.02,-1732.28 216.15,-1733.63"/>
+</g>
+<!-- proc~free_hfint32_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node49" class="node">
+<title>proc~free_hfint32_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node49"><a xlink:href=".././proc/free_hfint32_r4.html" xlink:title="Free_hfInt32_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-1536 26.5,-1536 26.5,-1512 120.5,-1512 120.5,-1536"/>
+<text text-anchor="middle" x="73.5" y="-1521.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt32_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint32_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge48" class="edge">
+<title>proc~free_hfint32_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.83,-1530.46C130.38,-1533.59 139.72,-1538.2 147,-1545 201.9,-1596.32 217.52,-1690.2 221.87,-1732.86"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="218.4,-1733.35 222.78,-1743 225.37,-1732.72 218.4,-1733.35"/>
+</g>
+<!-- proc~alloc_hfint64_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node50" class="node">
+<title>proc~alloc_hfint64_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node50"><a xlink:href=".././proc/alloc_hfint64_r3.html" xlink:title="Alloc_hfInt64_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-1494 24.5,-1494 24.5,-1470 122.5,-1470 122.5,-1494"/>
+<text text-anchor="middle" x="73.5" y="-1479.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge49" class="edge">
+<title>proc~alloc_hfint64_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.62,-1488.68C131.61,-1491.81 140.29,-1496.37 147,-1503 211.9,-1567.07 222.11,-1684.28 223.45,-1732.93"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.95,-1733.06 223.62,-1742.99 226.95,-1732.93 219.95,-1733.06"/>
+</g>
+<!-- proc~alloc_hfint64_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node51" class="node">
+<title>proc~alloc_hfint64_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node51"><a xlink:href=".././proc/alloc_hfint64_r2.html" xlink:title="Alloc_hfInt64_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-1452 24.5,-1452 24.5,-1428 122.5,-1428 122.5,-1452"/>
+<text text-anchor="middle" x="73.5" y="-1437.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge50" class="edge">
+<title>proc~alloc_hfint64_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.82,-1446.47C131.81,-1449.62 140.42,-1454.24 147,-1461 185.35,-1500.41 211.98,-1670.68 220.54,-1732.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="217.11,-1733.26 221.93,-1742.7 224.05,-1732.32 217.11,-1733.26"/>
+</g>
+<!-- proc~alloc_hfint32_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node52" class="node">
+<title>proc~alloc_hfint32_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node52"><a xlink:href=".././proc/alloc_hfint32_r4.html" xlink:title="Alloc_hfInt32_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-1410 24.5,-1410 24.5,-1386 122.5,-1386 122.5,-1410"/>
+<text text-anchor="middle" x="73.5" y="-1395.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge51" class="edge">
+<title>proc~alloc_hfint32_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.61,-1404.18C131.72,-1407.34 140.44,-1412.04 147,-1419 190.47,-1465.07 214.37,-1664.81 221.33,-1732.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="217.89,-1733.25 222.37,-1742.85 224.85,-1732.55 217.89,-1733.25"/>
+</g>
+<!-- proc~alloc_hfreal_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node53" class="node">
+<title>proc~alloc_hfreal_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node53"><a xlink:href=".././proc/alloc_hfreal_r7.html" xlink:title="Alloc_hfReal_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-1368 26.5,-1368 26.5,-1344 120.5,-1344 120.5,-1368"/>
+<text text-anchor="middle" x="73.5" y="-1353.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge52" class="edge">
+<title>proc~alloc_hfreal_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.87,-1361.43C130.64,-1364.59 140.08,-1369.48 147,-1377 195.65,-1429.83 216.48,-1659.56 221.96,-1732.61"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="218.49,-1733.22 222.71,-1742.94 225.47,-1732.71 218.49,-1733.22"/>
+</g>
+<!-- proc~updatedevice_hfint32_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node54" class="node">
+<title>proc~updatedevice_hfint32_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node54"><a xlink:href=".././proc/updatedevice_hfint32_r3.html" xlink:title="UpdateDevice_hfInt32_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1326 0,-1326 0,-1302 147,-1302 147,-1326"/>
+<text text-anchor="middle" x="73.5" y="-1311.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge53" class="edge">
+<title>proc~updatedevice_hfint32_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.1,-1326.11C140.13,-1328.57 143.84,-1331.5 147,-1335 200.86,-1394.64 218.36,-1654.57 222.46,-1732.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="218.97,-1733.06 222.97,-1742.87 225.96,-1732.71 218.97,-1733.06"/>
+</g>
+<!-- proc~updatedevice_hfint32_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node55" class="node">
+<title>proc~updatedevice_hfint32_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node55"><a xlink:href=".././proc/updatedevice_hfint32_r4.html" xlink:title="UpdateDevice_hfInt32_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1284 0,-1284 0,-1260 147,-1260 147,-1284"/>
+<text text-anchor="middle" x="73.5" y="-1269.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge54" class="edge">
+<title>proc~updatedevice_hfint32_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.16,-1284.06C140.18,-1286.52 143.87,-1289.47 147,-1293 206.12,-1359.53 220.07,-1650.17 222.87,-1732.94"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.37,-1733.1 223.19,-1742.99 226.37,-1732.88 219.37,-1733.1"/>
+</g>
+<!-- proc~updatehost_hfint32_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node56" class="node">
+<title>proc~updatehost_hfint32_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node56"><a xlink:href=".././proc/updatehost_hfint32_r2.html" xlink:title="UpdateHost_hfInt32_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-1242 6.5,-1242 6.5,-1218 140.5,-1218 140.5,-1242"/>
+<text text-anchor="middle" x="73.5" y="-1227.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge55" class="edge">
+<title>proc~updatehost_hfint32_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.21,-1242.01C140.22,-1244.49 143.89,-1247.45 147,-1251 211.27,-1324.32 221.58,-1644.8 223.2,-1732.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.71,-1732.89 223.37,-1742.83 226.7,-1732.77 219.71,-1732.89"/>
+</g>
+<!-- proc~free_hfreal_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node57" class="node">
+<title>proc~free_hfreal_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node57"><a xlink:href=".././proc/free_hfreal_r6.html" xlink:title="Free_hfReal_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="118.5,-1200 28.5,-1200 28.5,-1176 118.5,-1176 118.5,-1200"/>
+<text text-anchor="middle" x="73.5" y="-1185.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfReal_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfreal_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge56" class="edge">
+<title>proc~free_hfreal_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M118.57,-1192.32C129.26,-1195.44 139.71,-1200.58 147,-1209 216.5,-1289.2 223,-1640.14 223.49,-1732.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.99,-1732.8 223.53,-1742.79 226.99,-1732.77 219.99,-1732.8"/>
+</g>
+<!-- proc~updatehost_hfreal_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node58" class="node">
+<title>proc~updatehost_hfreal_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node58"><a xlink:href=".././proc/updatehost_hfreal_r6.html" xlink:title="UpdateHost_hfReal_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-1158 8.5,-1158 8.5,-1134 138.5,-1134 138.5,-1158"/>
+<text text-anchor="middle" x="73.5" y="-1143.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge57" class="edge">
+<title>proc~updatehost_hfreal_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.63,-1158.15C140.49,-1160.6 144.01,-1163.52 147,-1167 221.8,-1254.18 224.32,-1636.2 223.74,-1732.76"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.24,-1732.83 223.66,-1742.85 227.24,-1732.88 220.24,-1732.83"/>
+</g>
+<!-- proc~updatedevice_hfint64_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node59" class="node">
+<title>proc~updatedevice_hfint64_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node59"><a xlink:href=".././proc/updatedevice_hfint64_r4.html" xlink:title="UpdateDevice_hfInt64_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1116 0,-1116 0,-1092 147,-1092 147,-1116"/>
+<text text-anchor="middle" x="73.5" y="-1101.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge58" class="edge">
+<title>proc~updatedevice_hfint64_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.66,-1116.12C140.51,-1118.58 144.03,-1121.51 147,-1125 226.99,-1219.04 225.56,-1631.26 223.96,-1732.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.45,-1732.71 223.78,-1742.77 227.45,-1732.83 220.45,-1732.71"/>
+</g>
+<!-- proc~updatedevice_hfint64_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node60" class="node">
+<title>proc~updatedevice_hfint64_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node60"><a xlink:href=".././proc/updatedevice_hfint64_r6.html" xlink:title="UpdateDevice_hfInt64_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-1074 0,-1074 0,-1050 147,-1050 147,-1074"/>
+<text text-anchor="middle" x="73.5" y="-1059.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt64_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint64_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge59" class="edge">
+<title>proc~updatedevice_hfint64_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.69,-1074.09C140.54,-1076.56 144.04,-1079.5 147,-1083 189.93,-1133.86 216.82,-1621.73 222.41,-1732.64"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="218.93,-1733.15 222.93,-1742.97 225.92,-1732.8 218.93,-1733.15"/>
+</g>
+<!-- proc~updatedevice_hfreal_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node61" class="node">
+<title>proc~updatedevice_hfreal_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node61"><a xlink:href=".././proc/updatedevice_hfreal_r2.html" xlink:title="UpdateDevice_hfReal_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-1032 2.5,-1032 2.5,-1008 144.5,-1008 144.5,-1032"/>
+<text text-anchor="middle" x="73.5" y="-1017.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge60" class="edge">
+<title>proc~updatedevice_hfreal_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.72,-1032.07C140.56,-1034.54 144.05,-1037.49 147,-1041 192.59,-1095.37 217.6,-1617.74 222.57,-1732.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.08,-1732.95 223,-1742.8 226.07,-1732.66 219.08,-1732.95"/>
+</g>
+<!-- proc~free_hfint64_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node62" class="node">
+<title>proc~free_hfint64_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node62"><a xlink:href=".././proc/free_hfint64_r1.html" xlink:title="Free_hfInt64_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-990 26.5,-990 26.5,-966 120.5,-966 120.5,-990"/>
+<text text-anchor="middle" x="73.5" y="-975.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge61" class="edge">
+<title>proc~free_hfint64_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.67,-982.71C130.69,-985.88 140.29,-990.95 147,-999 195.28,-1056.92 218.34,-1614.35 222.72,-1732.9"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.22,-1733.11 223.08,-1742.97 226.22,-1732.85 219.22,-1733.11"/>
+</g>
+<!-- proc~updatedevice_hfint32_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node63" class="node">
+<title>proc~updatedevice_hfint32_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node63"><a xlink:href=".././proc/updatedevice_hfint32_r2.html" xlink:title="UpdateDevice_hfInt32_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-948 0,-948 0,-924 147,-924 147,-948"/>
+<text text-anchor="middle" x="73.5" y="-933.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge62" class="edge">
+<title>proc~updatedevice_hfint32_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.76,-948.04C140.59,-950.51 144.07,-953.47 147,-957 197.93,-1018.43 219,-1610.24 222.84,-1732.84"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.35,-1733.03 223.15,-1742.92 226.34,-1732.81 219.35,-1733.03"/>
+</g>
+<!-- proc~updatehost_hfint32_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node64" class="node">
+<title>proc~updatehost_hfint32_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node64"><a xlink:href=".././proc/updatehost_hfint32_r7.html" xlink:title="UpdateHost_hfInt32_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-906 6.5,-906 6.5,-882 140.5,-882 140.5,-906"/>
+<text text-anchor="middle" x="73.5" y="-891.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge63" class="edge">
+<title>proc~updatehost_hfint32_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.78,-906.02C140.61,-908.5 144.08,-911.46 147,-915 200.6,-979.96 219.64,-1606.54 222.95,-1732.87"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.46,-1733 223.21,-1742.91 226.45,-1732.83 219.46,-1733"/>
+</g>
+<!-- proc~updatehost_hfint64_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node65" class="node">
+<title>proc~updatehost_hfint64_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node65"><a xlink:href=".././proc/updatehost_hfint64_r7.html" xlink:title="UpdateHost_hfInt64_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-864 6.5,-864 6.5,-840 140.5,-840 140.5,-864"/>
+<text text-anchor="middle" x="73.5" y="-849.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge64" class="edge">
+<title>proc~updatehost_hfint64_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M136.8,-864.01C140.62,-866.49 144.09,-869.46 147,-873 203.23,-941.45 220.23,-1601.92 223.05,-1732.6"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.56,-1733.03 223.27,-1742.95 226.56,-1732.88 219.56,-1733.03"/>
+</g>
+<!-- proc~updatedevice_hfint32_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node66" class="node">
+<title>proc~updatedevice_hfint32_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node66"><a xlink:href=".././proc/updatedevice_hfint32_r7.html" xlink:title="UpdateDevice_hfInt32_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-822 0,-822 0,-798 147,-798 147,-822"/>
+<text text-anchor="middle" x="73.5" y="-807.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge65" class="edge">
+<title>proc~updatedevice_hfint32_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.14,-822.21C140.83,-824.65 144.18,-827.55 147,-831 205.87,-902.95 220.79,-1597.5 223.14,-1732.37"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.64,-1732.77 223.31,-1742.71 226.64,-1732.65 219.64,-1732.77"/>
+</g>
+<!-- proc~updatehost_hfint64_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node67" class="node">
+<title>proc~updatehost_hfint64_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node67"><a xlink:href=".././proc/updatehost_hfint64_r2.html" xlink:title="UpdateHost_hfInt64_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-780 6.5,-780 6.5,-756 140.5,-756 140.5,-780"/>
+<text text-anchor="middle" x="73.5" y="-765.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge66" class="edge">
+<title>proc~updatehost_hfint64_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.15,-780.2C140.84,-782.64 144.18,-785.55 147,-789 208.58,-864.54 221.36,-1594.88 223.23,-1732.65"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.73,-1732.88 223.36,-1742.83 226.73,-1732.79 219.73,-1732.88"/>
+</g>
+<!-- proc~free_hfint64_r3 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node68" class="node">
+<title>proc~free_hfint64_r3</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node68"><a xlink:href=".././proc/free_hfint64_r3.html" xlink:title="Free_hfInt64_r3">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-738 26.5,-738 26.5,-714 120.5,-714 120.5,-738"/>
+<text text-anchor="middle" x="73.5" y="-723.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r3</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r3&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge67" class="edge">
+<title>proc~free_hfint64_r3&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.81,-730.59C130.83,-733.76 140.39,-738.86 147,-747 211.25,-826.08 221.88,-1591.13 223.31,-1732.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.81,-1733.03 223.4,-1742.99 226.81,-1732.96 219.81,-1733.03"/>
+</g>
+<!-- proc~free_hfint64_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node69" class="node">
+<title>proc~free_hfint64_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node69"><a xlink:href=".././proc/free_hfint64_r2.html" xlink:title="Free_hfInt64_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-696 26.5,-696 26.5,-672 120.5,-672 120.5,-696"/>
+<text text-anchor="middle" x="73.5" y="-681.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge68" class="edge">
+<title>proc~free_hfint64_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.83,-688.58C130.85,-691.75 140.4,-696.85 147,-705 213.92,-787.63 222.39,-1587.59 223.38,-1732.54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.88,-1732.87 223.44,-1742.85 226.88,-1732.82 219.88,-1732.87"/>
+</g>
+<!-- proc~alloc_hfreal_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node70" class="node">
+<title>proc~alloc_hfreal_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node70"><a xlink:href=".././proc/alloc_hfreal_r1.html" xlink:title="Alloc_hfReal_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-654 26.5,-654 26.5,-630 120.5,-630 120.5,-654"/>
+<text text-anchor="middle" x="73.5" y="-639.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge69" class="edge">
+<title>proc~alloc_hfreal_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.84,-646.57C130.86,-649.74 140.41,-654.84 147,-663 216.61,-749.19 222.88,-1584.33 223.44,-1732.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.94,-1732.73 223.48,-1742.72 226.94,-1732.71 219.94,-1732.73"/>
+</g>
+<!-- proc~updatehost_hfint64_r1 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node71" class="node">
+<title>proc~updatehost_hfint64_r1</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node71"><a xlink:href=".././proc/updatehost_hfint64_r1.html" xlink:title="UpdateHost_hfInt64_r1">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-612 6.5,-612 6.5,-588 140.5,-588 140.5,-612"/>
+<text text-anchor="middle" x="73.5" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r1</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r1&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge70" class="edge">
+<title>proc~updatehost_hfint64_r1&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.2,-612.16C140.87,-614.61 144.21,-617.53 147,-621 219.31,-710.77 223.35,-1581.4 223.51,-1732.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.01,-1732.99 223.51,-1742.99 227.01,-1732.98 220.01,-1732.99"/>
+</g>
+<!-- proc~alloc_hfreal_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node72" class="node">
+<title>proc~alloc_hfreal_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node72"><a xlink:href=".././proc/alloc_hfreal_r6.html" xlink:title="Alloc_hfReal_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-570 26.5,-570 26.5,-546 120.5,-546 120.5,-570"/>
+<text text-anchor="middle" x="73.5" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge71" class="edge">
+<title>proc~alloc_hfreal_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.87,-562.54C130.89,-565.71 140.43,-570.83 147,-579 222.02,-672.36 223.8,-1578.68 223.56,-1732.78"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.06,-1732.91 223.54,-1742.91 227.06,-1732.92 220.06,-1732.91"/>
+</g>
+<!-- proc~updatehost_hfreal_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node73" class="node">
+<title>proc~updatehost_hfreal_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node73"><a xlink:href=".././proc/updatehost_hfreal_r5.html" xlink:title="UpdateHost_hfReal_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-528 8.5,-528 8.5,-504 138.5,-504 138.5,-528"/>
+<text text-anchor="middle" x="73.5" y="-513.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge72" class="edge">
+<title>proc~updatehost_hfreal_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.22,-528.14C140.89,-530.6 144.21,-533.52 147,-537 224.66,-633.86 224.24,-1574.36 223.62,-1732.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.12,-1732.85 223.57,-1742.86 227.12,-1732.88 220.12,-1732.85"/>
+</g>
+<!-- proc~alloc_hfreal_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node74" class="node">
+<title>proc~alloc_hfreal_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node74"><a xlink:href=".././proc/alloc_hfreal_r4.html" xlink:title="Alloc_hfReal_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-486 26.5,-486 26.5,-462 120.5,-462 120.5,-486"/>
+<text text-anchor="middle" x="73.5" y="-471.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfReal_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfreal_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge73" class="edge">
+<title>proc~alloc_hfreal_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.52,-478.4C130.68,-481.57 140.37,-486.71 147,-495 227.38,-595.48 224.66,-1572.12 223.67,-1732.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.16,-1732.81 223.6,-1742.83 227.16,-1732.86 220.16,-1732.81"/>
+</g>
+<!-- proc~updatehost_hfint64_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node75" class="node">
+<title>proc~updatehost_hfint64_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node75"><a xlink:href=".././proc/updatehost_hfint64_r6.html" xlink:title="UpdateHost_hfInt64_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-444 6.5,-444 6.5,-420 140.5,-420 140.5,-444"/>
+<text text-anchor="middle" x="73.5" y="-429.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt64_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint64_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge74" class="edge">
+<title>proc~updatehost_hfint64_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.23,-444.13C140.9,-446.59 144.22,-449.52 147,-453 230.04,-557.01 225.08,-1568.13 223.71,-1732.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="220.21,-1732.79 223.62,-1742.82 227.21,-1732.85 220.21,-1732.79"/>
+</g>
+<!-- proc~alloc_hfint32_r2 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node76" class="node">
+<title>proc~alloc_hfint32_r2</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node76"><a xlink:href=".././proc/alloc_hfint32_r2.html" xlink:title="Alloc_hfInt32_r2">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-402 24.5,-402 24.5,-378 122.5,-378 122.5,-402"/>
+<text text-anchor="middle" x="73.5" y="-387.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r2</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r2&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge75" class="edge">
+<title>proc~alloc_hfint32_r2&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.79,-395.12C132.12,-398.33 140.87,-403.31 147,-411 189.96,-464.91 218.72,-1561.15 222.96,-1732.55"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.46,-1732.77 223.2,-1742.68 226.46,-1732.59 219.46,-1732.77"/>
+</g>
+<!-- proc~updatedevice_hfreal_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node77" class="node">
+<title>proc~updatedevice_hfreal_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node77"><a xlink:href=".././proc/updatedevice_hfreal_r5.html" xlink:title="UpdateDevice_hfReal_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-360 2.5,-360 2.5,-336 144.5,-336 144.5,-360"/>
+<text text-anchor="middle" x="73.5" y="-345.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge76" class="edge">
+<title>proc~updatedevice_hfreal_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.25,-360.12C140.91,-362.58 144.23,-365.51 147,-369 191.32,-424.71 219,-1558.58 223,-1732.66"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.5,-1732.79 223.23,-1742.71 226.5,-1732.64 219.5,-1732.79"/>
+</g>
+<!-- proc~updatedevice_hfint32_r5 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node78" class="node">
+<title>proc~updatedevice_hfint32_r5</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node78"><a xlink:href=".././proc/updatedevice_hfint32_r5.html" xlink:title="UpdateDevice_hfInt32_r5">
+<polygon fill="#d9534f" stroke="#d9534f" points="147,-318 0,-318 0,-294 147,-294 147,-318"/>
+<text text-anchor="middle" x="73.5" y="-303.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfInt32_r5</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfint32_r5&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge77" class="edge">
+<title>proc~updatedevice_hfint32_r5&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.25,-318.12C140.92,-320.58 144.23,-323.51 147,-327 192.66,-384.49 219.26,-1555.05 223.03,-1732.53"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.54,-1732.84 223.25,-1742.76 226.54,-1732.69 219.54,-1732.84"/>
+</g>
+<!-- proc~free_hfint64_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node79" class="node">
+<title>proc~free_hfint64_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node79"><a xlink:href=".././proc/free_hfint64_r4.html" xlink:title="Free_hfInt64_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="120.5,-276 26.5,-276 26.5,-252 120.5,-252 120.5,-276"/>
+<text text-anchor="middle" x="73.5" y="-261.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Free_hfInt64_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~free_hfint64_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge78" class="edge">
+<title>proc~free_hfint64_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M120.57,-268.36C130.73,-271.53 140.41,-276.68 147,-285 194.02,-344.3 219.53,-1552.87 223.07,-1732.71"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.58,-1732.91 223.27,-1742.84 226.57,-1732.77 219.58,-1732.91"/>
+</g>
+<!-- proc~alloc_hfint64_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node80" class="node">
+<title>proc~alloc_hfint64_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node80"><a xlink:href=".././proc/alloc_hfint64_r7.html" xlink:title="Alloc_hfInt64_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-234 24.5,-234 24.5,-210 122.5,-210 122.5,-234"/>
+<text text-anchor="middle" x="73.5" y="-219.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge79" class="edge">
+<title>proc~alloc_hfint64_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.83,-227.09C132.15,-230.3 140.9,-235.29 147,-243 195.39,-304.12 219.8,-1550.91 223.11,-1732.91"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.61,-1732.99 223.29,-1742.92 226.61,-1732.86 219.61,-1732.99"/>
+</g>
+<!-- proc~updatehost_hfint32_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node81" class="node">
+<title>proc~updatehost_hfint32_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node81"><a xlink:href=".././proc/updatehost_hfint32_r6.html" xlink:title="UpdateHost_hfInt32_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="140.5,-192 6.5,-192 6.5,-168 140.5,-168 140.5,-192"/>
+<text text-anchor="middle" x="73.5" y="-177.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfInt32_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfint32_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge80" class="edge">
+<title>proc~updatehost_hfint32_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.27,-192.1C140.93,-194.57 144.24,-197.51 147,-201 196.72,-263.88 220.01,-1546.53 223.13,-1732.58"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.64,-1732.65 223.3,-1742.59 226.63,-1732.53 219.64,-1732.65"/>
+</g>
+<!-- proc~alloc_hfint32_r6 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node82" class="node">
+<title>proc~alloc_hfint32_r6</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node82"><a xlink:href=".././proc/alloc_hfint32_r6.html" xlink:title="Alloc_hfInt32_r6">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-150 24.5,-150 24.5,-126 122.5,-126 122.5,-150"/>
+<text text-anchor="middle" x="73.5" y="-135.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt32_r6</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint32_r6&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge81" class="edge">
+<title>proc~alloc_hfint32_r6&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.84,-143.08C132.16,-146.29 140.91,-151.29 147,-159 198.07,-223.67 220.25,-1543.62 223.16,-1732.56"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.67,-1732.76 223.32,-1742.7 226.67,-1732.65 219.67,-1732.76"/>
+</g>
+<!-- proc~updatehost_hfreal_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node83" class="node">
+<title>proc~updatehost_hfreal_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node83"><a xlink:href=".././proc/updatehost_hfreal_r7.html" xlink:title="UpdateHost_hfReal_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="138.5,-108 8.5,-108 8.5,-84 138.5,-84 138.5,-108"/>
+<text text-anchor="middle" x="73.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateHost_hfReal_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~updatehost_hfreal_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge82" class="edge">
+<title>proc~updatehost_hfreal_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.28,-108.09C140.94,-110.56 144.24,-113.5 147,-117 199.42,-183.47 220.48,-1540.85 223.19,-1732.57"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.7,-1732.89 223.34,-1742.84 226.7,-1732.79 219.7,-1732.89"/>
+</g>
+<!-- proc~updatedevice_hfreal_r7 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node84" class="node">
+<title>proc~updatedevice_hfreal_r7</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node84"><a xlink:href=".././proc/updatedevice_hfreal_r7.html" xlink:title="UpdateDevice_hfReal_r7">
+<polygon fill="#d9534f" stroke="#d9534f" points="144.5,-66 2.5,-66 2.5,-42 144.5,-42 144.5,-66"/>
+<text text-anchor="middle" x="73.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UpdateDevice_hfReal_r7</text>
+</a>
+</g>
+</g>
+<!-- proc~updatedevice_hfreal_r7&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge83" class="edge">
+<title>proc~updatedevice_hfreal_r7&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M137.28,-66.09C140.94,-68.56 144.24,-71.5 147,-75 200.8,-143.31 220.72,-1539.63 223.22,-1732.88"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.73,-1733.03 223.35,-1742.98 226.72,-1732.94 219.73,-1733.03"/>
+</g>
+<!-- proc~alloc_hfint64_r4 -->
+<g id="proc~~gpuavailable~~CalledByGraph_node85" class="node">
+<title>proc~alloc_hfint64_r4</title>
+<g id="a_proc~~gpuavailable~~CalledByGraph_node85"><a xlink:href=".././proc/alloc_hfint64_r4.html" xlink:title="Alloc_hfInt64_r4">
+<polygon fill="#d9534f" stroke="#d9534f" points="122.5,-24 24.5,-24 24.5,0 122.5,0 122.5,-24"/>
+<text text-anchor="middle" x="73.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Alloc_hfInt64_r4</text>
+</a>
+</g>
+</g>
+<!-- proc~alloc_hfint64_r4&#45;&gt;proc~gpuavailable -->
+<g id="proc~~gpuavailable~~CalledByGraph_edge84" class="edge">
+<title>proc~alloc_hfint64_r4&#45;&gt;proc~gpuavailable</title>
+<path fill="none" stroke="#ff0000" d="M122.86,-17.07C132.18,-20.28 140.92,-25.28 147,-33 202.14,-103.08 220.92,-1535.67 223.25,-1732.63"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.75,-1732.72 223.36,-1742.68 226.75,-1732.64 219.75,-1732.72"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="594pt" height="32pt"
+ viewBox="0.00 0.00 594.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 590,-28 590,4 -4,4"/>
+<!-- Subroutine -->
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
+<text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388,-24 244,-24 244,0 388,0 388,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463.5,-24 406.5,-24 406.5,0 463.5,0 463.5,-24"/>
+<text text-anchor="middle" x="435" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="586,-24 482,-24 482,0 586,0 586,-24"/>
+<text text-anchor="middle" x="534" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title">Source Code</h3></div>
+  <div class="list-group">
+    <a class="list-group-item" href="../proc/gpuavailable.html#src">GPUAvailable</a>
+  </div>
+</div>
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+    <section>
+    <h2><span class="anchor" id="src"></span>Source Code</h2>
+    <div class="highlight"><pre><span></span>  <span class="k">FUNCTION </span><span class="n">GPUAvailable</span><span class="p">()</span> <span class="k">RESULT</span><span class="p">(</span><span class="n">avail</span><span class="p">)</span>
+    <span class="k">IMPLICIT NONE</span>
+<span class="k">    </span><span class="kt">LOGICAL</span> <span class="kd">::</span> <span class="n">avail</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">gpuCount</span>
+    <span class="kt">INTEGER</span><span class="p">(</span><span class="nb">KIND</span><span class="p">(</span><span class="n">hipSuccess</span><span class="p">))</span> <span class="kd">::</span> <span class="n">err</span>
+
+    <span class="n">err</span> <span class="o">=</span> <span class="n">hipGetDeviceCount</span><span class="p">(</span><span class="n">gpuCount</span><span class="p">)</span>
+    <span class="k">IF</span> <span class="p">(</span><span class="n">gpuCount</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">.</span><span class="nb">AND</span><span class="p">.</span> <span class="n">err</span> <span class="o">==</span> <span class="n">hipSuccess</span><span class="p">)</span> <span class="k">THEN</span>
+<span class="k">      </span><span class="n">avail</span> <span class="o">=</span> <span class="p">.</span><span class="n">TRUE</span><span class="p">.</span>
+    <span class="k">ELSE</span>
+<span class="k">      </span><span class="n">avail</span> <span class="o">=</span> <span class="p">.</span><span class="n">FALSE</span><span class="p">.</span>
+    <span class="k">END IF</span>
+
+<span class="k">  END FUNCTION </span><span class="n">GPUAvailable</span>
+</pre></div>
+
+    </section>
+    <br>
+    
+    
+    </div>
+  </div>
+
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2021 Anti-Capitalist Software License
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+             on 2021-12-06 19:13  
+            
+          </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>
