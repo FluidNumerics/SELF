@@ -788,13 +788,17 @@ CONTAINS
     ! Local
     INTEGER :: nSteps
     REAL(prec) :: dt
+    REAL(prec) :: t1, t2
 
     IF( this % integrator == RK3 )THEN
     
       ! Step forward
       dt = this % dt
       nSteps = INT(( endTime - this % simulationTime )/dt)
+      CALL CPU_TIME(t1)
       CALL this % TimeStepRK3( nSteps )
+      CALL CPU_TIME(t2)
+      PRINT*, nSteps, ' steps took ', (t2-t1), ' seconds'
 
       ! Take any additional steps to reach desired endTime
       this % dt = endTime - this % simulationTime
