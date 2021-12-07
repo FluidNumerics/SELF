@@ -1,0 +1,52 @@
+BootStrap: docker
+From: gcr.io/self-fluids/self-base:latest
+
+%files
+
+   . /build
+
+%post
+
+   export BUILD_TYPE=release
+   export GPU_TARGET=sm_72
+   export HIP_PLATFORM=nvidia
+   
+   # Install SELF
+   . /etc/profile.d/z10_spack_environment.sh && \
+   cd /build && \
+   BUILD=${BUILD_TYPE} \
+   SELF_PREFIX=/opt/self \
+   FC=hipfort \
+   HIPFORT_GPU=${GPU_TARGET} \
+   HIPFORT_COMPILER=h5pfc \
+   PREC=double \
+   make && \
+   cp -r /build/src /opt/self
+   
+   
+%labels
+   Author joe@fluidnumerics.com
+   OS Ubuntu
+   Compiler gcc@9.2.0
+   MPI openmpi@4.0.5
+   Dependencies "hdf5@1.12.0+cxx+fortran+mpi, feq-parse@v1.1.0, flap@master"
+   Platform amd
+   GPU sm_72
+
+%environment
+   export LD_LIBRARY_PATH=/opt/view/lib:/opt/self/lib:/opt/feqparse/lib:/opt/FLAP/lib:$LD_LIBRARY_PATH
+   export PATH=/opt/self/bin:/opt/view/bin:$PATH
+   export INSTALL_ROOT=/opt/self
+   export GPU_ACCEL=false
+   export WORKSPACE=/workspace
+   export BUILD_TYPE=release
+   export GPU_TARGET=sm_72
+   export SPACK_VERSION="v0.16.1"
+   export HDF5_VERSION="1.12.0"
+   export HIP_PLATFORM=nvidia
+
+%help
+   The Spectral Element Library in Fortran is an OO Fortran library that is used to create PDE and ODE solvers
+   using Spectral Element Methods. This container includes the SELF library in addition to a command line interface
+   (self), that can be used to test drive interpolation and calculus operations using spectral element routines defined
+   by SELF.

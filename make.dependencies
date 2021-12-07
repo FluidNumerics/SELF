@@ -1,17 +1,22 @@
 
 
 # feq-parse Dependencies
-SELF_FEQPARSE_LIBS ?= -L/opt/feqparse/lib -lfeqparse
-SELF_FEQPARSE_INC ?= -I/opt/feqparse/include
+SELF_FEQPARSE_LIBS ?= -L/opt/view/lib -lfeqparse
+SELF_FEQPARSE_INC ?= -I/opt/view/include
 
 SELF_FLIBS += $(SELF_FEQPARSE_LIBS)
 SELF_FFLAGS += $(SELF_FEQPARSE_INC)
 
 # FLAP Dependencies
-SELF_FLAP_LIBS ?= -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF
-SELF_FLAP_INC ?= -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/FLAP/include/FACE
+SELF_FLAP_LIBS ?= -L/opt/view/lib/ -lFLAP -lFACE -lPENF
+SELF_FLAP_INC ?= -I/opt/view/include/FLAP -I/opt/view/include/PENF -I/opt/view/include/FACE
 
 SELF_FLIBS += $(SELF_FLAP_LIBS)
 SELF_FFLAGS += $(SELF_FLAP_INC)
 
+# HDF5
+SELF_HDF5_LIBS ?= -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm
+SELF_HDF5_INC ?= -I/opt/view/include/shared
 
+SELF_FLIBS += $(SELF_HDF5_LIBS)
+SELF_FFLAGS += $(SELF_HDF5_INC)

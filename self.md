@@ -1,6 +1,6 @@
 ---
 project: SELF
-summary: SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.
+summary: SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.
 author: Joe Schoonover
 author_description: Committed to service for science
 github: https://github.com/schoonovernumerics

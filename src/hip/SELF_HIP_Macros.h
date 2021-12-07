@@ -18,6 +18,7 @@
 #endif
 
 #define INDEX(i,j,N) i+j*(N+1)
+#define INDEX3(i,j,k,Ni,Nj) i+Ni*(j+Nj*k)
 #define SC_1D_INDEX(i,iVar,iel,N,nVar) i+(N+1)*(iVar + nVar*iel)
 #define SCB_1D_INDEX(iVar,iSide,iel,N,nVar) iVar + nVar*(iSide + 2*iel)
 

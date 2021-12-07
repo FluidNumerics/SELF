@@ -1,13 +1,12 @@
 # Compiler
 
-
-FC ?= gfortran
+HIPFC ?= /opt/rocm/bin/hipfc
 HIPFORT_COMPILER ?= gfortran
-HIPFORT_GPU ?= gfx900 
+HIPFORT_GPU ?= gfx900
 ROCM_DIR ?= /opt/rocm
 CUDA_PATH ?= /usr/local/cuda
-BUILD ?= dev
 PREC ?= single
+SELF_FFLAGS ?= -cpp -pg -g -O3 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
 
 
 ifeq ($(PREC),double)
@@ -16,39 +15,20 @@ ifeq ($(PREC),double)
 endif
 
  
-ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER)), hipfc-gfortran)
-  FC = hipfc
-  CXX = hipfc  
-  AR = gcc-ar
+FC = $(HIPFC) 
+CXX = $(HIPFC) 
+AR = gcc-ar
+SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+SELF_CXXFLAGS += -v -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET) -I$(ROCM_DIR)/include
 
-  ifeq ($(findstring gfx, $(OFFLOAD_ARCH)), gfx)
-    SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
-    SELF_CXXFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
-  else ifeq ($(findstring sm, $(OFFLOAD_ARCH)), sm)
-    SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(HIPFORT_GPU)
-    SELF_CXXFLAGS += --gpu-architecture $(HIPFORT_GPU)
-  endif
+#  ifeq ($(findstring gfx, $(OFFLOAD_ARCH)), gfx)
+#    SELF_SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+#    SELF_SELF_CXXFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+#  else ifeq ($(findstring sm, $(OFFLOAD_ARCH)), sm)
+#    SELF_SELF_FFLAGS += -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET)
+#    SELF_SELF_CXXFLAGS += --gpu-architecture $(GPU_TARGET)
+#  endif
 
-  $(info Fortran Compiler : $(FC))
-  $(info HIPFORT Compiler : $(HIPFORT_COMPILER))
-  GPU_ACCELERATED = true
-else ifeq ($(findstring gfortran,$(FC)), gfortran)
-  FC = gfortran
-  AR = gcc-ar
-else
-  $(error unrecognized compiler $(FC).)
-endif
-
-
-ifeq ($(findstring gfortran,$(FC))-$(BUILD), gfortran-dev)
-  SELF_FFLAGS += -cpp -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow
-else ifeq ($(findstring gfortran,$(FC))-$(BUILD), gfortran-release)
-  SELF_FFLAGS += -cpp -O3
-else ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER))-$(BUILD), hipfc-gfortran-dev)
-  SELF_FFLAGS += -v -cpp -g -Og -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow -DGPU
-  SELF_CXXFLAGS += -v -g -Og
-else ifeq ($(findstring hipfc,$(FC))-$(findstring gfortran,$(HIPFORT_COMPILER))-$(BUILD), hipfc-gfortran-release)
-  SELF_FFLAGS += -v -cpp -O3 -DGPU
-else
-  $(error unrecognized build target $(BUILD).)
-endif
+$(info HIPFC : $(HIPFC))
+$(info Fortran Compiler : $(HIPFORT_COMPILER))
+$(GPU Target : $(HIPFORT_GPU))

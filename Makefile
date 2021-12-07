@@ -8,6 +8,7 @@
 #   
 #   * FLAP (https://github.com/szaghi/FLAP) ( For dev builds )
 #   * feq-parse (https://github.com/fluidnumerics/feq-parse) ( For dev builds )
+#   * HDF5
 #
 #-----------------------
 # Environment variables
@@ -21,17 +22,19 @@
 #     PREC                   Set the floating point precision in SELF. (Default: single | Options : single, double)
 #
 #   Compiler and Target Hardware Options
-#     FC                     Set the Fortran compiler. (Default: gfortran | Options: gfortran)
+#     HIPFC                  Set the full path to hipfc. (Default: hipfc)
 #     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: gfortran | Options: gfortran)
 #     HIPFORT_GPU            Set the target GPU platform. (Default: gfx900 | Options gfx900, sm35, sm50, sm70) 
 #     ROCM_DIR               Set the path to ROCm installation (Default: /opt/rocm)
-#     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if HIPFORT_GPU is an Nvidia GPU)
+#     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if GPU_TARGET is an Nvidia GPU)
 #
 #   Dependency Options
-#     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/feqparse/lib -lfeqparse)
-#     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/feqparse/include)
-#     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/FLAP/lib/ -lFLAP -lFACE -lPENF) 
-#     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/FLAP/include/FLAP -I/opt/FLAP/include/PENF -I/opt/self/include/FACE)
+#     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/view/lib -lfeqparse)
+#     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/view/include)
+#     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/view/lib/ -lFLAP -lFACE -lPENF) 
+#     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/view/include/FLAP -I/opt/view/include/PENF -I/opt/view/include/FACE)
+#     SELF_HDF5_LIBS         Set the linker flags for hdf5 (Default: -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm)
+#     SELF_HDF5_INC          Set the includes flags for hdf5 (Default: -I/opt/view/include/shared)
 #
 # ================================================================================================================================================= #
 

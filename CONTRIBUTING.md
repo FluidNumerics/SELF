@@ -15,9 +15,46 @@ If you are interested in making a code contribution and would like to learn more
 * [Understanding the SELF Software Layout](link needed)
 * [Commit Guidelines](link needed)
 
+## Branching Model
+
+
 ## How do I make a contribution?
 
-### Contribute Code
+### Contributing Code as a Maintainer
+Maintainers have access to the SELF Jira board that is managed by OctopusSkeleton. When contributing as a maintainer, you must include JIRA ticket numbers in commits, branches, and pull requests.
+
+
+Developers just have to reference Jira issue keys in commits, branches, pull requests, etc, as described in the table below.
+
+In all cases, the issue key must use to the default Jira key format – that is, two or more uppercase letters ([A-Z][A-Z]+), followed by a hyphen and the issue number. For example, ABC-123.
+
+ 	Tool	Instructions
+Commits	Bitbucket, GitLab, GitHub, GitHub Enterprise, Fisheye
+Other service providers or SCM tools	Include the issue key in the commit message.
+For example, a commit message like this "TIS-1 Initial commit" will automatically transition the TIS-1 issue from 'To Do' to 'In Progress'.
+Branches	Bitbucket, GitLab, GitHub, GitHub Enterprise, Fisheye
+Other service providers or SCM tools	Include the issue key in the branch name when you create the branch.
+If you create the branch from the Development panel in a Jira issue, the issue key is added automatically.
+For example, if you name your branch "TIS-2_feature", the TIS-2 issue in Jira will automatically transition from 'To Do' to 'In Progress'. (Note that Git doesn't allow spaces in branch names.)
+Pull requests	Bitbucket, GitLab, GitHub,
+GitHub Enterprise
+Other service providers or SCM tools	Do at least one of the following:
+Include a commit in the pull request that has the issue key in the commit message. Note, the commit cannot be a merge commit.
+Include the issue key in the pull request title.
+Ensure that the source branch name includes the issue key.
+If you create the pull request from the Branches dialog of the Development panel in a Jira issue, the issue key is added automatically.
+For example, if you create a pull request that has "TIS-3" in the title, the TIS-3 issue will automatically transition from 'In Progress' to 'In Review'. If you reopen, decline, or merge the pull request, it will also transition the TIS-3 issue accordingly.
+Reviews	Crucible	Include the issue key in the review title when you create the review.
+For example, if you name your review "TIS-4 New story" and start the review, the TIS-4 issue will automatically transition from 'In Progress' to 'In Review'. If you reject, abandon, or close the review, it will also transition the TIS-4 issue accordingly.
+Builds	Bamboo
+Bitbucket Pipelines
+Other service providers, SCM tools, or CI/CD Pipelines	For Bamboo, a build is automatically linked to an issue if one of the build's commits includes the issue key in its commit message. The issue key must be included in the commit to activate this feature.
+For Pipelines, simply include the issue key in the branch name.
+Deployment	Bamboo
+Bitbucket Pipelines
+Other service providers, SCM tools, or CI/CD Pipelines	A deployment to an environment, such as production or testing, is linked if a commit associated with the deploy contains the issue key in its commit message. The issue key must be included in the commit to activate this feature.
+
+### Contribute Code (Non-maintainer)
 1. Find an issue that you are interested in addressing or a feature that you would like to add.
 2. Fork the repository associated with the issue to your local GitHub organization. This means that you will have a copy of the repository under your-GitHub-username/SELF.
 3. Clone the repository to your local machine using git clone https://github.com/github-username/SELF.git.

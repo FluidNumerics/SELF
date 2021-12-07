@@ -5,11 +5,11 @@
 // Template
 __global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar, int nEl){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
 
   // How to access scalars 
@@ -61,9 +61,9 @@ extern "C"
 // ScalarGridInterp_1D //
 __global__ void ScalarGridInterp_1D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
   real fm = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -77,17 +77,17 @@ extern "C"
 {
   void ScalarGridInterp_1D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarGridInterp_1D_gpu), dim3(nVar,nEl,1), dim3(M+1,1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  ScalarGridInterp_1D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // ScalarGridInterp_2D //
 __global__ void ScalarGridInterp_2D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real fij = 0.0;
   real fi = 0.0;
@@ -106,17 +106,17 @@ extern "C"
 {
   void ScalarGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarGridInterp_2D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  ScalarGridInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // VectorGridInterp_2D //
 __global__ void VectorGridInterp_2D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real fij[2] = {0.0};
   real fi[2] = {0.0};
@@ -139,17 +139,17 @@ extern "C"
 {
   void VectorGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorGridInterp_2D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  VectorGridInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // TensorGridInterp_2D //
 __global__ void TensorGridInterp_2D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real fij[4] = {0.0};
   real fi[4] = {0.0};
@@ -180,18 +180,18 @@ extern "C"
 {
   void TensorGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorGridInterp_2D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  TensorGridInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // ScalarGridInterp_3D //
 __global__ void ScalarGridInterp_3D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real fijk = 0.0;
   real fij = 0.0;
@@ -215,18 +215,18 @@ extern "C"
 {
   void ScalarGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarGridInterp_3D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  ScalarGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // VectorGridInterp_3D //
 __global__ void VectorGridInterp_3D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real fijk[3] = {0.0};
   real fij[3] = {0.0};
@@ -262,18 +262,18 @@ extern "C"
 {
   void VectorGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorGridInterp_3D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  VectorGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // TensorGridInterp_3D //
 __global__ void TensorGridInterp_3D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real fijk[9] = {0.0};
   real fij[9] = {0.0};
@@ -345,16 +345,16 @@ extern "C"
 {
   void TensorGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorGridInterp_3D_gpu), dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0, *iMatrix, *f, *fInterp, N, M, nVar);
+	  TensorGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
   } 
 }
 
 // ScalarBoundaryInterp_1D //
 __global__ void ScalarBoundaryInterp_1D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t bid = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t bid = threadIdx.x;
 
   real fb = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -367,15 +367,15 @@ extern "C"
 {
   void ScalarBoundaryInterp_1D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarBoundaryInterp_1D_gpu), dim3(nVar,nEl,1), dim3(2,1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  ScalarBoundaryInterp_1D_gpu<<<dim3(nVar,nEl,1), dim3(2,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 // ScalarBoundaryInterp_2D //
 __global__ void ScalarBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
   real fb[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -394,17 +394,17 @@ extern "C"
 {
   void ScalarBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  ScalarBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
 // VectorBoundaryInterp_2D //
 __global__ void VectorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t idir = hipThreadIdx_x+1;
-  size_t i = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t idir = threadIdx.x+1;
+  size_t i = threadIdx.y;
 
   real fb[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -423,16 +423,16 @@ extern "C"
 {
   void VectorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(2,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  VectorBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(2,N+1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
 // TensorBoundaryInterp_2D //
 __global__ void TensorBoundaryInterp_2D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
   real fb[16] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -482,16 +482,16 @@ extern "C"
 {
   void TensorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-    hipLaunchKernelGGL((TensorBoundaryInterp_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+    TensorBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   }
 }
 // ScalarBoundaryInterp_3D //
 __global__ void ScalarBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real fb[6] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -514,18 +514,18 @@ extern "C"
 {
   void ScalarBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  ScalarBoundaryInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
 // VectorBoundaryInterp_3D //
 __global__ void VectorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t idir = hipThreadIdx_x+1;
-  size_t i = hipThreadIdx_y;
-  size_t j = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t idir = threadIdx.x+1;
+  size_t i = threadIdx.y;
+  size_t j = threadIdx.z;
 
   real fb[6] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -548,17 +548,17 @@ extern "C"
 {
   void VectorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(3,N+1,N+1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  VectorBoundaryInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(3,N+1,N+1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
 // TensorBoundaryInterp_3D //
 __global__ void TensorBoundaryInterp_3D_gpu(real *bMatrix, real *f, real *fBound, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   for (int col=1; col<=3; col++){
     for (int row=1; row<=3; row++){
@@ -589,16 +589,16 @@ extern "C"
 {
   void TensorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorBoundaryInterp_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *bMatrix, *f, *fBound, N, nVar);
+	  TensorBoundaryInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
 // Derivative_1D //
 __global__ void Derivative_1D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
   real fm = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -612,16 +612,16 @@ extern "C"
 {
   void Derivative_1D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((Derivative_1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  Derivative_1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // DGDerivative_1D //
 __global__ void DGDerivative_1D_gpu(real *dMatrix, real *bMatrix, real *qWeight, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
 
   real fm = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -639,18 +639,17 @@ extern "C"
 {
   void DGDerivative_1D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeight, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((DGDerivative_1D_gpu), dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0,
-                        *dMatrix, *bMatrix, *qWeight, *f, *bf, *df, N, nVar);
+	  DGDerivative_1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*dMatrix, *bMatrix, *qWeight, *f, *bf, *df, N, nVar);
   }
 }
 
 // ScalarGradient_2D //
 __global__ void ScalarGradient_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real fs = 0.0;
   real fp = 0.0;
@@ -667,16 +666,16 @@ extern "C"
 {
   void ScalarGradient_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  ScalarGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 __global__ void ScalarDGGradient_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real fs = 0.0;
   real fp = 0.0;
@@ -700,17 +699,17 @@ extern "C"
 {
   void ScalarDGGradient_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarDGGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  ScalarDGGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   } 
 }
 
 // VectorGradient_2D //
 __global__ void VectorGradient_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real dfloc[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -730,17 +729,17 @@ extern "C"
 {
   void VectorGradient_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  VectorGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // VectorDGGradient_2D //
 __global__ void VectorDGGradient_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real dfloc[4] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -770,17 +769,17 @@ extern "C"
 {
   void VectorDGGradient_2D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorDGGradient_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  VectorDGGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   } 
 }
 
 // VectorDivergence_2D //
 __global__ void VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real dfloc = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -795,17 +794,17 @@ extern "C"
 {
   void VectorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  VectorDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // VectorDGDivergence_2D //
 __global__ void VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -813,11 +812,11 @@ __global__ void VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *q
              f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
   }
 
-  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += (bf[VEB_2D_INDEX(1,j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
-            bf[VEB_2D_INDEX(1,j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += (bf[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
+            bf[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
            qWeights[i] +
-           (bf[VEB_2D_INDEX(2,i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
-            bf[VEB_2D_INDEX(2,i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
+           (bf[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
+            bf[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
            qWeights[j];
 
 
@@ -827,17 +826,17 @@ extern "C"
 {
   void VectorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorDGDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  VectorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   } 
 }
 
 // VectorCurl_2D //
 __global__ void VectorCurl_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real dfloc = 0.0;
   for (int ii=0; ii<N+1; ii++) {
@@ -852,17 +851,17 @@ extern "C"
 {
   void VectorCurl_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorCurl_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  VectorCurl_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // TensorDivergence_2D //
 __global__ void TensorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   real df1 = 0.0;
   real df2 = 0.0;
@@ -882,17 +881,17 @@ extern "C"
 {
   void TensorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  TensorDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // TensorDGDivergence_2D //
 __global__ void TensorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
 
   df[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 0.0;
   df[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 0.0;
@@ -920,18 +919,18 @@ extern "C"
 {
   void TensorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorDGDivergence_2D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  TensorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   }
 }
 
 // ScalarGradient_3D //
 __global__ void ScalarGradient_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real dfloc[3] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -948,18 +947,18 @@ extern "C"
 {
   void ScalarGradient_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((ScalarGradient_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  ScalarGradient_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // VectorGradient_3D //
 __global__ void VectorGradient_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real dfloc[9] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -988,18 +987,18 @@ extern "C"
 {
   void VectorGradient_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorGradient_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  VectorGradient_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // VectorDivergence_3D //
 __global__ void VectorDivergence_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = 0.0; 
   for (int ii=0; ii<N+1; ii++) {
@@ -1014,18 +1013,18 @@ extern "C"
 {
   void VectorDivergence_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  VectorDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // VectorDGDivergence_3D //
 __global__ void VectorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] = 0.0; 
   for (int ii=0; ii<N+1; ii++) {
@@ -1033,14 +1032,14 @@ __global__ void VectorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *q
              f[VE_3D_INDEX(2,i,ii,k,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]+
              f[VE_3D_INDEX(3,i,j,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+k*(N+1)];
   }
-  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += (bf[VEB_3D_INDEX(1,j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
-            bf[VEB_3D_INDEX(1,j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
+  df[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)] += (bf[SCB_3D_INDEX(j,k,iVar,3,iEl,N,nVar)]*bMatrix[i+(N+1)]+
+            bf[SCB_3D_INDEX(j,k,iVar,5,iEl,N,nVar)]*bMatrix[i])/
            qWeights[i]+
-           (bf[VEB_3D_INDEX(2,i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
-            bf[VEB_3D_INDEX(2,i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
+           (bf[SCB_3D_INDEX(i,k,iVar,4,iEl,N,nVar)]*bMatrix[j+(N+1)]+
+            bf[SCB_3D_INDEX(i,k,iVar,2,iEl,N,nVar)]*bMatrix[j])/
            qWeights[j]+
-           (bf[VEB_3D_INDEX(3,i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
-            bf[VEB_3D_INDEX(3,i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
+           (bf[SCB_3D_INDEX(i,j,iVar,6,iEl,N,nVar)]*bMatrix[k+(N+1)]+
+            bf[SCB_3D_INDEX(i,j,iVar,1,iEl,N,nVar)]*bMatrix[k])/
            qWeights[k];
 
 
@@ -1050,18 +1049,18 @@ extern "C"
 {
   void VectorDGDivergence_3D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorDGDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  VectorDGDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   } 
 }
 
 // VectorCurl_3D //
 __global__ void VectorCurl_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real dfloc[3] = {0.0};
   for (int ii=0; ii<N+1; ii++) {
@@ -1082,18 +1081,18 @@ extern "C"
 {
   void VectorCurl_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((VectorCurl_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  VectorCurl_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // TensorDivergence_3D //
 __global__ void TensorDivergence_3D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   real df1 = 0.0;
   real df2 = 0.0;
@@ -1121,18 +1120,18 @@ extern "C"
 {
   void TensorDivergence_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dMatrix, *f, *df, N, nVar);
+	  TensorDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
   } 
 }
 
 // TensorDGDivergence_3D //
 __global__ void TensorDGDivergence_3D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
 
-  size_t iVar = hipBlockIdx_x;
-  size_t iEl = hipBlockIdx_y;
-  size_t i = hipThreadIdx_x;
-  size_t j = hipThreadIdx_y;
-  size_t k = hipThreadIdx_z;
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+  size_t k = threadIdx.z;
 
   df[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = 0.0;
   df[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = 0.0;
@@ -1188,6 +1187,6 @@ extern "C"
 {
   void TensorDGDivergence_3D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
-	  hipLaunchKernelGGL((TensorDGDivergence_3D_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0, *dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+	  TensorDGDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
   } 
 }

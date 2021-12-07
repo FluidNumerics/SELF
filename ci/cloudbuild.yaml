@@ -1,0 +1,76 @@
+
+steps:
+- id: Build Docker Image (Nvidia GPU)
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','GPU_TARGET=sm_72',
+         '--build-arg','HIP_PLATFORM=nvidia',
+         '-f','img/Dockerfile',
+         '.',
+         '-t',
+         'gcr.io/${PROJECT_ID}/self-nvidia:${SHORT_SHA}']
+  waitFor: ["-"]
+
+- id: Build Docker Image (AMD GPU)
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','GPU_TARGET=gfx908',
+         '--build-arg','HIP_PLATFORM=amd',
+         '-f','img/Dockerfile',
+         '.',
+         '-t',
+         'gcr.io/${PROJECT_ID}/self-amd:${SHORT_SHA}']
+  waitFor: ["-"]
+
+- id: Build Singularity Image (Nvidia)
+  name: 'quay.io/singularity/singularity:v3.7.1'
+  args: ['build',
+         'self-nvidia.sif',
+         'img/Singularity.nvidia']
+  waitFor: ["-"]
+
+- id: Build Singularity Image (AMD)
+  name: 'quay.io/singularity/singularity:v3.7.1'
+  args: ['build',
+         'self-amd.sif',
+         'img/Singularity.amd']
+  waitFor: ["-"]
+
+    #- id: CI/CB (Singularity Nvidia)
+    #  name: 'gcr.io/research-computing-cloud/fluid-run'
+    #  args: 
+    #  - '--build-id=${BUILD_ID}'
+    #  - '--git-sha=${COMMIT_SHA}'
+    #  - '--project=${PROJECT_ID}'
+    #  - '--zone=${_ZONE}'
+    #  - '--gce-image=projects/fluid-cluster-ops/global/images/family/rcc-centos-7-v300'
+    #  - '--artifact-type=singularity'
+    #  - '--compiler="gcc@9.3.0"'
+    #  - '--target-arch=""'
+    #  - '--singularity-image=self-nvidia.sif'
+    #  - '--rcc-tfvars=ci/fluid.auto.tfvars'
+    #  - '--ci-file=fluid-run.yaml'
+    #  - '--save-results'
+    #  - '--ignore-job-dependencies'
+    #
+
+images: ['gcr.io/${PROJECT_ID}/self-nvidia:${SHORT_SHA}',
+         'gcr.io/${PROJECT_ID}/self-amd:${SHORT_SHA}' ]
+
+artifacts:
+  objects:
+    location: 'gs://self-fluids-singularity/${SHORT_SHA}'
+    paths: ['self-nvidia.sif','self-amd.sif']
+
+
+options:
+ machineType: 'E2_HIGHCPU_32'
+ diskSizeGb: 500
+
+timeout: 14400s
+
+
+substitutions:
+  _ZONE: 'us-west1-b'
+
+

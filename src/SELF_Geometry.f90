@@ -1,3 +1,9 @@
+!
+! Copyright 2020 Fluid Numerics LLC
+! Author : Joseph Schoonover (joe@fluidnumerics.com)
+! Support : self@higherordermethods.org
+!
+! //////////////////////////////////////////////////////////////////////////////////////////////// !
 MODULE SELF_Geometry
 
   USE SELF_Constants
@@ -35,6 +41,8 @@ MODULE SELF_Geometry
     TYPE(Vector2D) :: x ! Physical positions
     TYPE(Tensor2D) :: dxds ! Covariant basis vectors
     TYPE(Tensor2D) :: dsdx ! Contavariant basis vectors
+    TYPE(Vector2D) :: nHat ! Normal Vectors pointing across coordinate lines
+    TYPE(Scalar2D) :: nScale ! Boundary scale
     TYPE(Scalar2D) :: J ! Jacobian of the transformation
 
   CONTAINS
@@ -56,6 +64,8 @@ MODULE SELF_Geometry
     TYPE(Vector3D) :: x ! Physical positions
     TYPE(Tensor3D) :: dxds ! Covariant basis vectors
     TYPE(Tensor3D) :: dsdx ! Contavariant basis vectors
+    TYPE(Vector3D) :: nHat ! Normal Vectors pointing across coordinate lines
+    TYPE(Scalar3D) :: nScale ! Boundary scale
     TYPE(Scalar3D) :: J ! Jacobian of the transformation
 
   CONTAINS
@@ -69,14 +79,14 @@ MODULE SELF_Geometry
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
 
   END TYPE SEMHex
-#ifdef GPU
+
   INTERFACE
     SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper(dxds,dsdx,N,nEl) &
       bind(c,name="CalculateContravariantBasis_SEMQuad_gpu_wrapper")
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dxds,dsdx
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE CalculateContravariantBasis_SEMQuad_gpu_wrapper
   END INTERFACE
 
@@ -86,7 +96,7 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dsdx,J
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper
   END INTERFACE
 
@@ -96,7 +106,7 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dxds,dsdx
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE CalculateContravariantBasis_SEMHex_gpu_wrapper
   END INTERFACE
 
@@ -106,11 +116,9 @@ MODULE SELF_Geometry
       USE iso_c_binding
       IMPLICIT NONE
       TYPE(c_ptr) :: dsdx,J
-      INTEGER,VALUE :: N,nEl
+      INTEGER(C_INT),VALUE :: N,nEl
     END SUBROUTINE AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper
   END INTERFACE
-
-#endif
 
 CONTAINS
 
@@ -156,10 +164,8 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
-#ifdef GPU
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
-#endif
 
   END SUBROUTINE UpdateHost_Geometry1D
 
@@ -167,14 +173,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Geometry1D),INTENT(inout) :: myGeom
 
-#ifdef GPU
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
-#endif
 
   END SUBROUTINE UpdateDevice_Geometry1D
 
-  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
     IMPLICIT NONE
@@ -184,15 +188,23 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,i,nid
     TYPE(Scalar1D) :: xMesh
+    INTEGER :: quadrature
+
+    IF (PRESENT(meshQuadrature)) THEN
+      quadrature = meshQuadrature
+    ELSE
+      quadrature = GAUSS_LOBATTO
+    END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
     ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+    CALL xMesh % Init(mesh % nGeo,quadrature, &
                       cqDegree,cqType, &
                       1,mesh % nElem)
 
@@ -200,12 +212,12 @@ CONTAINS
     nid = 1
     DO iel = 1,mesh % nElem
       DO i = 0,mesh % nGeo
-        xMesh % interior % hostData(i,1,iel) = mesh % nodeCoords % hostData(nid)
+        xMesh % interior % hostData(i,1,iel) = mesh % hopr_nodeCoords % hostData(nid)
         nid = nid + 1
       END DO
     END DO
 
-    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+    ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
     CALL xMesh % GridInterp(myGeom % x,.FALSE.)
 
     CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
@@ -262,6 +274,20 @@ CONTAINS
                               nVar=1, &
                               nElem=nElem)
 
+    CALL myGeom % nHat % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
+    CALL myGeom % nScale % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
     CALL myGeom % J % Init(N=cqDegree, &
                            quadratureType=cqType, &
                            M=tqDegree, &
@@ -278,6 +304,8 @@ CONTAINS
     CALL myGeom % x % Free()
     CALL myGeom % dxds % Free()
     CALL myGeom % dsdx % Free()
+    CALL myGeom % nHat % Free()
+    CALL myGeom % nScale % Free()
     CALL myGeom % J % Free()
 
   END SUBROUTINE Free_SEMQuad
@@ -286,12 +314,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-#ifdef GPU
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
+    CALL myGeom % nHat % UpdateHost()
+    CALL myGeom % nScale % UpdateHost()
     CALL myGeom % J % UpdateHost()
-#endif
 
   END SUBROUTINE UpdateHost_SEMQuad
 
@@ -299,15 +327,16 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-#ifdef GPU
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
+    CALL myGeom % nHat % UpdateDevice()
+    CALL myGeom % nScale % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
-#endif
 
   END SUBROUTINE UpdateDevice_SEMQuad
-  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+
+  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
     !  * the degree is given by mesh % nGeo
@@ -320,16 +349,24 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
-    INTEGER :: iel,jel,elid
+    INTEGER :: iel
     INTEGER :: i,j,nid
     TYPE(Vector2D) :: xMesh
+    INTEGER :: quadrature
+
+    IF (PRESENT(meshQuadrature)) THEN
+      quadrature = meshQuadrature
+    ELSE
+      quadrature = GAUSS_LOBATTO
+    END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
     ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+    CALL xMesh % Init(mesh % nGeo,quadrature, &
                       cqDegree,cqType, &
                       1,mesh % nElem)
 
@@ -338,24 +375,25 @@ CONTAINS
     DO iel = 1,mesh % nElem
       DO j = 0,mesh % nGeo
         DO i = 0,mesh % nGeo
-          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % nodeCoords % hostData(1:2,nid)
+          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % hopr_nodeCoords % hostData(1:2,nid)
           nid = nid + 1
         END DO
       END DO
     END DO
 
-#ifdef GPU
-    CALL xMesh % UpdateDevice()
-    CALL xMesh % GridInterp(myGeom % x,.TRUE.)
-    CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % CalculateMetricTerms()
-    CALL myGeom % UpdateHost()
-#else
-    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
-    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % CalculateMetricTerms()
-#endif
+    !IF (GPUAvailable()) THEN
+    !  CALL xMesh % UpdateDevice()
+    !  CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    !  CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % CalculateMetricTerms()
+    !  CALL myGeom % UpdateHost()
+    !ELSE
+      CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+      CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+      CALL myGeom % CalculateMetricTerms()
+    !END IF
 
+    CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
 
   END SUBROUTINE GenerateFromMesh_SEMQuad
@@ -366,21 +404,8 @@ CONTAINS
     ! Local
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
+    REAL(prec) :: mag
 
-#ifdef GPU
-
-    CALL CalculateContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dxds % interior % deviceData, &
-                                                        myGeom % dsdx % interior % deviceData, &
-                                                        myGeom % dxds % N, &
-                                                        myGeom % dxds % nElem)
-    ! Interpolate the contravariant tensor to the boundaries
-    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL AdjustBoundaryContravariantBasis_SEMQuad_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
-                                                             myGeom % J % boundary % deviceData, &
-                                                             myGeom % J % N, &
-                                                             myGeom % J % nElem)
-
-#else
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
@@ -411,13 +436,57 @@ CONTAINS
             fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,1,k,iEl))
           END IF
 
-          myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = &
-            fac*myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)
+          IF( k == 1 )THEN ! South
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,2,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              fac*myGeom % dsdx % boundary % hostData(1:2,2,i,1,k,iEl)/mag
+
+
+          ELSEIF( k == 2 )THEN ! East
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,1,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
+
+          ELSEIF( k == 3 )THEN ! North
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,2,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              fac*myGeom % dsdx % boundary % hostData(1:2,2,i,1,k,iEl)/mag
+
+          ELSEIF( k == 4 )THEN ! West
+
+            mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,1,k,iEl)**2 +&
+                        myGeom % dsdx % boundary % hostData(2,1,i,1,k,iEl)**2 )
+ 
+            myGeom % nScale % boundary % hostData(i,1,k,iEl) = mag
+
+            myGeom % nHat % boundary % hostData(1:2,i,1,k,iEl) = &
+              fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
+
+          ENDIF
+          ! Set the directionality for dsdx on the boundaries
+          ! This is primarily used for DG gradient calculations,
+          ! which do not use nHat for the boundary terms.
+          myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = & 
+              myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)*fac
 
         END DO
       END DO
     END DO
-#endif
 
   END SUBROUTINE CalculateContravariantBasis_SEMQuad
 
@@ -425,20 +494,25 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMQuad),INTENT(inout) :: myGeom
 
-#ifdef GPU           
-    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
-    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
-    CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % CalculateContravariantBasis()
-#else
-    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
-    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
-    CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % CalculateContravariantBasis()
-#endif
+!    IF (GPUAvailable()) THEN
+!      CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+!      CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+!      CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+!      CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+!      CALL myGeom % UpdateHost()
+!    ELSE
+      CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
+      CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
+      CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
+      CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
+!    END IF
 
+    CALL myGeom % CalculateContravariantBasis()
+    IF (GPUAvailable()) THEN
+      CALL myGeom % dsdx % UpdateDevice()
+      CALL myGeom % nHat % UpdateDevice()
+      CALL myGeom % nScale % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
 
@@ -476,6 +550,20 @@ CONTAINS
                               nVar=1, &
                               nElem=nElem)
 
+    CALL myGeom % nHat % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
+    CALL myGeom % nScale % Init(N=cqDegree, &
+                              quadratureType=cqType, &
+                              M=tqDegree, &
+                              targetNodeType=tqType, &
+                              nVar=1, &
+                              nElem=nElem)
+
     CALL myGeom % J % Init(N=cqDegree, &
                            quadratureType=cqType, &
                            M=tqDegree, &
@@ -492,19 +580,22 @@ CONTAINS
     CALL myGeom % x % Free()
     CALL myGeom % dxds % Free()
     CALL myGeom % dsdx % Free()
+    CALL myGeom % nHat % Free()
+    CALL myGeom % nScale % Free()
     CALL myGeom % J % Free()
 
   END SUBROUTINE Free_SEMHex
+
   SUBROUTINE UpdateHost_SEMHex(myGeom)
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
-#ifdef GPU
     CALL myGeom % x % UpdateHost()
     CALL myGeom % dxds % UpdateHost()
     CALL myGeom % dsdx % UpdateHost()
+    CALL myGeom % nHat % UpdateHost()
+    CALL myGeom % nScale % UpdateHost()
     CALL myGeom % J % UpdateHost()
-#endif
 
   END SUBROUTINE UpdateHost_SEMHex
 
@@ -512,15 +603,16 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
-#ifdef GPU
     CALL myGeom % x % UpdateDevice()
     CALL myGeom % dxds % UpdateDevice()
     CALL myGeom % dsdx % UpdateDevice()
+    CALL myGeom % nHat % UpdateDevice()
+    CALL myGeom % nScale % UpdateDevice()
     CALL myGeom % J % UpdateDevice()
-#endif
 
   END SUBROUTINE UpdateDevice_SEMHex
-  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree)
+
+  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,cqType,tqType,cqDegree,tqDegree,meshQuadrature)
     ! Assumes that
     !  * mesh is using Gauss-Lobatto quadrature
     !  * the degree is given by mesh % nGeo
@@ -533,16 +625,24 @@ CONTAINS
     INTEGER,INTENT(in) :: tqType
     INTEGER,INTENT(in) :: cqDegree
     INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
-    INTEGER :: iel,jel,kel,elid
+    INTEGER :: iel
     INTEGER :: i,j,k,nid
     TYPE(Vector3D) :: xMesh
+    INTEGER :: quadrature
+
+    IF (PRESENT(meshQuadrature)) THEN
+      quadrature = meshQuadrature
+    ELSE
+      quadrature = GAUSS_LOBATTO
+    END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)
 
     ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
     ! cqDegree, cqType grid
-    CALL xMesh % Init(mesh % nGeo,GAUSS_LOBATTO, &
+    CALL xMesh % Init(mesh % nGeo,quadrature, &
                       cqDegree,cqType, &
                       1,mesh % nElem)
 
@@ -552,28 +652,27 @@ CONTAINS
       DO k = 0,mesh % nGeo
         DO j = 0,mesh % nGeo
           DO i = 0,mesh % nGeo
-            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % nodeCoords % hostData(1:3,nid)
+            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % hopr_nodeCoords % hostData(1:3,nid)
             nid = nid + 1
           END DO
         END DO
       END DO
     END DO
 
-    ! Interpolate from the mesh nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
-    CALL xMesh % UpdateDevice()
+    ! Interpolate from the mesh hopr_nodeCoords to the geometry (Possibly not gauss_lobatto quadrature)
+    !IF (GPUAvailable()) THEN
+    !  CALL xMesh % UpdateDevice()
+    !  CALL xMesh % GridInterp(myGeom % x,.TRUE.)
+    !  CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % CalculateMetricTerms()
+    !  CALL myGeom % UpdateHost()
+    !ELSE
+      CALL xMesh % GridInterp(myGeom % x,.FALSE.)
+      CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
+      CALL myGeom % CalculateMetricTerms()
+    !END IF
 
-#ifdef GPU
-    CALL xMesh % GridInterp(myGeom % x,.TRUE.)
-    CALL myGeom % x % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % CalculateMetricTerms()
-    CALL myGeom % UpdateHost()
-#else
-    CALL xMesh % GridInterp(myGeom % x,.FALSE.)
-    CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % CalculateMetricTerms()
-#endif
-
-
+    CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
 
   END SUBROUTINE GenerateFromMesh_SEMHex
@@ -584,21 +683,8 @@ CONTAINS
     ! Local
     INTEGER :: iEl,i,j,k
     REAL(prec) :: fac
+    REAL(prec) :: mag
 
-#ifdef GPU
-
-    CALL CalculateContravariantBasis_SEMHex_gpu_wrapper(myGeom % dxds % interior % deviceData, &
-                                                        myGeom % dsdx % interior % deviceData, &
-                                                        myGeom % dxds % N, &
-                                                        myGeom % dxds % nElem)
-    ! Interpolate the contravariant tensor to the boundaries
-    CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL AdjustBoundaryContravariantBasis_SEMHex_gpu_wrapper(myGeom % dsdx % boundary % deviceData, &
-                                                             myGeom % J % boundary % deviceData, &
-                                                             myGeom % J % N, &
-                                                             myGeom % J % nElem)
-
-#else
     ! Now calculate the contravariant basis vectors
     ! In this convention, dsdx(j,i) is contravariant vector i, component j
     ! To project onto contravariant vector i, dot vector along the first dimension
@@ -672,8 +758,7 @@ CONTAINS
     ! Interpolate the contravariant tensor to the boundaries
     CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
 
-    ! Now, modify the sign of dsdx so that
-    ! myGeom % dsdx % boundary is equal to the outward pointing normal vector
+    ! Now, calculate nHat (outward pointing normal)
     DO iEl = 1,myGeom % nElem
       DO k = 1,6
         DO j = 0,myGeom % J % N
@@ -684,15 +769,84 @@ CONTAINS
               fac = -SIGN(1.0_prec,myGeom % J % boundary % hostData(i,j,1,k,iEl))
             END IF
 
-            myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = &
-              fac*myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)
+            IF( k == 1 )THEN ! Bottom
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,3,i,j,1,k,iEl)**2 )
+ 
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,3,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 2 )THEN  ! South
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,2,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,2,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 3 )THEN  ! East
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,1,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,1,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 4 )THEN  ! North
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,2,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,2,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,2,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 5 )THEN  ! West
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,1,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,1,i,j,1,k,iEl)**2 )
+
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,1,i,j,1,k,iEl)/mag
+
+            ELSEIF( k == 6 )THEN  ! Top
+
+              mag = SQRT( myGeom % dsdx % boundary % hostData(1,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(2,3,i,j,1,k,iEl)**2 +&
+                          myGeom % dsdx % boundary % hostData(3,3,i,j,1,k,iEl)**2 )
+ 
+              myGeom % nScale % boundary % hostData(i,j,1,k,iEl) = mag
+
+              myGeom % nHat % boundary % hostData(1:3,i,j,1,k,iEl) = &
+                fac*myGeom % dsdx % boundary % hostData(1:3,3,i,j,1,k,iEl)/mag
+
+            ENDIF
+
+            ! Set the directionality for dsdx on the boundaries
+            ! This is primarily used for DG gradient calculations,
+            ! which do not use nHat for the boundary terms.
+            myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl) = & 
+                myGeom % dsdx % boundary % hostData(1:3,1:3,i,j,1,k,iEl)*fac
+
           END DO
         END DO
       END DO
     END DO
-
-#endif
-
 
   END SUBROUTINE CalculateContravariantBasis_SEMHex
 
@@ -700,19 +854,23 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SEMHex),INTENT(inout) :: myGeom
 
-#ifdef GPU           
-    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
-    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
-    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
-    CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+    !IF (GPUAvailable()) THEN
+    !  CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.TRUE.)
+    !  CALL myGeom % dxds % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.TRUE.)
+    !  CALL myGeom % J % BoundaryInterp(gpuAccel=.TRUE.)
+    !  CALL myGeom % UpdateHost()
+    !ELSE
+      CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
+      CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
+      CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
+      CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
+    !END IF
+
     CALL myGeom % CalculateContravariantBasis()
-#else
-    CALL myGeom % x % Gradient(myGeom % dxds,gpuAccel=.FALSE.)
-    CALL myGeom % dxds % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % dxds % Determinant(myGeom % J,gpuAccel=.FALSE.)
-    CALL myGeom % J % BoundaryInterp(gpuAccel=.FALSE.)
-    CALL myGeom % CalculateContravariantBasis()
-#endif
+    IF (GPUAvailable()) THEN
+      CALL myGeom % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE CalculateMetricTerms_SEMHex
 
