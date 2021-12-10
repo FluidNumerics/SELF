@@ -163,11 +163,11 @@ CONTAINS
       CALL this % mesh % Load(spec,this % decomp)
     ELSE
       CALL this % mesh % Load(spec)
+      CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
     ENDIF
 
     CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
 
-!    CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
 
     ! Create geometry from mesh
     CALL this % geometry % GenerateFromMesh(&
@@ -1040,6 +1040,7 @@ CONTAINS
                    ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
                    extState = this % solution % extBoundary % hostData(i,j,iVar,iSide,iEl)
                    intState = this % solution % boundary % hostData(i,j,iVar,iSide,iEl)
+                   !PRINT*, iEl, iSide, extState, intState
                    nmag = this % geometry % nScale % boundary % hostData(i,j,1,iSide,iEl)
 
                    ! Calculate the flux
