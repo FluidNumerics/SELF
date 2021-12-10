@@ -165,7 +165,7 @@ CONTAINS
 
     CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
 
-    CALL this % decomp % setElemToRank(this % mesh % nElem)
+!    CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
 
     ! Create geometry from mesh
     CALL this % geometry % GenerateFromMesh(&

@@ -143,6 +143,7 @@ MODULE SELF_Mesh
 
   TYPE,PUBLIC :: Mesh1D
     INTEGER :: nGeo
+    INTEGER :: nGlobalElem
     INTEGER :: nElem
     INTEGER :: nNodes
     INTEGER :: nCornerNodes
@@ -172,6 +173,7 @@ MODULE SELF_Mesh
 
   TYPE,PUBLIC :: Mesh2D
     INTEGER :: nGeo
+    INTEGER :: nGlobalElem
     INTEGER :: nElem
     INTEGER :: nNodes
     INTEGER :: nSides
@@ -218,6 +220,7 @@ MODULE SELF_Mesh
   TYPE,PUBLIC :: Mesh3D
     INTEGER :: nGeo
     INTEGER :: nElem
+    INTEGER :: nGlobalElem
     INTEGER :: nNodes
     INTEGER :: nSides
     INTEGER :: nCornerNodes
@@ -269,6 +272,7 @@ CONTAINS
 
     myMesh % nGeo = nGeo
     myMesh % nElem = nElem
+    myMesh % nGlobalElem = nElem
     myMesh % nNodes = nNodes
     myMesh % nCornerNodes = nElem*2
     myMesh % nUniqueNodes = 0
@@ -566,6 +570,7 @@ CONTAINS
 
     myMesh % nGeo = nGeo
     myMesh % nElem = nElem
+    myMesh % nGlobalElem = nElem
     myMesh % nNodes = nNodes
     myMesh % nSides = nSides
     myMesh % nCornerNodes = 0
@@ -1119,6 +1124,7 @@ CONTAINS
     INTEGER :: nGlobalElem
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
+    INTEGER :: nUniqueSides
     INTEGER :: nGeo,nBCs
     INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
@@ -1132,6 +1138,7 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
     CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
@@ -1175,6 +1182,7 @@ CONTAINS
     myMesh % hopr_nodeCoords = hopr_nodeCoords
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
+    myMesh % nUniqueSides = nUniqueSides
 
     iSide = 0 
     DO eid = 1,myMesh % nElem
@@ -1207,6 +1215,7 @@ CONTAINS
     INTEGER :: firstElem,nLocalElems
     INTEGER :: firstNode,nLocalNodes
     INTEGER :: firstSide,nLocalSides
+    INTEGER :: nUniqueSides
     INTEGER :: nGeo,nBCs
     INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
@@ -1220,6 +1229,7 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
     CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
@@ -1275,6 +1285,8 @@ CONTAINS
     myMesh % hopr_nodeCoords = hopr_nodeCoords
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
+    myMesh % nUniqueSides = nUniqueSides
+    myMesh % nGlobalElem = nGlobalElem
 
     iSide = 0 
     DO eid = 1,myMesh % nElem
@@ -1334,6 +1346,7 @@ CONTAINS
     INTEGER :: i,j,k,l
 
     myMesh % nElem = nElem
+    myMesh % nGlobalElem = nElem
     myMesh % nGeo = nGeo
     myMesh % nSides = nSides
     myMesh % nNodes = nNodes
@@ -1775,6 +1788,7 @@ CONTAINS
     INTEGER :: nGlobalElem
     INTEGER :: nLocalNodes
     INTEGER :: nLocalSides
+    INTEGER :: nUniqueSides
     INTEGER :: nGeo,nBCs
     INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
@@ -1788,6 +1802,12 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
     CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
+
+    PRINT*, 'Reading mesh file '//TRIM(meshFile)
+    PRINT*, 'Number of Elements : ', nGlobalElem
+    PRINT*, 'Input polynomial degree : ', nGeo
+    PRINT*, 'Number of BC types : ', nBCs
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
@@ -1812,9 +1832,9 @@ CONTAINS
 
     CALL ReadArray_HDF5(fileId,'NodeCoords',hopr_nodeCoords)
     CALL ReadArray_HDF5(fileId,'GlobalNodeIDs',hopr_globalNodeIDs)
-
     ! Read local subarray of SideInfo
     nLocalSides = hopr_elemInfo % hostData(4,nGlobalElem) - hopr_elemInfo % hostData(3,1)
+    PRINT*, 'Number of local sides : ', nLocalSides
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
@@ -1827,10 +1847,11 @@ CONTAINS
     CALL myMesh % Init(nGeo,nGlobalElem,nLocalSides,nLocalNodes,nBCs)
 
     ! Copy data from local arrays into myMesh
-    myMesh % hopr_elemInfo = hopr_elemInfo
-    myMesh % hopr_nodeCoords = hopr_nodeCoords
-    myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
-    myMesh % hopr_sideInfo = hopr_sideInfo
+    myMesh % hopr_elemInfo % hostData = hopr_elemInfo % hostData
+    myMesh % hopr_nodeCoords % hostData = hopr_nodeCoords % hostData
+    myMesh % hopr_globalNodeIDs % hostData = hopr_globalNodeIDs % hostData
+    myMesh % hopr_sideInfo % hostData = hopr_sideInfo % hostData
+    myMesh % nUniqueSides = nUniqueSides
 
     iSide = 0 
     DO eid = 1,myMesh % nElem
@@ -1862,6 +1883,7 @@ CONTAINS
     INTEGER :: firstElem,nLocalElems
     INTEGER :: firstNode,nLocalNodes
     INTEGER :: firstSide,nLocalSides
+    INTEGER :: nUniqueSides
     INTEGER :: nGeo,nBCs
     INTEGER :: eid, lsid, iSide
     TYPE(hfInt32_r2) :: hopr_elemInfo
@@ -1870,17 +1892,25 @@ CONTAINS
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
+    PRINT*, 'Reading mesh file '//TRIM(meshFile)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
     CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
+    CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
+
+    PRINT*, 'Number of Elements : ', nGlobalElem
+    PRINT*, 'Input polynomial degree : ', nGeo
+    PRINT*, 'Number of BC types : ', nBCs
 
     ! Read BCType
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
     offset(:) = 0
+    PRINT*, 'Reading boundary condition types'
     CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
+    PRINT*, 'Done Reading boundary condition types'
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
@@ -1931,6 +1961,8 @@ CONTAINS
     myMesh % hopr_nodeCoords = hopr_nodeCoords
     myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
     myMesh % hopr_sideInfo = hopr_sideInfo
+    myMesh % nUniqueSides = nUniqueSides
+    myMesh % nGlobalElem = nGlobalElem
 
     iSide = 0 
     DO eid = 1,myMesh % nElem

@@ -3027,30 +3027,33 @@ CONTAINS
         DO s1 = 1,6
 
           e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+          IF( e2 > 0 )THEN
+            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF (r2 /= mpiHandler % rankId) THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-            msgCount = msgCount + 1
-            CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
-                           (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+              msgCount = msgCount + 1
+              CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
+                             (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests % hostData(msgCount,1),iError)
 
-            msgCount = msgCount + 1
-            CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
-                           (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+              msgCount = msgCount + 1
+              CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
+                             (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests % hostData(msgCount,1),iError)
 
-          END IF
+            END IF
+
+          ENDIF
 
         END DO
       END DO

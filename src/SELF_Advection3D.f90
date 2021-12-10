@@ -167,7 +167,7 @@ CONTAINS
 
     CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
 
-    CALL this % decomp % setElemToRank(this % mesh % nElem)
+!    CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
 
     ! Create geometry from mesh
     CALL this % geometry % GenerateFromMesh(&
@@ -1222,12 +1222,20 @@ CONTAINS
     INTEGER :: iEl, i, j, k 
     CHARACTER(LEN=self_FileNameLength) :: tecFile
     CHARACTER(13) :: timeStampString
+    CHARACTER(5) :: rankString
 
     IF( PRESENT(filename) )THEN
       tecFile = filename
     ELSE
       timeStampString = TimeStamp(self % simulationTime, 's')
-      tecFile = 'solution.'//timeStampString//'.tec'
+
+      IF( self % decomp % mpiEnabled )THEN
+        WRITE(rankString,'(I5.5)') self % decomp % rankId 
+        tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
+      ELSE
+        tecFile = 'solution.'//timeStampString//'.tec'
+      ENDIF
+
     ENDIF
                       
     IF( self % gpuAccel )THEN

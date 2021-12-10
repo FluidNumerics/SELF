@@ -635,7 +635,7 @@ CONTAINS
     IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
-      quadrature = GAUSS_LOBATTO
+      quadrature = CHEBYSHEV_GAUSS_LOBATTO
     END IF
 
     CALL myGeom % Init(cqType,tqType,cqDegree,tqDegree,mesh % nElem)

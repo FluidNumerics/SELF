@@ -183,11 +183,11 @@ CONTAINS
 
     CALL h5pcreate_f(H5P_FILE_ACCESS_F,plistId,error)
     CALL h5pset_fapl_mpio_f(plistId,mpiComm,MPI_INFO_NULL,error)
-    CALL h5fopen_f(TRIM(fileName),accessFlag,fileId,error,plistId)
+
     IF (accessFlag == H5F_ACC_TRUNC_F) THEN
-      CALL h5fcreate_f(TRIM(fileName),accessFlag,fileId,error,plistId)
+      CALL h5fcreate_f(TRIM(fileName),accessFlag,fileId,error,access_prp = plistId)
     ELSE
-      CALL h5fopen_f(TRIM(fileName),accessFlag,fileId,error,plistId)
+      CALL h5fopen_f(TRIM(fileName),accessFlag,fileId,error,access_prp = plistId)
     END IF
     CALL h5pclose_f(plistId,error)
 
