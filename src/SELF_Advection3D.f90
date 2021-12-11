@@ -297,7 +297,7 @@ CONTAINS
     CALL cli % get(val=Lz, switch="--zlength")
     CALL cli % get(val=velEqnX,switch="--velocity-x")
     CALL cli % get(val=velEqnY,switch="--velocity-y")
-    CALL cli % get(val=velEqnY,switch="--velocity-z")
+    CALL cli % get(val=velEqnZ,switch="--velocity-z")
     CALL cli % get(val=icEqn,switch="--initial-condition")
     CALL cli % get(val=bcEqn,switch="--boundary-condition")
     CALL cli % get(val=sourceEqn,switch="--source")

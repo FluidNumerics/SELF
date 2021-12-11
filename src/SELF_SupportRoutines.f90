@@ -385,7 +385,7 @@ CONTAINS
     theSumOfDiffs = 0
 
     DO i = 1,N
-      theSumOfDiffs = theSumOfDiffs + arrayOne(i) - arrayTwo(i)
+      theSumOfDiffs = theSumOfDiffs + ABS(arrayOne(i) - arrayTwo(i))
     END DO
 
     IF (theSumOfDiffs == 0) THEN

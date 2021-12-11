@@ -239,6 +239,7 @@ MODULE SELF_Mesh
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r1) :: hopr_CGNSCornerMap
     TYPE(hfInt32_r2) :: hopr_CGNSSideMap
+    TYPE(hfInt32_r2) :: self_sideMap
     TYPE(hfInt32_r2) :: hopr_curveNodeMap
     TYPE(hfInt32_r3) :: hopr_curveNodeMapInv
     TYPE(hfInt32_r2) :: BCType
@@ -257,6 +258,8 @@ MODULE SELF_Mesh
     GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D_serial,Read_HOPr_Mesh3D_parallel
     PROCEDURE,PRIVATE :: Read_HOPr_Mesh3D_serial,Read_HOPr_Mesh3D_parallel
     PROCEDURE,PUBLIC :: Write_HOPr => Write_HOPr_Mesh3D
+
+    PROCEDURE,PRIVATE :: RecalculateFlip => RecalculateFlip_Mesh3D
 
   END TYPE Mesh3D
 
@@ -1376,6 +1379,9 @@ CONTAINS
     CALL myMesh % hopr_CGNSCornerMap % Alloc(loBound=1, &
                                              upBound=8)
 
+    CALL myMesh % self_sideMap % Alloc(loBound=(/1,1/), &
+                                       upBound=(/4,6/))
+
     CALL myMesh % hopr_CGNSSideMap % Alloc(loBound=(/1,1/), &
                                            upBound=(/4,6/))
 
@@ -1419,6 +1425,13 @@ CONTAINS
     myMesh % hopr_CGNSSideMap % hostData(1:4,5) = (/1,5,8,4/)
     myMesh % hopr_CGNSSideMap % hostData(1:4,6) = (/5,6,7,8/)
 
+    myMesh % self_sideMap % hostData(1:4,1) = (/1,2,3,4/) ! Bottom
+    myMesh % self_sideMap % hostData(1:4,2) = (/1,2,6,5/) ! South
+    myMesh % self_sideMap % hostData(1:4,3) = (/2,3,7,6/) ! East
+    myMesh % self_sideMap % hostData(1:4,4) = (/4,3,7,8/) ! North
+    myMesh % self_sideMap % hostData(1:4,5) = (/1,4,8,5/) ! West
+    myMesh % self_sideMap % hostData(1:4,6) = (/5,6,7,8/) ! Top
+
   END SUBROUTINE Init_Mesh3D
 
   SUBROUTINE Free_Mesh3D(myMesh)
@@ -1440,6 +1453,7 @@ CONTAINS
     CALL myMesh % self_nodeCoords % Free()
     CALL myMesh % hopr_CGNSCornerMap % Free()
     CALL myMesh % hopr_globalNodeIDs % Free()
+    CALL myMesh % self_sideMap % Free()
     CALL myMesh % BCType % Free()
 
     DEALLOCATE (myMesh % BCNames)
@@ -1595,7 +1609,9 @@ CONTAINS
              myMesh % hopr_sideInfo % hostData(1,sid) = selfQuadLinear ! Side type set to linear quad
              myMesh % hopr_sideInfo % hostData(2,sid) = usid ! Unique side id
              myMesh % hopr_sideInfo % hostData(3,sid) = nbeid ! Neighbor Element ID (0=boundary)
-             myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_Top ! 10*nbLocalSide + flip
+             ! flip == 1 indicates internal geometry of each neighboring element
+             ! has the same orientation
+             myMesh % hopr_sideInfo % hostData(4,sid) = 10*selfSide3D_Top + 1 ! 10*nbLocalSide + flip
              myMesh % hopr_sideInfo % hostData(5,sid) = 0 ! Boundary condition ID
 
           ENDIF
@@ -1778,6 +1794,85 @@ CONTAINS
 
   END SUBROUTINE Load_Mesh3D_parallel
 
+  SUBROUTINE RecalculateFlip_Mesh3D(myMesh)  
+    IMPLICIT NONE
+    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    ! Local
+    INTEGER :: e1
+    INTEGER :: s1
+    INTEGER :: e2
+    INTEGER :: s2
+    INTEGER :: flip
+    INTEGER :: bcid
+    INTEGER :: lnid1(1:4)
+    INTEGER :: lnid2(1:4)
+    INTEGER :: nid1(1:4)
+    INTEGER :: nid2(1:4)
+    INTEGER :: n1
+    INTEGER :: n2
+    INTEGER :: c1
+    INTEGER :: c2
+    INTEGER :: i
+    INTEGER :: l
+    INTEGER :: nShifts
+    LOGICAL :: theyMatch
+
+    DO e1 = 1,myMesh % nElem
+      DO s1 = 1,6
+
+        e2 = myMesh % self_sideInfo % hostData(3,s1,e1)
+        s2 = myMesh % self_sideInfo % hostData(4,s1,e1)/10
+        flip = myMesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+        bcid = myMesh % self_sideInfo % hostData(5,s1,e1)
+
+        IF (bcid == 0) THEN
+
+          n1 = myMesh % hopr_elemInfo % hostData(5,e1) ! Starting node index for element 1
+          n2 = myMesh % hopr_elemInfo % hostData(5,e2) ! Starting node index for element 2
+          lnid1 = myMesh % self_sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
+          lnid2 = myMesh % self_sideMap % hostData(1:4,s2) ! local CGNS corner node ids for element 2 side
+
+          DO l = 1, 4
+            
+            c1 = myMesh % hopr_CGNSCornerMap % hostData(lnid1(l)) ! Get the local HOPR node id for element 1
+            c2 = myMesh % hopr_CGNSCornerMap % hostData(lnid2(l)) ! Get the local HOPR node id for element 2
+            nid1(l) = myMesh % hopr_globalNodeIDs % hostData(n1+c1) ! Global node IDs for element 1 side
+            nid2(l) = myMesh % hopr_globalNodeIDs % hostData(n2+c2) ! Global node IDs for element 2 side
+
+          ENDDO
+!          PRINT*, nid1
+!          PRINT*, nid2
+          
+
+          nShifts = 0
+          theyMatch = .FALSE.
+
+          DO i = 1, 4
+
+            theyMatch = CompareArray( nid1, nid2, 4 )
+!            PRINT*, theyMatch
+
+            IF( theyMatch )THEN
+              EXIT
+            ELSE
+              nShifts = nShifts + 1
+              CALL ForwardShift( nid1, 4 )
+            ENDIF
+
+          ENDDO
+
+          myMesh % self_sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
+
+!          PRINT *, nShifts
+!          PRINT*, '==============='
+
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE RecalculateFlip_Mesh3D
+
   SUBROUTINE Read_HOPr_Mesh3D_serial(myMesh,meshFile)
     ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
     IMPLICIT NONE
@@ -1860,6 +1955,8 @@ CONTAINS
         myMesh % self_sideInfo % hostData(1:5,lsid,eid) = myMesh % hopr_sideInfo % hostData(1:5,iSide)
       ENDDO
     ENDDO
+
+    CALL myMesh % RecalculateFlip()
 
     CALL myMesh % UpdateDevice()
 
@@ -1971,6 +2068,8 @@ CONTAINS
         myMesh % self_sideInfo % hostData(1:5,lsid,eid) = myMesh % hopr_sideInfo % hostData(1:5,iSide)
       ENDDO
     ENDDO
+
+    CALL myMesh % RecalculateFlip()
 
     CALL myMesh % UpdateDevice()
 

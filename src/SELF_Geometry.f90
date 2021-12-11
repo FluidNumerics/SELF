@@ -77,6 +77,7 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_SEMHex
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMHex
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMHex
+    PROCEDURE,PRIVATE :: CheckSides => CheckSides_SEMHex
 
   END TYPE SEMHex
 
@@ -671,11 +672,125 @@ CONTAINS
       CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateMetricTerms()
     !END IF
+    CALL myGeom % CheckSides(mesh)
 
     CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
 
   END SUBROUTINE GenerateFromMesh_SEMHex
+
+  SUBROUTINE CheckSides_SEMHex(myGeom,mesh)
+    IMPLICIT NONE
+    CLASS(SEMHex),INTENT(in) :: myGeom
+    TYPE(Mesh3D),INTENT(in) :: mesh
+    ! 
+    INTEGER :: e1, s1
+    INTEGER :: e2, s2
+    INTEGER :: i1, j1
+    INTEGER :: i2, j2
+    INTEGER :: flip, bcid
+    REAL(prec) :: rms
+
+      DO e1 = 1,mesh % nElem
+        DO s1 = 1,6
+
+          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+
+          IF (bcid == 0) THEN ! Interior
+
+            rms = 0.0_prec
+
+            IF (flip == 0) THEN
+
+                DO j1 = 0,myGeom % x % N
+                  DO i1 = 0,myGeom % x % N
+                    rms = rms + &
+                          sqrt( (myGeom % x % boundary % hostdata(1,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(1,i1,j1,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(2,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(2,i1,j1,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(3,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(3,i1,j1,1,s2,e2))**2 )
+                  END DO
+                END DO
+
+            ELSEIF (flip == 1) THEN
+
+                DO j1 = 0,myGeom % x % N
+                  DO i1 = 0,myGeom % x % N
+                    i2 = j1
+                    j2 = myGeom % x % N - i1
+                    rms = rms + &
+                          sqrt( (myGeom % x % boundary % hostdata(1,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(1,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(2,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(2,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(3,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(3,i2,j2,1,s2,e2))**2 )
+                  END DO
+                END DO
+
+            ELSEIF (flip == 2) THEN
+
+                DO j1 = 0,myGeom % x % N
+                  DO i1 = 0,myGeom % x % N
+                    i2 = myGeom % x % N - i1
+                    j2 = myGeom % x % N - j1
+                    rms = rms + &
+                          sqrt( (myGeom % x % boundary % hostdata(1,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(1,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(2,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(2,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(3,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(3,i2,j2,1,s2,e2))**2 )
+                  END DO
+                END DO
+
+            ELSEIF (flip == 3) THEN
+
+                DO j1 = 0,myGeom % x % N
+                  DO i1 = 0,myGeom % x % N
+                    i2 = myGeom % x % N - j1
+                    j2 = i1
+                    rms = rms + &
+                          sqrt( (myGeom % x % boundary % hostdata(1,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(1,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(2,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(2,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(3,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(3,i2,j2,1,s2,e2))**2 )
+                  END DO
+                END DO
+
+            ELSEIF (flip == 4) THEN
+
+                DO j1 = 0,myGeom % x % N
+                  DO i1 = 0,myGeom % x % N
+                    i2 = j1
+                    j2 = i1
+                    rms = rms + &
+                          sqrt( (myGeom % x % boundary % hostdata(1,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(1,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(2,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(2,i2,j2,1,s2,e2))**2+&
+                                (myGeom % x % boundary % hostdata(3,i1,j1,1,s1,e1)-&
+                                 myGeom % x % boundary % hostdata(3,i2,j2,1,s2,e2))**2 )
+                  END DO
+                END DO
+            END IF
+
+         !   PRINT*, e1, e2, s1, s2, flip, rms
+
+          END IF
+
+        END DO
+      END DO
+      !STOP
+
+  END SUBROUTINE CheckSides_SEMHex
 
   SUBROUTINE CalculateContravariantBasis_SEMHex(myGeom)
     IMPLICIT NONE
