@@ -3,6 +3,11 @@ Copyright 2020-2021 Fluid Numerics LLC
 
 SELF is licensed for use under the [Anti-Capitalist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
 
+## Support this project
+SELF is open-source made freely available to the public. Fluid Numerics is a nano-business (less than 5 people) that is funded solely through service engagements with customers; we are not funded by venture capital in any way. Developing SELF and the associated documentation and delivering live coding sessions and tutorials all require time & labor as well as compute resources. 
+
+If you value this repository and the activities of the SELF developers, you can [support the continued development and maintenance SELF on Open Collective](https://opencollective.com/higher-order-methods/projects/fluid-self), where we transparently share our operational budget and expenses for this project. Through the [Higher Order Methods collective](https://opencollective.com/higher-order-methods) you can support a variety of activities all focused on providing publicly accessible tools and training for using spectral element methods for physical modeling.
+
 ## About
 SELF is an object-oriented Fortran library that support the implementation of Spectral Element Methods for solving partial differential equations.
 
