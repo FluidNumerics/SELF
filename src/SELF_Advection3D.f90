@@ -614,6 +614,7 @@ CONTAINS
     CLASS(Advection3D),INTENT(inout) :: this
 
     CALL this % mesh % Free()
+    CALL this % decomp % Free()
     CALL this % geometry % Free()
     CALL this % solution % Free()
     CALL this % dSdt % Free()
@@ -633,6 +634,7 @@ CONTAINS
     DEALLOCATE (this % boundaryConditionEqn)
     DEALLOCATE (this % solutionEqn)
     DEALLOCATE (this % sourceEqn)
+    CALL this % decomp % Finalize()
 
   END SUBROUTINE Free_Advection3D
 

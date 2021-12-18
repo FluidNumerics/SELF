@@ -31,6 +31,7 @@ MODULE SELF_MPI
 
     PROCEDURE :: Init => Init_MPILayer
     PROCEDURE :: Free => Free_MPILayer
+    PROCEDURE :: Finalize => Finalize_MPILayer
 
     PROCEDURE :: SetElemToRank
     PROCEDURE :: SetMaxMsg
@@ -88,6 +89,24 @@ CONTAINS
     CALL this % elemToRank % Free()
 
   END SUBROUTINE Free_MPILayer
+
+  SUBROUTINE Finalize_MPILayer(this)
+#undef __FUNC__
+#define __FUNC__ "Finalize_MPILayer"
+    IMPLICIT NONE
+    CLASS(MPILayer),INTENT(inout) :: this
+    ! Local
+    INTEGER       :: ierror
+    CHARACTER(30) :: msg
+
+    IF (this % mpiEnabled) THEN
+      WRITE (msg,'(I5)') this % rankId
+      msg = "Goodbye from rank "//TRIM(msg)//"."
+      INFO(TRIM(msg))
+      CALL MPI_FINALIZE(ierror)
+    ENDIF
+
+  END SUBROUTINE Finalize_MPILayer
 
   SUBROUTINE SetMaxMsg(this,maxMsg)
     IMPLICIT NONE
