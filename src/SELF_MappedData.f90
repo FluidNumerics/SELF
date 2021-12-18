@@ -370,67 +370,67 @@ MODULE SELF_MappedData
 
   INTERFACE
     SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
-      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
-      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
-      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
-      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
-      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,N,nVar,nEl) &
+                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
-      INTEGER(C_INT),VALUE :: rankId,N,nVar,nEl
+      INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper
   END INTERFACE
 
@@ -650,10 +650,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1,e2,s1,s2
+    INTEGER :: e1,e2,s1,s2,e2Global
     INTEGER :: flip,bcid
     INTEGER :: i1,i2,ivar
     INTEGER :: neighborRank
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -663,6 +667,7 @@ CONTAINS
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
+                                                   offset, &
                                                    scalar % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
@@ -672,14 +677,15 @@ CONTAINS
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
-            neighborRank = decomp % elemToRank % hostData(e2)
+            neighborRank = decomp % elemToRank % hostData(e2Global)
 
             IF (neighborRank == decomp % rankId) THEN
 
@@ -939,10 +945,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1,e2,s1,s2
-    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
     INTEGER :: neighborRank
     INTEGER :: i1,i2,j1,j2,ivar
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -953,6 +963,7 @@ CONTAINS
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
+                                                   offset, &
                                                    scalar % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
@@ -964,8 +975,8 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
-          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
@@ -973,7 +984,7 @@ CONTAINS
 
           IF (bcid == 0) THEN
 
-            neighborRank = decomp % elemToRank % hostData(e2)
+            neighborRank = decomp % elemToRank % hostData(e2Global)
 
             IF (neighborRank == decomp % rankId) THEN
 
@@ -1055,11 +1066,7 @@ CONTAINS
 
     END IF
 
-    ! Right... this is only for MPI exchanged data
-    ! If we correct the flip cases above in serial
-    ! I'll need to propagate those through to this.
     CALL scalar % ApplyFlip(decomp,mesh,gpuAccel)
-!    STOP
 
   END SUBROUTINE SideExchange_MappedScalar3D
 
@@ -1346,10 +1353,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1,e2,s1,s2
-    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
     INTEGER :: neighborRank
     INTEGER :: i1,i2,ivar
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -1360,6 +1371,7 @@ CONTAINS
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
+                                                   offset, &
                                                    vector % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
@@ -1371,15 +1383,15 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
-            neighborRank = decomp % elemToRank % hostData(e2)
+            neighborRank = decomp % elemToRank % hostData(e2Global)
 
             IF (neighborRank == decomp % rankId) THEN
 
@@ -1806,10 +1818,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1,e2,s1,s2
-    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
     INTEGER :: neighborRank
     INTEGER :: i1,i2,j1,j2,ivar
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -1820,6 +1836,7 @@ CONTAINS
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
+                                                   offset, &
                                                    vector % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
@@ -1831,15 +1848,15 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
-          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN ! Interior
 
-            neighborRank = decomp % elemToRank % hostData(e2)
+            neighborRank = decomp % elemToRank % hostData(e2Global)
 
             IF (neighborRank == decomp % rankId) THEN
 
@@ -2335,10 +2352,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1,e2,s1,s2
-    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
     INTEGER :: neighborRank
     INTEGER :: i1,i2,ivar
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -2349,6 +2370,7 @@ CONTAINS
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
+                                                   offset, &
                                                    tensor % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
@@ -2359,15 +2381,15 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
-            neighborRank = decomp % elemToRank % hostData(e2)
+            neighborRank = decomp % elemToRank % hostData(e2Global)
 
             IF (neighborRank == decomp % rankId) THEN
 
@@ -2494,10 +2516,14 @@ CONTAINS
     TYPE(MPILayer),INTENT(inout) :: decomp
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: e1,e2,s1,s2
-    INTEGER :: flip,bcid,globalSideId
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
     INTEGER :: neighborRank
     INTEGER :: i1,i2,j1,j2,ivar
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -2508,6 +2534,7 @@ CONTAINS
                                                    mesh % self_sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
+                                                   offset, &
                                                    tensor % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
@@ -2517,15 +2544,15 @@ CONTAINS
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
-          globalSideId = mesh % self_sideInfo % hostData(2,s1,e1)
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2 = e2Global - offset
           s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
           flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
           bcid = mesh % self_sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
-            neighborRank = decomp % elemToRank % hostData(e2)
+            neighborRank = decomp % elemToRank % hostData(e2Global)
 
             IF (neighborRank == decomp % rankId) THEN
 
@@ -3094,7 +3121,6 @@ CONTAINS
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
               globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
-              PRINT*, mpiHandler % rankId, r2, globalSideId
 
               msgCount = msgCount + 1
               CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
