@@ -1808,8 +1808,8 @@ CONTAINS
     INTEGER :: bcid
     INTEGER :: lnid1(1:4)
     INTEGER :: lnid2(1:4)
-    INTEGER :: nid1(1:4)
-    INTEGER :: nid2(1:4)
+    INTEGER :: nid1(1:4,1:6,1:myMesh % nElem)
+    INTEGER :: nid2(1:4,1:6,1:myMesh % nElem)
     INTEGER :: n1
     INTEGER :: n1Global
     INTEGER :: n2
@@ -1822,7 +1822,16 @@ CONTAINS
     INTEGER :: neighborRank
     INTEGER :: rankId
     INTEGER :: offset
+    INTEGER :: msgCount
+    INTEGER :: globalSideId
+    INTEGER, ALLOCATABLE :: requests(:)
+    INTEGER, ALLOCATABLE :: stats(:)
+    INTEGER :: iError
     LOGICAL :: theyMatch
+
+
+    ALLOCATE(requests(1:myMesh % nSides*2))
+    ALLOCATE(stats(1:myMesh % nSides*2))
 
     IF (PRESENT(decomp)) THEN
       rankId = decomp % rankId
@@ -1831,8 +1840,8 @@ CONTAINS
       rankId = 0
       offset = 0
     ENDIF
-!    PRINT*, rankId, offset, myMesh % nElem
 
+    msgCount = 0
     DO e1 = 1,myMesh % nElem
       DO s1 = 1,6
 
@@ -1850,17 +1859,13 @@ CONTAINS
             neighborRank = 0
           ENDIF
 
-          ! TO DO : Need a method to handle flip recalculation 
-          ! when the element is on a neighboring rank.
-          ! Trying this patch now to make sure this resolves
-          ! the out-of-bounds memory addressing... though I'm
-          ! certain the answer will be incorrect :(
           IF (neighborRank == rankId) THEN
 
             ! With 8 nodes per element, and the nodes provided in order, we can also shift the node indices
             n1Global = myMesh % hopr_elemInfo % hostData(5,e1) ! Starting node index for element 1
             n1 = n1Global - 8*offset
             n2Global = myMesh % hopr_elemInfo % hostData(5,e2) ! Starting node index for element 2
+
             n2 = n1Global - 8*offset
             lnid1 = myMesh % self_sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
             lnid2 = myMesh % self_sideMap % hostData(1:4,s2) ! local CGNS corner node ids for element 2 side
@@ -1869,34 +1874,90 @@ CONTAINS
               
               c1 = myMesh % hopr_CGNSCornerMap % hostData(lnid1(l)) ! Get the local HOPR node id for element 1
               c2 = myMesh % hopr_CGNSCornerMap % hostData(lnid2(l)) ! Get the local HOPR node id for element 2
-              nid1(l) = myMesh % hopr_globalNodeIDs % hostData(n1+c1) ! Global node IDs for element 1 side
-              nid2(l) = myMesh % hopr_globalNodeIDs % hostData(n2+c2) ! Global node IDs for element 2 side
+              nid1(l,s1,e1) = myMesh % hopr_globalNodeIDs % hostData(n1+c1) ! Global node IDs for element 1 side
+              nid2(l,s1,e1) = myMesh % hopr_globalNodeIDs % hostData(n2+c2) ! Global node IDs for element 2 side
 
             ENDDO
 
-            nShifts = 0
-            theyMatch = .FALSE.
+          ELSE ! In this case, we need to exchange
 
-            DO i = 1, 4
+            globalSideId = ABS(myMesh % self_sideInfo % hostdata(2,s1,e1))
 
-              theyMatch = CompareArray( nid1, nid2, 4 )
+            n1Global = myMesh % hopr_elemInfo % hostData(5,e1) ! Starting node index for element 1
+            n1 = n1Global - 8*offset
 
-              IF( theyMatch )THEN
-                EXIT
-              ELSE
-                nShifts = nShifts + 1
-                CALL ForwardShift( nid1, 4 )
-              ENDIF
+            lnid1 = myMesh % self_sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
 
+            DO l = 1, 4
+              
+              c1 = myMesh % hopr_CGNSCornerMap % hostData(lnid1(l)) ! Get the local HOPR node id for element 1
+              nid1(l,s1,e1) = myMesh % hopr_globalNodeIDs % hostData(n1+c1) ! Global node IDs for element 1 side
+
+              ! Receive nid2(l) on this rank from  nid1(l) on the other rank
+              msgCount = msgCount + 1
+              CALL MPI_IRECV(nid2(l,s1,e1), &
+                             1, &
+                             MPI_INTEGER, &
+                             neighborRank,globalSideId, &
+                             decomp % mpiComm, &
+                             requests(msgCount),iError)
+  
+              ! Send nid1(l) from this rank to nid2(l) on the other rank
+              msgCount = msgCount + 1
+              CALL MPI_ISEND(nid1(l,s1,e1), &
+                             1, &
+                             MPI_INTEGER, &
+                             neighborRank,globalSideId, &
+                             decomp % mpiComm, &
+                             requests(msgCount),iError)
+  
             ENDDO
 
-            myMesh % self_sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
+          ENDIF ! MPI or not
 
-          ENDIF
+        ENDIF ! If not physical boundary
+
+      ENDDO
+    ENDDO
+
+    IF (decomp % mpiEnabled) THEN
+      CALL MPI_WaitAll(msgCount, &
+                       requests(1:msgCount), &
+                       stats(1:msgCount), &
+                       iError)
+    ENDDO
+
+    DO e1 = 1,myMesh % nElem
+      DO s1 = 1,6
+
+        bcid = myMesh % self_sideInfo % hostData(5,s1,e1)
+
+        IF (bcid == 0) THEN
+          nShifts = 0
+          theyMatch = .FALSE.
+
+          DO i = 1, 4
+
+            theyMatch = CompareArray( nid1(1:4,s1,e1), nid2(1:4,s1,e1), 4 )
+
+            IF( theyMatch )THEN
+              EXIT
+            ELSE
+              nShifts = nShifts + 1
+              CALL ForwardShift( nid1, 4 )
+            ENDIF
+
+          ENDDO
+
+          myMesh % self_sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
+
         ENDIF
 
       ENDDO
     ENDDO
+
+    DEALLOCATE(requests)
+    DEALLOCATE(stats)
 
   END SUBROUTINE RecalculateFlip_Mesh3D
 
