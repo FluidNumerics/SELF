@@ -2770,6 +2770,7 @@ CONTAINS
     INTEGER :: i,i2
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
+    INTEGER :: bcid
     REAL(prec) :: extBuff(0:scalar % N)
 
     IF (mpiHandler % mpiEnabled) THEN
@@ -2787,29 +2788,33 @@ CONTAINS
           DO s1 = 1,4
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            IF (bcid == 0) THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF (r2 /= mpiHandler % rankId) THEN
+              IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              ! Need to update extBoundary with flip applied
-              IF (flip == 1) THEN
+                ! Need to update extBoundary with flip applied
+                IF (flip == 1) THEN
 
-                DO ivar = 1,scalar % nvar
-                  DO i = 0,scalar % N
-                    i2 = scalar % N - i
-                    extBuff(i) = scalar % extBoundary % hostData(i2,ivar,s1,e1)
+                  DO ivar = 1,scalar % nvar
+                    DO i = 0,scalar % N
+                      i2 = scalar % N - i
+                      extBuff(i) = scalar % extBoundary % hostData(i2,ivar,s1,e1)
+                    END DO
+                    DO i = 0,scalar % N
+                      scalar % extBoundary % hostData(i,ivar,s1,e1) = extBuff(i)
+                    END DO
                   END DO
-                  DO i = 0,scalar % N
-                    scalar % extBoundary % hostData(i,ivar,s1,e1) = extBuff(i)
-                  END DO
-                END DO
 
+                END IF
               END IF
-            END IF
+
+            ENDIF
 
           END DO
         END DO
@@ -2886,6 +2891,7 @@ CONTAINS
     INTEGER :: i,i2
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
+    INTEGER :: bcid
     REAL(prec) :: extBuff(1:2,0:vector % N)
 
     IF (mpiHandler % mpiEnabled) THEN
@@ -2903,29 +2909,32 @@ CONTAINS
           DO s1 = 1,4
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            IF (bcid == 0) THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF (r2 /= mpiHandler % rankId) THEN
+              IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              ! Need to update extBoundary with flip applied
-              IF (flip == 1) THEN
+                ! Need to update extBoundary with flip applied
+                IF (flip == 1) THEN
 
-                DO ivar = 1,vector % nvar
-                  DO i = 0,vector % N
-                    i2 = vector % N - i
-                    extBuff(1:2,i) = vector % extBoundary % hostData(1:2,i2,ivar,s1,e1)
+                  DO ivar = 1,vector % nvar
+                    DO i = 0,vector % N
+                      i2 = vector % N - i
+                      extBuff(1:2,i) = vector % extBoundary % hostData(1:2,i2,ivar,s1,e1)
+                    END DO
+                    DO i = 0,vector % N
+                      vector % extBoundary % hostData(1:2,i,ivar,s1,e1) = extBuff(1:2,i)
+                    END DO
                   END DO
-                  DO i = 0,vector % N
-                    vector % extBoundary % hostData(1:2,i,ivar,s1,e1) = extBuff(1:2,i)
-                  END DO
-                END DO
 
+                END IF
               END IF
-            END IF
+            ENDIF
 
           END DO
         END DO
@@ -3002,6 +3011,7 @@ CONTAINS
     INTEGER :: i,i2
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
+    INTEGER :: bcid
     REAL(prec) :: extBuff(1:2,1:2,0:tensor % N)
 
     IF (mpiHandler % mpiEnabled) THEN
@@ -3019,29 +3029,33 @@ CONTAINS
           DO s1 = 1,4
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            IF (bcid == 0) THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF (r2 /= mpiHandler % rankId) THEN
+              IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              ! Need to update extBoundary with flip applied
-              IF (flip == 1) THEN
+                ! Need to update extBoundary with flip applied
+                IF (flip == 1) THEN
 
-                DO ivar = 1,tensor % nvar
-                  DO i = 0,tensor % N
-                    i2 = tensor % N - i
-                    extBuff(1:2,1:2,i) = tensor % extBoundary % hostData(1:2,1:2,i2,ivar,s1,e1)
+                  DO ivar = 1,tensor % nvar
+                    DO i = 0,tensor % N
+                      i2 = tensor % N - i
+                      extBuff(1:2,1:2,i) = tensor % extBoundary % hostData(1:2,1:2,i2,ivar,s1,e1)
+                    END DO
+                    DO i = 0,tensor % N
+                      tensor % extBoundary % hostData(1:2,1:2,i,ivar,s1,e1) = extBuff(1:2,1:2,i)
+                    END DO
                   END DO
-                  DO i = 0,tensor % N
-                    tensor % extBoundary % hostData(1:2,1:2,i,ivar,s1,e1) = extBuff(1:2,1:2,i)
-                  END DO
-                END DO
 
+                END IF
               END IF
-            END IF
+
+            ENDIF
 
           END DO
         END DO
@@ -3121,6 +3135,7 @@ CONTAINS
     INTEGER :: i,i2,j,j2
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
+    INTEGER :: bcid
     REAL(prec) :: extBuff(0:scalar % N,0:scalar % N)
 
     IF (mpiHandler % mpiEnabled) THEN
@@ -3138,85 +3153,89 @@ CONTAINS
           DO s1 = 1,6
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            IF( bcid == 0 )THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF (r2 /= mpiHandler % rankId) THEN
+              IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              ! Need to update extBoundary with flip applied
-              IF (flip == 1) THEN
+                ! Need to update extBoundary with flip applied
+                IF (flip == 1) THEN
 
-                DO ivar = 1,scalar % nvar
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      i2 = j
-                      j2 = scalar % N-i
-                      extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                  DO ivar = 1,scalar % nvar
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        i2 = j
+                        j2 = scalar % N-i
+                        extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                      END DO
                     END DO
                   END DO
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+
+                ELSEIF (flip == 2) THEN
+
+                  DO ivar = 1,scalar % nvar
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        i2 = scalar % N - i
+                        j2 = scalar % N - j
+                        extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                      END DO
                     END DO
                   END DO
-                END DO
 
-              ELSEIF (flip == 2) THEN
+                ELSEIF (flip == 3) THEN
 
-                DO ivar = 1,scalar % nvar
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      i2 = scalar % N - i
-                      j2 = scalar % N - j
-                      extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                  DO ivar = 1,scalar % nvar
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        i2 = scalar % N-j
+                        j2 = i
+                        extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                      END DO
                     END DO
                   END DO
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+
+                ELSEIF (flip == 4) THEN
+
+                  DO ivar = 1,scalar % nvar
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        i2 = j
+                        j2 = i
+                        extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,scalar % N
+                      DO i = 0,scalar % N
+                        scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
+                      END DO
                     END DO
                   END DO
-                END DO
 
-              ELSEIF (flip == 3) THEN
-
-                DO ivar = 1,scalar % nvar
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      i2 = scalar % N-j
-                      j2 = i
-                      extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
-                    END DO
-                  END DO
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
-                    END DO
-                  END DO
-                END DO
-
-              ELSEIF (flip == 4) THEN
-
-                DO ivar = 1,scalar % nvar
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      i2 = j
-                      j2 = i
-                      extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
-                    END DO
-                  END DO
-                  DO j = 0,scalar % N
-                    DO i = 0,scalar % N
-                      scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
-                    END DO
-                  END DO
-                END DO
-
+                END IF
               END IF
-            END IF
+
+            ENDIF
 
           END DO
         END DO
@@ -3292,6 +3311,7 @@ CONTAINS
     INTEGER :: i,i2,j,j2
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
+    INTEGER :: bcid     
     REAL(prec) :: extBuff(1:3,0:vector % N,0:vector % N)
 
     IF (mpiHandler % mpiEnabled) THEN
@@ -3309,84 +3329,87 @@ CONTAINS
           DO s1 = 1,6
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            IF (bcid == 0) THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF (r2 /= mpiHandler % rankId) THEN
+              IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              IF (flip == 1) THEN
+                IF (flip == 1) THEN
 
-                DO ivar = 1,vector % nvar
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      i2 = j
-                      j2 = vector % N - i
-                      extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                  DO ivar = 1,vector % nvar
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        i2 = j
+                        j2 = vector % N - i
+                        extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+
+                ELSEIF (flip == 2) THEN
+
+                  DO ivar = 1,vector % nvar
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        i2 = vector % N - i
+                        j2 = vector % N - j
+                        extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                END DO
 
-              ELSEIF (flip == 2) THEN
+                ELSEIF (flip == 3) THEN
 
-                DO ivar = 1,vector % nvar
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      i2 = vector % N - i
-                      j2 = vector % N - j
-                      extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                  DO ivar = 1,vector % nvar
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        i2 = vector % N - j
+                        j2 = i
+                        extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+
+                ELSEIF (flip == 4) THEN
+
+                  DO ivar = 1,vector % nvar
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        i2 = j
+                        j2 = i
+                        extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,vector % N
+                      DO i = 0,vector % N
+                        vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                END DO
 
-              ELSEIF (flip == 3) THEN
-
-                DO ivar = 1,vector % nvar
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      i2 = vector % N - j
-                      j2 = i
-                      extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
-                    END DO
-                  END DO
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
-                    END DO
-                  END DO
-                END DO
-
-              ELSEIF (flip == 4) THEN
-
-                DO ivar = 1,vector % nvar
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      i2 = j
-                      j2 = i
-                      extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
-                    END DO
-                  END DO
-                  DO j = 0,vector % N
-                    DO i = 0,vector % N
-                      vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
-                    END DO
-                  END DO
-                END DO
-
+                END IF
               END IF
-            END IF
+            ENDIF
           END DO
         END DO
       END IF
@@ -3462,6 +3485,7 @@ CONTAINS
     INTEGER :: i,i2,j,j2
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
+    INTEGER :: bcid
     REAL(prec) :: extBuff(1:3,1:3,0:tensor % N,0:tensor % N)
 
     IF (mpiHandler % mpiEnabled) THEN
@@ -3479,84 +3503,88 @@ CONTAINS
           DO s1 = 1,6
 
             e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            IF (bcid == 0) THEN ! Interior Element
+              r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-            IF (r2 /= mpiHandler % rankId) THEN
+              IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
 
-              IF (flip == 1) THEN
+                IF (flip == 1) THEN
 
-                DO ivar = 1,tensor % nvar
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      i2 = j
-                      j2 = tensor % N - i
-                      extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                  DO ivar = 1,tensor % nvar
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        i2 = j
+                        j2 = tensor % N - i
+                        extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+
+                ELSEIF (flip == 2) THEN
+
+                  DO ivar = 1,tensor % nvar
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        i2 = tensor % N - i
+                        j2 = tensor % N - j
+                        extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                END DO
 
-              ELSEIF (flip == 2) THEN
+                ELSEIF (flip == 3) THEN
 
-                DO ivar = 1,tensor % nvar
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      i2 = tensor % N - i
-                      j2 = tensor % N - j
-                      extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                  DO ivar = 1,tensor % nvar
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        i2 = tensor % N - j
+                        j2 = i
+                        extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+
+                ELSEIF (flip == 4) THEN
+
+                  DO ivar = 1,tensor % nvar
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        i2 = j
+                        j2 = i
+                        extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
+                      END DO
+                    END DO
+                    DO j = 0,tensor % N
+                      DO i = 0,tensor % N
+                        tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
+                      END DO
                     END DO
                   END DO
-                END DO
 
-              ELSEIF (flip == 3) THEN
-
-                DO ivar = 1,tensor % nvar
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      i2 = tensor % N - j
-                      j2 = i
-                      extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
-                    END DO
-                  END DO
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
-                    END DO
-                  END DO
-                END DO
-
-              ELSEIF (flip == 4) THEN
-
-                DO ivar = 1,tensor % nvar
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      i2 = j
-                      j2 = i
-                      extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
-                    END DO
-                  END DO
-                  DO j = 0,tensor % N
-                    DO i = 0,tensor % N
-                      tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
-                    END DO
-                  END DO
-                END DO
-
+                END IF
               END IF
-            END IF
+
+            ENDIF
 
           END DO
         END DO

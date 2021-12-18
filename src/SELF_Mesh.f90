@@ -1520,12 +1520,12 @@ CONTAINS
     zU = UniformPoints(x(5),x(6),1,nElem(3) + 1)
 
     ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,GAUSS_LOBATTO, &
-                        nGeo,GAUSS_LOBATTO, &
+    CALL xLinear % Init(1,CHEBYSHEV_GAUSS_LOBATTO, &
+                        nGeo,CHEBYSHEV_GAUSS_LOBATTO, &
                         1,nEl)
 
-    CALL xGeo % Init(nGeo,GAUSS_LOBATTO, &
-                     nGeo,GAUSS_LOBATTO, &
+    CALL xGeo % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO, &
+                     nGeo,CHEBYSHEV_GAUSS_LOBATTO, &
                      1,nEl)
     elid = 1
     DO kel = 1,nElem(3)
@@ -1794,13 +1794,15 @@ CONTAINS
 
   END SUBROUTINE Load_Mesh3D_parallel
 
-  SUBROUTINE RecalculateFlip_Mesh3D(myMesh)  
+  SUBROUTINE RecalculateFlip_Mesh3D(myMesh,decomp)  
     IMPLICIT NONE
     CLASS(Mesh3D),INTENT(inout) :: myMesh
+    TYPE(MPILayer),INTENT(inout),OPTIONAL :: decomp
     ! Local
     INTEGER :: e1
     INTEGER :: s1
     INTEGER :: e2
+    INTEGER :: e2Global
     INTEGER :: s2
     INTEGER :: flip
     INTEGER :: bcid
@@ -1809,63 +1811,88 @@ CONTAINS
     INTEGER :: nid1(1:4)
     INTEGER :: nid2(1:4)
     INTEGER :: n1
+    INTEGER :: n1Global
     INTEGER :: n2
+    INTEGER :: n2Global
     INTEGER :: c1
     INTEGER :: c2
     INTEGER :: i
     INTEGER :: l
     INTEGER :: nShifts
+    INTEGER :: neighborRank
+    INTEGER :: rankId
+    INTEGER :: offset
     LOGICAL :: theyMatch
+
+    IF (PRESENT(decomp)) THEN
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
+    ELSE
+      rankId = 0
+      offset = 0
+    ENDIF
+!    PRINT*, rankId, offset, myMesh % nElem
 
     DO e1 = 1,myMesh % nElem
       DO s1 = 1,6
 
-        e2 = myMesh % self_sideInfo % hostData(3,s1,e1)
+        e2Global = myMesh % self_sideInfo % hostData(3,s1,e1)
+        e2 = e2Global - offset
         s2 = myMesh % self_sideInfo % hostData(4,s1,e1)/10
         flip = myMesh % self_sideInfo % hostData(4,s1,e1) - s2*10
         bcid = myMesh % self_sideInfo % hostData(5,s1,e1)
 
         IF (bcid == 0) THEN
 
-          n1 = myMesh % hopr_elemInfo % hostData(5,e1) ! Starting node index for element 1
-          n2 = myMesh % hopr_elemInfo % hostData(5,e2) ! Starting node index for element 2
-          lnid1 = myMesh % self_sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
-          lnid2 = myMesh % self_sideMap % hostData(1:4,s2) ! local CGNS corner node ids for element 2 side
+          IF (PRESENT(decomp)) THEN
+            neighborRank = decomp % elemToRank % hostData(e2Global)
+          ELSE
+            neighborRank = 0
+          ENDIF
 
-          DO l = 1, 4
-            
-            c1 = myMesh % hopr_CGNSCornerMap % hostData(lnid1(l)) ! Get the local HOPR node id for element 1
-            c2 = myMesh % hopr_CGNSCornerMap % hostData(lnid2(l)) ! Get the local HOPR node id for element 2
-            nid1(l) = myMesh % hopr_globalNodeIDs % hostData(n1+c1) ! Global node IDs for element 1 side
-            nid2(l) = myMesh % hopr_globalNodeIDs % hostData(n2+c2) ! Global node IDs for element 2 side
+          ! TO DO : Need a method to handle flip recalculation 
+          ! when the element is on a neighboring rank.
+          ! Trying this patch now to make sure this resolves
+          ! the out-of-bounds memory addressing... though I'm
+          ! certain the answer will be incorrect :(
+          IF (neighborRank == rankId) THEN
 
-          ENDDO
-!          PRINT*, nid1
-!          PRINT*, nid2
-          
+            ! With 8 nodes per element, and the nodes provided in order, we can also shift the node indices
+            n1Global = myMesh % hopr_elemInfo % hostData(5,e1) ! Starting node index for element 1
+            n1 = n1Global - 8*offset
+            n2Global = myMesh % hopr_elemInfo % hostData(5,e2) ! Starting node index for element 2
+            n2 = n1Global - 8*offset
+            lnid1 = myMesh % self_sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
+            lnid2 = myMesh % self_sideMap % hostData(1:4,s2) ! local CGNS corner node ids for element 2 side
 
-          nShifts = 0
-          theyMatch = .FALSE.
+            DO l = 1, 4
+              
+              c1 = myMesh % hopr_CGNSCornerMap % hostData(lnid1(l)) ! Get the local HOPR node id for element 1
+              c2 = myMesh % hopr_CGNSCornerMap % hostData(lnid2(l)) ! Get the local HOPR node id for element 2
+              nid1(l) = myMesh % hopr_globalNodeIDs % hostData(n1+c1) ! Global node IDs for element 1 side
+              nid2(l) = myMesh % hopr_globalNodeIDs % hostData(n2+c2) ! Global node IDs for element 2 side
 
-          DO i = 1, 4
+            ENDDO
 
-            theyMatch = CompareArray( nid1, nid2, 4 )
-!            PRINT*, theyMatch
+            nShifts = 0
+            theyMatch = .FALSE.
 
-            IF( theyMatch )THEN
-              EXIT
-            ELSE
-              nShifts = nShifts + 1
-              CALL ForwardShift( nid1, 4 )
-            ENDIF
+            DO i = 1, 4
 
-          ENDDO
+              theyMatch = CompareArray( nid1, nid2, 4 )
 
-          myMesh % self_sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
+              IF( theyMatch )THEN
+                EXIT
+              ELSE
+                nShifts = nShifts + 1
+                CALL ForwardShift( nid1, 4 )
+              ENDIF
 
-!          PRINT *, nShifts
-!          PRINT*, '==============='
+            ENDDO
 
+            myMesh % self_sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
+
+          ENDIF
         ENDIF
 
       ENDDO
@@ -1997,7 +2024,7 @@ CONTAINS
     CALL ReadAttribute_HDF5(fileId,'nBCs',nBCs)
     CALL ReadAttribute_HDF5(fileId,'nUniqueSides',nUniqueSides)
 
-    PRINT*, 'Number of Elements : ', nGlobalElem
+    PRINT*, 'Number of Global Elements : ', nGlobalElem
     PRINT*, 'Input polynomial degree : ', nGeo
     PRINT*, 'Number of BC types : ', nBCs
 
@@ -2005,15 +2032,15 @@ CONTAINS
     CALL bcType % Alloc(loBound=(/1,1/), &
                         upBound=(/4,nBCs/))
     offset(:) = 0
-    PRINT*, 'Reading boundary condition types'
     CALL ReadArray_HDF5(fileId,'BCType',bcType,offset)
-    PRINT*, 'Done Reading boundary condition types'
 
     ! Read local subarray of ElemInfo
     CALL decomp % SetElemToRank(nGlobalElem)
     firstElem = decomp % offsetElem % hostData(decomp % rankId) + 1
-    nLocalElems = decomp % offsetElem % hostData(decomp % rankId + 1) - &
-                  decomp % offsetElem % hostData(decomp % rankId)
+    nLocalElems = decomp % offsetElem % hostData(decomp % rankId+1)-& 
+                  decomp % offsetElem % hostData(decomp % rankId) 
+
+    PRINT*, 'Number of Local Elements : ', nLocalElems
 
     ! Allocate Space for hopr_elemInfo!
     CALL hopr_elemInfo % Alloc(loBound=(/1,1/), &
@@ -2041,6 +2068,7 @@ CONTAINS
     ! Read local subarray of SideInfo
     firstSide = hopr_elemInfo % hostData(3,1) + 1
     nLocalSides = hopr_elemInfo % hostData(4,nLocalElems) - hopr_elemInfo % hostData(3,1)
+    PRINT*, 'Number of local sides : ', nLocalSides
 
     ! Allocate space for hopr_sideInfo
     CALL hopr_sideInfo % Alloc(loBound=(/1,1/), &
@@ -2054,10 +2082,10 @@ CONTAINS
     CALL myMesh % Init(nGeo,nLocalElems,nLocalSides,nLocalNodes,nBCs)
 
     ! Copy data from local arrays into myMesh
-    myMesh % hopr_elemInfo = hopr_elemInfo
-    myMesh % hopr_nodeCoords = hopr_nodeCoords
-    myMesh % hopr_globalNodeIDs = hopr_globalNodeIDs
-    myMesh % hopr_sideInfo = hopr_sideInfo
+    myMesh % hopr_elemInfo % hostData = hopr_elemInfo % hostData
+    myMesh % hopr_nodeCoords % hostData = hopr_nodeCoords % hostData
+    myMesh % hopr_globalNodeIDs % hostData = hopr_globalNodeIDs % hostData
+    myMesh % hopr_sideInfo % hostData = hopr_sideInfo % hostData
     myMesh % nUniqueSides = nUniqueSides
     myMesh % nGlobalElem = nGlobalElem
 
@@ -2069,7 +2097,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    CALL myMesh % RecalculateFlip()
+    CALL myMesh % RecalculateFlip(decomp)
 
     CALL myMesh % UpdateDevice()
 

@@ -672,7 +672,7 @@ CONTAINS
       CALL myGeom % x % BoundaryInterp(gpuAccel=.FALSE.)
       CALL myGeom % CalculateMetricTerms()
     !END IF
-    CALL myGeom % CheckSides(mesh)
+!    CALL myGeom % CheckSides(mesh)
 
     CALL myGeom % UpdateDevice()
     CALL xMesh % Free()
@@ -782,13 +782,10 @@ CONTAINS
                 END DO
             END IF
 
-         !   PRINT*, e1, e2, s1, s2, flip, rms
-
           END IF
 
         END DO
       END DO
-      !STOP
 
   END SUBROUTINE CheckSides_SEMHex
 
