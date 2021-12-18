@@ -2731,7 +2731,7 @@ CONTAINS
           IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
@@ -2851,7 +2851,7 @@ CONTAINS
           IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
@@ -3093,7 +3093,8 @@ CONTAINS
             IF (r2 /= mpiHandler % rankId) THEN
 
               s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+              globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
+              PRINT*, mpiHandler % rankId, r2, globalSideId
 
               msgCount = msgCount + 1
               CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
@@ -3272,7 +3273,7 @@ CONTAINS
           IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
@@ -3445,7 +3446,7 @@ CONTAINS
           IF (r2 /= mpiHandler % rankId) THEN
 
             s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
