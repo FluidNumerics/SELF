@@ -2766,7 +2766,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
@@ -2774,7 +2774,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
           END IF
 
         END DO
@@ -2886,7 +2886,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
@@ -2894,7 +2894,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
           END IF
 
@@ -3006,7 +3006,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
@@ -3014,7 +3014,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
           END IF
 
@@ -3128,7 +3128,7 @@ CONTAINS
                              mpiHandler % mpiPrec, &
                              r2,globalSideId, &
                              mpiHandler % mpiComm, &
-                             mpiHandler % requests % hostData(msgCount,1),iError)
+                             mpiHandler % requests(msgCount),iError)
 
               msgCount = msgCount + 1
               CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
@@ -3136,7 +3136,7 @@ CONTAINS
                              mpiHandler % mpiPrec, &
                              r2,globalSideId, &
                              mpiHandler % mpiComm, &
-                             mpiHandler % requests % hostData(msgCount,1),iError)
+                             mpiHandler % requests(msgCount),iError)
 
             END IF
 
@@ -3307,7 +3307,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(vector % boundary % hostData(:,:,:,:,s1,e1), &
@@ -3315,7 +3315,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
           END IF
 
         END DO
@@ -3480,7 +3480,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,:,s1,e1), &
@@ -3488,7 +3488,7 @@ CONTAINS
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
-                           mpiHandler % requests % hostData(msgCount,1),iError)
+                           mpiHandler % requests(msgCount),iError)
 
           END IF
 

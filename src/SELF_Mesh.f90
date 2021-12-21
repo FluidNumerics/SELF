@@ -13,7 +13,9 @@ MODULE SELF_Mesh
   USE SELF_Data
   USE SELF_SupportRoutines
   USE SELF_HDF5
+  ! External Libs !
   USE HDF5
+  USE MPI
 
   USE ISO_C_BINDING
 
@@ -1825,13 +1827,13 @@ CONTAINS
     INTEGER :: msgCount
     INTEGER :: globalSideId
     INTEGER, ALLOCATABLE :: requests(:)
-    INTEGER, ALLOCATABLE :: stats(:)
+    INTEGER, ALLOCATABLE :: stats(:,:)
     INTEGER :: iError
     LOGICAL :: theyMatch
 
 
     ALLOCATE(requests(1:myMesh % nSides*2))
-    ALLOCATE(stats(1:myMesh % nSides*2))
+    ALLOCATE(stats(MPI_STATUS_SIZE,1:myMesh % nSides*2))
 
     IF (PRESENT(decomp)) THEN
       rankId = decomp % rankId
@@ -1920,12 +1922,12 @@ CONTAINS
       ENDDO
     ENDDO
 
-    IF (decomp % mpiEnabled) THEN
+    IF (decomp % mpiEnabled .AND. msgCount > 0) THEN
       CALL MPI_WaitAll(msgCount, &
                        requests(1:msgCount), &
-                       stats(1:msgCount), &
+                       stats(1:MPI_STATUS_SIZE,1:msgCount), &
                        iError)
-    ENDDO
+    ENDIF
 
     DO e1 = 1,myMesh % nElem
       DO s1 = 1,6

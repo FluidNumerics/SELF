@@ -9,6 +9,7 @@ MODULE SELF_MPI
   USE SELF_Constants
   USE SELF_Memory
   USE ISO_C_BINDING
+  USE MPI
 
   IMPLICIT NONE
 
@@ -25,7 +26,8 @@ MODULE SELF_MPI
     INTEGER :: msgCount
     TYPE(hfInt32_r1) :: elemToRank
     TYPE(hfInt32_r1) :: offSetElem
-    TYPE(hfInt32_r2) :: requests
+    INTEGER, ALLOCATABLE :: requests(:)
+    INTEGER, ALLOCATABLE :: stats(:,:)
 
   CONTAINS
 
@@ -85,8 +87,10 @@ CONTAINS
     CLASS(MPILayer),INTENT(inout) :: this
 
     CALL this % offSetElem % Free()
-    CALL this % requests % Free()
     CALL this % elemToRank % Free()
+
+    DEALLOCATE( this % requests )
+    DEALLOCATE( this % stats )
 
   END SUBROUTINE Free_MPILayer
 
@@ -113,8 +117,8 @@ CONTAINS
     CLASS(MPILayer),INTENT(inout) :: this
     INTEGER,INTENT(in) :: maxMsg
 
-    CALL this % requests % Alloc((/1,1/), &
-                                 (/maxMsg,2/))
+    ALLOCATE( this % requests(1:maxMsg) )
+    ALLOCATE( this % stats(MPI_STATUS_SIZE,1:maxMsg) )
     this % maxMsg = maxMsg
 
   END SUBROUTINE SetMaxMsg
@@ -209,8 +213,8 @@ CONTAINS
     INTEGER :: ierror
 
     CALL MPI_WaitAll(mpiHandler % msgCount, &
-                     mpiHandler % requests % hostData(1:mpiHandler % msgCount,1), &
-                     mpiHandler % requests % hostData(1:mpiHandler % msgCount,2), &
+                     mpiHandler % requests(1:mpiHandler % msgCount), &
+                     mpiHandler % stats(1:MPI_STATUS_SIZE,1:mpiHandler % msgCount), &
                      iError)
 
   END SUBROUTINE FinalizeMPIExchangeAsync
