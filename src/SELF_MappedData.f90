@@ -661,7 +661,11 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      CALL scalar % boundary % UpdateHost()
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL scalar % extBoundary % UpdateDevice()
+
       CALL SideExchange_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                    scalar % boundary % deviceData, &
                                                    mesh % self_sideInfo % deviceData, &
@@ -671,7 +675,6 @@ CONTAINS
                                                    scalar % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
-      CALL decomp % FinalizeMPIExchangeAsync()
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
@@ -956,7 +959,10 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      CALL scalar % boundary % UpdateHost()
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL scalar % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                    scalar % boundary % deviceData, &
@@ -967,7 +973,6 @@ CONTAINS
                                                    scalar % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
-      CALL decomp % FinalizeMPIExchangeAsync()
 
     ELSE
 
@@ -1364,7 +1369,10 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      CALL vector % boundary % UpdateHost()
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL vector % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                    vector % boundary % deviceData, &
@@ -1375,7 +1383,6 @@ CONTAINS
                                                    vector % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
-      CALL decomp % FinalizeMPIExchangeAsync()
 
     ELSE
 
@@ -1829,7 +1836,10 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      CALL vector % boundary % UpdateHost()
       CALL vector % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL vector % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                    vector % boundary % deviceData, &
@@ -1840,7 +1850,6 @@ CONTAINS
                                                    vector % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
-      CALL decomp % FinalizeMPIExchangeAsync()
 
     ELSE
 
@@ -2363,7 +2372,10 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      CALL tensor % boundary % UpdateHost()
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL tensor % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                    tensor % boundary % deviceData, &
@@ -2374,7 +2386,6 @@ CONTAINS
                                                    tensor % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
-      CALL decomp % FinalizeMPIExchangeAsync()
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
@@ -2527,7 +2538,10 @@ CONTAINS
 
     IF (gpuAccel) THEN
 
+      CALL tensor % boundary % UpdateHost()
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      CALL decomp % FinalizeMPIExchangeAsync()
+      CALL tensor % extBoundary % UpdateDevice()
 
       CALL SideExchange_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                    tensor % boundary % deviceData, &
@@ -2538,7 +2552,6 @@ CONTAINS
                                                    tensor % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
-      CALL decomp % FinalizeMPIExchangeAsync()
     ELSE
 
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
