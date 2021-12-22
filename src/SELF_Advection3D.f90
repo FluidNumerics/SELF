@@ -73,6 +73,7 @@ USE ISO_C_BINDING
       PROCEDURE, PRIVATE :: SetBoundaryConditionFromEquation_Advection3D
 
       PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection3D
+      PROCEDURE, PUBLIC :: WritePickup => WritePickup_Advection3D
 
       PROCEDURE, PUBLIC :: ForwardStep => ForwardStep_Advection3D
       PROCEDURE, PUBLIC :: TimeStepRK3 => TimeStepRK3_Advection3D
@@ -1293,5 +1294,25 @@ CONTAINS
     CLOSE(UNIT=fUnit)
 
   END SUBROUTINE WriteTecplot_Advection3D
+
+  SUBROUTINE WritePickup_Advection3D(self, filename)
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: self
+    CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    ! Local
+    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+    CHARACTER(13) :: timeStampString
+
+    IF( PRESENT(filename) )THEN
+      pickupFile = filename
+    ELSE
+      timeStampString = TimeStamp(self % simulationTime, 's')
+      pickupFile = 'solution.'//timeStampString//'.h5'
+
+    ENDIF
+
+    CALL self % Write(pickupFile)
+
+  END SUBROUTINE WritePickup_Advection3D
 
 END MODULE SELF_Advection3D

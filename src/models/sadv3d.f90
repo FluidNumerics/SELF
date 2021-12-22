@@ -21,11 +21,10 @@ USE SELF_Constants
         
     CALL model % ForwardStep( endTime )
     CALL model % WriteTecplot()
+    CALL model % WritePickup()
 
   ENDDO
 
   CALL model % Free()
-
- 
 
 END PROGRAM sadv3d

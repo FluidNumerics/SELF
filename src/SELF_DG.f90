@@ -288,14 +288,14 @@ CONTAINS
 
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
 
-      firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
-      solOffset(1:4) = (/0,0,1,firstElem/)
+      firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
+      solOffset(1:4) = (/0,0,0,firstElem/)
       solGlobalDims(1:4) = (/this % solution % N, &
                              this % solution % N, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
 
-      xOffset(1:5) = (/1,0,0,1,firstElem/)
+      xOffset(1:5) = (/0,0,0,0,firstElem/)
       xGlobalDims(1:5) = (/2, &
                            this % solution % N, &
                            this % solution % N, &
@@ -551,18 +551,18 @@ CONTAINS
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId, &
                      this % decomp % mpiComm)
 
-      firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
-      solOffset(1:5) = (/0,0,0,1,firstElem/)
-      solGlobalDims(1:5) = (/this % solution % N, &
-                             this % solution % N, &
-                             this % solution % N, &
+      firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
+      solOffset(1:5) = (/0,0,0,0,firstElem/)
+      solGlobalDims(1:5) = (/this % solution % N+1, &
+                             this % solution % N+1, &
+                             this % solution % N+1, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
-      xOffset(1:6) = (/1,0,0,0,1,firstElem/)
+      xOffset(1:6) = (/0,0,0,0,0,firstElem/)
       xGlobalDims(1:6) = (/3, &
-                           this % solution % N, &
-                           this % solution % N, &
-                           this % solution % N, &
+                           this % solution % N+1, &
+                           this % solution % N+1, &
+                           this % solution % N+1, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 

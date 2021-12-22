@@ -1922,7 +1922,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-    IF (decomp % mpiEnabled .AND. msgCount > 0) THEN
+    IF (PRESENT(decomp) .AND. msgCount > 0) THEN
       CALL MPI_WaitAll(msgCount, &
                        requests(1:msgCount), &
                        stats(1:MPI_STATUS_SIZE,1:msgCount), &

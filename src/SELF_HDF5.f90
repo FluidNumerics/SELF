@@ -951,6 +951,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1)
+    INTEGER(HSIZE_T) :: strides(1)
+    INTEGER(HSIZE_T) :: counts(1)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -967,10 +969,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1/)
+    counts = (/1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -992,6 +1006,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:2)
+    INTEGER(HSIZE_T) :: strides(1:2)
+    INTEGER(HSIZE_T) :: counts(1:2)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1008,10 +1024,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1/)
+    counts = (/1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1033,6 +1061,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:3)
+    INTEGER(HSIZE_T) :: strides(1:3)
+    INTEGER(HSIZE_T) :: counts(1:3)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1049,10 +1079,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1/)
+    counts = (/1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1075,6 +1117,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:4)
+    INTEGER(HSIZE_T) :: strides(1:4)
+    INTEGER(HSIZE_T) :: counts(1:4)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1091,10 +1135,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1/)
+    counts = (/1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1116,6 +1172,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:5)
+    INTEGER(HSIZE_T) :: strides(1:5)
+    INTEGER(HSIZE_T) :: counts(1:5)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1132,10 +1190,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1/)
+    counts = (/1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace, &
+                               H5S_SELECT_SET_F, &
+                               offset, &
+                               counts, &
+                               error, &
+                               strides, &
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1157,6 +1227,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:6)
+    INTEGER(HSIZE_T) :: strides(1:6)
+    INTEGER(HSIZE_T) :: counts(1:6)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1173,10 +1245,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1,1/)
+    counts = (/1,1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1198,6 +1282,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:7)
+    INTEGER(HSIZE_T) :: strides(1:7)
+    INTEGER(HSIZE_T) :: counts(1:7)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1214,10 +1300,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),HDF5_IO_PREC,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1,1,1/)
+    counts = (/1,1,1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,HDF5_IO_PREC, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1239,6 +1337,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1)
+    INTEGER(HSIZE_T) :: strides(1)
+    INTEGER(HSIZE_T) :: counts(1)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1255,10 +1355,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1/)
+    counts = (/1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1280,6 +1392,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:2)
+    INTEGER(HSIZE_T) :: strides(1:2)
+    INTEGER(HSIZE_T) :: counts(1:2)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1296,10 +1410,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1/)
+    counts = (/1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1321,6 +1447,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:3)
+    INTEGER(HSIZE_T) :: strides(1:3)
+    INTEGER(HSIZE_T) :: counts(1:3)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1337,10 +1465,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1/)
+    counts = (/1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1362,6 +1502,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:4)
+    INTEGER(HSIZE_T) :: strides(1:4)
+    INTEGER(HSIZE_T) :: counts(1:4)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1378,10 +1520,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1/)
+    counts = (/1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1403,6 +1557,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:5)
+    INTEGER(HSIZE_T) :: strides(1:5)
+    INTEGER(HSIZE_T) :: counts(1:5)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1419,10 +1575,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1/)
+    counts = (/1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1444,6 +1612,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:6)
+    INTEGER(HSIZE_T) :: strides(1:6)
+    INTEGER(HSIZE_T) :: counts(1:6)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1460,10 +1630,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1,1/)
+    counts = (/1,1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1485,6 +1667,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:7)
+    INTEGER(HSIZE_T) :: strides(1:7)
+    INTEGER(HSIZE_T) :: counts(1:7)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1501,10 +1685,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I32LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1,1,1/)
+    counts = (/1,1,1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I32LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1526,6 +1722,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1)
+    INTEGER(HSIZE_T) :: strides(1)
+    INTEGER(HSIZE_T) :: counts(1)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1542,10 +1740,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1/)
+    counts = (/1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1567,6 +1777,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:2)
+    INTEGER(HSIZE_T) :: strides(1:2)
+    INTEGER(HSIZE_T) :: counts(1:2)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1583,10 +1795,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1/)
+    counts = (/1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1608,6 +1832,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:3)
+    INTEGER(HSIZE_T) :: strides(1:3)
+    INTEGER(HSIZE_T) :: counts(1:3)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1624,10 +1850,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1/)
+    counts = (/1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1649,6 +1887,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:4)
+    INTEGER(HSIZE_T) :: strides(1:4)
+    INTEGER(HSIZE_T) :: counts(1:4)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1665,10 +1905,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1/)
+    counts = (/1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1690,6 +1942,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:5)
+    INTEGER(HSIZE_T) :: strides(1:5)
+    INTEGER(HSIZE_T) :: counts(1:5)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1706,10 +1960,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1/)
+    counts = (/1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1731,6 +1997,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:6)
+    INTEGER(HSIZE_T) :: strides(1:6)
+    INTEGER(HSIZE_T) :: counts(1:6)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1747,10 +2015,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1,1/)
+    counts = (/1,1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,&
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
@@ -1772,6 +2052,8 @@ CONTAINS
     INTEGER(HID_T) :: filespace
     INTEGER(HID_T) :: memspace
     INTEGER(HSIZE_T) :: dims(1:7)
+    INTEGER(HSIZE_T) :: strides(1:7)
+    INTEGER(HSIZE_T) :: counts(1:7)
     INTEGER :: error
     INTEGER :: aRank
 
@@ -1788,10 +2070,22 @@ CONTAINS
     CALL h5dcreate_f(fileId,TRIM(arrayName),H5T_STD_I64LE,filespace, &
                      dsetId,error,plistId)
 
-    CALL h5sselect_hyperslab_f(filespace,H5S_SELECT_SET_F,offset,dims,error)
+    strides = (/1,1,1,1,1,1,1/)
+    counts = (/1,1,1,1,1,1,1/)
+    CALL h5sselect_hyperslab_f(filespace,&
+                               H5S_SELECT_SET_F,&
+                               offset,&
+                               counts,&
+                               error,
+                               strides,&
+                               dims)
 
     CALL h5dwrite_f(dsetId,H5T_STD_I64LE, &
                     hfArray % hostData,dims,error,memspace,filespace)
+    IF( error /= 0 )THEN
+      PRINT*, 'Failure to write dataset'
+      STOP
+    ENDIF
 
     CALL h5pclose_f(plistId,error)
     CALL h5sclose_f(filespace,error)
