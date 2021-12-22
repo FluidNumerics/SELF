@@ -2076,7 +2076,7 @@ CONTAINS
                                H5S_SELECT_SET_F,&
                                offset,&
                                counts,&
-                               error,
+                               error,&
                                strides,&
                                dims)
 
