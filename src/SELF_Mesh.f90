@@ -1812,6 +1812,8 @@ CONTAINS
     INTEGER :: lnid2(1:4)
     INTEGER :: nid1(1:4,1:6,1:myMesh % nElem)
     INTEGER :: nid2(1:4,1:6,1:myMesh % nElem)
+    INTEGER :: nloc1(1:4)
+    INTEGER :: nloc2(1:4)
     INTEGER :: n1
     INTEGER :: n1Global
     INTEGER :: n2
@@ -1866,9 +1868,10 @@ CONTAINS
             ! With 8 nodes per element, and the nodes provided in order, we can also shift the node indices
             n1Global = myMesh % hopr_elemInfo % hostData(5,e1) ! Starting node index for element 1
             n1 = n1Global - 8*offset
-            n2Global = myMesh % hopr_elemInfo % hostData(5,e2) ! Starting node index for element 2
 
-            n2 = n1Global - 8*offset
+            n2Global = myMesh % hopr_elemInfo % hostData(5,e2) ! Starting node index for element 2
+            n2 = n2Global - 8*offset
+
             lnid1 = myMesh % self_sideMap % hostData(1:4,s1) ! local CGNS corner node ids for element 1 side
             lnid2 = myMesh % self_sideMap % hostData(1:4,s2) ! local CGNS corner node ids for element 2 side
 
@@ -1932,7 +1935,10 @@ CONTAINS
     DO e1 = 1,myMesh % nElem
       DO s1 = 1,6
 
+        s2 = myMesh % self_sideInfo % hostData(4,s1,e1)/10
         bcid = myMesh % self_sideInfo % hostData(5,s1,e1)
+        nloc1(1:4) = nid1(1:4,s1,e1)
+        nloc2(1:4) = nid2(1:4,s1,e1)
 
         IF (bcid == 0) THEN
           nShifts = 0
@@ -1940,13 +1946,13 @@ CONTAINS
 
           DO i = 1, 4
 
-            theyMatch = CompareArray( nid1(1:4,s1,e1), nid2(1:4,s1,e1), 4 )
+            theyMatch = CompareArray( nloc1, nloc2, 4 )
 
             IF( theyMatch )THEN
               EXIT
             ELSE
               nShifts = nShifts + 1
-              CALL ForwardShift( nid1, 4 )
+              CALL ForwardShift( nloc1, 4 )
             ENDIF
 
           ENDDO
