@@ -280,8 +280,12 @@ CONTAINS
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: solOffset(1:4)
     INTEGER(HID_T) :: xOffset(1:5)
+    INTEGER(HID_T) :: bOffset(1:4)
+    INTEGER(HID_T) :: bxOffset(1:5)
     INTEGER(HID_T) :: solGlobalDims(1:4)
     INTEGER(HID_T) :: xGlobalDims(1:5)
+    INTEGER(HID_T) :: bGlobalDims(1:4)
+    INTEGER(HID_T) :: bxGlobalDims(1:5)
     INTEGER :: firstElem
 
     IF (this % decomp % mpiEnabled) THEN
@@ -289,33 +293,75 @@ CONTAINS
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
 
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
-      solOffset(1:4) = (/0,0,0,firstElem/)
+      solOffset(1:4) = (/0,0,1,firstElem/)
       solGlobalDims(1:4) = (/this % solution % N, &
                              this % solution % N, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
 
-      xOffset(1:5) = (/0,0,0,0,firstElem/)
+
+      xOffset(1:5) = (/1,0,0,1,firstElem/)
       xGlobalDims(1:5) = (/2, &
                            this % solution % N, &
                            this % solution % N, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 
-      CALL WriteArray_HDF5(fileId,'/solution', &
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:4) = (/0,1,1,firstElem/)
+      bGlobalDims(1:4) = (/this % solution % N, &
+                           this % solution % nVar, &
+                           4,&
+                           this % decomp % nElem/)
+
+      bxOffset(1:5) = (/1,0,1,1,firstElem/)
+      bxGlobalDims(1:5) = (/2,&
+                           this % solution % N, &
+                           this % solution % nVar, &
+                           4,&
+                           this % decomp % nElem/)
+
+      
+      CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+      CALL CreateGroup_HDF5(fileId,'/state')
+
+      CALL CreateGroup_HDF5(fileId,'/state/interior')
+
+      CALL CreateGroup_HDF5(fileId,'/state/boundary')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solution', &
                            this % solution % interior,solOffset,solGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/fluxDivergence', &
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solution', &
+                           this % solution % boundary,bOffset,bGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/fluxDivergence', &
                            this % fluxDivergence % interior,solOffset,solGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/flux', &
+      CALL WriteArray_HDF5(fileId,'/state/interior/flux', &
                            this % flux % interior,xOffset,xGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/solutionGradient', &
+      CALL WriteArray_HDF5(fileId,'/state/boundary/flux', &
+                           this % flux % boundary,bxOffset,bxGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solutionGradient', &
                            this % solutionGradient % interior,xOffset,xGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/x', &
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solutionGradient', &
+                           this % solutionGradient % boundary,bxOffset,bxGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/interior/x', &
                            this % geometry % x % interior,xOffset,xGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/boundary/x', &
+                           this % geometry % x % boundary,bxOffset,bxGlobalDims)
 
       CALL Close_HDF5(fileId)
 
@@ -323,15 +369,37 @@ CONTAINS
 
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId)
 
-      CALL WriteArray_HDF5(fileId,'/solution',this % solution % interior)
+      CALL CreateGroup_HDF5(fileId,'/quadrature')
 
-      CALL WriteArray_HDF5(fileId,'/fluxDivergence',this % fluxDivergence % interior)
+      CALL CreateGroup_HDF5(fileId,'/state')
 
-      CALL WriteArray_HDF5(fileId,'/flux',this % flux % interior)
+      CALL CreateGroup_HDF5(fileId,'/state/interior')
 
-      CALL WriteArray_HDF5(fileId,'/solutionGradient',this % solutionGradient % interior)
+      CALL CreateGroup_HDF5(fileId,'/state/boundary')
 
-      CALL WriteArray_HDF5(fileId,'/x',this % geometry % x % interior)
+      CALL CreateGroup_HDF5(fileId,'/mesh')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solution',this % solution % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solution',this % solution % boundary)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/fluxDivergence',this % fluxDivergence % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/flux',this % flux % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/boundary/flux',this % flux % boundary)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solutionGradient',this % solutionGradient % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solutionGradient',this % solutionGradient % boundary)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/interior/x',this % geometry % x % interior)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',this % geometry % x % boundary)
 
       CALL Close_HDF5(fileId)
 
@@ -365,10 +433,10 @@ CONTAINS
     IF (this % decomp % mpiEnabled) THEN
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
       solOffset(1:4) = (/0,0,1,firstElem/)
-      CALL ReadArray_HDF5(fileId,'solution', &
+      CALL ReadArray_HDF5(fileId,'/state/interior/solution', &
                           this % solution % interior,solOffset)
     ELSE
-      CALL ReadArray_HDF5(fileId,'solution',this % solution % interior)
+      CALL ReadArray_HDF5(fileId,'/state/interior/solution',this % solution % interior)
     END IF
 
     CALL Close_HDF5(fileId)
@@ -542,8 +610,12 @@ CONTAINS
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: solOffset(1:5)
     INTEGER(HID_T) :: xOffset(1:6)
+    INTEGER(HID_T) :: bOffset(1:5)
+    INTEGER(HID_T) :: bxOffset(1:6)
     INTEGER(HID_T) :: solGlobalDims(1:5)
     INTEGER(HID_T) :: xGlobalDims(1:6)
+    INTEGER(HID_T) :: bGlobalDims(1:5)
+    INTEGER(HID_T) :: bxGlobalDims(1:6)
     INTEGER :: firstElem
 
     IF (this % decomp % mpiEnabled) THEN
@@ -552,34 +624,77 @@ CONTAINS
                      this % decomp % mpiComm)
 
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
-      solOffset(1:5) = (/0,0,0,0,firstElem/)
-      solGlobalDims(1:5) = (/this % solution % N+1, &
-                             this % solution % N+1, &
-                             this % solution % N+1, &
+      solOffset(1:5) = (/0,0,0,1,firstElem/)
+      solGlobalDims(1:5) = (/this % solution % N, &
+                             this % solution % N, &
+                             this % solution % N, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
-      xOffset(1:6) = (/0,0,0,0,0,firstElem/)
+      xOffset(1:6) = (/1,0,0,0,1,firstElem/)
       xGlobalDims(1:6) = (/3, &
-                           this % solution % N+1, &
-                           this % solution % N+1, &
-                           this % solution % N+1, &
+                           this % solution % N, &
+                           this % solution % N, &
+                           this % solution % N, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 
-      CALL WriteArray_HDF5(fileId,'/solution', &
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:5) = (/0,0,1,1,firstElem/)
+      bGlobalDims(1:5) = (/this % solution % N, &
+                           this % solution % N, &
+                           this % solution % nVar, &
+                           6,&
+                           this % decomp % nElem/)
+
+      bxOffset(1:6) = (/1,0,0,1,1,firstElem/)
+      bxGlobalDims(1:6) = (/3,&
+                           this % solution % N, &
+                           this % solution % N, &
+                           this % solution % nVar, &
+                           6,&
+                           this % decomp % nElem/)
+
+      
+      CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+      CALL CreateGroup_HDF5(fileId,'/state')
+
+      CALL CreateGroup_HDF5(fileId,'/state/interior')
+
+      CALL CreateGroup_HDF5(fileId,'/state/boundary')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solution', &
                            this % solution % interior,solOffset,solGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/fluxDivergence', &
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solution', &
+                           this % solution % boundary,bOffset,bGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/fluxDivergence', &
                            this % fluxDivergence % interior,solOffset,solGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/flux', &
+      CALL WriteArray_HDF5(fileId,'/state/interior/flux', &
                            this % flux % interior,xOffset,xGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/solutionGradient', &
+      CALL WriteArray_HDF5(fileId,'/state/boundary/flux', &
+                           this % flux % boundary,bxOffset,bxGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solutionGradient', &
                            this % solutionGradient % interior,xOffset,xGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/x', &
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solutionGradient', &
+                           this % solutionGradient % boundary,bxOffset,bxGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/interior/x', &
                            this % geometry % x % interior,xOffset,xGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/boundary/x', &
+                           this % geometry % x % boundary,bxOffset,bxGlobalDims)
 
       CALL Close_HDF5(fileId)
 
@@ -587,15 +702,37 @@ CONTAINS
 
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId)
 
-      CALL WriteArray_HDF5(fileId,'/solution',this % solution % interior)
+      CALL CreateGroup_HDF5(fileId,'/quadrature')
 
-      CALL WriteArray_HDF5(fileId,'/fluxDivergence',this % fluxDivergence % interior)
+      CALL CreateGroup_HDF5(fileId,'/state')
 
-      CALL WriteArray_HDF5(fileId,'/flux',this % flux % interior)
+      CALL CreateGroup_HDF5(fileId,'/state/interior')
 
-      CALL WriteArray_HDF5(fileId,'/solutionGradient',this % solutionGradient % interior)
+      CALL CreateGroup_HDF5(fileId,'/state/boundary')
 
-      CALL WriteArray_HDF5(fileId,'/x',this % geometry % x % interior)
+      CALL CreateGroup_HDF5(fileId,'/mesh')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+      CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solution',this % solution % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solution',this % solution % boundary)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/fluxDivergence',this % fluxDivergence % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/flux',this % flux % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/boundary/flux',this % flux % boundary)
+
+      CALL WriteArray_HDF5(fileId,'/state/interior/solutionGradient',this % solutionGradient % interior)
+
+      CALL WriteArray_HDF5(fileId,'/state/boundary/solutionGradient',this % solutionGradient % boundary)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/interior/x',this % geometry % x % interior)
+
+      CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',this % geometry % x % boundary)
 
       CALL Close_HDF5(fileId)
 
@@ -629,9 +766,9 @@ CONTAINS
     IF (this % decomp % mpiEnabled) THEN
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
       solOffset(1:5) = (/0,0,0,1,firstElem/)
-      CALL ReadArray_HDF5(fileId,'solution',this % solution % interior,solOffset)
+      CALL ReadArray_HDF5(fileId,'/state/interior/solution',this % solution % interior,solOffset)
     ELSE
-      CALL ReadArray_HDF5(fileId,'solution',this % solution % interior)
+      CALL ReadArray_HDF5(fileId,'/state/interior/solution',this % solution % interior)
     END IF
 
     CALL Close_HDF5(fileId)
