@@ -324,6 +324,20 @@ CONTAINS
       
       CALL CreateGroup_HDF5(fileId,'/quadrature')
 
+      IF( this % decomp % rankId == 0 )THEN
+        CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                             this % solution % interp % controlPoints)
+
+        CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                             this % solution % interp % qWeights)
+
+        CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                             this % solution % interp % dgMatrix)
+
+        CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                             this % solution % interp % dMatrix)
+      ENDIF
+
       CALL CreateGroup_HDF5(fileId,'/state')
 
       CALL CreateGroup_HDF5(fileId,'/state/interior')
@@ -370,6 +384,18 @@ CONTAINS
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId)
 
       CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                           this % solution % interp % controlPoints)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                           this % solution % interp % qWeights)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                           this % solution % interp % dgMatrix)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                           this % solution % interp % dMatrix)
 
       CALL CreateGroup_HDF5(fileId,'/state')
 
@@ -657,6 +683,20 @@ CONTAINS
       
       CALL CreateGroup_HDF5(fileId,'/quadrature')
 
+      IF( this % decomp % rankId == 0 )THEN
+        CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                             this % solution % interp % controlPoints)
+
+        CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                             this % solution % interp % qWeights)
+
+        CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                             this % solution % interp % dgMatrix)
+
+        CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                             this % solution % interp % dMatrix)
+      ENDIF
+
       CALL CreateGroup_HDF5(fileId,'/state')
 
       CALL CreateGroup_HDF5(fileId,'/state/interior')
@@ -703,6 +743,18 @@ CONTAINS
       CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId)
 
       CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                           this % solution % interp % controlPoints)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                           this % solution % interp % qWeights)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                           this % solution % interp % dgMatrix)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                           this % solution % interp % dMatrix)
 
       CALL CreateGroup_HDF5(fileId,'/state')
 
