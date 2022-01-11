@@ -24,6 +24,7 @@ Before installing SELF, make sure your system has the following dependencies ins
 * Fortran compiler (e.g. gfortran)
 * [HIP](https://github.com/ROCm-Developer-Tools/HIP) (For GPU Accelerated Builds)
 * [HIPFort](https://github.com/ROCmSoftwarePlatform/hipfort) (For GPU Accelerated Builds)
+* [json-fortran](https://github.com/jacobwilliams/json-fortran)
 * [FLAP](https://github.com/szaghi/FLAP)
 * [feq-parse](https://github.com/FluidNumerics/feqparse)
 * [HDF5]()

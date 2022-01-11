@@ -1,11 +1,23 @@
 MODULE SELF_Advection3D
-
+!
+! Copyright 2021-2022 Fluid Numerics LLC
+!
+! ============================================================
+!
+! A class for solving the advection-diffusion equation in 3-D
+!
+! Environment variables that influence behavior
+!
+!  SELF_INSTALL_DIR - the path to the SELF installation
+!
+! ============================================================
 USE SELF_Constants
 USE SELF_SupportRoutines
 USE SELF_Mesh
 USE SELF_DG
 USE FEQParse
 USE FLAP
+USE SELF_CLI
 
 ! Needed for Fortran-C interoperability
 ! Helps expose HIP kernels to Fortran
@@ -84,7 +96,7 @@ USE ISO_C_BINDING
 
   END TYPE Advection3D
 
-  PRIVATE :: GetCLIParameters
+!  PRIVATE :: GetCLIParameters
 
   ! Interfaces to GPU kernels !
   INTERFACE
@@ -242,7 +254,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Advection3D),INTENT(inout) :: this
     ! Local
-    TYPE(COMMAND_LINE_INTERFACE) :: cli
+    TYPE(CLI) :: cliConf
     TYPE(MeshSpec) :: spec
     CHARACTER(self_QuadratureTypeCharLength) :: cqTypeChar
     CHARACTER(self_QuadratureTypeCharLength) :: tqTypeChar
@@ -265,6 +277,7 @@ CONTAINS
     CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
     CHARACTER(LEN=self_EquationLength) :: bcEqn ! Boundary condition Equation
     CHARACTER(LEN=self_EquationLength) :: sourceEqn ! Boundary condition Equation
+    CHARACTER(LEN=self_FileNameLength) :: selfInstallDir
     LOGICAL :: enableMPI
     LOGICAL :: enableGPU
     LOGICAL :: diffusiveFlux
@@ -273,37 +286,55 @@ CONTAINS
     REAL(prec) :: endTime
     TYPE(EquationParser) :: eqn(1)
     TYPE(EquationParser) :: velEqn(1:3)
+    LOGICAL :: fileExists
 
-    ! Get the CLI parameters !
-    CALL GetCLIParameters(cli)
+ 
+    CALL GET_ENVIRONMENT_VARIABLE('SELF_INSTALL_DIR', selfInstallDir)
+    IF( TRIM(selfInstallDir) == "" )THEN
+      PRINT*, "SELF_INSTALL_DIR environment variable unset."
+      PRINT*, "Trying /opt/view/"
+      selfInstallDir = "/opt/view"
+    ENDIF
 
+    INQUIRE(FILE=TRIM(selfInstallDir)//'/etc/sadv3d.json', EXIST=fileExists)
+    IF( .NOT. fileExists )THEN
+      PRINT*, TRIM(selfInstallDir)//'/etc/sadv3d.json'//' configuration file not found!'
+      STOP "ERROR"
+    ENDIF
+
+    CALL cliConf % Init(TRIM(selfInstallDir)//'/etc/sadv3d.json')
+    CALL cliConf % LoadFromCLI() 
+
+    ! TO DO : Swap out for cliConf generic "get" based on
+    !  cliConf % opts json object
+    !
     ! Set the CLI parameters !
-    CALL cli % get(val=enableMPI,switch='--mpi')
-    CALL cli % get(val=enableGPU,switch='--gpu')
-    CALL cli % get(val=meshfile,switch='--mesh')
-    CALL cli % get(val=dt,switch="--time-step")
-    CALL cli % get(val=outputInterval,switch="--output-interval")
-    CALL cli % get(val=initialTime,switch="--initial-time")
-    CALL cli % get(val=endTime,switch="--end-time")
-    CALL cli % get(val=controlDegree,switch="--control-degree")
-    CALL cli % get(val=targetDegree,switch="--target-degree")
-    CALL cli % get(val=cqTypeChar,switch="--control-quadrature")
-    CALL cli % get(val=tqTypeChar,switch="--target-quadrature")
-    CALL cli % get(val=meshFile,switch="--mesh")
-    CALL cli % get(val=nxElements,switch="--nxelements")
-    CALL cli % get(val=nyElements,switch="--nyelements")
-    CALL cli % get(val=nzElements,switch="--nzelements")
-    CALL cli % get(val=Lx, switch="--xlength")
-    CALL cli % get(val=Ly, switch="--ylength")
-    CALL cli % get(val=Lz, switch="--zlength")
-    CALL cli % get(val=velEqnX,switch="--velocity-x")
-    CALL cli % get(val=velEqnY,switch="--velocity-y")
-    CALL cli % get(val=velEqnZ,switch="--velocity-z")
-    CALL cli % get(val=icEqn,switch="--initial-condition")
-    CALL cli % get(val=bcEqn,switch="--boundary-condition")
-    CALL cli % get(val=sourceEqn,switch="--source")
-    CALL cli % get(val=integratorChar,switch="--integrator")
-    CALL cli % get(val=diffusivity,switch="--diffusivity")
+    CALL cliConf % cliObj % get(val=enableMPI,switch='--mpi')
+    CALL cliConf % cliObj % get(val=enableGPU,switch='--gpu')
+    CALL cliConf % cliObj % get(val=meshfile,switch='--mesh')
+    CALL cliConf % cliObj % get(val=dt,switch="--time-step")
+    CALL cliConf % cliObj % get(val=outputInterval,switch="--output-interval")
+    CALL cliConf % cliObj % get(val=initialTime,switch="--initial-time")
+    CALL cliConf % cliObj % get(val=endTime,switch="--end-time")
+    CALL cliConf % cliObj % get(val=controlDegree,switch="--control-degree")
+    CALL cliConf % cliObj % get(val=targetDegree,switch="--target-degree")
+    CALL cliConf % cliObj % get(val=cqTypeChar,switch="--control-quadrature")
+    CALL cliConf % cliObj % get(val=tqTypeChar,switch="--target-quadrature")
+    CALL cliConf % cliObj % get(val=meshFile,switch="--mesh")
+    CALL cliConf % cliObj % get(val=nxElements,switch="--nxelements")
+    CALL cliConf % cliObj % get(val=nyElements,switch="--nyelements")
+    CALL cliConf % cliObj % get(val=nzElements,switch="--nzelements")
+    CALL cliConf % cliObj % get(val=Lx, switch="--xlength")
+    CALL cliConf % cliObj % get(val=Ly, switch="--ylength")
+    CALL cliConf % cliObj % get(val=Lz, switch="--zlength")
+    CALL cliConf % cliObj % get(val=velEqnX,switch="--velocity-x")
+    CALL cliConf % cliObj % get(val=velEqnY,switch="--velocity-y")
+    CALL cliConf % cliObj % get(val=velEqnZ,switch="--velocity-z")
+    CALL cliConf % cliObj % get(val=icEqn,switch="--initial-condition")
+    CALL cliConf % cliObj % get(val=bcEqn,switch="--boundary-condition")
+    CALL cliConf % cliObj % get(val=sourceEqn,switch="--source")
+    CALL cliConf % cliObj % get(val=integratorChar,switch="--integrator")
+    CALL cliConf % cliObj % get(val=diffusivity,switch="--diffusivity")
 
     diffusiveFlux = .TRUE.
     IF( diffusivity == 0.0_prec ) THEN
@@ -346,7 +377,7 @@ CONTAINS
 
     IF (TRIM(UpperCase(integratorChar)) == 'EULER') THEN
       integrator = EULER
-    ELSEIF (TRIM(UpperCase(integratorChar)) == 'WILLIAMSON_RK3') THEN
+    ELSEIF (TRIM(UpperCase(integratorChar)) == 'RK3') THEN
       integrator = RK3
     ELSE
       PRINT *, 'Invalid time integrator'
@@ -423,192 +454,192 @@ CONTAINS
 
   END SUBROUTINE InitFromCLI_Advection3D
 
-  SUBROUTINE GetCLIParameters( cli )
-    TYPE(COMMAND_LINE_INTERFACE), INTENT(inout) :: cli
-
-    CALL cli % init(progname="sadv3d", &
-                    version="v0.0.0", &
-                    description="SELF Advection in 3-D", &
-                    license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
-                    authors="Joseph Schoonover (Fluid Numerics LLC)")
-
-    CALL cli % add(switch="--mpi", &
-                   help="Enable MPI", &
-                   act="store_true", &
-                   def="false", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--gpu", &
-                   help="Enable GPU acceleration", &
-                   act="store_true", &
-                   def="false", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--time-step", &
-                   switch_ab="-dt", &
-                   help="The time step size for the time integrator", &
-                   def="0.001", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--initial-time", &
-                   switch_ab="-t0", &
-                   help="The initial time level", &
-                   def="0.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--output-interval", &
-                   switch_ab="-oi", &
-                   help="The time between file output", &
-                   def="0.5", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--end-time", &
-                   switch_ab="-tn", &
-                   help="The final time level", &
-                   def="1.0", &
-                   required=.FALSE.)
-
-    ! Get the control degree
-    CALL cli % add(switch="--control-degree", &
-                   switch_ab="-c", &
-                   help="The polynomial degree of the control points."//NEW_LINE("A"), &
-                   def="7", &
-                   required=.FALSE.)
-
-    ! Get the target degree (assumed for plotting)
-    CALL cli % add(switch="--target-degree", &
-                   switch_ab="-t", &
-                   help="The polynomial degree for the"//&
-                  &" target points for interpolation."//&
-                  &" Typically used for plotting"//NEW_LINE("A"), &
-                   def="14", &
-                   required=.FALSE.)
-
-    ! Get the control quadrature
-    ! Everyone know Legendre-Gauss Quadrature is the best...
-    CALL cli % add(switch="--control-quadrature", &
-                   switch_ab="-cq", &
-                   def="gauss", &
-                   help="The quadrature type for control points."//NEW_LINE("A"), &
-                   choices="gauss,gauss-lobatto,chebyshev-gauss,chebyshev-gauss-lobatto", &
-                   required=.FALSE.)
-
-
-    ! Set the target grid quadrature
-    ! Default to uniform (assumed for plotting)
-    CALL cli % add(switch="--target-quadrature", &
-                   switch_ab="-tq", &
-                   def="uniform", &
-                   help="The quadrature type for target points."//NEW_LINE("A"), &
-                   choices="gauss,gauss-lobatto,uniform", &
-                   required=.FALSE.)
-
-    ! (Optional) Provide a file for a mesh
-    ! Assumed in HOPR or ISM-v2 format
-    CALL cli % add(switch="--mesh", &
-                   switch_ab="-m", &
-                   help="Path to a mesh file for control mesh."//NEW_LINE("A"), &
-                   def="", &
-                   required=.FALSE.)
-
-    ! (Optional) If a mesh is not provided, you
-    ! can request a structured grid to be generated
-    ! just set the nxelement, nyelements..
-    CALL cli % add(switch="--nxelements", &
-                   switch_ab="-nx", &
-                   help="The number of elements in the x-direction for structured mesh generation.", &
-                   def="5", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--nyelements", &
-                   switch_ab="-ny", &
-                   help="The number of elements in the y-direction for structured mesh generation.", &
-                   def="5", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--nzelements", &
-                   switch_ab="-nz", &
-                   help="The number of elements in the z-direction for structured mesh generation.", &
-                   def="5", &
-                   required=.FALSE.)
-
-    ! Alright... now tell me some physical mesh dimensions
-    CALL cli % add(switch="--xlength", &
-                   switch_ab="-lx", &
-                   help="The physical x-scale for structured mesh generation."//&
-                   " Ignored if a mesh file is provided", &
-                   def="1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--ylength", &
-                   switch_ab="-ly", &
-                   help="The physical y-scale for structured mesh generation."//&
-                   " Ignored if a mesh file is provided", &
-                   def="1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--zlength", &
-                   switch_ab="-lz", &
-                   help="The physical z-scale for structured mesh generation."//&
-                   " Ignored if a mesh file is provided", &
-                   def="1.0", &
-                   required=.FALSE.)
-
-    ! Set the velocity field
-    CALL cli % add(switch="--velocity-x", &
-                   switch_ab="-vx", &
-                   help="Equation for the x-component of the velocity field",&
-                   def="vx=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--velocity-y", &
-                   switch_ab="-vy", &
-                   help="Equation for the y-component of the velocity field",&
-                   def="vy=1.0", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--velocity-z", &
-                   switch_ab="-vz", &
-                   help="Equation for the z-component of the velocity field",&
-                   def="vz=1.0", &
-                   required=.FALSE.)
-
-    ! Tracer diffusivity
-    CALL cli % add(switch="--diffusivity", &
-                   switch_ab="-nu", &
-                   help="Tracer diffusivity (applied to all tracers)", &
-                   def="0.0", &
-                   required=.FALSE.)
-
-    ! Set the initial conditions
-    ! .. TO DO .. 
-    !  > How to handle multiple tracer fields ??
-    CALL cli % add(switch="--initial-condition", &
-                   switch_ab="-ic", &
-                   help="Equation for the initial tracer distributions",&
-                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2 + ((z-t)-0.5)^2)/0.01 )", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--boundary-condition", &
-                   switch_ab="-bc", &
-                   help="Equation for the boundary tracer distributions (can be time dependent!)", &
-                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2 + ((z-t)-0.5)^2)/0.01 )", &
-                   required=.FALSE.)
-
-    CALL cli % add(switch="--source", &
-                   switch_ab="-s", &
-                   help="Equation for the source term (can be time dependent!)", &
-                   def="s = 0.0", &
-                   required=.FALSE.)
-
-    ! Give me a time integrator
-    CALL cli % add(switch="--integrator", &
-                   switch_ab="-int", &
-                   help="Sets the time integration method. Only 'euler' or 'williamson_rk3'", &
-                   def="williamson_rk3", &
-                   required=.FALSE.)
-
-  END SUBROUTINE GetCLIParameters
+!  SUBROUTINE GetCLIParameters( cli )
+!    TYPE(COMMAND_LINE_INTERFACE), INTENT(inout) :: cli
+!
+!    CALL cli % init(progname="sadv3d", &
+!                    version="v0.0.0", &
+!                    description="SELF Advection in 3-D", &
+!                    license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
+!                    authors="Joseph Schoonover (Fluid Numerics LLC)")
+!
+!    CALL cli % add(switch="--mpi", &
+!                   help="Enable MPI", &
+!                   act="store_true", &
+!                   def="false", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--gpu", &
+!                   help="Enable GPU acceleration", &
+!                   act="store_true", &
+!                   def="false", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--time-step", &
+!                   switch_ab="-dt", &
+!                   help="The time step size for the time integrator", &
+!                   def="0.001", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--initial-time", &
+!                   switch_ab="-t0", &
+!                   help="The initial time level", &
+!                   def="0.0", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--output-interval", &
+!                   switch_ab="-oi", &
+!                   help="The time between file output", &
+!                   def="0.5", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--end-time", &
+!                   switch_ab="-tn", &
+!                   help="The final time level", &
+!                   def="1.0", &
+!                   required=.FALSE.)
+!
+!    ! Get the control degree
+!    CALL cli % add(switch="--control-degree", &
+!                   switch_ab="-c", &
+!                   help="The polynomial degree of the control points."//NEW_LINE("A"), &
+!                   def="7", &
+!                   required=.FALSE.)
+!
+!    ! Get the target degree (assumed for plotting)
+!    CALL cli % add(switch="--target-degree", &
+!                   switch_ab="-t", &
+!                   help="The polynomial degree for the"//&
+!                  &" target points for interpolation."//&
+!                  &" Typically used for plotting"//NEW_LINE("A"), &
+!                   def="14", &
+!                   required=.FALSE.)
+!
+!    ! Get the control quadrature
+!    ! Everyone know Legendre-Gauss Quadrature is the best...
+!    CALL cli % add(switch="--control-quadrature", &
+!                   switch_ab="-cq", &
+!                   def="gauss", &
+!                   help="The quadrature type for control points."//NEW_LINE("A"), &
+!                   choices="gauss,gauss-lobatto,chebyshev-gauss,chebyshev-gauss-lobatto", &
+!                   required=.FALSE.)
+!
+!
+!    ! Set the target grid quadrature
+!    ! Default to uniform (assumed for plotting)
+!    CALL cli % add(switch="--target-quadrature", &
+!                   switch_ab="-tq", &
+!                   def="uniform", &
+!                   help="The quadrature type for target points."//NEW_LINE("A"), &
+!                   choices="gauss,gauss-lobatto,uniform", &
+!                   required=.FALSE.)
+!
+!    ! (Optional) Provide a file for a mesh
+!    ! Assumed in HOPR or ISM-v2 format
+!    CALL cli % add(switch="--mesh", &
+!                   switch_ab="-m", &
+!                   help="Path to a mesh file for control mesh."//NEW_LINE("A"), &
+!                   def="", &
+!                   required=.FALSE.)
+!
+!    ! (Optional) If a mesh is not provided, you
+!    ! can request a structured grid to be generated
+!    ! just set the nxelement, nyelements..
+!    CALL cli % add(switch="--nxelements", &
+!                   switch_ab="-nx", &
+!                   help="The number of elements in the x-direction for structured mesh generation.", &
+!                   def="5", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--nyelements", &
+!                   switch_ab="-ny", &
+!                   help="The number of elements in the y-direction for structured mesh generation.", &
+!                   def="5", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--nzelements", &
+!                   switch_ab="-nz", &
+!                   help="The number of elements in the z-direction for structured mesh generation.", &
+!                   def="5", &
+!                   required=.FALSE.)
+!
+!    ! Alright... now tell me some physical mesh dimensions
+!    CALL cli % add(switch="--xlength", &
+!                   switch_ab="-lx", &
+!                   help="The physical x-scale for structured mesh generation."//&
+!                   " Ignored if a mesh file is provided", &
+!                   def="1.0", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--ylength", &
+!                   switch_ab="-ly", &
+!                   help="The physical y-scale for structured mesh generation."//&
+!                   " Ignored if a mesh file is provided", &
+!                   def="1.0", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--zlength", &
+!                   switch_ab="-lz", &
+!                   help="The physical z-scale for structured mesh generation."//&
+!                   " Ignored if a mesh file is provided", &
+!                   def="1.0", &
+!                   required=.FALSE.)
+!
+!    ! Set the velocity field
+!    CALL cli % add(switch="--velocity-x", &
+!                   switch_ab="-vx", &
+!                   help="Equation for the x-component of the velocity field",&
+!                   def="vx=1.0", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--velocity-y", &
+!                   switch_ab="-vy", &
+!                   help="Equation for the y-component of the velocity field",&
+!                   def="vy=1.0", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--velocity-z", &
+!                   switch_ab="-vz", &
+!                   help="Equation for the z-component of the velocity field",&
+!                   def="vz=1.0", &
+!                   required=.FALSE.)
+!
+!    ! Tracer diffusivity
+!    CALL cli % add(switch="--diffusivity", &
+!                   switch_ab="-nu", &
+!                   help="Tracer diffusivity (applied to all tracers)", &
+!                   def="0.0", &
+!                   required=.FALSE.)
+!
+!    ! Set the initial conditions
+!    ! .. TO DO .. 
+!    !  > How to handle multiple tracer fields ??
+!    CALL cli % add(switch="--initial-condition", &
+!                   switch_ab="-ic", &
+!                   help="Equation for the initial tracer distributions",&
+!                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2 + ((z-t)-0.5)^2)/0.01 )", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--boundary-condition", &
+!                   switch_ab="-bc", &
+!                   help="Equation for the boundary tracer distributions (can be time dependent!)", &
+!                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2 + ((z-t)-0.5)^2)/0.01 )", &
+!                   required=.FALSE.)
+!
+!    CALL cli % add(switch="--source", &
+!                   switch_ab="-s", &
+!                   help="Equation for the source term (can be time dependent!)", &
+!                   def="s = 0.0", &
+!                   required=.FALSE.)
+!
+!    ! Give me a time integrator
+!    CALL cli % add(switch="--integrator", &
+!                   switch_ab="-int", &
+!                   help="Sets the time integration method. Only 'euler' or 'williamson_rk3'", &
+!                   def="williamson_rk3", &
+!                   required=.FALSE.)
+!
+!  END SUBROUTINE GetCLIParameters
 
   SUBROUTINE Free_Advection3D(this)
     IMPLICIT NONE
