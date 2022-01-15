@@ -26,13 +26,13 @@ USE ISO_C_BINDING
 
   TYPE,EXTENDS(DG3D), PUBLIC :: Advection3D
 
-    TYPE(CLI) :: cliConf
     TYPE(MappedVector3D),PUBLIC :: velocity
     TYPE(Vector3D),PUBLIC :: plotVelocity
     TYPE(Vector3D),PUBLIC :: plotX
 
     TYPE(EquationParser), ALLOCATABLE :: boundaryConditionEqn(:)
     TYPE(EquationParser), ALLOCATABLE :: solutionEqn(:)
+    TYPE(EquationParser), ALLOCATABLE :: velEqn(:)
     TYPE(EquationParser), ALLOCATABLE :: sourceEqn(:)
 
     REAL(prec) :: simulationTime
@@ -66,29 +66,35 @@ USE ISO_C_BINDING
 
     CONTAINS
 
+      PROCEDURE,PUBLIC :: Init => Init_Advection3D
+
       PROCEDURE,PUBLIC :: InitWithCLI => InitWithCLI_Advection3D
-
-      PROCEDURE,PUBLIC :: InitCLI => InitCLI_Advection3D
-
-!      PROCEDURE,PUBLIC :: InitFromCLI => InitFromCLI_Advection3D
 
       PROCEDURE,PUBLIC :: Free => Free_Advection3D
 
+      PROCEDURE,PUBLIC :: MaxSolutionError => MaxSolutionError_Advection3D
 
-      GENERIC, PUBLIC :: SetSolution => SetSolutionFromEquation_Advection3D
+      GENERIC, PUBLIC :: SetSolution => SetSolutionFromEquation_Advection3D, &
+                                        SetSolutionFromChar_Advection3D
       PROCEDURE, PRIVATE :: SetSolutionFromEquation_Advection3D
+      PROCEDURE, PRIVATE :: SetSolutionFromChar_Advection3D
 
-      GENERIC, PUBLIC :: SetSource => SetSourceFromEquation_Advection3D
+      GENERIC, PUBLIC :: SetSource => SetSourceFromEquation_Advection3D, &
+                                      SetSourceFromChar_Advection3D
       PROCEDURE, PRIVATE :: SetSourceFromEquation_Advection3D
+      PROCEDURE, PRIVATE :: SetSourceFromChar_Advection3D
 
-      GENERIC, PUBLIC :: SetVelocity => SetVelocityFromEquation_Advection3D
+      GENERIC, PUBLIC :: SetVelocity => SetVelocityFromEquation_Advection3D,&
+                                        SetVelocityFromChar_Advection3D
       PROCEDURE, PRIVATE :: SetVelocityFromEquation_Advection3D
+      PROCEDURE, PRIVATE :: SetVelocityFromChar_Advection3D
 
-      GENERIC, PUBLIC :: SetBoundaryCondition => SetBoundaryConditionFromEquation_Advection3D
+      GENERIC, PUBLIC :: SetBoundaryCondition => SetBoundaryConditionFromEquation_Advection3D, &
+                                                 SetBoundaryConditionFromChar_Advection3D
       PROCEDURE, PRIVATE :: SetBoundaryConditionFromEquation_Advection3D
+      PROCEDURE, PRIVATE :: SetBoundaryConditionFromChar_Advection3D
 
       PROCEDURE, PUBLIC :: ModelExecute => ModelExecute_Advection3D
-!      PROCEDURE, PUBLIC :: ConvergenceCheck => ConvergenceCheck_Advection3D
 
       PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection3D
       PROCEDURE, PUBLIC :: WritePickup => WritePickup_Advection3D
@@ -164,11 +170,104 @@ USE ISO_C_BINDING
 
 CONTAINS
 
-  SUBROUTINE InitWithCLI_Advection3D(this)
+  SUBROUTINE Init_Advection3D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
+    IMPLICIT NONE
+    CLASS(Advection3D),INTENT(out) :: this
+    INTEGER,INTENT(in) :: cqType
+    INTEGER,INTENT(in) :: tqType
+    INTEGER,INTENT(in) :: cqDegree
+    INTEGER,INTENT(in) :: tqDegree
+    INTEGER,INTENT(in) :: nvar
+    LOGICAL,INTENT(in) :: enableMPI
+    TYPE(MeshSpec),INTENT(in) :: spec
+
+    CALL this % decomp % Init(enableMPI)
+
+    ! Load Mesh
+    IF (enableMPI)THEN
+      CALL this % mesh % Load(spec,this % decomp)
+    ELSE
+      CALL this % mesh % Load(spec)
+      CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
+    ENDIF
+
+    CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
+
+
+    ! Create geometry from mesh
+    CALL this % geometry % GenerateFromMesh(&
+            this % mesh,cqType,tqType,cqDegree,tqDegree)
+
+    CALL this % plotSolution % Init(&
+            tqDegree,tqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % dSdt % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % solution % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % solutionGradient % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % flux % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % velocity % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % plotVelocity % Init(&
+            tqDegree,tqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % plotX % Init(&
+            tqDegree,tqType,tqDegree,tqType,1,&
+            this % mesh % nElem)
+
+    CALL this % source % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+                this % mesh % nElem)
+
+    CALL this % fluxDivergence % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % workScalar % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % workVector % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % workTensor % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    CALL this % compFlux % Init(&
+            cqDegree,cqType,tqDegree,tqType,nVar,&
+            this % mesh % nElem)
+
+    ALLOCATE (this % solutionMetaData(1:nvar))
+    ALLOCATE (this % boundaryConditionEqn(1:nvar))
+    ALLOCATE (this % solutionEqn(1:nvar))
+    ALLOCATE (this % sourceEqn(1:nvar))
+    ALLOCATE (this % velEqn(1:3) )
+
+  END SUBROUTINE Init_Advection3D
+
+  SUBROUTINE InitWithCLI_Advection3D(this, cliConf)
     !! Initializes the Advection3D class and assumes the cli configuration
     !! has already been set
     IMPLICIT NONE
     CLASS(Advection3D),INTENT(inout) :: this
+    TYPE(CLI), INTENT(inout) :: cliConf
     ! Local
     INTEGER :: controlDegree
     INTEGER :: targetDegree
@@ -196,6 +295,7 @@ CONTAINS
     LOGICAL :: enableMPI
     LOGICAL :: enableGPU
     LOGICAL :: diffusiveFlux
+    LOGICAL :: found
     REAL(prec) :: outputInterval
     REAL(prec) :: initialTime
     REAL(prec) :: endTime
@@ -203,32 +303,32 @@ CONTAINS
     TYPE(EquationParser) :: velEqn(1:3)
 
     ! Set the CLI parameters !
-    CALL this % cliConf % cliObj % get(val=enableMPI,switch='--mpi')
-    CALL this % cliConf % cliObj % get(val=enableGPU,switch='--gpu')
-    CALL this % cliConf % cliObj % get(val=meshfile,switch='--mesh')
-    CALL this % cliConf % cliObj % get(val=dt,switch="--time-step")
-    CALL this % cliConf % cliObj % get(val=outputInterval,switch="--output-interval")
-    CALL this % cliConf % cliObj % get(val=initialTime,switch="--initial-time")
-    CALL this % cliConf % cliObj % get(val=endTime,switch="--end-time")
-    CALL this % cliConf % cliObj % get(val=controlDegree,switch="--control-degree")
-    CALL this % cliConf % cliObj % get(val=targetDegree,switch="--target-degree")
-    CALL this % cliConf % cliObj % get(val=controlQuadratureChar,switch="--control-quadrature")
-    CALL this % cliConf % cliObj % get(val=targetQuadratureChar,switch="--target-quadrature")
-    CALL this % cliConf % cliObj % get(val=meshFile,switch="--mesh")
-    CALL this % cliConf % cliObj % get(val=nxElements,switch="--nxelements")
-    CALL this % cliConf % cliObj % get(val=nyElements,switch="--nyelements")
-    CALL this % cliConf % cliObj % get(val=nzElements,switch="--nzelements")
-    CALL this % cliConf % cliObj % get(val=Lx, switch="--xlength")
-    CALL this % cliConf % cliObj % get(val=Ly, switch="--ylength")
-    CALL this % cliConf % cliObj % get(val=Lz, switch="--zlength")
-    CALL this % cliConf % cliObj % get(val=velEqnX,switch="--velocity-x")
-    CALL this % cliConf % cliObj % get(val=velEqnY,switch="--velocity-y")
-    CALL this % cliConf % cliObj % get(val=velEqnZ,switch="--velocity-z")
-    CALL this % cliConf % cliObj % get(val=icEqn,switch="--initial-condition")
-    CALL this % cliConf % cliObj % get(val=bcEqn,switch="--boundary-condition")
-    CALL this % cliConf % cliObj % get(val=sourceEqn,switch="--source")
-    CALL this % cliConf % cliObj % get(val=integratorChar,switch="--integrator")
-    CALL this % cliConf % cliObj % get(val=diffusivity,switch="--diffusivity")
+    CALL cliConf % cliObj % get(val=enableMPI,switch='--mpi')
+    CALL cliConf % cliObj % get(val=enableGPU,switch='--gpu')
+    CALL cliConf % cliObj % get(val=meshfile,switch='--mesh')
+    CALL cliConf % cliObj % get(val=dt,switch="--time-step")
+    CALL cliConf % cliObj % get(val=outputInterval,switch="--output-interval")
+    CALL cliConf % cliObj % get(val=initialTime,switch="--initial-time")
+    CALL cliConf % cliObj % get(val=endTime,switch="--end-time")
+    CALL cliConf % cliObj % get(val=controlDegree,switch="--control-degree")
+    CALL cliConf % cliObj % get(val=targetDegree,switch="--target-degree")
+    CALL cliConf % cliObj % get(val=controlQuadratureChar,switch="--control-quadrature")
+    CALL cliConf % cliObj % get(val=targetQuadratureChar,switch="--target-quadrature")
+    CALL cliConf % cliObj % get(val=meshFile,switch="--mesh")
+    CALL cliConf % cliObj % get(val=nxElements,switch="--nxelements")
+    CALL cliConf % cliObj % get(val=nyElements,switch="--nyelements")
+    CALL cliConf % cliObj % get(val=nzElements,switch="--nzelements")
+    CALL cliConf % cliObj % get(val=Lx, switch="--xlength")
+    CALL cliConf % cliObj % get(val=Ly, switch="--ylength")
+    CALL cliConf % cliObj % get(val=Lz, switch="--zlength")
+    CALL cliConf % cliObj % get(val=velEqnX,switch="--velocity-x")
+    CALL cliConf % cliObj % get(val=velEqnY,switch="--velocity-y")
+    CALL cliConf % cliObj % get(val=velEqnZ,switch="--velocity-z")
+    CALL cliConf % cliObj % get(val=icEqn,switch="--initial-condition")
+    CALL cliConf % cliObj % get(val=bcEqn,switch="--boundary-condition")
+    CALL cliConf % cliObj % get(val=sourceEqn,switch="--source")
+    CALL cliConf % cliObj % get(val=integratorChar,switch="--integrator")
+    CALL cliConf % cliObj % get(val=diffusivity,switch="--diffusivity")
     !
     !  Fix the number of tracer variables to 1 ! 
     nvar = 1
@@ -406,47 +506,14 @@ CONTAINS
     ALLOCATE (this % boundaryConditionEqn(1:nvar))
     ALLOCATE (this % solutionEqn(1:nvar))
     ALLOCATE (this % sourceEqn(1:nvar))
+    ALLOCATE (this % velEqn(1:3))
 
-    eqn(1) = EquationParser( icEqn, (/'x','y','z','t'/))
-    CALL this % SetSolution( eqn )
-    this % solutionEqn(1) = EquationParser( icEqn, (/'x','y','z','t'/))
-
-    velEqn(1) = EquationParser(velEqnX, (/'x','y','z'/))
-    velEqn(2) = EquationParser(velEqnY, (/'x','y','z'/))
-    velEqn(3) = EquationParser(velEqnZ, (/'x','y','z'/))
-    CALL this % SetVelocity( velEqn )
-
-    this % boundaryConditionEqn(1) = EquationParser( bcEqn, (/'x','y','z','t'/))
-    CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
-    this % sourceEqn(1) = EquationParser( sourceEqn, (/'x','y','z','t'/))
+    CALL this % SetSolution( icEqn )
+    CALL this % SetVelocity( velEqnX, velEqnY, velEqnZ )
+    CALL this % SetBoundaryCondition( bcEqn )
+    CALL this % SetSource( sourceEqn )
 
   END SUBROUTINE InitWithCLI_Advection3D
-
-  SUBROUTINE InitCLI_Advection3D(this) 
-    IMPLICIT NONE
-    CLASS(Advection3D),INTENT(inout) :: this
-    ! Local
-    LOGICAL :: fileExists
-    CHARACTER(LEN=self_FileNameLength) :: selfInstallDir
-
-      CALL GET_ENVIRONMENT_VARIABLE('SELF_INSTALL_DIR', selfInstallDir)
-      IF( TRIM(selfInstallDir) == "" )THEN
-        PRINT*, "SELF_INSTALL_DIR environment variable unset."
-        PRINT*, "Trying /opt/view/"
-        selfInstallDir = "/opt/view"
-      ENDIF
-
-      INQUIRE(FILE=TRIM(selfInstallDir)//'/etc/sadv3d.json', EXIST=fileExists)
-      IF( .NOT. fileExists )THEN
-        PRINT*, TRIM(selfInstallDir)//'/etc/sadv3d.json'//' configuration file not found!'
-        STOP "ERROR"
-      ENDIF
-
-      CALL this % cliConf % Init(TRIM(selfInstallDir)//'/etc/sadv3d.json')
-      CALL this % cliConf % LoadFromCLI() 
-          
-
-  END SUBROUTINE InitCLI_Advection3D
 
   SUBROUTINE Free_Advection3D(this)
     IMPLICIT NONE
@@ -473,9 +540,51 @@ CONTAINS
     DEALLOCATE (this % boundaryConditionEqn)
     DEALLOCATE (this % solutionEqn)
     DEALLOCATE (this % sourceEqn)
+    DEALLOCATE (this % velEqn)
     CALL this % decomp % Finalize()
 
   END SUBROUTINE Free_Advection3D
+
+  SUBROUTINE SetSolutionFromChar_Advection3D( this, eqnChar )
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: i, j, k, iEl, iVar, iSide
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+    REAL(prec) :: t
+
+    this % solutionEqn(1) = EquationParser( eqnChar, (/'x','y','z','t'/))
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1, this % solution % nVar
+        DO k = 0, this % solution % N
+          DO j = 0, this % solution % N
+            DO i = 0, this % solution % N
+
+               ! Get the mesh positions
+               x = this % geometry % x % interior % hostData(1,i,j,k,1,iEl)
+               y = this % geometry % x % interior % hostData(2,i,j,k,1,iEl)
+               z = this % geometry % x % interior % hostData(3,i,j,k,1,iEl)
+               t = this % simulationTime
+
+               this % solution % interior % hostData(i,j,k,iVar,iEl) = &
+                 this % solutionEqn(iVar) % Evaluate((/x, y, z, t/))
+
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    IF( this % gpuAccel )THEN
+      ! Copy data to the GPU
+      CALL this % solution % extBoundary % UpdateDevice()
+    ENDIF
+
+  END SUBROUTINE SetSolutionFromChar_Advection3D
 
   SUBROUTINE SetSolutionFromEquation_Advection3D( this, eqn )
     IMPLICIT NONE
@@ -517,6 +626,47 @@ CONTAINS
 
   END SUBROUTINE SetSolutionFromEquation_Advection3D
 
+  SUBROUTINE SetSourceFromChar_Advection3D( this, eqnChar )
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: i, j, k, iEl, iVar, iSide
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+    REAL(prec) :: t
+
+    this % sourceEqn(1) = EquationParser( eqnChar, (/'x','y','z','t'/))
+    DO iEl = 1,this % source % nElem
+      DO iVar = 1, this % source % nVar
+        DO k = 0, this % source % N
+          DO j = 0, this % source % N
+            DO i = 0, this % source % N
+
+               ! Get the mesh positions
+               x = this % geometry % x % interior % hostData(1,i,j,k,1,iEl)
+               y = this % geometry % x % interior % hostData(2,i,j,k,1,iEl)
+               z = this % geometry % x % interior % hostData(3,i,j,k,1,iEl)
+               t = this % simulationTime
+
+               this % source % interior % hostData(i,j,k,iVar,iEl) = &
+                 this % sourceEqn(iVar) % Evaluate((/x, y, z, t/))
+
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    IF( this % gpuAccel )THEN
+      ! Copy data to the GPU
+      CALL this % source % extBoundary % UpdateDevice()
+    ENDIF
+
+  END SUBROUTINE SetSourceFromChar_Advection3D
+
   SUBROUTINE SetSourceFromEquation_Advection3D( this, eqn )
     IMPLICIT NONE
     CLASS(Advection3D), INTENT(inout) :: this
@@ -556,6 +706,85 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE SetSourceFromEquation_Advection3D
+
+  SUBROUTINE SetVelocityFromChar_Advection3D( this, velX, velY, velZ )
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: velX
+    CHARACTER(*), INTENT(in) :: velY
+    CHARACTER(*), INTENT(in) :: velZ
+    ! Local
+    INTEGER :: i, j, k, iEl, iVar, iSide
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+
+    this % velEqn(1) = EquationParser(velX, (/'x','y','z'/))
+    this % velEqn(2) = EquationParser(velY, (/'x','y','z'/))
+    this % velEqn(3) = EquationParser(velZ, (/'x','y','z'/))
+    DO iEl = 1,this % solution % nElem
+
+      ! Set the velocity at the element interiors
+      DO k = 0, this % solution % N
+        DO j = 0, this % solution % N
+          DO i = 0, this % solution % N
+
+             ! Get the mesh positions
+             x = this % geometry % x % interior % hostData(1,i,j,k,1,iEl)
+             y = this % geometry % x % interior % hostData(2,i,j,k,1,iEl)
+             z = this % geometry % x % interior % hostData(3,i,j,k,1,iEl)
+
+             ! Set the velocity in the x-direction
+             this % velocity % interior % hostData(1,i,j,k,1,iEl) = &
+               this % velEqn(1) % Evaluate((/x, y, z/))
+
+             ! Set the velocity in the y-direction
+             this % velocity % interior % hostData(2,i,j,k,1,iEl) = &
+               this % velEqn(2) % Evaluate((/x, y, z/))
+
+             ! Set the velocity in the z-direction
+             this % velocity % interior % hostData(3,i,j,k,1,iEl) = &
+               this % velEqn(3) % Evaluate((/x, y, z/))
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+      ! Set the velocity at element faces
+      DO iSide = 1, 6
+        DO j = 0, this % solution % N
+          DO i = 0, this % solution % N
+
+             ! Get the mesh positions
+             x = this % geometry % x % boundary % hostData(1,i,j,1,iSide,iEl)
+             y = this % geometry % x % boundary % hostData(2,i,j,1,iSide,iEl)
+             z = this % geometry % x % boundary % hostData(3,i,j,1,iSide,iEl)
+
+             ! Set the velocity in the x-direction
+             this % velocity % boundary % hostData(1,i,j,1,iSide,iEl) = &
+               this % velEqn(1) % Evaluate((/x, y, z/))
+
+             ! Set the velocity in the y-direction
+             this % velocity % boundary % hostData(2,i,j,1,iSide,iEl) = &
+               this % velEqn(2) % Evaluate((/x, y, z/))
+
+             ! Set the velocity in the z-direction
+             this % velocity % boundary % hostData(3,i,j,1,iSide,iEl) = &
+               this % velEqn(3) % Evaluate((/x, y, z/))
+
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDDO
+
+    IF( this % gpuAccel )THEN
+      ! Copy data to the GPU
+      CALL this % velocity % extBoundary % UpdateDevice()
+    ENDIF
+
+  END SUBROUTINE SetVelocityFromChar_Advection3D
 
   SUBROUTINE SetVelocityFromEquation_Advection3D( this, eqn )
     IMPLICIT NONE
@@ -632,6 +861,52 @@ CONTAINS
 
   END SUBROUTINE SetVelocityFromEquation_Advection3D
 
+  SUBROUTINE SetBoundaryConditionFromChar_Advection3D( this, eqnChar )
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: i, j, iEl, iVar, iSide
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+
+    this % boundaryConditionEqn(1) = EquationParser( eqnChar, (/'x','y','z','t'/))
+    DO iEl = 1,this % solution % nElem
+      DO iSide = 1, 6
+        DO iVar = 1, this % solution % nvar
+          DO j = 0, this % solution % N
+            DO i = 0, this % solution % N
+
+               ! If this element's side has no neighbor assigned
+               ! it is assumed to be a physical boundary.
+               ! In this case, we want to assign the external boundary
+               ! condition.
+               IF( this % mesh % self_sideInfo % hostData(3,iSide,iEl) == 0 )THEN
+                 ! Get the mesh positions
+                 x = this % geometry % x % boundary % hostData(1,i,j,1,iSide,iEl)
+                 y = this % geometry % x % boundary % hostData(2,i,j,1,iSide,iEl)
+                 z = this % geometry % x % boundary % hostData(3,i,j,1,iSide,iEl)
+
+                 ! Set the external boundary condition
+                 this % solution % extBoundary % hostData(i,j,iVar,iSide,iEl) = &
+                   this % boundaryConditionEqn(iVar) % Evaluate((/x, y, z, this % simulationTime/))
+               ENDIF
+
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    IF( this % gpuAccel )THEN
+      ! Copy data to the GPU
+      CALL this % solution % extBoundary % UpdateDevice()
+    ENDIF
+
+  END SUBROUTINE SetBoundaryConditionFromChar_Advection3D
+
   SUBROUTINE SetBoundaryConditionFromEquation_Advection3D( this, eqn )
     IMPLICIT NONE
     CLASS(Advection3D), INTENT(inout) :: this
@@ -678,17 +953,27 @@ CONTAINS
 
   END SUBROUTINE SetBoundaryConditionFromEquation_Advection3D
   
-  SUBROUTINE ModelExecute_Advection3D( this ) 
+  SUBROUTINE ModelExecute_Advection3D( this, io ) 
     IMPLICIT NONE
     CLASS(Advection3D), INTENT(inout) :: this
+    LOGICAL, INTENT(in), OPTIONAL :: io
     ! Local
     INTEGER :: nDumps
     INTEGER :: i
     REAL(prec) :: endTime
+    LOGICAL :: ioLoc
 
-    CALL this % InitWithCLI()
-    CALL this % WriteTecplot()
-    CALL this % WritePickup()
+    ! Set flag to control if file IO is done
+    IF( PRESENT(io) )THEN
+      ioLoc = io
+    ELSE
+      ioLoc = .TRUE.
+    ENDIF
+
+    IF( ioLoc )THEN
+      CALL this % WriteTecplot()
+      CALL this % WritePickup()
+    ENDIF
 
     nDumps = INT(( this % endTime - this % initialTime )/( this % outputInterval ) )
     DO i = 1, nDumps
@@ -696,12 +981,12 @@ CONTAINS
       endTime = this % simulationTime + this % outputInterval
           
       CALL this % ForwardStep( endTime )
-      CALL this % WriteTecplot()
-      CALL this % WritePickup()
+      IF( ioLoc )THEN
+        CALL this % WriteTecplot()
+        CALL this % WritePickup()
+      ENDIF
 
     ENDDO
-
-    CALL this % Free()
 
   END SUBROUTINE ModelExecute_Advection3D
 
@@ -1183,5 +1468,52 @@ CONTAINS
     CALL self % Write(pickupFile)
 
   END SUBROUTINE WritePickup_Advection3D
+
+  SUBROUTINE MaxSolutionError_Advection3D( this, maxError )
+  !! Uses the solution equation supplied by the equation parser
+  !! to compare with the computed solution. This difference is assumed
+  !! be the solution error and this routine returns the max(abs(error))
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: this
+    REAL(prec), INTENT(out) :: maxError
+    ! Local
+    INTEGER :: i, j, k, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+    REAL(prec) :: t
+    REAL(prec) :: exactSolution
+    REAL(prec) :: computedSolution
+
+    ! Initialize the maxError
+    maxError = 0.0_prec
+    DO iEl = 1,this % solution % nElem
+      DO iVar = 1, this % solution % nVar
+        DO k = 0, this % solution % N
+          DO j = 0, this % solution % N
+            DO i = 0, this % solution % N
+
+               ! Get the mesh positions
+               x = this % geometry % x % interior % hostData(1,i,j,k,1,iEl)
+               y = this % geometry % x % interior % hostData(2,i,j,k,1,iEl)
+               z = this % geometry % x % interior % hostData(3,i,j,k,1,iEl)
+               t = this % simulationTime
+
+               exactSolution = this % solutionEqn(iVar) % Evaluate((/x, y, z, t/))
+               computedSolution =  this % solution % interior % hostData(i,j,k,iVar,iEl)
+
+               maxError = MAX( maxError, &
+                             ABS( exactSolution - computedSolution ) )
+
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+    PRINT*, this % solution % N, maxError
+
+  END SUBROUTINE MaxSolutionError_Advection3D
 
 END MODULE SELF_Advection3D
