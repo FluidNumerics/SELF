@@ -6,25 +6,18 @@ USE FEQParse
 USE SELF_Constants
 
   TYPE( Advection3D ) :: model
-  INTEGER :: nDumps
-  INTEGER :: i
-  REAL(prec) :: endTime
 
-  CALL model % InitFromCLI( )
+  CALL model % InitCLI( )
 
-  CALL model %  WriteTecplot()
+  ! Now that we have CLI variables,
+  ! we need to determine what to do
+  !
+  ! When convergence check is requested, we want to advance the model multiple
+  ! times, gradually increasing N. Additionally, we want to calculate the
+  ! difference between the exact solution and the numerical solution to obtain
+  ! the max(abs(error)).
 
-  nDumps = INT(( model % endTime - model % initialTime )/( model % outputInterval ) )
-  DO i = 1, nDumps
-  
-    endTime = model % simulationTime + model % outputInterval
-        
-    CALL model % ForwardStep( endTime )
-    CALL model % WriteTecplot()
-    CALL model % WritePickup()
+  CALL model % ModelExecute() 
 
-  ENDDO
-
-  CALL model % Free()
 
 END PROGRAM sadv3d

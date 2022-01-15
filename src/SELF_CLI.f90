@@ -40,6 +40,7 @@ MODULE SELF_CLI
 
   TYPE,PUBLIC :: CLI
     TYPE(JSON_FILE) :: json
+    TYPE(JSON_CORE) :: conf
     TYPE(COMMAND_LINE_INTERFACE) :: cliObj
     CHARACTER(SELF_FILE_DEFAULT_LENGTH) :: config
 
@@ -228,9 +229,13 @@ MODULE SELF_CLI
     CHARACTER(SELF_JSON_DEFAULT_VALUE_LENGTH) :: tmpVal
     CHARACTER(LEN=:),ALLOCATABLE :: cliObjLong
     LOGICAL :: found
+    TYPE(JSON_VALUE),POINTER :: p
 
       CALL this % json % info('self_model.options',n_children=nopts)
 
+      ! Initialize the configuration !
+      CALL this % conf % initialize()
+      CALL this % conf % create_object(p,'')
 
       DO i = 1, nopts
       
@@ -249,6 +254,10 @@ MODULE SELF_CLI
                   "].value" 
 
         CALL this % json % update( TRIM(jsonKey), TRIM(tmpVal), found )
+
+        ! Create a map between the CLI command and the value
+        ! associated in the conf lookup dictionary.
+        CALL this % conf % add(p, TRIM(cliObjLong), TRIM(tmpVal) ) 
 
         IF( ALLOCATED(cliObjLong) ) DEALLOCATE(cliObjLong)
 

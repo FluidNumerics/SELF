@@ -26,6 +26,7 @@ USE ISO_C_BINDING
 
   TYPE,EXTENDS(DG3D), PUBLIC :: Advection3D
 
+    TYPE(CLI) :: cliConf
     TYPE(MappedVector3D),PUBLIC :: velocity
     TYPE(Vector3D),PUBLIC :: plotVelocity
     TYPE(Vector3D),PUBLIC :: plotX
@@ -65,9 +66,11 @@ USE ISO_C_BINDING
 
     CONTAINS
 
-      PROCEDURE,PUBLIC :: Init => Init_Advection3D
+      PROCEDURE,PUBLIC :: InitWithCLI => InitWithCLI_Advection3D
 
-      PROCEDURE,PUBLIC :: InitFromCLI => InitFromCLI_Advection3D
+      PROCEDURE,PUBLIC :: InitCLI => InitCLI_Advection3D
+
+!      PROCEDURE,PUBLIC :: InitFromCLI => InitFromCLI_Advection3D
 
       PROCEDURE,PUBLIC :: Free => Free_Advection3D
 
@@ -83,6 +86,9 @@ USE ISO_C_BINDING
 
       GENERIC, PUBLIC :: SetBoundaryCondition => SetBoundaryConditionFromEquation_Advection3D
       PROCEDURE, PRIVATE :: SetBoundaryConditionFromEquation_Advection3D
+
+      PROCEDURE, PUBLIC :: ModelExecute => ModelExecute_Advection3D
+!      PROCEDURE, PUBLIC :: ConvergenceCheck => ConvergenceCheck_Advection3D
 
       PROCEDURE, PUBLIC :: WriteTecplot => WriteTecplot_Advection3D
       PROCEDURE, PUBLIC :: WritePickup => WritePickup_Advection3D
@@ -158,118 +164,28 @@ USE ISO_C_BINDING
 
 CONTAINS
 
-  SUBROUTINE Init_Advection3D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
-    IMPLICIT NONE
-    CLASS(Advection3D),INTENT(out) :: this
-    INTEGER,INTENT(in) :: cqType
-    INTEGER,INTENT(in) :: tqType
-    INTEGER,INTENT(in) :: cqDegree
-    INTEGER,INTENT(in) :: tqDegree
-    INTEGER,INTENT(in) :: nvar
-    LOGICAL,INTENT(in) :: enableMPI
-    TYPE(MeshSpec),INTENT(in) :: spec
-
-    CALL this % decomp % Init(enableMPI)
-
-    ! Load Mesh
-    IF (enableMPI)THEN
-      CALL this % mesh % Load(spec,this % decomp)
-    ELSE
-      CALL this % mesh % Load(spec)
-      CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
-    ENDIF
-
-    CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
-
-
-    ! Create geometry from mesh
-    CALL this % geometry % GenerateFromMesh(&
-            this % mesh,cqType,tqType,cqDegree,tqDegree)
-
-    CALL this % plotSolution % Init(&
-            tqDegree,tqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % dSdt % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % solution % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % solutionGradient % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % flux % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % velocity % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % plotVelocity % Init(&
-            tqDegree,tqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % plotX % Init(&
-            tqDegree,tqType,tqDegree,tqType,1,&
-            this % mesh % nElem)
-
-    CALL this % source % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-                this % mesh % nElem)
-
-    CALL this % fluxDivergence % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % workScalar % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % workVector % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % workTensor % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    CALL this % compFlux % Init(&
-            cqDegree,cqType,tqDegree,tqType,nVar,&
-            this % mesh % nElem)
-
-    ALLOCATE (this % solutionMetaData(1:nvar))
-    ALLOCATE (this % boundaryConditionEqn(1:nvar))
-    ALLOCATE (this % solutionEqn(1:nvar))
-    ALLOCATE (this % sourceEqn(1:nvar))
-
-
-  END SUBROUTINE Init_Advection3D
-
-  SUBROUTINE InitFromCLI_Advection3D(this)
+  SUBROUTINE InitWithCLI_Advection3D(this)
+    !! Initializes the Advection3D class and assumes the cli configuration
+    !! has already been set
     IMPLICIT NONE
     CLASS(Advection3D),INTENT(inout) :: this
     ! Local
-    TYPE(CLI) :: cliConf
-    TYPE(MeshSpec) :: spec
-    CHARACTER(self_QuadratureTypeCharLength) :: cqTypeChar
-    CHARACTER(self_QuadratureTypeCharLength) :: tqTypeChar
-    CHARACTER(self_IntegratorTypeCharLength) :: integratorChar
-    REAL(prec) :: Lx, Ly, Lz ! Domain lengths
-    REAL(prec) :: dt ! Default time step size
-    REAL(prec) :: diffusivity
     INTEGER :: controlDegree
     INTEGER :: targetDegree
     INTEGER :: controlQuadrature ! ENUMS in SELF_Constants.f90
     INTEGER :: targetQuadrature ! ENUMS in SELF_Constants.f90
+    TYPE(MeshSpec) :: spec
+    CHARACTER(self_QuadratureTypeCharLength) :: controlQuadratureChar
+    CHARACTER(self_QuadratureTypeCharLength) :: targetQuadratureChar
+    CHARACTER(self_IntegratorTypeCharLength) :: integratorChar
+    REAL(prec) :: Lx, Ly, Lz ! Domain lengths
+    REAL(prec) :: dt ! Default time step size
+    REAL(prec) :: diffusivity
     CHARACTER(LEN=self_FileNameLength) :: meshFile
     INTEGER :: nxElements
     INTEGER :: nyElements
     INTEGER :: nzElements
+    INTEGER :: nvar
     INTEGER :: integrator ! ENUMS needed in SELF_Constants.f90 !! TO DO !!
     CHARACTER(LEN=self_EquationLength) :: velEqnX ! Velocity Equation (x-direction)
     CHARACTER(LEN=self_EquationLength) :: velEqnY ! Velocity Equation (y-direction)
@@ -277,7 +193,6 @@ CONTAINS
     CHARACTER(LEN=self_EquationLength) :: icEqn ! Initial condition Equation
     CHARACTER(LEN=self_EquationLength) :: bcEqn ! Boundary condition Equation
     CHARACTER(LEN=self_EquationLength) :: sourceEqn ! Boundary condition Equation
-    CHARACTER(LEN=self_FileNameLength) :: selfInstallDir
     LOGICAL :: enableMPI
     LOGICAL :: enableGPU
     LOGICAL :: diffusiveFlux
@@ -286,55 +201,37 @@ CONTAINS
     REAL(prec) :: endTime
     TYPE(EquationParser) :: eqn(1)
     TYPE(EquationParser) :: velEqn(1:3)
-    LOGICAL :: fileExists
 
- 
-    CALL GET_ENVIRONMENT_VARIABLE('SELF_INSTALL_DIR', selfInstallDir)
-    IF( TRIM(selfInstallDir) == "" )THEN
-      PRINT*, "SELF_INSTALL_DIR environment variable unset."
-      PRINT*, "Trying /opt/view/"
-      selfInstallDir = "/opt/view"
-    ENDIF
-
-    INQUIRE(FILE=TRIM(selfInstallDir)//'/etc/sadv3d.json', EXIST=fileExists)
-    IF( .NOT. fileExists )THEN
-      PRINT*, TRIM(selfInstallDir)//'/etc/sadv3d.json'//' configuration file not found!'
-      STOP "ERROR"
-    ENDIF
-
-    CALL cliConf % Init(TRIM(selfInstallDir)//'/etc/sadv3d.json')
-    CALL cliConf % LoadFromCLI() 
-
-    ! TO DO : Swap out for cliConf generic "get" based on
-    !  cliConf % opts json object
-    !
     ! Set the CLI parameters !
-    CALL cliConf % cliObj % get(val=enableMPI,switch='--mpi')
-    CALL cliConf % cliObj % get(val=enableGPU,switch='--gpu')
-    CALL cliConf % cliObj % get(val=meshfile,switch='--mesh')
-    CALL cliConf % cliObj % get(val=dt,switch="--time-step")
-    CALL cliConf % cliObj % get(val=outputInterval,switch="--output-interval")
-    CALL cliConf % cliObj % get(val=initialTime,switch="--initial-time")
-    CALL cliConf % cliObj % get(val=endTime,switch="--end-time")
-    CALL cliConf % cliObj % get(val=controlDegree,switch="--control-degree")
-    CALL cliConf % cliObj % get(val=targetDegree,switch="--target-degree")
-    CALL cliConf % cliObj % get(val=cqTypeChar,switch="--control-quadrature")
-    CALL cliConf % cliObj % get(val=tqTypeChar,switch="--target-quadrature")
-    CALL cliConf % cliObj % get(val=meshFile,switch="--mesh")
-    CALL cliConf % cliObj % get(val=nxElements,switch="--nxelements")
-    CALL cliConf % cliObj % get(val=nyElements,switch="--nyelements")
-    CALL cliConf % cliObj % get(val=nzElements,switch="--nzelements")
-    CALL cliConf % cliObj % get(val=Lx, switch="--xlength")
-    CALL cliConf % cliObj % get(val=Ly, switch="--ylength")
-    CALL cliConf % cliObj % get(val=Lz, switch="--zlength")
-    CALL cliConf % cliObj % get(val=velEqnX,switch="--velocity-x")
-    CALL cliConf % cliObj % get(val=velEqnY,switch="--velocity-y")
-    CALL cliConf % cliObj % get(val=velEqnZ,switch="--velocity-z")
-    CALL cliConf % cliObj % get(val=icEqn,switch="--initial-condition")
-    CALL cliConf % cliObj % get(val=bcEqn,switch="--boundary-condition")
-    CALL cliConf % cliObj % get(val=sourceEqn,switch="--source")
-    CALL cliConf % cliObj % get(val=integratorChar,switch="--integrator")
-    CALL cliConf % cliObj % get(val=diffusivity,switch="--diffusivity")
+    CALL this % cliConf % cliObj % get(val=enableMPI,switch='--mpi')
+    CALL this % cliConf % cliObj % get(val=enableGPU,switch='--gpu')
+    CALL this % cliConf % cliObj % get(val=meshfile,switch='--mesh')
+    CALL this % cliConf % cliObj % get(val=dt,switch="--time-step")
+    CALL this % cliConf % cliObj % get(val=outputInterval,switch="--output-interval")
+    CALL this % cliConf % cliObj % get(val=initialTime,switch="--initial-time")
+    CALL this % cliConf % cliObj % get(val=endTime,switch="--end-time")
+    CALL this % cliConf % cliObj % get(val=controlDegree,switch="--control-degree")
+    CALL this % cliConf % cliObj % get(val=targetDegree,switch="--target-degree")
+    CALL this % cliConf % cliObj % get(val=controlQuadratureChar,switch="--control-quadrature")
+    CALL this % cliConf % cliObj % get(val=targetQuadratureChar,switch="--target-quadrature")
+    CALL this % cliConf % cliObj % get(val=meshFile,switch="--mesh")
+    CALL this % cliConf % cliObj % get(val=nxElements,switch="--nxelements")
+    CALL this % cliConf % cliObj % get(val=nyElements,switch="--nyelements")
+    CALL this % cliConf % cliObj % get(val=nzElements,switch="--nzelements")
+    CALL this % cliConf % cliObj % get(val=Lx, switch="--xlength")
+    CALL this % cliConf % cliObj % get(val=Ly, switch="--ylength")
+    CALL this % cliConf % cliObj % get(val=Lz, switch="--zlength")
+    CALL this % cliConf % cliObj % get(val=velEqnX,switch="--velocity-x")
+    CALL this % cliConf % cliObj % get(val=velEqnY,switch="--velocity-y")
+    CALL this % cliConf % cliObj % get(val=velEqnZ,switch="--velocity-z")
+    CALL this % cliConf % cliObj % get(val=icEqn,switch="--initial-condition")
+    CALL this % cliConf % cliObj % get(val=bcEqn,switch="--boundary-condition")
+    CALL this % cliConf % cliObj % get(val=sourceEqn,switch="--source")
+    CALL this % cliConf % cliObj % get(val=integratorChar,switch="--integrator")
+    CALL this % cliConf % cliObj % get(val=diffusivity,switch="--diffusivity")
+    !
+    !  Fix the number of tracer variables to 1 ! 
+    nvar = 1
 
     diffusiveFlux = .TRUE.
     IF( diffusivity == 0.0_prec ) THEN
@@ -347,28 +244,28 @@ CONTAINS
       ENDIF
     ENDIF
 
-    IF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS') THEN
+    IF (TRIM(UpperCase(controlQuadratureChar)) == 'GAUSS') THEN
       controlQuadrature = GAUSS
-    ELSEIF (TRIM(UpperCase(cqTypeChar)) == 'GAUSS-LOBATTO') THEN
+    ELSEIF (TRIM(UpperCase(controlQuadratureChar)) == 'GAUSS-LOBATTO') THEN
       controlQuadrature = GAUSS_LOBATTO
-    ELSEIF (TRIM(UpperCase(cqTypeChar)) == 'CHEBYSHEV-GAUSS') THEN
+    ELSEIF (TRIM(UpperCase(controlQuadratureChar)) == 'CHEBYSHEV-GAUSS') THEN
       controlQuadrature = CHEBYSHEV_GAUSS
-    ELSEIF (TRIM(UpperCase(cqTypeChar)) == 'CHEBYSHEV-GAUSS-LOBATTO') THEN
+    ELSEIF (TRIM(UpperCase(controlQuadratureChar)) == 'CHEBYSHEV-GAUSS-LOBATTO') THEN
       controlQuadrature = CHEBYSHEV_GAUSS_LOBATTO
     ELSE
       PRINT *, 'Invalid Control Quadrature'
       STOP - 1
     END IF
 
-    IF (TRIM(UpperCase(tqTypeChar)) == 'UNIFORM') THEN
+    IF (TRIM(UpperCase(targetQuadratureChar)) == 'UNIFORM') THEN
       targetQuadrature = UNIFORM
-    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'GAUSS') THEN
+    ELSEIF (TRIM(UpperCase(targetQuadratureChar)) == 'GAUSS') THEN
       targetQuadrature = GAUSS
-    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'GAUSS-LOBATTO') THEN
+    ELSEIF (TRIM(UpperCase(targetQuadratureChar)) == 'GAUSS-LOBATTO') THEN
       targetQuadrature = GAUSS_LOBATTO
-    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'CHEBYSHEV-GAUSS') THEN
+    ELSEIF (TRIM(UpperCase(targetQuadratureChar)) == 'CHEBYSHEV-GAUSS') THEN
       targetQuadrature = CHEBYSHEV_GAUSS
-    ELSEIF (TRIM(UpperCase(tqTypeChar)) == 'CHEBYSHEV-GAUSS-LOBATTO') THEN
+    ELSEIF (TRIM(UpperCase(targetQuadratureChar)) == 'CHEBYSHEV-GAUSS-LOBATTO') THEN
       targetQuadrature = CHEBYSHEV_GAUSS_LOBATTO
     ELSE
       PRINT *, 'Invalid Target Quadrature'
@@ -403,13 +300,6 @@ CONTAINS
     spec % blockMesh_nElemY = nyElements
     spec % blockMesh_nElemZ = nzElements
 
-    CALL this % Init(controlQuadrature, &
-                     targetQuadrature, &
-                     controlDegree, &
-                     targetDegree, &
-                     1,enableMPI, &
-                     spec)
-
     this % simulationTime = 0.0_prec
     this % Lx = Lx
     this % Ly = Ly ! Domain lengths
@@ -438,6 +328,85 @@ CONTAINS
     this % diffusivity = diffusivity
     this % diffusiveFlux = diffusiveFlux        
 
+
+    CALL this % decomp % Init(enableMPI)
+
+    ! Load Mesh
+    IF (enableMPI)THEN
+      CALL this % mesh % Load(spec,this % decomp)
+    ELSE
+      CALL this % mesh % Load(spec)
+      CALL this % decomp % setElemToRank(this % mesh % nGlobalElem)
+    ENDIF
+
+    CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
+
+
+    ! Create geometry from mesh
+    CALL this % geometry % GenerateFromMesh(&
+            this % mesh,controlQuadrature,targetQuadrature,controlDegree,targetDegree)
+
+    CALL this % plotSolution % Init(&
+            targetDegree,targetQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % dSdt % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % solution % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % solutionGradient % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % flux % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % velocity % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % plotVelocity % Init(&
+            targetDegree,targetQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % plotX % Init(&
+            targetDegree,targetQuadrature,targetDegree,targetQuadrature,1,&
+            this % mesh % nElem)
+
+    CALL this % source % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+                this % mesh % nElem)
+
+    CALL this % fluxDivergence % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % workScalar % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % workVector % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % workTensor % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    CALL this % compFlux % Init(&
+            controlDegree,controlQuadrature,targetDegree,targetQuadrature,nVar,&
+            this % mesh % nElem)
+
+    ALLOCATE (this % solutionMetaData(1:nvar))
+    ALLOCATE (this % boundaryConditionEqn(1:nvar))
+    ALLOCATE (this % solutionEqn(1:nvar))
+    ALLOCATE (this % sourceEqn(1:nvar))
+
     eqn(1) = EquationParser( icEqn, (/'x','y','z','t'/))
     CALL this % SetSolution( eqn )
     this % solutionEqn(1) = EquationParser( icEqn, (/'x','y','z','t'/))
@@ -449,197 +418,35 @@ CONTAINS
 
     this % boundaryConditionEqn(1) = EquationParser( bcEqn, (/'x','y','z','t'/))
     CALL this % SetBoundaryCondition( this % boundaryConditionEqn )
-
     this % sourceEqn(1) = EquationParser( sourceEqn, (/'x','y','z','t'/))
 
-  END SUBROUTINE InitFromCLI_Advection3D
+  END SUBROUTINE InitWithCLI_Advection3D
 
-!  SUBROUTINE GetCLIParameters( cli )
-!    TYPE(COMMAND_LINE_INTERFACE), INTENT(inout) :: cli
-!
-!    CALL cli % init(progname="sadv3d", &
-!                    version="v0.0.0", &
-!                    description="SELF Advection in 3-D", &
-!                    license="ANTI-CAPITALIST SOFTWARE LICENSE (v 1.4)", &
-!                    authors="Joseph Schoonover (Fluid Numerics LLC)")
-!
-!    CALL cli % add(switch="--mpi", &
-!                   help="Enable MPI", &
-!                   act="store_true", &
-!                   def="false", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--gpu", &
-!                   help="Enable GPU acceleration", &
-!                   act="store_true", &
-!                   def="false", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--time-step", &
-!                   switch_ab="-dt", &
-!                   help="The time step size for the time integrator", &
-!                   def="0.001", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--initial-time", &
-!                   switch_ab="-t0", &
-!                   help="The initial time level", &
-!                   def="0.0", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--output-interval", &
-!                   switch_ab="-oi", &
-!                   help="The time between file output", &
-!                   def="0.5", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--end-time", &
-!                   switch_ab="-tn", &
-!                   help="The final time level", &
-!                   def="1.0", &
-!                   required=.FALSE.)
-!
-!    ! Get the control degree
-!    CALL cli % add(switch="--control-degree", &
-!                   switch_ab="-c", &
-!                   help="The polynomial degree of the control points."//NEW_LINE("A"), &
-!                   def="7", &
-!                   required=.FALSE.)
-!
-!    ! Get the target degree (assumed for plotting)
-!    CALL cli % add(switch="--target-degree", &
-!                   switch_ab="-t", &
-!                   help="The polynomial degree for the"//&
-!                  &" target points for interpolation."//&
-!                  &" Typically used for plotting"//NEW_LINE("A"), &
-!                   def="14", &
-!                   required=.FALSE.)
-!
-!    ! Get the control quadrature
-!    ! Everyone know Legendre-Gauss Quadrature is the best...
-!    CALL cli % add(switch="--control-quadrature", &
-!                   switch_ab="-cq", &
-!                   def="gauss", &
-!                   help="The quadrature type for control points."//NEW_LINE("A"), &
-!                   choices="gauss,gauss-lobatto,chebyshev-gauss,chebyshev-gauss-lobatto", &
-!                   required=.FALSE.)
-!
-!
-!    ! Set the target grid quadrature
-!    ! Default to uniform (assumed for plotting)
-!    CALL cli % add(switch="--target-quadrature", &
-!                   switch_ab="-tq", &
-!                   def="uniform", &
-!                   help="The quadrature type for target points."//NEW_LINE("A"), &
-!                   choices="gauss,gauss-lobatto,uniform", &
-!                   required=.FALSE.)
-!
-!    ! (Optional) Provide a file for a mesh
-!    ! Assumed in HOPR or ISM-v2 format
-!    CALL cli % add(switch="--mesh", &
-!                   switch_ab="-m", &
-!                   help="Path to a mesh file for control mesh."//NEW_LINE("A"), &
-!                   def="", &
-!                   required=.FALSE.)
-!
-!    ! (Optional) If a mesh is not provided, you
-!    ! can request a structured grid to be generated
-!    ! just set the nxelement, nyelements..
-!    CALL cli % add(switch="--nxelements", &
-!                   switch_ab="-nx", &
-!                   help="The number of elements in the x-direction for structured mesh generation.", &
-!                   def="5", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--nyelements", &
-!                   switch_ab="-ny", &
-!                   help="The number of elements in the y-direction for structured mesh generation.", &
-!                   def="5", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--nzelements", &
-!                   switch_ab="-nz", &
-!                   help="The number of elements in the z-direction for structured mesh generation.", &
-!                   def="5", &
-!                   required=.FALSE.)
-!
-!    ! Alright... now tell me some physical mesh dimensions
-!    CALL cli % add(switch="--xlength", &
-!                   switch_ab="-lx", &
-!                   help="The physical x-scale for structured mesh generation."//&
-!                   " Ignored if a mesh file is provided", &
-!                   def="1.0", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--ylength", &
-!                   switch_ab="-ly", &
-!                   help="The physical y-scale for structured mesh generation."//&
-!                   " Ignored if a mesh file is provided", &
-!                   def="1.0", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--zlength", &
-!                   switch_ab="-lz", &
-!                   help="The physical z-scale for structured mesh generation."//&
-!                   " Ignored if a mesh file is provided", &
-!                   def="1.0", &
-!                   required=.FALSE.)
-!
-!    ! Set the velocity field
-!    CALL cli % add(switch="--velocity-x", &
-!                   switch_ab="-vx", &
-!                   help="Equation for the x-component of the velocity field",&
-!                   def="vx=1.0", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--velocity-y", &
-!                   switch_ab="-vy", &
-!                   help="Equation for the y-component of the velocity field",&
-!                   def="vy=1.0", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--velocity-z", &
-!                   switch_ab="-vz", &
-!                   help="Equation for the z-component of the velocity field",&
-!                   def="vz=1.0", &
-!                   required=.FALSE.)
-!
-!    ! Tracer diffusivity
-!    CALL cli % add(switch="--diffusivity", &
-!                   switch_ab="-nu", &
-!                   help="Tracer diffusivity (applied to all tracers)", &
-!                   def="0.0", &
-!                   required=.FALSE.)
-!
-!    ! Set the initial conditions
-!    ! .. TO DO .. 
-!    !  > How to handle multiple tracer fields ??
-!    CALL cli % add(switch="--initial-condition", &
-!                   switch_ab="-ic", &
-!                   help="Equation for the initial tracer distributions",&
-!                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2 + ((z-t)-0.5)^2)/0.01 )", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--boundary-condition", &
-!                   switch_ab="-bc", &
-!                   help="Equation for the boundary tracer distributions (can be time dependent!)", &
-!                   def="f = exp( -( ((x-t)-0.5)^2 + ((y-t)-0.5)^2 + ((z-t)-0.5)^2)/0.01 )", &
-!                   required=.FALSE.)
-!
-!    CALL cli % add(switch="--source", &
-!                   switch_ab="-s", &
-!                   help="Equation for the source term (can be time dependent!)", &
-!                   def="s = 0.0", &
-!                   required=.FALSE.)
-!
-!    ! Give me a time integrator
-!    CALL cli % add(switch="--integrator", &
-!                   switch_ab="-int", &
-!                   help="Sets the time integration method. Only 'euler' or 'williamson_rk3'", &
-!                   def="williamson_rk3", &
-!                   required=.FALSE.)
-!
-!  END SUBROUTINE GetCLIParameters
+  SUBROUTINE InitCLI_Advection3D(this) 
+    IMPLICIT NONE
+    CLASS(Advection3D),INTENT(inout) :: this
+    ! Local
+    LOGICAL :: fileExists
+    CHARACTER(LEN=self_FileNameLength) :: selfInstallDir
+
+      CALL GET_ENVIRONMENT_VARIABLE('SELF_INSTALL_DIR', selfInstallDir)
+      IF( TRIM(selfInstallDir) == "" )THEN
+        PRINT*, "SELF_INSTALL_DIR environment variable unset."
+        PRINT*, "Trying /opt/view/"
+        selfInstallDir = "/opt/view"
+      ENDIF
+
+      INQUIRE(FILE=TRIM(selfInstallDir)//'/etc/sadv3d.json', EXIST=fileExists)
+      IF( .NOT. fileExists )THEN
+        PRINT*, TRIM(selfInstallDir)//'/etc/sadv3d.json'//' configuration file not found!'
+        STOP "ERROR"
+      ENDIF
+
+      CALL this % cliConf % Init(TRIM(selfInstallDir)//'/etc/sadv3d.json')
+      CALL this % cliConf % LoadFromCLI() 
+          
+
+  END SUBROUTINE InitCLI_Advection3D
 
   SUBROUTINE Free_Advection3D(this)
     IMPLICIT NONE
@@ -870,6 +677,33 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE SetBoundaryConditionFromEquation_Advection3D
+  
+  SUBROUTINE ModelExecute_Advection3D( this ) 
+    IMPLICIT NONE
+    CLASS(Advection3D), INTENT(inout) :: this
+    ! Local
+    INTEGER :: nDumps
+    INTEGER :: i
+    REAL(prec) :: endTime
+
+    CALL this % InitWithCLI()
+    CALL this % WriteTecplot()
+    CALL this % WritePickup()
+
+    nDumps = INT(( this % endTime - this % initialTime )/( this % outputInterval ) )
+    DO i = 1, nDumps
+    
+      endTime = this % simulationTime + this % outputInterval
+          
+      CALL this % ForwardStep( endTime )
+      CALL this % WriteTecplot()
+      CALL this % WritePickup()
+
+    ENDDO
+
+    CALL this % Free()
+
+  END SUBROUTINE ModelExecute_Advection3D
 
   SUBROUTINE ForwardStep_Advection3D( this, endTime )
     IMPLICIT NONE
