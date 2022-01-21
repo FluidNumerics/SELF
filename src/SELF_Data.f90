@@ -10,6 +10,7 @@ MODULE SELF_Data
 
   USE SELF_Constants
   USE SELF_Lagrange
+  USE SELF_Metadata
 
   USE ISO_C_BINDING
 
@@ -17,9 +18,7 @@ MODULE SELF_Data
 
 #include "SELF_Macros.h"
 
-! ---------------------- Scalars ---------------------- !
-  TYPE,PUBLIC :: Scalar1D
-
+  TYPE,PUBLIC :: SELF_DataObj
     INTEGER :: N
     INTEGER :: M
     INTEGER :: nVar
@@ -27,9 +26,27 @@ MODULE SELF_Data
     INTEGER :: controlType
     INTEGER :: targetType
     TYPE(Lagrange) :: interp
+    TYPE(Metadata),ALLOCATABLE :: meta(:)
+
+    CONTAINS
+
+    PROCEDURE,PUBLIC :: Init => Init_DataObj
+    PROCEDURE,PUBLIC :: Free => Free_DataObj
+
+    ! Procedures for setting metadata for 
+    PROCEDURE,PUBLIC :: Set_Name => Set_Name_DataObj
+    PROCEDURE,PUBLIC :: Set_Description => Set_Description_DataObj
+    PROCEDURE,PUBLIC :: Set_Units => Set_Units_DataObj
+
+  END TYPE SELF_DataObj
+
+! ---------------------- Scalars ---------------------- !
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar1D
+
     TYPE(hfReal_r3) :: interior
     TYPE(hfReal_r3) :: boundary
     TYPE(hfReal_r3) :: extBoundary
+    TYPE(hfReal_r3) :: avgBoundary
 
   CONTAINS
 
@@ -55,17 +72,11 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Scalar1D
     PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Scalar1D
 
+
   END TYPE Scalar1D
 
-  TYPE,PUBLIC :: Scalar2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar2D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r4) :: interior
     TYPE(hfReal_r4) :: boundary
     TYPE(hfReal_r4) :: extBoundary
@@ -95,15 +106,8 @@ MODULE SELF_Data
 
   END TYPE Scalar2D
 
-  TYPE,PUBLIC :: Scalar3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
@@ -135,15 +139,8 @@ MODULE SELF_Data
 
 ! ---------------------- Vectors ---------------------- !
 
-  TYPE,PUBLIC :: Vector2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector2D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
@@ -179,15 +176,8 @@ MODULE SELF_Data
 
   END TYPE Vector2D
 
-  TYPE,PUBLIC :: Vector3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector3D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
     TYPE(hfReal_r6) :: extBoundary
@@ -225,15 +215,8 @@ MODULE SELF_Data
 
 ! ---------------------- Tensors ---------------------- !
 
-  TYPE,PUBLIC :: Tensor2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
     TYPE(hfReal_r6) :: extBoundary
@@ -264,15 +247,8 @@ MODULE SELF_Data
 
   END TYPE Tensor2D
 
-  TYPE,PUBLIC :: Tensor3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor3D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r7) :: interior
     TYPE(hfReal_r7) :: boundary
     TYPE(hfReal_r7) :: extBoundary
@@ -329,6 +305,79 @@ MODULE SELF_Data
 
 CONTAINS
 
+! -- DataObj -- !
+  SUBROUTINE Init_DataObj(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(out) :: SELFStorage
+    INTEGER,INTENT(in) :: N
+    INTEGER,INTENT(in) :: quadratureType
+    INTEGER,INTENT(in) :: M
+    INTEGER,INTENT(in) :: targetNodeType
+    INTEGER,INTENT(in) :: nVar
+    INTEGER,INTENT(in) :: nElem
+
+    SELFStorage % N = N
+    SELFStorage % M = M
+    SELFStorage % nVar = nVar
+    SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
+
+    CALL SELFStorage % interp % Init(N=N, &
+                                     controlNodeType=quadratureType, &
+                                     M=M, &
+                                     targetNodeType=targetNodeType)
+
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
+  END SUBROUTINE Init_DataObj
+
+  SUBROUTINE Free_DataObj(SELFStorage)
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+
+    SELFStorage % N = 0
+    SELFStorage % nVar = 0
+    SELFStorage % nElem = 0
+    CALL SELFStorage % interp % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+
+  END SUBROUTINE Free_DataObj
+
+  SUBROUTINE Set_Name_DataObj(SELFStorage,ivar,name)
+    !! Set the name of the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: name
+
+    CALL SELFStorage % meta(ivar) % Set_Name(name) 
+
+  END SUBROUTINE Set_Name_DataObj
+
+  SUBROUTINE Set_Description_DataObj(SELFStorage,ivar,description)
+    !! Set the description of the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: description
+
+    CALL SELFStorage % meta(ivar) % Set_Name(description) 
+
+  END SUBROUTINE Set_Description_DataObj
+
+  SUBROUTINE Set_Units_DataObj(SELFStorage,ivar,units)
+    !! Set the units of the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: units
+
+    CALL SELFStorage % meta(ivar) % Set_Name(units) 
+
+  END SUBROUTINE Set_Units_DataObj
+
 ! -- Scalar1D -- !
 
   SUBROUTINE Init_Scalar1D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
@@ -362,6 +411,8 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,1/), &
                                            upBound=(/nVar,2,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Scalar1D
 
   SUBROUTINE Free_Scalar1D(SELFStorage)
@@ -375,6 +426,8 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Scalar1D
 
@@ -523,6 +576,7 @@ CONTAINS
     SELFOut % boundary % hostData = SELFa % boundary % hostData + &
                                     SELFb % boundary % hostData
 
+
   END FUNCTION Add_Scalar1D
 
   FUNCTION Subtract_Scalar1D(SELFa,SELFb) RESULT(SELFOut)
@@ -581,6 +635,8 @@ CONTAINS
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,1,1,1/), &
                                            upBound=(/N,nVar,4,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Scalar2D
 
   SUBROUTINE Free_Scalar2D(SELFStorage)
@@ -595,6 +651,8 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
     CALL SELFStorage % avgBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Scalar2D
 
@@ -807,6 +865,8 @@ CONTAINS
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,0,1,1,1/), &
                                            upBound=(/N,N,nVar,6,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Scalar3D
 
   SUBROUTINE Free_Scalar3D(SELFStorage)
@@ -821,6 +881,8 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
     CALL SELFStorage % avgBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Scalar3D
 
@@ -1037,6 +1099,8 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
                                            upBound=(/2,N,nVar,4,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Vector2D
 
   SUBROUTINE Free_Vector2D(SELFStorage)
@@ -1051,6 +1115,8 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % boundaryNormal % Free()
     CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Vector2D
 
@@ -1328,6 +1394,8 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,0,1,1,1/), &
                                            upBound=(/3,N,N,nVar,6,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Vector3D
 
   SUBROUTINE Free_Vector3D(SELFStorage)
@@ -1342,6 +1410,8 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % boundaryNormal % Free()
     CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Vector3D
 
@@ -1599,6 +1669,8 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,0,1,1,1/), &
                                            upBound=(/2,2,N,nVar,4,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Tensor2D
 
   SUBROUTINE Free_Tensor2D(SELFStorage)
@@ -1612,6 +1684,8 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Tensor2D
 
@@ -1866,6 +1940,8 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,0,0,1,1,1/), &
                                            upBound=(/3,3,N,N,nVar,6,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+
   END SUBROUTINE Init_Tensor3D
 
   SUBROUTINE Free_Tensor3D(SELFStorage)
@@ -1879,6 +1955,8 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+    
+    DEALLOCATE( SELFStorage % meta )
 
   END SUBROUTINE Free_Tensor3D
 
