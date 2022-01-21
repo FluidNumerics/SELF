@@ -1,0 +1,4214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    
+    <meta name="author" content="Joe Schoonover" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_Advection3D &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
+        
+            </ul>
+        
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>SELF_Advection3D 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 6.7% of total for modules and submodules.">915 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/SELF_Advection3D.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/self_advection3d.f90.html'>SELF_Advection3D.f90</a></li>
+    
+  
+     <li class="active">SELF_Advection3D</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-0">Interfaces</a></h3></div>
+  <div id="inters-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-internaldiffusiveflux_advection3d_gpu_wrapper">InternalDiffusiveFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-internalflux_advection3d_gpu_wrapper">InternalFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-sidediffusiveflux_advection3d_gpu_wrapper">SideDiffusiveFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-sideflux_advection3d_gpu_wrapper">SideFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-updategrk3_advection3d_gpu_wrapper">UpdateGRK3_Advection3D_gpu_wrapper</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#type-advection3d">Advection3D</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-forwardstep_advection3d">ForwardStep_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-free_advection3d">Free_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-initwithcli_advection3d">InitWithCLI_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-init_advection3d">Init_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-internalflux_advection3d">InternalFlux_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-maxsolutionerror_advection3d">MaxSolutionError_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-modelexecute_advection3d">ModelExecute_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setboundaryconditionfromchar_advection3d">SetBoundaryConditionFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setboundaryconditionfromequation_advection3d">SetBoundaryConditionFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsolutionfromchar_advection3d">SetSolutionFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsolutionfromequation_advection3d">SetSolutionFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsourcefromchar_advection3d">SetSourceFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsourcefromequation_advection3d">SetSourceFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setvelocityfromchar_advection3d">SetVelocityFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setvelocityfromequation_advection3d">SetVelocityFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-sideflux_advection3d">SideFlux_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-tendency_advection3d">Tendency_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-timesteprk3_advection3d">TimeStepRK3_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-writepickup_advection3d">WritePickup_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-writetecplot_advection3d">WriteTecplot_Advection3D</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href='../module/self_mesh.html'>SELF_Mesh</a></li>
+    
+    <li><a href="http://fortranwiki.org/fortran/show/iso_c_binding">iso_c_binding</a></li>
+    
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    
+    <li>FEQParse</li>
+    
+    <li><a href='../module/self_dg.html'>SELF_DG</a></li>
+    
+    <li><a href='../module/self_supportroutines.html'>SELF_SupportRoutines</a></li>
+    
+    <li><a href='../module/self_cli.html'>SELF_CLI</a></li>
+    
+    <li>FLAP</li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_advection3d~~UsesGraph Pages: 1 -->
+<svg id="moduleself_advection3dUsesGraph" width="641pt" height="365pt"
+ viewBox="0.00 0.00 641.00 365.40" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_advection3d~~UsesGraph" class="graph" transform="scale(2.02 2.02) rotate(0) translate(4 735.92)">
+<title>module~~self_advection3d~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-735.92 1294,-735.92 1294,4 -4,4"/>
+<!-- module~self_advection3d -->
+<g id="module~~self_advection3d~~UsesGraph_node1" class="node">
+<title>module~self_advection3d</title>
+<polygon fill="none" stroke="black" points="1290,-164 1179,-164 1179,-140 1290,-140 1290,-164"/>
+<text text-anchor="middle" x="1234.5" y="-149.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_Advection3D</text>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_node2" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node2"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-378 5,-378 5,-354 89,-354 89,-378"/>
+<text text-anchor="middle" x="47" y="-363.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge1" class="edge">
+<title>module~self_advection3d&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1178.66,-149.33C1129.17,-146.48 1054.47,-141.11 990,-132"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M988,-132C870.38,-109.51 849.25,-56 729.5,-56 729.5,-56 729.5,-56 326,-56 248.15,-56 104.53,-275.41 60.9,-345.05"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="57.74,-343.51 55.43,-353.85 63.68,-347.21 57.74,-343.51"/>
+</g>
+<!-- module~self_dg -->
+<g id="module~~self_advection3d~~UsesGraph_node3" class="node">
+<title>module~self_dg</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node3"><a xlink:href=".././module/self_dg.html" xlink:title="SELF_DG">
+<polygon fill="#337ab7" stroke="#337ab7" points="1142,-353 1082,-353 1082,-329 1142,-329 1142,-353"/>
+<text text-anchor="middle" x="1112" y="-338.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DG</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_dg -->
+<g id="module~~self_advection3d~~UsesGraph_edge2" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_dg</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1226.1,-164.02C1210.79,-188.82 1174.45,-247.42 1143,-296 1137.79,-304.04 1131.97,-312.83 1126.85,-320.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1123.91,-318.58 1121.24,-328.84 1129.72,-322.48 1123.91,-318.58"/>
+</g>
+<!-- module~self_cli -->
+<g id="module~~self_advection3d~~UsesGraph_node4" class="node">
+<title>module~self_cli</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node4"><a xlink:href=".././module/self_cli.html" xlink:title="SELF_CLI">
+<polygon fill="#337ab7" stroke="#337ab7" points="1142,-84 1082,-84 1082,-60 1142,-60 1142,-84"/>
+<text text-anchor="middle" x="1112" y="-69.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_CLI</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_cli -->
+<g id="module~~self_advection3d~~UsesGraph_edge4" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_cli</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1215.2,-139.85C1195.09,-126.5 1162.6,-104.93 1139.66,-89.7"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1141.35,-86.62 1131.08,-84 1137.47,-92.45 1141.35,-86.62"/>
+</g>
+<!-- FEQParse -->
+<g id="module~~self_advection3d~~UsesGraph_node5" class="node">
+<title>FEQParse</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="1143,-184 1081,-184 1081,-160 1143,-160 1143,-184"/>
+<text text-anchor="middle" x="1112" y="-169.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FEQParse</text>
+</g>
+<!-- module~self_advection3d&#45;&gt;FEQParse -->
+<g id="module~~self_advection3d~~UsesGraph_edge5" class="edge">
+<title>module~self_advection3d&#45;&gt;FEQParse</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1178.89,-161.06C1170.22,-162.5 1161.4,-163.97 1153.14,-165.34"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1152.33,-161.92 1143.04,-167.01 1153.48,-168.83 1152.33,-161.92"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_node6" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node6"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-378 130,-378 130,-354 226,-354 226,-378"/>
+<text text-anchor="middle" x="178" y="-363.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge6" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M988,-132C874.11,-116.87 844.39,-132 729.5,-132 729.5,-132 729.5,-132 607.5,-132 527.13,-132 490.08,-102.95 428,-154 388.27,-186.67 427.59,-226.86 392,-264 370.98,-285.93 353.51,-271.51 328,-288"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M326,-288C289.07,-311.55 244.33,-334.56 213.98,-349.41"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="212.13,-346.42 204.66,-353.94 215.19,-352.72 212.13,-346.42"/>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_advection3d~~UsesGraph_node7" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node7"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="764,-450 693,-450 693,-426 764,-426 764,-450"/>
+<text text-anchor="middle" x="728.5" y="-435.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_mesh -->
+<g id="module~~self_advection3d~~UsesGraph_edge7" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M988,-282C917.48,-277.75 919.86,-353.62 849.5,-360"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M847.5,-360C806.11,-363.75 767.88,-396.62 746.72,-418.48"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="744,-416.27 739.72,-425.96 749.11,-421.05 744,-416.27"/>
+</g>
+<!-- FLAP -->
+<g id="module~~self_advection3d~~UsesGraph_node8" class="node">
+<title>FLAP</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="1016,-24 962,-24 962,0 1016,0 1016,-24"/>
+<text text-anchor="middle" x="989" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">FLAP</text>
+</g>
+<!-- module~self_advection3d&#45;&gt;FLAP -->
+<g id="module~~self_advection3d~~UsesGraph_edge3" class="edge">
+<title>module~self_advection3d&#45;&gt;FLAP</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1226.18,-139.95C1212.58,-118.59 1181.26,-74.19 1143,-51 1106.83,-29.08 1058.68,-19.41 1026.13,-15.19"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="1026.49,-11.71 1016.14,-14.01 1025.66,-18.66 1026.49,-11.71"/>
+</g>
+<!-- module~self_supportroutines -->
+<g id="module~~self_advection3d~~UsesGraph_node9" class="node">
+<title>module~self_supportroutines</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node9"><a xlink:href=".././module/self_supportroutines.html" xlink:title="SELF_SupportRoutines">
+<polygon fill="#337ab7" stroke="#337ab7" points="392,-416 262,-416 262,-392 392,-392 392,-416"/>
+<text text-anchor="middle" x="327" y="-401.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_SupportRoutines</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection3d~~UsesGraph_edge8" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M1222,-164.15C1189.01,-197.57 1089.98,-288.03 990,-282"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M988,-282C925.59,-286.9 792.1,-170 729.5,-170 729.5,-170 729.5,-170 607.5,-170 527.28,-170 487.02,-134.67 428,-189 365.09,-246.91 446.2,-311.86 392,-378 389.31,-381.29 386.13,-384.16 382.66,-386.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="380.81,-383.7 374.11,-391.91 384.47,-389.67 380.81,-383.7"/>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_mesh -->
+<g id="module~~self_advection3d~~UsesGraph_edge14" class="edge">
+<title>module~self_dg&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1110.88,-353.1C1109.67,-400.93 1097.81,-576 990,-614"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M988,-614C866.73,-656.74 977.56,-348.39 849.5,-360"/>
+</g>
+<!-- HDF5 -->
+<g id="module~~self_advection3d~~UsesGraph_node10" class="node">
+<title>HDF5</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="503,-612 449,-612 449,-588 503,-588 503,-612"/>
+<text text-anchor="middle" x="476" y="-597.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">HDF5</text>
+</g>
+<!-- module~self_dg&#45;&gt;HDF5 -->
+<g id="module~~self_advection3d~~UsesGraph_edge9" class="edge">
+<title>module~self_dg&#45;&gt;HDF5</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M988,-614C908.79,-641.92 882.28,-616.18 800,-633 767.84,-639.57 761.9,-649.76 729.5,-655"/>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M727.5,-655C686.15,-659.25 571.88,-628.05 513.04,-610.84"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="513.99,-607.48 503.41,-608.01 512.02,-614.19 513.99,-607.48"/>
+</g>
+<!-- module~self_mpi -->
+<g id="module~~self_advection3d~~UsesGraph_node11" class="node">
+<title>module~self_mpi</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node11"><a xlink:href=".././module/self_mpi.html" xlink:title="SELF_MPI">
+<polygon fill="#337ab7" stroke="#337ab7" points="506.5,-222 445.5,-222 445.5,-198 506.5,-198 506.5,-222"/>
+<text text-anchor="middle" x="476" y="-207.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MPI</text>
+</a>
+</g>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_mpi -->
+<g id="module~~self_advection3d~~UsesGraph_edge10" class="edge">
+<title>module~self_dg&#45;&gt;module~self_mpi</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1081.96,-333.57C995.61,-311.54 741.26,-247.21 657,-232 609.2,-223.37 553.65,-217.15 517.04,-213.57"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="517.07,-210.06 506.78,-212.59 516.4,-217.03 517.07,-210.06"/>
+</g>
+<!-- module~self_mappeddata -->
+<g id="module~~self_advection3d~~UsesGraph_node12" class="node">
+<title>module~self_mappeddata</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node12"><a xlink:href=".././module/self_mappeddata.html" xlink:title="SELF_MappedData">
+<polygon fill="#337ab7" stroke="#337ab7" points="1045,-372 933,-372 933,-348 1045,-348 1045,-372"/>
+<text text-anchor="middle" x="989" y="-357.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedData</text>
+</a>
+</g>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_mappeddata -->
+<g id="module~~self_advection3d~~UsesGraph_edge11" class="edge">
+<title>module~self_dg&#45;&gt;module~self_mappeddata</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M1081.71,-345.6C1073.59,-346.87 1064.45,-348.31 1055.15,-349.77"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="1054.39,-346.35 1045.05,-351.36 1055.47,-353.26 1054.39,-346.35"/>
+</g>
+<!-- module~self_hdf5 -->
+<g id="module~~self_advection3d~~UsesGraph_node13" class="node">
+<title>module~self_hdf5</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node13"><a xlink:href=".././module/self_hdf5.html" xlink:title="SELF_HDF5">
+<polygon fill="#337ab7" stroke="#337ab7" points="645,-686 572,-686 572,-662 645,-662 645,-686"/>
+<text text-anchor="middle" x="608.5" y="-671.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HDF5</text>
+</a>
+</g>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection3d~~UsesGraph_edge12" class="edge">
+<title>module~self_dg&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M727.5,-655C703.63,-658.86 677.04,-663.15 655.15,-666.67"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="654.45,-663.23 645.13,-668.28 655.56,-670.15 654.45,-663.23"/>
+</g>
+<!-- module~self_metadata -->
+<g id="module~~self_advection3d~~UsesGraph_node16" class="node">
+<title>module~self_metadata</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node16"><a xlink:href=".././module/self_metadata.html" xlink:title="SELF_Metadata">
+<polygon fill="#337ab7" stroke="#337ab7" points="895.5,-666 801.5,-666 801.5,-642 895.5,-642 895.5,-666"/>
+<text text-anchor="middle" x="848.5" y="-651.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Metadata</text>
+</a>
+</g>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_metadata -->
+<g id="module~~self_advection3d~~UsesGraph_edge13" class="edge">
+<title>module~self_dg&#45;&gt;module~self_metadata</title>
+<path fill="none" stroke="#ffbf00" stroke-dasharray="5,2" d="M988,-614C961.22,-623.44 930.98,-632.37 905.6,-639.38"/>
+<polygon fill="#ffbf00" stroke="#ffbf00" points="904.49,-636.06 895.77,-642.07 906.34,-642.81 904.49,-636.06"/>
+</g>
+<!-- module~self_cli&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge15" class="edge">
+<title>module~self_cli&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1081.76,-71.46C1070.3,-71.28 1057.03,-71.09 1045,-71 995.22,-70.62 982.7,-68.2 933,-71 842.12,-76.12 820.52,-94 729.5,-94 729.5,-94 729.5,-94 607.5,-94 527.01,-94 493.77,-71.6 428,-118 399.41,-138.17 415.35,-161.95 392,-188 345.77,-239.59 308.86,-222.97 262,-274 239.4,-298.61 249.56,-316.3 226,-340 222.97,-343.05 219.5,-345.85 215.86,-348.38"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="213.78,-345.55 207.15,-353.81 217.49,-351.49 213.78,-345.55"/>
+</g>
+<!-- module~self_cli&#45;&gt;FLAP -->
+<g id="module~~self_advection3d~~UsesGraph_edge17" class="edge">
+<title>module~self_cli&#45;&gt;FLAP</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1087.88,-59.85C1075.26,-53.27 1059.33,-45.08 1045,-38 1038.7,-34.89 1031.96,-31.64 1025.44,-28.53"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1026.64,-25.23 1016.11,-24.12 1023.65,-31.56 1026.64,-25.23"/>
+</g>
+<!-- json_module -->
+<g id="module~~self_advection3d~~UsesGraph_node20" class="node">
+<title>json_module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="1029,-104 949,-104 949,-80 1029,-80 1029,-104"/>
+<text text-anchor="middle" x="989" y="-89.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">json_module</text>
+</g>
+<!-- module~self_cli&#45;&gt;json_module -->
+<g id="module~~self_advection3d~~UsesGraph_edge16" class="edge">
+<title>module~self_cli&#45;&gt;json_module</title>
+<path fill="none" stroke="#7fff00" stroke-dasharray="5,2" d="M1081.71,-76.84C1068.99,-78.94 1053.74,-81.47 1039.35,-83.84"/>
+<polygon fill="#7fff00" stroke="#7fff00" points="1038.38,-80.46 1029.08,-85.54 1039.52,-87.36 1038.38,-80.46"/>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge20" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M129.7,-366C119.88,-366 109.48,-366 99.52,-366"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="99.34,-362.5 89.34,-366 99.34,-369.5 99.34,-362.5"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_node15" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node15"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-610 0,-610 0,-586 94,-586 94,-610"/>
+<text text-anchor="middle" x="47" y="-595.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_edge18" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M147.89,-378.03C141.37,-381.76 134.93,-386.4 130,-392 81.29,-447.3 59.57,-535.1 51.72,-575.86"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="48.25,-575.36 49.9,-585.82 55.14,-576.62 48.25,-575.36"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_advection3d~~UsesGraph_node18" class="node">
+<title>mpi</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node18"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="74,-261 20,-261 20,-237 74,-237 74,-261"/>
+<text text-anchor="middle" x="47" y="-246.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;mpi -->
+<g id="module~~self_advection3d~~UsesGraph_edge19" class="edge">
+<title>module~self_constants&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M163.68,-353.92C141.28,-333.6 95.89,-292.43 69.11,-268.14"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="71.2,-265.32 61.44,-261.19 66.5,-270.5 71.2,-265.32"/>
+</g>
+<!-- module~self_mesh&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge21" class="edge">
+<title>module~self_mesh&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M475,-322C352.09,-275.07 305.69,-290.52 179,-326"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge26" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M607.5,-360C553.21,-339.6 534.79,-355.1 477,-360"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection3d~~UsesGraph_edge30" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M692.83,-443.25C658.95,-448.41 605.9,-456.57 560,-464 523.07,-469.98 513.94,-483.93 477,-478"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M475,-478C433.15,-469.99 429.66,-449.94 392,-430 385.37,-426.49 378.16,-423.14 371.04,-420.09"/>
+<polygon fill="#003fff" stroke="#003fff" points="372.05,-416.71 361.47,-416.12 369.36,-423.18 372.05,-416.71"/>
+</g>
+<!-- module~self_mesh&#45;&gt;HDF5 -->
+<g id="module~~self_advection3d~~UsesGraph_edge22" class="edge">
+<title>module~self_mesh&#45;&gt;HDF5</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M607.5,-558C577.13,-573.48 539.9,-584.78 512.99,-591.74"/>
+<polygon fill="#003fff" stroke="#003fff" points="512.07,-588.36 503.22,-594.19 513.77,-595.15 512.07,-588.36"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_mpi -->
+<g id="module~~self_advection3d~~UsesGraph_edge23" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_mpi</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M719.75,-425.85C707.66,-407.42 682.98,-371.81 657,-346 608.33,-297.66 541.99,-251.8 504.95,-227.66"/>
+<polygon fill="#003fff" stroke="#003fff" points="506.49,-224.49 496.19,-222 502.7,-230.37 506.49,-224.49"/>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection3d~~UsesGraph_edge24" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M707.05,-450.24C701.89,-454.11 696.77,-458.76 693,-464 663.46,-505.08 675.71,-524.99 657,-572 645.64,-600.54 630.31,-632.51 620.18,-652.92"/>
+<polygon fill="#003fff" stroke="#003fff" points="617.01,-651.44 615.66,-661.95 623.27,-654.57 617.01,-651.44"/>
+</g>
+<!-- module~self_hashtable -->
+<g id="module~~self_advection3d~~UsesGraph_node14" class="node">
+<title>module~self_hashtable</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node14"><a xlink:href=".././module/self_hashtable.html" xlink:title="SELF_HashTable">
+<polygon fill="#337ab7" stroke="#337ab7" points="657,-412 560,-412 560,-388 657,-388 657,-412"/>
+<text text-anchor="middle" x="608.5" y="-397.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_HashTable</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_hashtable -->
+<g id="module~~self_advection3d~~UsesGraph_edge25" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_hashtable</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M692.73,-426.8C681.36,-423.14 668.54,-419.01 656.42,-415.11"/>
+<polygon fill="#003fff" stroke="#003fff" points="657.49,-411.78 646.9,-412.04 655.34,-418.44 657.49,-411.78"/>
+</g>
+<!-- module~self_data -->
+<g id="module~~self_advection3d~~UsesGraph_node17" class="node">
+<title>module~self_data</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node17"><a xlink:href=".././module/self_data.html" xlink:title="SELF_Data">
+<polygon fill="#337ab7" stroke="#337ab7" points="643,-530 574,-530 574,-506 643,-506 643,-530"/>
+<text text-anchor="middle" x="608.5" y="-515.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Data</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_data -->
+<g id="module~~self_advection3d~~UsesGraph_edge27" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M711.31,-450.12C705.52,-454.48 698.96,-459.44 693,-464 676.91,-476.32 673.94,-480.88 657,-492 652.38,-495.03 647.38,-498.04 642.42,-500.88"/>
+<polygon fill="#003fff" stroke="#003fff" points="640.66,-497.85 633.62,-505.77 644.06,-503.97 640.66,-497.85"/>
+</g>
+<!-- module~self_mesh&#45;&gt;mpi -->
+<g id="module~~self_advection3d~~UsesGraph_edge28" class="edge">
+<title>module~self_mesh&#45;&gt;mpi</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M715.43,-425.82C702.08,-412.86 679.47,-392.43 657,-379 637.48,-367.34 630.78,-368 609.5,-360"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M607.5,-360C550.95,-338.75 532.58,-345.67 477,-322"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M475,-322C389.7,-285.67 418.2,-195.41 328,-174"/>
+</g>
+<!-- module~self_lagrange -->
+<g id="module~~self_advection3d~~UsesGraph_node19" class="node">
+<title>module~self_lagrange</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node19"><a xlink:href=".././module/self_lagrange.html" xlink:title="SELF_Lagrange">
+<polygon fill="#337ab7" stroke="#337ab7" points="523,-570 429,-570 429,-546 523,-546 523,-570"/>
+<text text-anchor="middle" x="476" y="-555.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Lagrange</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_lagrange -->
+<g id="module~~self_advection3d~~UsesGraph_edge29" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M708.19,-450.03C702.81,-454.01 697.28,-458.78 693,-464 669.57,-492.6 684.01,-513.75 657,-539 640.39,-554.53 629.76,-547.68 609.5,-558"/>
+<path fill="none" stroke="#003fff" stroke-dasharray="5,2" d="M607.5,-558C584.98,-569.48 557.3,-570.95 533.24,-568.96"/>
+<polygon fill="#003fff" stroke="#003fff" points="533.49,-565.47 523.18,-567.91 532.76,-572.43 533.49,-565.47"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge32" class="edge">
+<title>module~self_supportroutines&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M279.49,-391.98C265.48,-388.35 249.95,-384.34 235.37,-380.57"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="236.02,-377.12 225.46,-378.01 234.27,-383.9 236.02,-377.12"/>
+</g>
+<!-- module~self_supportroutines&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_edge31" class="edge">
+<title>module~self_supportroutines&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00bf" stroke-dasharray="5,2" d="M291.28,-416.05C281.54,-419.98 271.13,-424.7 262,-430 184.89,-474.73 105.17,-544.82 68.59,-578.56"/>
+<polygon fill="#ff00bf" stroke="#ff00bf" points="66,-576.2 61.05,-585.57 70.76,-581.32 66,-576.2"/>
+</g>
+<!-- module~self_mpi&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge36" class="edge">
+<title>module~self_mpi&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M445.25,-217.41C415.42,-225 368.27,-237.43 328,-250"/>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M326,-250C297,-259.05 289.23,-260.53 262,-274 222.98,-293.3 220.92,-314.26 179,-326"/>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M177,-326C149.51,-333.7 119,-343.12 94.55,-350.88"/>
+<polygon fill="#ff8b00" stroke="#ff8b00" points="93.28,-347.62 84.82,-353.99 95.41,-354.28 93.28,-347.62"/>
+</g>
+<!-- module~self_mpi&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge35" class="edge">
+<title>module~self_mpi&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M458.79,-222.07C442.51,-233.83 416.4,-251.67 392,-264 364.88,-277.7 353.51,-271.51 328,-288"/>
+</g>
+<!-- module~self_mpi&#45;&gt;mpi -->
+<g id="module~~self_advection3d~~UsesGraph_edge33" class="edge">
+<title>module~self_mpi&#45;&gt;mpi</title>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M445.27,-203.39C415.46,-196.6 368.32,-185.44 328,-174"/>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M326,-174C234.32,-147.98 125.03,-202.3 75.19,-231.74"/>
+<polygon fill="#ff8b00" stroke="#ff8b00" points="73.35,-228.76 66.59,-236.92 76.96,-234.76 73.35,-228.76"/>
+</g>
+<!-- module~self_memory -->
+<g id="module~~self_advection3d~~UsesGraph_node23" class="node">
+<title>module~self_memory</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node23"><a xlink:href=".././module/self_memory.html" xlink:title="SELF_Memory">
+<polygon fill="#337ab7" stroke="#337ab7" points="370.5,-652 283.5,-652 283.5,-628 370.5,-628 370.5,-652"/>
+<text text-anchor="middle" x="327" y="-637.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Memory</text>
+</a>
+</g>
+</g>
+<!-- module~self_mpi&#45;&gt;module~self_memory -->
+<g id="module~~self_advection3d~~UsesGraph_edge34" class="edge">
+<title>module~self_mpi&#45;&gt;module~self_memory</title>
+<path fill="none" stroke="#ff8b00" stroke-dasharray="5,2" d="M467.59,-222.18C456.99,-240.22 437.68,-275.45 428,-308 393.1,-425.3 448.36,-472.37 392,-581 383.55,-597.29 368.72,-611.39 355.46,-621.73"/>
+<polygon fill="#ff8b00" stroke="#ff8b00" points="353.01,-619.19 347.06,-627.96 357.18,-624.81 353.01,-619.19"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge37" class="edge">
+<title>module~self_mappeddata&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M607.5,-246C548.99,-225.15 387.3,-231.49 328,-250"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge39" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M727.5,-322C617.7,-297.02 589.2,-350.48 477,-360"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M475,-360C409.82,-364.8 392.95,-371.29 328,-364"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M326,-364C296.54,-360.69 263.55,-360.8 236.29,-361.9"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="235.98,-358.41 226.15,-362.37 236.3,-365.4 235.98,-358.41"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_mesh -->
+<g id="module~~self_advection3d~~UsesGraph_edge42" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M932.97,-357.72C907.52,-357.25 876.92,-357.51 849.5,-360"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_mpi -->
+<g id="module~~self_advection3d~~UsesGraph_edge38" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_mpi</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M932.67,-351.39C920.9,-349.59 908.54,-347.71 897,-346 822.61,-334.95 803.82,-333.49 729.5,-322"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M727.5,-322C687.66,-312.94 692.45,-283.31 657,-263 637.54,-251.85 630.62,-253.53 609.5,-246"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M607.5,-246C577.5,-235.31 542.69,-225.85 516.58,-219.31"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="517.21,-215.86 506.67,-216.87 515.54,-222.66 517.21,-215.86"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_data -->
+<g id="module~~self_advection3d~~UsesGraph_edge41" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M985.14,-372.13C975.04,-411.76 936.81,-537.17 849.5,-576"/>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M847.5,-576C838.56,-579.98 719.45,-548.26 653.21,-530.11"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="654.02,-526.7 643.45,-527.43 652.17,-533.45 654.02,-526.7"/>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_lagrange -->
+<g id="module~~self_advection3d~~UsesGraph_edge43" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M847.5,-576C800.07,-598.39 780.21,-562.64 729.5,-576"/>
+</g>
+<!-- module~self_geometry -->
+<g id="module~~self_advection3d~~UsesGraph_node24" class="node">
+<title>module~self_geometry</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node24"><a xlink:href=".././module/self_geometry.html" xlink:title="SELF_Geometry">
+<polygon fill="#337ab7" stroke="#337ab7" points="897,-470 800,-470 800,-446 897,-446 897,-470"/>
+<text text-anchor="middle" x="848.5" y="-455.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_geometry -->
+<g id="module~~self_advection3d~~UsesGraph_edge40" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_geometry</title>
+<path fill="none" stroke="#e7ff00" stroke-dasharray="5,2" d="M971.02,-372.02C947.03,-388.99 903.04,-420.11 875.09,-439.89"/>
+<polygon fill="#e7ff00" stroke="#e7ff00" points="872.76,-437.25 866.62,-445.88 876.81,-442.97 872.76,-437.25"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge47" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M571.96,-663.9C545.83,-656.69 509.37,-647.04 477,-640"/>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M475,-640C452.98,-635.21 444.17,-636.7 428,-621 399.44,-593.27 415.4,-571.2 392,-539 369.61,-508.19 358.01,-505.46 328,-482"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;HDF5 -->
+<g id="module~~self_advection3d~~UsesGraph_edge45" class="edge">
+<title>module~self_hdf5&#45;&gt;HDF5</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M584.67,-661.79C576.8,-657.51 567.97,-652.62 560,-648 543.77,-638.61 540.21,-635.43 524,-626 519.06,-623.13 513.8,-620.14 508.64,-617.26"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="510.03,-614.02 499.58,-612.24 506.63,-620.15 510.03,-614.02"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_edge44" class="edge">
+<title>module~self_hdf5&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M475,-640C432,-630.65 433.42,-679.14 392,-694 302.33,-726.17 269.8,-746.82 179,-718"/>
+</g>
+<!-- module~self_hdf5&#45;&gt;module~self_memory -->
+<g id="module~~self_advection3d~~UsesGraph_edge46" class="edge">
+<title>module~self_hdf5&#45;&gt;module~self_memory</title>
+<path fill="none" stroke="#5cff00" stroke-dasharray="5,2" d="M475,-640C444.24,-633.31 408.99,-633.07 380.72,-634.61"/>
+<polygon fill="#5cff00" stroke="#5cff00" points="380.41,-631.12 370.65,-635.25 380.85,-638.11 380.41,-631.12"/>
+</g>
+<!-- module~self_hashtable&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge49" class="edge">
+<title>module~self_hashtable&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M589.12,-412.09C564.05,-427.09 517.59,-449.59 477,-440"/>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M475,-440C453.07,-434.82 446.62,-433.69 428,-421 408.78,-407.9 411.83,-395.17 392,-383 366.71,-367.48 357.49,-367.31 328,-364"/>
+</g>
+<!-- module~self_linkedlist -->
+<g id="module~~self_advection3d~~UsesGraph_node21" class="node">
+<title>module~self_linkedlist</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node21"><a xlink:href=".././module/self_linkedlist.html" xlink:title="SELF_LinkedList">
+<polygon fill="#337ab7" stroke="#337ab7" points="524,-412 428,-412 428,-388 524,-388 524,-412"/>
+<text text-anchor="middle" x="476" y="-397.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinkedList</text>
+</a>
+</g>
+</g>
+<!-- module~self_hashtable&#45;&gt;module~self_linkedlist -->
+<g id="module~~self_advection3d~~UsesGraph_edge48" class="edge">
+<title>module~self_hashtable&#45;&gt;module~self_linkedlist</title>
+<path fill="none" stroke="#00ff2e" stroke-dasharray="5,2" d="M559.65,-400C551.48,-400 542.91,-400 534.52,-400"/>
+<polygon fill="#00ff2e" stroke="#00ff2e" points="534.41,-396.5 524.41,-400 534.41,-403.5 534.41,-396.5"/>
+</g>
+<!-- module~self_metadata&#45;&gt;module~self_hdf5 -->
+<g id="module~~self_advection3d~~UsesGraph_edge50" class="edge">
+<title>module~self_metadata&#45;&gt;module~self_hdf5</title>
+<path fill="none" stroke="#00b9ff" stroke-dasharray="5,2" d="M801.3,-663.54C789.21,-665.69 776.16,-667.72 764,-669 727.55,-672.84 686.03,-674.01 655.21,-674.26"/>
+<polygon fill="#00b9ff" stroke="#00b9ff" points="655.17,-670.76 645.19,-674.31 655.21,-677.76 655.17,-670.76"/>
+</g>
+<!-- module~self_data&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge51" class="edge">
+<title>module~self_data&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M326,-444C263.85,-423.85 239.5,-468.66 179,-444"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M177,-444C138.19,-428.18 97.47,-401.64 72.4,-383.97"/>
+<polygon fill="#002eff" stroke="#002eff" points="74.39,-381.09 64.22,-378.13 70.32,-386.79 74.39,-381.09"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge53" class="edge">
+<title>module~self_data&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M573.97,-517.53C537.06,-516.02 476.52,-510.59 428,-492 410.04,-485.12 409.11,-476.77 392,-468 364.96,-454.15 356.5,-454.5 328,-444"/>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M326,-444C297.78,-434.85 288.68,-437.99 262,-425 239.87,-414.22 217.27,-397.72 201.24,-384.9"/>
+<polygon fill="#002eff" stroke="#002eff" points="203.02,-381.84 193.07,-378.22 198.6,-387.26 203.02,-381.84"/>
+</g>
+<!-- module~self_data&#45;&gt;module~self_lagrange -->
+<g id="module~~self_advection3d~~UsesGraph_edge52" class="edge">
+<title>module~self_data&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#002eff" stroke-dasharray="5,2" d="M573.89,-528.3C559.38,-532.75 542.12,-538.04 526.21,-542.92"/>
+<polygon fill="#002eff" stroke="#002eff" points="525.05,-539.61 516.52,-545.89 527.11,-546.3 525.05,-539.61"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge55" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M428.68,-546.12C375.5,-532.2 291.78,-509.35 262,-496 222.28,-478.19 219.21,-460.69 179,-444"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge58" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M454.27,-545.96C446.04,-541.09 436.52,-535.37 428,-530 411.73,-519.74 409.11,-514.77 392,-506 364.96,-492.15 351.93,-500.71 328,-482"/>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M326,-482C302.07,-463.29 287.11,-475.1 262,-458 233.34,-438.49 207.88,-407.09 192.94,-386.49"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="195.66,-384.28 187.02,-378.14 189.94,-388.32 195.66,-384.28"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection3d~~UsesGraph_edge61" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M465.64,-545.59C455.89,-532.5 440.34,-511.16 428,-492 410.74,-465.22 416.05,-450.9 392,-430 387.87,-426.41 383.18,-423.28 378.26,-420.55"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="379.74,-417.37 369.22,-416.06 376.62,-423.64 379.74,-417.37"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_edge57" class="edge">
+<title>module~self_lagrange&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M326,-680C310.48,-686.62 195.08,-723.1 179,-718"/>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M177,-718C155.52,-711.18 148.12,-712.39 130,-699 100.12,-676.92 74.78,-641.51 60.49,-619.02"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="63.3,-616.91 55.06,-610.25 57.35,-620.59 63.3,-616.91"/>
+</g>
+<!-- hipfort_check -->
+<g id="module~~self_advection3d~~UsesGraph_node22" class="node">
+<title>hipfort_check</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="220.5,-690 135.5,-690 135.5,-666 220.5,-666 220.5,-690"/>
+<text text-anchor="middle" x="178" y="-675.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hipfort_check</text>
+</g>
+<!-- module~self_lagrange&#45;&gt;hipfort_check -->
+<g id="module~~self_advection3d~~UsesGraph_edge54" class="edge">
+<title>module~self_lagrange&#45;&gt;hipfort_check</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M439.74,-570.2C435.46,-572.66 431.4,-575.58 428,-579 399.95,-607.24 421.85,-634.67 392,-661 369.75,-680.63 355.29,-668.36 328,-680"/>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M326,-680C296.18,-692.72 259.76,-692.32 230.63,-688.7"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="231.05,-685.22 220.66,-687.3 230.07,-692.15 231.05,-685.22"/>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_memory -->
+<g id="module~~self_advection3d~~UsesGraph_edge56" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_memory</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M443.83,-570.06C438.37,-572.69 432.88,-575.69 428,-579 409.53,-591.52 410.68,-601.8 392,-614 386.4,-617.66 380.2,-620.96 373.94,-623.88"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="372.52,-620.67 364.76,-627.88 375.33,-627.09 372.52,-620.67"/>
+</g>
+<!-- hipfort -->
+<g id="module~~self_advection3d~~UsesGraph_node25" class="node">
+<title>hipfort</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="205,-610 151,-610 151,-586 205,-586 205,-610"/>
+<text text-anchor="middle" x="178" y="-595.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hipfort</text>
+</g>
+<!-- module~self_lagrange&#45;&gt;hipfort -->
+<g id="module~~self_advection3d~~UsesGraph_edge59" class="edge">
+<title>module~self_lagrange&#45;&gt;hipfort</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M437.33,-570.07C423.25,-574.15 407.02,-578.34 392,-581 330.54,-591.87 257.87,-595.79 215.26,-597.21"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="214.99,-593.71 205.11,-597.52 215.21,-600.71 214.99,-593.71"/>
+</g>
+<!-- module~self_quadrature -->
+<g id="module~~self_advection3d~~UsesGraph_node26" class="node">
+<title>module~self_quadrature</title>
+<g id="a_module~~self_advection3d~~UsesGraph_node26"><a xlink:href=".././module/self_quadrature.html" xlink:title="SELF_Quadrature">
+<polygon fill="#337ab7" stroke="#337ab7" points="379,-572 275,-572 275,-548 379,-548 379,-572"/>
+<text text-anchor="middle" x="327" y="-557.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Quadrature</text>
+</a>
+</g>
+</g>
+<!-- module~self_lagrange&#45;&gt;module~self_quadrature -->
+<g id="module~~self_advection3d~~UsesGraph_edge60" class="edge">
+<title>module~self_lagrange&#45;&gt;module~self_quadrature</title>
+<path fill="none" stroke="#e700ff" stroke-dasharray="5,2" d="M428.89,-558.63C416.28,-558.8 402.41,-558.99 389.1,-559.17"/>
+<polygon fill="#e700ff" stroke="#e700ff" points="389.01,-555.67 379.06,-559.31 389.1,-562.67 389.01,-555.67"/>
+</g>
+<!-- module~self_memory&#45;&gt;iso_c_binding -->
+<g id="module~~self_advection3d~~UsesGraph_edge63" class="edge">
+<title>module~self_memory&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M283.34,-648.49C252.81,-652.46 211.52,-653.42 179,-638"/>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M177,-638C156.64,-628.34 145.36,-635.49 130,-619 67.5,-551.91 52.62,-436.67 49.09,-388.35"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="52.57,-387.84 48.44,-378.08 45.58,-388.28 52.57,-387.84"/>
+</g>
+<!-- module~self_memory&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge64" class="edge">
+<title>module~self_memory&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M307.77,-627.88C293.2,-617.23 273.38,-600.43 262,-581 227.12,-521.47 254.99,-492.6 226,-430 218.56,-413.94 206.77,-397.89 196.85,-385.89"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="199.51,-383.61 190.37,-378.27 194.18,-388.15 199.51,-383.61"/>
+</g>
+<!-- module~self_memory&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_edge65" class="edge">
+<title>module~self_memory&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M177,-638C153.92,-627.05 127.12,-618.18 103.95,-611.6"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="104.84,-608.21 94.27,-608.92 102.97,-614.96 104.84,-608.21"/>
+</g>
+<!-- module~self_memory&#45;&gt;hipfort_check -->
+<g id="module~~self_advection3d~~UsesGraph_edge62" class="edge">
+<title>module~self_memory&#45;&gt;hipfort_check</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M283.48,-650.99C266.97,-655.26 247.9,-660.19 230.6,-664.66"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="229.47,-661.34 220.66,-667.23 231.22,-668.12 229.47,-661.34"/>
+</g>
+<!-- module~self_memory&#45;&gt;hipfort -->
+<g id="module~~self_advection3d~~UsesGraph_edge66" class="edge">
+<title>module~self_memory&#45;&gt;hipfort</title>
+<path fill="none" stroke="#00ff00" stroke-dasharray="5,2" d="M283.88,-627.96C262.15,-621.76 235.92,-614.26 215.13,-608.32"/>
+<polygon fill="#00ff00" stroke="#00ff00" points="215.98,-604.92 205.4,-605.54 214.05,-611.66 215.98,-604.92"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge67" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M799.86,-466.14C778.37,-469.79 752.66,-474.14 729.5,-478"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M727.5,-478C675.77,-486.62 661.81,-481.73 609.5,-478"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M607.5,-478C547.24,-473.7 535.79,-453.89 477,-440"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_mesh -->
+<g id="module~~self_advection3d~~UsesGraph_edge69" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M799.85,-449.92C791.39,-448.49 782.61,-447 774.23,-445.58"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="774.71,-442.11 764.27,-443.89 773.54,-449.02 774.71,-442.11"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_supportroutines -->
+<g id="module~~self_advection3d~~UsesGraph_edge71" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_supportroutines</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M607.5,-478C549.65,-473.87 533.97,-488.9 477,-478"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_data -->
+<g id="module~~self_advection3d~~UsesGraph_edge68" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_data</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M727.5,-478C699.5,-482.67 669.19,-493.06 646.3,-502.09"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="644.94,-498.86 636.98,-505.85 647.56,-505.35 644.94,-498.86"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_lagrange -->
+<g id="module~~self_advection3d~~UsesGraph_edge70" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_lagrange</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M840.72,-470.32C825.24,-496.84 784.39,-558.35 729.5,-576"/>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M727.5,-576C660.76,-597.46 579.04,-584.86 527.49,-572.52"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="528.14,-569.08 517.59,-570.07 526.46,-575.87 528.14,-569.08"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;module~self_constants -->
+<g id="module~~self_advection3d~~UsesGraph_edge73" class="edge">
+<title>module~self_quadrature&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M311.58,-547.78C297.77,-535.6 276.87,-515.88 262,-496 241.98,-469.25 243.93,-458.2 226,-430 216.48,-415.02 204.64,-398.92 195.23,-386.62"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="197.76,-384.17 188.88,-378.4 192.23,-388.45 197.76,-384.17"/>
+</g>
+<!-- module~self_quadrature&#45;&gt;iso_fortran_env -->
+<g id="module~~self_advection3d~~UsesGraph_edge72" class="edge">
+<title>module~self_quadrature&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#ff00ff" stroke-dasharray="5,2" d="M274.95,-562.13C235.22,-564.34 178.82,-568.69 130,-577 120,-578.7 109.44,-581.01 99.34,-583.48"/>
+<polygon fill="#ff00ff" stroke="#ff00ff" points="98.27,-580.14 89.43,-585.98 99.98,-586.93 98.27,-580.14"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_advection3dUsesGraph = svgPanZoom('#moduleself_advection3dUsesGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="516pt" height="32pt"
+ viewBox="0.00 0.00 516.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 512,-28 512,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="385.5,-24 328.5,-24 328.5,0 385.5,0 385.5,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="508,-24 404,-24 404,0 508,0 508,-24"/>
+<text text-anchor="middle" x="456" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  
+  
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_advection3d~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_advection3dUsedByGraph" width="209pt" height="32pt"
+ viewBox="0.00 0.00 209.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_advection3d~~UsedByGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>module~~self_advection3d~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 205,-28 205,4 -4,4"/>
+<!-- module~self_advection3d -->
+<g id="module~~self_advection3d~~UsedByGraph_node1" class="node">
+<title>module~self_advection3d</title>
+<polygon fill="none" stroke="black" points="111,-24 0,-24 0,0 111,0 111,-24"/>
+<text text-anchor="middle" x="55.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_Advection3D</text>
+</g>
+<!-- program~sadv3d -->
+<g id="module~~self_advection3d~~UsedByGraph_node2" class="node">
+<title>program~sadv3d</title>
+<g id="a_module~~self_advection3d~~UsedByGraph_node2"><a xlink:href=".././program/sadv3d.html" xlink:title="sadv3d">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="201,-24 147,-24 147,0 201,0 201,-24"/>
+<text text-anchor="middle" x="174" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sadv3d</text>
+</a>
+</g>
+</g>
+<!-- program~sadv3d&#45;&gt;module~self_advection3d -->
+<g id="module~~self_advection3d~~UsedByGraph_edge1" class="edge">
+<title>program~sadv3d&#45;&gt;module~self_advection3d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M146.86,-12C139.15,-12 130.36,-12 121.36,-12"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="121.15,-8.5 111.15,-12 121.15,-15.5 121.15,-8.5"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="516pt" height="32pt"
+ viewBox="0.00 0.00 516.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 512,-28 512,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="385.5,-24 328.5,-24 328.5,0 385.5,0 385.5,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="508,-24 404,-24 404,0 508,0 508,-24"/>
+<text text-anchor="middle" x="456" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+  
+      </ul>
+    </div>
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#inters-1">Interfaces</a></h3></div>
+  <div id="inters-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-internaldiffusiveflux_advection3d_gpu_wrapper">InternalDiffusiveFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-internalflux_advection3d_gpu_wrapper">InternalFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-sidediffusiveflux_advection3d_gpu_wrapper">SideDiffusiveFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-sideflux_advection3d_gpu_wrapper">SideFlux_Advection3D_gpu_wrapper</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#interface-updategrk3_advection3d_gpu_wrapper">UpdateGRK3_Advection3D_gpu_wrapper</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#type-advection3d">Advection3D</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-forwardstep_advection3d">ForwardStep_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-free_advection3d">Free_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-initwithcli_advection3d">InitWithCLI_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-init_advection3d">Init_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-internalflux_advection3d">InternalFlux_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-maxsolutionerror_advection3d">MaxSolutionError_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-modelexecute_advection3d">ModelExecute_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setboundaryconditionfromchar_advection3d">SetBoundaryConditionFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setboundaryconditionfromequation_advection3d">SetBoundaryConditionFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsolutionfromchar_advection3d">SetSolutionFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsolutionfromequation_advection3d">SetSolutionFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsourcefromchar_advection3d">SetSourceFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setsourcefromequation_advection3d">SetSourceFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setvelocityfromchar_advection3d">SetVelocityFromChar_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-setvelocityfromequation_advection3d">SetVelocityFromEquation_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-sideflux_advection3d">SideFlux_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-tendency_advection3d">Tendency_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-timesteprk3_advection3d">TimeStepRK3_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-writepickup_advection3d">WritePickup_Advection3D</a>
+      
+      <a class="list-group-item" href="../module/self_advection3d.html#proc-writetecplot_advection3d">WriteTecplot_Advection3D</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+    <section>
+   <h2>Interfaces</h2>
+   
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-internaldiffusiveflux_advection3d_gpu_wrapper"></span><h3>interface 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+public subroutine InternalDiffusiveFlux_Advection3D_gpu_wrapper(flux, solutionGradient, dsdx, diffusivity, N, nVar, nEl) bind(c,name="0")
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>solutionGradient</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dsdx</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_prec),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>diffusivity</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nEl</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+    </li>
+  
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-internalflux_advection3d_gpu_wrapper"></span><h3>interface 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+public subroutine InternalFlux_Advection3D_gpu_wrapper(flux, solution, velocity, dsdx, N, nVar, nEl) bind(c,name="0")
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>velocity</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dsdx</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nEl</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+    </li>
+  
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-sidediffusiveflux_advection3d_gpu_wrapper"></span><h3>interface 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+public subroutine SideDiffusiveFlux_Advection3D_gpu_wrapper(flux, boundarySolGradient, extSolGradient, nHat, nScale, diffusivity, N, nVar, nEl) bind(c,name="0")
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>boundarySolGradient</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>extSolGradient</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nHat</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nScale</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_prec),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>diffusivity</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nEl</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+    </li>
+  
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-sideflux_advection3d_gpu_wrapper"></span><h3>interface 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+public subroutine SideFlux_Advection3D_gpu_wrapper(flux, boundarySol, extSol, velocity, nHat, nScale, N, nVar, nEl) bind(c,name="0")
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>flux</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>boundarySol</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>extSol</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>velocity</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nHat</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nScale</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nEl</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+    </li>
+  
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="interface-updategrk3_advection3d_gpu_wrapper"></span><h3>interface 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+  
+    <li class="list-group-item">
+    
+    
+    <h3>
+public subroutine UpdateGRK3_Advection3D_gpu_wrapper(gRK3, solution, dSdt, rk3A, rk3G, dt, N, nVar, nEl) bind(c,name="0")
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>gRK3</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>solution</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(c_ptr)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dSdt</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_prec),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>rk3A</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_prec),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>rk3G</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=c_prec),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nVar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer(kind=C_INT),</td>
+  <td></td>
+  <td></td>
+  
+  <td>VALUE</td><td>::</td>
+  <td><strong>nEl</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+    </li>
+  
+  </ul>
+</div>
+
+    
+    </section>
+  <br>
+    
+
+    
+    
+    
+    <section>
+     <h2>Derived Types</h2>
+   
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-advection3d"></span><h3>type, public, extends(DG3D) :: <a href='../type/advection3d.html'>Advection3D</a>
+    
+  </h3></div>
+  <div class="panel-body">
+    
+     
+     <h4>Components</h4>
+    
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th>
+
+<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-lx"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>Lx</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-ly"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>Ly</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-lz"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>Lz</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-bceqn"></span>character(len=self_EquationLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>bcEqn</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-boundaryconditioneqn"></span>type(EquationParser),</td>
+  
+  <td>public,</td>
+  <td>ALLOCATABLE</td><td>::</td>
+  <td><strong>boundaryConditionEqn</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-controldegree"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>controlDegree</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-controlquadrature"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>controlQuadrature</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-diffusiveflux"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>diffusiveFlux</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-diffusivity"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>diffusivity</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-dt"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-enablempi"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>enableMPI</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-endtime"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>endTime</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-gpuaccel"></span>logical,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>gpuAccel</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-iceqn"></span>character(len=self_EquationLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>icEqn</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-icfile"></span>character(len=self_FileNameLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>icFile</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-initialtime"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>initialTime</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-integrator"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>integrator</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-meshfile"></span>character(len=self_FileNameLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nxelements"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>nxElements</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nyelements"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>nyElements</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nzelements"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>nzElements</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-outputinterval"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>outputInterval</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-plotvelocity"></span>type(Vector3D),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>plotVelocity</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-plotx"></span>type(Vector3D),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>plotX</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-simulationtime"></span>real(kind=prec),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>simulationTime</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-solutioneqn"></span>type(EquationParser),</td>
+  
+  <td>public,</td>
+  <td>ALLOCATABLE</td><td>::</td>
+  <td><strong>solutionEqn</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-sourceeqn"></span>type(EquationParser),</td>
+  
+  <td>public,</td>
+  <td>ALLOCATABLE</td><td>::</td>
+  <td><strong>sourceEqn</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-targetdegree"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>targetDegree</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-targetquadrature"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>targetQuadrature</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-veleqn"></span>type(EquationParser),</td>
+  
+  <td>public,</td>
+  <td>ALLOCATABLE</td><td>::</td>
+  <td><strong>velEqn</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-veleqnx"></span>character(len=self_EquationLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>velEqnX</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-veleqny"></span>character(len=self_EquationLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>velEqnY</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-veleqnz"></span>character(len=self_EquationLength),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>velEqnZ</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-velocity"></span>type(MappedVector3D),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>velocity</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+     
+     
+          
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-forwardstep'>ForwardStep</a></strong>  => ForwardStep_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-free~23'>Free</a></strong>  => Free_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-init~2'>Init</a></strong>  => Init_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-initwithcli'>InitWithCLI</a></strong>  => InitWithCLI_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-internalflux'>InternalFlux</a></strong>  => InternalFlux_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-maxsolutionerror'>MaxSolutionError</a></strong>  => MaxSolutionError_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-modelexecute'>ModelExecute</a></strong>  => ModelExecute_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>generic, public :: <strong><a href='../type/advection3d.html#boundprocedure-setboundarycondition'>SetBoundaryCondition</a></strong>  => SetBoundaryConditionFromEquation_Advection3D, SetBoundaryConditionFromChar_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setboundaryconditionfromchar_advection3d'>SetBoundaryConditionFromChar_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setboundaryconditionfromequation_advection3d'>SetBoundaryConditionFromEquation_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>generic, public :: <strong><a href='../type/advection3d.html#boundprocedure-setsolution'>SetSolution</a></strong>  => SetSolutionFromEquation_Advection3D, SetSolutionFromChar_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setsolutionfromchar_advection3d'>SetSolutionFromChar_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setsolutionfromequation_advection3d'>SetSolutionFromEquation_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>generic, public :: <strong><a href='../type/advection3d.html#boundprocedure-setsource'>SetSource</a></strong>  => SetSourceFromEquation_Advection3D, SetSourceFromChar_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setsourcefromchar_advection3d'>SetSourceFromChar_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setsourcefromequation_advection3d'>SetSourceFromEquation_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>generic, public :: <strong><a href='../type/advection3d.html#boundprocedure-setvelocity'>SetVelocity</a></strong>  => SetVelocityFromEquation_Advection3D, SetVelocityFromChar_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setvelocityfromchar_advection3d'>SetVelocityFromChar_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, private :: <strong><a href='../type/advection3d.html#boundprocedure-setvelocityfromequation_advection3d'>SetVelocityFromEquation_Advection3D</a></strong>  </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-sideflux'>SideFlux</a></strong>  => SideFlux_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-tendency'>Tendency</a></strong>  => Tendency_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-timesteprk3'>TimeStepRK3</a></strong>  => TimeStepRK3_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-writepickup'>WritePickup</a></strong>  => WritePickup_Advection3D </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/advection3d.html#boundprocedure-writetecplot'>WriteTecplot</a></strong>  => WriteTecplot_Advection3D </td>
+       <td></td></tr>
+      
+       </tbody>
+       </table>
+     
+  </div>
+</div>
+
+     
+    </section>
+  <br>
+    
+    
+    
+
+    
+    <section>
+    <h2>Subroutines</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-forwardstep_advection3d"></span><h3>
+public subroutine <a href='../proc/forwardstep_advection3d.html'>ForwardStep_Advection3D</a>(this, endTime)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>endTime</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_advection3d"></span><h3>
+public subroutine <a href='../proc/free_advection3d.html'>Free_Advection3D</a>(this)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-initwithcli_advection3d"></span><h3>
+public subroutine <a href='../proc/initwithcli_advection3d.html'>InitWithCLI_Advection3D</a>(this, cliConf)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Initializes the Advection3D class and assumes the cli configuration
+has already been set</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(CLI),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>cliConf</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_advection3d"></span><h3>
+public subroutine <a href='../proc/init_advection3d.html'>Init_Advection3D</a>(this, cqType, tqType, cqDegree, tqDegree, nvar, enableMPI, spec)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>cqType</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tqType</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>cqDegree</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>tqDegree</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nvar</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>logical,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>enableMPI</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(MeshSpec),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>spec</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-internalflux_advection3d"></span><h3>
+public subroutine <a href='../proc/internalflux_advection3d.html'>InternalFlux_Advection3D</a>(this)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Calculates the advective flux using the provided velocity</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-maxsolutionerror_advection3d"></span><h3>
+public subroutine <a href='../proc/maxsolutionerror_advection3d.html'>MaxSolutionError_Advection3D</a>(this, maxError)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Uses the solution equation supplied by the equation parser
+to compare with the computed solution. This difference is assumed
+be the solution error and this routine returns the max(abs(error))</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>maxError</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-modelexecute_advection3d"></span><h3>
+public subroutine <a href='../proc/modelexecute_advection3d.html'>ModelExecute_Advection3D</a>(this, io)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>logical,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>io</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setboundaryconditionfromchar_advection3d"></span><h3>
+public subroutine <a href='../proc/setboundaryconditionfromchar_advection3d.html'>SetBoundaryConditionFromChar_Advection3D</a>(this, eqnChar)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqnChar</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setboundaryconditionfromequation_advection3d"></span><h3>
+public subroutine <a href='../proc/setboundaryconditionfromequation_advection3d.html'>SetBoundaryConditionFromEquation_Advection3D</a>(this, eqn)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:this%solution%nVar)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setsolutionfromchar_advection3d"></span><h3>
+public subroutine <a href='../proc/setsolutionfromchar_advection3d.html'>SetSolutionFromChar_Advection3D</a>(this, eqnChar)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqnChar</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setsolutionfromequation_advection3d"></span><h3>
+public subroutine <a href='../proc/setsolutionfromequation_advection3d.html'>SetSolutionFromEquation_Advection3D</a>(this, eqn)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:this%solution%nVar)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setsourcefromchar_advection3d"></span><h3>
+public subroutine <a href='../proc/setsourcefromchar_advection3d.html'>SetSourceFromChar_Advection3D</a>(this, eqnChar)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqnChar</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setsourcefromequation_advection3d"></span><h3>
+public subroutine <a href='../proc/setsourcefromequation_advection3d.html'>SetSourceFromEquation_Advection3D</a>(this, eqn)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:this%solution%nVar)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setvelocityfromchar_advection3d"></span><h3>
+public subroutine <a href='../proc/setvelocityfromchar_advection3d.html'>SetVelocityFromChar_Advection3D</a>(this, velX, velY, velZ)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>velX</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>velY</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>velZ</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-setvelocityfromequation_advection3d"></span><h3>
+public subroutine <a href='../proc/setvelocityfromequation_advection3d.html'>SetVelocityFromEquation_Advection3D</a>(this, eqn)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(EquationParser),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>eqn</strong>(1:3)</td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-sideflux_advection3d"></span><h3>
+public subroutine <a href='../proc/sideflux_advection3d.html'>SideFlux_Advection3D</a>(this)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>Calculates the Advective Flux on element sides using a Lax-Friedrich's upwind Riemann Solver</p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-tendency_advection3d"></span><h3>
+public subroutine <a href='../proc/tendency_advection3d.html'>Tendency_Advection3D</a>(this)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-timesteprk3_advection3d"></span><h3>
+public subroutine <a href='../proc/timesteprk3_advection3d.html'>TimeStepRK3_Advection3D</a>(this, nSteps)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>this</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>nSteps</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-writepickup_advection3d"></span><h3>
+public subroutine <a href='../proc/writepickup_advection3d.html'>WritePickup_Advection3D</a>(self, filename)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>self</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-writetecplot_advection3d"></span><h3>
+public subroutine <a href='../proc/writetecplot_advection3d.html'>WriteTecplot_Advection3D</a>(self, filename)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/advection3d.html'>Advection3D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>self</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in),</td>
+  <td>optional</td>
+  
+  <td></td><td>::</td>
+  <td><strong>filename</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    </section>    
+    <br>
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2022 Anti-Capitalist Software License
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+             on 2022-01-20 09:52  
+            
+          </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>

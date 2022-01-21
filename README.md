@@ -1,6 +1,9 @@
 # Spectral Element Libraries in Fortran (SELF)
 Copyright 2020-2021 Fluid Numerics LLC
 
+[![Documentation Status](https://readthedocs.org/projects/self/badge/?version=latest)](https://self.readthedocs.io/en/latest/?badge=latest)
+
+
 SELF is licensed for use under the [Anti-Capitalist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
 
 ## Support this project
@@ -24,6 +27,7 @@ Before installing SELF, make sure your system has the following dependencies ins
 * Fortran compiler (e.g. gfortran)
 * [HIP](https://github.com/ROCm-Developer-Tools/HIP) (For GPU Accelerated Builds)
 * [HIPFort](https://github.com/ROCmSoftwarePlatform/hipfort) (For GPU Accelerated Builds)
+* [stdlib](https://github.com/fortran-lang/stdlib)
 * [json-fortran](https://github.com/jacobwilliams/json-fortran)
 * [FLAP](https://github.com/szaghi/FLAP)
 * [feq-parse](https://github.com/FluidNumerics/feqparse)

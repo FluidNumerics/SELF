@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+    
+    <meta name="author" content="Joe Schoonover" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>SELF_HashTable &ndash; SELF</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">SELF </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
+        
+            </ul>
+        
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>SELF_HashTable 
+    <small>Module</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title=" 0.6% of total for modules and submodules.">83 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/SELF_HashTable.f90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/self_hashtable.f90.html'>SELF_HashTable.f90</a></li>
+    
+  
+     <li class="active">SELF_HashTable</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+    
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-0">Derived Types</a></h3></div>
+  <div id="types-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#type-hashtable">HashTable</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-0">Functions</a></h3></div>
+  <div id="funcs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-containskeys_hashtable">ContainsKeys_HashTable</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-0">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-0" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-adddataforkeys_hashtable">AddDataForKeys_HashTable</a>
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-free_hashtable">Free_HashTable</a>
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-getdataforkeys_hashtable">GetDataForKeys_HashTable</a>
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-init_hashtable">Init_HashTable</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+    <p>\file SELF_HashTable.f90
+Contains the \ref SELF_HashTable module, and <BR>
+defines the \ref HashTable data-structures.
+\defgroup SELF_HashTable SELF_HashTable
+This module defines the \ref HashTable data-structure and associated routines.</p>
+      <br>
+    
+  
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Uses</h3>
+      </div>
+      <ul class="list-group">
+      
+      <li class="list-group-item">
+  <ul class="list-inline">
+    
+    <li><a href='../module/self_linkedlist.html'>SELF_LinkedList</a></li>
+    
+    <li><a href='../module/self_constants.html'>SELF_Constants</a></li>
+    
+  </ul>
+      </li>
+      
+      
+      
+      <li class="list-group-item">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_hashtable~~UsesGraph Pages: 1 -->
+<svg id="moduleself_hashtableUsesGraph" width="367pt" height="116pt"
+ viewBox="0.00 0.00 367.00 116.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_hashtable~~UsesGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 112)">
+<title>module~~self_hashtable~~UsesGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-112 363,-112 363,4 -4,4"/>
+<!-- module~self_hashtable -->
+<g id="module~~self_hashtable~~UsesGraph_node1" class="node">
+<title>module~self_hashtable</title>
+<polygon fill="none" stroke="black" points="359,-87 262,-87 262,-63 359,-63 359,-87"/>
+<text text-anchor="middle" x="310.5" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_HashTable</text>
+</g>
+<!-- module~self_linkedlist -->
+<g id="module~~self_hashtable~~UsesGraph_node2" class="node">
+<title>module~self_linkedlist</title>
+<g id="a_module~~self_hashtable~~UsesGraph_node2"><a xlink:href=".././module/self_linkedlist.html" xlink:title="SELF_LinkedList">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-108 130,-108 130,-84 226,-84 226,-108"/>
+<text text-anchor="middle" x="178" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_LinkedList</text>
+</a>
+</g>
+</g>
+<!-- module~self_hashtable&#45;&gt;module~self_linkedlist -->
+<g id="module~~self_hashtable~~UsesGraph_edge1" class="edge">
+<title>module~self_hashtable&#45;&gt;module~self_linkedlist</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M261.65,-82.7C253.48,-84.02 244.91,-85.39 236.52,-86.74"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="235.73,-83.33 226.41,-88.37 236.84,-90.24 235.73,-83.33"/>
+</g>
+<!-- module~self_constants -->
+<g id="module~~self_hashtable~~UsesGraph_node3" class="node">
+<title>module~self_constants</title>
+<g id="a_module~~self_hashtable~~UsesGraph_node3"><a xlink:href=".././module/self_constants.html" xlink:title="SELF_Constants">
+<polygon fill="#337ab7" stroke="#337ab7" points="226,-66 130,-66 130,-42 226,-42 226,-66"/>
+<text text-anchor="middle" x="178" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Constants</text>
+</a>
+</g>
+</g>
+<!-- module~self_hashtable&#45;&gt;module~self_constants -->
+<g id="module~~self_hashtable~~UsesGraph_edge2" class="edge">
+<title>module~self_hashtable&#45;&gt;module~self_constants</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M261.65,-67.3C253.48,-65.98 244.91,-64.61 236.52,-63.26"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="236.84,-59.76 226.41,-61.63 235.73,-66.67 236.84,-59.76"/>
+</g>
+<!-- iso_fortran_env -->
+<g id="module~~self_hashtable~~UsesGraph_node4" class="node">
+<title>iso_fortran_env</title>
+<g id="a_module~~self_hashtable~~UsesGraph_node4"><a xlink:href="http://fortranwiki.org/fortran/show/iso_fortran_env" xlink:title="iso_fortran_env">
+<polygon fill="#337ab7" stroke="#337ab7" points="94,-108 0,-108 0,-84 94,-84 94,-108"/>
+<text text-anchor="middle" x="47" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_fortran_env</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_fortran_env -->
+<g id="module~~self_hashtable~~UsesGraph_edge3" class="edge">
+<title>module~self_constants&#45;&gt;iso_fortran_env</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M140.03,-66.04C125.86,-70.65 109.51,-75.97 94.56,-80.84"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="93.4,-77.54 84.97,-83.96 95.56,-84.19 93.4,-77.54"/>
+</g>
+<!-- mpi -->
+<g id="module~~self_hashtable~~UsesGraph_node5" class="node">
+<title>mpi</title>
+<g id="a_module~~self_hashtable~~UsesGraph_node5"><a xlink:href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm" xlink:title="mpi">
+<polygon fill="#337ab7" stroke="#337ab7" points="74,-66 20,-66 20,-42 74,-42 74,-66"/>
+<text text-anchor="middle" x="47" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">mpi</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;mpi -->
+<g id="module~~self_hashtable~~UsesGraph_edge4" class="edge">
+<title>module~self_constants&#45;&gt;mpi</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M129.7,-54C114.8,-54 98.58,-54 84.55,-54"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="84.3,-50.5 74.3,-54 84.3,-57.5 84.3,-50.5"/>
+</g>
+<!-- iso_c_binding -->
+<g id="module~~self_hashtable~~UsesGraph_node6" class="node">
+<title>iso_c_binding</title>
+<g id="a_module~~self_hashtable~~UsesGraph_node6"><a xlink:href="http://fortranwiki.org/fortran/show/iso_c_binding" xlink:title="iso_c_binding">
+<polygon fill="#337ab7" stroke="#337ab7" points="89,-24 5,-24 5,0 89,0 89,-24"/>
+<text text-anchor="middle" x="47" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">iso_c_binding</text>
+</a>
+</g>
+</g>
+<!-- module~self_constants&#45;&gt;iso_c_binding -->
+<g id="module~~self_hashtable~~UsesGraph_edge5" class="edge">
+<title>module~self_constants&#45;&gt;iso_c_binding</title>
+<path fill="none" stroke="#00ffff" stroke-dasharray="5,2" d="M140.03,-41.96C125.86,-37.35 109.51,-32.03 94.56,-27.16"/>
+<polygon fill="#00ffff" stroke="#00ffff" points="95.56,-23.81 84.97,-24.04 93.4,-30.46 95.56,-23.81"/>
+</g>
+</g>
+</svg>
+</div><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="516pt" height="32pt"
+ viewBox="0.00 0.00 516.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 512,-28 512,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="385.5,-24 328.5,-24 328.5,0 385.5,0 385.5,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="508,-24 404,-24 404,0 508,0 508,-24"/>
+<text text-anchor="middle" x="456" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+      </li>
+      
+      </ul>
+    </div>
+    
+
+    
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Used by</h3>
+      </div>
+      <ul class="list-group">
+  
+  
+  <li class="list-group-item">
+    <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: module~~self_hashtable~~UsedByGraph Pages: 1 -->
+<svg id="moduleself_hashtableUsedByGraph" width="641pt" height="92pt"
+ viewBox="0.00 0.00 641.00 91.78" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="module~~self_hashtable~~UsedByGraph" class="graph" transform="scale(1.29 1.29) rotate(0) translate(4 114.27)">
+<title>module~~self_hashtable~~UsedByGraph</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-114.27 822,-114.27 822,4 -4,4"/>
+<!-- module~self_hashtable -->
+<g id="module~~self_hashtable~~UsedByGraph_node1" class="node">
+<title>module~self_hashtable</title>
+<polygon fill="none" stroke="black" points="97,-77.92 0,-77.92 0,-53.92 97,-53.92 97,-77.92"/>
+<text text-anchor="middle" x="48.5" y="-63.52" font-family="Helvetica,sans-Serif" font-size="10.50">SELF_HashTable</text>
+</g>
+<!-- module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_node2" class="node">
+<title>module~self_mesh</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node2"><a xlink:href=".././module/self_mesh.html" xlink:title="SELF_Mesh">
+<polygon fill="#337ab7" stroke="#337ab7" points="204,-77.92 133,-77.92 133,-53.92 204,-53.92 204,-77.92"/>
+<text text-anchor="middle" x="168.5" y="-63.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Mesh</text>
+</a>
+</g>
+</g>
+<!-- module~self_mesh&#45;&gt;module~self_hashtable -->
+<g id="module~~self_hashtable~~UsedByGraph_edge1" class="edge">
+<title>module~self_mesh&#45;&gt;module~self_hashtable</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M132.73,-65.92C124.72,-65.92 115.99,-65.92 107.29,-65.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="107.13,-62.42 97.13,-65.92 107.13,-69.42 107.13,-62.42"/>
+</g>
+<!-- module~self_advection2d -->
+<g id="module~~self_hashtable~~UsedByGraph_node3" class="node">
+<title>module~self_advection2d</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node3"><a xlink:href=".././module/self_advection2d.html" xlink:title="SELF_Advection2D">
+<polygon fill="#337ab7" stroke="#337ab7" points="728,-79.92 617,-79.92 617,-55.92 728,-55.92 728,-79.92"/>
+<text text-anchor="middle" x="672.5" y="-65.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Advection2D</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection2d&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge2" class="edge">
+<title>module~self_advection2d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M647.07,-79.98C623.42,-90.71 586.23,-105.12 552,-107.92"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M550,-107.92C496.84,-112.27 483.29,-105.75 430,-107.92"/>
+</g>
+<!-- module~self_dg -->
+<g id="module~~self_hashtable~~UsedByGraph_node6" class="node">
+<title>module~self_dg</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node6"><a xlink:href=".././module/self_dg.html" xlink:title="SELF_DG">
+<polygon fill="#337ab7" stroke="#337ab7" points="581,-78.92 521,-78.92 521,-54.92 581,-54.92 581,-78.92"/>
+<text text-anchor="middle" x="551" y="-64.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_DG</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection2d&#45;&gt;module~self_dg -->
+<g id="module~~self_hashtable~~UsedByGraph_edge12" class="edge">
+<title>module~self_advection2d&#45;&gt;module~self_dg</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M617,-67.46C608.34,-67.39 599.53,-67.32 591.32,-67.25"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="591.3,-63.75 581.28,-67.16 591.25,-70.75 591.3,-63.75"/>
+</g>
+<!-- module~self_advection3d -->
+<g id="module~~self_hashtable~~UsedByGraph_node4" class="node">
+<title>module~self_advection3d</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node4"><a xlink:href=".././module/self_advection3d.html" xlink:title="SELF_Advection3D">
+<polygon fill="#337ab7" stroke="#337ab7" points="728,-37.92 617,-37.92 617,-13.92 728,-13.92 728,-37.92"/>
+<text text-anchor="middle" x="672.5" y="-23.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Advection3D</text>
+</a>
+</g>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge3" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M616.99,-24.05C596.57,-23.84 573.19,-24.19 552,-25.92"/>
+</g>
+<!-- module~self_advection3d&#45;&gt;module~self_dg -->
+<g id="module~~self_hashtable~~UsedByGraph_edge13" class="edge">
+<title>module~self_advection3d&#45;&gt;module~self_dg</title>
+<path fill="none" stroke="#00ff91" stroke-dasharray="5,2" d="M636.29,-38C622.08,-42.87 605.63,-48.52 591.06,-53.52"/>
+<polygon fill="#00ff91" stroke="#00ff91" points="589.64,-50.3 581.32,-56.86 591.91,-56.93 589.64,-50.3"/>
+</g>
+<!-- module~self_mappeddata -->
+<g id="module~~self_hashtable~~UsedByGraph_node5" class="node">
+<title>module~self_mappeddata</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node5"><a xlink:href=".././module/self_mappeddata.html" xlink:title="SELF_MappedData">
+<polygon fill="#337ab7" stroke="#337ab7" points="485,-77.92 373,-77.92 373,-53.92 485,-53.92 485,-77.92"/>
+<text text-anchor="middle" x="429" y="-63.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_MappedData</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge4" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M405.48,-53.88C378.49,-40.76 331.63,-22.11 289.5,-25.92"/>
+</g>
+<!-- module~self_geometry -->
+<g id="module~~self_hashtable~~UsedByGraph_node7" class="node">
+<title>module~self_geometry</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node7"><a xlink:href=".././module/self_geometry.html" xlink:title="SELF_Geometry">
+<polygon fill="#337ab7" stroke="#337ab7" points="337,-77.92 240,-77.92 240,-53.92 337,-53.92 337,-77.92"/>
+<text text-anchor="middle" x="288.5" y="-63.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">SELF_Geometry</text>
+</a>
+</g>
+</g>
+<!-- module~self_mappeddata&#45;&gt;module~self_geometry -->
+<g id="module~~self_hashtable~~UsedByGraph_edge14" class="edge">
+<title>module~self_mappeddata&#45;&gt;module~self_geometry</title>
+<path fill="none" stroke="#0091ff" stroke-dasharray="5,2" d="M372.86,-65.92C364.5,-65.92 355.84,-65.92 347.42,-65.92"/>
+<polygon fill="#0091ff" stroke="#0091ff" points="347.29,-62.42 337.29,-65.92 347.29,-69.42 347.29,-62.42"/>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge5" class="edge">
+<title>module~self_dg&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M525.95,-79.07C502.25,-90.09 464.66,-105.03 430,-107.92"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M428,-107.92C344.22,-114.91 322.39,-103.65 240,-86.92 231.54,-85.2 222.64,-82.93 214.12,-80.51"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="214.91,-77.1 204.33,-77.63 212.94,-83.81 214.91,-77.1"/>
+</g>
+<!-- module~self_dg&#45;&gt;module~self_mappeddata -->
+<g id="module~~self_hashtable~~UsedByGraph_edge11" class="edge">
+<title>module~self_dg&#45;&gt;module~self_mappeddata</title>
+<path fill="none" stroke="#48ff00" stroke-dasharray="5,2" d="M520.95,-66.68C513.09,-66.61 504.25,-66.54 495.25,-66.46"/>
+<polygon fill="#48ff00" stroke="#48ff00" points="495.1,-62.96 485.07,-66.38 495.04,-69.96 495.1,-62.96"/>
+</g>
+<!-- module~self_geometry&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge6" class="edge">
+<title>module~self_geometry&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M239.85,-65.92C231.48,-65.92 222.8,-65.92 214.51,-65.92"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="214.27,-62.42 204.27,-65.92 214.27,-69.42 214.27,-62.42"/>
+</g>
+<!-- program~sadv3d -->
+<g id="module~~self_hashtable~~UsedByGraph_node8" class="node">
+<title>program~sadv3d</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node8"><a xlink:href=".././program/sadv3d.html" xlink:title="sadv3d">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="818,-27.92 764,-27.92 764,-3.92 818,-3.92 818,-27.92"/>
+<text text-anchor="middle" x="791" y="-13.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sadv3d</text>
+</a>
+</g>
+</g>
+<!-- program~sadv3d&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge7" class="edge">
+<title>program~sadv3d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M763.89,-10.24C752.87,-8.11 739.87,-5.96 728,-4.92 678.86,-0.59 665.73,2.76 617,-4.92 587.01,-9.64 582.26,-23.45 552,-25.92"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M550,-25.92C434.35,-31.38 404.81,-15.49 289.5,-25.92"/>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M287.5,-25.92C258.1,-28.63 226.5,-39.82 203.41,-49.68"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="201.81,-46.56 194.07,-53.8 204.63,-52.97 201.81,-46.56"/>
+</g>
+<!-- program~sadv3d&#45;&gt;module~self_advection3d -->
+<g id="module~~self_hashtable~~UsedByGraph_edge10" class="edge">
+<title>program~sadv3d&#45;&gt;module~self_advection3d</title>
+<path fill="none" stroke="#ffda00" stroke-dasharray="5,2" d="M763.86,-18.16C756.15,-18.83 747.36,-19.58 738.36,-20.35"/>
+<polygon fill="#ffda00" stroke="#ffda00" points="737.81,-16.89 728.15,-21.23 738.41,-23.86 737.81,-16.89"/>
+</g>
+<!-- program~sadv2d -->
+<g id="module~~self_hashtable~~UsedByGraph_node9" class="node">
+<title>program~sadv2d</title>
+<g id="a_module~~self_hashtable~~UsedByGraph_node9"><a xlink:href=".././program/sadv2d.html" xlink:title="sadv2d">
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="818,-89.92 764,-89.92 764,-65.92 818,-65.92 818,-89.92"/>
+<text text-anchor="middle" x="791" y="-75.52" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">sadv2d</text>
+</a>
+</g>
+</g>
+<!-- program~sadv2d&#45;&gt;module~self_mesh -->
+<g id="module~~self_hashtable~~UsedByGraph_edge8" class="edge">
+<title>program~sadv2d&#45;&gt;module~self_mesh</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M763.82,-82.97C752.79,-84.99 739.8,-87.24 728,-88.92 650.11,-100.02 630.42,-101.51 552,-107.92"/>
+</g>
+<!-- program~sadv2d&#45;&gt;module~self_advection2d -->
+<g id="module~~self_hashtable~~UsedByGraph_edge9" class="edge">
+<title>program~sadv2d&#45;&gt;module~self_advection2d</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M763.86,-75.68C756.15,-75.01 747.36,-74.26 738.36,-73.49"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="738.41,-69.98 728.15,-72.61 737.81,-76.95 738.41,-69.98"/>
+</g>
+</g>
+</svg>
+</div><script>var panmoduleself_hashtableUsedByGraph = svgPanZoom('#moduleself_hashtableUsedByGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.43.0 (0)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="516pt" height="32pt"
+ viewBox="0.00 0.00 516.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 512,-28 512,4 -4,4"/>
+<!-- Module -->
+<g id="node1" class="node">
+<title>Module</title>
+<polygon fill="#337ab7" stroke="#337ab7" points="54,-24 0,-24 0,0 54,0 54,-24"/>
+<text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Module</text>
+</g>
+<!-- Submodule -->
+<g id="node2" class="node">
+<title>Submodule</title>
+<polygon fill="#5bc0de" stroke="#5bc0de" points="145.5,-24 72.5,-24 72.5,0 145.5,0 145.5,-24"/>
+<text text-anchor="middle" x="109" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Submodule</text>
+</g>
+<!-- Subroutine -->
+<g id="node3" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="234,-24 164,-24 164,0 234,0 234,-24"/>
+<text text-anchor="middle" x="199" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node4" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="310,-24 252,-24 252,0 310,0 310,-24"/>
+<text text-anchor="middle" x="281" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="385.5,-24 328.5,-24 328.5,0 385.5,0 385.5,-24"/>
+<text text-anchor="middle" x="357" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="508,-24 404,-24 404,0 508,0 508,-24"/>
+<text text-anchor="middle" x="456" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a submodule to the (sub)module which it is
+    descended from. Dashed arrows point from a module or program unit to 
+    modules which it uses. Where possible, edges connecting nodes are given different colours to make them easier to distinguish in large graphs.
+    </p>
+    </div></div></div></div>
+  </li>
+  
+      </ul>
+    </div>
+    
+
+    <br>
+
+    <section class="visible-xs visible-sm hidden-md">
+      
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#types-1">Derived Types</a></h3></div>
+  <div id="types-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#type-hashtable">HashTable</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#funcs-1">Functions</a></h3></div>
+  <div id="funcs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-containskeys_hashtable">ContainsKeys_HashTable</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#subs-1">Subroutines</a></h3></div>
+  <div class="list-group">
+    <div id="subs-1" class="panel-collapse collapse">
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-adddataforkeys_hashtable">AddDataForKeys_HashTable</a>
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-free_hashtable">Free_HashTable</a>
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-getdataforkeys_hashtable">GetDataForKeys_HashTable</a>
+      
+      <a class="list-group-item" href="../module/self_hashtable.html#proc-init_hashtable">Init_HashTable</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+    </section>
+    <br class="visible-xs visible-sm hidden-md">
+
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    <section>
+     <h2>Derived Types</h2>
+   
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="type-hashtable"></span><h3>type, public :: <a href='../type/hashtable.html'>HashTable</a>
+    
+  </h3></div>
+  <div class="panel-body">
+    
+    
+    <p>\addtogroup SELF_HashTable
+@{
+\struct HashTable
+A template hash-table data structure that is comprised of an array of linked lists ( see
+SELF_LinkedList ).</p><a href="../type/hashtable.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+     
+     <h4>Components</h4>
+    
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th><th>Visibility</th>
+
+<th>Attributes</th><th></th><th>Name</th><th></th><th>Initial</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-list"></span>type(LinkedList),</td>
+  
+  <td>public,</td>
+  <td>ALLOCATABLE</td><td>::</td>
+  <td><strong>list</strong>(:)</td><td></td><td></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+     
+     
+          
+     
+     <h4>Type-Bound Procedures</h4>
+      <table class="table table-striped varlist">
+      <tbody>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/hashtable.html#boundprocedure-adddataforkeys'>AddDataForKeys</a></strong>  => AddDataForKeys_HashTable </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/hashtable.html#boundprocedure-containskeys'>ContainsKeys</a></strong>  => ContainsKeys_HashTable </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/hashtable.html#boundprocedure-free~40'>Free</a></strong>  => Free_HashTable </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/hashtable.html#boundprocedure-getdataforkeys'>GetDataForKeys</a></strong>  => GetDataForKeys_HashTable </td>
+       <td></td></tr>
+      
+       <tr><td>procedure, public :: <strong><a href='../type/hashtable.html#boundprocedure-init~19'>Init</a></strong>  => Init_HashTable </td>
+       <td></td></tr>
+      
+       </tbody>
+       </table>
+     
+  </div>
+</div>
+
+     
+    </section>
+  <br>
+    
+    
+     
+    <section>
+    <h2>Functions</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-containskeys_hashtable"></span><h3>
+public function <a href='../proc/containskeys_hashtable.html'>ContainsKeys_HashTable</a>(myTable, i, j) result(doesContain)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_HashTable
+ @{
+ \fn ContainsKeys_HashTable
+ Checks to see if an entry in the hash-table exists for the keys "i" and "j".</p><a href="../proc/containskeys_hashtable.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/hashtable.html'>HashTable</a>)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myTable</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>i</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>j</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>logical
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+    
+    </section>
+    <br>
+    
+
+    
+    <section>
+    <h2>Subroutines</h2>
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-adddataforkeys_hashtable"></span><h3>
+public subroutine <a href='../proc/adddataforkeys_hashtable.html'>AddDataForKeys_HashTable</a>(myTable, inData, i, j)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_HashTable
+ @{
+ \fn AddDataForKeys_HashTable
+ Adds data to the i-th linked list with a key set to "j"</p><a href="../proc/adddataforkeys_hashtable.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/hashtable.html'>HashTable</a>)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myTable</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>inData</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>i</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>j</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-free_hashtable"></span><h3>
+public subroutine <a href='../proc/free_hashtable.html'>Free_HashTable</a>(myTable)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_HashTable
+ @{
+ \fn Free_HashTable
+  Deallocates memory associated with the Hash-Table</p><a href="../proc/free_hashtable.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/hashtable.html'>HashTable</a>)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myTable</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-getdataforkeys_hashtable"></span><h3>
+public subroutine <a href='../proc/getdataforkeys_hashtable.html'>GetDataForKeys_HashTable</a>(myTable, outData, i, j)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_HashTable
+ @{
+ \fn GetDataForKeys_HashTable
+ Returns data from the hash table associated with the keys "i" and "j".</p><a href="../proc/getdataforkeys_hashtable.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/hashtable.html'>HashTable</a>)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myTable</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>outData</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>i</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>j</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-init_hashtable"></span><h3>
+public subroutine <a href='../proc/init_hashtable.html'>Init_HashTable</a>(myTable, N)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+
+
+
+
+
+
+
+<p>\addtogroup SELF_HashTable
+ @{
+ \fn Init_HashTable
+ Allocates space for the hash table and initializes each linked list within the hash-table</p><a href="../proc/init_hashtable.html" class="pull-right"><emph>Read more&hellip;</emph></a>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/hashtable.html'>HashTable</a>)</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myTable</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>integer</td>
+  <td></td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>N</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  </div>
+  </div>
+
+    
+    </section>    
+    <br>
+    
+    
+    
+    </div>
+  </div>
+
+  
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2022 Anti-Capitalist Software License
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+             on 2022-01-20 09:52  
+            
+          </p>
+        </div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>
