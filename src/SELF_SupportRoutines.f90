@@ -19,6 +19,11 @@ MODULE SELF_SupportRoutines
 
   IMPLICIT NONE
 
+  INTERFACE AlmostEqual
+    MODULE PROCEDURE AlmostEqual_r64, &
+                     AlmostEqual_r32
+  END INTERFACE AlmostEqual
+
 CONTAINS
 
   FUNCTION Int2Str(aNumber) RESULT(aString)
@@ -67,7 +72,7 @@ CONTAINS
 ! ================================================================================================ !
 !>@}
 
-  FUNCTION AlmostEqual(a,b) RESULT(AisB)
+  FUNCTION AlmostEqual_r64(a,b) RESULT(AisB)
 
     IMPLICIT NONE
     REAL(real64) :: a,b
@@ -87,7 +92,29 @@ CONTAINS
       END IF
     END IF
 
-  END FUNCTION AlmostEqual
+  END FUNCTION AlmostEqual_r64
+
+  FUNCTION AlmostEqual_r32(a,b) RESULT(AisB)
+
+    IMPLICIT NONE
+    REAL(real32) :: a,b
+    LOGICAL :: AisB
+
+    IF (a == 0.0_real32 .OR. b == 0.0_real32) THEN
+      IF (ABS(a - b) <= EPSILON(1.0_real32)) THEN
+        AisB = .TRUE.
+      ELSE
+        AisB = .FALSE.
+      END IF
+    ELSE
+      IF ((abs(a - b) <= EPSILON(1.0_real32)*abs(a)) .OR. (abs(a - b) <= EPSILON(1.0_real32)*abs(b))) THEN
+        AisB = .TRUE.
+      ELSE
+        AisB = .FALSE.
+      END IF
+    END IF
+
+  END FUNCTION AlmostEqual_r32
 !
 !> \addtogroup SELF_SupportRoutines
 !! @{
