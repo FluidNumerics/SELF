@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -71,9 +71,12 @@
             <li><a href="../lists/types.html">Derived Types</a></li>
         
         
-            <li><a href="../program/self.html">Program</a></li>
-      
+            <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
+        
             </ul>
+        
             </li>
 
 
@@ -91,7 +94,9 @@
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
 
 
-<li class="visible-xs hidden-sm visible-lg"><a href="../program/self.html">Program</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -124,13 +129,16 @@
      
      
      
+    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+     
+     
      
     
     
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.5% of total for procedures.">34 statements</a>
+    title=" 0.3% of total for procedures.">38 statements</a>
      </li> 
      
      
@@ -213,6 +221,11 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
 
 
     
+    <p>Initialize an instance of the Lagrange class
+On output, all of the attributes for the Lagrange class are allocated and values are initialized according to the number of
+control points, number of target points, and the types for the control and target nodes.
+If a GPU is available, device pointers for the Lagrange attributes are allocated and initialized.</p>
+    
 
     <h3>Arguments</h3>
     
@@ -232,12 +245,12 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
   
 <tr>
   
-  <td><span class="anchor" id="variable-mypoly%7E10"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
+  <td><span class="anchor" id="variable-mypoly~10"></span>class(<a href='../type/lagrange.html'>Lagrange</a>),</td>
   <td>intent(out)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>myPoly</strong></td><td></td>
+  <td><strong>myPoly</strong></td><td><p>Lagrange class instance</p></td>
   
 </tr>
 
@@ -247,12 +260,12 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
   
 <tr>
   
-  <td><span class="anchor" id="variable-n%7E22"></span>integer,</td>
+  <td><span class="anchor" id="variable-n~90"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>N</strong></td><td></td>
+  <td><strong>N</strong></td><td><p>The number of control points for interpolant</p></td>
   
 </tr>
 
@@ -267,7 +280,8 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>controlNodeType</strong></td><td></td>
+  <td><strong>controlNodeType</strong></td><td><p>The integer code specifying the type of control points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
+GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
   
 </tr>
 
@@ -277,12 +291,12 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
   
 <tr>
   
-  <td><span class="anchor" id="variable-m%7E16"></span>integer,</td>
+  <td><span class="anchor" id="variable-m~17"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>M</strong></td><td></td>
+  <td><strong>M</strong></td><td><p>The number of target points for the interpolant</p></td>
   
 </tr>
 
@@ -292,12 +306,13 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
   
 <tr>
   
-  <td><span class="anchor" id="variable-targetnodetype%7E8"></span>integer,</td>
+  <td><span class="anchor" id="variable-targetnodetype~8"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>targetNodeType</strong></td><td></td>
+  <td><strong>targetNodeType</strong></td><td><p>The integer code specifying the type of target points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),
+GAUSS_LOBATTO(=2), or UNIFORM(=3)</p></td>
   
 </tr>
 
@@ -318,96 +333,55 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
   <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.30.1 (20201013.1554)
+<!-- Generated by graphviz version 2.43.0 (0)
  -->
 <!-- Title: proc~~init_lagrange~~CallsGraph Pages: 1 -->
-<svg id="procinit_lagrangeCallsGraph" width="586pt" height="95pt"
- viewBox="0.00 0.00 586.00 95.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="proc~~init_lagrange~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 91)">
+<svg id="procinit_lagrangeCallsGraph" width="258pt" height="116pt"
+ viewBox="0.00 0.00 258.00 116.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="proc~~init_lagrange~~CallsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 112)">
 <title>proc~~init_lagrange~~CallsGraph</title>
-<polygon fill="white" stroke="white" points="-4,5 -4,-91 583,-91 583,5 -4,5"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-112 254,-112 254,4 -4,4"/>
 <!-- proc~init_lagrange -->
-<g id="proc~~init_lagrange~~CallsGraph_node1" class="node"><title>proc~init_lagrange</title>
-<polygon fill="none" stroke="black" points="85.5,-45 0.5,-45 0.5,-21 85.5,-21 85.5,-45"/>
-<text text-anchor="middle" x="43" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">Init_Lagrange</text>
+<g id="proc~~init_lagrange~~CallsGraph_node1" class="node">
+<title>proc~init_lagrange</title>
+<polygon fill="none" stroke="black" points="85,-66 0,-66 0,-42 85,-42 85,-66"/>
+<text text-anchor="middle" x="42.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50">Init_Lagrange</text>
 </g>
-<!-- proc~legendrequadrature -->
-<g id="proc~~init_lagrange~~CallsGraph_node2" class="node"><title>proc~legendrequadrature</title>
-<g id="a_proc~~init_lagrange~~CallsGraph_node2"><a xlink:href=".././proc/legendrequadrature.html" xlink:title="LegendreQuadrature">
-<polygon fill="#d9534f" stroke="#d9534f" points="247.5,-66 122.5,-66 122.5,-42 247.5,-42 247.5,-66"/>
-<text text-anchor="middle" x="185" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreQuadrature</text>
-</a>
+<!-- legendrequadrature -->
+<g id="proc~~init_lagrange~~CallsGraph_node2" class="node">
+<title>legendrequadrature</title>
+<polygon fill="#777777" stroke="#777777" points="245,-108 126,-108 126,-84 245,-84 245,-108"/>
+<text text-anchor="middle" x="185.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">legendrequadrature</text>
 </g>
+<!-- proc~init_lagrange&#45;&gt;legendrequadrature -->
+<g id="proc~~init_lagrange~~CallsGraph_edge1" class="edge">
+<title>proc~init_lagrange&#45;&gt;legendrequadrature</title>
+<path fill="none" stroke="#ff0000" d="M83.9,-66.04C99.54,-70.69 117.61,-76.07 134.08,-80.98"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="133.51,-84.46 144.09,-83.96 135.5,-77.75 133.51,-84.46"/>
 </g>
-<!-- proc~init_lagrange&#45;&gt;proc~legendrequadrature -->
-<g id="proc~~init_lagrange~~CallsGraph_edge1" class="edge"><title>proc~init_lagrange&#45;&gt;proc~legendrequadrature</title>
-<path fill="none" stroke="#ff0000" d="M85.6256,-39.2438C94.09,-40.5135 103.221,-41.8831 112.388,-43.2583"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="111.912,-46.7259 122.321,-44.7481 112.951,-39.8034 111.912,-46.7259"/>
+<!-- uniformpoints -->
+<g id="proc~~init_lagrange~~CallsGraph_node3" class="node">
+<title>uniformpoints</title>
+<polygon fill="#777777" stroke="#777777" points="229,-66 142,-66 142,-42 229,-42 229,-66"/>
+<text text-anchor="middle" x="185.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">uniformpoints</text>
 </g>
-<!-- proc~uniformpoints -->
-<g id="proc~~init_lagrange~~CallsGraph_node3" class="node"><title>proc~uniformpoints</title>
-<g id="a_proc~~init_lagrange~~CallsGraph_node3"><a xlink:href=".././proc/uniformpoints.html" xlink:title="UniformPoints">
-<polygon fill="#d94e8f" stroke="#d94e8f" points="228.5,-24 141.5,-24 141.5,-0 228.5,-0 228.5,-24"/>
-<text text-anchor="middle" x="185" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">UniformPoints</text>
-</a>
+<!-- proc~init_lagrange&#45;&gt;uniformpoints -->
+<g id="proc~~init_lagrange~~CallsGraph_edge2" class="edge">
+<title>proc~init_lagrange&#45;&gt;uniformpoints</title>
+<path fill="none" stroke="#ff0000" d="M85.04,-54C99.56,-54 116.07,-54 131.4,-54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="131.79,-57.5 141.79,-54 131.79,-50.5 131.79,-57.5"/>
 </g>
+<!-- chebyshevquadrature -->
+<g id="proc~~init_lagrange~~CallsGraph_node4" class="node">
+<title>chebyshevquadrature</title>
+<polygon fill="#777777" stroke="#777777" points="250,-24 121,-24 121,0 250,0 250,-24"/>
+<text text-anchor="middle" x="185.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">chebyshevquadrature</text>
 </g>
-<!-- proc~init_lagrange&#45;&gt;proc~uniformpoints -->
-<g id="proc~~init_lagrange~~CallsGraph_edge2" class="edge"><title>proc~init_lagrange&#45;&gt;proc~uniformpoints</title>
-<path fill="none" stroke="#ff0000" d="M85.6256,-26.7562C99.9022,-24.6147 116.074,-22.1889 131.122,-19.9317"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="131.952,-23.3464 141.323,-18.4016 130.914,-16.4238 131.952,-23.3464"/>
-</g>
-<!-- proc~legendregausslobatto -->
-<g id="proc~~init_lagrange~~CallsGraph_node4" class="node"><title>proc~legendregausslobatto</title>
-<g id="a_proc~~init_lagrange~~CallsGraph_node4"><a xlink:href=".././proc/legendregausslobatto.html" xlink:title="LegendreGaussLobatto">
-<polygon fill="#d9534f" stroke="#d9534f" points="420,-87 284,-87 284,-63 420,-63 420,-87"/>
-<text text-anchor="middle" x="352" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreGaussLobatto</text>
-</a>
-</g>
-</g>
-<!-- proc~legendrequadrature&#45;&gt;proc~legendregausslobatto -->
-<g id="proc~~init_lagrange~~CallsGraph_edge3" class="edge"><title>proc~legendrequadrature&#45;&gt;proc~legendregausslobatto</title>
-<path fill="none" stroke="#ff0000" d="M247.909,-61.8794C256.322,-62.9501 265.04,-64.0597 273.682,-65.1595"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="273.407,-68.6527 283.769,-66.4434 274.291,-61.7087 273.407,-68.6527"/>
-</g>
-<!-- proc~legendregauss -->
-<g id="proc~~init_lagrange~~CallsGraph_node5" class="node"><title>proc~legendregauss</title>
-<g id="a_proc~~init_lagrange~~CallsGraph_node5"><a xlink:href=".././proc/legendregauss.html" xlink:title="LegendreGauss">
-<polygon fill="#d9534f" stroke="#d9534f" points="400,-45 304,-45 304,-21 400,-21 400,-45"/>
-<text text-anchor="middle" x="352" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreGauss</text>
-</a>
-</g>
-</g>
-<!-- proc~legendrequadrature&#45;&gt;proc~legendregauss -->
-<g id="proc~~init_lagrange~~CallsGraph_edge4" class="edge"><title>proc~legendrequadrature&#45;&gt;proc~legendregauss</title>
-<path fill="none" stroke="#ff0000" d="M247.909,-46.1206C262.992,-44.201 279.055,-42.1566 293.903,-40.267"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="294.482,-43.7215 303.96,-38.9869 293.598,-36.7775 294.482,-43.7215"/>
-</g>
-<!-- proc~legendreqandl -->
-<g id="proc~~init_lagrange~~CallsGraph_node7" class="node"><title>proc~legendreqandl</title>
-<g id="a_proc~~init_lagrange~~CallsGraph_node7"><a xlink:href=".././proc/legendreqandl.html" xlink:title="LegendreQandL">
-<polygon fill="#d9534f" stroke="#d9534f" points="566,-87 468,-87 468,-63 566,-63 566,-87"/>
-<text text-anchor="middle" x="517" y="-72.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendreQandL</text>
-</a>
-</g>
-</g>
-<!-- proc~legendregausslobatto&#45;&gt;proc~legendreqandl -->
-<g id="proc~~init_lagrange~~CallsGraph_edge5" class="edge"><title>proc~legendregausslobatto&#45;&gt;proc~legendreqandl</title>
-<path fill="none" stroke="#ff0000" d="M420.239,-75C432.709,-75 445.638,-75 457.809,-75"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="457.828,-78.5001 467.828,-75 457.828,-71.5001 457.828,-78.5001"/>
-</g>
-<!-- proc~legendrepolynomial -->
-<g id="proc~~init_lagrange~~CallsGraph_node6" class="node"><title>proc~legendrepolynomial</title>
-<g id="a_proc~~init_lagrange~~CallsGraph_node6"><a xlink:href=".././proc/legendrepolynomial.html" xlink:title="LegendrePolynomial">
-<polygon fill="#d9534f" stroke="#d9534f" points="578,-45 456,-45 456,-21 578,-21 578,-45"/>
-<text text-anchor="middle" x="517" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">LegendrePolynomial</text>
-</a>
-</g>
-</g>
-<!-- proc~legendregauss&#45;&gt;proc~legendrepolynomial -->
-<g id="proc~~init_lagrange~~CallsGraph_edge6" class="edge"><title>proc~legendregauss&#45;&gt;proc~legendrepolynomial</title>
-<path fill="none" stroke="#00ffff" d="M400.146,-33C414.415,-33 430.404,-33 445.839,-33"/>
-<polygon fill="#00ffff" stroke="#00ffff" points="445.878,-36.5001 455.878,-33 445.878,-29.5001 445.878,-36.5001"/>
+<!-- proc~init_lagrange&#45;&gt;chebyshevquadrature -->
+<g id="proc~~init_lagrange~~CallsGraph_edge3" class="edge">
+<title>proc~init_lagrange&#45;&gt;chebyshevquadrature</title>
+<path fill="none" stroke="#ff0000" d="M83.9,-41.96C99.54,-37.31 117.61,-31.93 134.08,-27.02"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="135.5,-30.25 144.09,-24.04 133.51,-23.54 135.5,-30.25"/>
 </g>
 </g>
 </svg>
@@ -416,43 +390,49 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.30.1 (20201013.1554)
+<!-- Generated by graphviz version 2.43.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
-<svg width="598pt" height="32pt"
- viewBox="0.00 0.00 598.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="594pt" height="32pt"
+ viewBox="0.00 0.00 594.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="white" stroke="white" points="-4,5 -4,-28 595,-28 595,5 -4,5"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 590,-28 590,4 -4,4"/>
 <!-- Subroutine -->
-<g id="node1" class="node"><title>Subroutine</title>
-<polygon fill="#d9534f" stroke="#d9534f" points="70.25,-24 -0.25,-24 -0.25,-0 70.25,-0 70.25,-24"/>
+<g id="node1" class="node">
+<title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="70,-24 0,-24 0,0 70,0 70,-24"/>
 <text text-anchor="middle" x="35" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
 </g>
 <!-- Function -->
-<g id="node2" class="node"><title>Function</title>
-<polygon fill="#d94e8f" stroke="#d94e8f" points="147,-24 89,-24 89,-0 147,-0 147,-24"/>
-<text text-anchor="middle" x="118" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+<g id="node2" class="node">
+<title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="146,-24 88,-24 88,0 146,0 146,-24"/>
+<text text-anchor="middle" x="117" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
 </g>
 <!-- Interface -->
-<g id="node3" class="node"><title>Interface</title>
-<polygon fill="#a7506f" stroke="#a7506f" points="226.25,-24 165.75,-24 165.75,-0 226.25,-0 226.25,-24"/>
-<text text-anchor="middle" x="196" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+<g id="node3" class="node">
+<title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="225.5,-24 164.5,-24 164.5,0 225.5,0 225.5,-24"/>
+<text text-anchor="middle" x="195" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
 </g>
 <!-- Unknown Procedure Type -->
-<g id="node4" class="node"><title>Unknown Procedure Type</title>
-<polygon fill="#777777" stroke="#777777" points="391.25,-24 244.75,-24 244.75,-0 391.25,-0 391.25,-24"/>
-<text text-anchor="middle" x="318" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+<g id="node4" class="node">
+<title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="388,-24 244,-24 244,0 388,0 388,-24"/>
+<text text-anchor="middle" x="316" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
 </g>
 <!-- Program -->
-<g id="node5" class="node"><title>Program</title>
-<polygon fill="#f0ad4e" stroke="#f0ad4e" points="468,-24 410,-24 410,-0 468,-0 468,-24"/>
-<text text-anchor="middle" x="439" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+<g id="node5" class="node">
+<title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="463.5,-24 406.5,-24 406.5,0 463.5,0 463.5,-24"/>
+<text text-anchor="middle" x="435" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
 </g>
 <!-- This Page&#39;s Entity -->
-<g id="node6" class="node"><title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="black" points="590,-24 486,-24 486,-0 590,-0 590,-24"/>
-<text text-anchor="middle" x="538" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+<g id="node6" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="586,-24 482,-24 482,0 586,0 586,-24"/>
+<text text-anchor="middle" x="534" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
 </svg>
@@ -528,10 +508,24 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
     <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_Lagrange</span><span class="p">(</span><span class="n">myPoly</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">controlNodeType</span><span class="p">,</span><span class="n">M</span><span class="p">,</span><span class="n">targetNodeType</span><span class="p">)</span>
+    <span class="c">!! Initialize an instance of the Lagrange class</span>
+    <span class="c">!! On output, all of the attributes for the Lagrange class are allocated and values are initialized according to the number of</span>
+    <span class="c">!! control points, number of target points, and the types for the control and target nodes.</span>
+    <span class="c">!! If a GPU is available, device pointers for the Lagrange attributes are allocated and initialized.</span>
     <span class="k">IMPLICIT NONE</span>
 <span class="k">    CLASS</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">myPoly</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>          <span class="kd">::</span> <span class="n">N</span><span class="p">,</span><span class="n">M</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>          <span class="kd">::</span> <span class="n">controlNodeType</span><span class="p">,</span><span class="n">targetNodeType</span>
+    <span class="c">!! Lagrange class instance</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>          <span class="kd">::</span> <span class="n">N</span>
+    <span class="c">!! The number of control points for interpolant</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>          <span class="kd">::</span> <span class="n">M</span>
+    <span class="c">!! The number of target points for the interpolant</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>          <span class="kd">::</span> <span class="n">controlNodeType</span>
+    <span class="c">!! The integer code specifying the type of control points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),</span>
+    <span class="c">!! GAUSS_LOBATTO(=2), or UNIFORM(=3)</span>
+    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span>          <span class="kd">::</span> <span class="n">targetNodeType</span>
+    <span class="c">!! The integer code specifying the type of target points. Parameters are defined in SELF_Constants.f90. One of GAUSS(=1),</span>
+    <span class="c">!! GAUSS_LOBATTO(=2), or UNIFORM(=3)</span>
+    <span class="c">! -------!</span>
     <span class="c">! Local</span>
     <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span> <span class="kd">::</span> <span class="n">q</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">M</span><span class="p">)</span>
 
@@ -568,6 +562,13 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
                               <span class="n">myPoly</span> <span class="p">%</span> <span class="n">controlPoints</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                               <span class="n">myPoly</span> <span class="p">%</span> <span class="n">qWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
                               <span class="n">controlNodeType</span><span class="p">)</span>
+
+    <span class="n">ELSEIF</span> <span class="p">(</span><span class="n">controlNodeType</span> <span class="o">==</span> <span class="n">CHEBYSHEV_GAUSS</span> <span class="p">.</span><span class="nb">OR</span><span class="p">.</span> <span class="n">controlNodeType</span> <span class="o">==</span> <span class="n">CHEBYSHEV_GAUSS_LOBATTO</span><span class="p">)</span> <span class="k">THEN</span>
+
+<span class="k">      CALL </span><span class="n">ChebyshevQuadrature</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="p">&amp;</span>
+                               <span class="n">myPoly</span> <span class="p">%</span> <span class="n">controlPoints</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                               <span class="n">myPoly</span> <span class="p">%</span> <span class="n">qWeights</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">,</span> <span class="p">&amp;</span>
+                               <span class="n">controlNodeType</span><span class="p">)</span>
 
     <span class="n">ELSEIF</span> <span class="p">(</span><span class="n">controlNodeType</span> <span class="o">==</span> <span class="n">UNIFORM</span><span class="p">)</span> <span class="k">THEN</span>
 
@@ -614,16 +615,17 @@ public subroutine Init_Lagrange(myPoly, N, controlNodeType, M, targetNodeType)
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2021 
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2022 Anti-Capitalist Software License
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-04-14 00:34  
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+             on 2022-01-20 09:52  
+            
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

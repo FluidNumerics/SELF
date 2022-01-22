@@ -1,8 +1,8 @@
 ! SELF_Data.F90
 !
-! Copyright 2020 Fluid Numerics LLC
+! Copyright 2020-2022 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self-fluids@fluidnumerics.com
+! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -10,6 +10,8 @@ MODULE SELF_Data
 
   USE SELF_Constants
   USE SELF_Lagrange
+  USE SELF_Metadata
+  USE FEQParse
 
   USE ISO_C_BINDING
 
@@ -17,9 +19,17 @@ MODULE SELF_Data
 
 #include "SELF_Macros.h"
 
-! ---------------------- Scalars ---------------------- !
-  TYPE,PUBLIC :: Scalar1D
-
+  TYPE,PUBLIC :: SELF_DataObj
+  !! The SELF_DataObj class is a base class for all data objects in SELF.
+  !! A data object in SELF is a multidimensional array of data, represented
+  !! on both host and device, that is associated with an interpolant, metadata,
+  !! and (optionally) an equation string.
+  !! Type extensions of the SELF_DataObj include scalars, vectors, and tensors
+  !! in 1-D, 2-D, and 3-D using the storage patterns that are expected for
+  !! derivative and interpolation operations defined in SELF_Lagrange.f90
+  !! Additionally, each extended type has the necessary attributes to store
+  !! information on element interiors and element boundaries, both of which
+  !! are commonly used for spectral element solvers.
     INTEGER :: N
     INTEGER :: M
     INTEGER :: nVar
@@ -27,9 +37,30 @@ MODULE SELF_Data
     INTEGER :: controlType
     INTEGER :: targetType
     TYPE(Lagrange) :: interp
+    TYPE(Metadata),ALLOCATABLE :: meta(:)
+    TYPE(EquationParser),ALLOCATABLE :: eqn(:)
+
+    CONTAINS
+
+    PROCEDURE,PUBLIC :: Init => Init_DataObj
+    PROCEDURE,PUBLIC :: Free => Free_DataObj
+
+    ! Procedures for setting metadata for 
+    PROCEDURE,PUBLIC :: SetName => SetName_DataObj
+    PROCEDURE,PUBLIC :: SetDescription => SetDescription_DataObj
+    PROCEDURE,PUBLIC :: SetUnits => SetUnits_DataObj
+    GENERIC,PUBLIC :: SetEquation => SetEquation_DataObj
+    PROCEDURE,PRIVATE :: SetEquation_DataObj
+
+  END TYPE SELF_DataObj
+
+! ---------------------- Scalars ---------------------- !
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar1D
+
     TYPE(hfReal_r3) :: interior
     TYPE(hfReal_r3) :: boundary
     TYPE(hfReal_r3) :: extBoundary
+    TYPE(hfReal_r3) :: avgBoundary
 
   CONTAINS
 
@@ -55,17 +86,11 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Scalar1D
     PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Scalar1D
 
+
   END TYPE Scalar1D
 
-  TYPE,PUBLIC :: Scalar2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar2D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r4) :: interior
     TYPE(hfReal_r4) :: boundary
     TYPE(hfReal_r4) :: extBoundary
@@ -95,15 +120,8 @@ MODULE SELF_Data
 
   END TYPE Scalar2D
 
-  TYPE,PUBLIC :: Scalar3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Scalar3D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
@@ -135,15 +153,8 @@ MODULE SELF_Data
 
 ! ---------------------- Vectors ---------------------- !
 
-  TYPE,PUBLIC :: Vector2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector2D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r5) :: interior
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
@@ -177,17 +188,13 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Vector2D
     PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Vector2D
 
+    GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
+    PROCEDURE,PRIVATE :: SetEquation_Vector2D
+
   END TYPE Vector2D
 
-  TYPE,PUBLIC :: Vector3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Vector3D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
     TYPE(hfReal_r6) :: extBoundary
@@ -221,19 +228,15 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Vector3D
     PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Vector3D
 
+    GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
+    PROCEDURE,PRIVATE :: SetEquation_Vector3D
+
   END TYPE Vector3D
 
 ! ---------------------- Tensors ---------------------- !
 
-  TYPE,PUBLIC :: Tensor2D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r6) :: interior
     TYPE(hfReal_r6) :: boundary
     TYPE(hfReal_r6) :: extBoundary
@@ -262,17 +265,13 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Tensor2D
     PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Tensor2D
 
+    GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor2D
+    PROCEDURE,PRIVATE :: SetEquation_Tensor2D
+
   END TYPE Tensor2D
 
-  TYPE,PUBLIC :: Tensor3D
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor3D
 
-    INTEGER :: N
-    INTEGER :: M
-    INTEGER :: nVar
-    INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
     TYPE(hfReal_r7) :: interior
     TYPE(hfReal_r7) :: boundary
     TYPE(hfReal_r7) :: extBoundary
@@ -301,6 +300,9 @@ MODULE SELF_Data
     PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Tensor3D
     PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Tensor3D
 
+    GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor3D
+    PROCEDURE,PRIVATE :: SetEquation_Tensor3D
+
   END TYPE Tensor3D
 
   INTEGER,PARAMETER :: selfStrongForm = 0
@@ -328,6 +330,93 @@ MODULE SELF_Data
   END INTERFACE
 
 CONTAINS
+
+! -- DataObj -- !
+  SUBROUTINE Init_DataObj(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(out) :: SELFStorage
+    INTEGER,INTENT(in) :: N
+    INTEGER,INTENT(in) :: quadratureType
+    INTEGER,INTENT(in) :: M
+    INTEGER,INTENT(in) :: targetNodeType
+    INTEGER,INTENT(in) :: nVar
+    INTEGER,INTENT(in) :: nElem
+
+    SELFStorage % N = N
+    SELFStorage % M = M
+    SELFStorage % nVar = nVar
+    SELFStorage % nElem = nElem
+    SELFStorage % controlType = quadratureType
+    SELFStorage % targetType = targetNodeType
+
+    CALL SELFStorage % interp % Init(N=N, &
+                                     controlNodeType=quadratureType, &
+                                     M=M, &
+                                     targetNodeType=targetNodeType)
+
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:nVar) )
+
+  END SUBROUTINE Init_DataObj
+
+  SUBROUTINE Free_DataObj(SELFStorage)
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+
+    SELFStorage % N = 0
+    SELFStorage % nVar = 0
+    SELFStorage % nElem = 0
+    CALL SELFStorage % interp % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
+
+  END SUBROUTINE Free_DataObj
+
+  SUBROUTINE SetName_DataObj(SELFStorage,ivar,name)
+    !! Set the name of the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: name
+
+    CALL SELFStorage % meta(ivar) % SetName(name) 
+
+  END SUBROUTINE SetName_DataObj
+
+  SUBROUTINE SetDescription_DataObj(SELFStorage,ivar,description)
+    !! Set the description of the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: description
+
+    CALL SELFStorage % meta(ivar) % SetName(description) 
+
+  END SUBROUTINE SetDescription_DataObj
+
+  SUBROUTINE SetUnits_DataObj(SELFStorage,ivar,units)
+    !! Set the units of the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: units
+
+    CALL SELFStorage % meta(ivar) % SetName(units) 
+
+  END SUBROUTINE SetUnits_DataObj
+
+  SUBROUTINE SetEquation_DataObj(SELFStorage,ivar,eqnChar)
+    !! Sets the equation parser for the `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
+
+    SELFStorage % eqn(ivar) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
+
+  END SUBROUTINE SetEquation_DataObj
 
 ! -- Scalar1D -- !
 
@@ -362,6 +451,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,1/), &
                                            upBound=(/nVar,2,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:nVar) )
+
   END SUBROUTINE Init_Scalar1D
 
   SUBROUTINE Free_Scalar1D(SELFStorage)
@@ -375,6 +467,9 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
 
   END SUBROUTINE Free_Scalar1D
 
@@ -523,6 +618,7 @@ CONTAINS
     SELFOut % boundary % hostData = SELFa % boundary % hostData + &
                                     SELFb % boundary % hostData
 
+
   END FUNCTION Add_Scalar1D
 
   FUNCTION Subtract_Scalar1D(SELFa,SELFb) RESULT(SELFOut)
@@ -581,6 +677,9 @@ CONTAINS
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,1,1,1/), &
                                            upBound=(/N,nVar,4,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:nVar) )
+
   END SUBROUTINE Init_Scalar2D
 
   SUBROUTINE Free_Scalar2D(SELFStorage)
@@ -595,6 +694,9 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
     CALL SELFStorage % avgBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
 
   END SUBROUTINE Free_Scalar2D
 
@@ -807,6 +909,9 @@ CONTAINS
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,0,1,1,1/), &
                                            upBound=(/N,N,nVar,6,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:nVar) )
+
   END SUBROUTINE Init_Scalar3D
 
   SUBROUTINE Free_Scalar3D(SELFStorage)
@@ -821,6 +926,9 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
     CALL SELFStorage % avgBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
 
   END SUBROUTINE Free_Scalar3D
 
@@ -1037,6 +1145,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
                                            upBound=(/2,N,nVar,4,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:2*nVar) )
+
   END SUBROUTINE Init_Vector2D
 
   SUBROUTINE Free_Vector2D(SELFStorage)
@@ -1052,7 +1163,22 @@ CONTAINS
     CALL SELFStorage % boundaryNormal % Free()
     CALL SELFStorage % extBoundary % Free()
 
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
+
   END SUBROUTINE Free_Vector2D
+
+  SUBROUTINE SetEquation_Vector2D(SELFStorage,idir,ivar,eqnChar)
+    !! Sets the equation parser for the `idir` direction and `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(Vector2D),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: idir,ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
+
+    SELFStorage % eqn(idir+2*(ivar-1)) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
+
+  END SUBROUTINE SetEquation_Vector2D
 
   SUBROUTINE UpdateHost_Vector2D(SELFStorage)
     IMPLICIT NONE
@@ -1328,6 +1454,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,0,1,1,1/), &
                                            upBound=(/3,N,N,nVar,6,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:3*nVar) )
+
   END SUBROUTINE Init_Vector3D
 
   SUBROUTINE Free_Vector3D(SELFStorage)
@@ -1343,7 +1472,22 @@ CONTAINS
     CALL SELFStorage % boundaryNormal % Free()
     CALL SELFStorage % extBoundary % Free()
 
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
+
   END SUBROUTINE Free_Vector3D
+
+  SUBROUTINE SetEquation_Vector3D(SELFStorage,idir,ivar,eqnChar)
+    !! Sets the equation parser for the `idir` direction and `ivar-th` variable
+    IMPLICIT NONE
+    CLASS(Vector3D),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: idir,ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
+
+    SELFStorage % eqn(idir+3*(ivar-1)) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
+
+  END SUBROUTINE SetEquation_Vector3D
 
   SUBROUTINE UpdateHost_Vector3D(SELFStorage)
     IMPLICIT NONE
@@ -1599,6 +1743,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,0,1,1,1/), &
                                            upBound=(/2,2,N,nVar,4,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:4*nVar) )
+
   END SUBROUTINE Init_Tensor2D
 
   SUBROUTINE Free_Tensor2D(SELFStorage)
@@ -1613,7 +1760,25 @@ CONTAINS
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
 
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
+
   END SUBROUTINE Free_Tensor2D
+
+  SUBROUTINE SetEquation_Tensor2D(SELFStorage,row,col,ivar,eqnChar)
+    !! Sets the equation parser for row, col  of the ivar-th tensor
+    IMPLICIT NONE
+    CLASS(Tensor2D),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: row,col,ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: ind
+
+    ind = row+2*(col-1+2*(ivar-1))
+    SELFStorage % eqn(ind) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
+
+  END SUBROUTINE SetEquation_Tensor2D
 
   SUBROUTINE UpdateHost_Tensor2D(SELFStorage)
     IMPLICIT NONE
@@ -1866,6 +2031,9 @@ CONTAINS
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,0,0,1,1,1/), &
                                            upBound=(/3,3,N,N,nVar,6,nElem/))
 
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:9*nVar) )
+
   END SUBROUTINE Init_Tensor3D
 
   SUBROUTINE Free_Tensor3D(SELFStorage)
@@ -1879,8 +2047,26 @@ CONTAINS
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
+    
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
 
   END SUBROUTINE Free_Tensor3D
+
+  SUBROUTINE SetEquation_Tensor3D(SELFStorage,row,col,ivar,eqnChar)
+    !! Sets the equation parser for row, col  of the ivar-th tensor
+    IMPLICIT NONE
+    CLASS(Tensor3D),INTENT(inout) :: SELFStorage
+    INTEGER,INTENT(in) :: row,col,ivar
+    CHARACTER(*),INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: ind
+
+    ind = row+3*(col-1+3*(ivar-1))
+    SELFStorage % eqn(ind) = EquationParser( TRIM(eqnChar), &
+                                              (/'x','y','z','t'/) )
+
+  END SUBROUTINE SetEquation_Tensor3D
 
   SUBROUTINE UpdateHost_Tensor3D(SELFStorage)
     IMPLICIT NONE

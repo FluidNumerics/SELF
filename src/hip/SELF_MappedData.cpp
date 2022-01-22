@@ -786,20 +786,21 @@ extern "C"
   }
 }
 
-__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int e2 = e2Global - offset;
   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
+    int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
         extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = boundary[SCB_2D_INDEX(i1,ivar,s2,e2,N,nVar)];
@@ -815,28 +816,29 @@ __global__ void SideExchange_MappedScalar2D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
   }
 
 }
 
-__global__ void SideExchange_MappedVector2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedVector2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int e2 = e2Global - offset;
   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
   int i2 = N-i1;
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
+    int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
         extBoundary[VEB_2D_INDEX(1,i1,ivar,s1,e1,N,nVar)] = boundary[VEB_2D_INDEX(1,i1,ivar,s2,e2,N,nVar)];
@@ -853,28 +855,29 @@ __global__ void SideExchange_MappedVector2D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedVector2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedVector2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedVector2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedVector2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
   }
 
 }
 
-__global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
   size_t i1 = threadIdx.x;
   size_t ivar = threadIdx.y;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,4)]-1;
+  int e2 = e2Global - offset;
   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
   int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
   int i2 = N-i1;
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
+    int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
         extBoundary[TEB_2D_INDEX(1,1,i1,ivar,s1,e1,N,nVar)] = boundary[TEB_2D_INDEX(1,1,i1,ivar,s2,e2,N,nVar)];
@@ -895,14 +898,14 @@ __global__ void SideExchange_MappedTensor2D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedTensor2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedTensor2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedTensor2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedTensor2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
   }
 
 }
 
-__global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -910,27 +913,37 @@ __global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int e2 = e2Global - offset;
   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
   int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
-  int i2 = N-i1;
-  int j2 = N-j1;
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
+    int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
         extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i1,j1,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 1){
-        extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(j2,i1,ivar,s2,e2,N,nVar)];
+        int i2 = j1;
+        int j2 = N-i1;
+        extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i2,j2,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 2){
+        int i2 = N-i1;
+        int j2 = N-j1;
         extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i2,j2,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 3){
-        extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(j1,i2,ivar,s2,e2,N,nVar)];
+        int i2 = N-j1;
+        int j2 = i1;
+        extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i2,j2,ivar,s2,e2,N,nVar)];
+      }
+      else if(flip == 4){
+        int i2 = j1;
+        int j2 = i1;
+        extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = boundary[SCB_3D_INDEX(i2,j2,ivar,s2,e2,N,nVar)];
       }
     }
   }
@@ -939,14 +952,14 @@ __global__ void SideExchange_MappedScalar3D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedScalar3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedScalar3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
   }
 
 }
 
-__global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -954,15 +967,14 @@ __global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int e2 = e2Global - offset;
   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
   int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
-  int i2 = N-i1;
-  int j2 = N-j1;
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
+    int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
         extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,i1,j1,ivar,s2,e2,N,nVar)];
@@ -970,19 +982,32 @@ __global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundar
         extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,i1,j1,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 1){
-        extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[VEB_3D_INDEX(2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(2,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,j2,i1,ivar,s2,e2,N,nVar)];
+        int i2 = j1;
+        int j2 = N-i1;
+        extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[VEB_3D_INDEX(2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,i2,j2,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 2){
+        int i2 = N-i1;
+        int j2 = N-j1;
         extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,i2,j2,ivar,s2,e2,N,nVar)];
         extBoundary[VEB_3D_INDEX(2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(2,i2,j2,ivar,s2,e2,N,nVar)];
         extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,i2,j2,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 3){
-        extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[VEB_3D_INDEX(2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(2,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,j1,i2,ivar,s2,e2,N,nVar)];
+        int i2 = N-j1;
+        int j2 = i1;
+        extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[VEB_3D_INDEX(2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,i2,j2,ivar,s2,e2,N,nVar)];
+      }
+      else if(flip == 4){
+        int i2 = j1;
+        int j2 = i1;
+        extBoundary[VEB_3D_INDEX(1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[VEB_3D_INDEX(2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[VEB_3D_INDEX(3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[VEB_3D_INDEX(3,i2,j2,ivar,s2,e2,N,nVar)];
       }
     }
   }
@@ -991,14 +1016,14 @@ __global__ void SideExchange_MappedVector3D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedVector3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedVector3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
   }
 
 }
 
-__global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
+__global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundary, int *sideInfo, int *elemToRank, int rankId, int offset, int N, int nVar){
 
   size_t s1 = blockIdx.x+1;
   size_t e1 = blockIdx.y;
@@ -1006,15 +1031,14 @@ __global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundar
   size_t j1 = threadIdx.y;
   size_t ivar = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int e2Global = sideInfo[INDEX3(2,s1-1,e1,5,6)]-1;
+  int e2 = e2Global - offset;
   int s2 = sideInfo[INDEX3(3,s1-1,e1,5,6)]/10;
   int flip = sideInfo[INDEX3(3,s1-1,e1,5,6)]-s2*10;
   int bcid = sideInfo[INDEX3(4,s1-1,e1,5,6)];
-  int i2 = N-i1;
-  int j2 = N-j1;
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
+    int neighborRank = elemToRank[e2Global];
     if( neighborRank == rankId ){
       if(flip == 0){
         extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s2,e2,N,nVar)];
@@ -1028,17 +1052,21 @@ __global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundar
         extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 1){
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,j2,i1,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,j2,i1,ivar,s2,e2,N,nVar)];
+        int i2 = j1;
+        int j2 = N-i1;
+        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 2){
+        int i2 = N-i1;
+        int j2 = N-j1;
         extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
         extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
         extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
@@ -1050,15 +1078,27 @@ __global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundar
         extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
       }
       else if(flip == 3){
-        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,j1,i2,ivar,s2,e2,N,nVar)];
-        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,j1,i2,ivar,s2,e2,N,nVar)];
+        int i2 = N-j1;
+        int j2 = i1;
+        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(1,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,3,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,3,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,3,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,3,i2,j2,ivar,s2,e2,N,nVar)];
+      }
+      else if(flip == 4){
+        int i2 = j1;
+        int j2 = i1;
+        extBoundary[TEB_3D_INDEX(1,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,1,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,1,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(1,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(1,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(2,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(2,2,i2,j2,ivar,s2,e2,N,nVar)];
+        extBoundary[TEB_3D_INDEX(3,2,i1,j1,ivar,s1,e1,N,nVar)] = boundary[TEB_3D_INDEX(3,2,i2,j2,ivar,s2,e2,N,nVar)];
       }
     }
   }
@@ -1067,9 +1107,9 @@ __global__ void SideExchange_MappedTensor3D_gpu(real *extBoundary, real *boundar
 
 extern "C"
 {
-  void SideExchange_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
+  void SideExchange_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    SideExchange_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
   }
 
 }
@@ -1373,19 +1413,24 @@ __global__ void ApplyFlip_MappedScalar3D_gpu(real *extBoundary, int *sideInfo, i
   if(bcid == 0){
     int neighborRank = elemToRank[e2];
     if( neighborRank /= rankId ){
-      if(flip == 2){
-        int i2 = N-j1;
-        int j2 = i1;
+      if(flip == 1){
+        int i2 = j1;
+        int j2 = N-i1;
         extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = extBuff[i2+(N+1)*j2];
       }
-      else if(flip == 3){
+      else if(flip == 2){
         int i2 = N-i1;
         int j2 = N-j1;
         extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = extBuff[i2+(N+1)*j2];
       }
+      else if(flip == 3){
+        int i2 = N-j1;
+        int j2 = i1;
+        extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = extBuff[i2+(N+1)*j2];
+      }
       else if(flip == 4){
         int i2 = j1;
-        int j2 = N-i1;
+        int j2 = i1;
         extBoundary[SCB_3D_INDEX(i1,j1,ivar,s1,e1,N,nVar)] = extBuff[i2+(N+1)*j2];
       }
     }
@@ -1424,19 +1469,24 @@ __global__ void ApplyFlip_MappedVector3D_gpu(real *extBoundary, int *sideInfo, i
   if(bcid == 0){
     int neighborRank = elemToRank[e2];
     if( neighborRank /= rankId ){
-      if(flip == 2){
-        int i2 = N-j1;
-        int j2 = i1;
+      if(flip == 1){
+        int i2 = j1;
+        int j2 = N-i1;
         extBoundary[VEB_3D_INDEX(dir,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[dir+3*(i2+(N+1)*j2)];
       }
-      else if(flip == 3){
+      else if(flip == 2){
         int i2 = N-i1;
         int j2 = N-j1;
         extBoundary[VEB_3D_INDEX(dir,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[dir+3*(i2+(N+1)*j2)];
       }
+      else if(flip == 3){
+        int i2 = N-j1;
+        int j2 = i1;
+        extBoundary[VEB_3D_INDEX(dir,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[dir+3*(i2+(N+1)*j2)];
+      }
       else if(flip == 4){
         int i2 = j1;
-        int j2 = N-i1;
+        int j2 = i1;
         extBoundary[VEB_3D_INDEX(dir,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[dir+3*(i2+(N+1)*j2)];
       }
     }
@@ -1478,19 +1528,24 @@ __global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, int *sideInfo, i
   if(bcid == 0){
     int neighborRank = elemToRank[e2];
     if( neighborRank /= rankId ){
-      if(flip == 2){
-        int i2 = N-j1;
-        int j2 = i1;
+      if(flip == 1){
+        int i2 = j1;
+        int j2 = N-i1;
         extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
       }
-      else if(flip == 3){
+      else if(flip == 2){
         int i2 = N-i1;
         int j2 = N-j1;
         extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
       }
+      else if(flip == 3){
+        int i2 = N-j1;
+        int j2 = i1;
+        extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
+      }
       else if(flip == 4){
         int i2 = j1;
-        int j2 = N-i1;
+        int j2 = i1;
         extBoundary[TEB_3D_INDEX(row+1,col+1,i1,j1,ivar,s1,e1,N,nVar)] = extBuff[row+3*(col+3*(i2+(N+1)*j2))];
       }
     }

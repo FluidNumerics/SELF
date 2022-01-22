@@ -2,26 +2,37 @@
 !
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self-fluids@fluidnumerics.com
+! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
 MODULE SELF_Constants
 
+  USE ISO_C_BINDING
   USE ISO_FORTRAN_ENV
+  USE MPI
 
   IMPLICIT NONE
 
-#ifdef HAVE_MPI
-  INCLUDE 'mpif.h'
-#endif
+!  INCLUDE 'mpif.h'
+
 
 #ifdef DOUBLE_PRECISION
   INTEGER,PARAMETER :: prec = real64
+  INTEGER,PARAMETER :: c_prec = C_DOUBLE
 #else
   INTEGER,PARAMETER :: prec = real32
+  INTEGER,PARAMETER :: c_prec = C_FLOAT 
 #endif
 
+!*************************************************************!
+! ------------------ CHARACTER LENGTHS----- ------------------!
+! ************************************************************!
+!                                                             !
+INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
+INTEGER, PARAMETER :: SELF_FILE_DEFAULT_LENGTH=500
+
+! ------------------------------------------------------------!
 !*************************************************************!
 ! ------------------ MATHEMATICAL CONSTANTS ------------------!
 ! ************************************************************!
@@ -52,6 +63,8 @@ MODULE SELF_Constants
   REAL(prec),PARAMETER :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
   REAL(prec),PARAMETER :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
   REAL(prec),PARAMETER :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
+  INTEGER, PARAMETER :: EULER = 100
+  INTEGER, PARAMETER :: RK3 = 203
 
 !*************************************************************!
 ! ------------------- PHYSICAL CONSTANTS ---------------------!
@@ -71,6 +84,8 @@ MODULE SELF_Constants
 !==============================================!
   INTEGER,PARAMETER :: GAUSS = 1
   INTEGER,PARAMETER :: GAUSS_LOBATTO = 2
+  INTEGER,PARAMETER :: CHEBYSHEV_GAUSS = 3
+  INTEGER,PARAMETER :: CHEBYSHEV_GAUSS_LOBATTO = 4
   INTEGER,PARAMETER :: UNIFORM = 3
   INTEGER,PARAMETER :: DG = 2000
   INTEGER,PARAMETER :: CG = 2001
@@ -78,5 +93,9 @@ MODULE SELF_Constants
 ! Misc. INTEGER and CHARACTER flag definitions
   CHARACTER(1),PARAMETER :: nada = ' '
   CHARACTER(6),PARAMETER :: MsgFmt = '(2x,A)'
+  INTEGER,PARAMETER :: self_FileNameLength = 500
+  INTEGER,PARAMETER :: self_EquationLength = 210
+  INTEGER,PARAMETER :: self_QuadratureTypeCharLength = 50
+  INTEGER,PARAMETER :: self_IntegratorTypeCharLength = 50
 
 END MODULE SELF_Constants

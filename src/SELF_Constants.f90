@@ -10,10 +10,12 @@ MODULE SELF_Constants
 
   USE ISO_C_BINDING
   USE ISO_FORTRAN_ENV
+  USE MPI
 
   IMPLICIT NONE
 
-  INCLUDE 'mpif.h'
+!  INCLUDE 'mpif.h'
+
 
 #ifdef DOUBLE_PRECISION
   INTEGER,PARAMETER :: prec = real64
@@ -28,6 +30,7 @@ MODULE SELF_Constants
 ! ************************************************************!
 !                                                             !
 INTEGER, PARAMETER :: SELF_EQN_DEFAULT_LENGTH=100
+INTEGER, PARAMETER :: SELF_FILE_DEFAULT_LENGTH=500
 
 ! ------------------------------------------------------------!
 !*************************************************************!

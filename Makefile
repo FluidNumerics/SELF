@@ -29,6 +29,8 @@
 #     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if GPU_TARGET is an Nvidia GPU)
 #
 #   Dependency Options
+#     SELF_JSONF_LIBS        Set the linker flags for json-fortran (Default: -L/opt/view/lib -ljsonfortran)
+#     SELF_JSONF_INC         Set the includes flags for json-fortran (Default: -I/opt/view/include)
 #     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/view/lib -lfeqparse)
 #     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/view/include)
 #     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/view/lib/ -lFLAP -lFACE -lPENF) 

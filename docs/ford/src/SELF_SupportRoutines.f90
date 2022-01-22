@@ -2,7 +2,7 @@
 !
 ! Copyright 2020 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self-fluids@fluidnumerics.com
+! Support : self@higherordermethods.org
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -385,7 +385,7 @@ CONTAINS
     theSumOfDiffs = 0
 
     DO i = 1,N
-      theSumOfDiffs = theSumOfDiffs + arrayOne(i) - arrayTwo(i)
+      theSumOfDiffs = theSumOfDiffs + ABS(arrayOne(i) - arrayTwo(i))
     END DO
 
     IF (theSumOfDiffs == 0) THEN
@@ -805,7 +805,7 @@ CONTAINS
     CHARACTER(4) :: dayStamp
     CHARACTER(2) :: hourStamp,minuteStamp,secondStamp
     CHARACTER(3) :: milliSecondStamp
-    REAL(real64)     :: time_real64
+    REAL(real64) :: time_real64
 
     time_real64 = REAL(time,real64)
     ! Units in "seconds"
@@ -828,6 +828,26 @@ CONTAINS
                            - 86400.0_real64*day) &
                           - REAL(second,real64))*1000.0_real64)
 
+      IF( milliSecond >= 1000 )THEN
+        milliSecond = milliSecond - 1000
+        second = second + 1
+      ENDIF
+
+      IF( second >= 60 )THEN
+        second = second - 60
+        minute = minute + 1
+      ENDIF
+
+      IF( minute >= 60 )THEN
+        minute = minute - 60
+        hour = hour + 1
+      ENDIF
+
+      IF( hour >= 24 )THEN
+        hour = hour - 24
+        day = day + 1
+      ENDIF
+
       WRITE (dayStamp,'(I4.4)') day
       WRITE (hourStamp,'(I2.2)') hour
       WRITE (minuteStamp,'(I2.2)') minute
@@ -844,18 +864,7 @@ CONTAINS
     END IF
 
   END FUNCTION TimeStamp
-  LOGICAL FUNCTION IsNaN(a)
-    IMPLICIT NONE
-    REAL(prec) ::  a
 
-    IF (a .ne. a) THEN
-      IsNaN = .TRUE.
-    ELSE
-      IsNaN = .FALSE.
-    END IF
-    RETURN
-
-  END FUNCTION IsNaN
   LOGICAL FUNCTION IsInf(a)
     IMPLICIT NONE
     REAL(prec) :: a

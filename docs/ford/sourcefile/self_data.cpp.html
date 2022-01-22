@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -71,9 +71,12 @@
             <li><a href="../lists/types.html">Derived Types</a></li>
         
         
-            <li><a href="../program/self.html">Program</a></li>
-      
+            <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
+        
             </ul>
+        
             </li>
 
 
@@ -91,7 +94,9 @@
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
 
 
-<li class="visible-xs hidden-sm visible-lg"><a href="../program/self.html">Program</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -122,6 +127,9 @@
 <div class="well well-sm">
   <ul class="list-inline" style="margin-bottom:0px;display:inline">
      
+     
+     
+    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
      
      
      
@@ -242,11 +250,11 @@
 <a name="ln-5"></a><span class="cm">// Template</span>
 <a name="ln-6"></a><span class="cm">__global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar){</span>
 <a name="ln-7"></a>
-<a name="ln-8"></a><span class="cm">  size_t iVar = hipBlockIdx_x;</span>
-<a name="ln-9"></a><span class="cm">  size_t iEl = hipBlockIdx_y;</span>
-<a name="ln-10"></a><span class="cm">  size_t i = hipThreadIdx_x;</span>
-<a name="ln-11"></a><span class="cm">  size_t j = hipThreadIdx_y;</span>
-<a name="ln-12"></a><span class="cm">  size_t k = hipThreadIdx_z;</span>
+<a name="ln-8"></a><span class="cm">  size_t iVar = blockIdx.x;</span>
+<a name="ln-9"></a><span class="cm">  size_t iEl = blockIdx.y;</span>
+<a name="ln-10"></a><span class="cm">  size_t i = threadIdx.x;</span>
+<a name="ln-11"></a><span class="cm">  size_t j = threadIdx.y;</span>
+<a name="ln-12"></a><span class="cm">  size_t k = threadIdx.z;</span>
 <a name="ln-13"></a>
 <a name="ln-14"></a>
 <a name="ln-15"></a><span class="cm">  // How to access scalars </span>
@@ -296,10 +304,10 @@
 <a name="ln-59"></a>
 <a name="ln-60"></a><span class="n">__global__</span> <span class="kt">void</span> <span class="n">Determinant_Tensor2D_gpu</span><span class="p">(</span><span class="n">real</span> <span class="o">*</span><span class="n">tensor</span><span class="p">,</span> <span class="n">real</span> <span class="o">*</span><span class="n">detTensor</span><span class="p">,</span> <span class="kt">int</span> <span class="n">N</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nVar</span><span class="p">){</span>
 <a name="ln-61"></a>
-<a name="ln-62"></a>  <span class="kt">size_t</span> <span class="n">iVar</span> <span class="o">=</span> <span class="n">hipBlockIdx_x</span><span class="p">;</span>
-<a name="ln-63"></a>  <span class="kt">size_t</span> <span class="n">iEl</span> <span class="o">=</span> <span class="n">hipBlockIdx_y</span><span class="p">;</span>
-<a name="ln-64"></a>  <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">hipThreadIdx_x</span><span class="p">;</span>
-<a name="ln-65"></a>  <span class="kt">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="n">hipThreadIdx_y</span><span class="p">;</span>
+<a name="ln-62"></a>  <span class="kt">size_t</span> <span class="n">iVar</span> <span class="o">=</span> <span class="n">blockIdx</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+<a name="ln-63"></a>  <span class="kt">size_t</span> <span class="n">iEl</span> <span class="o">=</span> <span class="n">blockIdx</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+<a name="ln-64"></a>  <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+<a name="ln-65"></a>  <span class="kt">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
 <a name="ln-66"></a>
 <a name="ln-67"></a>    <span class="n">detTensor</span><span class="p">[</span><span class="n">SC_2D_INDEX</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">TE_2D_INDEX</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">)]</span><span class="o">*</span>
 <a name="ln-68"></a>	                                          <span class="n">tensor</span><span class="p">[</span><span class="n">TE_2D_INDEX</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">)]</span><span class="o">-</span>
@@ -310,17 +318,17 @@
 <a name="ln-73"></a><span class="p">{</span>
 <a name="ln-74"></a>  <span class="kt">void</span> <span class="nf">Determinant_Tensor2D_gpu_wrapper</span><span class="p">(</span><span class="n">real</span> <span class="o">**</span><span class="n">tensor</span><span class="p">,</span> <span class="n">real</span> <span class="o">**</span><span class="n">detTensor</span><span class="p">,</span> <span class="kt">int</span> <span class="n">N</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nVar</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nEl</span><span class="p">)</span>
 <a name="ln-75"></a>  <span class="p">{</span>
-<a name="ln-76"></a>	  <span class="n">hipLaunchKernelGGL</span><span class="p">((</span><span class="n">Determinant_Tensor2D_gpu</span><span class="p">),</span> <span class="n">dim3</span><span class="p">(</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim3</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">detTensor</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">nVar</span><span class="p">);</span>
+<a name="ln-76"></a>	  <span class="n">Determinant_Tensor2D_gpu</span><span class="o">&lt;&lt;&lt;</span><span class="n">dim3</span><span class="p">(</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim3</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">detTensor</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">nVar</span><span class="p">);</span>
 <a name="ln-77"></a>  <span class="p">}</span> 
 <a name="ln-78"></a><span class="p">}</span>
 <a name="ln-79"></a>
 <a name="ln-80"></a><span class="n">__global__</span> <span class="kt">void</span> <span class="n">Determinant_Tensor3D_gpu</span><span class="p">(</span><span class="n">real</span> <span class="o">*</span><span class="n">tensor</span><span class="p">,</span> <span class="n">real</span> <span class="o">*</span><span class="n">detTensor</span><span class="p">,</span> <span class="kt">int</span> <span class="n">N</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nVar</span><span class="p">){</span>
 <a name="ln-81"></a>
-<a name="ln-82"></a>  <span class="kt">size_t</span> <span class="n">iVar</span> <span class="o">=</span> <span class="n">hipBlockIdx_x</span><span class="p">;</span>
-<a name="ln-83"></a>  <span class="kt">size_t</span> <span class="n">iEl</span> <span class="o">=</span> <span class="n">hipBlockIdx_y</span><span class="p">;</span>
-<a name="ln-84"></a>  <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">hipThreadIdx_x</span><span class="p">;</span>
-<a name="ln-85"></a>  <span class="kt">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="n">hipThreadIdx_y</span><span class="p">;</span>
-<a name="ln-86"></a>  <span class="kt">size_t</span> <span class="n">k</span> <span class="o">=</span> <span class="n">hipThreadIdx_z</span><span class="p">;</span>
+<a name="ln-82"></a>  <span class="kt">size_t</span> <span class="n">iVar</span> <span class="o">=</span> <span class="n">blockIdx</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+<a name="ln-83"></a>  <span class="kt">size_t</span> <span class="n">iEl</span> <span class="o">=</span> <span class="n">blockIdx</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+<a name="ln-84"></a>  <span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">x</span><span class="p">;</span>
+<a name="ln-85"></a>  <span class="kt">size_t</span> <span class="n">j</span> <span class="o">=</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">y</span><span class="p">;</span>
+<a name="ln-86"></a>  <span class="kt">size_t</span> <span class="n">k</span> <span class="o">=</span> <span class="n">threadIdx</span><span class="p">.</span><span class="n">z</span><span class="p">;</span>
 <a name="ln-87"></a>
 <a name="ln-88"></a>    <span class="n">detTensor</span><span class="p">[</span><span class="n">SC_3D_INDEX</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tensor</span><span class="p">[</span><span class="n">TE_3D_INDEX</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">)]</span><span class="o">*</span>
 <a name="ln-89"></a>	                                            <span class="p">(</span><span class="n">tensor</span><span class="p">[</span><span class="n">TE_3D_INDEX</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">iVar</span><span class="p">,</span><span class="n">iEl</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">)]</span><span class="o">*</span>
@@ -342,7 +350,7 @@
 <a name="ln-105"></a><span class="p">{</span>
 <a name="ln-106"></a>  <span class="kt">void</span> <span class="nf">Determinant_Tensor3D_gpu_wrapper</span><span class="p">(</span><span class="n">real</span> <span class="o">**</span><span class="n">tensor</span><span class="p">,</span> <span class="n">real</span> <span class="o">**</span><span class="n">detTensor</span><span class="p">,</span> <span class="kt">int</span> <span class="n">N</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nVar</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nEl</span><span class="p">)</span>
 <a name="ln-107"></a>  <span class="p">{</span>
-<a name="ln-108"></a>	  <span class="n">hipLaunchKernelGGL</span><span class="p">((</span><span class="n">Determinant_Tensor3D_gpu</span><span class="p">),</span> <span class="n">dim3</span><span class="p">(</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim3</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">*</span><span class="n">tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">detTensor</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">nVar</span><span class="p">);</span>
+<a name="ln-108"></a>	  <span class="n">Determinant_Tensor3D_gpu</span><span class="o">&lt;&lt;&lt;</span><span class="n">dim3</span><span class="p">(</span><span class="n">nVar</span><span class="p">,</span><span class="n">nEl</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dim3</span><span class="p">(</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="o">&gt;&gt;&gt;</span><span class="p">(</span><span class="o">*</span><span class="n">tensor</span><span class="p">,</span> <span class="o">*</span><span class="n">detTensor</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">nVar</span><span class="p">);</span>
 <a name="ln-109"></a>  <span class="p">}</span> 
 <a name="ln-110"></a><span class="p">}</span>
 </pre></div>
@@ -357,16 +365,17 @@
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2021 
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2022 Anti-Capitalist Software License
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-04-14 00:34  
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+             on 2022-01-20 09:52  
+            
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

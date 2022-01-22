@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
    
-   <meta name="description" content="SELF -- Spectral Element Libraries in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
+   <meta name="description" content="SELF -- Spectral Element Library in Fortran. Fortran classes for implementing spectral element methods on CPU and GPU hardware.">
     
     <meta name="author" content="Joe Schoonover" >
     <link rel="icon" href="../favicon.png">
@@ -71,9 +71,12 @@
             <li><a href="../lists/types.html">Derived Types</a></li>
         
         
-            <li><a href="../program/self.html">Program</a></li>
-      
+            <li><a href="../lists/programs.html">Programs</a></li>
+               
+        
+        
             </ul>
+        
             </li>
 
 
@@ -91,7 +94,9 @@
 <li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
 
 
-<li class="visible-xs hidden-sm visible-lg"><a href="../program/self.html">Program</a></li>
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+
 
           </ul>
         
@@ -124,13 +129,16 @@
      
      
      
+    <li><i class="fa fa-legal"></i> Anti-Capitalist Software License</li> 
+     
+     
      
     
     
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 2.9% of total for derived types.</p>Including implementation: 104 statements,  1.6% of total for derived types.">19 statements</a>
+    title="<p> 2.4% of total for derived types.</p>Including implementation: 284 statements,  2.4% of total for derived types.">23 statements</a>
      </li> 
      
      
@@ -179,23 +187,25 @@
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-bctype">BCType</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#variable-eleminfo">elemInfo</a>
+      <a class="list-group-item" href="../type/mesh1d.html#variable-hopr_eleminfo">hopr_elemInfo</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#variable-globalnodeids">globalNodeIDs</a>
+      <a class="list-group-item" href="../type/mesh1d.html#variable-hopr_globalnodeids">hopr_globalNodeIDs</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#variable-hopr_nodecoords">hopr_nodeCoords</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-nbcs">nBCs</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-ncornernodes">nCornerNodes</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#variable-nelem%7E11">nElem</a>
+      <a class="list-group-item" href="../type/mesh1d.html#variable-nelem~8">nElem</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-ngeo">nGeo</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#variable-nglobalelem">nGlobalElem</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-nnodes">nNodes</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-nuniquenodes">nUniqueNodes</a>
-      
-      <a class="list-group-item" href="../type/mesh1d.html#variable-nodecoords">nodeCoords</a>
       
     </div>
   </div>
@@ -223,15 +233,23 @@
   <div id="boundprocs-0" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-free%7E12">Free</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-free~31">Free</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-init%7E12">Init</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-init~10">Init</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-read_hopr">Read_HOPr</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-read_hopr_mesh1d_parallel">Read_HOPr_Mesh1D_parallel</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-read_hopr_mesh1d_serial">Read_HOPr_Mesh1D_serial</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-uniformblockmesh">UniformBlockMesh</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatedevice%7E12">UpdateDevice</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatedevice~29">UpdateDevice</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatehost%7E12">UpdateHost</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatehost~29">UpdateHost</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-write_hopr">Write_HOPr</a>
       
     </div>
   </div>
@@ -266,40 +284,58 @@
     <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.30.1 (20201013.1554)
+<!-- Generated by graphviz version 2.43.0 (0)
  -->
 <!-- Title: type~~mesh1d~~InheritsGraph Pages: 1 -->
-<svg id="typemesh1dInheritsGraph" width="304pt" height="74pt"
- viewBox="0.00 0.00 304.00 74.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="type~~mesh1d~~InheritsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 70)">
+<svg id="typemesh1dInheritsGraph" width="277pt" height="116pt"
+ viewBox="0.00 0.00 277.00 116.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="type~~mesh1d~~InheritsGraph" class="graph" transform="scale(1 1) rotate(0) translate(4 112)">
 <title>type~~mesh1d~~InheritsGraph</title>
-<polygon fill="white" stroke="white" points="-4,5 -4,-70 301,-70 301,5 -4,5"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-112 273,-112 273,4 -4,4"/>
 <!-- type~mesh1d -->
-<g id="type~~mesh1d~~InheritsGraph_node1" class="node"><title>type~mesh1d</title>
-<polygon fill="none" stroke="black" points="295.5,-45 240.5,-45 240.5,-21 295.5,-21 295.5,-45"/>
-<text text-anchor="middle" x="268" y="-30.6" font-family="Helvetica,sans-Serif" font-size="10.50">Mesh1D</text>
+<g id="type~~mesh1d~~InheritsGraph_node1" class="node">
+<title>type~mesh1d</title>
+<polygon fill="none" stroke="black" points="269,-66 214,-66 214,-42 269,-42 269,-66"/>
+<text text-anchor="middle" x="241.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50">Mesh1D</text>
 </g>
 <!-- hfInt32_r2 -->
-<g id="type~~mesh1d~~InheritsGraph_node2" class="node"><title>hfInt32_r2</title>
-<polygon fill="#5cb85c" stroke="#5cb85c" points="67.5,-66 0.5,-66 0.5,-42 67.5,-42 67.5,-66"/>
-<text text-anchor="middle" x="34" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hfInt32_r2</text>
+<g id="type~~mesh1d~~InheritsGraph_node2" class="node">
+<title>hfInt32_r2</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="67,-108 0,-108 0,-84 67,-84 67,-108"/>
+<text text-anchor="middle" x="33.5" y="-93.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hfInt32_r2</text>
 </g>
 <!-- type~mesh1d&#45;&gt;hfInt32_r2 -->
-<g id="type~~mesh1d~~InheritsGraph_edge1" class="edge"><title>type~mesh1d&#45;&gt;hfInt32_r2</title>
-<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M240.387,-35.409C200.579,-39.0123 125.136,-45.8411 77.6015,-50.1438"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="77.2575,-46.6606 67.6138,-51.0479 77.8886,-53.6321 77.2575,-46.6606"/>
-<text text-anchor="middle" x="154" y="-50.4" font-family="Helvetica,sans-Serif" font-size="9.50">elemInfo, BCType</text>
+<g id="type~~mesh1d~~InheritsGraph_edge1" class="edge">
+<title>type~mesh1d&#45;&gt;hfInt32_r2</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M213.84,-63.02C208,-64.82 201.82,-66.59 196,-68 156.2,-77.67 110.11,-85.31 77.37,-90.16"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="76.63,-86.73 67.24,-91.63 77.64,-93.65 76.63,-86.73"/>
+<text text-anchor="middle" x="140.5" y="-90.4" font-family="Helvetica,sans-Serif" font-size="9.50">hopr_elemInfo, BCType</text>
+</g>
+<!-- hfInt32_r1 -->
+<g id="type~~mesh1d~~InheritsGraph_node3" class="node">
+<title>hfInt32_r1</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="67,-66 0,-66 0,-42 67,-42 67,-66"/>
+<text text-anchor="middle" x="33.5" y="-51.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hfInt32_r1</text>
+</g>
+<!-- type~mesh1d&#45;&gt;hfInt32_r1 -->
+<g id="type~~mesh1d~~InheritsGraph_edge3" class="edge">
+<title>type~mesh1d&#45;&gt;hfInt32_r1</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M213.99,-54C179.33,-54 118.19,-54 77.02,-54"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="77.01,-50.5 67.01,-54 77.01,-57.5 77.01,-50.5"/>
+<text text-anchor="middle" x="140.5" y="-56.4" font-family="Helvetica,sans-Serif" font-size="9.50">hopr_globalNodeIDs</text>
 </g>
 <!-- hfReal_r1 -->
-<g id="type~~mesh1d~~InheritsGraph_node3" class="node"><title>hfReal_r1</title>
-<polygon fill="#5cb85c" stroke="#5cb85c" points="65.5,-24 2.5,-24 2.5,-0 65.5,-0 65.5,-24"/>
-<text text-anchor="middle" x="34" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hfReal_r1</text>
+<g id="type~~mesh1d~~InheritsGraph_node4" class="node">
+<title>hfReal_r1</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="64.5,-24 2.5,-24 2.5,0 64.5,0 64.5,-24"/>
+<text text-anchor="middle" x="33.5" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">hfReal_r1</text>
 </g>
 <!-- type~mesh1d&#45;&gt;hfReal_r1 -->
-<g id="type~~mesh1d~~InheritsGraph_edge2" class="edge"><title>type~mesh1d&#45;&gt;hfReal_r1</title>
-<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M240.478,-26.3681C234.437,-25.064 228.024,-23.841 222,-23 171.95,-16.0126 113.762,-13.455 75.755,-12.5239"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="75.668,-9.02122 65.594,-12.302 75.5152,-16.0196 75.668,-9.02122"/>
-<text text-anchor="middle" x="154" y="-25.4" font-family="Helvetica,sans-Serif" font-size="9.50">nodeCoords, globalNodeIDs</text>
+<g id="type~~mesh1d~~InheritsGraph_edge2" class="edge">
+<title>type~mesh1d&#45;&gt;hfReal_r1</title>
+<path fill="none" stroke="#ff0000" stroke-dasharray="5,2" d="M213.84,-44.98C208,-43.18 201.82,-41.41 196,-40 155.08,-30.06 107.5,-22.26 74.64,-17.44"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="74.91,-13.94 64.51,-15.98 73.91,-20.87 74.91,-13.94"/>
+<text text-anchor="middle" x="140.5" y="-42.4" font-family="Helvetica,sans-Serif" font-size="9.50">hopr_nodeCoords</text>
 </g>
 </g>
 </svg>
@@ -308,22 +344,24 @@
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.30.1 (20201013.1554)
+<!-- Generated by graphviz version 2.43.0 (0)
  -->
 <!-- Title: Graph Key Pages: 1 -->
 <svg width="184pt" height="32pt"
  viewBox="0.00 0.00 184.00 32.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 28)">
 <title>Graph Key</title>
-<polygon fill="white" stroke="white" points="-4,5 -4,-28 181,-28 181,5 -4,5"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-28 180,-28 180,4 -4,4"/>
 <!-- Type -->
-<g id="node1" class="node"><title>Type</title>
-<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,-0 54,-0 54,-24"/>
+<g id="node1" class="node">
+<title>Type</title>
+<polygon fill="#5cb85c" stroke="#5cb85c" points="54,-24 0,-24 0,0 54,0 54,-24"/>
 <text text-anchor="middle" x="27" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Type</text>
 </g>
 <!-- This Page&#39;s Entity -->
-<g id="node2" class="node"><title>This Page&#39;s Entity</title>
-<polygon fill="none" stroke="black" points="176,-24 72,-24 72,-0 176,-0 176,-24"/>
+<g id="node2" class="node">
+<title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="176,-24 72,-24 72,0 176,0 176,-24"/>
 <text text-anchor="middle" x="124" y="-9.6" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
 </g>
 </g>
@@ -358,23 +396,25 @@
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-bctype">BCType</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#variable-eleminfo">elemInfo</a>
+      <a class="list-group-item" href="../type/mesh1d.html#variable-hopr_eleminfo">hopr_elemInfo</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#variable-globalnodeids">globalNodeIDs</a>
+      <a class="list-group-item" href="../type/mesh1d.html#variable-hopr_globalnodeids">hopr_globalNodeIDs</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#variable-hopr_nodecoords">hopr_nodeCoords</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-nbcs">nBCs</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-ncornernodes">nCornerNodes</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#variable-nelem%7E11">nElem</a>
+      <a class="list-group-item" href="../type/mesh1d.html#variable-nelem~8">nElem</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-ngeo">nGeo</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#variable-nglobalelem">nGlobalElem</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-nnodes">nNodes</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#variable-nuniquenodes">nUniqueNodes</a>
-      
-      <a class="list-group-item" href="../type/mesh1d.html#variable-nodecoords">nodeCoords</a>
       
     </div>
   </div>
@@ -402,15 +442,23 @@
   <div id="boundprocs-1" class="panel-collapse collapse">
     <div class="list-group">
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-free%7E12">Free</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-free~31">Free</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-init%7E12">Init</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-init~10">Init</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-read_hopr">Read_HOPr</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-read_hopr_mesh1d_parallel">Read_HOPr_Mesh1D_parallel</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-read_hopr_mesh1d_serial">Read_HOPr_Mesh1D_serial</a>
       
       <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-uniformblockmesh">UniformBlockMesh</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatedevice%7E12">UpdateDevice</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatedevice~29">UpdateDevice</a>
       
-      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatehost%7E12">UpdateHost</a>
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-updatehost~29">UpdateHost</a>
+      
+      <a class="list-group-item" href="../type/mesh1d.html#boundprocedure-write_hopr">Write_HOPr</a>
       
     </div>
   </div>
@@ -478,11 +526,11 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-eleminfo"></span>type(hfInt32_r2),</td>
+  <td><span class="anchor" id="variable-hopr_eleminfo"></span>type(hfInt32_r2),</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>elemInfo</strong></td><td></td><td></td><td></td>
+  <td><strong>hopr_elemInfo</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -492,11 +540,25 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-globalnodeids"></span>type(hfReal_r1),</td>
+  <td><span class="anchor" id="variable-hopr_globalnodeids"></span>type(hfInt32_r1),</td>
   
   <td>public</td>
   <td></td><td>::</td>
-  <td><strong>globalNodeIDs</strong></td><td></td><td></td><td></td>
+  <td><strong>hopr_globalNodeIDs</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-hopr_nodecoords"></span>type(hfReal_r1),</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>hopr_nodeCoords</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -534,7 +596,7 @@
   
 <tr>
   
-  <td><span class="anchor" id="variable-nelem%7E11"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem~8"></span>integer,</td>
   
   <td>public</td>
   <td></td><td>::</td>
@@ -553,6 +615,20 @@
   <td>public</td>
   <td></td><td>::</td>
   <td><strong>nGeo</strong></td><td></td><td></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" id="variable-nglobalelem"></span>integer,</td>
+  
+  <td>public</td>
+  <td></td><td>::</td>
+  <td><strong>nGlobalElem</strong></td><td></td><td></td><td></td>
   
 </tr>
 
@@ -584,20 +660,6 @@
   
 </tr>
 
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nodecoords"></span>type(hfReal_r1),</td>
-  
-  <td>public</td>
-  <td></td><td>::</td>
-  <td><strong>nodeCoords</strong></td><td></td><td></td><td></td>
-  
-</tr>
-
 </tbody>
 </table>
 
@@ -615,7 +677,7 @@
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free%7E12"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_mesh1d.html'>Free_Mesh1D</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-free~31"></span><h3>procedure, public :: <strong>Free</strong>  => <a href='../proc/free_mesh1d.html'>Free_Mesh1D</a> 
     
   </h3></div>
   
@@ -679,7 +741,7 @@ public subroutine <a href='../proc/free_mesh1d.html'>Free_Mesh1D</a>(myMesh)
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init%7E12"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_mesh1d.html'>Init_Mesh1D</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-init~10"></span><h3>procedure, public :: <strong>Init</strong>  => <a href='../proc/init_mesh1d.html'>Init_Mesh1D</a> 
     
   </h3></div>
   
@@ -783,6 +845,340 @@ public subroutine <a href='../proc/init_mesh1d.html'>Init_Mesh1D</a>(myMesh, nGe
   
   <td></td><td>::</td>
   <td><strong>nBCs</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-read_hopr"></span><h3>generic, public :: <strong>Read_HOPr</strong>  => <a href='../type/mesh1d.html#boundprocedure-read_hopr_mesh1d_serial'>Read_HOPr_Mesh1D_serial</a>, <a href='../type/mesh1d.html#boundprocedure-read_hopr_mesh1d_parallel'>Read_HOPr_Mesh1D_parallel</a> 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+         
+            
+    
+    <h3>
+public subroutine <a href='../proc/read_hopr_mesh1d_serial.html'>Read_HOPr_Mesh1D_serial</a>(myMesh, meshFile)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myMesh</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+         
+      
+      </li>
+    
+      <li class="list-group-item">
+      
+         
+            
+    
+    <h3>
+public subroutine <a href='../proc/read_hopr_mesh1d_parallel.html'>Read_HOPr_Mesh1D_parallel</a>(myMesh, meshFile, decomp)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myMesh</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(MPILayer),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+         
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-read_hopr_mesh1d_parallel"></span><h3>procedure, private :: <strong>Read_HOPr_Mesh1D_parallel</strong>  
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/read_hopr_mesh1d_parallel.html'>Read_HOPr_Mesh1D_parallel</a>(myMesh, meshFile, decomp)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myMesh</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(MPILayer),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>decomp</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-read_hopr_mesh1d_serial"></span><h3>procedure, private :: <strong>Read_HOPr_Mesh1D_serial</strong>  
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/read_hopr_mesh1d_serial.html'>Read_HOPr_Mesh1D_serial</a>(myMesh, meshFile)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+  <td>intent(out)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myMesh</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
   
 </tr>
 
@@ -912,7 +1308,7 @@ public subroutine <a href='../proc/uniformblockmesh_mesh1d.html'>UniformBlockMes
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice%7E12"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_mesh1d.html'>UpdateDevice_Mesh1D</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatedevice~29"></span><h3>procedure, public :: <strong>UpdateDevice</strong>  => <a href='../proc/updatedevice_mesh1d.html'>UpdateDevice_Mesh1D</a> 
     
   </h3></div>
   
@@ -976,7 +1372,7 @@ public subroutine <a href='../proc/updatedevice_mesh1d.html'>UpdateDevice_Mesh1D
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatehost%7E12"></span><h3>procedure, public :: <strong>UpdateHost</strong>  => <a href='../proc/updatehost_mesh1d.html'>UpdateHost_Mesh1D</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-updatehost~29"></span><h3>procedure, public :: <strong>UpdateHost</strong>  => <a href='../proc/updatehost_mesh1d.html'>UpdateHost_Mesh1D</a> 
     
   </h3></div>
   
@@ -1038,6 +1434,85 @@ public subroutine <a href='../proc/updatehost_mesh1d.html'>UpdateHost_Mesh1D</a>
 </div>
 
     
+     
+<div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-write_hopr"></span><h3>procedure, public :: <strong>Write_HOPr</strong>  => <a href='../proc/write_hopr_mesh1d.html'>Write_HOPr_Mesh1D</a> 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/write_hopr_mesh1d.html'>Write_HOPr_Mesh1D</a>(myMesh, meshFile)
+    
+    
+   
+</h3>
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mesh1d.html'>Mesh1D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>myMesh</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>character,</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>meshFile</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
     </section>
     
     
@@ -1046,14 +1521,15 @@ public subroutine <a href='../proc/updatehost_mesh1d.html'>UpdateHost_Mesh1D</a>
     <h3><span class="anchor" id="src"></span>Source Code</h3>
     <div class="highlight"><pre><span></span>  <span class="k">TYPE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">Mesh1D</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nGeo</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nGlobalElem</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nElem</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nNodes</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nCornerNodes</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nUniqueNodes</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">nBCs</span>
-    <span class="k">TYPE</span><span class="p">(</span><span class="n">hfInt32_r2</span><span class="p">)</span> <span class="kd">::</span> <span class="n">elemInfo</span>
-    <span class="k">TYPE</span><span class="p">(</span><span class="n">hfReal_r1</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nodeCoords</span>
-    <span class="k">TYPE</span><span class="p">(</span><span class="n">hfReal_r1</span><span class="p">)</span> <span class="kd">::</span> <span class="n">globalNodeIDs</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">hfInt32_r2</span><span class="p">)</span> <span class="kd">::</span> <span class="n">hopr_elemInfo</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">hfReal_r1</span><span class="p">)</span> <span class="kd">::</span> <span class="n">hopr_nodeCoords</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">hfInt32_r1</span><span class="p">)</span> <span class="kd">::</span> <span class="n">hopr_globalNodeIDs</span>
     <span class="k">TYPE</span><span class="p">(</span><span class="n">hfInt32_r2</span><span class="p">)</span> <span class="kd">::</span> <span class="n">BCType</span>
     <span class="kt">CHARACTER</span><span class="p">(</span><span class="nb">LEN</span><span class="o">=</span><span class="mi">255</span><span class="p">),</span><span class="k">ALLOCATABLE</span> <span class="kd">::</span> <span class="n">BCNames</span><span class="p">(:)</span>
 
@@ -1063,6 +1539,10 @@ public subroutine <a href='../proc/updatehost_mesh1d.html'>UpdateHost_Mesh1D</a>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">UpdateHost</span> <span class="o">=&gt;</span> <span class="n">UpdateHost_Mesh1D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">UpdateDevice</span> <span class="o">=&gt;</span> <span class="n">UpdateDevice_Mesh1D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">UniformBlockMesh</span> <span class="o">=&gt;</span> <span class="n">UniformBlockMesh_Mesh1D</span>
+
+    <span class="k">GENERIC</span><span class="p">,</span><span class="k">PUBLIC</span>  <span class="kd">::</span> <span class="n">Read_HOPr</span> <span class="o">=&gt;</span> <span class="n">Read_HOPr_Mesh1D_serial</span><span class="p">,</span><span class="n">Read_HOPr_Mesh1D_parallel</span>
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">Read_HOPr_Mesh1D_serial</span><span class="p">,</span><span class="n">Read_HOPr_Mesh1D_parallel</span>
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span>  <span class="kd">::</span> <span class="n">Write_HOPr</span> <span class="o">=&gt;</span> <span class="n">Write_HOPr_Mesh1D</span>
 
   <span class="k">END TYPE </span><span class="n">Mesh1D</span>
 </pre></div>
@@ -1079,16 +1559,17 @@ public subroutine <a href='../proc/updatehost_mesh1d.html'>UpdateHost_Mesh1D</a>
     <footer>
       <div class="container">
       <div class="row">
-        <div class="col-xs-6 col-md-4"><p>&copy; 2021 
-                                          </p></div>
-        <div class="col-xs-6 col-md-4 col-md-push-4">
+        <div class="col-xs-6 col-md-6"><p>SELF was developed by Joe Schoonover<br>&copy; 2022 Anti-Capitalist Software License
+                                          </p>
+        </div>
+        <div class="col-xs-6 col-md-6">
           <p class="text-right">
             Documentation generated by 
-            <a href="https://github.com/cmacmackin/ford">FORD</a>
-             on 2021-04-14 00:34  
+            <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
+             on 2022-01-20 09:52  
+            
           </p>
         </div>
-        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> SELF was developed by Joe Schoonover</p></div>
       </div>
       <br>
       </div> <!-- /container -->    

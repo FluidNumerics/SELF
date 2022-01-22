@@ -22,40 +22,40 @@ MODULE SELF_Metadata
 
   CONTAINS
 
-    PROCEDURE,PUBLIC :: Set_Name => Set_Name_Metadata
-    PROCEDURE,PUBLIC :: Set_Description => Set_Description_Metadata
-    PROCEDURE,PUBLIC :: Set_Units => Set_Units_Metadata
+    PROCEDURE,PUBLIC :: SetName => SetName_Metadata
+    PROCEDURE,PUBLIC :: SetDescription => SetDescription_Metadata
+    PROCEDURE,PUBLIC :: SetUnits => SetUnits_Metadata
     ! PROCEDURE,PUBLIC :: Write_HDF5 => Write_HDF5_Metadata
 
   END TYPE Metadata
 
 CONTAINS
 
-  SUBROUTINE Set_Name_Metadata(mtd,name)
+  SUBROUTINE SetName_Metadata(mtd,name)
     IMPLICIT NONE
     CLASS(Metadata),INTENT(inout) :: mtd
     CHARACTER(*),INTENT(in) :: name
 
     mtd % name = name
 
-  END SUBROUTINE Set_Name_Metadata
+  END SUBROUTINE SetName_Metadata
 
-  SUBROUTINE Set_Description_Metadata(mtd,description)
+  SUBROUTINE SetDescription_Metadata(mtd,description)
     IMPLICIT NONE
     CLASS(Metadata),INTENT(inout) :: mtd
     CHARACTER(*),INTENT(in) :: description
 
     mtd % description = description
 
-  END SUBROUTINE Set_Description_Metadata
+  END SUBROUTINE SetDescription_Metadata
 
-  SUBROUTINE Set_Units_Metadata(mtd,units)
+  SUBROUTINE SetUnits_Metadata(mtd,units)
     IMPLICIT NONE
     CLASS(Metadata),INTENT(inout) :: mtd
     CHARACTER(*),INTENT(in) :: units
 
     mtd % units = units
 
-  END SUBROUTINE Set_Units_Metadata
+  END SUBROUTINE SetUnits_Metadata
 
 END MODULE SELF_Metadata

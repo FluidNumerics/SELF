@@ -8,7 +8,7 @@ email: joe@fluidnumerics.com
 project_github: https://github.com/FluidNumerics/SELF
 project_website: https://www.fluidnumerics.com/products/selffluids
 src_dir: ./src/
-output_dir: ./docs
+output_dir: ./docs/ford
 exclude_dir: ./src/dev
 fpp_extensions: fpp
 predocmark: >
