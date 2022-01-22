@@ -1,8 +1,8 @@
 ! SELF_MappedData.F90
 !
-! Copyright 2020 Fluid Numerics LLC
+! Copyright 2020-2022 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self@higherordermethods.org
+! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 
@@ -14,6 +14,8 @@ MODULE SELF_MappedData
   USE SELF_Mesh
   USE SELF_Geometry
   USE SELF_MPI
+
+  USE FEQParse
 
   USE ISO_C_BINDING
 
@@ -27,6 +29,8 @@ MODULE SELF_MappedData
     GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
     PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar1D
+
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar1D
 
   END TYPE MappedScalar1D
 
@@ -45,6 +49,8 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar2D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedScalar2D
 
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar2D
+
   END TYPE MappedScalar2D
 
   TYPE,EXTENDS(Scalar3D),PUBLIC :: MappedScalar3D
@@ -60,6 +66,8 @@ MODULE SELF_MappedData
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedScalar3D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedScalar3D
+
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedScalar3D
 
   END TYPE MappedScalar3D
 
@@ -85,6 +93,8 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedVector2D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedVector2D
 
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
+
   END TYPE MappedVector2D
 
   TYPE,EXTENDS(Vector3D),PUBLIC :: MappedVector3D
@@ -108,6 +118,8 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedVector3D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedVector3D
 
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector3D
+
   END TYPE MappedVector3D
 
   TYPE,EXTENDS(Tensor2D),PUBLIC :: MappedTensor2D
@@ -122,6 +134,8 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedTensor2D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedTensor2D
 
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedTensor2D
+
   END TYPE MappedTensor2D
 
   TYPE,EXTENDS(Tensor3D),PUBLIC :: MappedTensor3D
@@ -135,6 +149,8 @@ MODULE SELF_MappedData
 
     PROCEDURE,PRIVATE :: MPIExchangeAsync => MPIExchangeAsync_MappedTensor3D
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedTensor3D
+
+    PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedTensor3D
 
   END TYPE MappedTensor3D
 
@@ -558,6 +574,35 @@ CONTAINS
 
 ! ---------------------- Scalars ---------------------- !
 
+  SUBROUTINE SetInteriorFromEquation_MappedScalar1D( scalar, geometry, time )
+    !!  Sets the scalar % interior attribute using the eqn attribute,
+    !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedScalar1D), INTENT(inout) :: scalar
+    TYPE(Geometry1D), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, iEl, iVar
+    REAL(prec) :: x
+
+    ! TO DO : Check if scalar % eqn is set before proceeding
+
+    DO iEl = 1,scalar % nElem
+      DO iVar = 1, scalar % nVar
+        DO i = 0, scalar % N
+
+          ! Get the mesh positions
+          x = geometry % x % interior % hostData(i,1,iEl)
+
+          scalar % interior % hostData(i,iVar,iEl) = &
+            scalar % eqn(iVar) % Evaluate((/x, 0.0_prec, 0.0_prec, time/))
+
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedScalar1D
+
   SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,dForm,gpuAccel)
     ! Strong Form Operator
     !
@@ -642,6 +687,38 @@ CONTAINS
     END IF
 
   END SUBROUTINE JacobianWeight_MappedScalar1D
+
+  SUBROUTINE SetInteriorFromEquation_MappedScalar2D( scalar, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedScalar2D), INTENT(inout) :: scalar
+    TYPE(SEMQuad), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+
+
+    DO iEl = 1,scalar % nElem
+      DO iVar = 1, scalar % nVar
+        DO j = 0, scalar % N
+          DO i = 0, scalar % N
+
+            ! Get the mesh positions
+            x = geometry % x % interior % hostData(1,i,j,1,iEl)
+            y = geometry % x % interior % hostData(2,i,j,1,iEl)
+
+            scalar % interior % hostData(i,j,iVar,iEl) = &
+              scalar % eqn(iVar) % Evaluate((/x, y, 0.0_prec, time/))
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedScalar2D
 
   SUBROUTINE SideExchange_MappedScalar2D(scalar,mesh,decomp,gpuAccel)
     IMPLICIT NONE
@@ -940,6 +1017,42 @@ CONTAINS
   ! SideExchange_MappedScalar3D is used to populate scalar % extBoundary
   ! by finding neighboring elements that share a side and copying the neighboring
   ! elements solution % boundary data.
+
+  SUBROUTINE SetInteriorFromEquation_MappedScalar3D( scalar, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedScalar3D), INTENT(inout) :: scalar
+    TYPE(SEMHex), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, k, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+
+
+    DO iEl = 1,scalar % nElem
+      DO iVar = 1, scalar % nVar
+        DO k = 0, scalar % N
+          DO j = 0, scalar % N
+            DO i = 0, scalar % N
+
+              ! Get the mesh positions
+              x = geometry % x % interior % hostData(1,i,j,k,1,iEl)
+              y = geometry % x % interior % hostData(2,i,j,k,1,iEl)
+              z = geometry % x % interior % hostData(3,i,j,k,1,iEl)
+
+              scalar % interior % hostData(i,j,k,iVar,iEl) = &
+                scalar % eqn(iVar) % Evaluate((/x, y, z, time/))
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedScalar3D
 
   SUBROUTINE SideExchange_MappedScalar3D(scalar,mesh,decomp,gpuAccel)
     IMPLICIT NONE
@@ -1347,11 +1460,46 @@ CONTAINS
   END SUBROUTINE JacobianWeight_MappedScalar3D
 
   ! ---------------------- Vectors ---------------------- !
-  ! SideExchange_MappedVectorvector2D is used to populate vector % extBoundary
-  ! by finding neighboring elements that share a side and copying the neighboring
-  ! elements solution % boundary data.
+
+  SUBROUTINE SetInteriorFromEquation_MappedVector2D( vector, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedVector2D), INTENT(inout) :: vector
+    TYPE(SEMQuad), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+
+
+    DO iEl = 1,vector % nElem
+      DO iVar = 1, vector % nVar
+        DO j = 0, vector % N
+          DO i = 0, vector % N
+
+            ! Get the mesh positions
+            x = geometry % x % interior % hostData(1,i,j,1,iEl)
+            y = geometry % x % interior % hostData(2,i,j,1,iEl)
+
+            vector % interior % hostData(1,i,j,iVar,iEl) = &
+              vector % eqn(1+2*(iVar-1)) % Evaluate((/x, y, 0.0_prec, time/))
+
+            vector % interior % hostData(2,i,j,iVar,iEl) = &
+              vector % eqn(2+2*(iVar-1)) % Evaluate((/x, y, 0.0_prec, time/))
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedVector2D
 
   SUBROUTINE SideExchange_MappedVector2D(vector,mesh,decomp,gpuAccel)
+  !! SideExchange_MappedVectorvector2D is used to populate vector % extBoundary
+  !! by finding neighboring elements that share a side and copying the neighboring
+  !! elements solution % boundary data.
     IMPLICIT NONE
     CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(Mesh2D),INTENT(in) :: mesh
@@ -1813,6 +1961,48 @@ CONTAINS
     END IF
 
   END SUBROUTINE JacobianWeight_MappedVector2D
+
+  SUBROUTINE SetInteriorFromEquation_MappedVector3D( vector, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedVector3D), INTENT(inout) :: vector
+    TYPE(SEMHex), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, k, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+
+
+    DO iEl = 1,vector % nElem
+      DO iVar = 1, vector % nVar
+        DO k = 0, vector % N
+          DO j = 0, vector % N
+            DO i = 0, vector % N
+
+              ! Get the mesh positions
+              x = geometry % x % interior % hostData(1,i,j,k,1,iEl)
+              y = geometry % x % interior % hostData(2,i,j,k,1,iEl)
+              z = geometry % x % interior % hostData(3,i,j,k,1,iEl)
+
+              vector % interior % hostData(1,i,j,k,iVar,iEl) = &
+                vector % eqn(1+3*(iVar-1)) % Evaluate((/x, y, z, time/))
+
+              vector % interior % hostData(2,i,j,k,iVar,iEl) = &
+                vector % eqn(2+3*(iVar-1)) % Evaluate((/x, y, z, time/))
+
+              vector % interior % hostData(3,i,j,k,iVar,iEl) = &
+                vector % eqn(3+3*(iVar-1)) % Evaluate((/x, y, z, time/))
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedVector3D
 
   ! SideExchange_MappedVector3D is used to populate vector % extBoundary
   ! by finding neighboring elements that share a side and copying the neighboring
@@ -2350,11 +2540,48 @@ CONTAINS
   END SUBROUTINE JacobianWeight_MappedVector3D
 
   ! ---------------------- Tensors ---------------------- !
-  ! SideExchange_MappedTensor2D is used to populate tensor % extBoundary
-  ! by finding neighboring elements that share a side and copying the neighboring
-  ! elements solution % boundary data.
+
+  SUBROUTINE SetInteriorFromEquation_MappedTensor2D( tensor, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedTensor2D), INTENT(inout) :: tensor
+    TYPE(SEMQuad), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, ind, row, col, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+
+
+    DO iEl = 1,tensor % nElem
+      DO iVar = 1, tensor % nVar
+        DO j = 0, tensor % N
+          DO i = 0, tensor % N
+
+            ! Get the mesh positions
+            x = geometry % x % interior % hostData(1,i,j,1,iEl)
+            y = geometry % x % interior % hostData(2,i,j,1,iEl)
+
+            DO col = 1, 2
+              DO row = 1, 2
+                ind = row + 2*(col-1 + 2*(iVar-1))
+                tensor % interior % hostData(row,col,i,j,iVar,iEl) = &
+                  tensor % eqn(ind) % Evaluate((/x, y, 0.0_prec, time/))
+              ENDDO
+            ENDDO
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedTensor2D
 
   SUBROUTINE SideExchange_MappedTensor2D(tensor,mesh,decomp,gpuAccel)
+  !! SideExchange_MappedTensor2D is used to populate tensor % extBoundary
+  !! by finding neighboring elements that share a side and copying the neighboring
+  !! elements solution % boundary data.
     IMPLICIT NONE
     CLASS(MappedTensor2D),INTENT(inout) :: tensor
     TYPE(Mesh2D),INTENT(in) :: mesh
@@ -2516,11 +2743,51 @@ CONTAINS
 
   END SUBROUTINE JacobianWeight_MappedTensor2D
 
-  ! SideExchange_MappedVector3D is used to populate vector % extBoundary
-  ! by finding neighboring elements that share a side and copying the neighboring
-  ! elements solution % boundary data.
+  SUBROUTINE SetInteriorFromEquation_MappedTensor3D( tensor, geometry, time )
+  !!  Sets the scalar % interior attribute using the eqn attribute,
+  !!  geometry (for physical positions), and provided simulation time. 
+    IMPLICIT NONE
+    CLASS(MappedTensor3D), INTENT(inout) :: tensor
+    TYPE(SEMHex), INTENT(in) :: geometry
+    REAL(prec), INTENT(in) :: time
+    ! Local
+    INTEGER :: i, j, k, row, col, ind, iEl, iVar
+    REAL(prec) :: x
+    REAL(prec) :: y
+    REAL(prec) :: z
+
+
+    DO iEl = 1,tensor % nElem
+      DO iVar = 1, tensor % nVar
+        DO k = 0, tensor % N
+          DO j = 0, tensor % N
+            DO i = 0, tensor % N
+
+              ! Get the mesh positions
+              x = geometry % x % interior % hostData(1,i,j,k,1,iEl)
+              y = geometry % x % interior % hostData(2,i,j,k,1,iEl)
+              z = geometry % x % interior % hostData(2,i,j,k,1,iEl)
+
+              DO col = 1, 3
+                DO row = 1, 3
+                  ind = row + 3*(col-1 + 3*(iVar-1))
+                  tensor % interior % hostData(row,col,i,j,k,iVar,iEl) = &
+                    tensor % eqn(ind) % Evaluate((/x, y, z, time/))
+                ENDDO
+              ENDDO
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE SetInteriorFromEquation_MappedTensor3D
 
   SUBROUTINE SideExchange_MappedTensor3D(tensor,mesh,decomp,gpuAccel)
+  !! SideExchange_MappedVector3D is used to populate vector % extBoundary
+  !! by finding neighboring elements that share a side and copying the neighboring
+  !! elements solution % boundary data.
     IMPLICIT NONE
     CLASS(MappedTensor3D),INTENT(inout) :: tensor
     TYPE(Mesh3D),INTENT(in) :: mesh
