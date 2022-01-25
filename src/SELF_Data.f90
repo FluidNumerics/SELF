@@ -30,13 +30,10 @@ MODULE SELF_Data
   !! Additionally, each extended type has the necessary attributes to store
   !! information on element interiors and element boundaries, both of which
   !! are commonly used for spectral element solvers.
-    INTEGER :: N
-    INTEGER :: M
+
     INTEGER :: nVar
     INTEGER :: nElem
-    INTEGER :: controlType
-    INTEGER :: targetType
-    TYPE(Lagrange) :: interp
+    TYPE(Lagrange),POINTER :: interp
     TYPE(Metadata),ALLOCATABLE :: meta(:)
     TYPE(EquationParser),ALLOCATABLE :: eqn(:)
 
@@ -61,6 +58,7 @@ MODULE SELF_Data
     TYPE(hfReal_r3) :: boundary
     TYPE(hfReal_r3) :: extBoundary
     TYPE(hfReal_r3) :: avgBoundary
+    TYPE(hfReal_r3) :: jumpBoundary
 
   CONTAINS
 
@@ -80,11 +78,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar1D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar1D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Scalar1D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Scalar1D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar1D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Scalar1D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Scalar1D
 
 
   END TYPE Scalar1D
@@ -95,6 +89,7 @@ MODULE SELF_Data
     TYPE(hfReal_r4) :: boundary
     TYPE(hfReal_r4) :: extBoundary
     TYPE(hfReal_r4) :: avgBoundary
+    TYPE(hfReal_r4) :: jumpBoundary
 
   CONTAINS
 
@@ -112,11 +107,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar2D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar2D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Scalar2D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Scalar2D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar2D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Scalar2D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Scalar2D
 
   END TYPE Scalar2D
 
@@ -126,6 +117,7 @@ MODULE SELF_Data
     TYPE(hfReal_r5) :: boundary
     TYPE(hfReal_r5) :: extBoundary
     TYPE(hfReal_r5) :: avgBoundary
+    TYPE(hfReal_r5) :: jumpBoundary
 
   CONTAINS
 
@@ -143,11 +135,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Scalar3D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar3D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Scalar3D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Scalar3D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar3D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Scalar3D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Scalar3D
 
   END TYPE Scalar3D
 
@@ -182,11 +170,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Vector2D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Vector2D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Vector2D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Vector2D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Vector2D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Vector2D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Vector2D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
     PROCEDURE,PRIVATE :: SetEquation_Vector2D
@@ -222,11 +206,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Vector3D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Vector3D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Vector3D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Vector3D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Vector3D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Vector3D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Vector3D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector3D
     PROCEDURE,PRIVATE :: SetEquation_Vector3D
@@ -259,11 +239,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Tensor2D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Tensor2D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Tensor2D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Tensor2D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Tensor2D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Tensor2D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Tensor2D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor2D
     PROCEDURE,PRIVATE :: SetEquation_Tensor2D
@@ -294,11 +270,7 @@ MODULE SELF_Data
     PROCEDURE,PUBLIC :: AbsMaxBoundary => AbsMaxBoundary_Tensor3D
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Tensor3D
-    GENERIC,PUBLIC :: OPERATOR(+) => Add_Tensor3D
-    GENERIC,PUBLIC :: OPERATOR(-) => Subtract_Tensor3D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Tensor3D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Add_Tensor3D
-    PROCEDURE,PRIVATE,PASS(SELFa) :: Subtract_Tensor3D
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Tensor3D
     PROCEDURE,PRIVATE :: SetEquation_Tensor3D
@@ -332,28 +304,14 @@ MODULE SELF_Data
 CONTAINS
 
 ! -- DataObj -- !
-  SUBROUTINE Init_DataObj(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_DataObj(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
-    CLASS(SELF_DataObj),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    CLASS(SELF_DataObj),INTENT(out)  :: SELFStorage
+    TYPE(Lagrange),INTENT(in),POINTER :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
-    SELFStorage % N = N
-    SELFStorage % M = M
-    SELFStorage % nVar = nVar
-    SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
-
+    SELFStorage % interp => interp
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
 
@@ -363,11 +321,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(SELF_DataObj),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
-    SELFStorage % nVar = 0
-    SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
-
+    SELFStorage % interp => NULL()
     DEALLOCATE( SELFStorage % meta )
     DEALLOCATE( SELFStorage % eqn )
 
@@ -420,35 +374,30 @@ CONTAINS
 
 ! -- Scalar1D -- !
 
-  SUBROUTINE Init_Scalar1D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Scalar1D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),INTENT(in),POINTER :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
 
     CALL SELFStorage % interior % Alloc(loBound=(/0,1,1/), &
-                                        upBound=(/N,nVar,nElem/))
+                                        upBound=(/interp % N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/1,1,1/), &
                                         upBound=(/nVar,2,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/1,1,1/), &
+                                           upBound=(/nVar,2,nElem/))
+
+    CALL SELFStorage % avgBoundary % Alloc(loBound=(/1,1,1/), &
+                                           upBound=(/nVar,2,nElem/))
+
+    CALL SELFStorage % jumpBoundary % Alloc(loBound=(/1,1,1/), &
                                            upBound=(/nVar,2,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
@@ -460,14 +409,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
-    SELFStorage % nVar = 0
-    SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
+    SELFStorage % interp => NULL()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
-
+    CALL SELFStorage % avgBoundary % Free()
+    CALL SELFStorage % jumpBoundary % Free()
     DEALLOCATE( SELFStorage % meta )
     DEALLOCATE( SELFStorage % eqn )
 
@@ -477,10 +424,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
+    CALL SELFStorage % avgBoundary % UpdateHost()
+    CALL SELFStorage % jumpBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Scalar1D
 
@@ -488,10 +436,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
+    CALL SELFStorage % avgBoundary % UpdateDevice()
+    CALL SELFStorage % jumpBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Scalar1D
 
@@ -564,7 +513,7 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,scalar % nElem
       DO iVar = 1,scalar % nVar
-        DO i = 0,scalar % N
+        DO i = 0,scalar % interp % N
           absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,iVar,iEl)),absMax(iVar))
         END DO
       END DO
@@ -600,82 +549,33 @@ CONTAINS
 
   END SUBROUTINE Equals_Scalar1D
 
-  FUNCTION Add_Scalar1D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(in) :: SELFa,SELFb
-    TYPE(Scalar1D):: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-
-  END FUNCTION Add_Scalar1D
-
-  FUNCTION Subtract_Scalar1D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar1D),INTENT(in) :: SELFa,SELFb
-    TYPE(Scalar1D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Scalar1D
-
 ! -- Scalar2D -- !
 
-  SUBROUTINE Init_Scalar2D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Scalar2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),INTENT(in),POINTER :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
 
     CALL SELFStorage % interior % Alloc(loBound=(/0,0,1,1/), &
-                                        upBound=(/N,N,nVar,nElem/))
+                                        upBound=(/interp % N,interp % N,nVar,nElem/))
 
     CALL SELFStorage % boundary % Alloc(loBound=(/0,1,1,1/), &
-                                        upBound=(/N,nVar,4,nElem/))
+                                        upBound=(/interp % N,nVar,4,nElem/))
 
     CALL SELFStorage % extBoundary % Alloc(loBound=(/0,1,1,1/), &
-                                           upBound=(/N,nVar,4,nElem/))
+                                           upBound=(/interp % N,nVar,4,nElem/))
 
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,1,1,1/), &
-                                           upBound=(/N,nVar,4,nElem/))
+                                           upBound=(/interp % N,nVar,4,nElem/))
+
+    CALL SELFStorage % jumpBoundary % Alloc(loBound=(/0,1,1,1/), &
+                                           upBound=(/interp % N,nVar,4,nElem/))
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
@@ -686,14 +586,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
+    SELFStorage % interp => NULL()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
     CALL SELFStorage % avgBoundary % Free()
+    CALL SELFStorage % jumpBoundary % Free()
 
     DEALLOCATE( SELFStorage % meta )
     DEALLOCATE( SELFStorage % eqn )
@@ -704,11 +604,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
     CALL SELFStorage % avgBoundary % UpdateHost()
+    CALL SELFStorage % jumpBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Scalar2D
 
@@ -716,11 +616,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
     CALL SELFStorage % avgBoundary % UpdateDevice()
+    CALL SELFStorage % jumpBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Scalar2D
 
@@ -793,8 +693,8 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,scalar % nElem
       DO iVar = 1,scalar % nVar
-        DO j = 0,scalar % N
-          DO i = 0,scalar % N
+        DO j = 0,scalar % interp % N
+          DO i = 0,scalar % interp % N
             absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,iVar,iEl)),absMax(iVar))
           END DO
         END DO
@@ -814,7 +714,7 @@ CONTAINS
     DO iEl = 1,scalar % nElem
       DO iSide = 1,4
         DO iVar = 1,scalar % nVar
-          DO i = 0,scalar % N
+          DO i = 0,scalar % interp % N
             absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(i,iVar,iSide,iEl)),absMax(iVar,iSide))
           END DO
         END DO
@@ -833,69 +733,21 @@ CONTAINS
 
   END SUBROUTINE Equals_Scalar2D
 
-  FUNCTION Add_Scalar2D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(in) :: SELFa,SELFb
-    TYPE(Scalar2D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Add_Scalar2D
-
-  FUNCTION Subtract_Scalar2D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar2D),INTENT(in) :: SELFa,SELFb
-    TYPE(Scalar2D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Scalar2D
-
 ! -- Scalar3D -- !
 
-  SUBROUTINE Init_Scalar3D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Scalar3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),POINTER,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
+    N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/0,0,0,1,1/), &
                                         upBound=(/N,N,N,nVar,nElem/))
@@ -909,6 +761,9 @@ CONTAINS
     CALL SELFStorage % avgBoundary % Alloc(loBound=(/0,0,1,1,1/), &
                                            upBound=(/N,N,nVar,6,nElem/))
 
+    CALL SELFStorage % jumpBoundary % Alloc(loBound=(/0,0,1,1,1/), &
+                                           upBound=(/N,N,nVar,6,nElem/))
+
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
 
@@ -918,14 +773,14 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
+    SELFStorage % interp => NULL()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
     CALL SELFStorage % avgBoundary % Free()
+    CALL SELFStorage % jumpBoundary % Free()
 
     DEALLOCATE( SELFStorage % meta )
     DEALLOCATE( SELFStorage % eqn )
@@ -936,11 +791,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
     CALL SELFStorage % avgBoundary % UpdateHost()
+    CALL SELFStorage % jumpBoundary % UpdateHost()
 
   END SUBROUTINE UpdateHost_Scalar3D
 
@@ -948,11 +803,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
     CALL SELFStorage % avgBoundary % UpdateDevice()
+    CALL SELFStorage % jumpBoundary % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Scalar3D
 
@@ -1035,9 +890,9 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,scalar % nElem
       DO iVar = 1,scalar % nVar
-        DO k = 0,scalar % N
-          DO j = 0,scalar % N
-            DO i = 0,scalar % N
+        DO k = 0,scalar % interp % N
+          DO j = 0,scalar % interp % N
+            DO i = 0,scalar % interp % N
               absMax(iVar) = MAX(ABS(scalar % interior % hostData(i,j,k,iVar,iEl)),absMax(iVar))
             END DO
           END DO
@@ -1058,8 +913,8 @@ CONTAINS
     DO iEl = 1,scalar % nElem
       DO iSide = 1,6
         DO iVar = 1,scalar % nVar
-          DO j = 0,scalar % N
-            DO i = 0,scalar % N
+          DO j = 0,scalar % interp % N
+            DO i = 0,scalar % interp % N
               absMax(iVar,iSide) = MAX(ABS(scalar % boundary % hostData(i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
             END DO
           END DO
@@ -1069,69 +924,22 @@ CONTAINS
 
   END FUNCTION AbsMaxBoundary_Scalar3D
 
-  FUNCTION Add_Scalar3D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar3D),INTENT(in) :: SELFa,SELFb
-    TYPE(Scalar3D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Add_Scalar3D
-
-  FUNCTION Subtract_Scalar3D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Scalar3D),INTENT(in) :: SELFa,SELFb
-    TYPE(Scalar3D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Scalar3D
-
 ! -- Vector2D -- !
 
-  SUBROUTINE Init_Vector2D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Vector2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),POINTER,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
+    N = interp % N
 
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,1,1/), &
                                         upBound=(/2,N,N,nVar,nElem/))
@@ -1154,10 +962,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
+    SELFStorage % interp => NULL()
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % boundaryNormal % Free()
@@ -1184,7 +991,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % boundaryNormal % UpdateHost()
@@ -1196,7 +1002,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % boundaryNormal % UpdateDevice()
@@ -1344,8 +1149,8 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,vector % nElem
       DO iVar = 1,vector % nVar
-        DO j = 0,vector % N
-          DO i = 0,vector % N
+        DO j = 0,vector % interp % N
+          DO i = 0,vector % interp % N
             DO iDir = 1,2
               absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,iVar,iEl)),absMax(iVar))
             END DO
@@ -1367,7 +1172,7 @@ CONTAINS
     DO iEl = 1,vector % nElem
       DO iSide = 1,4
         DO iVar = 1,vector % nVar
-          DO i = 0,vector % N
+          DO i = 0,vector % interp % N
             DO iDir = 1,2
               absMax(iVar,iSide) = MAX(ABS(vector % boundary % hostData(iDir,i,iVar,iSide,iEl)),absMax(iVar,iSide))
             END DO
@@ -1378,69 +1183,21 @@ CONTAINS
 
   END FUNCTION AbsMaxBoundary_Vector2D
 
-  FUNCTION Add_Vector2D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Vector2D),INTENT(in) :: SELFa,SELFb
-    TYPE(Vector2D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Add_Vector2D
-
-  FUNCTION Subtract_Vector2D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Vector2D),INTENT(in) :: SELFa,SELFb
-    TYPE(Vector2D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Vector2D
-
 ! -- Vector3D -- !
 
-  SUBROUTINE Init_Vector3D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Vector3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),POINTER,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
+    N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
                                         upBound=(/3,N,N,N,nVar,nElem/))
@@ -1463,10 +1220,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
+    SELFStorage % interp => NULL()
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % boundaryNormal % Free()
@@ -1493,7 +1249,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % boundaryNormal % UpdateHost()
@@ -1505,7 +1260,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % boundaryNormal % UpdateDevice()
@@ -1622,9 +1376,9 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,vector % nElem
       DO iVar = 1,vector % nVar
-        DO k = 0,vector % N
-          DO j = 0,vector % N
-            DO i = 0,vector % N
+        DO k = 0,vector % interp % N
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
               DO iDir = 1,3
                 absMax(iVar) = MAX(ABS(vector % interior % hostData(iDir,i,j,k,iVar,iEl)),absMax(iVar))
               END DO
@@ -1647,8 +1401,8 @@ CONTAINS
     DO iEl = 1,vector % nElem
       DO iSide = 1,6
         DO iVar = 1,vector % nVar
-          DO j = 0,vector % N
-            DO i = 0,vector % N
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
               DO iDir = 1,3
                 absMax(iVar,iSide) = MAX(ABS(vector % boundary % hostData(iDir,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
               END DO
@@ -1670,69 +1424,21 @@ CONTAINS
 
   END SUBROUTINE Equals_Vector3D
 
-  FUNCTION Add_Vector3D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Vector3D),INTENT(in) :: SELFa,SELFb
-    TYPE(Vector3D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Add_Vector3D
-
-  FUNCTION Subtract_Vector3D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Vector3D),INTENT(in) :: SELFa,SELFb
-    TYPE(Vector3D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Vector3D
-
 ! -- Tensor2D -- !
 
-  SUBROUTINE Init_Tensor2D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Tensor2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),POINTER,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
+    N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,1,0,0,1,1/), &
                                         upBound=(/2,2,N,N,nVar,nElem/))
@@ -1752,10 +1458,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
+    SELFStorage % interp => NULL()
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
@@ -1784,7 +1489,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
@@ -1795,7 +1499,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateDevice()
@@ -1875,7 +1578,7 @@ CONTAINS
 
       CALL Determinant_Tensor2D_gpu_wrapper(SELFStorage % interior % deviceData, &
                                             SELFOut % interior % deviceData, &
-                                            SELFStorage % N, &
+                                            SELFStorage % interp % N, &
                                             SELFStorage % nVar, &
                                             SELFStorage % nElem)
 
@@ -1883,8 +1586,8 @@ CONTAINS
 
       DO iEl = 1,SELFStorage % nElem
         DO iVar = 1,SELFStorage % nVar
-          DO j = 0,SELFStorage % N
-            DO i = 0,SELFStorage % N
+          DO j = 0,SELFStorage % interp % N
+            DO i = 0,SELFStorage % interp % N
 
               SELFOut % interior % hostData(i,j,iVar,iEl) = SELFStorage % interior % hostData(1,1,i,j,iVar,iEl)* &
                                                             SELFStorage % interior % hostData(2,2,i,j,iVar,iEl) - &
@@ -1910,8 +1613,8 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,tensor % nElem
       DO iVar = 1,tensor % nVar
-        DO j = 0,tensor % N
-          DO i = 0,tensor % N
+        DO j = 0,tensor % interp % N
+          DO i = 0,tensor % interp % N
             DO col = 1,2
               DO row = 1,2
                 absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,iVar,iEl)),absMax(iVar))
@@ -1935,7 +1638,7 @@ CONTAINS
     DO iEl = 1,tensor % nElem
       DO iSide = 1,4
         DO iVar = 1,tensor % nVar
-          DO i = 0,tensor % N
+          DO i = 0,tensor % interp % N
             DO col = 1,2
               DO row = 1,2
                 absMax(iVar,iSide) = MAX(ABS(tensor % boundary % hostData(row,col,i,iVar,iSide,iEl)),absMax(iVar,iSide))
@@ -1958,69 +1661,21 @@ CONTAINS
 
   END SUBROUTINE Equals_Tensor2D
 
-  FUNCTION Add_Tensor2D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Tensor2D),INTENT(in) :: SELFa,SELFb
-    TYPE(Tensor2D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Add_Tensor2D
-
-  FUNCTION Subtract_Tensor2D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Tensor2D),INTENT(in) :: SELFa,SELFb
-    TYPE(Tensor2D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Tensor2D
-
 ! -- Tensor3D -- !
 
-  SUBROUTINE Init_Tensor3D(SELFStorage,N,quadratureType,M,targetNodeType,nVar,nElem)
+  SUBROUTINE Init_Tensor3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(out) :: SELFStorage
-    INTEGER,INTENT(in) :: N
-    INTEGER,INTENT(in) :: quadratureType
-    INTEGER,INTENT(in) :: M
-    INTEGER,INTENT(in) :: targetNodeType
+    TYPE(Lagrange),POINTER,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
 
-    SELFStorage % N = N
-    SELFStorage % M = M
+    SELFStorage % interp => interp
     SELFStorage % nVar = nVar
     SELFStorage % nElem = nElem
-    SELFStorage % controlType = quadratureType
-    SELFStorage % targetType = targetNodeType
-
-    CALL SELFStorage % interp % Init(N=N, &
-                                     controlNodeType=quadratureType, &
-                                     M=M, &
-                                     targetNodeType=targetNodeType)
+    N = interp % N
 
     CALL SELFStorage % interior % Alloc(loBound=(/1,1,0,0,0,1,1/), &
                                         upBound=(/3,3,N,N,N,nVar,nElem/))
@@ -2040,10 +1695,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(inout) :: SELFStorage
 
-    SELFStorage % N = 0
+    SELFStorage % interp => NULL()
     SELFStorage % nVar = 0
     SELFStorage % nElem = 0
-    CALL SELFStorage % interp % Free()
     CALL SELFStorage % interior % Free()
     CALL SELFStorage % boundary % Free()
     CALL SELFStorage % extBoundary % Free()
@@ -2072,7 +1726,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateHost()
     CALL SELFStorage % interior % UpdateHost()
     CALL SELFStorage % boundary % UpdateHost()
     CALL SELFStorage % extBoundary % UpdateHost()
@@ -2083,7 +1736,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(inout) :: SELFStorage
 
-    CALL SELFStorage % interp % UpdateDevice()
     CALL SELFStorage % interior % UpdateDevice()
     CALL SELFStorage % boundary % UpdateDevice()
     CALL SELFStorage % extBoundary % UpdateHost()
@@ -2163,7 +1815,7 @@ CONTAINS
 
       CALL Determinant_Tensor3D_gpu_wrapper(SELFStorage % interior % deviceData, &
                                             SELFOut % interior % deviceData, &
-                                            SELFStorage % N, &
+                                            SELFStorage % interp % N, &
                                             SELFStorage % nVar, &
                                             SELFStorage % nElem)
 
@@ -2171,9 +1823,9 @@ CONTAINS
 
       DO iEl = 1,SELFStorage % nElem
         DO iVar = 1,SELFStorage % nVar
-          DO k = 0,SELFStorage % N
-            DO j = 0,SELFStorage % N
-              DO i = 0,SELFStorage % N
+          DO k = 0,SELFStorage % interp % N
+            DO j = 0,SELFStorage % interp % N
+              DO i = 0,SELFStorage % interp % N
 
                 SELFOut % interior % hostData(i,j,k,iVar,iEl) = &
                   SELFStorage % interior % hostData(1,1,i,j,k,iVar,iEl)* &
@@ -2212,9 +1864,9 @@ CONTAINS
     absMax = 0.0_prec
     DO iEl = 1,tensor % nElem
       DO iVar = 1,tensor % nVar
-        DO k = 0,tensor % N
-          DO j = 0,tensor % N
-            DO i = 0,tensor % N
+        DO k = 0,tensor % interp % N
+          DO j = 0,tensor % interp % N
+            DO i = 0,tensor % interp % N
               DO col = 1,3
                 DO row = 1,3
                   absMax(iVar) = MAX(ABS(tensor % interior % hostData(row,col,i,j,k,iVar,iEl)),absMax(iVar))
@@ -2239,8 +1891,8 @@ CONTAINS
     DO iEl = 1,tensor % nElem
       DO iSide = 1,6
         DO iVar = 1,tensor % nVar
-          DO j = 0,tensor % N
-            DO i = 0,tensor % N
+          DO j = 0,tensor % interp % N
+            DO i = 0,tensor % interp % N
               DO col = 1,3
                 DO row = 1,3
               absMax(iVar,iSide) = MAX(ABS(tensor % boundary % hostData(row,col,i,j,iVar,iSide,iEl)),absMax(iVar,iSide))
@@ -2263,45 +1915,5 @@ CONTAINS
     SELFOut % boundary % hostData = SELFin % boundary % hostData
 
   END SUBROUTINE Equals_Tensor3D
-
-  FUNCTION Add_Tensor3D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Tensor3D),INTENT(in) :: SELFa,SELFb
-    TYPE(Tensor3D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData + &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData + &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Add_Tensor3D
-
-  FUNCTION Subtract_Tensor3D(SELFa,SELFb) RESULT(SELFOut)
-    IMPLICIT NONE
-    CLASS(Tensor3D),INTENT(in) :: SELFa,SELFb
-    TYPE(Tensor3D) :: SELFOut
-
-    CALL SELFOut % Init(SELFa % N, &
-                        SELFa % controlType, &
-                        SELFa % M, &
-                        SELFa % targetType, &
-                        SELFa % nVar, &
-                        SELFa % nElem)
-
-    SELFOut % interior % hostData = SELFa % interior % hostData - &
-                                    SELFb % interior % hostData
-
-    SELFOut % boundary % hostData = SELFa % boundary % hostData - &
-                                    SELFb % boundary % hostData
-
-  END FUNCTION Subtract_Tensor3D
 
 END MODULE SELF_Data

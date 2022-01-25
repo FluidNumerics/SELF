@@ -351,6 +351,8 @@ CONTAINS
     INTEGER :: nid,nNodes
     INTEGER :: i
     REAL(prec) :: xU(1:nElem + 1)
+    TYPE(Lagrange), POINTER :: linearInterp
+    TYPE(Lagrange), POINTER :: nGeoInterp
     TYPE(Scalar1D) :: xLinear
     TYPE(Scalar1D) :: xGeo
 
@@ -360,14 +362,16 @@ CONTAINS
     ! Set the hopr_nodeCoords
     xU = UniformPoints(x(1),x(2),1,nElem + 1)
 
-    ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,GAUSS_LOBATTO, &
-                        nGeo,GAUSS_LOBATTO, &
-                        1,nElem)
+    CALL linearInterp % Init(1,CHEBYSHEV_GAUSS_LOBATTO,&
+            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
 
-    CALL xGeo % Init(nGeo,GAUSS_LOBATTO, &
-                     nGeo,GAUSS_LOBATTO, &
-                     1,nElem)
+    CALL nGeoInterp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,&
+            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+
+    ! Create a linear interpolant to interpolate to nGeo grid
+    CALL xLinear % Init(linearInterp,1,nElem)
+    CALL xGeo % Init(nGeoInterp,1,nElem)
+
     DO iel = 1,nElem
       xLinear % interior % hostData(0:1,1,iel) = xU(iel:iel + 1)
     END DO
@@ -391,6 +395,8 @@ CONTAINS
 
     CALL xLinear % Free()
     CALL xGeo % Free()
+    CALL linearInterp % Free()
+    CALL nGeoInterp % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh1D
 
@@ -707,6 +713,8 @@ CONTAINS
     INTEGER :: i,j
     REAL(prec) :: xU(1:nElem(1) + 1)
     REAL(prec) :: yU(1:nElem(2) + 1)
+    TYPE(Lagrange), POINTER :: linearInterp
+    TYPE(Lagrange), POINTER :: nGeoInterp
     TYPE(Vector2D) :: xLinear
     TYPE(Vector2D) :: xGeo
 
@@ -720,14 +728,16 @@ CONTAINS
     xU = UniformPoints(x(1),x(2),1,nElem(1) + 1)
     yU = UniformPoints(x(3),x(4),1,nElem(2) + 1)
 
-    ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,GAUSS_LOBATTO, &
-                        nGeo,GAUSS_LOBATTO, &
-                        1,nEl)
+    CALL linearInterp % Init(1,CHEBYSHEV_GAUSS_LOBATTO,&
+            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
 
-    CALL xGeo % Init(nGeo,GAUSS_LOBATTO, &
-                     nGeo,GAUSS_LOBATTO, &
-                     1,nEl)
+    CALL nGeoInterp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,&
+            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+
+    ! Create a linear interpolant to interpolate to nGeo grid
+    CALL xLinear % Init(linearInterp,1,nEl)
+    CALL xGeo % Init(nGeoInterp,1,nEl)
+
     elid = 1
     DO jel = 1,nElem(2)
       DO iel = 1,nElem(1)
@@ -773,6 +783,8 @@ CONTAINS
 
     CALL xLinear % Free()
     CALL xGeo % Free()
+    CALL linearInterp % Free()
+    CALL nGeoInterp % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh2D
 
@@ -1505,6 +1517,8 @@ CONTAINS
     REAL(prec) :: xU(1:nElem(1) + 1)
     REAL(prec) :: yU(1:nElem(2) + 1)
     REAL(prec) :: zU(1:nElem(3) + 1)
+    TYPE(Lagrange), POINTER :: linearInterp
+    TYPE(Lagrange), POINTER :: nGeoInterp
     TYPE(Vector3D) :: xLinear
     TYPE(Vector3D) :: xGeo
 
@@ -1521,14 +1535,16 @@ CONTAINS
     yU = UniformPoints(x(3),x(4),1,nElem(2) + 1)
     zU = UniformPoints(x(5),x(6),1,nElem(3) + 1)
 
-    ! Create a linear interpolant to interpolate to nGeo grid
-    CALL xLinear % Init(1,CHEBYSHEV_GAUSS_LOBATTO, &
-                        nGeo,CHEBYSHEV_GAUSS_LOBATTO, &
-                        1,nEl)
+    CALL linearInterp % Init(1,CHEBYSHEV_GAUSS_LOBATTO,&
+            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
 
-    CALL xGeo % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO, &
-                     nGeo,CHEBYSHEV_GAUSS_LOBATTO, &
-                     1,nEl)
+    CALL nGeoInterp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,&
+            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+
+    ! Create a linear interpolant to interpolate to nGeo grid
+    CALL xLinear % Init(linearInterp,1,nEl)
+    CALL xGeo % Init(nGeoInterp,1,nEl)
+
     elid = 1
     DO kel = 1,nElem(3)
       DO jel = 1,nElem(2)
@@ -1741,6 +1757,8 @@ CONTAINS
 
     CALL xLinear % Free()
     CALL xGeo % Free()
+    CALL linearInterp % Free()
+    CALL nGeoInterp % Free()
 
   END SUBROUTINE UniformBlockMesh_Mesh3D
 

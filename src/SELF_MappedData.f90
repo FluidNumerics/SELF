@@ -589,7 +589,7 @@ CONTAINS
 
     DO iEl = 1,scalar % nElem
       DO iVar = 1, scalar % nVar
-        DO i = 0, scalar % N
+        DO i = 0, scalar % interp % N
 
           ! Get the mesh positions
           x = geometry % x % interior % hostData(i,1,iEl)
@@ -670,14 +670,14 @@ CONTAINS
 
       CALL JacobianWeight_MappedScalar1D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % dxds % interior % deviceData, &
-                                                     scalar % N, &
+                                                     scalar % interp % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
     ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
-          DO i = 0,scalar % N
+          DO i = 0,scalar % interp % N
             scalar % interior % hostData(i,iVar,iEl) = scalar % interior % hostData(i,iVar,iEl)/ &
                                                        geometry % dxds % interior % hostData(i,1,iEl)
           END DO
@@ -703,8 +703,8 @@ CONTAINS
 
     DO iEl = 1,scalar % nElem
       DO iVar = 1, scalar % nVar
-        DO j = 0, scalar % N
-          DO i = 0, scalar % N
+        DO j = 0, scalar % interp % N
+          DO i = 0, scalar % interp % N
 
             ! Get the mesh positions
             x = geometry % x % interior % hostData(1,i,j,1,iEl)
@@ -749,7 +749,7 @@ CONTAINS
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
-                                                   scalar % N, &
+                                                   scalar % interp % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
     ELSE
@@ -772,7 +772,7 @@ CONTAINS
               IF (flip == 0) THEN
 
                 DO ivar = 1,scalar % nvar
-                  DO i1 = 0,scalar % N
+                  DO i1 = 0,scalar % interp % N
                     scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
                       scalar % boundary % hostData(i1,ivar,s2,e2)
                   END DO
@@ -781,8 +781,8 @@ CONTAINS
               ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,scalar % nvar
-                  DO i1 = 0,scalar % N
-                    i2 = scalar % N - i1
+                  DO i1 = 0,scalar % interp % N
+                    i2 = scalar % interp % N - i1
                     scalar % extBoundary % hostData(i1,ivar,s1,e1) = &
                       scalar % boundary % hostData(i2,ivar,s2,e2)
                   END DO
@@ -819,7 +819,7 @@ CONTAINS
       CALL BassiRebaySides_MappedScalar2D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                       scalar % boundary % deviceData, &
                                                       scalar % extBoundary % deviceData, &
-                                                      scalar % N, &
+                                                      scalar % interp % N, &
                                                       scalar % nvar, &
                                                       scalar % nElem)
 
@@ -828,7 +828,7 @@ CONTAINS
       DO iel = 1,scalar % nElem
         DO iside = 1,4
           DO ivar = 1,scalar % nVar
-            DO i = 0,scalar % N
+            DO i = 0,scalar % interp % N
               scalar % avgBoundary % hostData(i,ivar,iside,iel) = 0.5_prec*( &
                                                                scalar % boundary % hostData(i,ivar,iside,iel) + &
                                                                scalar % extBoundary % hostData(i,ivar,iside,iel))
@@ -911,22 +911,22 @@ CONTAINS
       CALL ContravariantWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
-                                                          scalar % N, &
+                                                          scalar % interp % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
 
       CALL ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                                   workTensor % boundary % deviceData, &
                                                                   geometry % dsdx % boundary % deviceData, &
-                                                                  scalar % N, &
+                                                                  scalar % interp % N, &
                                                                   scalar % nVar, &
                                                                   scalar % nElem)
     ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
-          DO j = 0,scalar % N
-            DO i = 0,scalar % N
+          DO j = 0,scalar % interp % N
+            DO i = 0,scalar % interp % N
 
               workTensor % interior % hostData(1,1,i,j,iVar,iEl) = geometry % dsdx % interior % &
                                                                    hostData(1,1,i,j,1,iEl)* &
@@ -953,7 +953,7 @@ CONTAINS
       DO iEl = 1,scalar % nElem
         DO iside = 1,4
           DO iVar = 1,scalar % nVar
-            DO j = 0,scalar % N
+            DO j = 0,scalar % interp % N
               workTensor % boundary % hostData(1,1,j,iVar,iside,iEl) = geometry % dsdx % boundary % &
                                                                        hostData(1,1,j,1,iside,iEl)* &
                                                                         scalar % avgBoundary % hostData(j,iVar,iside,iEl)
@@ -994,15 +994,15 @@ CONTAINS
 
       CALL JacobianWeight_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
-                                                     scalar % N, &
+                                                     scalar % interp % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
     ELSE
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
-          DO j = 0,scalar % N
-            DO i = 0,scalar % N
+          DO j = 0,scalar % interp % N
+            DO i = 0,scalar % interp % N
               scalar % interior % hostData(i,j,iVar,iEl) = scalar % interior % hostData(i,j,iVar,iEl)/ &
                                                            geometry % J % interior % hostData(i,j,1,iEl)
             END DO
@@ -1034,9 +1034,9 @@ CONTAINS
 
     DO iEl = 1,scalar % nElem
       DO iVar = 1, scalar % nVar
-        DO k = 0, scalar % N
-          DO j = 0, scalar % N
-            DO i = 0, scalar % N
+        DO k = 0, scalar % interp % N
+          DO j = 0, scalar % interp % N
+            DO i = 0, scalar % interp % N
 
               ! Get the mesh positions
               x = geometry % x % interior % hostData(1,i,j,k,1,iEl)
@@ -1083,7 +1083,7 @@ CONTAINS
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
-                                                   scalar % N, &
+                                                   scalar % interp % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
 
@@ -1109,8 +1109,8 @@ CONTAINS
               IF (flip == 0) THEN ! Orientation matches on both sides of the face
 
                 DO ivar = 1,scalar % nvar
-                  DO j1 = 0,scalar % N
-                    DO i1 = 0,scalar % N
+                  DO j1 = 0,scalar % interp % N
+                    DO i1 = 0,scalar % interp % N
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i1,j1,ivar,s2,e2)
                     END DO
@@ -1120,11 +1120,11 @@ CONTAINS
               ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,scalar % nvar
-                  DO j1 = 0,scalar % N
-                    DO i1 = 0,scalar % N
+                  DO j1 = 0,scalar % interp % N
+                    DO i1 = 0,scalar % interp % N
 
                       i2 = j1
-                      j2 = scalar % N - i1
+                      j2 = scalar % interp % N - i1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i2,j2,ivar,s2,e2)
 
@@ -1135,10 +1135,10 @@ CONTAINS
               ELSEIF (flip == 2) THEN
 
                 DO ivar = 1,scalar % nvar
-                  DO j1 = 0,scalar % N
-                    DO i1 = 0,scalar % N
-                      i2 = scalar % N - i1
-                      j2 = scalar % N - j1
+                  DO j1 = 0,scalar % interp % N
+                    DO i1 = 0,scalar % interp % N
+                      i2 = scalar % interp % N - i1
+                      j2 = scalar % interp % N - j1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i2,j2,ivar,s2,e2)
                     END DO
@@ -1148,9 +1148,9 @@ CONTAINS
               ELSEIF (flip == 3) THEN
 
                 DO ivar = 1,scalar % nvar
-                  DO j1 = 0,scalar % N
-                    DO i1 = 0,scalar % N
-                      i2 = scalar % N - j1
+                  DO j1 = 0,scalar % interp % N
+                    DO i1 = 0,scalar % interp % N
+                      i2 = scalar % interp % N - j1
                       j2 = i1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
                         scalar % boundary % hostData(i2,j2,ivar,s2,e2)
@@ -1161,8 +1161,8 @@ CONTAINS
               ELSEIF (flip == 4) THEN
 
                 DO ivar = 1,scalar % nvar
-                  DO j1 = 0,scalar % N
-                    DO i1 = 0,scalar % N
+                  DO j1 = 0,scalar % interp % N
+                    DO i1 = 0,scalar % interp % N
                       i2 = j1
                       j2 = i1
                       scalar % extBoundary % hostData(i1,j1,ivar,s1,e1) = &
@@ -1203,7 +1203,7 @@ CONTAINS
       CALL BassiRebaySides_MappedScalar3D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                       scalar % boundary % deviceData, &
                                                       scalar % extBoundary % deviceData, &
-                                                      scalar % N, &
+                                                      scalar % interp % N, &
                                                       scalar % nvar, &
                                                       scalar % nElem)
 
@@ -1212,8 +1212,8 @@ CONTAINS
       DO iel = 1,scalar % nElem
         DO iside = 1,6
           DO ivar = 1,scalar % nVar
-            DO j = 0,scalar % N
-              DO i = 0,scalar % N
+            DO j = 0,scalar % interp % N
+              DO i = 0,scalar % interp % N
                 scalar % avgBoundary % hostData(i,j,ivar,iside,iel) = 0.5_prec*( &
                                                                    scalar % boundary % hostData(i,j,ivar,iside,iel) + &
                                                                    scalar % extBoundary % hostData(i,j,ivar,iside,iel))
@@ -1296,14 +1296,14 @@ CONTAINS
       CALL ContravariantWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                           workTensor % interior % deviceData, &
                                                           geometry % dsdx % interior % deviceData, &
-                                                          scalar % N, &
+                                                          scalar % interp % N, &
                                                           scalar % nVar, &
                                                           scalar % nElem)
 
       CALL ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(scalar % avgBoundary % deviceData, &
                                                                   workTensor % boundary % deviceData, &
                                                                   geometry % dsdx % boundary % deviceData, &
-                                                                  scalar % N, &
+                                                                  scalar % interp % N, &
                                                                   scalar % nVar, &
                                                                   scalar % nElem)
 
@@ -1311,9 +1311,9 @@ CONTAINS
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
-          DO k = 0,scalar % N
-            DO j = 0,scalar % N
-              DO i = 0,scalar % N
+          DO k = 0,scalar % interp % N
+            DO j = 0,scalar % interp % N
+              DO i = 0,scalar % interp % N
 
                 ! Get the x-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
@@ -1367,8 +1367,8 @@ CONTAINS
       DO iEl = 1,scalar % nElem
         DO iside = 1,6
           DO iVar = 1,scalar % nVar
-            DO k = 0,scalar % N
-              DO j = 0,scalar % N
+            DO k = 0,scalar % interp % N
+              DO j = 0,scalar % interp % N
                 ! Get the x-component of the Jacobian weighted
                 ! contravariant basis vectors multipled by the scalar
                 workTensor % boundary % hostData(1,1,j,k,iVar,iside,iEl) = geometry % dsdx % boundary % &
@@ -1436,7 +1436,7 @@ CONTAINS
 
       CALL JacobianWeight_MappedScalar3D_gpu_wrapper(scalar % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
-                                                     scalar % N, &
+                                                     scalar % interp % N, &
                                                      scalar % nVar, &
                                                      scalar % nElem)
 
@@ -1444,9 +1444,9 @@ CONTAINS
 
       DO iEl = 1,scalar % nElem
         DO iVar = 1,scalar % nVar
-          DO k = 0,scalar % N
-            DO j = 0,scalar % N
-              DO i = 0,scalar % N
+          DO k = 0,scalar % interp % N
+            DO j = 0,scalar % interp % N
+              DO i = 0,scalar % interp % N
                 scalar % interior % hostData(i,j,k,iVar,iEl) = scalar % interior % hostData(i,j,k,iVar,iEl)/ &
                                                                geometry % J % interior % hostData(i,j,k,1,iEl)
               END DO
@@ -1476,8 +1476,8 @@ CONTAINS
 
     DO iEl = 1,vector % nElem
       DO iVar = 1, vector % nVar
-        DO j = 0, vector % N
-          DO i = 0, vector % N
+        DO j = 0, vector % interp % N
+          DO i = 0, vector % interp % N
 
             ! Get the mesh positions
             x = geometry % x % interior % hostData(1,i,j,1,iEl)
@@ -1528,7 +1528,7 @@ CONTAINS
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
-                                                   vector % N, &
+                                                   vector % interp % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
 
@@ -1553,7 +1553,7 @@ CONTAINS
               IF (flip == 0) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO i1 = 0,vector % N
+                  DO i1 = 0,vector % interp % N
                     vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
                       vector % boundary % hostData(1:2,i1,ivar,s2,e2)
                   END DO
@@ -1562,8 +1562,8 @@ CONTAINS
               ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO i1 = 0,vector % N
-                    i2 = vector % N - i1
+                  DO i1 = 0,vector % interp % N
+                    i2 = vector % interp % N - i1
                     vector % extBoundary % hostData(1:2,i1,ivar,s1,e1) = &
                       vector % boundary % hostData(1:2,i2,ivar,s2,e2)
                   END DO
@@ -1600,7 +1600,7 @@ CONTAINS
 
       CALL BassiRebaySides_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                       vector % boundary % deviceData, &
-                                                      vector % N, &
+                                                      vector % interp % N, &
                                                       vector % nvar, &
                                                       vector % nElem)
 
@@ -1609,7 +1609,7 @@ CONTAINS
       DO iel = 1,vector % nElem
         DO iside = 1,4
           DO ivar = 1,vector % nVar
-            DO i = 0,vector % N
+            DO i = 0,vector % interp % N
               vector % boundary % hostData(1:2,i,ivar,iside,iel) = 0.5_prec*( &
                                                                   vector % boundary % hostData(1:2,i,ivar,iside,iel) + &
                                                                   vector % extBoundary % hostData(1:2,i,ivar,iside,iel))
@@ -1747,20 +1747,20 @@ CONTAINS
 
       CALL MapToScalar_MappedVector2D_gpu_wrapper(scalar % interior % deviceData, &
                                                   vector % interior % deviceData, &
-                                                  vector % N, &
+                                                  vector % interp % N, &
                                                   vector % nVar, &
                                                   vector % nelem)
 
       CALL MapToScalarBoundary_MappedVector2D_gpu_wrapper(scalar % boundary % deviceData, &
                                                           vector % boundary % deviceData, &
-                                                          vector % N, &
+                                                          vector % interp % N, &
                                                           vector % nVar, &
                                                           vector % nelem)
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
-          DO j = 0,vector % N
-            DO i = 0,vector % N
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
               DO row = 1,2
                 jvar = row + 2*(ivar - 1)
                 scalar % interior % hostData(i,j,jvar,iel) = vector % interior % hostData(row,i,j,ivar,iel)
@@ -1774,7 +1774,7 @@ CONTAINS
       DO iel = 1,vector % nelem
         DO iside = 1,4
           DO ivar = 1,vector % nvar
-            DO j = 0,vector % N
+            DO j = 0,vector % interp % N
               DO row = 1,2
                 jvar = row + 2*(ivar - 1)
                 scalar % boundary % hostData(j,jvar,iside,iel) = vector % boundary % hostData(row,j,ivar,iside,iel)
@@ -1802,20 +1802,20 @@ CONTAINS
 
       CALL MapToTensor_MappedVector2D_gpu_wrapper(tensor % interior % deviceData, &
                                                   vector % interior % deviceData, &
-                                                  tensor % N, &
+                                                  tensor % interp % N, &
                                                   tensor % nVar, &
                                                   tensor % nelem)
 
       CALL MapToTensorBoundary_MappedVector2D_gpu_wrapper(tensor % boundary % deviceData, &
                                                           vector % boundary % deviceData, &
-                                                          tensor % N, &
+                                                          tensor % interp % N, &
                                                           tensor % nVar, &
                                                           tensor % nelem)
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
-          DO j = 0,tensor % N
-            DO i = 0,tensor % N
+          DO j = 0,tensor % interp % N
+            DO i = 0,tensor % interp % N
               DO col = 1,2
                 DO row = 1,2
                   jvar = row + 2*(ivar - 1)
@@ -1831,7 +1831,7 @@ CONTAINS
       DO iel = 1,tensor % nelem
         DO iside = 1,4
           DO ivar = 1,tensor % nvar
-            DO j = 0,tensor % N
+            DO j = 0,tensor % interp % N
               DO col = 1,2
                 DO row = 1,2
                   jvar = row + 2*(ivar - 1)
@@ -1867,14 +1867,14 @@ CONTAINS
       CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
-                                                              physVector % N, &
+                                                              physVector % interp % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
 
       CALL ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector % boundary % deviceData, &
                                                                       compVector % boundaryNormal % deviceData, &
                                                                       geometry % nHat % boundary % deviceData, &
-                                                                      physVector % N, &
+                                                                      physVector % interp % N, &
                                                                       physVector % nVar, &
                                                                       physVector % nElem)
     ELSE
@@ -1883,8 +1883,8 @@ CONTAINS
       ! to project onto computational space
       DO iel = 1,physVector % nElem
         DO ivar = 1,physVector % nVar
-          DO j = 0,physVector % N
-            DO i = 0,physVector % N
+          DO j = 0,physVector % interp % N
+            DO i = 0,physVector % interp % N
 
               compVector % interior % hostData(1,i,j,ivar,iel) = &
                 geometry % dsdx % interior % hostData(1,1,i,j,1,iel)* &
@@ -1907,7 +1907,7 @@ CONTAINS
       DO iel = 1,physVector % nElem
         DO iside = 1,4
           DO ivar = 1,physVector % nVar
-            DO j = 0,physVector % N
+            DO j = 0,physVector % interp % N
 
               nhat(1:2) = geometry % nHat % boundary % hostData(1:2,j,1,iSide,iEl)
               nmag = geometry % nScale % boundary % hostData(j,1,iSide,iEl)
@@ -1940,15 +1940,15 @@ CONTAINS
 
       CALL JacobianWeight_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
-                                                     vector % N, &
+                                                     vector % interp % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
     ELSE
 
       DO iEl = 1,vector % nElem
         DO iVar = 1,vector % nVar
-          DO j = 0,vector % N
-            DO i = 0,vector % N
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
               vector % interior % hostData(1,i,j,iVar,iEl) = vector % interior % hostData(1,i,j,iVar,iEl)/ &
                                                              geometry % J % interior % hostData(i,j,1,iEl)
               vector % interior % hostData(2,i,j,iVar,iEl) = vector % interior % hostData(2,i,j,iVar,iEl)/ &
@@ -1978,9 +1978,9 @@ CONTAINS
 
     DO iEl = 1,vector % nElem
       DO iVar = 1, vector % nVar
-        DO k = 0, vector % N
-          DO j = 0, vector % N
-            DO i = 0, vector % N
+        DO k = 0, vector % interp % N
+          DO j = 0, vector % interp % N
+            DO i = 0, vector % interp % N
 
               ! Get the mesh positions
               x = geometry % x % interior % hostData(1,i,j,k,1,iEl)
@@ -2037,7 +2037,7 @@ CONTAINS
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
-                                                   vector % N, &
+                                                   vector % interp % N, &
                                                    vector % nvar, &
                                                    vector % nElem)
 
@@ -2062,8 +2062,8 @@ CONTAINS
               IF (flip == 0) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO j1 = 0,vector % N
-                    DO i1 = 0,vector % N
+                  DO j1 = 0,vector % interp % N
+                    DO i1 = 0,vector % interp % N
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i1,j1,ivar,s2,e2)
                     END DO
@@ -2073,10 +2073,10 @@ CONTAINS
               ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO j1 = 0,vector % N
-                    DO i1 = 0,vector % N
+                  DO j1 = 0,vector % interp % N
+                    DO i1 = 0,vector % interp % N
                       i2 = j1
-                      j2 = vector % N - i1
+                      j2 = vector % interp % N - i1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
                     END DO
@@ -2086,10 +2086,10 @@ CONTAINS
               ELSEIF (flip == 2) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO j1 = 0,vector % N
-                    DO i1 = 0,vector % N
-                      i2 = vector % N - i1
-                      j2 = vector % N - j1
+                  DO j1 = 0,vector % interp % N
+                    DO i1 = 0,vector % interp % N
+                      i2 = vector % interp % N - i1
+                      j2 = vector % interp % N - j1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
                     END DO
@@ -2099,9 +2099,9 @@ CONTAINS
               ELSEIF (flip == 3) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO j1 = 0,vector % N
-                    DO i1 = 0,vector % N
-                      i2 = vector % N - j1
+                  DO j1 = 0,vector % interp % N
+                    DO i1 = 0,vector % interp % N
+                      i2 = vector % interp % N - j1
                       j2 = i1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
                         vector % boundary % hostData(1:3,i2,j2,ivar,s2,e2)
@@ -2112,8 +2112,8 @@ CONTAINS
               ELSEIF (flip == 4) THEN
 
                 DO ivar = 1,vector % nvar
-                  DO j1 = 0,vector % N
-                    DO i1 = 0,vector % N
+                  DO j1 = 0,vector % interp % N
+                    DO i1 = 0,vector % interp % N
                       i2 = j1
                       j2 = i1
                       vector % extBoundary % hostData(1:3,i1,j1,ivar,s1,e1) = &
@@ -2153,7 +2153,7 @@ CONTAINS
 
       CALL BassiRebaySides_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                       vector % boundary % deviceData, &
-                                                      vector % N, &
+                                                      vector % interp % N, &
                                                       vector % nvar, &
                                                       vector % nElem)
     ELSE
@@ -2161,8 +2161,8 @@ CONTAINS
       DO iel = 1,vector % nElem
         DO iside = 1,6
           DO ivar = 1,vector % nVar
-            DO j = 0,vector % N
-              DO i = 0,vector % N
+            DO j = 0,vector % interp % N
+              DO i = 0,vector % interp % N
                 vector % boundary % hostData(1:3,i,j,ivar,iside,iel) = 0.5_prec*( &
                                                                 vector % boundary % hostData(1:3,i,j,ivar,iside,iel) + &
                                                                 vector % extBoundary % hostData(1:3,i,j,ivar,iside,iel))
@@ -2296,21 +2296,21 @@ CONTAINS
 
       CALL MapToScalar_MappedVector3D_gpu_wrapper(scalar % interior % deviceData, &
                                                   vector % interior % deviceData, &
-                                                  vector % N, &
+                                                  vector % interp % N, &
                                                   vector % nVar, &
                                                   vector % nelem)
 
       CALL MapToScalarBoundary_MappedVector3D_gpu_wrapper(scalar % boundary % deviceData, &
                                                           vector % boundary % deviceData, &
-                                                          vector % N, &
+                                                          vector % interp % N, &
                                                           vector % nVar, &
                                                           vector % nelem)
     ELSE
       DO iel = 1,vector % nelem
         DO ivar = 1,vector % nvar
-          DO k = 0,vector % N
-            DO j = 0,vector % N
-              DO i = 0,vector % N
+          DO k = 0,vector % interp % N
+            DO j = 0,vector % interp % N
+              DO i = 0,vector % interp % N
                 DO row = 1,3
                   jvar = row + 3*(ivar - 1)
                   scalar % interior % hostData(i,j,k,jvar,iel) = vector % interior % hostData(row,i,j,k,ivar,iel)
@@ -2325,8 +2325,8 @@ CONTAINS
       DO iel = 1,vector % nelem
         DO iside = 1,6
           DO ivar = 1,vector % nvar
-            DO k = 0,vector % N
-              DO j = 0,vector % N
+            DO k = 0,vector % interp % N
+              DO j = 0,vector % interp % N
                 DO row = 1,3
                   jvar = row + 3*(ivar - 1)
                  scalar % boundary % hostData(j,k,jvar,iside,iel) = vector % boundary % hostData(row,j,k,ivar,iside,iel)
@@ -2354,21 +2354,21 @@ CONTAINS
 
       CALL MapToTensor_MappedVector3D_gpu_wrapper(tensor % interior % deviceData, &
                                                   vector % interior % deviceData, &
-                                                  tensor % N, &
+                                                  tensor % interp % N, &
                                                   tensor % nVar, &
                                                   tensor % nelem)
 
       CALL MapToTensorBoundary_MappedVector3D_gpu_wrapper(tensor % boundary % deviceData, &
                                                           vector % boundary % deviceData, &
-                                                          tensor % N, &
+                                                          tensor % interp % N, &
                                                           tensor % nVar, &
                                                           tensor % nelem)
     ELSE
       DO iel = 1,tensor % nelem
         DO ivar = 1,tensor % nvar
-          DO k = 0,tensor % N
-            DO j = 0,tensor % N
-              DO i = 0,tensor % N
+          DO k = 0,tensor % interp % N
+            DO j = 0,tensor % interp % N
+              DO i = 0,tensor % interp % N
                 DO col = 1,3
                   DO row = 1,3
                     jvar = row + 3*(ivar - 1)
@@ -2385,8 +2385,8 @@ CONTAINS
       DO iel = 1,tensor % nelem
         DO iside = 1,6
           DO ivar = 1,tensor % nvar
-            DO k = 0,tensor % N
-              DO j = 0,tensor % N
+            DO k = 0,tensor % interp % N
+              DO j = 0,tensor % interp % N
                 DO col = 1,3
                   DO row = 1,3
                     jvar = row + 3*(ivar - 1)
@@ -2423,14 +2423,14 @@ CONTAINS
       CALL ContravariantProjection_MappedVector3D_gpu_wrapper(physVector % interior % deviceData, &
                                                               compVector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
-                                                              physVector % N, &
+                                                              physVector % interp % N, &
                                                               physVector % nVar, &
                                                               physVector % nElem)
 
       CALL ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector % boundary % deviceData, &
                                                                       compVector % boundaryNormal % deviceData, &
                                                                       geometry % nHat % boundary % deviceData, &
-                                                                      physVector % N, &
+                                                                      physVector % interp % N, &
                                                                       physVector % nVar, &
                                                                       physVector % nElem)
     ELSE
@@ -2439,9 +2439,9 @@ CONTAINS
       ! project onto computational space
       DO iEl = 1,physVector % nElem
         DO iVar = 1,physVector % nVar
-          DO k = 0,physVector % N
-            DO j = 0,physVector % N
-              DO i = 0,physVector % N
+          DO k = 0,physVector % interp % N
+            DO j = 0,physVector % interp % N
+              DO i = 0,physVector % interp % N
 
                 compVector % interior % hostData(1,i,j,k,iVar,iEl) = &
                   geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)* &
@@ -2477,8 +2477,8 @@ CONTAINS
       DO iEl = 1,physVector % nElem
         DO iside = 1,6
           DO iVar = 1,physVector % nVar
-            DO k = 0,physVector % N
-              DO j = 0,physVector % N
+            DO k = 0,physVector % interp % N
+              DO j = 0,physVector % interp % N
 
                 nHat(1:3) = geometry % nHat % boundary % hostData(1:3,j,k,1,iSide,iEl)
                 nmag = geometry % nScale % boundary % hostData(j,k,1,iSide,iEl)
@@ -2513,16 +2513,16 @@ CONTAINS
 
       CALL JacobianWeight_MappedVector3D_gpu_wrapper(vector % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
-                                                     vector % N, &
+                                                     vector % interp % N, &
                                                      vector % nVar, &
                                                      vector % nElem)
     ELSE
 
       DO iEl = 1,vector % nElem
         DO iVar = 1,vector % nVar
-          DO k = 0,vector % N
-            DO j = 0,vector % N
-              DO i = 0,vector % N
+          DO k = 0,vector % interp % N
+            DO j = 0,vector % interp % N
+              DO i = 0,vector % interp % N
                 vector % interior % hostData(1,i,j,k,iVar,iEl) = vector % interior % hostData(1,i,j,k,iVar,iEl)/ &
                                                                  geometry % J % interior % hostData(i,j,k,1,iEl)
                 vector % interior % hostData(2,i,j,k,iVar,iEl) = vector % interior % hostData(2,i,j,k,iVar,iEl)/ &
@@ -2556,8 +2556,8 @@ CONTAINS
 
     DO iEl = 1,tensor % nElem
       DO iVar = 1, tensor % nVar
-        DO j = 0, tensor % N
-          DO i = 0, tensor % N
+        DO j = 0, tensor % interp % N
+          DO i = 0, tensor % interp % N
 
             ! Get the mesh positions
             x = geometry % x % interior % hostData(1,i,j,1,iEl)
@@ -2610,7 +2610,7 @@ CONTAINS
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
-                                                   tensor % N, &
+                                                   tensor % interp % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
     ELSE
@@ -2634,7 +2634,7 @@ CONTAINS
               IF (flip == 0) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO i1 = 0,tensor % N
+                  DO i1 = 0,tensor % interp % N
                     tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
                       tensor % boundary % hostData(1:2,1:2,i1,ivar,s2,e2)
                   END DO
@@ -2643,8 +2643,8 @@ CONTAINS
               ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO i1 = 0,tensor % N
-                    i2 = tensor % N - i1
+                  DO i1 = 0,tensor % interp % N
+                    i2 = tensor % interp % N - i1
                     tensor % extBoundary % hostData(1:2,1:2,i1,ivar,s1,e1) = &
                       tensor % boundary % hostData(1:2,1:2,i2,ivar,s2,e2)
                   END DO
@@ -2681,7 +2681,7 @@ CONTAINS
 
       CALL BassiRebaySides_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                       tensor % boundary % deviceData, &
-                                                      tensor % N, &
+                                                      tensor % interp % N, &
                                                       tensor % nvar, &
                                                       tensor % nElem)
     ELSE
@@ -2689,7 +2689,7 @@ CONTAINS
       DO iel = 1,tensor % nElem
         DO iside = 1,4
           DO ivar = 1,tensor % nVar
-            DO i = 0,tensor % N
+            DO i = 0,tensor % interp % N
               tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) = 0.5_prec*( &
                                                               tensor % boundary % hostData(1:2,1:2,i,ivar,iside,iel) + &
                                                               tensor % extBoundary % hostData(1:2,1:2,i,ivar,iside,iel))
@@ -2717,15 +2717,15 @@ CONTAINS
 
       CALL JacobianWeight_MappedTensor2D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
-                                                     tensor % N, &
+                                                     tensor % interp % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
     ELSE
 
       DO iEl = 1,tensor % nElem
         DO iVar = 1,tensor % nVar
-          DO j = 0,tensor % N
-            DO i = 0,tensor % N
+          DO j = 0,tensor % interp % N
+            DO i = 0,tensor % interp % N
               tensor % interior % hostData(1,1,i,j,iVar,iEl) = tensor % interior % hostData(1,1,i,j,iVar,iEl)/ &
                                                                geometry % J % interior % hostData(i,j,1,iEl)
               tensor % interior % hostData(2,1,i,j,iVar,iEl) = tensor % interior % hostData(2,1,i,j,iVar,iEl)/ &
@@ -2759,9 +2759,9 @@ CONTAINS
 
     DO iEl = 1,tensor % nElem
       DO iVar = 1, tensor % nVar
-        DO k = 0, tensor % N
-          DO j = 0, tensor % N
-            DO i = 0, tensor % N
+        DO k = 0, tensor % interp % N
+          DO j = 0, tensor % interp % N
+            DO i = 0, tensor % interp % N
 
               ! Get the mesh positions
               x = geometry % x % interior % hostData(1,i,j,k,1,iEl)
@@ -2816,7 +2816,7 @@ CONTAINS
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
-                                                   tensor % N, &
+                                                   tensor % interp % N, &
                                                    tensor % nvar, &
                                                    tensor % nElem)
     ELSE
@@ -2839,8 +2839,8 @@ CONTAINS
               IF (flip == 0) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO j1 = 0,tensor % N
-                    DO i1 = 0,tensor % N
+                  DO j1 = 0,tensor % interp % N
+                    DO i1 = 0,tensor % interp % N
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i1,j1,ivar,s2,e2)
                     END DO
@@ -2850,10 +2850,10 @@ CONTAINS
               ELSEIF (flip == 1) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO j1 = 0,tensor % N
-                    DO i1 = 0,tensor % N
+                  DO j1 = 0,tensor % interp % N
+                    DO i1 = 0,tensor % interp % N
                       i2 = j1
-                      j2 = tensor % N - i1
+                      j2 = tensor % interp % N - i1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
                     END DO
@@ -2863,10 +2863,10 @@ CONTAINS
               ELSEIF (flip == 2) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO j1 = 0,tensor % N
-                    DO i1 = 0,tensor % N
-                      i2 = tensor % N - i1
-                      j2 = tensor % N - j1
+                  DO j1 = 0,tensor % interp % N
+                    DO i1 = 0,tensor % interp % N
+                      i2 = tensor % interp % N - i1
+                      j2 = tensor % interp % N - j1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
                     END DO
@@ -2876,9 +2876,9 @@ CONTAINS
               ELSEIF (flip == 3) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO j1 = 0,tensor % N
-                    DO i1 = 0,tensor % N
-                      i2 = tensor % N - j1
+                  DO j1 = 0,tensor % interp % N
+                    DO i1 = 0,tensor % interp % N
+                      i2 = tensor % interp % N - j1
                       j2 = i1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
                         tensor % boundary % hostData(1:3,1:3,i2,j2,ivar,s2,e2)
@@ -2889,8 +2889,8 @@ CONTAINS
               ELSEIF (flip == 4) THEN
 
                 DO ivar = 1,tensor % nvar
-                  DO j1 = 0,tensor % N
-                    DO i1 = 0,tensor % N
+                  DO j1 = 0,tensor % interp % N
+                    DO i1 = 0,tensor % interp % N
                       i2 = j1
                       j2 = i1
                       tensor % extBoundary % hostData(1:3,1:3,i1,j1,ivar,s1,e1) = &
@@ -2930,7 +2930,7 @@ CONTAINS
 
       CALL BassiRebaySides_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                       tensor % boundary % deviceData, &
-                                                      tensor % N, &
+                                                      tensor % interp % N, &
                                                       tensor % nvar, &
                                                       tensor % nElem)
 
@@ -2939,8 +2939,8 @@ CONTAINS
       DO iel = 1,tensor % nElem
         DO iside = 1,6
           DO ivar = 1,tensor % nVar
-            DO j = 0,tensor % N
-              DO i = 0,tensor % N
+            DO j = 0,tensor % interp % N
+              DO i = 0,tensor % interp % N
                 tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) = 0.5_prec*( &
                                                             tensor % boundary % hostData(1:3,1:3,i,j,ivar,iside,iel) + &
                                                             tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,iside,iel))
@@ -2969,7 +2969,7 @@ CONTAINS
 
       CALL JacobianWeight_MappedTensor3D_gpu_wrapper(tensor % interior % deviceData, &
                                                      geometry % J % interior % deviceData, &
-                                                     tensor % N, &
+                                                     tensor % interp % N, &
                                                      tensor % nVar, &
                                                      tensor % nElem)
 
@@ -2977,9 +2977,9 @@ CONTAINS
 
       DO iEl = 1,tensor % nElem
         DO iVar = 1,tensor % nVar
-          DO k = 0,tensor % N
-            DO j = 0,tensor % N
-              DO i = 0,tensor % N
+          DO k = 0,tensor % interp % N
+            DO j = 0,tensor % interp % N
+              DO i = 0,tensor % interp % N
                 tensor % interior % hostData(1,1,i,j,k,iVar,iEl) = tensor % interior % hostData(1,1,i,j,k,iVar,iEl)/ &
                                                                    geometry % J % interior % hostData(i,j,k,1,iEl)
                 tensor % interior % hostData(2,1,i,j,k,iVar,iEl) = tensor % interior % hostData(2,1,i,j,k,iVar,iEl)/ &
@@ -3042,7 +3042,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
-                           (scalar % N + 1)*scalar % nVar, &
+                           (scalar % interp % N + 1)*scalar % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3050,7 +3050,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
-                           (scalar % N + 1)*scalar % nVar, &
+                           (scalar % interp % N + 1)*scalar % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3078,7 +3078,7 @@ CONTAINS
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     INTEGER :: bcid
-    REAL(prec) :: extBuff(0:scalar % N)
+    REAL(prec) :: extBuff(0:scalar % interp % N)
 
     IF (mpiHandler % mpiEnabled) THEN
       IF (gpuAccel) THEN
@@ -3087,7 +3087,7 @@ CONTAINS
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
-                                                  scalar % N, &
+                                                  scalar % interp % N, &
                                                   scalar % nVar, &
                                                   scalar % nElem)
       ELSE
@@ -3109,11 +3109,11 @@ CONTAINS
                 IF (flip == 1) THEN
 
                   DO ivar = 1,scalar % nvar
-                    DO i = 0,scalar % N
-                      i2 = scalar % N - i
+                    DO i = 0,scalar % interp % N
+                      i2 = scalar % interp % N - i
                       extBuff(i) = scalar % extBoundary % hostData(i2,ivar,s1,e1)
                     END DO
-                    DO i = 0,scalar % N
+                    DO i = 0,scalar % interp % N
                       scalar % extBoundary % hostData(i,ivar,s1,e1) = extBuff(i)
                     END DO
                   END DO
@@ -3162,7 +3162,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
-                           2*(vector % N + 1)*vector % nVar, &
+                           2*(vector % interp % N + 1)*vector % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3170,7 +3170,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
-                           2*(vector % N + 1)*vector % nVar, &
+                           2*(vector % interp % N + 1)*vector % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3199,7 +3199,7 @@ CONTAINS
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     INTEGER :: bcid
-    REAL(prec) :: extBuff(1:2,0:vector % N)
+    REAL(prec) :: extBuff(1:2,0:vector % interp % N)
 
     IF (mpiHandler % mpiEnabled) THEN
       IF (gpuAccel) THEN
@@ -3208,7 +3208,7 @@ CONTAINS
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
-                                                  vector % N, &
+                                                  vector % interp % N, &
                                                   vector % nVar, &
                                                   vector % nElem)
       ELSE
@@ -3230,11 +3230,11 @@ CONTAINS
                 IF (flip == 1) THEN
 
                   DO ivar = 1,vector % nvar
-                    DO i = 0,vector % N
-                      i2 = vector % N - i
+                    DO i = 0,vector % interp % N
+                      i2 = vector % interp % N - i
                       extBuff(1:2,i) = vector % extBoundary % hostData(1:2,i2,ivar,s1,e1)
                     END DO
-                    DO i = 0,vector % N
+                    DO i = 0,vector % interp % N
                       vector % extBoundary % hostData(1:2,i,ivar,s1,e1) = extBuff(1:2,i)
                     END DO
                   END DO
@@ -3282,7 +3282,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
-                           4*(tensor % N + 1)*tensor % nVar, &
+                           4*(tensor % interp % N + 1)*tensor % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3290,7 +3290,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
-                           4*(tensor % N + 1)*tensor % nVar, &
+                           4*(tensor % interp % N + 1)*tensor % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3319,7 +3319,7 @@ CONTAINS
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     INTEGER :: bcid
-    REAL(prec) :: extBuff(1:2,1:2,0:tensor % N)
+    REAL(prec) :: extBuff(1:2,1:2,0:tensor % interp % N)
 
     IF (mpiHandler % mpiEnabled) THEN
       IF (gpuAccel) THEN
@@ -3328,7 +3328,7 @@ CONTAINS
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
-                                                  tensor % N, &
+                                                  tensor % interp % N, &
                                                   tensor % nVar, &
                                                   tensor % nElem)
       ELSE
@@ -3350,11 +3350,11 @@ CONTAINS
                 IF (flip == 1) THEN
 
                   DO ivar = 1,tensor % nvar
-                    DO i = 0,tensor % N
-                      i2 = tensor % N - i
+                    DO i = 0,tensor % interp % N
+                      i2 = tensor % interp % N - i
                       extBuff(1:2,1:2,i) = tensor % extBoundary % hostData(1:2,1:2,i2,ivar,s1,e1)
                     END DO
-                    DO i = 0,tensor % N
+                    DO i = 0,tensor % interp % N
                       tensor % extBoundary % hostData(1:2,1:2,i,ivar,s1,e1) = extBuff(1:2,1:2,i)
                     END DO
                   END DO
@@ -3404,7 +3404,7 @@ CONTAINS
 
               msgCount = msgCount + 1
               CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
-                             (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
+                             (scalar % interp % N + 1)*(scalar % interp % N + 1)*scalar % nVar, &
                              mpiHandler % mpiPrec, &
                              r2,globalSideId, &
                              mpiHandler % mpiComm, &
@@ -3412,7 +3412,7 @@ CONTAINS
 
               msgCount = msgCount + 1
               CALL MPI_ISEND(scalar % boundary % hostData(:,:,:,s1,e1), &
-                             (scalar % N + 1)*(scalar % N + 1)*scalar % nVar, &
+                             (scalar % interp % N + 1)*(scalar % interp % N + 1)*scalar % nVar, &
                              mpiHandler % mpiPrec, &
                              r2,globalSideId, &
                              mpiHandler % mpiComm, &
@@ -3443,7 +3443,7 @@ CONTAINS
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     INTEGER :: bcid
-    REAL(prec) :: extBuff(0:scalar % N,0:scalar % N)
+    REAL(prec) :: extBuff(0:scalar % interp % N,0:scalar % interp % N)
 
     IF (mpiHandler % mpiEnabled) THEN
       IF (gpuAccel) THEN
@@ -3452,7 +3452,7 @@ CONTAINS
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
-                                                  scalar % N, &
+                                                  scalar % interp % N, &
                                                   scalar % nVar, &
                                                   scalar % nElem)
       ELSE
@@ -3474,15 +3474,15 @@ CONTAINS
                 IF (flip == 1) THEN
 
                   DO ivar = 1,scalar % nvar
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
                         i2 = j
-                        j2 = scalar % N-i
+                        j2 = scalar % interp % N-i
                         extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
                         scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
                       END DO
                     END DO
@@ -3491,15 +3491,15 @@ CONTAINS
                 ELSEIF (flip == 2) THEN
 
                   DO ivar = 1,scalar % nvar
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
-                        i2 = scalar % N - i
-                        j2 = scalar % N - j
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
+                        i2 = scalar % interp % N - i
+                        j2 = scalar % interp % N - j
                         extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
                         scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
                       END DO
                     END DO
@@ -3508,15 +3508,15 @@ CONTAINS
                 ELSEIF (flip == 3) THEN
 
                   DO ivar = 1,scalar % nvar
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
-                        i2 = scalar % N-j
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
+                        i2 = scalar % interp % N-j
                         j2 = i
                         extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
                         scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
                       END DO
                     END DO
@@ -3525,15 +3525,15 @@ CONTAINS
                 ELSEIF (flip == 4) THEN
 
                   DO ivar = 1,scalar % nvar
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
                         i2 = j
                         j2 = i
                         extBuff(i,j) = scalar % extBoundary % hostData(i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,scalar % N
-                      DO i = 0,scalar % N
+                    DO j = 0,scalar % interp % N
+                      DO i = 0,scalar % interp % N
                         scalar % extBoundary % hostData(i,j,ivar,s1,e1) = extBuff(i,j)
                       END DO
                     END DO
@@ -3583,7 +3583,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
-                           3*(vector % N + 1)*(vector % N + 1)*vector % nVar, &
+                           3*(vector % interp % N + 1)*(vector % interp % N + 1)*vector % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3591,7 +3591,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(vector % boundary % hostData(:,:,:,:,s1,e1), &
-                           3*(vector % N + 1)*(vector % N + 1)*vector % nVar, &
+                           3*(vector % interp % N + 1)*(vector % interp % N + 1)*vector % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3619,7 +3619,7 @@ CONTAINS
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     INTEGER :: bcid     
-    REAL(prec) :: extBuff(1:3,0:vector % N,0:vector % N)
+    REAL(prec) :: extBuff(1:3,0:vector % interp % N,0:vector % interp % N)
 
     IF (mpiHandler % mpiEnabled) THEN
       IF (gpuAccel) THEN
@@ -3628,7 +3628,7 @@ CONTAINS
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
-                                                  vector % N, &
+                                                  vector % interp % N, &
                                                   vector % nVar, &
                                                   vector % nElem)
       ELSE
@@ -3649,15 +3649,15 @@ CONTAINS
                 IF (flip == 1) THEN
 
                   DO ivar = 1,vector % nvar
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
                         i2 = j
-                        j2 = vector % N - i
+                        j2 = vector % interp % N - i
                         extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
                         vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
                       END DO
                     END DO
@@ -3666,15 +3666,15 @@ CONTAINS
                 ELSEIF (flip == 2) THEN
 
                   DO ivar = 1,vector % nvar
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
-                        i2 = vector % N - i
-                        j2 = vector % N - j
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
+                        i2 = vector % interp % N - i
+                        j2 = vector % interp % N - j
                         extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
                         vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
                       END DO
                     END DO
@@ -3683,15 +3683,15 @@ CONTAINS
                 ELSEIF (flip == 3) THEN
 
                   DO ivar = 1,vector % nvar
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
-                        i2 = vector % N - j
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
+                        i2 = vector % interp % N - j
                         j2 = i
                         extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
                         vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
                       END DO
                     END DO
@@ -3700,15 +3700,15 @@ CONTAINS
                 ELSEIF (flip == 4) THEN
 
                   DO ivar = 1,vector % nvar
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
                         i2 = j
                         j2 = i
                         extBuff(1:3,i,j) = vector % extBoundary % hostData(1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,vector % N
-                      DO i = 0,vector % N
+                    DO j = 0,vector % interp % N
+                      DO i = 0,vector % interp % N
                         vector % extBoundary % hostData(1:3,i,j,ivar,s1,e1) = extBuff(1:3,i,j)
                       END DO
                     END DO
@@ -3756,7 +3756,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
-                           9*(tensor % N + 1)*(tensor % N + 1)*tensor % nVar, &
+                           9*(tensor % interp % N + 1)*(tensor % interp % N + 1)*tensor % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3764,7 +3764,7 @@ CONTAINS
 
             msgCount = msgCount + 1
             CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,:,s1,e1), &
-                           9*(tensor % N + 1)*(tensor % N + 1)*tensor % nVar, &
+                           9*(tensor % interp % N + 1)*(tensor % interp % N + 1)*tensor % nVar, &
                            mpiHandler % mpiPrec, &
                            r2,globalSideId, &
                            mpiHandler % mpiComm, &
@@ -3793,7 +3793,7 @@ CONTAINS
     INTEGER :: r2,flip,ivar
     INTEGER :: globalSideId
     INTEGER :: bcid
-    REAL(prec) :: extBuff(1:3,1:3,0:tensor % N,0:tensor % N)
+    REAL(prec) :: extBuff(1:3,1:3,0:tensor % interp % N,0:tensor % interp % N)
 
     IF (mpiHandler % mpiEnabled) THEN
       IF (gpuAccel) THEN
@@ -3802,7 +3802,7 @@ CONTAINS
                                                   mesh % self_sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
-                                                  tensor % N, &
+                                                  tensor % interp % N, &
                                                   tensor % nVar, &
                                                   tensor % nElem)
       ELSE
@@ -3823,15 +3823,15 @@ CONTAINS
                 IF (flip == 1) THEN
 
                   DO ivar = 1,tensor % nvar
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
                         i2 = j
-                        j2 = tensor % N - i
+                        j2 = tensor % interp % N - i
                         extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
                         tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
                       END DO
                     END DO
@@ -3840,15 +3840,15 @@ CONTAINS
                 ELSEIF (flip == 2) THEN
 
                   DO ivar = 1,tensor % nvar
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
-                        i2 = tensor % N - i
-                        j2 = tensor % N - j
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
+                        i2 = tensor % interp % N - i
+                        j2 = tensor % interp % N - j
                         extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
                         tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
                       END DO
                     END DO
@@ -3857,15 +3857,15 @@ CONTAINS
                 ELSEIF (flip == 3) THEN
 
                   DO ivar = 1,tensor % nvar
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
-                        i2 = tensor % N - j
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
+                        i2 = tensor % interp % N - j
                         j2 = i
                         extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
                         tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
                       END DO
                     END DO
@@ -3874,15 +3874,15 @@ CONTAINS
                 ELSEIF (flip == 4) THEN
 
                   DO ivar = 1,tensor % nvar
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
                         i2 = j
                         j2 = i
                         extBuff(1:3,1:3,i,j) = tensor % extBoundary % hostData(1:3,1:3,i2,j2,ivar,s1,e1)
                       END DO
                     END DO
-                    DO j = 0,tensor % N
-                      DO i = 0,tensor % N
+                    DO j = 0,tensor % interp % N
+                      DO i = 0,tensor % interp % N
                         tensor % extBoundary % hostData(1:3,1:3,i,j,ivar,s1,e1) = extBuff(1:3,1:3,i,j)
                       END DO
                     END DO
