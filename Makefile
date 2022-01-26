@@ -23,8 +23,9 @@
 #
 #   Compiler and Target Hardware Options
 #     HIPFC                  Set the full path to hipfc. (Default: hipfc)
-#     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: gfortran | Options: gfortran)
-#     HIPFORT_GPU            Set the target GPU platform. (Default: gfx900 | Options gfx900, sm35, sm50, sm70) 
+#     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: h5pfc | Options: h5pfc)
+#     GPU_PLATFORM           Set the target GPU platform. (Default: gfx900 | Options gfx900, sm35, sm50, sm70) 
+#     HIP_PLATFORM           Set the target vendor. (Default: amd | Options amd, nvidia) 
 #     ROCM_DIR               Set the path to ROCm installation (Default: /opt/rocm)
 #     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if GPU_TARGET is an Nvidia GPU)
 #
