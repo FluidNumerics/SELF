@@ -19,14 +19,16 @@ resource "google_cloudbuild_trigger" "builds" {
   github {
     owner = var.github_owner
     name = var.github_repo
-    push {
+    pull_request {
       branch = var.builds[count.index].branch
+      comment_control = "COMMENTS_ENABLED"
     }
   }
   substitutions = {
   _ZONE = var.builds[count.index].zone
-  _PARTITIONS = var.builds[count.index].partitions
   _GPU_TARGET = var.builds[count.index].gpu_target
+  _HIP_PLATFORM = var.builds[count.index].hip_platform
+  _PREC = var.builds[count.index].prec
   }
   filename = "ci/cloudbuild.yaml"
 }

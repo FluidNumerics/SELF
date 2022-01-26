@@ -4,12 +4,13 @@ variable "builds" {
     name = string
     description = string
     branch = string
-    partitions = string
     gpu_target = string
+    prec = string
+    hip_platform = string
     zone = string
     }))
   default = []
-  description = "List of build triggers and their settings to configure"
+  description = "List of build triggers and their settings to configure for pull requests"
 }
 
 variable "bq_location" {
