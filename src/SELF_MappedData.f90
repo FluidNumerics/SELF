@@ -13,7 +13,6 @@ MODULE SELF_MappedData
   USE SELF_Data
   USE SELF_Mesh
   USE SELF_Geometry
-  USE SELF_MPI
 
   USE FEQParse
 
