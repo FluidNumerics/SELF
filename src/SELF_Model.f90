@@ -6,21 +6,53 @@
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 MODULE SELF_Model
 
+  USE SELF_SupportRoutines
   USE SELF_Metadata
-  USE SELF_MPI
   USE SELF_Mesh
   USE SELF_MappedData
   USE SELF_HDF5
   USE HDF5
 
+! //////////////////////////////////////////////// !
+!   Time integration parameters
+
+!     Runge-Kutta 3rd Order, low storage constants
+  REAL(prec),PARAMETER :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
+  REAL(prec),PARAMETER :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
+  REAL(prec),PARAMETER :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
+
+! 
+  INTEGER, PARAMETER :: SELF_EULER = 100
+  INTEGER, PARAMETER :: SELF_RK3 = 300
+  INTEGER, PARAMETER :: SELF_RK4 = 400
+
+! //////////////////////////////////////////////// !
+
   TYPE,ABSTRACT :: Model
-    INTEGER :: timeIntegrator
     LOGICAL :: gpuAccel
+
+    ! Time integration attributes
+    INTEGER :: timeIntegrator
+    REAL(prec) :: dt
+    REAL(prec) :: t
 
     CONTAINS
 
-!    PROCEDURE,PRIVATE :: ForwardStepEuler 
+    PROCEDURE :: ForwardStep => ForwardStep_Model
+    PROCEDURE :: ForwardStepEuler => ForwardStepEuler_Model 
+
+    PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
     PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
+
+!    PROCEDURE :: SetTimeIntegrator
+!    PROCEDURE :: SetSimulationTime
+!    PROCEDURE :: GetSimulationTime
+!    PROCEDURE :: SetTimeStep
+!    PROCEDURE :: GetTimeStep
+
+
+    PROCEDURE :: EnableGPUAccel => EnableGPUAccel_Model
+    PROCEDURE :: DisableGPUAccel => DisableGPUAccel_Model
 
   END TYPE Model
 
@@ -44,6 +76,7 @@ MODULE SELF_Model
     PROCEDURE :: UpdateHost => UpdateHost_Model2D
     PROCEDURE :: UpdateDevice => UpdateDevice_Model2D
 
+    PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
 
@@ -57,6 +90,16 @@ MODULE SELF_Model
     PROCEDURE :: Write => Write_Model2D
 
   END TYPE Model2D
+
+  INTERFACE 
+    SUBROUTINE UpdateSolution( this, dt )
+      USE SELF_Constants, ONLY : prec
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model),INTENT(inout) :: this
+      REAL(prec),OPTIONAL,INTENT(in) :: dt
+    END SUBROUTINE UpdateSolution
+  END INTERFACE
 
   INTERFACE 
     SUBROUTINE CalculateTendency( this )
@@ -90,7 +133,124 @@ MODULE SELF_Model
     END SUBROUTINE RiemannSolver2D
   END INTERFACE
 
+  INTERFACE
+    SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
+      bind(c,name="UpdateSolution_Model2D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: solution, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      REAL(c_prec),VALUE :: dt
+    END SUBROUTINE UpdateSolution_Model2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
+      bind(c,name="CalculateDSDt_Model2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: fluxDivergence, source, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE CalculateDSDt_Model3D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
+      bind(c,name="CalculateDSDt_Model3D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: fluxDivergence, source, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE CalculateDSDt_Model3D_gpu_wrapper
+  END INTERFACE
+
 CONTAINS
+
+  SUBROUTINE EnableGPUAccel_Model(this)
+    IMPLICIT NONE
+    CLASS(Model), INTENT(inout) :: this
+
+    IF (GPUAvailable()) THEN
+      this % gpuAccel = .TRUE.
+    ELSE
+      this % gpuAccel = .FALSE.
+      ! TO DO : Warning to user that no GPU is available
+    ENDIF
+
+  END SUBROUTINE EnableGPUAccel_Model
+
+  SUBROUTINE DisableGPUAccel_Model(this)
+    IMPLICIT NONE
+    CLASS(Model), INTENT(inout) :: this
+
+    this % gpuAccel = .FALSE.
+
+  END SUBROUTINE DisableGPUAccel_Model
+
+  ! ////////////////////////////////////// !
+  !       Time Integrators                 !
+
+  SUBROUTINE ForwardStep_Model(this,tn,dt)
+  !!  Forward steps the model using the associated tendency procedure and time integrator
+  !!
+  !!  If the final time `tn` is provided, the model is forward stepped to that final time,
+  !!  otherwise, the model is forward stepped only a single time step
+  !!  
+  !!  If a time step is provided through the interface, the model time step size is updated
+  !!  and that time step is used to update the model
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec),OPTIONAL,INTENT(in) :: tn
+    REAL(prec),OPTIONAL,INTENT(in) :: dt
+    ! Local
+    INTEGER :: nSteps
+    
+
+    IF (PRESENT(dt)) THEN
+      this % dt = dt
+    ENDIF
+
+    IF (PRESENT(tn)) THEN
+      nSteps = INT( (tn - this % t)/(this % dt) )
+    ELSE
+      nSteps = 1
+    ENDIF
+
+    SELECT CASE (this % timeIntegrator)
+
+      CASE (SELF_EULER)
+
+        CALL this % ForwardStepEuler(nSteps)
+
+!      CASE RK3
+!
+!        CALL this % ForwardStepRK3(nSteps)
+
+      CASE DEFAULT
+        ! TODO : Warn user that time integrator not valid, default to Euler
+        CALL this % ForwardStepEuler(nSteps)
+
+    END SELECT
+
+  END SUBROUTINE ForwardStep_Model
+
+  SUBROUTINE ForwardStepEuler_Model(this,nSteps)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    INTEGER,INTENT(in) :: nSteps
+    ! Local
+    INTEGER :: i
+
+    DO i = 1, nSteps
+
+      CALL this % CalculateTendency()
+      CALL this % UpdateSolution()
+
+    ENDDO 
+
+  END SUBROUTINE ForwardStepEuler_Model
+
 
   SUBROUTINE Init_Model2D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
@@ -100,13 +260,9 @@ CONTAINS
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
     TYPE(MPILayer),INTENT(in),TARGET :: decomp
 
-    
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
-
-    CALL this % decomp % SetMaxMsg(this % mesh % nUniqueSides)
-    CALL this % decomp % setElemToRank(this % mesh % nElem)
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -121,8 +277,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
 
-    CALL this % mesh % Free()
-    CALL this % geometry % Free()
     CALL this % solution % Free()
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
@@ -160,6 +314,52 @@ CONTAINS
     CALL this % fluxDivergence % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Model2D
+
+  SUBROUTINE UpdateSolution_Model2D(this,dt)
+    !! Computes a solution update as `s=s+dt*dsdt`, where dt is either provided through the interface
+    !! or taken as the Model's stored time step size (model % dt)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    REAL(prec),OPTIONAL,INTENT(in) :: dt
+    ! Local
+    REAL(prec) :: dtLoc
+    INTEGER :: i, j, iVar, iEl
+
+    IF (PRESENT(dt)) THEN
+      dtLoc = dt
+    ELSE 
+      dtLoc = this % dt
+    ENDIF
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateSolution_Model2D_gpu_wrapper( this % solution % interior % deviceData, &
+                                      this % dSdt % interior % deviceData, &
+                                      dtLoc, &
+                                      this % solution % interp % N, &
+                                      this % solution % nVar, &
+                                      this % solution % nElem ) 
+                                      
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
+
+              this % solution % interior % hostData(i,j,iVar,iEl) = &
+                  this % solution % interior % hostData(i,j,iVar,iEl) +&
+                  dtLoc*this % dSdt % interior % hostData(i,j,iVar,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateSolution_Model2D
 
   SUBROUTINE ReprojectFlux_Model2D(this) 
     IMPLICIT NONE
@@ -217,16 +417,16 @@ CONTAINS
       CALL this % ReprojectFlux()
       CALL this % CalculateFluxDivergence()
 
-   ! IF( gpuAccel )THEN
+    IF( this % gpuAccel )THEN
 
-   !   CALL CalculateDSDt_Model2D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
-   !                                   this % source % interior % deviceData, &
-   !                                   this % dSdt % interior % deviceData, &
-   !                                   this % solution % interp % N, &
-   !                                   this % solution % nVar, &
-   !                                   this % solution % nElem ) 
-   !                                   
-   ! ELSE
+      CALL CalculateDSDt_Model2D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
+                                      this % source % interior % deviceData, &
+                                      this % dSdt % interior % deviceData, &
+                                      this % solution % interp % N, &
+                                      this % solution % nVar, &
+                                      this % solution % nElem ) 
+                                      
+    ELSE
 
       DO iEl = 1, this % solution % nElem
         DO iVar = 1, this % solution % nVar
@@ -242,7 +442,7 @@ CONTAINS
         ENDDO
       ENDDO
 
-   ! ENDIF
+    ENDIF
 
   END SUBROUTINE CalculateTendency_Model2D
 
