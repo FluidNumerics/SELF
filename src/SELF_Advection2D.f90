@@ -7,14 +7,13 @@
 MODULE SELF_Advection
 
   USE SELF_Metadata
-  USE SELF_MPI
   USE SELF_Mesh
   USE SELF_MappedData
   USE SELF_Model
 
 
   TYPE,EXTENDS(Model2D) :: Advection2D
-    TYPE(MappedScalar2D) :: velocity
+    TYPE(MappedVector2D) :: velocity
 
     CONTAINS
 
@@ -125,7 +124,7 @@ CONTAINS
     DO iEl = 1, this % solution % nElem
       DO iSide = 1, 4
         DO iVar = 1, this % solution % nVar
-          DO i = 0, this % solution % N
+          DO i = 0, this % solution % interp % N
 
              ! Get the boundary normals on cell edges from the mesh geometry
              nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
