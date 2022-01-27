@@ -12,6 +12,7 @@ MODULE SELF_Model
   USE SELF_MappedData
   USE SELF_HDF5
   USE HDF5
+  USE FEQParse
 
 ! //////////////////////////////////////////////// !
 !   Time integration parameters
@@ -27,6 +28,7 @@ MODULE SELF_Model
   INTEGER, PARAMETER :: SELF_RK4 = 400
 
   INTEGER, PARAMETER :: SELF_INTEGRATOR_LENGTH = 10 ! max length of integrator methods when specified as char
+  INTEGER, PARAMETER :: SELF_EQUATION_LENGTH = 500
 
 ! //////////////////////////////////////////////// !
 
@@ -85,6 +87,11 @@ MODULE SELF_Model
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
+
+    GENERIC :: SetSolution => SetSolutionFromChar_Model2D,&
+                              SetSolutionFromEqn_Model2D
+    PROCEDURE,PRIVATE :: SetSolutionFromChar_Model2D
+    PROCEDURE,PRIVATE :: SetSolutionFromEqn_Model2D
 
     PROCEDURE(Source2D),DEFERRED :: Source2D
     PROCEDURE(Flux2D),DEFERRED :: Flux2D
@@ -395,6 +402,37 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Model2D
 
+  SUBROUTINE SetSolutionFromEqn_Model2D(this, eqn) 
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
+    ! Local
+    INTEGER :: iVar
+
+      ! Copy the equation parser
+      DO iVar = 1, this % solution % nVar
+        CALL this % solution % SetEquation(ivar, eqn(iVar) % equation)
+      ENDDO
+
+      CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
+
+  END SUBROUTINE SetSolutionFromEqn_Model2D 
+
+  SUBROUTINE SetSolutionFromChar_Model2D(this, eqnChar) 
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % solution % nVar)
+    ! Local
+    INTEGER :: iVar
+
+      DO iVar = 1, this % solution % nVar
+        CALL this % solution % SetEquation(ivar, eqnChar(iVar))
+      ENDDO
+
+      CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
+
+  END SUBROUTINE SetSolutionFromChar_Model2D
+
   SUBROUTINE UpdateSolution_Model2D(this,dt)
     !! Computes a solution update as `s=s+dt*dsdt`, where dt is either provided through the interface
     !! or taken as the Model's stored time step size (model % dt)
@@ -491,6 +529,7 @@ CONTAINS
 
 !      CALL this % solution % AverageSides()
 !      CALL this % solution % DiffSides()
+!      CALL this % SetBoundaryCondition()
       CALL this % Source2D()
       CALL this % RiemannSolver2D()
       CALL this % Flux2D()
@@ -529,7 +568,7 @@ CONTAINS
   SUBROUTINE Write_Model2D(this,fileName)
     IMPLICIT NONE
     CLASS(Model2D),INTENT(in) :: this
-    CHARACTER(*),INTENT(in) :: fileName
+    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: solOffset(1:4)
@@ -541,10 +580,20 @@ CONTAINS
     INTEGER(HID_T) :: bGlobalDims(1:4)
     INTEGER(HID_T) :: bxGlobalDims(1:5)
     INTEGER :: firstElem
+    ! Local
+    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+    CHARACTER(13) :: timeStampString
+
+    IF( PRESENT(filename) )THEN
+      pickupFile = filename
+    ELSE
+      timeStampString = TimeStamp(this % t, 's')
+      pickupFile = 'solution.'//timeStampString//'.h5'
+    ENDIF
 
     IF (this % decomp % mpiEnabled) THEN
 
-      CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
+      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
 
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
       solOffset(1:4) = (/0,0,1,firstElem/)
@@ -635,7 +684,7 @@ CONTAINS
 
     ELSE
 
-      CALL Open_HDF5(fileName,H5F_ACC_TRUNC_F,fileId)
+      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
       CALL CreateGroup_HDF5(fileId,'/quadrature')
 
