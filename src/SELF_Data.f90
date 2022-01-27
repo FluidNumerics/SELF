@@ -311,6 +311,8 @@ CONTAINS
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
+    SELFStorage % nElem = nElem
+    SELFStorage % nVar = nVar
     SELFStorage % interp => interp
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
