@@ -26,6 +26,8 @@ MODULE SELF_Model
   INTEGER, PARAMETER :: SELF_RK3 = 300
   INTEGER, PARAMETER :: SELF_RK4 = 400
 
+  INTEGER, PARAMETER :: SELF_INTEGRATOR_LENGTH = 10 ! max length of integrator methods when specified as char
+
 ! //////////////////////////////////////////////// !
 
   TYPE,ABSTRACT :: Model
@@ -44,9 +46,13 @@ MODULE SELF_Model
     PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
     PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
 
-!    PROCEDURE :: SetTimeIntegrator
-!    PROCEDURE :: SetSimulationTime
-!    PROCEDURE :: GetSimulationTime
+    GENERIC :: SetTimeIntegrator => SetTimeIntegrator_withInt, &
+                                    SetTimeIntegrator_withChar
+    PROCEDURE,PRIVATE :: SetTimeIntegrator_withInt
+    PROCEDURE,PRIVATE :: SetTimeIntegrator_withChar
+
+    PROCEDURE :: SetSimulationTime
+    PROCEDURE :: GetSimulationTime
 !    PROCEDURE :: SetTimeStep
 !    PROCEDURE :: GetTimeStep
 
@@ -166,6 +172,80 @@ MODULE SELF_Model
   END INTERFACE
 
 CONTAINS
+
+  SUBROUTINE SetTimeIntegrator_withInt(this,integrator)
+    !! Sets the time integrator method, using an integer flag
+    !!
+    !! Valid options for `integrator` are
+    !!
+    !!    SELF_EULER
+    !!    SELF_RK3
+    !!    SELF_RK4
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: integrator
+
+      this % timeIntegrator = integrator
+
+  END SUBROUTINE SetTimeIntegrator_withInt
+
+  SUBROUTINE SetTimeIntegrator_withChar(this,integrator)
+    !! Sets the time integrator method, using a character input
+    !!
+    !! Valid options for integrator are
+    !!
+    !!   "euler"
+    !!   "rk3"
+    !!   "rk4"
+    !!
+    !! Note that the character provided is not case-sensitive
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: integrator
+    ! Local
+    CHARACTER(SELF_INTEGRATOR_LENGTH) :: upperCaseInt
+
+      upperCaseInt = UpperCase(TRIM(integrator))
+
+      SELECT CASE (upperCaseInt)
+
+        CASE ("EULER")
+          this % timeIntegrator = SELF_EULER
+
+        CASE ("RK3")
+          this % timeIntegrator = SELF_RK3
+
+        CASE ("RK4")
+          this % timeIntegrator = SELF_RK4
+
+        CASE DEFAULT
+          this % timeIntegrator = SELF_EULER
+
+      END SELECT
+
+  END SUBROUTINE SetTimeIntegrator_withChar
+
+  SUBROUTINE GetSimulationTime(this,t)
+    !! Returns the current simulation time stored in the model % t attribute
+    IMPLICIT NONE
+    CLASS(Model),INTENT(in) :: this
+    REAL(prec),INTENT(out) :: t
+
+      t = this % t
+
+  END SUBROUTINE GetSimulationTime
+
+  SUBROUTINE SetSimulationTime(this,t)
+    !! Sets the model % t attribute with the provided simulation time
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec),INTENT(in) :: t
+
+      this % t = t
+
+  END SUBROUTINE SetSimulationTime
 
   SUBROUTINE EnableGPUAccel_Model(this)
     IMPLICIT NONE
