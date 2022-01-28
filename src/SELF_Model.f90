@@ -112,6 +112,7 @@ MODULE SELF_Model
 
     PROCEDURE :: Read => Read_Model2D
     PROCEDURE :: Write => Write_Model2D
+    PROCEDURE :: WriteTecplot => WriteTecplot_Model2D
 
   END TYPE Model2D
 
@@ -783,5 +784,92 @@ CONTAINS
     CALL Close_HDF5(fileId)
 
   END SUBROUTINE Read_Model2D
+
+  SUBROUTINE WriteTecplot_Model2D(this, filename)
+    IMPLICIT NONE
+    CLASS(Model2D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    ! Local
+    CHARACTER(8) :: zoneID
+    INTEGER :: fUnit
+    INTEGER :: iEl, i, j 
+    CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(13) :: timeStampString
+    CHARACTER(5) :: rankString
+    TYPE(Scalar2D) :: solution
+    TYPE(Vector2D) :: x
+    TYPE(Lagrange),TARGET :: interp
+
+    IF( PRESENT(filename) )THEN
+      tecFile = filename
+    ELSE
+      timeStampString = TimeStamp(this % t, 's')
+
+      IF( this % decomp % mpiEnabled )THEN
+        WRITE(rankString,'(I5.5)') this % decomp % rankId 
+        tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
+      ELSE
+        tecFile = 'solution.'//timeStampString//'.tec'
+      ENDIF
+
+    ENDIF
+                      
+    IF( this % gpuAccel )THEN
+      ! Copy data to the CPU
+      CALL this % solution % interior % UpdateHost()
+    ENDIF
+
+    ! Create an interpolant for the uniform grid
+    CALL interp % Init(this % solution % interp % M,&
+            this % solution % interp % targetNodeType,&
+            this % solution % interp % N, &
+            this % solution % interp % controlNodeType)
+
+    CALL solution % Init( interp, &
+            this % solution % nVar, this % solution % nElem )
+
+    CALL x % Init( interp, 1, this % solution % nElem )
+
+    ! Map the mesh positions to the target grid
+    CALL this % geometry % x % GridInterp(x, gpuAccel=.FALSE.)
+
+    ! Map the solution to the target grid
+    CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+   
+    ! Let's write some tecplot!! 
+     OPEN( UNIT=NEWUNIT(fUnit), &
+      FILE= TRIM(tecFile), &
+      FORM='formatted', &
+      STATUS='replace')
+
+    ! TO DO :: Create header from solution metadata 
+    WRITE(fUnit,*) 'VARIABLES = "X", "Y","solution"'
+
+    DO iEl = 1, this % solution % nElem
+
+      ! TO DO :: Get the global element ID 
+      WRITE(zoneID,'(I8.8)') iEl
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % solution % interp % M+1,&
+                                                 ', J=',this % solution % interp % M+1
+
+      DO j = 0, this % solution % interp % M
+        DO i = 0, this % solution % interp % M
+
+          WRITE(fUnit,'(3(E15.7,1x))') x % interior % hostData(1,i,j,1,iEl), &
+                                       x % interior % hostData(2,i,j,1,iEl), &
+                                       solution % interior % hostData(i,j,1,iEl)
+
+        ENDDO
+      ENDDO
+
+    ENDDO
+
+    CLOSE(UNIT=fUnit)
+
+    CALL x % Free()
+    CALL solution % Free() 
+    CALL interp % Free()
+
+  END SUBROUTINE WriteTecplot_Model2D
 
 END MODULE SELF_Model

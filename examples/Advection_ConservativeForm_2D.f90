@@ -60,6 +60,10 @@ USE SELF_Advection2D
     initialCondition = (/"s = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2 )/0.1 )"/)
     CALL semModel % SetSolution( initialCondition )
 
+    ! Write the initial condition to file
+    CALL semModel % Write()
+    CALL semModel % WriteTecplot()
+
     ! Set the boundary condition
     ! CALL semModel % SetPrescribedBoundaryCondition( initialCondition )
 
@@ -80,6 +84,7 @@ USE SELF_Advection2D
 
     ! Manually write the last semModel state
     CALL semModel % Write()
+    CALL semModel % WriteTecplot()
 
     ! Clean up
     CALL semModel % Free()
