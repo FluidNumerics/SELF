@@ -366,8 +366,8 @@ CONTAINS
     INTEGER :: nid,nNodes
     INTEGER :: i
     REAL(prec) :: xU(1:nElem + 1)
-    TYPE(Lagrange), POINTER :: linearInterp
-    TYPE(Lagrange), POINTER :: nGeoInterp
+    TYPE(Lagrange), TARGET :: linearInterp
+    TYPE(Lagrange), TARGET :: nGeoInterp
     TYPE(Scalar1D) :: xLinear
     TYPE(Scalar1D) :: xGeo
 
@@ -728,8 +728,8 @@ CONTAINS
     INTEGER :: i,j
     REAL(prec) :: xU(1:nElem(1) + 1)
     REAL(prec) :: yU(1:nElem(2) + 1)
-    TYPE(Lagrange), POINTER :: linearInterp
-    TYPE(Lagrange), POINTER :: nGeoInterp
+    TYPE(Lagrange), TARGET :: linearInterp
+    TYPE(Lagrange), TARGET :: nGeoInterp
     TYPE(Vector2D) :: xLinear
     TYPE(Vector2D) :: xGeo
 
@@ -743,11 +743,11 @@ CONTAINS
     xU = UniformPoints(x(1),x(2),1,nElem(1) + 1)
     yU = UniformPoints(x(3),x(4),1,nElem(2) + 1)
 
-    CALL linearInterp % Init(1,CHEBYSHEV_GAUSS_LOBATTO,&
-            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+    CALL linearInterp % Init(1,GAUSS_LOBATTO,&
+            nGeo,GAUSS_LOBATTO)
 
-    CALL nGeoInterp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,&
-            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+    CALL nGeoInterp % Init(nGeo,GAUSS_LOBATTO,&
+            nGeo,GAUSS_LOBATTO)
 
     ! Create a linear interpolant to interpolate to nGeo grid
     CALL xLinear % Init(linearInterp,1,nEl)
@@ -1532,8 +1532,8 @@ CONTAINS
     REAL(prec) :: xU(1:nElem(1) + 1)
     REAL(prec) :: yU(1:nElem(2) + 1)
     REAL(prec) :: zU(1:nElem(3) + 1)
-    TYPE(Lagrange), POINTER :: linearInterp
-    TYPE(Lagrange), POINTER :: nGeoInterp
+    TYPE(Lagrange), TARGET :: linearInterp
+    TYPE(Lagrange), TARGET :: nGeoInterp
     TYPE(Vector3D) :: xLinear
     TYPE(Vector3D) :: xGeo
 
@@ -1550,11 +1550,11 @@ CONTAINS
     yU = UniformPoints(x(3),x(4),1,nElem(2) + 1)
     zU = UniformPoints(x(5),x(6),1,nElem(3) + 1)
 
-    CALL linearInterp % Init(1,CHEBYSHEV_GAUSS_LOBATTO,&
-            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+    CALL linearInterp % Init(1,GAUSS_LOBATTO,&
+            nGeo,GAUSS_LOBATTO)
 
-    CALL nGeoInterp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,&
-            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+    CALL nGeoInterp % Init(nGeo,GAUSS_LOBATTO,&
+            nGeo,GAUSS_LOBATTO)
 
     ! Create a linear interpolant to interpolate to nGeo grid
     CALL xLinear % Init(linearInterp,1,nEl)
@@ -2500,8 +2500,12 @@ CONTAINS
     IMPLICIT NONE
     CLASS(MPILayer),INTENT(inout) :: this
 
-    CALL this % offSetElem % Free()
-    CALL this % elemToRank % Free()
+    IF (ASSOCIATED(this % offSetElem % hostData)) THEN
+      CALL this % offSetElem % Free()
+    ENDIF
+    IF (ASSOCIATED(this % elemToRank % hostData)) THEN
+      CALL this % elemToRank % Free()
+    ENDIF
 
     DEALLOCATE( this % requests )
     DEALLOCATE( this % stats )
@@ -2529,7 +2533,7 @@ CONTAINS
   SUBROUTINE GenerateDecomposition_MPILayer(this,mesh,maxMsg)
     IMPLICIT NONE
     CLASS(MPILayer),INTENT(inout) :: this
-    TYPE(SEMMesh),INTENT(in) :: mesh
+    CLASS(SEMMesh),INTENT(in) :: mesh
     INTEGER,OPTIONAL,INTENT(in) :: maxMsg
     ! Local
     INTEGER :: maxMsgLoc

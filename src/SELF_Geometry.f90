@@ -172,7 +172,7 @@ CONTAINS
     INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,i,nid
-    TYPE(Lagrange),POINTER :: meshToModel
+    TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Scalar1D) :: xMesh
     INTEGER :: quadrature
 
@@ -313,7 +313,7 @@ CONTAINS
     ! Local
     INTEGER :: iel
     INTEGER :: i,j,nid
-    TYPE(Lagrange),POINTER :: meshToModel
+    TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Vector2D) :: xMesh
     INTEGER :: quadrature
 
@@ -567,7 +567,7 @@ CONTAINS
     ! Local
     INTEGER :: iel
     INTEGER :: i,j,k,nid
-    TYPE(Lagrange),POINTER :: meshToModel
+    TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Vector3D) :: xMesh
     INTEGER :: quadrature
 

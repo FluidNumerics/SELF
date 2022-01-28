@@ -307,7 +307,7 @@ CONTAINS
   SUBROUTINE Init_DataObj(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(SELF_DataObj),INTENT(out)  :: SELFStorage
-    TYPE(Lagrange),INTENT(in),POINTER :: interp
+    TYPE(Lagrange),INTENT(in),TARGET :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
@@ -379,7 +379,7 @@ CONTAINS
   SUBROUTINE Init_Scalar1D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar1D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),INTENT(in),POINTER :: interp
+    TYPE(Lagrange),INTENT(in),TARGET :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
@@ -556,7 +556,7 @@ CONTAINS
   SUBROUTINE Init_Scalar2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar2D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),INTENT(in),POINTER :: interp
+    TYPE(Lagrange),INTENT(in),TARGET :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
 
@@ -740,7 +740,7 @@ CONTAINS
   SUBROUTINE Init_Scalar3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Scalar3D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
     ! Local
@@ -931,7 +931,7 @@ CONTAINS
   SUBROUTINE Init_Vector2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Vector2D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
     ! Local
@@ -1190,7 +1190,7 @@ CONTAINS
   SUBROUTINE Init_Vector3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Vector3D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
     ! Local
@@ -1431,7 +1431,7 @@ CONTAINS
   SUBROUTINE Init_Tensor2D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Tensor2D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
     ! Local
@@ -1668,7 +1668,7 @@ CONTAINS
   SUBROUTINE Init_Tensor3D(SELFStorage,interp,nVar,nElem)
     IMPLICIT NONE
     CLASS(Tensor3D),INTENT(out) :: SELFStorage
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
     INTEGER,INTENT(in) :: nVar
     INTEGER,INTENT(in) :: nElem
     ! Local

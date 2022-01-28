@@ -73,7 +73,7 @@ CONTAINS
     INTEGER :: i,j,iEl,iVar
 
     DO iEl = 1, this % source % nElem
-      DO iVar = 1, this % source % nElem
+      DO iVar = 1, this % source % nVar
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
 
@@ -93,7 +93,7 @@ CONTAINS
     INTEGER :: i,j,iEl,iVar
 
     DO iEl = 1, this % source % nElem
-      DO iVar = 1, this % source % nElem
+      DO iVar = 1, this % source % nVar
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
 

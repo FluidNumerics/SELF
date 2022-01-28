@@ -309,6 +309,7 @@ CONTAINS
       CASE (SELF_EULER)
 
         CALL this % ForwardStepEuler(nSteps)
+        this % t = tn
 
 !      CASE RK3
 !
