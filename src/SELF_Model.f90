@@ -31,6 +31,17 @@ MODULE SELF_Model
   INTEGER, PARAMETER :: SELF_EQUATION_LENGTH = 500
 
 ! //////////////////////////////////////////////// !
+!   Boundary Condition parameters
+!
+
+  ! Conditions on the solution
+  INTEGER, PARAMETER :: SELF_BC_PRESCRIBED = 100
+  INTEGER, PARAMETER :: SELF_BC_RADIATION = 101
+  INTEGER, PARAMETER :: SELF_BC_NONORMALFLOW = 102
+
+  ! Conditions on the solution gradients
+  INTEGER, PARAMETER :: SELF_BC_PRESCRIBED_STRESS = 200
+  INTEGER, PARAMETER :: SELF_BC_NOSTRESS = 201
 
   TYPE,ABSTRACT :: Model
     LOGICAL :: gpuAccel

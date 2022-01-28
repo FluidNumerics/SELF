@@ -26,6 +26,11 @@ MODULE SELF_Advection2D
     PROCEDURE :: Flux2D => Flux_Advection2D
     PROCEDURE :: RiemannSolver2D => RiemannSolver_Advection2D
 
+    GENERIC :: SetVelocityField => SetVelocityFieldFromChar_Advection2D,&
+                              SetVelocityFieldFromEqn_Advection2D
+    PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Advection2D
+    PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Advection2D
+
   END TYPE Advection2D
 
 CONTAINS
@@ -42,7 +47,7 @@ CONTAINS
     this % mesh => mesh
     this % geometry => geometry
 
-    CALL this % velocity % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -65,6 +70,39 @@ CONTAINS
     CALL this % fluxDivergence % Free()
 
   END SUBROUTINE Free_Advection2D
+
+  SUBROUTINE SetVelocityFieldFromEqn_Advection2D(this, eqn) 
+    IMPLICIT NONE
+    CLASS(Advection2D),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn(1:2)
+
+      ! Copy the equation parser
+      ! Set the x-component of the velocity
+      CALL this % velocity % SetEquation(1,1,eqn(1) % equation)
+
+      ! Set the y-component of the velocity
+      CALL this % velocity % SetEquation(2,1,eqn(2) % equation)
+
+      ! Set the velocity values using the equation parser
+      CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
+
+  END SUBROUTINE SetVelocityFieldFromEqn_Advection2D 
+
+  SUBROUTINE SetVelocityFieldFromChar_Advection2D(this, eqnChar) 
+    IMPLICIT NONE
+    CLASS(Advection2D),INTENT(inout) :: this
+    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % velocity % nVar)
+
+      ! Set the x-component of the velocity
+      CALL this % velocity % SetEquation(1,1,eqnChar(1))
+
+      ! Set the y-component of the velocity
+      CALL this % velocity % SetEquation(2,1,eqnChar(2))
+
+      ! Set the velocity values using the equation parser
+      CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
+
+  END SUBROUTINE SetVelocityFieldFromChar_Advection2D
 
   SUBROUTINE Source_Advection2D(this)
     IMPLICIT NONE

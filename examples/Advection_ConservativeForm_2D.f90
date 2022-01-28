@@ -46,12 +46,15 @@ USE SELF_Advection2D
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
+    ! Set the solution name
+    CALL semModel % solution % SetName(1,'Tracer')
+
     ! Enable GPU Acceleration (if a GPU is found) !
     CALL semModel % EnableGPUAccel()
 
     ! Set the velocity field
     velocityField = (/"vx=1.0","vy=1.0"/)
-    ! CALL semModel % SetVelocityField( velocityField )
+    CALL semModel % SetVelocityField( velocityField )
 
     ! Set the initial condition
     initialCondition = (/"s = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2 )/0.1 )"/)
