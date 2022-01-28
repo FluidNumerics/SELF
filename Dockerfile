@@ -111,13 +111,6 @@ RUN cd /opt/spack-environment && \
     spack install --fail-fast && \
     spack gc -y
 
-# Strip all the binaries
-RUN find -L /opt/view/* -type f -exec readlink -f '{}' \; | \
-    xargs file -i | \
-    grep 'charset=binary' | \
-    grep 'x-executable\|x-archive\|x-sharedlib' | \
-    awk -F: '{print $1}' | xargs strip -s
-
 # Modifications to the environment that are necessary to run
 RUN cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
@@ -127,6 +120,7 @@ COPY . /tmp
 RUN . /etc/profile.d/z10_spack_environment.sh && \
     cd /tmp && \
     HIP_PLATFORM=${HIP_PLATFORM} \
+    SELF_DIR=/tmp \
     SELF_PREFIX=/opt/self \
     PREC=${PREC} \
     GPU_TARGET=${GPU_TARGET} \

@@ -17,6 +17,7 @@
 #   Installation Options
 #     SELF_PREFIX            Set the path to install SELF (Default: /opt/self)
 #     BUILD                  Set the type of build. (Default: dev | Options : dev, release)
+#     SELF_DIR               Set the path to the repository root ( Default $(shell pwd) )
 #
 #   Precision Options
 #     PREC                   Set the floating point precision in SELF. (Default: single | Options : single, double)
@@ -47,10 +48,9 @@ SELF_DIR ?= .
 # Build Target
 install: all
 	mkdir -p $(SELF_PREFIX)
-	mv $(SELF_DIR)/*.mod $(SELF_DIR)/include/
-	mv $(SELF_DIR)/include $(SELF_DIR)/lib $(SELF_DIR)/obj $(SELF_DIR)/bin $(SELF_PREFIX)
+	mv -f $(SELF_DIR)/build/include $(SELF_DIR)/build/lib $(SELF_DIR)/build/obj $(SELF_DIR)/build/bin $(SELF_DIR)/build/examples $(SELF_PREFIX)
 
-all: self
+all: self examples
 
 include ${SELF_DIR}/make.include
 

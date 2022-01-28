@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Advection
+MODULE SELF_Advection2D
 
   USE SELF_Metadata
   USE SELF_Mesh
@@ -149,4 +149,4 @@ CONTAINS
 
   END SUBROUTINE RiemannSolver_Advection2D
 
-END MODULE SELF_Advection
+END MODULE SELF_Advection2D
