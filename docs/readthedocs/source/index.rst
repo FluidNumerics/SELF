@@ -7,8 +7,12 @@ Spectral Element Library in Fortran
 ====================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :caption: For Developers
+   :name: fordevelopers
+   :titlesonly:
+
+   Developers/add_a_model
+
 
 
 

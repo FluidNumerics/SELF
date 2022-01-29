@@ -176,3 +176,45 @@ extern "C"
 
   }
 }
+
+// VectorDGDivergence_2D //
+__global__ void FluxDivergence_Advection2D_SplitForm_gpu(real *dgMatrix, real *dMatrix, real *bMatrix, real *qWeights, real *f, real *solution, real* velocity, real *bf, real *df, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  real dfloc;
+
+  dfloc = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc += 0.5*(f[VE_2D_INDEX(1,ii,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
+                  f[VE_2D_INDEX(2,i,ii,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)]+
+                  solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]*
+                  ( velocity[VE_2D_INDEX(1,ii,j,1,iEl,N,nVar)] -
+                    velocity[VE_2D_INDEX(1,i,j,1,iEl,N,nVar)] )*dMatrix[ii + i*(N+1)]+
+                  solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]*
+                  ( velocity[VE_2D_INDEX(2,i,ii,1,iEl,N,nVar)] -
+                    velocity[VE_2D_INDEX(2,i,j,1,iEl,N,nVar)] )*dMatrix[ii+j*(N+1)]);
+  }
+
+  dfloc += (bf[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
+            bf[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
+           qWeights[i] +
+           (bf[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
+            bf[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
+           qWeights[j];
+
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc;
+
+
+}
+
+extern "C"
+{
+  void FluxDivergence_Advection2D_SplitForm_gpu_wrapper(real **dgMatrix, real **dMatrix, real **bMatrix, real **qWeights, real **f, real **solution, real **velocity, real **bf, real **df, int N, int nVar, int nEl)
+  {
+	  FluxDivergence_Advection2D_SplitForm_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *dMatrix, *bMatrix, *qWeights, *f, *solution, *velocity, *bf, *df, N, nVar);
+  } 
+}

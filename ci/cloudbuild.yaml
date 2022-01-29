@@ -1,6 +1,6 @@
 
 steps:
-- id: Build Docker Image (Nvidia GPU)
+- id: Build Docker Image
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
          '--build-arg','GPU_TARGET=${_GPU_TARGET}',
@@ -12,7 +12,15 @@ steps:
          'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
   waitFor: ["-"]
 
-    #- id: CI/CB (Singularity Nvidia)
+
+- id: Convert to Singularity
+  name: 'quay.io/singularity/singularity:v3.7.1'
+  args: ['build',
+         'self.sif',
+         'docker-daemon://gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+  waitFor: ["Build Docker Image"]
+
+    #- id: Fluid Run
     #  name: 'gcr.io/research-computing-cloud/fluid-run'
     #  args: 
     #  - '--build-id=${BUILD_ID}'
@@ -23,7 +31,7 @@ steps:
     #  - '--artifact-type=singularity'
     #  - '--compiler="gcc@9.3.0"'
     #  - '--target-arch=""'
-    #  - '--singularity-image=self-nvidia.sif'
+    #  - '--singularity-image=self.sif'
     #  - '--rcc-tfvars=ci/fluid.auto.tfvars'
     #  - '--ci-file=fluid-run.yaml'
     #  - '--save-results'
@@ -40,7 +48,7 @@ timeout: 14400s
 
 
 substitutions:
-  _ZONE: 'us-west1-b'
+  #  _ZONE: 'us-west1-b'
   _PREC: 'single'
   _GPU_TARGET: 'sm_72'
   _HIP_PLATFORM: 'nvidia'
