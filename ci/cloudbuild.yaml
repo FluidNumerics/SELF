@@ -6,19 +6,18 @@ steps:
          '--build-arg','GPU_TARGET=${_GPU_TARGET}',
          '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
          '--build-arg','PREC=${_PREC}',
-         '-f','img/Dockerfile',
          '.',
          '-t',
          'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
   waitFor: ["-"]
 
 
-- id: Convert to Singularity
-  name: 'quay.io/singularity/singularity:v3.7.1'
-  args: ['build',
-         'self.sif',
-         'docker-daemon://gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
-  waitFor: ["Build Docker Image"]
+    #- id: Convert to Singularity
+    #  name: 'quay.io/singularity/singularity:v3.7.1'
+    #  args: ['build',
+    #         'self.sif',
+    #         'docker-daemon://gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+    #  waitFor: ["Build Docker Image"]
 
     #- id: Fluid Run
     #  name: 'gcr.io/research-computing-cloud/fluid-run'

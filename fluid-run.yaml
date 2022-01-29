@@ -1,19 +1,6 @@
 tests:
-- command_group: "sadv2d"
-  execution_command: "test/sadv2d/gaussian_blockmesh/gpu_nvidia.sh"
-  output_directory: "test/sadv2d/gaussian_blockmesh/"
+- command_group: "Advection_ConservativeForm_2D"
+  execution_command: "singularity run --nv /opt/self/examples/Advection_ConservativeForm_2D"
+  output_directory: "example/Advection_ConservativeForm_2D_output/"
   partition: "v100"
   batch_options: "-N1 --time=30:00 --gres=gpu:1"
-
-- command_group: "sadv2d"
-  execution_command: "test/sadv2d/gaussian_square_hohqmesh/gpu_nvidia.sh"
-  output_directory: "test/sadv2d/gaussian_square_hohqmesh/"
-  partition: "v100"
-  batch_options: "-N1 --time=30:00 --gres=gpu:1"
-
-- command_group: "sadv2d"
-  execution_command: "test/sadv2d/gaussian_spline_hohqmesh/gpu_nvidia.sh"
-  output_directory: "test/sadv2d/gaussian_spline_hohqmesh/"
-  partition: "v100"
-  batch_options: "-N1 --time=30:00 --gres=gpu:1"
-
