@@ -512,6 +512,7 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
   END SUBROUTINE SetSolutionFromEqn_Model1D 
 
@@ -527,6 +528,7 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
   END SUBROUTINE SetSolutionFromChar_Model1D
 
@@ -987,6 +989,8 @@ CONTAINS
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
 
+      CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
   END SUBROUTINE SetSolutionFromEqn_Model2D 
 
   SUBROUTINE SetSolutionFromChar_Model2D(this, eqnChar) 
@@ -1001,6 +1005,8 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
+
+      CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
   END SUBROUTINE SetSolutionFromChar_Model2D
 
@@ -1053,31 +1059,8 @@ CONTAINS
   SUBROUTINE ReprojectFlux_Model2D(this) 
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl, iVar, j, i
-    REAL(prec) :: Fx, Fy
 
-      DO iEl = 1,this % solution % nElem
-        DO iVar = 1, this % solution % nVar
-          DO j = 0, this % solution % interp % N
-            DO i = 0, this % solution % interp % N
-
-              Fx = this % flux % interior % hostData(1,i,j,iVar,iEl)
-              Fy = this % flux % interior % hostData(2,i,j,iVar,iEl)
-
-              this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                this % geometry % dsdx % interior % hostData(1,1,i,j,1,iel)*Fx + &
-                this % geometry % dsdx % interior % hostData(2,1,i,j,1,iel)*Fy 
-
-              this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                this % geometry % dsdx % interior % hostData(1,2,i,j,1,iel)*Fx + &
-                this % geometry % dsdx % interior % hostData(2,2,i,j,1,iel)*Fy 
-
-
-            ENDDO
-          ENDDO
-        ENDDO
-      ENDDO
+      CALL this % flux % ContravariantProjection(this % geometry, this % flux, this % gpuAccel)
 
   END SUBROUTINE ReprojectFlux_Model2D
 
