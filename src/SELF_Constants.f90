@@ -59,12 +59,6 @@ INTEGER, PARAMETER :: SELF_FILE_DEFAULT_LENGTH=500
 ! ************************************************************!
 !                                                             !
 ! ------------------------------------------------------------!
-! Runge-Kutta 3rd Order, low storage constants
-  REAL(prec),PARAMETER :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
-  REAL(prec),PARAMETER :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
-  REAL(prec),PARAMETER :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
-  INTEGER, PARAMETER :: EULER = 100
-  INTEGER, PARAMETER :: RK3 = 203
 
 !*************************************************************!
 ! ------------------- PHYSICAL CONSTANTS ---------------------!

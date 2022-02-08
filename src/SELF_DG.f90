@@ -1,7 +1,7 @@
 !
-! Copyright 2020 Fluid Numerics LLC
+! Copyright 2020-2022 Fluid Numerics LLC
 ! Author : Joseph Schoonover (joe@fluidnumerics.com)
-! Support : self@higherordermethods.org
+! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
 MODULE SELF_DG
@@ -42,6 +42,7 @@ MODULE SELF_DG
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_DG2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_DG2D
 
+!    PROCEDURE,PUBLIC :: FluxMethod => FluxMethod_DG2D
     PROCEDURE,PUBLIC :: CalculateSolutionGradient => CalculateSolutionGradient_DG2D
     PROCEDURE,PUBLIC :: CalculateFluxDivergence => CalculateFluxDivergence_DG2D
     PROCEDURE,PUBLIC :: CalculateDSDt => CalculateDSDt_DG2D
@@ -111,7 +112,7 @@ MODULE SELF_DG
 
 CONTAINS
 
-  SUBROUTINE Init_DG2D(this,cqType,tqType,cqDegree,tqDegree,nvar,enableMPI,spec)
+  SUBROUTINE Init_DG2D(this,interp,nvar,enableMPI,spec)
     IMPLICIT NONE
     CLASS(DG2D),INTENT(out) :: this
     INTEGER,INTENT(in) :: cqType
@@ -134,18 +135,18 @@ CONTAINS
     ! Create geometry from mesh
     CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
-    CALL this % solution % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % solution % Init(interp,nVar,this % mesh % nElem)
     CALL this % plotSolution % Init(tqDegree,tqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % dSdt % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % solutionGradient % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % flux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % fluxDivergence % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % dSdt % Init(interp,nVar,this % mesh % nElem)
+    CALL this % solutionGradient % Init(interp,nVar,this % mesh % nElem)
+    CALL this % flux % Init(interp,nVar,this % mesh % nElem)
+    CALL this % source % Init(interp,nVar,this % mesh % nElem)
+    CALL this % fluxDivergence % Init(interp,nVar,this % mesh % nElem)
 
-    CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % compFlux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % workScalar % Init(interp,nVar,this % mesh % nElem)
+    CALL this % workVector % Init(interp,nVar,this % mesh % nElem)
+    CALL this % workTensor % Init(interp,nVar,this % mesh % nElem)
+    CALL this % compFlux % Init(interp,nVar,this % mesh % nElem)
 
     ALLOCATE (this % solutionMetaData(1:nvar))
 
@@ -248,7 +249,7 @@ CONTAINS
       CALL CalculateDSDt_DG2D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
                                       this % source % interior % deviceData, &
                                       this % dSdt % interior % deviceData, &
-                                      this % solution % N, &
+                                      this % solution % interp % N, &
                                       this % solution % nVar, &
                                       this % solution % nElem ) 
                                       
@@ -256,8 +257,8 @@ CONTAINS
 
       DO iEl = 1, this % solution % nElem
         DO iVar = 1, this % solution % nVar
-          DO j = 0, this % solution % N
-            DO i = 0, this % solution % N
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
 
               this % dSdt % interior % hostData(i,j,iVar,iEl) = &
                       this % source % interior % hostData(i,j,iVar,iEl) -&
@@ -294,29 +295,29 @@ CONTAINS
 
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
       solOffset(1:4) = (/0,0,1,firstElem/)
-      solGlobalDims(1:4) = (/this % solution % N, &
-                             this % solution % N, &
+      solGlobalDims(1:4) = (/this % solution % interp % N, &
+                             this % solution % interp % N, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
 
 
       xOffset(1:5) = (/1,0,0,1,firstElem/)
       xGlobalDims(1:5) = (/2, &
-                           this % solution % N, &
-                           this % solution % N, &
+                           this % solution % interp % N, &
+                           this % solution % interp % N, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 
       ! Offsets and dimensions for element boundary data
       bOffset(1:4) = (/0,1,1,firstElem/)
-      bGlobalDims(1:4) = (/this % solution % N, &
+      bGlobalDims(1:4) = (/this % solution % interp % N, &
                            this % solution % nVar, &
                            4,&
                            this % decomp % nElem/)
 
       bxOffset(1:5) = (/1,0,1,1,firstElem/)
       bxGlobalDims(1:5) = (/2,&
-                           this % solution % N, &
+                           this % solution % interp % N, &
                            this % solution % nVar, &
                            4,&
                            this % decomp % nElem/)
@@ -452,7 +453,7 @@ CONTAINS
 
     CALL ReadAttribute_HDF5(fileId,'N',N)
 
-    IF (this % solution % N /= N) THEN
+    IF (this % solution % interp % N /= N) THEN
       STOP 'Error : Solution polynomial degree does not match input file'
     END IF
 
@@ -490,17 +491,17 @@ CONTAINS
     ! Create geometry from mesh
     CALL this % geometry % GenerateFromMesh(this % mesh,cqType,tqType,cqDegree,tqDegree)
 
-    CALL this % solution % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % dSdt % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % solutionGradient % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % flux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % source % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % fluxDivergence % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % solution % Init(interp,nVar,this % mesh % nElem)
+    CALL this % dSdt % Init(interp,nVar,this % mesh % nElem)
+    CALL this % solutionGradient % Init(interp,nVar,this % mesh % nElem)
+    CALL this % flux % Init(interp,nVar,this % mesh % nElem)
+    CALL this % source % Init(interp,nVar,this % mesh % nElem)
+    CALL this % fluxDivergence % Init(interp,nVar,this % mesh % nElem)
 
-    CALL this % workScalar % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % workVector % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % workTensor % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
-    CALL this % compFlux % Init(cqDegree,cqType,tqDegree,tqType,nVar,this % mesh % nElem)
+    CALL this % workScalar % Init(interp,nVar,this % mesh % nElem)
+    CALL this % workVector % Init(interp,nVar,this % mesh % nElem)
+    CALL this % workTensor % Init(interp,nVar,this % mesh % nElem)
+    CALL this % compFlux % Init(interp,nVar,this % mesh % nElem)
 
     ALLOCATE (this % solutionMetaData(1:nvar))
 
@@ -602,7 +603,7 @@ CONTAINS
       CALL CalculateDSDt_DG3D_gpu_wrapper( this % fluxDivergence % interior % deviceData, &
                                       this % source % interior % deviceData, &
                                       this % dSdt % interior % deviceData, &
-                                      this % solution % N, &
+                                      this % solution % interp % N, &
                                       this % solution % nVar, &
                                       this % solution % nElem ) 
                                       
@@ -610,9 +611,9 @@ CONTAINS
 
       DO iEl = 1, this % solution % nElem
         DO iVar = 1, this % solution % nVar
-          DO k = 0, this % solution % N
-            DO j = 0, this % solution % N
-              DO i = 0, this % solution % N
+          DO k = 0, this % solution % interp % N
+            DO j = 0, this % solution % interp % N
+              DO i = 0, this % solution % interp % N
 
                 this % dSdt % interior % hostData(i,j,k,iVar,iEl) = &
                         this % source % interior % hostData(i,j,k,iVar,iEl) -&
@@ -651,31 +652,31 @@ CONTAINS
 
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
       solOffset(1:5) = (/0,0,0,1,firstElem/)
-      solGlobalDims(1:5) = (/this % solution % N, &
-                             this % solution % N, &
-                             this % solution % N, &
+      solGlobalDims(1:5) = (/this % solution % interp % N, &
+                             this % solution % interp % N, &
+                             this % solution % interp % N, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
       xOffset(1:6) = (/1,0,0,0,1,firstElem/)
       xGlobalDims(1:6) = (/3, &
-                           this % solution % N, &
-                           this % solution % N, &
-                           this % solution % N, &
+                           this % solution % interp % N, &
+                           this % solution % interp % N, &
+                           this % solution % interp % N, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 
       ! Offsets and dimensions for element boundary data
       bOffset(1:5) = (/0,0,1,1,firstElem/)
-      bGlobalDims(1:5) = (/this % solution % N, &
-                           this % solution % N, &
+      bGlobalDims(1:5) = (/this % solution % interp % N, &
+                           this % solution % interp % N, &
                            this % solution % nVar, &
                            6,&
                            this % decomp % nElem/)
 
       bxOffset(1:6) = (/1,0,0,1,1,firstElem/)
       bxGlobalDims(1:6) = (/3,&
-                           this % solution % N, &
-                           this % solution % N, &
+                           this % solution % interp % N, &
+                           this % solution % interp % N, &
                            this % solution % nVar, &
                            6,&
                            this % decomp % nElem/)
@@ -811,7 +812,7 @@ CONTAINS
 
     CALL ReadAttribute_HDF5(fileId,'N',N)
 
-    IF (this % solution % N /= N) THEN
+    IF (this % solution % interp % N /= N) THEN
       STOP 'Error : Solution polynomial degree does not match input file'
     END IF
 

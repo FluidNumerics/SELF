@@ -1,0 +1,42 @@
+spack:
+  specs:
+    - hipfort@4.5.2
+    - openmpi@4.0.2 +internal-hwloc
+    - hdf5@1.12.0+cxx+fortran+mpi
+    - json-fortran@7.1.0
+    - feq-parse@1.1.0
+    - flap@master
+
+  packages:
+    cuda:
+      buildable: False
+      externals:
+      - spec: cuda%gcc
+        prefix: /usr/local/cuda
+    hip:
+      buildable: False
+      externals:
+      - spec: hip%gcc
+        prefix: /opt/rocm/
+
+
+  container:
+    format: docker
+
+    images:
+      os: nvidia/cuda:11.2.1
+      spack: develop
+
+    strip: true
+
+    extra_instructions:
+      final: |
+        COPY . /tmp
+        
+        RUN . /etc/profile.d/z10_spack_environment.sh && \
+            cd /tmp && \
+            HIP_PLATFORM=nvidia \
+            SELF_PREFIX=/opt/self \
+            PREC=double \
+            HIPFORT_GPU=sm_72 \
+            make

@@ -34,8 +34,12 @@ MODULE SELF_Lagrange
     INTEGER :: N
       !! The number of control points.
 
+    INTEGER :: controlNodeType
+
     INTEGER :: M
       !! The number of target points.
+
+    INTEGER :: targetNodeType
 
     TYPE(hfReal_r1) :: controlPoints
       !! The set of nodes in one dimension where data is known.
@@ -538,6 +542,8 @@ CONTAINS
 
     myPoly % N = N
     myPoly % M = M
+    myPoly % controlNodeType = controlNodeType
+    myPoly % targetNodeType = targetNodeType
 
     CALL myPoly % controlPoints % Alloc(loBound=0, &
                                         upBound=N)
