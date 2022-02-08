@@ -84,7 +84,7 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: Divergence_MappedVector2D
     PROCEDURE,PRIVATE :: Gradient_MappedVector2D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector2D
-    PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector2D
+    PROCEDURE,PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector2D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector2D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector2D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector2D
@@ -109,7 +109,7 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: Divergence_MappedVector3D
 !    PROCEDURE,PRIVATE :: Curl_MappedVector3D
     PROCEDURE,PRIVATE :: Gradient_MappedVector3D
-    PROCEDURE,PRIVATE :: ContravariantProjection => ContravariantProjection_MappedVector3D
+    PROCEDURE,PUBLIC :: ContravariantProjection => ContravariantProjection_MappedVector3D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedVector3D
     PROCEDURE,PRIVATE :: MapToScalar => MapToScalar_MappedVector3D
     PROCEDURE,PRIVATE :: MapToTensor => MapToTensor_MappedVector3D
@@ -1857,9 +1857,8 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
-    INTEGER :: i,j,ivar,iel,iside
-    REAL(prec) :: nhat(1:2)
-    REAL(prec) :: nmag
+    INTEGER :: i,j,ivar,iel
+    REAL(prec) :: Fx, Fy
 
     IF (gpuAccel) THEN
 
@@ -1870,12 +1869,6 @@ CONTAINS
                                                               physVector % nVar, &
                                                               physVector % nElem)
 
-      CALL ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(physVector % boundary % deviceData, &
-                                                                      compVector % boundaryNormal % deviceData, &
-                                                                      geometry % nHat % boundary % deviceData, &
-                                                                      physVector % interp % N, &
-                                                                      physVector % nVar, &
-                                                                      physVector % nElem)
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
@@ -1885,35 +1878,16 @@ CONTAINS
           DO j = 0,physVector % interp % N
             DO i = 0,physVector % interp % N
 
+              Fx = physVector % interior % hostData(1,i,j,ivar,iel)
+              Fy = physVector % interior % hostData(2,i,j,ivar,iel)
+
               compVector % interior % hostData(1,i,j,ivar,iel) = &
-                geometry % dsdx % interior % hostData(1,1,i,j,1,iel)* &
-                physVector % interior % hostData(1,i,j,ivar,iel) + &
-                geometry % dsdx % interior % hostData(2,1,i,j,1,iel)* &
-                physVector % interior % hostData(2,i,j,ivar,iel)
+                geometry % dsdx % interior % hostData(1,1,i,j,1,iel)*Fx + &
+                geometry % dsdx % interior % hostData(2,1,i,j,1,iel)*Fy
 
               compVector % interior % hostData(2,i,j,ivar,iel) = &
-                geometry % dsdx % interior % hostData(1,2,i,j,1,iel)* &
-                physVector % interior % hostData(1,i,j,ivar,iel) + &
-                geometry % dsdx % interior % hostData(2,2,i,j,1,iel)* &
-                physVector % interior % hostData(2,i,j,ivar,iel)
-
-            END DO
-          END DO
-        END DO
-      END DO
-
-      ! Boundary Terms
-      DO iel = 1,physVector % nElem
-        DO iside = 1,4
-          DO ivar = 1,physVector % nVar
-            DO j = 0,physVector % interp % N
-
-              nhat(1:2) = geometry % nHat % boundary % hostData(1:2,j,1,iSide,iEl)
-              nmag = geometry % nScale % boundary % hostData(j,1,iSide,iEl)
-
-              compVector % boundaryNormal % hostData(j,ivar,iside,iel) = & 
-                ( nhat(1)*physVector % boundary % hostData(1,j,ivar,iside,iel) + &
-                  nhat(2)*physVector % boundary % hostData(2,j,ivar,iside,iel) )*nmag
+                geometry % dsdx % interior % hostData(1,2,i,j,1,iel)*Fx + &
+                geometry % dsdx % interior % hostData(2,2,i,j,1,iel)*Fy
 
             END DO
           END DO
@@ -2413,9 +2387,8 @@ CONTAINS
     TYPE(SEMHex),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
-    INTEGER :: i,j,k,iVar,iEl,iside
-    REAL(prec) :: nHat(1:3)
-    REAL(prec) :: nmag
+    INTEGER :: i,j,k,iVar,iEl
+    REAL(prec) :: Fx, Fy, Fz
 
     IF (gpuAccel) THEN
 
@@ -2426,12 +2399,6 @@ CONTAINS
                                                               physVector % nVar, &
                                                               physVector % nElem)
 
-      CALL ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(physVector % boundary % deviceData, &
-                                                                      compVector % boundaryNormal % deviceData, &
-                                                                      geometry % nHat % boundary % deviceData, &
-                                                                      physVector % interp % N, &
-                                                                      physVector % nVar, &
-                                                                      physVector % nElem)
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension to
@@ -2442,50 +2409,24 @@ CONTAINS
             DO j = 0,physVector % interp % N
               DO i = 0,physVector % interp % N
 
+                Fx = physVector % interior % hostData(1,i,j,k,iVar,iEl)
+                Fy = physVector % interior % hostData(2,i,j,k,iVar,iEl)
+                Fz = physVector % interior % hostData(3,i,j,k,iVar,iEl)
+
                 compVector % interior % hostData(1,i,j,k,iVar,iEl) = &
-                  geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
-                  geometry % dsdx % interior % hostData(2,1,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
-                  geometry % dsdx % interior % hostData(3,1,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                  geometry % dsdx % interior % hostData(1,1,i,j,k,1,iEl)*Fx + &
+                  geometry % dsdx % interior % hostData(2,1,i,j,k,1,iEl)*Fy + &
+                  geometry % dsdx % interior % hostData(3,1,i,j,k,1,iEl)*Fz
 
                 compVector % interior % hostData(2,i,j,k,iVar,iEl) = &
-                  geometry % dsdx % interior % hostData(1,2,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
-                  geometry % dsdx % interior % hostData(2,2,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
-                  geometry % dsdx % interior % hostData(3,2,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(3,i,j,k,iVar,iEl)
+                  geometry % dsdx % interior % hostData(1,2,i,j,k,1,iEl)*Fx + &
+                  geometry % dsdx % interior % hostData(2,2,i,j,k,1,iEl)*Fy + &
+                  geometry % dsdx % interior % hostData(3,2,i,j,k,1,iEl)*Fz
 
                 compVector % interior % hostData(3,i,j,k,iVar,iEl) = &
-                  geometry % dsdx % interior % hostData(1,3,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(1,i,j,k,iVar,iEl) + &
-                  geometry % dsdx % interior % hostData(2,3,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(2,i,j,k,iVar,iEl) + &
-                  geometry % dsdx % interior % hostData(3,3,i,j,k,1,iEl)* &
-                  physVector % interior % hostData(3,i,j,k,iVar,iEl)
-
-              END DO
-            END DO
-          END DO
-        END DO
-      END DO
-
-      ! Boundary Terms
-      DO iEl = 1,physVector % nElem
-        DO iside = 1,6
-          DO iVar = 1,physVector % nVar
-            DO k = 0,physVector % interp % N
-              DO j = 0,physVector % interp % N
-
-                nHat(1:3) = geometry % nHat % boundary % hostData(1:3,j,k,1,iSide,iEl)
-                nmag = geometry % nScale % boundary % hostData(j,k,1,iSide,iEl)
-
-                compVector % boundaryNormal % hostData(j,k,iVar,iside,iEl) = &
-                  ( nHat(1)*physVector % boundary % hostData(1,j,k,iVar,iside,iEl) + &
-                    nHat(2)*physVector % boundary % hostData(2,j,k,iVar,iside,iEl) + &
-                    nHat(3)*physVector % boundary % hostData(3,j,k,iVar,iside,iEl) )*nmag
+                  geometry % dsdx % interior % hostData(1,3,i,j,k,1,iEl)*Fx + &
+                  geometry % dsdx % interior % hostData(2,3,i,j,k,1,iEl)*Fy + &
+                  geometry % dsdx % interior % hostData(3,3,i,j,k,1,iEl)*Fz
 
               END DO
             END DO
