@@ -619,6 +619,10 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
   END SUBROUTINE SetSolutionFromEqn_Model1D 
 
   SUBROUTINE SetSolutionFromChar_Model1D(this, eqnChar) 
@@ -635,6 +639,10 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
   END SUBROUTINE SetSolutionFromChar_Model1D
 
   SUBROUTINE SetVelocityFieldFromEqn_Model1D(this, eqn) 
@@ -649,6 +657,12 @@ CONTAINS
       ! Set the velocity values using the equation parser
       CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
 
+      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % velocity % UpdateDevice()
+      ENDIF
+
   END SUBROUTINE SetVelocityFieldFromEqn_Model1D 
 
   SUBROUTINE SetVelocityFieldFromChar_Model1D(this, eqnChar) 
@@ -661,6 +675,12 @@ CONTAINS
 
       ! Set the velocity values using the equation parser
       CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
+
+      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % velocity % UpdateDevice()
+      ENDIF
 
   END SUBROUTINE SetVelocityFieldFromChar_Model1D
 
@@ -1131,6 +1151,10 @@ CONTAINS
 
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
   END SUBROUTINE SetSolutionFromEqn_Model2D 
 
   SUBROUTINE SetVelocityFieldFromEqn_Model2D(this, eqn) 
@@ -1148,6 +1172,12 @@ CONTAINS
       ! Set the velocity values using the equation parser
       CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
 
+      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % velocity % UpdateDevice()
+      ENDIF
+
   END SUBROUTINE SetVelocityFieldFromEqn_Model2D 
 
   SUBROUTINE SetVelocityFieldFromChar_Model2D(this, eqnChar) 
@@ -1163,6 +1193,12 @@ CONTAINS
 
       ! Set the velocity values using the equation parser
       CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
+
+      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % velocity % UpdateDevice()
+      ENDIF
 
   END SUBROUTINE SetVelocityFieldFromChar_Model2D
 
@@ -1180,6 +1216,10 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
 
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
 
   END SUBROUTINE SetSolutionFromChar_Model2D
 
