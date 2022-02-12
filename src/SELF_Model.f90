@@ -159,6 +159,7 @@ MODULE SELF_Model
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
+    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Model2D
 
     GENERIC :: SetSolution => SetSolutionFromChar_Model2D,&
                               SetSolutionFromEqn_Model2D
@@ -1135,6 +1136,13 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Model2D
 
+  SUBROUTINE SetBoundaryCondition_Model2D(this)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+
+      RETURN
+
+  END SUBROUTINE SetBoundaryCondition_Model2D 
   SUBROUTINE SetSolutionFromEqn_Model2D(this, eqn) 
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
@@ -1322,7 +1330,7 @@ CONTAINS
 
 !      CALL this % solution % AverageSides()
 !      CALL this % solution % DiffSides()
-!      CALL this % SetBoundaryCondition()
+      CALL this % SetBoundaryCondition()
       CALL this % PreTendency()
       CALL this % Source2D()
       CALL this % RiemannSolver2D()

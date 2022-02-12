@@ -904,7 +904,7 @@ CONTAINS
 
     ! HOHQMesh reports interpolant data on Chebyshev Lobatto points
     ! We want data to be interpolated to Legendre Gauss Lobatto points
-    CALL interp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,nGeo,GAUSS_LOBATTO)
+    CALL interp % Init(nGeo,GAUSS_LOBATTO,nGeo,GAUSS_LOBATTO)
 
     ! When we initialize the mesh, we set nNodes=nElem*4*(nGeo+1)**2 and
     ! nSides = nElem*4 since we still use `nNodes` and `nSides`
@@ -1020,7 +1020,23 @@ CONTAINS
       END DO
     END DO
 
-    CALL myMesh % GenerateConnectivity()
+    !CALL myMesh % GenerateConnectivity()
+    ! TO DO : Fill in self_sideInfo from hohq_sideInfo
+    ! hohq_sideInfo
+    !    1 - start node ID
+    !    2 - end node ID
+    !    3 - element ID on the left
+    !    4 - element ID on the right
+    !    5 - local side of left element
+    !    6 - local side of right element (negative if flipped)
+    !
+    ! self_sideInfo
+    !   1 - side type
+    !   2 - global side id
+    !   3 - neighbor element id
+    !   4 - encoding for neighbor side id and flip (10*s2 + flip)
+    !   5 - boundary condition ID
+
 
     CALL interp % Free()
 
