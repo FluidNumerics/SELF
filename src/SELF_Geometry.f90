@@ -320,7 +320,7 @@ CONTAINS
     IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
-      quadrature = CHEBYSHEV_GAUSS_LOBATTO
+      quadrature = GAUSS_LOBATTO
     END IF
 
     CALL myGeom % Init(interp,mesh % nElem)
@@ -385,6 +385,7 @@ CONTAINS
         END DO
       END DO
     END DO
+    STOP
 
     ! Interpolate the contravariant tensor to the boundaries
     CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)

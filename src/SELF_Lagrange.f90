@@ -1449,22 +1449,24 @@ CONTAINS
     REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
+    REAL(prec) :: gf(1:2,1:2)
 
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            gradF(1,1,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,1,i,j,iVar,iEl) = 0.0_prec
-            gradF(1,2,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,2,i,j,iVar,iEl) = 0.0_prec
+            gf(1,1) = 0.0_prec
+            gf(2,1) = 0.0_prec
+            gf(1,2) = 0.0_prec
+            gf(2,2) = 0.0_prec
             DO ii = 0,myPoly % N
-              gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
-              gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
-              gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
-              gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
+              gf(1,1) = gf(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+              gf(2,1) = gf(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+              gf(1,2) = gf(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+              gf(2,2) = gf(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
+            gradF(1:2,1:2,i,j,iVar,iEl) = gf(1:2,1:2)
 
           END DO
         END DO
@@ -1606,6 +1608,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
     REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
+    REAL(prec) :: dfLoc
     INTEGER    :: i,j,ii,iVar,iEl
 
     DO iEl = 1,nElements
@@ -1613,18 +1616,20 @@ CONTAINS
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            dF(i,j,iVar,iEl) = 0.0_prec
+            dfLoc = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
+              dfLoc = dfLoc + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
                                  myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
-            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
+            dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
                                                    myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
                                myPoly % qWeights % hostData(i) + &
                                (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
                                 myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
+            dF(i,j,iVar,iEl) = dFLoc
+            PRINT*, dFLoc
 
           END DO
         END DO

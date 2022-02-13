@@ -53,7 +53,7 @@ MODULE SELF_Model
 
   TYPE,ABSTRACT :: Model
     LOGICAL :: gpuAccel
-    INTEGER :: fluxMethod
+    INTEGER :: fluxDivMethod
 
     ! Time integration attributes
     INTEGER :: timeIntegrator
@@ -66,6 +66,11 @@ MODULE SELF_Model
     PROCEDURE :: ForwardStepEuler => ForwardStepEuler_Model 
 
     PROCEDURE :: PreTendency => PreTendency_Model
+    PROCEDURE :: SourceMethod => Source_Model
+    PROCEDURE :: FluxMethod => Flux_Model
+    PROCEDURE :: RiemannSolver => RiemannSolver_Model
+    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Model
+
     PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
     PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
 
@@ -123,10 +128,6 @@ MODULE SELF_Model
     PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Model1D
     PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Model1D
 
-    PROCEDURE(Source1D),DEFERRED :: Source1D
-    PROCEDURE(Flux1D),DEFERRED :: Flux1D
-    PROCEDURE(RiemannSolver1D),DEFERRED :: RiemannSolver1D
-
 !    PROCEDURE :: ReprojectFlux => ReprojectFlux_Model1D
 
     PROCEDURE :: Read => Read_Model1D
@@ -135,7 +136,7 @@ MODULE SELF_Model
 
   END TYPE Model1D
 
-  TYPE,EXTENDS(Model),ABSTRACT :: Model2D
+  TYPE,EXTENDS(Model) :: Model2D
     TYPE(MappedScalar2D) :: solution
     TYPE(MappedVector2D) :: solutionGradient
     TYPE(MappedVector2D) :: velocity
@@ -159,7 +160,6 @@ MODULE SELF_Model
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
-    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Model2D
 
     GENERIC :: SetSolution => SetSolutionFromChar_Model2D,&
                               SetSolutionFromEqn_Model2D
@@ -170,10 +170,6 @@ MODULE SELF_Model
                               SetVelocityFieldFromEqn_Model2D
     PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Model2D
     PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Model2D
-
-    PROCEDURE(Source2D),DEFERRED :: Source2D
-    PROCEDURE(Flux2D),DEFERRED :: Flux2D
-    PROCEDURE(RiemannSolver2D),DEFERRED :: RiemannSolver2D
 
     PROCEDURE :: ReprojectFlux => ReprojectFlux_Model2D
 
@@ -201,53 +197,6 @@ MODULE SELF_Model
     END SUBROUTINE CalculateTendency
   END INTERFACE
 
-  INTERFACE 
-    SUBROUTINE Flux1D( this )
-      IMPORT Model1D
-      IMPLICIT NONE
-      CLASS(Model1D),INTENT(inout) :: this
-    END SUBROUTINE Flux1D
-  END INTERFACE
-
-  INTERFACE 
-    SUBROUTINE Source1D( this )
-      IMPORT Model1D
-      IMPLICIT NONE
-      CLASS(Model1D),INTENT(inout) :: this
-    END SUBROUTINE Source1D
-  END INTERFACE
-
-  INTERFACE 
-    SUBROUTINE RiemannSolver1D( this )
-      IMPORT Model1D
-      IMPLICIT NONE
-      CLASS(Model1D),INTENT(inout) :: this
-    END SUBROUTINE RiemannSolver1D
-  END INTERFACE
-
-  INTERFACE 
-    SUBROUTINE Flux2D( this )
-      IMPORT Model2D
-      IMPLICIT NONE
-      CLASS(Model2D),INTENT(inout) :: this
-    END SUBROUTINE Flux2D
-  END INTERFACE
-
-  INTERFACE 
-    SUBROUTINE Source2D( this )
-      IMPORT Model2D
-      IMPLICIT NONE
-      CLASS(Model2D),INTENT(inout) :: this
-    END SUBROUTINE Source2D
-  END INTERFACE
-
-  INTERFACE 
-    SUBROUTINE RiemannSolver2D( this )
-      IMPORT Model2D
-      IMPLICIT NONE
-      CLASS(Model2D),INTENT(inout) :: this
-    END SUBROUTINE RiemannSolver2D
-  END INTERFACE
 
   INTERFACE
     SUBROUTINE UpdateSolution_Model1D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
@@ -320,6 +269,41 @@ CONTAINS
 
   END SUBROUTINE PreTendency_Model
 
+  SUBROUTINE Source_Model(this)
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+      RETURN
+
+  END SUBROUTINE Source_Model
+
+  SUBROUTINE RiemannSolver_Model(this)
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+      RETURN
+
+  END SUBROUTINE RiemannSolver_Model
+
+  SUBROUTINE Flux_Model(this)
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+      RETURN
+
+  END SUBROUTINE Flux_Model
+
+  SUBROUTINE SetBoundaryCondition_Model(this)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+      RETURN
+
+  END SUBROUTINE SetBoundaryCondition_Model 
+  
   SUBROUTINE SetTimeIntegrator_withInt(this,integrator)
     !! Sets the time integrator method, using an integer flag
     !!
@@ -374,23 +358,23 @@ CONTAINS
 
   END SUBROUTINE SetTimeIntegrator_withChar
 
-  SUBROUTINE SetFluxMethod_withInt(this,fluxMethod)
+  SUBROUTINE SetFluxMethod_withInt(this,fluxDivMethod)
     !! Sets the method for calculating the flux divergence, using an integer flag
     !!
-    !! Valid options for `fluxMethod` are
+    !! Valid options for `fluxDivMethod` are
     !!
     !!    SELF_CONSERVATIVE_FLUX
     !!    SELF_SPLITFORM_FLUX
     !!
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
-    INTEGER, INTENT(in) :: fluxMethod
+    INTEGER, INTENT(in) :: fluxDivMethod
 
-      this % fluxMethod = fluxMethod
+      this % fluxDivMethod = fluxDivMethod
 
   END SUBROUTINE SetFluxMethod_withInt
 
-  SUBROUTINE SetFluxMethod_withChar(this,fluxMethod)
+  SUBROUTINE SetFluxMethod_withChar(this,fluxDivMethod)
     !! Sets the method for calculating the flux divergence, using a character input
     !!
     !! Valid options for flux method are
@@ -402,31 +386,31 @@ CONTAINS
     !!
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: fluxMethod
+    CHARACTER(*), INTENT(in) :: fluxDivMethod
     ! Local
     CHARACTER(SELF_FORMULATION_LENGTH) :: upperCaseInt
 
-      upperCaseInt = UpperCase(TRIM(fluxMethod))
+      upperCaseInt = UpperCase(TRIM(fluxDivMethod))
 
       SELECT CASE (TRIM(upperCaseInt))
 
         CASE ("CONSERVATIVE")
-          this % fluxMethod = SELF_CONSERVATIVE_FLUX
+          this % fluxDivMethod = SELF_CONSERVATIVE_FLUX
 
         CASE ("SPLIT")
-          this % fluxMethod = SELF_SPLITFORM_FLUX
+          this % fluxDivMethod = SELF_SPLITFORM_FLUX
 
         CASE ("SPLITFORM")
-          this % fluxMethod = SELF_SPLITFORM_FLUX
+          this % fluxDivMethod = SELF_SPLITFORM_FLUX
 
         CASE ("SPLIT FORM")
-          this % fluxMethod = SELF_SPLITFORM_FLUX
+          this % fluxDivMethod = SELF_SPLITFORM_FLUX
 
         CASE ("SPLIT-FORM")
-          this % fluxMethod = SELF_SPLITFORM_FLUX
+          this % fluxDivMethod = SELF_SPLITFORM_FLUX
 
         CASE DEFAULT
-          this % fluxMethod = SELF_CONSERVATIVE_FLUX
+          this % fluxDivMethod = SELF_CONSERVATIVE_FLUX
 
       END SELECT
 
@@ -548,6 +532,7 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
+    this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -749,9 +734,12 @@ CONTAINS
 !      CALL this % solution % AverageSides()
 !      CALL this % solution % DiffSides()
 !      CALL this % SetBoundaryCondition()
-      CALL this % Source1D()
-      CALL this % RiemannSolver1D()
-      CALL this % Flux1D()
+      CALL this % PreTendency()
+      CALL this % solution % BoundaryInterp(this % gpuAccel)
+      CALL this % SetBoundaryCondition()
+      CALL this % SourceMethod()
+      CALL this % RiemannSolver()
+      CALL this % FluxMethod()
       CALL this % CalculateFluxDivergence()
 
     IF( this % gpuAccel )THEN
@@ -1076,6 +1064,7 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
+    this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -1136,13 +1125,6 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Model2D
 
-  SUBROUTINE SetBoundaryCondition_Model2D(this)
-    IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
-
-      RETURN
-
-  END SUBROUTINE SetBoundaryCondition_Model2D 
   SUBROUTINE SetSolutionFromEqn_Model2D(this, eqn) 
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
@@ -1291,7 +1273,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
 
-      IF (this % fluxMethod == SELF_SPLITFORM_FLUX) THEN
+      IF (this % fluxDivMethod == SELF_SPLITFORM_FLUX) THEN
         CALL this % velocity % ContravariantProjection(this % geometry, this % compVelocity, this % gpuAccel)
 
         IF (this % gpuAccel) THEN
@@ -1330,11 +1312,12 @@ CONTAINS
 
 !      CALL this % solution % AverageSides()
 !      CALL this % solution % DiffSides()
-      CALL this % SetBoundaryCondition()
       CALL this % PreTendency()
-      CALL this % Source2D()
-      CALL this % RiemannSolver2D()
-      CALL this % Flux2D()
+      CALL this % solution % BoundaryInterp(this % gpuAccel)
+      CALL this % SetBoundaryCondition()
+      CALL this % SourceMethod()
+      CALL this % RiemannSolver()
+      CALL this % FluxMethod()
       CALL this % ReprojectFlux()
       CALL this % CalculateFluxDivergence()
 

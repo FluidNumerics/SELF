@@ -41,7 +41,7 @@ USE SELF_Advection2D
      CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
-    CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
+    CALL geometry % GenerateFromMesh(mesh,interp)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
@@ -50,7 +50,7 @@ USE SELF_Advection2D
     CALL semModel % solution % SetName(1,'Tracer')
 
     ! Enable GPU Acceleration (if a GPU is found) !
-    CALL semModel % EnableGPUAccel()
+    !CALL semModel % EnableGPUAccel()
 
     ! Set the velocity field
     velocityField = (/"vx=1.0","vy=1.0"/)
@@ -64,19 +64,11 @@ USE SELF_Advection2D
     CALL semModel % Write()
     CALL semModel % WriteTecplot()
 
-    ! Set the boundary condition
-    ! CALL semModel % SetPrescribedBoundaryCondition( initialCondition )
-
     ! Set the time integrator (euler, rk3, rk4)
     CALL semModel % SetTimeIntegrator("Euler")
 
     ! Set your time step
     semModel % dt = dt
-
-    ! Set the file IO frequency
-    ! semModel % 
-
-    ! TO DO :  Set the formulation type (conservative or splitform)
 
     ! Forward step the semModel and do the file io
     CALL semModel % ForwardStep( tn = tn )

@@ -17,9 +17,9 @@ MODULE SELF_Advection2D
     CONTAINS
 
     ! Concretized Methods
-    PROCEDURE :: Source2D => Source_Advection2D
-    PROCEDURE :: Flux2D => Flux_Advection2D
-    PROCEDURE :: RiemannSolver2D => RiemannSolver_Advection2D
+    PROCEDURE :: SourceMethod => Source_Advection2D
+    PROCEDURE :: FluxMethod => Flux_Advection2D
+    PROCEDURE :: RiemannSolver => RiemannSolver_Advection2D
 
   END TYPE Advection2D
 

@@ -19,7 +19,7 @@ export SELF_FLAP_INC="-I${VIEW}/include/FLAP -I${VIEW}/include/PENF -I${VIEW}/in
 export SELF_HDF5_LIBS="-L${VIEW}/lib -lhdf5_fortran -lhdf5 -lz -lm"
 export SELF_HDF5_INC="-I${VIEW}/include/shared"
 
-export SELF_FFLAGS="-cpp -pg -g -O3 -C -Wall -fbounds-check -fbacktrace --coverage"
+export SELF_FFLAGS="-cpp -pg -g -O3 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow"
 
 
 rm -rf ${SELF_PREFIX}
