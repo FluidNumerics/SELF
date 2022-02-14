@@ -66,29 +66,13 @@ steps:
             --exclude-directories ./etc \
             --exclude-directories ./docs \
             --exclude-directories ./tf \
-            -x -o coverage.xml \
             -r . 
 
       rm src/*.gcov
       rm examples/*.gcov
 
-      curl -Os https://uploader.codecov.io/latest/linux/codecov
-      chmod +x codecov
-      ./codecov -t $$CODECOV_TOKEN \
-                -R ./ \
-                --sha ${COMMIT_SHA} \
-                --branch ${BRANCH_NAME}
-
-
-
 
 timeout: 3600s
-
-availableSecrets:
-  secretManager:
-    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
-      env: 'CODECOV_TOKEN'
-
 
 substitutions:
   _PREC: 'double'
