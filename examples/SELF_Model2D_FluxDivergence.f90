@@ -1,4 +1,4 @@
-PROGRAM VectorDGDivergence_2D
+PROGRAM SELF_Model2D_FluxDivergence
 
 USE SELF_Constants
 USE SELF_Lagrange
@@ -66,4 +66,4 @@ USE SELF_Model
     CALL interp % Free()
     CALL semModel % Free()
 
-END PROGRAM VectorDGDivergence_2D
+END PROGRAM SELF_Model2D_FluxDivergence

@@ -84,7 +84,6 @@ RUN mkdir /opt/spack-environment \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
 &&   echo "  - hipfort@4.3.0" \
-&&   echo "  - openmpi@4.0.2 +internal-hwloc" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
 &&   echo "  - feq-parse@1.1.0" \
@@ -115,38 +114,26 @@ RUN cd /opt/spack-environment && \
 RUN cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
 
-COPY . /tmp
-
-RUN . /etc/profile.d/z10_spack_environment.sh && \
-    cd /tmp && \
-    HIP_PLATFORM=${HIP_PLATFORM} \
-    SELF_DIR=/tmp \
-    SELF_PREFIX=/opt/self \
-    PREC=${PREC} \
-    GPU_TARGET=${GPU_TARGET} \
-    make
-
 # Bare OS image to run the installed executables
-FROM nvidia/cuda:11.2.1-base
-
-COPY --from=builder /opt/self /opt/self
-COPY --from=builder /opt/rocm /opt/rocm
-COPY --from=builder /opt/spack-environment /opt/spack-environment
-COPY --from=builder /opt/software /opt/software
-COPY --from=builder /opt/view /opt/view
-COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
-
-ENV DEBIAN_FRONTEND=noninteractive   \
-    LANGUAGE=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8
-
-RUN apt-get -yqq update \
- && apt-get -yqq install --no-install-recommends \
-        g++ \
-        gcc \
-        gfortran \
- && rm -rf /var/lib/apt/lists/*
+#FROM nvidia/cuda:11.2.1-base
+#
+#COPY --from=builder /opt/rocm /opt/rocm
+#COPY --from=builder /opt/spack-environment /opt/spack-environment
+#COPY --from=builder /opt/software /opt/software
+#COPY --from=builder /opt/view /opt/view
+#COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
+#
+#ENV DEBIAN_FRONTEND=noninteractive   \
+#    LANGUAGE=en_US.UTF-8 \
+#    LANG=en_US.UTF-8 \
+#    LC_ALL=en_US.UTF-8
+#
+#RUN apt-get -yqq update \
+# && apt-get -yqq install --no-install-recommends \
+#        g++ \
+#        gcc \
+#        gfortran \
+# && rm -rf /var/lib/apt/lists/*
 
 
 ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l"]

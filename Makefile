@@ -49,6 +49,7 @@ SELF_DIR ?= .
 install: all
 	mkdir -p $(SELF_PREFIX)
 	mv -f $(SELF_DIR)/build/include $(SELF_DIR)/build/lib $(SELF_DIR)/build/obj $(SELF_DIR)/build/bin $(SELF_DIR)/build/examples $(SELF_PREFIX)
+	cp -r $(SELF_DIR)/etc $(SELF_PREFIX)/etc
 
 all: self examples
 

@@ -1,0 +1,19 @@
+
+steps:
+- id: Build Docker Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '.',
+         '-f',
+         'docker/base/nvidia/Dockerfile',
+         '-t',
+         'gcr.io/${PROJECT_ID}/self-base:cuda-11.2.1']
+
+images: ['gcr.io/${PROJECT_ID}/self-base:cuda-11.2.1']
+
+
+options:
+  machineType: 'E2_HIGHCPU_32'
+  diskSizeGb: 500
+
+timeout: 14400s

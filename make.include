@@ -1,5 +1,4 @@
 
-BUILD ?= dev
 SELF_DIR ?= $(shell pwd)
 
 # Compiler options
@@ -31,7 +30,7 @@ SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_LinkedList SELF_HashTab
 SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_Model SELF_Advection2D \
                 SELF_LinearShallowWater
 
-SELF_EXAMPLES = VectorDGDivergence_2D \
+SELF_EXAMPLES = SELF_Model2D_FluxDivergence \
                 Advection_ConservativeForm_2D \
                 LinearShallowWater_GravityWaveRelease
 
@@ -40,23 +39,19 @@ SELF_LIBS = self
 SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
 SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
-SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR) $(SELF_EXADIR)
+SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR) $(SELF_EXADIR) $(SELF_TESTDIR)
 
 # Example programs
 SELF_EXAS = $(addprefix $(SELF_EXADIR), $(SELF_EXAMPLES))
 SELF_EXAOBJS = $(addprefix $(SELF_EXADIR), $(addsuffix .f.o, $(SELF_EXAMPLES)))
-# 
 
 # Recipes
 #
 	
-#self: $(SELF_BINDIR)sadv2d $(SELF_BINDIR)sadv3d
-#self: $(SELF_LIBDIR)libself.a
 self: $(SELF_LIB_OBJS)
 
 examples: $(SELF_EXAS)
 
-#lib: $(SELF_LIB_OBJS)
 
 self_clean:
 	rm -f $(SELF_OBJDIR)*
@@ -64,9 +59,6 @@ self_clean:
 	rm -f $(SELF_LIBDIR)*.a
 	rm -f $(SELF_MODDIR)*.mod
 
-
-#$(SELF_BINDIR)sadv3d: $(SELF_LIB_OBJS)
-#	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_DIR)/src/models/sadv3d.f90 $(SELF_FLIBS) -o $@
 
 $(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS)
 	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_OBJDIR)*.o  $< $(SELF_FLIBS) -o $@

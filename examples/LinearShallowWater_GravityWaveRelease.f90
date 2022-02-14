@@ -6,6 +6,8 @@ USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_LinearShallowWater
 
+  IMPLICIT NONE
+
   INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
   INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
   INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
@@ -30,8 +32,8 @@ USE SELF_LinearShallowWater
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    !CALL mesh % UniformBlockMesh(N,(/nXe,nYe/),(/0.0_prec,Lx,0.0_prec,Ly/))
-    CALL mesh % Read_ISMv2('./mesh/Circle.mesh')
+    CALL mesh % UniformBlockMesh(N,(/10,10/),(/-1.0_prec,1.0_prec,-1.0_prec,1.0_prec/))
+    !CALL mesh % Read_ISMv2('./mesh/Circle.mesh')
 
     ! Generate a decomposition
      CALL decomp % GenerateDecomposition(mesh)
