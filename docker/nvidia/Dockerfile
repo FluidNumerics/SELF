@@ -4,12 +4,12 @@ ARG HIP_PLATFORM=nvidia
 ARG PREC=double
 
 # Install SELF
-COPY . /workspace
+COPY . /build
 
 RUN . /etc/profile.d/z10_spack_environment.sh && \
-    cd /workspace && \
+    cd /build && \
     HIP_PLATFORM=${HIP_PLATFORM} \
-    SELF_DIR=/workspace/ \
+    SELF_DIR=/build/ \
     SELF_PREFIX=/opt/self \
     PREC=${PREC} \
     GPU_TARGET=${GPU_TARGET} \
@@ -19,7 +19,7 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
 # Bare OS image to run the installed executables
 FROM nvidia/cuda:11.2.1-base
 
-COPY --from=builder /workspace /workspace
+COPY --from=builder /build /build
 COPY --from=builder /opt/rocm /opt/rocm
 COPY --from=builder /opt/spack-environment /opt/spack-environment
 COPY --from=builder /opt/software /opt/software
@@ -37,6 +37,7 @@ RUN apt-get -yqq update \
         gcc \
         gfortran \
         libelf-dev \
+        gcovr \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /opt/self /opt/self

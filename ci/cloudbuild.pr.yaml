@@ -19,39 +19,7 @@ steps:
   - '-c'
   - | 
 
-      source /etc/profile.d/z10_spack_environment.sh
-
-      for file in $(ls /opt/self/examples/*); do
-        echo $file
-        $file
-      done
-
-      for file in $(ls /build/src/*.gcno); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/src/*.gcda); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/examples/*.gcno); do
-        dest=$(echo $file | sed 's/\.f90//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/examples/*.gcda); do
-        dest=$(echo $file | sed 's/\.f90//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      gcovr -x -o coverage.xml \
-            -r /build 
+      ./test.sh
 
       rm /build/src/*.gcov
       rm /build/examples/*.gcov

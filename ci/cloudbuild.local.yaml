@@ -16,41 +16,7 @@ steps:
 - id: Run Tests & Create Coverage Report (Serial)
   name: 'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}'
   args: 
-  - '-c'
-  - | 
-
-      source /etc/profile.d/z10_spack_environment.sh
-
-      for file in $(ls /opt/self/examples/*); do
-        echo $file
-        $file
-      done
-
-      for file in $(ls /build/src/*.gcno); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/src/*.gcda); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/examples/*.gcno); do
-        dest=$(echo $file | sed 's/\.f90//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/examples/*.gcda); do
-        dest=$(echo $file | sed 's/\.f90//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      gcovr -r /build 
+  - ./test.sh
 
 timeout: 3600s
 
