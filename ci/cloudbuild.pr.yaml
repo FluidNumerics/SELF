@@ -10,39 +10,16 @@ steps:
          'docker/nvidia/Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+         'self:pr']
 
 - id: Run Tests (Serial)
-  name: 'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}'
+  name: 'self:pr'
   secretEnv: ['CODECOV_TOKEN']
   args: 
   - '-c'
   - | 
 
-      source /etc/profile.d/z10_spack_environment.sh
-
-      for file in $(ls /opt/self/examples/*); do
-        echo $file
-        $file
-      done
-
-      mv /build/*.gcda /build/examples/
-      mv /build/*.gcno /build/examples/
-      
-      for file in $(ls /build/src/*.gcno); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/src/*.gcda); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      gcovr -x -o coverage.xml \
-            -r /build 
+      ./test.sh
 
       rm /build/src/*.gcov
       rm /build/examples/*.gcov
@@ -52,10 +29,9 @@ steps:
       ./codecov -t $$CODECOV_TOKEN \
                 -R /build/ \
                 --sha ${COMMIT_SHA} \
-                --branch ${BRANCH_NAME}
+                --branch ${BRANCH_NAME} \
+                --pr ${_PR_NUMBER}
 
-
-images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
 
 options:
   diskSizeGb: 100

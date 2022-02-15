@@ -1,5 +1,4 @@
 
-BUILD ?= dev
 SELF_DIR ?= $(shell pwd)
 
 # Compiler options
@@ -10,12 +9,13 @@ include $(SELF_DIR)/make.dependencies
 
 # Directories with source code
 SELF_SRCDIR = $(SELF_DIR)/src/
+SELF_HIPDIR = $(SELF_DIR)/src/hip/
 SELF_EXASRCDIR = $(SELF_DIR)/examples/
+
 
 # Out-of-source build directories
 SELF_INCDIR = $(SELF_DIR)/build/include/
 SELF_LIBDIR = $(SELF_DIR)/build/lib/
-SELF_OBJDIR = $(SELF_DIR)/build/obj/
 SELF_BINDIR = $(SELF_DIR)/build/bin/
 SELF_EXADIR = $(SELF_DIR)/build/examples/
 
@@ -25,34 +25,33 @@ vpath %.h $(SELF_SRCDIR) $(SELF_SRCDIR)/hip
 
 SELF_F90_SRCS = SELF_Constants SELF_SupportRoutines SELF_LinkedList SELF_HashTable SELF_Memory \
                 SELF_CLI SELF_HDF5 SELF_Metadata SELF_Quadrature SELF_Lagrange SELF_Data \
-                SELF_Mesh SELF_Geometry SELF_MappedData SELF_Model SELF_Advection2D
+                SELF_Mesh SELF_Geometry SELF_MappedData SELF_Model SELF_Advection2D \
+                SELF_LinearShallowWater
 
-SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_Model SELF_Advection2D
+SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_Model SELF_Advection2D \
+                SELF_LinearShallowWater
 
-SELF_EXAMPLES = Advection_ConservativeForm_2D
+SELF_EXAMPLES = SELF_Model2D_FluxDivergence \
+                Advection_ConservativeForm_2D \
+                LinearShallowWater_GravityWaveRelease
 
 SELF_LIBS = self
 
-SELF_OBJS = $(addprefix $(SELF_OBJDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
-SELF_OBJS += $(addprefix $(SELF_OBJDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
+SELF_OBJS = $(addprefix $(SELF_SRCDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
+SELF_OBJS += $(addprefix $(SELF_HIPDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
-SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_OBJDIR) $(SELF_BINDIR) $(SELF_EXADIR)
+SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_BINDIR) $(SELF_EXADIR) $(SELF_TESTDIR)
 
 # Example programs
 SELF_EXAS = $(addprefix $(SELF_EXADIR), $(SELF_EXAMPLES))
-SELF_EXAOBJS = $(addprefix $(SELF_EXADIR), $(addsuffix .f.o, $(SELF_EXAMPLES)))
-# 
 
 # Recipes
 #
 	
-#self: $(SELF_BINDIR)sadv2d $(SELF_BINDIR)sadv3d
-#self: $(SELF_LIBDIR)libself.a
 self: $(SELF_LIB_OBJS)
 
 examples: $(SELF_EXAS)
 
-#lib: $(SELF_LIB_OBJS)
 
 self_clean:
 	rm -f $(SELF_OBJDIR)*
@@ -61,20 +60,18 @@ self_clean:
 	rm -f $(SELF_MODDIR)*.mod
 
 
-#$(SELF_BINDIR)sadv3d: $(SELF_LIB_OBJS)
-#	$(FC) $(SELF_FFLAGS) $(SELF_OBJDIR)*.o $(SELF_DIR)/src/models/sadv3d.f90 $(SELF_FLIBS) -o $@
-
 $(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS)
-	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_OBJDIR)*.o  $< $(SELF_FLIBS) -o $@
+	$(FC) -c $(SELF_FFLAGS) -I$(SELF_INCDIR) $< -o $<.o
+	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_HIPDIR)*.o $(SELF_SRCDIR)*.o  $<.o $(SELF_FLIBS) -o $@
 
 $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
 	rm -f $@
 	$(AR) -cq $@ $^
 
-$(SELF_OBJDIR)%.f.o: %.f90
+$(SELF_SRCDIR)%.f.o: %.f90
 	$(FC) -J$(SELF_INCDIR) $(SELF_FFLAGS) $(SELF_FLIBS) -c $< -o $@
 
-$(SELF_OBJDIR)%.cpp.o: %.cpp
+$(SELF_HIPDIR)%.cpp.o: %.cpp
 	$(FC) $(SELF_CXXFLAGS) -c $< -o $@
 
 # Dependency on build tree existence
