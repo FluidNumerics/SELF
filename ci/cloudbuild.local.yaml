@@ -13,7 +13,7 @@ steps:
          'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}']
 
 
-- id: Run Tests (Serial)
+- id: Run Tests & Create Coverage Report (Serial)
   name: 'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}'
   args: 
   - '-c'
@@ -26,51 +26,31 @@ steps:
         $file
       done
 
-      mv /opt/self/obj/*.gcno src/
-      mv /workspace/build/obj/*.gcda src/
-
-
-- id: Create coverage report
-  name: 'jenswet/gcc-cmake-gcovr:latest'
-  secretEnv: ['CODECOV_TOKEN']
-  entrypoint: '/bin/bash'
-  args: 
-  - '-c'
-  - | 
-
-      for file in $(ls src/*.gcno); do
+      for file in $(ls /build/src/*.gcno); do
         dest=$(echo $file | sed 's/\.f//g')
         echo "$file -> $dest"
         cp $file $dest
       done
 
-      for file in $(ls src/*.gcda); do
+      for file in $(ls /build/src/*.gcda); do
         dest=$(echo $file | sed 's/\.f//g')
         echo "$file -> $dest"
         cp $file $dest
       done
 
-      mv /workspace/*.gcda examples/
-
-      for file in "src/*.f90"; do
-        gcov $file
+      for file in $(ls /build/examples/*.gcno); do
+        dest=$(echo $file | sed 's/\.f90//g')
+        echo "$file -> $dest"
+        cp $file $dest
       done
 
-      for file in "examples/*.f90"; do
-        gcov $file
+      for file in $(ls /build/examples/*.gcda); do
+        dest=$(echo $file | sed 's/\.f90//g')
+        echo "$file -> $dest"
+        cp $file $dest
       done
 
-      gcovr --exclude-directories ./docker \
-            --exclude-directories ./ci \
-            --exclude-directories ./env \
-            --exclude-directories ./etc \
-            --exclude-directories ./docs \
-            --exclude-directories ./tf \
-            -r . 
-
-      rm src/*.gcov
-      rm examples/*.gcov
-
+      gcovr -r /build 
 
 timeout: 3600s
 

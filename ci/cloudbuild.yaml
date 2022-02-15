@@ -25,57 +25,34 @@ steps:
         $file
       done
 
-      mv /opt/self/obj/*.gcno src/
-      mv /workspace/build/obj/*.gcda src/
-
-- id: Create coverage report
-  name: 'jenswet/gcc-cmake-gcovr:latest'
-  secretEnv: ['CODECOV_TOKEN']
-  entrypoint: '/bin/bash'
-  args: 
-  - '-c'
-  - | 
-
-      for file in $(ls src/*.gcno); do
+      mv /build/*.gcda /build/examples/
+      mv /build/*.gcno /build/examples/
+      
+      for file in $(ls /build/src/*.gcno); do
         dest=$(echo $file | sed 's/\.f//g')
         echo "$file -> $dest"
         cp $file $dest
       done
 
-      for file in $(ls src/*.gcda); do
+      for file in $(ls /build/src/*.gcda); do
         dest=$(echo $file | sed 's/\.f//g')
         echo "$file -> $dest"
         cp $file $dest
       done
 
-      mv /workspace/*.gcda examples/
+      gcovr -x -o coverage.xml \
+            -r /build 
 
-      for file in "src/*.f90"; do
-        gcov $file
-      done
-
-      for file in "examples/*.f90"; do
-        gcov $file
-      done
-
-      gcovr --exclude-directories ./docker \
-            --exclude-directories ./ci \
-            --exclude-directories ./env \
-            --exclude-directories ./etc \
-            --exclude-directories ./docs \
-            --exclude-directories ./tf \
-            -x -o coverage.xml \
-            -r . 
-
-      rm src/*.gcov
-      rm examples/*.gcov
+      rm /build/src/*.gcov
+      rm /build/examples/*.gcov
 
       curl -Os https://uploader.codecov.io/latest/linux/codecov
       chmod +x codecov
       ./codecov -t $$CODECOV_TOKEN \
-                -R ./ \
+                -R /build/ \
                 --sha ${COMMIT_SHA} \
-                --branch ${BRANCH_NAME}
+                --branch ${BRANCH_NAME} \
+                --pr ${_PR_NUMBER}
 
 
 images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
