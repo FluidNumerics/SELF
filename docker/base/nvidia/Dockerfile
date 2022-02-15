@@ -29,6 +29,7 @@ RUN apt-get -yqq update \
         python3-setuptools \
         unzip \
         wget \
+        gcovr \
  && locale-gen en_US.UTF-8 \
  && pip3 install boto3 \
  && rm -rf /var/lib/apt/lists/*
