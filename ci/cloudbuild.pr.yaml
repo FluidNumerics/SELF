@@ -26,9 +26,6 @@ steps:
         $file
       done
 
-      mv /build/*.gcda /build/examples/
-      mv /build/*.gcno /build/examples/
-      
       for file in $(ls /build/src/*.gcno); do
         dest=$(echo $file | sed 's/\.f//g')
         echo "$file -> $dest"
@@ -37,6 +34,18 @@ steps:
 
       for file in $(ls /build/src/*.gcda); do
         dest=$(echo $file | sed 's/\.f//g')
+        echo "$file -> $dest"
+        cp $file $dest
+      done
+
+      for file in $(ls /build/examples/*.gcno); do
+        dest=$(echo $file | sed 's/\.f90//g')
+        echo "$file -> $dest"
+        cp $file $dest
+      done
+
+      for file in $(ls /build/examples/*.gcda); do
+        dest=$(echo $file | sed 's/\.f90//g')
         echo "$file -> $dest"
         cp $file $dest
       done
