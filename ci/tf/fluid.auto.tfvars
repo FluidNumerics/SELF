@@ -26,7 +26,7 @@ builds = [{name="main-v100-double",
            zone="us-west1-b"},
           {name="develop-v100-single",
            description="Single precision build targeting Nvidia V100 GPU for PR's to develop branch",
-           branch="main",
+           branch="develop",
            gpu_target="sm_72",
            hip_platform="nvidia",
            prec="single"

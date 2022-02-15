@@ -10,10 +10,10 @@ steps:
          'docker/nvidia/Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+         'self:pr']
 
 - id: Run Tests (Serial)
-  name: 'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}'
+  name: 'self:pr'
   secretEnv: ['CODECOV_TOKEN']
   args: 
   - '-c'
@@ -52,10 +52,9 @@ steps:
       ./codecov -t $$CODECOV_TOKEN \
                 -R /build/ \
                 --sha ${COMMIT_SHA} \
-                --branch ${BRANCH_NAME}
+                --branch ${BRANCH_NAME} \
+                --pr ${_PR_NUMBER}
 
-
-images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
 
 options:
   diskSizeGb: 100

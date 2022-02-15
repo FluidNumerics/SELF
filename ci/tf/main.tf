@@ -30,7 +30,7 @@ resource "google_cloudbuild_trigger" "builds" {
   _HIP_PLATFORM = var.builds[count.index].hip_platform
   _PREC = var.builds[count.index].prec
   }
-  filename = "ci/cloudbuild.yaml"
+  filename = "ci/cloudbuild.pr.yaml"
 }
 
 module "fluid_cicb" {
