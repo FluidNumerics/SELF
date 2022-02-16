@@ -1629,7 +1629,6 @@ CONTAINS
                                 myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
             dF(i,j,iVar,iEl) = dFLoc
-            PRINT*, dFLoc
 
           END DO
         END DO

@@ -58,7 +58,8 @@ USE SELF_Model
 
     CALL semModel % CalculateFluxDivergence() 
 
-    PRINT*, semModel % fluxDivergence % AbsMaxInterior()
+    ! TO DO !
+    ! Compute max error in the flux divergence !
 
     CALL decomp % Free()
     CALL geometry % Free()

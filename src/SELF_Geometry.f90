@@ -485,7 +485,6 @@ CONTAINS
         END DO
       END DO
     END DO
-    STOP
 
     ! Interpolate the contravariant tensor to the boundaries
     CALL myGeom % dsdx % BoundaryInterp(gpuAccel=.FALSE.)
@@ -658,19 +657,18 @@ CONTAINS
       tecFile = 'mesh.tec'
     ENDIF
                       
-    ! Let's write some tecplot!! 
      OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(tecFile), &
       FORM='formatted', &
       STATUS='replace')
 
     ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "x","y",'//&
+    WRITE(fUnit,*) 'VARIABLES = "X","Y",'//&
                    '"dxds1","dxds2",'//&
-                   '"dyds1","dyds2"'//&
+                   '"dyds1","dyds2",'//&
                    '"ds1dx","ds1dy",'//&
-                   '"ds2dx","ds2dy"'//&
-                   '"J"'
+                   '"ds2dx","ds2dy",'//&
+                   '"Jacobian"'
 
     DO iEl = 1, myGeom % x % nElem
 

@@ -5,6 +5,7 @@ USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 
+  IMPLICIT NONE
   INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
   INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
   INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
@@ -17,6 +18,7 @@ USE SELF_Geometry
   TYPE(Mesh1D),TARGET :: mesh
   TYPE(Geometry1D),TARGET :: geometry
   REAL(prec) :: dxdsExpect
+  REAL(prec) :: error
   INTEGER :: i, iEl
   LOGICAL :: fail
 

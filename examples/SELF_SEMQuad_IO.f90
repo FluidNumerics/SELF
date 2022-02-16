@@ -15,7 +15,7 @@ USE SELF_Geometry
   INTEGER, PARAMETER :: nvar = 1 ! The number of tracer fields
   REAL(prec), PARAMETER :: Lx = 1.0_prec ! Length of the domain in the x-direction 
   REAL(prec), PARAMETER :: Ly = 1.0_prec ! Length of the domain in the x-direction 
-  REAL(prec), PARAMETER :: tolerance=10.0_prec*epsilon(1.0_prec) ! Error tolerance
+  REAL(prec), PARAMETER :: tolerance=200.0_prec*epsilon(1.0_prec) ! Error tolerance
 
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
@@ -126,7 +126,6 @@ USE SELF_Geometry
       WRITE(*,1003) Jerror, tolerance 
       fail=.TRUE.
     ENDIF
-
 
     CALL geometry % Write()
     CALL geometry % WriteTecplot()
