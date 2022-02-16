@@ -6,6 +6,8 @@ USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_Model
 
+  IMPLICIT NONE
+
   INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
   INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
   INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
@@ -23,6 +25,8 @@ USE SELF_Model
   TYPE(SEMQuad),TARGET :: geometry
   TYPE(MPILayer),TARGET :: decomp
   TYPE(Model2D) :: semModel
+  INTEGER :: i,j,iSide,iEl
+  REAL(prec) :: nhat(1:2),nmag,fn
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -56,7 +60,29 @@ USE SELF_Model
 
     CALL semModel % flux % boundaryInterp(semModel % gpuAccel)
 
+    ! Compute \vec{F} \dot \hat{n}
+    ! Similar to "RiemannSolver"
+    DO iEl = 1, mesh % nElem
+      DO iSide = 1, 4
+        DO i = 0, interp % N
+
+           ! Get the boundary normals on cell edges from the mesh geometry
+           nhat(1:2) = geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+
+           fn = semModel % flux % boundary % hostData(1,i,1,iSide,iEl)*nhat(1)+&
+                      semModel % flux % boundary % hostData(1,i,1,iSide,iEl)*nhat(2)
+
+           nmag = semModel % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
+           ! Calculate the flux
+           semModel % flux % boundaryNormal % hostData(i,1,iSide,iEl) = fn*nmag
+
+        ENDDO
+      ENDDO
+    ENDDO
+
+    CALL semModel % ReprojectFlux()
     CALL semModel % CalculateFluxDivergence() 
+    PRINT*, semModel % fluxDivergence  % AbsMaxInterior()
 
     ! TO DO !
     ! Compute max error in the flux divergence !
