@@ -42,6 +42,11 @@ for file in $(ls $SELF_INSTALL_DIR/examples/*); do
 
   echo "Running Test : $file"
   $file
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "$file failed!"
+    exit $rc
+  fi
 
   moveCovFiles
 
