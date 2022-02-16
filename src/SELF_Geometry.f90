@@ -30,6 +30,9 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Geometry1D
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_Geometry1D
 
+    PROCEDURE :: Write => Write_Geometry1D
+    PROCEDURE :: WriteTecplot => WriteTecplot_Geometry1D
+
   END TYPE Geometry1D
 
   TYPE,PUBLIC :: SEMQuad
@@ -225,6 +228,102 @@ CONTAINS
     CALL myGeom % UpdateDevice()
 
   END SUBROUTINE CalculateMetricTerms_Geometry1D
+
+  SUBROUTINE Write_Geometry1D(myGeom,fileName)
+    IMPLICIT NONE
+    CLASS(Geometry1D),INTENT(in) :: myGeom
+    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
+    ! Local
+    INTEGER(HID_T) :: fileId
+    ! Local
+    CHARACTER(LEN=self_FileNameLength) :: pickupFile
+    CHARACTER(13) :: timeStampString
+
+    IF( PRESENT(filename) )THEN
+      pickupFile = filename
+    ELSE
+      pickupFile = 'mesh.h5'
+    ENDIF
+
+    CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+
+    CALL CreateGroup_HDF5(fileId,'/quadrature')
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                         myGeom % x % interp % controlPoints)
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                         myGeom % x % interp % qWeights)
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                         myGeom % x % interp % dgMatrix)
+
+    CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                         myGeom % x % interp % dMatrix)
+
+    CALL CreateGroup_HDF5(fileId,'/mesh')
+
+    CALL CreateGroup_HDF5(fileId,'/mesh/interior')
+
+    CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
+
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % geometry % x % interior)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % geometry % dxds % interior)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % geometry % x % boundary)
+
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % geometry % dxds % boundary)
+
+    CALL Close_HDF5(fileId)
+
+  END SUBROUTINE Write_Geometry1D
+
+  SUBROUTINE WriteTecplot_Geometry1D(myGeom, filename)
+    IMPLICIT NONE
+    CLASS(Geometry1D), INTENT(inout) :: myGeom
+    CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    ! Local
+    CHARACTER(8) :: zoneID
+    INTEGER :: fUnit
+    INTEGER :: iEl, i 
+    CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(13) :: timeStampString
+    CHARACTER(5) :: rankString
+
+    IF( PRESENT(filename) )THEN
+      tecFile = filename
+    ELSE
+      tecFile = 'mesh.tec'
+    ENDIF
+                      
+    ! Let's write some tecplot!! 
+     OPEN( UNIT=NEWUNIT(fUnit), &
+      FILE= TRIM(tecFile), &
+      FORM='formatted', &
+      STATUS='replace')
+
+    ! TO DO :: Create header from solution metadata 
+    WRITE(fUnit,*) 'VARIABLES = "x","dxds"'
+
+    DO iEl = 1, myGeom % x % nElem
+
+      ! TO DO :: Get the global element ID 
+      WRITE(zoneID,'(I8.8)') iEl
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',myGeom % x % interp % N+1
+
+      DO i = 0, myGeom % x % interp % N
+
+        WRITE(fUnit,'(2(E15.7,1x))') myGeom % x % interior % hostData(i,1,iEl), &
+                                     myGeom % dxds % interior % hostData(i,1,iEl)
+
+      ENDDO
+
+    ENDDO
+
+    CLOSE(UNIT=fUnit)
+
+  END SUBROUTINE WriteTecplot_Geometry1D
 
   SUBROUTINE Init_SEMQuad(myGeom,interp,nElem)
     IMPLICIT NONE
