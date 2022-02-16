@@ -182,7 +182,7 @@ CONTAINS
     IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
-      quadrature = CHEBYSHEV_GAUSS_LOBATTO
+      quadrature = GAUSS_LOBATTO
     END IF
 
     CALL myGeom % Init(interp,mesh % nElem)
@@ -267,13 +267,13 @@ CONTAINS
 
     CALL CreateGroup_HDF5(fileId,'/mesh/boundary')
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % geometry % x % interior)
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/x',myGeom % x % interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % geometry % dxds % interior)
+    CALL WriteArray_HDF5(fileId,'/mesh/interior/dxds',myGeom % dxds % interior)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % geometry % x % boundary)
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',myGeom % x % boundary)
 
-    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % geometry % dxds % boundary)
+    CALL WriteArray_HDF5(fileId,'/mesh/boundary/dxds',myGeom % dxds % boundary)
 
     CALL Close_HDF5(fileId)
 

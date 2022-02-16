@@ -49,7 +49,6 @@ INTEGER, PARAMETER :: SELF_FILE_DEFAULT_LENGTH=500
 ! ************************************************************!
 !                                                             !
 ! ------------------------------------------------------------!
-  REAL(prec),PARAMETER :: tolerance = 10.0**(-10)
   INTEGER,PARAMETER    :: maxInverseIters = 1000
   REAL(prec),PARAMETER :: newtonTolerance = 10.0**(-8)
   INTEGER,PARAMETER    :: newtonMax = 500

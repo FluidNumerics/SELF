@@ -23,6 +23,7 @@ MODULE SELF_SupportRoutines
     MODULE PROCEDURE AlmostEqual_r64, &
                      AlmostEqual_r32
   END INTERFACE AlmostEqual
+  REAL(prec),PRIVATE,PARAMETER :: tolerance = 10.0**(-10)
 
 CONTAINS
 
