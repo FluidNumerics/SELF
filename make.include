@@ -32,6 +32,7 @@ SELF_CPP_SRCS = SELF_Lagrange SELF_Data SELF_MappedData SELF_Geometry SELF_Model
                 SELF_LinearShallowWater
 
 SELF_EXAMPLES = SELF_Geometry1D_IO \
+                SELF_SEMQuad_IO \
                 SELF_Model2D_FluxDivergence \
                 Advection_ConservativeForm_2D \
                 LinearShallowWater_GravityWaveRelease
@@ -55,11 +56,12 @@ examples: $(SELF_EXAS)
 
 
 self_clean:
-	rm -f $(SELF_OBJDIR)*
 	rm -f $(SELF_BINDIR)*
 	rm -f $(SELF_LIBDIR)*.a
 	rm -f $(SELF_MODDIR)*.mod
-
+	rm -f $(SELF_SRCDIR)*.o
+	rm -f $(SELF_HIPDIR)*.o
+	rm -f $(SELF_EXASRCDIR)*.o
 
 $(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS)
 	$(FC) -c $(SELF_FFLAGS) -I$(SELF_INCDIR) $< -o $<.o
