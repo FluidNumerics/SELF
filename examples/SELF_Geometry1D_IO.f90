@@ -11,14 +11,17 @@ USE SELF_Geometry
   INTEGER, PARAMETER :: nXe = 1 ! Number of elements in the x-direction
   INTEGER, PARAMETER :: nvar = 1 ! The number of tracer fields
   REAL(prec), PARAMETER :: Lx = 1.0_prec ! Length of the domain in the x-direction 
-  REAL(prec), PARAMETER :: tolerance=3.0_prec*epsilon(1.0_prec) ! Error tolerance
+  REAL(prec), PARAMETER :: tolerance=10.0_prec*epsilon(1.0_prec) ! Error tolerance
 
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh1D),TARGET :: mesh
   TYPE(Geometry1D),TARGET :: geometry
   REAL(prec) :: dxdsExpect
   INTEGER :: i, iEl
+  LOGICAL :: fail
 
+
+    fail = .FALSE.
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
@@ -33,7 +36,7 @@ USE SELF_Geometry
     error = 0.0_prec
     DO iEl = 1, mesh % nElem
       DO i = 0, interp % N
-        error = MAX(ABS(geometry % dxds % interior(i,1,iEl)-dxdsExpect),error)
+        error = MAX(ABS(geometry % dxds % interior % hostData(i,1,iEl)-dxdsExpect),error)
       ENDDO
     ENDDO
 
@@ -45,8 +48,8 @@ USE SELF_Geometry
 
     error = 0.0_prec
     DO iEl = 1, mesh % nElem
-      error = MAX(ABS(geometry % dxds % boundary(1,1,iEl)-dxdsExpect),error)
-      error = MAX(ABS(geometry % dxds % boundary(1,2,iEl)-dxdsExpect),error)
+      error = MAX(ABS(geometry % dxds % boundary % hostData(1,1,iEl)-dxdsExpect),error)
+      error = MAX(ABS(geometry % dxds % boundary % hostData(1,2,iEl)-dxdsExpect),error)
     ENDDO
 
     IF( error > tolerance )THEN
@@ -56,7 +59,7 @@ USE SELF_Geometry
     ENDIF
 
     CALL geometry % Write()
-    CALL geometry % Write_Tecplot()
+    CALL geometry % WriteTecplot()
 
     CALL geometry % Free()
     CALL mesh % Free()
