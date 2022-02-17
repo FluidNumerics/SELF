@@ -243,7 +243,6 @@ CONTAINS
     INTEGER(HID_T) :: fileId
     ! Local
     CHARACTER(LEN=self_FileNameLength) :: pickupFile
-    CHARACTER(13) :: timeStampString
 
     IF( PRESENT(filename) )THEN
       pickupFile = filename
@@ -797,7 +796,7 @@ CONTAINS
     IF (PRESENT(meshQuadrature)) THEN
       quadrature = meshQuadrature
     ELSE
-      quadrature = CHEBYSHEV_GAUSS_LOBATTO
+      quadrature = GAUSS_LOBATTO
     END IF
 
     CALL myGeom % Init(interp,mesh % nElem)
