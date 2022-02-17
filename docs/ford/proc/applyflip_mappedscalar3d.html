@@ -270,7 +270,7 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-mesh~8"></span>type(Mesh3D),</td>
+  <td><span class="anchor" id="variable-mesh~13"></span>type(Mesh3D),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -477,7 +477,7 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">r2</span><span class="p">,</span><span class="n">flip</span><span class="p">,</span><span class="n">ivar</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">globalSideId</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">bcid</span>
-    <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span> <span class="kd">::</span> <span class="n">extBuff</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span><span class="p">)</span>
+    <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span> <span class="kd">::</span> <span class="n">extBuff</span><span class="p">(</span><span class="mi">0</span><span class="p">:</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="p">)</span>
 
     <span class="k">IF</span> <span class="p">(</span><span class="n">mpiHandler</span> <span class="p">%</span> <span class="n">mpiEnabled</span><span class="p">)</span> <span class="k">THEN</span>
 <span class="k">      IF</span> <span class="p">(</span><span class="n">gpuAccel</span><span class="p">)</span> <span class="k">THEN</span>
@@ -486,7 +486,7 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
                                                   <span class="n">mesh</span> <span class="p">%</span> <span class="n">self_sideInfo</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                   <span class="n">mpiHandler</span> <span class="p">%</span> <span class="n">elemToRank</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                   <span class="n">mpiHandler</span> <span class="p">%</span> <span class="n">rankId</span><span class="p">,</span> <span class="p">&amp;</span>
-                                                  <span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                  <span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span> <span class="p">&amp;</span>
                                                   <span class="n">scalar</span> <span class="p">%</span> <span class="n">nVar</span><span class="p">,</span> <span class="p">&amp;</span>
                                                   <span class="n">scalar</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
       <span class="k">ELSE</span>
@@ -508,15 +508,15 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
                 <span class="k">IF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                  DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">nvar</span>
-                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                         <span class="n">i2</span> <span class="o">=</span> <span class="n">j</span>
-                        <span class="n">j2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span><span class="o">-</span><span class="n">i</span>
+                        <span class="n">j2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="o">-</span><span class="n">i</span>
                         <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
-<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                         <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
@@ -525,15 +525,15 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
 <span class="k">                </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                  DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">nvar</span>
-                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                        <span class="n">i2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i</span>
-                        <span class="n">j2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j</span>
+                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                        <span class="n">i2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i</span>
+                        <span class="n">j2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j</span>
                         <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
-<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                         <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
@@ -542,15 +542,15 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
 <span class="k">                </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                  DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">nvar</span>
-                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                        <span class="n">i2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span><span class="o">-</span><span class="n">j</span>
+                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                        <span class="n">i2</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="o">-</span><span class="n">j</span>
                         <span class="n">j2</span> <span class="o">=</span> <span class="n">i</span>
                         <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
-<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                         <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
@@ -559,15 +559,15 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
 <span class="k">                </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                  DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">nvar</span>
-                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                         <span class="n">i2</span> <span class="o">=</span> <span class="n">j</span>
                         <span class="n">j2</span> <span class="o">=</span> <span class="n">i</span>
                         <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
-<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                    DO </span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="k">DO </span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">scalar</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                         <span class="n">scalar</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="n">extBuff</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
                       <span class="k">END DO</span>
 <span class="k">                    END DO</span>
@@ -606,7 +606,7 @@ public subroutine ApplyFlip_MappedScalar3D(scalar, mpiHandler, mesh, gpuAccel)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

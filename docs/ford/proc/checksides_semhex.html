@@ -255,7 +255,7 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
   
 <tr>
   
-  <td><span class="anchor" id="variable-mesh~3"></span>type(Mesh3D),</td>
+  <td><span class="anchor" id="variable-mesh~8"></span>type(Mesh3D),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -357,8 +357,8 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
 
             <span class="k">IF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                     <span class="n">rms</span> <span class="o">=</span> <span class="n">rms</span> <span class="o">+</span> <span class="p">&amp;</span>
                           <span class="nb">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span><span class="o">-</span><span class="p">&amp;</span>
                                  <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">&amp;</span>
@@ -371,10 +371,10 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
 
 <span class="k">            </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                     <span class="n">i2</span> <span class="o">=</span> <span class="n">j1</span>
-                    <span class="n">j2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
+                    <span class="n">j2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
                     <span class="n">rms</span> <span class="o">=</span> <span class="n">rms</span> <span class="o">+</span> <span class="p">&amp;</span>
                           <span class="nb">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span><span class="o">-</span><span class="p">&amp;</span>
                                  <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">&amp;</span>
@@ -387,10 +387,10 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
 
 <span class="k">            </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="n">i2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
-                    <span class="n">j2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
+<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="n">i2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
+                    <span class="n">j2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
                     <span class="n">rms</span> <span class="o">=</span> <span class="n">rms</span> <span class="o">+</span> <span class="p">&amp;</span>
                           <span class="nb">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span><span class="o">-</span><span class="p">&amp;</span>
                                  <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">&amp;</span>
@@ -403,9 +403,9 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
 
 <span class="k">            </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="n">i2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
+<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="n">i2</span> <span class="o">=</span> <span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
                     <span class="n">j2</span> <span class="o">=</span> <span class="n">i1</span>
                     <span class="n">rms</span> <span class="o">=</span> <span class="n">rms</span> <span class="o">+</span> <span class="p">&amp;</span>
                           <span class="nb">sqrt</span><span class="p">(</span> <span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostdata</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span><span class="o">-</span><span class="p">&amp;</span>
@@ -419,8 +419,8 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
 
 <span class="k">            </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="k">THEN</span>
 
-<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
-                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">N</span>
+<span class="k">                DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                     <span class="n">i2</span> <span class="o">=</span> <span class="n">j1</span>
                     <span class="n">j2</span> <span class="o">=</span> <span class="n">i1</span>
                     <span class="n">rms</span> <span class="o">=</span> <span class="n">rms</span> <span class="o">+</span> <span class="p">&amp;</span>
@@ -462,7 +462,7 @@ public subroutine CheckSides_SEMHex(myGeom, mesh)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

@@ -34,8 +34,12 @@ MODULE SELF_Lagrange
     INTEGER :: N
       !! The number of control points.
 
+    INTEGER :: controlNodeType
+
     INTEGER :: M
       !! The number of target points.
+
+    INTEGER :: targetNodeType
 
     TYPE(hfReal_r1) :: controlPoints
       !! The set of nodes in one dimension where data is known.
@@ -147,8 +151,10 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
 
-    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu,&
+                                     VectorDGSplitDivergence_2D_cpu,VectorDGSplitDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
+    PROCEDURE,PRIVATE :: VectorDGSplitDivergence_2D_cpu,VectorDGSplitDivergence_2D_gpu
 
     GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
     PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
@@ -413,6 +419,17 @@ MODULE SELF_Lagrange
   END INTERFACE
 
   INTERFACE
+   SUBROUTINE VectorDGSplitDivergence_2D_gpu_wrapper(dgMatrixT_dev,&
+                   dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,s_dev,v_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="VectorDGSplitDivergence_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,s_dev,v_dev,bf_dev,df_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE VectorDGSplitDivergence_2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE VectorCurl_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
       bind(c,name="VectorCurl_2D_gpu_wrapper")
       USE iso_c_binding
@@ -538,6 +555,8 @@ CONTAINS
 
     myPoly % N = N
     myPoly % M = M
+    myPoly % controlNodeType = controlNodeType
+    myPoly % targetNodeType = targetNodeType
 
     CALL myPoly % controlPoints % Alloc(loBound=0, &
                                         upBound=N)
@@ -1430,22 +1449,24 @@ CONTAINS
     REAL(prec),INTENT(out) :: gradF(1:2,1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
+    REAL(prec) :: gf(1:2,1:2)
 
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            gradF(1,1,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,1,i,j,iVar,iEl) = 0.0_prec
-            gradF(1,2,i,j,iVar,iEl) = 0.0_prec
-            gradF(2,2,i,j,iVar,iEl) = 0.0_prec
+            gf(1,1) = 0.0_prec
+            gf(2,1) = 0.0_prec
+            gf(1,2) = 0.0_prec
+            gf(2,2) = 0.0_prec
             DO ii = 0,myPoly % N
-              gradF(1,1,i,j,iVar,iEl) = gradF(1,1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
-              gradF(2,1,i,j,iVar,iEl) = gradF(2,1,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
-              gradF(1,2,i,j,iVar,iEl) = gradF(1,2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
-              gradF(2,2,i,j,iVar,iEl) = gradF(2,2,i,j,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
+              gf(1,1) = gf(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl)
+              gf(2,1) = gf(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,iVar,iEl)
+              gf(1,2) = gf(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,iVar,iEl)
+              gf(2,2) = gf(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
+            gradF(1:2,1:2,i,j,iVar,iEl) = gf(1:2,1:2)
 
           END DO
         END DO
@@ -1587,6 +1608,7 @@ CONTAINS
     REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
     REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
+    REAL(prec) :: dfLoc
     INTEGER    :: i,j,ii,iVar,iEl
 
     DO iEl = 1,nElements
@@ -1594,18 +1616,19 @@ CONTAINS
         DO j = 0,myPoly % N
           DO i = 0,myPoly % N
 
-            dF(i,j,iVar,iEl) = 0.0_prec
+            dfLoc = 0.0_prec
             DO ii = 0,myPoly % N
-              dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
+              dfLoc = dfLoc + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
                                  myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
-            dF(i,j,iVar,iEl) = dF(i,j,iVar,iEl) + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
+            dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
                                                    myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
                                myPoly % qWeights % hostData(i) + &
                                (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
                                 myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
+            dF(i,j,iVar,iEl) = dFLoc
 
           END DO
         END DO
@@ -1629,6 +1652,73 @@ CONTAINS
                                            nVariables,nElements)
 
   END SUBROUTINE VectorDGDivergence_2D_gpu
+
+  SUBROUTINE VectorDGSplitDivergence_2D_cpu(myPoly,f,s,c,bF,dF,nVariables,nElements)
+    !! This method calculates the divergence of a vector "f" using a split-form
+    !! method assuming the vector takes the form $f=c*s$, where "c" is an
+    !! advective velocity and "s" is usually a prognostic variable in a solver
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: s(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: c(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+    REAL(prec) :: dfLoc
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
+
+            dfLoc = 0.0_prec
+            DO ii = 0,myPoly % N
+              dFLoc = dFLoc + 0.5_prec*(&
+                myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
+                myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl) + &
+                s(i,j,iVar,iEl)*(c(1,ii,j,1,iEl)-c(1,i,j,1,iEl))* &
+                myPoly % dMatrix % hostData(ii,i) + &
+                s(i,j,iVar,iEl)*(c(1,i,ii,1,iEl)-c(1,i,j,1,iEl))* &
+                myPoly % dMatrix % hostData(ii,j))
+            END DO
+
+            dFLoc = dFLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
+                             myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
+                               myPoly % qWeights % hostData(i) + &
+                               (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
+                                myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
+                               myPoly % qWeights % hostData(j)
+            dF(i,j,iVar,iEl) = dFLoc
+
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE VectorDGSplitDivergence_2D_cpu
+
+  SUBROUTINE VectorDGSplitDivergence_2D_gpu(myPoly,f_dev,s_dev,c_dev,bF_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: s_dev
+    TYPE(c_ptr),INTENT(in)     :: c_dev
+    TYPE(c_ptr),INTENT(in)     :: bF_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
+
+    CALL VectorDGSplitDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+                                           myPoly % dMatrix % deviceData, &
+                                           myPoly % bMatrix % deviceData, &
+                                           myPoly % qWeights % deviceData, &
+                                           f_dev,s_dev,c_dev,bF_dev,dF_dev,&
+                                           myPoly % N, &
+                                           nVariables,nElements)
+
+  END SUBROUTINE VectorDGSplitDivergence_2D_gpu
 
   SUBROUTINE VectorCurl_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE
@@ -1783,6 +1873,7 @@ CONTAINS
     REAL(prec),INTENT(out) :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,k,ii,iVar,iEl
+    REAL(prec) :: gf(1:3)
 
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
@@ -1790,14 +1881,18 @@ CONTAINS
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              gradF(1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,i,j,k,iVar,iEl) = 0.0_prec
+              gF(1) = 0.0_prec
+              gF(2) = 0.0_prec
+              gF(3) = 0.0_prec
               DO ii = 0,myPoly % N
-                gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iVar,iEl)
-                gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iVar,iEl)
-                gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iVar,iEl)
+                gF(1) = gF(1) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iVar,iEl)
+                gF(2) = gF(2) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iVar,iEl)
+                gF(3) = gF(3) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iVar,iEl)
               END DO
+
+              gradF(1,i,j,k,iVar,iEl) = gF(1)
+              gradF(2,i,j,k,iVar,iEl) = gF(2)
+              gradF(3,i,j,k,iVar,iEl) = gF(3)
 
             END DO
           END DO
@@ -1837,6 +1932,7 @@ CONTAINS
     REAL(prec),INTENT(out) :: gradF(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,k,ii,iVar,iEl
+    REAL(prec) :: gF(1:3,1:3)
 
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
@@ -1844,44 +1940,28 @@ CONTAINS
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              gradF(1,1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(1,2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(1,3,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,3,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,3,i,j,k,iVar,iEl) = 0.0_prec
+              gF = 0.0_prec
               DO ii = 0,myPoly % N
-                gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl)
-
-                gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl)
-
-                gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
-
-                gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
-
-                gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl)
-
-                gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl)
-
-                gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl)
-
-                gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
-
-                gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
-
+                gF(1,1) = gF(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl)
+                gF(2,1) = gF(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl)
+                gF(3,1) = gF(3,1) + myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+                gF(1,2) = gF(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
+                gF(2,2) = gF(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl)
+                gF(3,2) = gF(3,2) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl)
+                gF(1,3) = gF(1,3) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl)
+                gF(2,3) = gF(2,3) + myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+                gF(3,3) = gF(3,3) + myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
+
+              gradF(1,1,i,j,k,iVar,iEl) = gF(1,1) 
+              gradF(2,1,i,j,k,iVar,iEl) = gF(2,1) 
+              gradF(3,1,i,j,k,iVar,iEl) = gF(3,1) 
+              gradF(1,2,i,j,k,iVar,iEl) = gF(1,2) 
+              gradF(2,2,i,j,k,iVar,iEl) = gF(2,2) 
+              gradF(3,2,i,j,k,iVar,iEl) = gF(3,2) 
+              gradF(1,3,i,j,k,iVar,iEl) = gF(1,3) 
+              gradF(2,3,i,j,k,iVar,iEl) = gF(2,3) 
+              gradF(3,3,i,j,k,iVar,iEl) = gF(3,3) 
 
             END DO
           END DO

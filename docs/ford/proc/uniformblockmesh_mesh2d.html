@@ -138,7 +138,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.5% of total for procedures.">60 statements</a>
+    title=" 0.5% of total for procedures.">66 statements</a>
      </li> 
      
      
@@ -255,7 +255,7 @@ public subroutine UniformBlockMesh_Mesh2D(myMesh, nGeo, nElem, x)
   
 <tr>
   
-  <td><span class="anchor" id="variable-ngeo~8"></span>integer,</td>
+  <td><span class="anchor" id="variable-ngeo~6"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -270,7 +270,7 @@ public subroutine UniformBlockMesh_Mesh2D(myMesh, nGeo, nElem, x)
   
 <tr>
   
-  <td><span class="anchor" id="variable-nelem~26"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem~20"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -474,6 +474,8 @@ public subroutine UniformBlockMesh_Mesh2D(myMesh, nGeo, nElem, x)
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">i</span><span class="p">,</span><span class="n">j</span>
     <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span> <span class="kd">::</span> <span class="n">xU</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nElem</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="kt">REAL</span><span class="p">(</span><span class="n">prec</span><span class="p">)</span> <span class="kd">::</span> <span class="n">yU</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nElem</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span> <span class="k">TARGET</span> <span class="kd">::</span> <span class="n">linearInterp</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span> <span class="k">TARGET</span> <span class="kd">::</span> <span class="n">nGeoInterp</span>
     <span class="k">TYPE</span><span class="p">(</span><span class="n">Vector2D</span><span class="p">)</span> <span class="kd">::</span> <span class="n">xLinear</span>
     <span class="k">TYPE</span><span class="p">(</span><span class="n">Vector2D</span><span class="p">)</span> <span class="kd">::</span> <span class="n">xGeo</span>
 
@@ -487,14 +489,16 @@ public subroutine UniformBlockMesh_Mesh2D(myMesh, nGeo, nElem, x)
     <span class="n">xU</span> <span class="o">=</span> <span class="n">UniformPoints</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="n">nElem</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">yU</span> <span class="o">=</span> <span class="n">UniformPoints</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="n">x</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="mi">1</span><span class="p">,</span><span class="n">nElem</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="c">! Create a linear interpolant to interpolate to nGeo grid</span>
-    <span class="k">CALL </span><span class="n">xLinear</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">,</span> <span class="p">&amp;</span>
-                        <span class="n">nGeo</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">,</span> <span class="p">&amp;</span>
-                        <span class="mi">1</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">linearInterp</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">,&amp;</span>
+            <span class="n">nGeo</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">)</span>
 
-    <span class="k">CALL </span><span class="n">xGeo</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">nGeo</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">,</span> <span class="p">&amp;</span>
-                     <span class="n">nGeo</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">,</span> <span class="p">&amp;</span>
-                     <span class="mi">1</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">nGeoInterp</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">nGeo</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">,&amp;</span>
+            <span class="n">nGeo</span><span class="p">,</span><span class="n">GAUSS_LOBATTO</span><span class="p">)</span>
+
+    <span class="c">! Create a linear interpolant to interpolate to nGeo grid</span>
+    <span class="k">CALL </span><span class="n">xLinear</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">linearInterp</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">xGeo</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">nGeoInterp</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">nEl</span><span class="p">)</span>
+
     <span class="n">elid</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">DO </span><span class="n">jel</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">nElem</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
       <span class="k">DO </span><span class="n">iel</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">nElem</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -540,6 +544,8 @@ public subroutine UniformBlockMesh_Mesh2D(myMesh, nGeo, nElem, x)
 
     <span class="k">CALL </span><span class="n">xLinear</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span>
     <span class="k">CALL </span><span class="n">xGeo</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span>
+    <span class="k">CALL </span><span class="n">linearInterp</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span>
+    <span class="k">CALL </span><span class="n">nGeoInterp</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span>
 
   <span class="k">END SUBROUTINE </span><span class="n">UniformBlockMesh_Mesh2D</span>
 </pre></div>
@@ -564,7 +570,7 @@ public subroutine UniformBlockMesh_Mesh2D(myMesh, nGeo, nElem, x)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

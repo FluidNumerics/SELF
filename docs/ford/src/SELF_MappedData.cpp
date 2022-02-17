@@ -276,15 +276,14 @@ __global__ void ContravariantProjection_MappedVector2D_gpu(real *physVector, rea
   size_t j = threadIdx.y;
 
 
-    compVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*
-                                                     physVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)]+ 
-						     dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*
-                                                     physVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
+    real Fx = physVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
+    real Fy = physVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
 
-    compVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*
-                                                     physVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)]+ 
-						     dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*
-                                                     physVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
+    compVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*Fx+
+						     dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*Fy;
+
+    compVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*Fx+
+						     dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*Fy;
   
 }
 
@@ -349,26 +348,21 @@ __global__ void ContravariantProjection_MappedVector3D_gpu(real *physVector, rea
   size_t j = threadIdx.y;
   size_t k = threadIdx.z;
 
-  compVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)]+ 
-                                                     dsdx[TE_3D_INDEX(2,1,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)]+
-                                                     dsdx[TE_3D_INDEX(3,1,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
+  real Fx = physVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
+  real Fy = physVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)];
+  real Fz = physVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
 
-  compVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,2,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)]+ 
-                                                     dsdx[TE_3D_INDEX(2,2,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)]+
-                                                     dsdx[TE_3D_INDEX(3,2,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
+  compVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,1,i,j,k,0,iEl,N,1)]*Fx+
+                                                     dsdx[TE_3D_INDEX(2,1,i,j,k,0,iEl,N,1)]*Fy+
+                                                     dsdx[TE_3D_INDEX(3,1,i,j,k,0,iEl,N,1)]*Fz;
 
-  compVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,3,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)]+ 
-                                                     dsdx[TE_3D_INDEX(2,3,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)]+
-                                                     dsdx[TE_3D_INDEX(3,3,i,j,k,0,iEl,N,1)]*
-                                                     physVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
+  compVector[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,2,i,j,k,0,iEl,N,1)]*Fx+
+                                                     dsdx[TE_3D_INDEX(2,2,i,j,k,0,iEl,N,1)]*Fy+
+                                                     dsdx[TE_3D_INDEX(3,2,i,j,k,0,iEl,N,1)]*Fz;
+
+  compVector[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)] = dsdx[TE_3D_INDEX(1,3,i,j,k,0,iEl,N,1)]*Fx+
+                                                     dsdx[TE_3D_INDEX(2,3,i,j,k,0,iEl,N,1)]*Fy+
+                                                     dsdx[TE_3D_INDEX(3,3,i,j,k,0,iEl,N,1)]*Fz;
 
 }
 
