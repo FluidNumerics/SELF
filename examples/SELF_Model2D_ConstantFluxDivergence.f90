@@ -1,4 +1,4 @@
-PROGRAM SELF_Model2D_FluxDivergence
+PROGRAM SELF_Model2D_ConstantFluxDivergence
 
 USE SELF_Constants
 USE SELF_Lagrange
@@ -18,6 +18,7 @@ USE SELF_Model
   REAL(prec), PARAMETER :: Ly = 1.0_prec ! Length of the domain in the y-direction 
   REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
   REAL(prec), PARAMETER :: tn = 0.5_prec ! File time 
+  REAL(prec), PARAMETER :: tolerance=5000.0_prec*epsilon(1.0_prec) ! Error tolerance
 
 
   TYPE(Lagrange),TARGET :: interp
@@ -27,7 +28,10 @@ USE SELF_Model
   TYPE(Model2D) :: semModel
   INTEGER :: i,j,iSide,iEl
   REAL(prec) :: nhat(1:2),nmag,fn
+  REAL(prec) :: dFError(1:nvar)
+  LOGICAL :: fail 
 
+    fail = .FALSE.
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
@@ -82,10 +86,16 @@ USE SELF_Model
 
     CALL semModel % ReprojectFlux()
     CALL semModel % CalculateFluxDivergence() 
-    PRINT*, semModel % fluxDivergence  % AbsMaxInterior()
 
     ! TO DO !
     ! Compute max error in the flux divergence !
+    1003 FORMAT('Flux divergence error max(|divF-exact|) greater than tolerance : ',E12.5, ' > ', E12.5)
+    dfError = semModel % fluxDivergence % AbsMaxInterior()
+
+    IF( dfError(1) > tolerance )THEN
+      WRITE(*,1003) dfError(1), tolerance 
+      fail=.TRUE.
+    ENDIF
 
     CALL decomp % Free()
     CALL geometry % Free()
@@ -93,4 +103,4 @@ USE SELF_Model
     CALL interp % Free()
     CALL semModel % Free()
 
-END PROGRAM SELF_Model2D_FluxDivergence
+END PROGRAM SELF_Model2D_ConstantFluxDivergence
