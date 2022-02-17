@@ -240,7 +240,7 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-vector~20"></span>class(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
+  <td><span class="anchor" id="variable-vector~22"></span>class(<a href='../type/mappedvector3d.html'>MappedVector3D</a>),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -255,7 +255,7 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-mesh~24"></span>type(Mesh3D),</td>
+  <td><span class="anchor" id="variable-mesh~29"></span>type(Mesh3D),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -270,7 +270,7 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
   
 <tr>
   
-  <td><span class="anchor" id="variable-decomp~14"></span>type(MPILayer),</td>
+  <td><span class="anchor" id="variable-decomp~18"></span>type(MPILayer),</td>
   <td>intent(inout)</td>
   <td></td>
   
@@ -493,7 +493,7 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
                                                    <span class="n">decomp</span> <span class="p">%</span> <span class="n">elemToRank</span> <span class="p">%</span> <span class="n">deviceData</span><span class="p">,</span> <span class="p">&amp;</span>
                                                    <span class="n">decomp</span> <span class="p">%</span> <span class="n">rankId</span><span class="p">,</span> <span class="p">&amp;</span>
                                                    <span class="n">offset</span><span class="p">,</span> <span class="p">&amp;</span>
-                                                   <span class="n">vector</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span> <span class="p">&amp;</span>
+                                                   <span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span> <span class="p">&amp;</span>
                                                    <span class="n">vector</span> <span class="p">%</span> <span class="n">nvar</span><span class="p">,</span> <span class="p">&amp;</span>
                                                    <span class="n">vector</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
 
@@ -518,8 +518,8 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
 <span class="k">              IF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nvar</span>
-                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                       <span class="n">vector</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
                         <span class="n">vector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
                     <span class="k">END DO</span>
@@ -529,10 +529,10 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
 <span class="k">              </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nvar</span>
-                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                       <span class="n">i2</span> <span class="o">=</span> <span class="n">j1</span>
-                      <span class="n">j2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
+                      <span class="n">j2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
                       <span class="n">vector</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
                         <span class="n">vector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
                     <span class="k">END DO</span>
@@ -542,10 +542,10 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
 <span class="k">              </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nvar</span>
-                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="n">i2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
-                      <span class="n">j2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
+                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="n">i2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">i1</span>
+                      <span class="n">j2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
                       <span class="n">vector</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
                         <span class="n">vector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
                     <span class="k">END DO</span>
@@ -555,9 +555,9 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
 <span class="k">              </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nvar</span>
-                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                      <span class="n">i2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
+                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                      <span class="n">i2</span> <span class="o">=</span> <span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span> <span class="o">-</span> <span class="n">j1</span>
                       <span class="n">j2</span> <span class="o">=</span> <span class="n">i1</span>
                       <span class="n">vector</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
                         <span class="n">vector</span> <span class="p">%</span> <span class="n">boundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i2</span><span class="p">,</span><span class="n">j2</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s2</span><span class="p">,</span><span class="n">e2</span><span class="p">)</span>
@@ -568,8 +568,8 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
 <span class="k">              </span><span class="n">ELSEIF</span> <span class="p">(</span><span class="n">flip</span> <span class="o">==</span> <span class="mi">4</span><span class="p">)</span> <span class="k">THEN</span>
 
 <span class="k">                DO </span><span class="n">ivar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">nvar</span>
-                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
-                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">N</span>
+                  <span class="k">DO </span><span class="n">j1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
+                    <span class="k">DO </span><span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">vector</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
                       <span class="n">i2</span> <span class="o">=</span> <span class="n">j1</span>
                       <span class="n">j2</span> <span class="o">=</span> <span class="n">i1</span>
                       <span class="n">vector</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">hostData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span><span class="n">i1</span><span class="p">,</span><span class="n">j1</span><span class="p">,</span><span class="n">ivar</span><span class="p">,</span><span class="n">s1</span><span class="p">,</span><span class="n">e1</span><span class="p">)</span> <span class="o">=</span> <span class="p">&amp;</span>
@@ -616,7 +616,7 @@ public subroutine SideExchange_MappedVector3D(vector, mesh, decomp, gpuAccel)
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

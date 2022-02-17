@@ -211,7 +211,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enableMPI, spec)
+public subroutine Init_DG2D(this, interp, nvar, enableMPI, spec)
     
     
    
@@ -240,7 +240,7 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
   
 <tr>
   
-  <td><span class="anchor" id="variable-this~132"></span>class(<a href='../type/dg2d.html'>DG2D</a>),</td>
+  <td><span class="anchor" id="variable-this~174"></span>class(<a href='../type/dg2d.html'>DG2D</a>),</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -255,12 +255,12 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
   
 <tr>
   
-  <td><span class="anchor" id="variable-cqtype~12"></span>integer,</td>
-  <td>intent(in)</td>
+  <td><span class="anchor" id="variable-interp~16"></span>integer</td>
+  <td></td>
   <td></td>
   
   <td></td><td>::</td>
-  <td><strong>cqType</strong></td><td></td>
+  <td><strong>interp</strong></td><td></td>
   
 </tr>
 
@@ -270,52 +270,7 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
   
 <tr>
   
-  <td><span class="anchor" id="variable-tqtype~12"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tqType</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-cqdegree~9"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>cqDegree</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-tqdegree~9"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tqDegree</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nvar~3"></span>integer,</td>
+  <td><span class="anchor" id="variable-nvar~4"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -330,7 +285,7 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
   
 <tr>
   
-  <td><span class="anchor" id="variable-enablempi~6"></span>logical,</td>
+  <td><span class="anchor" id="variable-enablempi~4"></span>logical,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -345,7 +300,7 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
   
 <tr>
   
-  <td><span class="anchor" id="variable-spec~3"></span>type(MeshSpec),</td>
+  <td><span class="anchor" id="variable-spec~2"></span>type(MeshSpec),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -421,7 +376,7 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_DG2D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">enableMPI</span><span class="p">,</span><span class="n">spec</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_DG2D</span><span class="p">(</span><span class="n">this</span><span class="p">,</span><span class="n">interp</span><span class="p">,</span><span class="n">nvar</span><span class="p">,</span><span class="n">enableMPI</span><span class="p">,</span><span class="n">spec</span><span class="p">)</span>
     <span class="k">IMPLICIT NONE</span>
 <span class="k">    CLASS</span><span class="p">(</span><span class="n">DG2D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">this</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">cqType</span>
@@ -444,18 +399,18 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
     <span class="c">! Create geometry from mesh</span>
     <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">geometry</span> <span class="p">%</span> <span class="n">GenerateFromMesh</span><span class="p">(</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">)</span>
 
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">solution</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">solution</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
     <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">plotSolution</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">dSdt</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">solutionGradient</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">flux</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">source</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">fluxDivergence</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">dSdt</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">solutionGradient</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">flux</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">source</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">fluxDivergence</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
 
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">workScalar</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">workVector</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">workTensor</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
-    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">compFlux</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">workScalar</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">workVector</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">workTensor</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+    <span class="k">CALL </span><span class="n">this</span> <span class="p">%</span> <span class="n">compFlux</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">this</span> <span class="p">%</span> <span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
 
     <span class="k">ALLOCATE</span> <span class="p">(</span><span class="n">this</span> <span class="p">%</span> <span class="n">solutionMetaData</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nvar</span><span class="p">))</span>
 
@@ -482,7 +437,7 @@ public subroutine Init_DG2D(this, cqType, tqType, cqDegree, tqDegree, nvar, enab
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

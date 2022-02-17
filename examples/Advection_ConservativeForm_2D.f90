@@ -38,7 +38,7 @@ USE SELF_Advection2D
     CALL mesh % UniformBlockMesh(N,(/nXe,nYe/),(/0.0_prec,Lx,0.0_prec,Ly/))
 
     ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % GenerateFromMesh(mesh,interp)
@@ -65,18 +65,18 @@ USE SELF_Advection2D
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("Euler")
+   ! CALL semModel % SetTimeIntegrator("Euler")
 
-    ! Set your time step
-    semModel % dt = dt
+   ! ! Set your time step
+   ! semModel % dt = dt
 
-    ! Forward step the semModel and do the file io
-    CALL semModel % ForwardStep( tn = tn )
+   ! ! Forward step the semModel and do the file io
+   ! CALL semModel % ForwardStep( tn = tn )
 
 
-    ! Manually write the last semModel state
-    CALL semModel % Write()
-    CALL semModel % WriteTecplot()
+   ! ! Manually write the last semModel state
+   ! CALL semModel % Write()
+   ! CALL semModel % WriteTecplot()
 
     ! Clean up
     CALL semModel % Free()

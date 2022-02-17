@@ -1629,7 +1629,6 @@ CONTAINS
                                 myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
             dF(i,j,iVar,iEl) = dFLoc
-            PRINT*, dFLoc
 
           END DO
         END DO
@@ -1874,6 +1873,7 @@ CONTAINS
     REAL(prec),INTENT(out) :: gradF(1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,k,ii,iVar,iEl
+    REAL(prec) :: gf(1:3)
 
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
@@ -1881,14 +1881,18 @@ CONTAINS
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              gradF(1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,i,j,k,iVar,iEl) = 0.0_prec
+              gF(1) = 0.0_prec
+              gF(2) = 0.0_prec
+              gF(3) = 0.0_prec
               DO ii = 0,myPoly % N
-                gradF(1,i,j,k,iVar,iEl) = gradF(1,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iVar,iEl)
-                gradF(2,i,j,k,iVar,iEl) = gradF(2,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iVar,iEl)
-                gradF(3,i,j,k,iVar,iEl) = gradF(3,i,j,k,iVar,iEl) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iVar,iEl)
+                gF(1) = gF(1) + myPoly % dMatrix % hostData(ii,i)*f(ii,j,k,iVar,iEl)
+                gF(2) = gF(2) + myPoly % dMatrix % hostData(ii,j)*f(i,ii,k,iVar,iEl)
+                gF(3) = gF(3) + myPoly % dMatrix % hostData(ii,k)*f(i,j,ii,iVar,iEl)
               END DO
+
+              gradF(1,i,j,k,iVar,iEl) = gF(1)
+              gradF(2,i,j,k,iVar,iEl) = gF(2)
+              gradF(3,i,j,k,iVar,iEl) = gF(3)
 
             END DO
           END DO
@@ -1928,6 +1932,7 @@ CONTAINS
     REAL(prec),INTENT(out) :: gradF(1:3,1:3,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
     ! Local
     INTEGER    :: i,j,k,ii,iVar,iEl
+    REAL(prec) :: gF(1:3,1:3)
 
     DO iEl = 1,nElements
       DO iVar = 1,nVariables
@@ -1935,44 +1940,28 @@ CONTAINS
           DO j = 0,myPoly % N
             DO i = 0,myPoly % N
 
-              gradF(1,1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,1,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(1,2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,2,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(1,3,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(2,3,i,j,k,iVar,iEl) = 0.0_prec
-              gradF(3,3,i,j,k,iVar,iEl) = 0.0_prec
+              gF = 0.0_prec
               DO ii = 0,myPoly % N
-                gradF(1,1,i,j,k,iVar,iEl) = gradF(1,1,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl)
-
-                gradF(2,1,i,j,k,iVar,iEl) = gradF(2,1,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl)
-
-                gradF(3,1,i,j,k,iVar,iEl) = gradF(3,1,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
-
-                gradF(1,2,i,j,k,iVar,iEl) = gradF(1,2,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
-
-                gradF(2,2,i,j,k,iVar,iEl) = gradF(2,2,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl)
-
-                gradF(3,2,i,j,k,iVar,iEl) = gradF(3,2,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl)
-
-                gradF(1,3,i,j,k,iVar,iEl) = gradF(1,3,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl)
-
-                gradF(2,3,i,j,k,iVar,iEl) = gradF(2,3,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
-
-                gradF(3,3,i,j,k,iVar,iEl) = gradF(3,3,i,j,k,iVar,iEl) + &
-                                            myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
-
+                gF(1,1) = gF(1,1) + myPoly % dMatrix % hostData(ii,i)*f(1,ii,j,k,iVar,iEl)
+                gF(2,1) = gF(2,1) + myPoly % dMatrix % hostData(ii,i)*f(2,ii,j,k,iVar,iEl)
+                gF(3,1) = gF(3,1) + myPoly % dMatrix % hostData(ii,i)*f(3,ii,j,k,iVar,iEl)
+                gF(1,2) = gF(1,2) + myPoly % dMatrix % hostData(ii,j)*f(1,i,ii,k,iVar,iEl)
+                gF(2,2) = gF(2,2) + myPoly % dMatrix % hostData(ii,j)*f(2,i,ii,k,iVar,iEl)
+                gF(3,2) = gF(3,2) + myPoly % dMatrix % hostData(ii,j)*f(3,i,ii,k,iVar,iEl)
+                gF(1,3) = gF(1,3) + myPoly % dMatrix % hostData(ii,k)*f(1,i,j,ii,iVar,iEl)
+                gF(2,3) = gF(2,3) + myPoly % dMatrix % hostData(ii,k)*f(2,i,j,ii,iVar,iEl)
+                gF(3,3) = gF(3,3) + myPoly % dMatrix % hostData(ii,k)*f(3,i,j,ii,iVar,iEl)
               END DO
+
+              gradF(1,1,i,j,k,iVar,iEl) = gF(1,1) 
+              gradF(2,1,i,j,k,iVar,iEl) = gF(2,1) 
+              gradF(3,1,i,j,k,iVar,iEl) = gF(3,1) 
+              gradF(1,2,i,j,k,iVar,iEl) = gF(1,2) 
+              gradF(2,2,i,j,k,iVar,iEl) = gF(2,2) 
+              gradF(3,2,i,j,k,iVar,iEl) = gF(3,2) 
+              gradF(1,3,i,j,k,iVar,iEl) = gF(1,3) 
+              gradF(2,3,i,j,k,iVar,iEl) = gF(2,3) 
+              gradF(3,3,i,j,k,iVar,iEl) = gF(3,3) 
 
             END DO
           END DO

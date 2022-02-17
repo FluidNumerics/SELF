@@ -377,11 +377,11 @@ CONTAINS
     ! Set the hopr_nodeCoords
     xU = UniformPoints(x(1),x(2),1,nElem + 1)
 
-    CALL linearInterp % Init(1,CHEBYSHEV_GAUSS_LOBATTO,&
-            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+    CALL linearInterp % Init(1,GAUSS_LOBATTO,&
+            nGeo,GAUSS_LOBATTO)
 
-    CALL nGeoInterp % Init(nGeo,CHEBYSHEV_GAUSS_LOBATTO,&
-            nGeo,CHEBYSHEV_GAUSS_LOBATTO)
+    CALL nGeoInterp % Init(nGeo,GAUSS_LOBATTO,&
+            nGeo,GAUSS_LOBATTO)
 
     ! Create a linear interpolant to interpolate to nGeo grid
     CALL xLinear % Init(linearInterp,1,nElem)

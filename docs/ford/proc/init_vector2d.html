@@ -138,7 +138,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.2% of total for procedures.">21 statements</a>
+    title=" 0.1% of total for procedures.">18 statements</a>
      </li> 
      
      
@@ -211,7 +211,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeType, nVar, nElem)
+public subroutine Init_Vector2D(SELFStorage, interp, nVar, nElem)
     
     
    
@@ -240,7 +240,7 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
   
 <tr>
   
-  <td><span class="anchor" id="variable-selfstorage~40"></span>class(<a href='../type/vector2d.html'>Vector2D</a>),</td>
+  <td><span class="anchor" id="variable-selfstorage~42"></span>class(<a href='../type/vector2d.html'>Vector2D</a>),</td>
   <td>intent(out)</td>
   <td></td>
   
@@ -255,12 +255,12 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
   
 <tr>
   
-  <td><span class="anchor" id="variable-n~25"></span>integer,</td>
-  <td>intent(in)</td>
+  <td><span class="anchor" id="variable-interp~8"></span>type(Lagrange),</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
-  <td><strong>N</strong></td><td></td>
+  <td>TARGET</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
   
 </tr>
 
@@ -270,52 +270,7 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
   
 <tr>
   
-  <td><span class="anchor" id="variable-quadraturetype~6"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>quadratureType</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-m~15"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>M</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-targetnodetype~6"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>targetNodeType</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nvar~18"></span>integer,</td>
+  <td><span class="anchor" id="variable-nvar~13"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -330,7 +285,7 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
   
 <tr>
   
-  <td><span class="anchor" id="variable-nelem~20"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem~13"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -406,27 +361,20 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_Vector2D</span><span class="p">(</span><span class="n">SELFStorage</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">quadratureType</span><span class="p">,</span><span class="n">M</span><span class="p">,</span><span class="n">targetNodeType</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nElem</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_Vector2D</span><span class="p">(</span><span class="n">SELFStorage</span><span class="p">,</span><span class="n">interp</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nElem</span><span class="p">)</span>
     <span class="k">IMPLICIT NONE</span>
 <span class="k">    CLASS</span><span class="p">(</span><span class="n">Vector2D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">SELFStorage</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">N</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">quadratureType</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">M</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">targetNodeType</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">TARGET</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">interp</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nVar</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nElem</span>
+    <span class="c">! Local</span>
+    <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">N</span>
 
-    <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">N</span> <span class="o">=</span> <span class="n">N</span>
-    <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">M</span> <span class="o">=</span> <span class="n">M</span>
+    <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">interp</span> <span class="o">=&gt;</span> <span class="n">interp</span>
     <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">nVar</span> <span class="o">=</span> <span class="n">nVar</span>
     <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">nElem</span> <span class="o">=</span> <span class="n">nElem</span>
-    <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">controlType</span> <span class="o">=</span> <span class="n">quadratureType</span>
-    <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">targetType</span> <span class="o">=</span> <span class="n">targetNodeType</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span>
 
-    <span class="k">CALL </span><span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="p">&amp;</span>
-                                     <span class="n">controlNodeType</span><span class="o">=</span><span class="n">quadratureType</span><span class="p">,</span> <span class="p">&amp;</span>
-                                     <span class="n">M</span><span class="o">=</span><span class="n">M</span><span class="p">,</span> <span class="p">&amp;</span>
-                                     <span class="n">targetNodeType</span><span class="o">=</span><span class="n">targetNodeType</span><span class="p">)</span>
 
     <span class="k">CALL </span><span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">interior</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="p">),</span> <span class="p">&amp;</span>
                                         <span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="n">nElem</span><span class="o">/</span><span class="p">))</span>
@@ -439,6 +387,9 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
 
     <span class="k">CALL </span><span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">extBoundary</span> <span class="p">%</span> <span class="n">Alloc</span><span class="p">(</span><span class="n">loBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="o">/</span><span class="p">),</span> <span class="p">&amp;</span>
                                            <span class="n">upBound</span><span class="o">=</span><span class="p">(</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">N</span><span class="p">,</span><span class="n">nVar</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="n">nElem</span><span class="o">/</span><span class="p">))</span>
+
+    <span class="k">ALLOCATE</span><span class="p">(</span> <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">meta</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="n">nVar</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">ALLOCATE</span><span class="p">(</span> <span class="n">SELFStorage</span> <span class="p">%</span> <span class="n">eqn</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="o">*</span><span class="n">nVar</span><span class="p">)</span> <span class="p">)</span>
 
   <span class="k">END SUBROUTINE </span><span class="n">Init_Vector2D</span>
 </pre></div>
@@ -463,7 +414,7 @@ public subroutine Init_Vector2D(SELFStorage, N, quadratureType, M, targetNodeTyp
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

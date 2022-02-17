@@ -118,8 +118,8 @@ CONTAINS
   SUBROUTINE ChebyshevQuadrature(N,nodes,weights,quadType)
     IMPLICIT NONE
     INTEGER,INTENT(in)     :: N
-    REAL(real64),INTENT(out) :: nodes(0:N)
-    REAL(real64),INTENT(out) :: weights(0:N)
+    REAL(prec),INTENT(out) :: nodes(0:N)
+    REAL(prec),INTENT(out) :: weights(0:N)
     INTEGER,INTENT(in)     :: QuadType
     ! Local
     REAL(real64) :: nodesLocal(0:N)

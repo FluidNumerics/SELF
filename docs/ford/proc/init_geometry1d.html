@@ -138,7 +138,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.1% of total for procedures.">14 statements</a>
+    title=" 0.1% of total for procedures.">9 statements</a>
      </li> 
      
      
@@ -211,7 +211,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine Init_Geometry1D(myGeom, cqType, tqType, cqDegree, tqDegree, nElem)
+public subroutine Init_Geometry1D(myGeom, interp, nElem)
     
     
    
@@ -255,12 +255,12 @@ public subroutine Init_Geometry1D(myGeom, cqType, tqType, cqDegree, tqDegree, nE
   
 <tr>
   
-  <td><span class="anchor" id="variable-cqtype~8"></span>integer,</td>
-  <td>intent(in)</td>
+  <td><span class="anchor" id="variable-interp~13"></span>type(Lagrange),</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
-  <td><strong>cqType</strong></td><td></td>
+  <td>POINTER</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
   
 </tr>
 
@@ -270,52 +270,7 @@ public subroutine Init_Geometry1D(myGeom, cqType, tqType, cqDegree, tqDegree, nE
   
 <tr>
   
-  <td><span class="anchor" id="variable-tqtype~8"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tqType</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-cqdegree~5"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>cqDegree</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-tqdegree~5"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tqDegree</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-nelem~29"></span>integer,</td>
+  <td><span class="anchor" id="variable-nelem~22"></span>integer,</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -391,30 +346,19 @@ public subroutine Init_Geometry1D(myGeom, cqType, tqType, cqDegree, tqDegree, nE
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">nElem</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">Init_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">interp</span><span class="p">,</span><span class="n">nElem</span><span class="p">)</span>
     <span class="k">IMPLICIT NONE</span>
 <span class="k">    CLASS</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">myGeom</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">cqType</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">tqType</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">cqDegree</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">tqDegree</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">POINTER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">interp</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">nElem</span>
 
-    <span class="n">myGeom</span> <span class="p">%</span> <span class="n">cqType</span> <span class="o">=</span> <span class="n">cqType</span>
-    <span class="n">myGeom</span> <span class="p">%</span> <span class="n">tqType</span> <span class="o">=</span> <span class="n">tqType</span>
     <span class="n">myGeom</span> <span class="p">%</span> <span class="n">nElem</span> <span class="o">=</span> <span class="n">nElem</span>
 
-    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">cqDegree</span><span class="p">,</span> <span class="p">&amp;</span>
-                           <span class="n">quadratureType</span><span class="o">=</span><span class="n">cqType</span><span class="p">,</span> <span class="p">&amp;</span>
-                           <span class="n">M</span><span class="o">=</span><span class="n">tqDegree</span><span class="p">,</span> <span class="p">&amp;</span>
-                           <span class="n">targetNodeType</span><span class="o">=</span><span class="n">tqType</span><span class="p">,</span> <span class="p">&amp;</span>
+    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span>
                            <span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
                            <span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span>
 
-    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">dxds</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">cqDegree</span><span class="p">,</span> <span class="p">&amp;</span>
-                              <span class="n">quadratureType</span><span class="o">=</span><span class="n">cqType</span><span class="p">,</span> <span class="p">&amp;</span>
-                              <span class="n">M</span><span class="o">=</span><span class="n">tqDegree</span><span class="p">,</span> <span class="p">&amp;</span>
-                              <span class="n">targetNodeType</span><span class="o">=</span><span class="n">tqType</span><span class="p">,</span> <span class="p">&amp;</span>
+    <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">dxds</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="o">=</span><span class="n">interp</span><span class="p">,&amp;</span>
                               <span class="n">nVar</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="p">&amp;</span>
                               <span class="n">nElem</span><span class="o">=</span><span class="n">nElem</span><span class="p">)</span>
 
@@ -441,7 +385,7 @@ public subroutine Init_Geometry1D(myGeom, cqType, tqType, cqDegree, tqDegree, nE
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>
