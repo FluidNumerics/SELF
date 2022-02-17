@@ -1,0 +1,51 @@
+
+steps:
+- id: Build Docker Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
+         '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
+         '--build-arg','PREC=${_PREC}',
+         '-f',
+         'docker/nvidia/Dockerfile',
+         '.',
+         '-t',
+         'self:pr']
+
+- id: Run Tests (Serial)
+  name: 'self:pr'
+  secretEnv: ['CODECOV_TOKEN']
+  args: 
+  - '-c'
+  - | 
+
+      ./test.sh
+
+      rm /build/src/*.gcov
+      rm /build/examples/*.gcov
+
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      chmod +x codecov
+      ./codecov -t $$CODECOV_TOKEN \
+                -R /build/ \
+                --sha ${COMMIT_SHA} \
+                --branch ${BRANCH_NAME} \
+                --pr ${_PR_NUMBER}
+
+
+options:
+  diskSizeGb: 100
+
+timeout: 3600s
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
+      env: 'CODECOV_TOKEN'
+
+substitutions:
+  _PREC: 'single'
+  _GPU_TARGET: 'sm_72'
+  _HIP_PLATFORM: 'nvidia'
+
+

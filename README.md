@@ -2,6 +2,7 @@
 Copyright 2020-2021 Fluid Numerics LLC
 
 [![Documentation Status](https://readthedocs.org/projects/self/badge/?version=latest)](https://self.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/FluidNumerics/SELF/branch/master/graph/badge.svg)](https://codecov.io/gh/FluidNumerics/SELF)
 
 
 SELF is licensed for use under the [Anti-Capitalist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.

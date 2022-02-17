@@ -138,7 +138,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title=" 0.3% of total for procedures.">32 statements</a>
+    title=" 0.2% of total for procedures.">32 statements</a>
      </li> 
      
      
@@ -211,7 +211,7 @@
     
     <div class="col-md-9" id='text'>
     <h2>
-public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDegree, tqDegree, meshQuadrature)
+public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, interp, meshQuadrature)
     
     
    
@@ -255,7 +255,7 @@ public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDe
   
 <tr>
   
-  <td><span class="anchor" id="variable-mesh~4"></span>type(Mesh1D),</td>
+  <td><span class="anchor" id="variable-mesh~9"></span>type(Mesh1D),</td>
   <td>intent(in)</td>
   <td></td>
   
@@ -270,57 +270,12 @@ public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDe
   
 <tr>
   
-  <td><span class="anchor" id="variable-cqtype~5"></span>integer,</td>
-  <td>intent(in)</td>
+  <td><span class="anchor" id="variable-interp~10"></span>type(Lagrange),</td>
+  <td>intent(in),</td>
   <td></td>
   
-  <td></td><td>::</td>
-  <td><strong>cqType</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-tqtype~5"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tqType</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-cqdegree~2"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>cqDegree</strong></td><td></td>
-  
-</tr>
-
-  
-  
-  
-  
-<tr>
-  
-  <td><span class="anchor" id="variable-tqdegree~2"></span>integer,</td>
-  <td>intent(in)</td>
-  <td></td>
-  
-  <td></td><td>::</td>
-  <td><strong>tqDegree</strong></td><td></td>
+  <td>POINTER</td><td>::</td>
+  <td><strong>interp</strong></td><td></td>
   
 </tr>
 
@@ -406,19 +361,17 @@ public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDe
     
     <section>
     <h2><span class="anchor" id="src"></span>Source Code</h2>
-    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">GenerateFromMesh_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">meshQuadrature</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span>  <span class="k">SUBROUTINE </span><span class="n">GenerateFromMesh_Geometry1D</span><span class="p">(</span><span class="n">myGeom</span><span class="p">,</span><span class="n">mesh</span><span class="p">,</span><span class="n">interp</span><span class="p">,</span><span class="n">meshQuadrature</span><span class="p">)</span>
     <span class="c">! Generates the geometry for a 1-D mesh ( set of line segments )</span>
     <span class="c">! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo</span>
     <span class="k">IMPLICIT NONE</span>
 <span class="k">    CLASS</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="kd">::</span> <span class="n">myGeom</span>
     <span class="k">TYPE</span><span class="p">(</span><span class="n">Mesh1D</span><span class="p">),</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">mesh</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">cqType</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">tqType</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">cqDegree</span>
-    <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">tqDegree</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">POINTER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">)</span> <span class="kd">::</span> <span class="n">interp</span>
     <span class="kt">INTEGER</span><span class="p">,</span><span class="k">INTENT</span><span class="p">(</span><span class="n">in</span><span class="p">),</span><span class="k">OPTIONAL</span> <span class="kd">::</span> <span class="n">meshQuadrature</span>
     <span class="c">! Local</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">iel</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">nid</span>
+    <span class="k">TYPE</span><span class="p">(</span><span class="n">Lagrange</span><span class="p">),</span><span class="k">TARGET</span> <span class="kd">::</span> <span class="n">meshToModel</span>
     <span class="k">TYPE</span><span class="p">(</span><span class="n">Scalar1D</span><span class="p">)</span> <span class="kd">::</span> <span class="n">xMesh</span>
     <span class="kt">INTEGER</span> <span class="kd">::</span> <span class="n">quadrature</span>
 
@@ -428,12 +381,14 @@ public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDe
 <span class="k">      </span><span class="n">quadrature</span> <span class="o">=</span> <span class="n">GAUSS_LOBATTO</span>
     <span class="k">END IF</span>
 
-<span class="k">    CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">cqType</span><span class="p">,</span><span class="n">tqType</span><span class="p">,</span><span class="n">cqDegree</span><span class="p">,</span><span class="n">tqDegree</span><span class="p">,</span><span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
+<span class="k">    CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span><span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
 
     <span class="c">! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to</span>
     <span class="c">! cqDegree, cqType grid</span>
-    <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">mesh</span> <span class="p">%</span> <span class="n">nGeo</span><span class="p">,</span><span class="n">quadrature</span><span class="p">,</span> <span class="p">&amp;</span>
-                      <span class="n">cqDegree</span><span class="p">,</span><span class="n">cqType</span><span class="p">,</span> <span class="p">&amp;</span>
+    <span class="k">CALL </span><span class="n">meshToModel</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">mesh</span> <span class="p">%</span> <span class="n">nGeo</span><span class="p">,</span> <span class="n">quadrature</span><span class="p">,&amp;</span>
+            <span class="n">interp</span> <span class="p">%</span> <span class="n">N</span><span class="p">,</span> <span class="n">interp</span> <span class="p">%</span> <span class="n">controlNodeType</span> <span class="p">)</span>
+
+    <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">Init</span><span class="p">(</span><span class="n">meshToModel</span><span class="p">,&amp;</span>
                       <span class="mi">1</span><span class="p">,</span><span class="n">mesh</span> <span class="p">%</span> <span class="n">nElem</span><span class="p">)</span>
 
     <span class="c">! Set the element internal mesh locations</span>
@@ -449,11 +404,14 @@ public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDe
     <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">GridInterp</span><span class="p">(</span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span><span class="p">,.</span><span class="n">FALSE</span><span class="p">.)</span>
 
     <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">x</span> <span class="p">%</span> <span class="n">BoundaryInterp</span><span class="p">(</span><span class="n">gpuAccel</span><span class="o">=</span><span class="p">.</span><span class="n">FALSE</span><span class="p">.)</span>
+
     <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">CalculateMetricTerms</span><span class="p">()</span>
 
     <span class="k">CALL </span><span class="n">myGeom</span> <span class="p">%</span> <span class="n">UpdateDevice</span><span class="p">()</span>
 
     <span class="k">CALL </span><span class="n">xMesh</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span>
+
+    <span class="k">CALL </span><span class="n">meshToModel</span> <span class="p">%</span> <span class="n">Free</span><span class="p">()</span> 
 
   <span class="k">END SUBROUTINE </span><span class="n">GenerateFromMesh_Geometry1D</span>
 </pre></div>
@@ -478,7 +436,7 @@ public subroutine GenerateFromMesh_Geometry1D(myGeom, mesh, cqType, tqType, cqDe
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

@@ -138,7 +138,7 @@
      <li><i class="fa fa-list-ol"></i>
        <a data-toggle="tooltip"
     data-placement="bottom" data-html="true"
-    title="<p> 1.6% of total for derived types.</p>Including implementation: 400 statements,  3.3% of total for derived types.">15 statements</a>
+    title="<p> 1.7% of total for derived types.</p>Including implementation: 411 statements,  3.1% of total for derived types.">16 statements</a>
      </li> 
      
      
@@ -220,6 +220,8 @@
       <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-maptoscalar">MapToScalar</a>
       
       <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-maptotensor">MapToTensor</a>
+      
+      <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-setinteriorfromequation~6">SetInteriorFromEquation</a>
       
       <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-sideexchange~5">SideExchange</a>
       
@@ -374,6 +376,8 @@
       <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-maptoscalar">MapToScalar</a>
       
       <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-maptotensor">MapToTensor</a>
+      
+      <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-setinteriorfromequation~6">SetInteriorFromEquation</a>
       
       <a class="list-group-item" href="../type/mappedvector2d.html#boundprocedure-sideexchange~5">SideExchange</a>
       
@@ -596,7 +600,7 @@ public subroutine <a href='../proc/bassirebaysides_mappedvector2d.html'>BassiReb
     
      
 <div class="panel panel-default">
-  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-contravariantprojection"></span><h3>procedure, private :: <strong>ContravariantProjection</strong>  => <a href='../proc/contravariantprojection_mappedvector2d.html'>ContravariantProjection_MappedVector2D</a> 
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-contravariantprojection"></span><h3>procedure, public :: <strong>ContravariantProjection</strong>  => <a href='../proc/contravariantprojection_mappedvector2d.html'>ContravariantProjection_MappedVector2D</a> 
     
   </h3></div>
   
@@ -1682,6 +1686,109 @@ public subroutine <a href='../proc/maptotensor_mappedvector2d.html'>MapToTensor_
     
      
 <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-setinteriorfromequation~6"></span><h3>procedure, public :: <strong>SetInteriorFromEquation</strong>  => <a href='../proc/setinteriorfromequation_mappedvector2d.html'>SetInteriorFromEquation_MappedVector2D</a> 
+    
+  </h3></div>
+  
+  <ul class="list-group">
+    
+      <li class="list-group-item">
+      
+        
+          
+    
+    <h3>
+public subroutine <a href='../proc/setinteriorfromequation_mappedvector2d.html'>SetInteriorFromEquation_MappedVector2D</a>(vector, geometry, time)
+    
+    
+   
+</h3>
+    
+
+
+
+
+
+
+
+<p>Sets the scalar % interior attribute using the eqn attribute,
+geometry (for physical positions), and provided simulation time. </p>
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/mappedvector2d.html'>MappedVector2D</a>),</td>
+  <td>intent(inout)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>vector</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>type(SEMQuad),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>geometry</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>real(kind=prec),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>time</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+        
+      
+      </li>
+    
+  </ul>
+</div>
+
+    
+     
+<div class="panel panel-default">
   <div class="panel-heading codesum"><span class="anchor" id="boundprocedure-sideexchange~5"></span><h3>procedure, public :: <strong>SideExchange</strong>  => <a href='../proc/sideexchange_mappedvector2d.html'>SideExchange_MappedVector2D</a> 
     
   </h3></div>
@@ -1700,6 +1807,16 @@ public subroutine <a href='../proc/sideexchange_mappedvector2d.html'>SideExchang
    
 </h3>
     
+
+
+
+
+
+
+
+<p>SideExchange_MappedVectorvector2D is used to populate vector % extBoundary
+by finding neighboring elements that share a side and copying the neighboring
+elements solution % boundary data.</p>
     
     <h4>Arguments</h4>
     
@@ -1809,13 +1926,15 @@ public subroutine <a href='../proc/sideexchange_mappedvector2d.html'>SideExchang
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">Divergence_MappedVector2D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">Gradient_MappedVector2D</span>
 <span class="c">!    PROCEDURE,PRIVATE :: Curl_MappedVector2D</span>
-    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">ContravariantProjection</span> <span class="o">=&gt;</span> <span class="n">ContravariantProjection_MappedVector2D</span>
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">ContravariantProjection</span> <span class="o">=&gt;</span> <span class="n">ContravariantProjection_MappedVector2D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">JacobianWeight</span> <span class="o">=&gt;</span> <span class="n">JacobianWeight_MappedVector2D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">MapToScalar</span> <span class="o">=&gt;</span> <span class="n">MapToScalar_MappedVector2D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">MapToTensor</span> <span class="o">=&gt;</span> <span class="n">MapToTensor_MappedVector2D</span>
 
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">MPIExchangeAsync</span> <span class="o">=&gt;</span> <span class="n">MPIExchangeAsync_MappedVector2D</span>
     <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PRIVATE</span> <span class="kd">::</span> <span class="n">ApplyFlip</span> <span class="o">=&gt;</span> <span class="n">ApplyFlip_MappedVector2D</span>
+
+    <span class="k">PROCEDURE</span><span class="p">,</span><span class="k">PUBLIC</span> <span class="kd">::</span> <span class="n">SetInteriorFromEquation</span> <span class="o">=&gt;</span> <span class="n">SetInteriorFromEquation_MappedVector2D</span>
 
   <span class="k">END TYPE </span><span class="n">MappedVector2D</span>
 </pre></div>
@@ -1839,7 +1958,7 @@ public subroutine <a href='../proc/sideexchange_mappedvector2d.html'>SideExchang
           <p class="text-right">
             Documentation generated by 
             <a href="https://github.com/Fortran-FOSS-Programmers/ford">FORD</a>
-             on 2022-01-20 09:52  
+             on 2022-02-16 21:12  
             
           </p>
         </div>

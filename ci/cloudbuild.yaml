@@ -1,76 +1,75 @@
 
 steps:
-- id: Build Docker Image (Nvidia GPU)
+- id: Build Docker Image
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
-         '--build-arg','GPU_TARGET=sm_72',
-         '--build-arg','HIP_PLATFORM=nvidia',
-         '-f','img/Dockerfile',
+         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
+         '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
+         '--build-arg','PREC=${_PREC}',
+         '-f',
+         'docker/nvidia/Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self-nvidia:${SHORT_SHA}']
-  waitFor: ["-"]
+         'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
 
-- id: Build Docker Image (AMD GPU)
-  name: 'gcr.io/cloud-builders/docker'
-  args: ['build',
-         '--build-arg','GPU_TARGET=gfx908',
-         '--build-arg','HIP_PLATFORM=amd',
-         '-f','img/Dockerfile',
-         '.',
-         '-t',
-         'gcr.io/${PROJECT_ID}/self-amd:${SHORT_SHA}']
-  waitFor: ["-"]
+- id: Run Tests (Serial)
+  name: 'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}'
+  secretEnv: ['CODECOV_TOKEN']
+  args: 
+  - '-c'
+  - | 
 
-- id: Build Singularity Image (Nvidia)
-  name: 'quay.io/singularity/singularity:v3.7.1'
-  args: ['build',
-         'self-nvidia.sif',
-         'img/Singularity.nvidia']
-  waitFor: ["-"]
+      source /etc/profile.d/z10_spack_environment.sh
 
-- id: Build Singularity Image (AMD)
-  name: 'quay.io/singularity/singularity:v3.7.1'
-  args: ['build',
-         'self-amd.sif',
-         'img/Singularity.amd']
-  waitFor: ["-"]
+      for file in $(ls /opt/self/examples/*); do
+        echo $file
+        $file
+      done
 
-    #- id: CI/CB (Singularity Nvidia)
-    #  name: 'gcr.io/research-computing-cloud/fluid-run'
-    #  args: 
-    #  - '--build-id=${BUILD_ID}'
-    #  - '--git-sha=${COMMIT_SHA}'
-    #  - '--project=${PROJECT_ID}'
-    #  - '--zone=${_ZONE}'
-    #  - '--gce-image=projects/fluid-cluster-ops/global/images/family/rcc-centos-7-v300'
-    #  - '--artifact-type=singularity'
-    #  - '--compiler="gcc@9.3.0"'
-    #  - '--target-arch=""'
-    #  - '--singularity-image=self-nvidia.sif'
-    #  - '--rcc-tfvars=ci/fluid.auto.tfvars'
-    #  - '--ci-file=fluid-run.yaml'
-    #  - '--save-results'
-    #  - '--ignore-job-dependencies'
-    #
+      mv /build/*.gcda /build/examples/
+      mv /build/*.gcno /build/examples/
+      
+      for file in $(ls /build/src/*.gcno); do
+        dest=$(echo $file | sed 's/\.f//g')
+        echo "$file -> $dest"
+        cp $file $dest
+      done
 
-images: ['gcr.io/${PROJECT_ID}/self-nvidia:${SHORT_SHA}',
-         'gcr.io/${PROJECT_ID}/self-amd:${SHORT_SHA}' ]
+      for file in $(ls /build/src/*.gcda); do
+        dest=$(echo $file | sed 's/\.f//g')
+        echo "$file -> $dest"
+        cp $file $dest
+      done
 
-artifacts:
-  objects:
-    location: 'gs://self-fluids-singularity/${SHORT_SHA}'
-    paths: ['self-nvidia.sif','self-amd.sif']
+      gcovr -x -o coverage.xml \
+            -r /build 
 
+      rm /build/src/*.gcov
+      rm /build/examples/*.gcov
+
+      curl -Os https://uploader.codecov.io/latest/linux/codecov
+      chmod +x codecov
+      ./codecov -t $$CODECOV_TOKEN \
+                -R /build/ \
+                --sha ${COMMIT_SHA} \
+                --branch ${BRANCH_NAME}
+
+
+images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
 
 options:
- machineType: 'E2_HIGHCPU_32'
- diskSizeGb: 500
+  diskSizeGb: 100
 
-timeout: 14400s
+timeout: 3600s
 
+availableSecrets:
+  secretManager:
+    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
+      env: 'CODECOV_TOKEN'
 
 substitutions:
-  _ZONE: 'us-west1-b'
+  _PREC: 'single'
+  _GPU_TARGET: 'sm_72'
+  _HIP_PLATFORM: 'nvidia'
 
 

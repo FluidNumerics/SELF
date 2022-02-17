@@ -17,14 +17,16 @@
 #   Installation Options
 #     SELF_PREFIX            Set the path to install SELF (Default: /opt/self)
 #     BUILD                  Set the type of build. (Default: dev | Options : dev, release)
+#     SELF_DIR               Set the path to the repository root ( Default $(shell pwd) )
 #
 #   Precision Options
 #     PREC                   Set the floating point precision in SELF. (Default: single | Options : single, double)
 #
 #   Compiler and Target Hardware Options
 #     HIPFC                  Set the full path to hipfc. (Default: hipfc)
-#     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: gfortran | Options: gfortran)
-#     HIPFORT_GPU            Set the target GPU platform. (Default: gfx900 | Options gfx900, sm35, sm50, sm70) 
+#     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: h5pfc | Options: h5pfc)
+#     GPU_PLATFORM           Set the target GPU platform. (Default: gfx900 | Options gfx900, sm35, sm50, sm70) 
+#     HIP_PLATFORM           Set the target vendor. (Default: amd | Options amd, nvidia) 
 #     ROCM_DIR               Set the path to ROCm installation (Default: /opt/rocm)
 #     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if GPU_TARGET is an Nvidia GPU)
 #
@@ -46,10 +48,10 @@ SELF_DIR ?= .
 # Build Target
 install: all
 	mkdir -p $(SELF_PREFIX)
-	mv $(SELF_DIR)/*.mod $(SELF_DIR)/include/
-	mv $(SELF_DIR)/include $(SELF_DIR)/lib $(SELF_DIR)/obj $(SELF_DIR)/bin $(SELF_PREFIX)
+	mv -f $(SELF_DIR)/build/include $(SELF_DIR)/build/lib $(SELF_DIR)/build/bin $(SELF_DIR)/build/examples $(SELF_PREFIX)
+	cp -r $(SELF_DIR)/etc $(SELF_PREFIX)/etc
 
-all: self
+all: self examples
 
 include ${SELF_DIR}/make.include
 
