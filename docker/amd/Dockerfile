@@ -1,6 +1,6 @@
-FROM gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3 as builder
-ARG GPU_TARGET=sm_72
-ARG HIP_PLATFORM=nvidia
+FROM gcr.io/self-fluids/self-base:amd-rocm4.3 as builder
+ARG GPU_TARGET=gfx900
+ARG HIP_PLATFORM=amd
 ARG PREC=double
 
 # Install SELF

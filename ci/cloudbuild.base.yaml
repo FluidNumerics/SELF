@@ -1,15 +1,25 @@
 
 steps:
-- id: Build Docker Image
+- id: Build Nvidia Image
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
          '.',
          '-f',
          'docker/base/nvidia/Dockerfile',
          '-t',
-         'gcr.io/${PROJECT_ID}/self-base:cuda-11.2.1']
+         'gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm-4.3']
 
-images: ['gcr.io/${PROJECT_ID}/self-base:cuda-11.2.1']
+- id: Build AMD Base Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '.',
+         '-f',
+         'docker/base/amd/Dockerfile',
+         '-t',
+         'gcr.io/self-fluids/self-base:amd-rocm-4.3']
+
+images: ['gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm-4.3',
+         'gcr.io/self-fluids/self-base:amd-rocm-4.3']
 
 
 options:
