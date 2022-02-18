@@ -7,14 +7,14 @@ steps:
          '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
          '--build-arg','PREC=${_PREC}',
          '-f',
-         'docker/nvidia/Dockerfile',
+         'docker/${_HIP_PLATFORM}/Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}']
+         'self:dev-${_PREC}-${_GPU_TARGET}']
 
 
 - id: Run Tests & Create Coverage Report (Serial)
-  name: 'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}'
+  name: 'self:dev-${_PREC}-${_GPU_TARGET}'
   args: 
   - ./test.sh
 
