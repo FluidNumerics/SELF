@@ -7,6 +7,13 @@ Spectral Element Library in Fortran
 ====================================
 
 .. toctree::
+   :caption: How To
+   :name: howto
+   :titlesonly:
+
+   HowTo/build
+
+.. toctree::
    :caption: For Developers
    :name: fordevelopers
    :titlesonly:
