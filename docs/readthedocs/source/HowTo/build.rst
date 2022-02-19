@@ -20,8 +20,9 @@ Bare Metal Install
 
 Install SELF Dependencies
 ==========================
+We recommend that you `install ROCm using using the instructions found in AMD's rocmdocs <https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html>`_.
 
-To help install all of SELF's dependencies, we recommend that you use `Spack <https://spack.io>`_. SELF comes with a Spack environment file that can be used to create a spack environment on your system.
+To help install the remainder of SELF's dependencies, we recommend that you use `Spack <https://spack.io>`_. SELF comes with a Spack environment file that can be used to create a spack environment on your system.
 
 First, install Spack
 
