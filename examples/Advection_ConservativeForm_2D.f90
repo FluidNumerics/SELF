@@ -61,7 +61,7 @@ USE SELF_Advection2D
     CALL semModel % SetSolution( initialCondition )
 
     ! Write the initial condition to file
-    CALL semModel % Write()
+    CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
@@ -75,7 +75,7 @@ USE SELF_Advection2D
 
 
    ! ! Manually write the last semModel state
-    CALL semModel % Write()
+    CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
     ! Clean up

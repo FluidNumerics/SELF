@@ -73,6 +73,9 @@ MODULE SELF_Model
 
     PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
     PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
+    PROCEDURE(ReadModel),DEFERRED :: ReadModel
+    PROCEDURE(WriteModel),DEFERRED :: WriteModel
+    PROCEDURE(WriteTecplot),DEFERRED :: WriteTecplot
 
     GENERIC :: SetTimeIntegrator => SetTimeIntegrator_withInt, &
                                     SetTimeIntegrator_withChar
@@ -130,8 +133,8 @@ MODULE SELF_Model
 
 !    PROCEDURE :: ReprojectFlux => ReprojectFlux_Model1D
 
-    PROCEDURE :: Read => Read_Model1D
-    PROCEDURE :: Write => Write_Model1D
+    PROCEDURE :: ReadModel => Read_Model1D
+    PROCEDURE :: WriteModel => Write_Model1D
     PROCEDURE :: WriteTecplot => WriteTecplot_Model1D
 
   END TYPE Model1D
@@ -173,8 +176,8 @@ MODULE SELF_Model
 
     PROCEDURE :: ReprojectFlux => ReprojectFlux_Model2D
 
-    PROCEDURE :: Read => Read_Model2D
-    PROCEDURE :: Write => Write_Model2D
+    PROCEDURE :: ReadModel => Read_Model2D
+    PROCEDURE :: WriteModel => Write_Model2D
     PROCEDURE :: WriteTecplot => WriteTecplot_Model2D
 
   END TYPE Model2D
@@ -196,6 +199,35 @@ MODULE SELF_Model
       CLASS(Model),INTENT(inout) :: this
     END SUBROUTINE CalculateTendency
   END INTERFACE
+
+  INTERFACE
+    SUBROUTINE WriteModel(this, filename)
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model), INTENT(in) :: this
+      CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    END SUBROUTINE WriteModel
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ReadModel(this, filename)
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model), INTENT(inout) :: this
+      CHARACTER(*), INTENT(in) :: filename
+    END SUBROUTINE ReadModel
+  END INTERFACE
+
+
+  INTERFACE
+    SUBROUTINE WriteTecplot(this, filename)
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model), INTENT(inout) :: this
+      CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    END SUBROUTINE WriteTecplot
+  END INTERFACE
+
 
 
   INTERFACE
@@ -444,7 +476,7 @@ CONTAINS
       this % gpuAccel = .TRUE.
     ELSE
       this % gpuAccel = .FALSE.
-      ! TO DO : Warning to user that no GPU is available
+      PRINT*, 'Warning : GPU acceleration requested, but no GPU is available'
     ENDIF
 
   END SUBROUTINE EnableGPUAccel_Model
@@ -460,7 +492,7 @@ CONTAINS
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
 
-  SUBROUTINE ForwardStep_Model(this,tn,dt)
+  SUBROUTINE ForwardStep_Model(this,tn,dt,ioInterval)
   !!  Forward steps the model using the associated tendency procedure and time integrator
   !!
   !!  If the final time `tn` is provided, the model is forward stepped to that final time,
@@ -468,56 +500,92 @@ CONTAINS
   !!  
   !!  If a time step is provided through the interface, the model time step size is updated
   !!  and that time step is used to update the model
+  !!
+  !! If ioInterval is provided, file IO will be conducted every ioInterval seconds until tn 
+  !! is reached
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
     REAL(prec),OPTIONAL,INTENT(in) :: tn
     REAL(prec),OPTIONAL,INTENT(in) :: dt
+    REAL(prec),OPTIONAL,INTENT(in) :: ioInterval
     ! Local
-    INTEGER :: nSteps
+    REAL(prec) :: targetTime, tNext
+    INTEGER :: i, nIO
     
 
     IF (PRESENT(dt)) THEN
       this % dt = dt
     ENDIF
 
+
     IF (PRESENT(tn)) THEN
-      nSteps = INT( (tn - this % t)/(this % dt) )
+      targetTime = tn
     ELSE
-      nSteps = 1
+      targetTime = this % t + this % dt
     ENDIF
 
     SELECT CASE (this % timeIntegrator)
 
       CASE (SELF_EULER)
 
-        CALL this % ForwardStepEuler(nSteps)
-        this % t = tn
+        IF (PRESENT(ioInterval)) THEN
+          nIO = INT( (targetTime - this % t)/ioInterval )
+          DO i = 1, nIO
+            tNext = this % t + ioInterval
+            CALL this % ForwardStepEuler(tNext)
+            CALL this % WriteModel()
+            CALL this % WriteTecplot()
+          ENDDO
+
+        ELSE
+          CALL this % ForwardStepEuler(targetTime)
+        ENDIF
 
 !      CASE RK3
 !
 !        CALL this % ForwardStepRK3(nSteps)
 
       CASE DEFAULT
+
         ! TODO : Warn user that time integrator not valid, default to Euler
-        CALL this % ForwardStepEuler(nSteps)
+        IF (PRESENT(ioInterval)) THEN
+          nIO = INT( (targetTime - this % t)/ioInterval )
+          DO i = 1, nIO
+            tNext = this % t + ioInterval
+            CALL this % ForwardStepEuler(tNext)
+            CALL this % WriteModel()
+            CALL this % WriteTecplot()
+          ENDDO
+
+        ELSE
+          CALL this % ForwardStepEuler(targetTime)
+        ENDIF
+
 
     END SELECT
 
   END SUBROUTINE ForwardStep_Model
 
-  SUBROUTINE ForwardStepEuler_Model(this,nSteps)
+  SUBROUTINE ForwardStepEuler_Model(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: nSteps
+    REAL(prec), INTENT(in) :: tn
     ! Local
-    INTEGER :: i
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
 
-    DO i = 1, nSteps
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+    DO WHILE (this % t < tn)
 
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
       CALL this % CalculateTendency()
       CALL this % UpdateSolution()
+      this % t = this % t + this % dt
 
     ENDDO 
+
+    this % dt = dtLim
 
   END SUBROUTINE ForwardStepEuler_Model
 

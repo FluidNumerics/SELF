@@ -1,4 +1,4 @@
-PROGRAM LinearShallowWater_GravityWaveRelease
+PROGRAM LinearShallowWater_GravityWaveRelease_UniformBlockMesh
 
 USE SELF_Constants
 USE SELF_Lagrange
@@ -13,7 +13,8 @@ USE SELF_LinearShallowWater
   INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
   INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
   REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
-  REAL(prec), PARAMETER :: tn = 0.5_prec ! File time 
+  REAL(prec), PARAMETER :: tn = 1.5_prec ! Total simulation time
+  REAL(prec), PARAMETER :: ioInterval = 0.025_prec ! File IO interval
 
 
   TYPE(Lagrange),TARGET :: interp
@@ -48,27 +49,26 @@ USE SELF_LinearShallowWater
     CALL semModel % EnableGPUAccel()
 
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                                      ", &
-                         "v = 0.0                                      ", &
-                         "n = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2 )/0.1 )"/)
+    initialCondition = (/"u = 0.0                        ", &
+                         "v = 0.0                        ", &
+                         "n = exp( -( (x^2 + y^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
 
     ! Write the initial condition to file
-    CALL semModel % Write()
+    CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
-    !! Set the time integrator (euler, rk3, rk4)
-    !CALL semModel % SetTimeIntegrator("Euler")
+    ! Set the time integrator (euler, rk3, rk4)
+    CALL semModel % SetTimeIntegrator("Euler")
 
-    !! Set your time step
-    !semModel % dt = dt
+    ! Set your time step
+    semModel % dt = dt
 
     !! Forward step the semModel and do the file io
-    !CALL semModel % ForwardStep( tn = tn )
+    CALL semModel % ForwardStep( tn = tn, ioInterval = ioInterval )
 
     !! Manually write the last semModel state
-    !CALL semModel % Write()
-    !CALL semModel % WriteTecplot()
+    CALL semModel % WriteModel('solution.pickup.h5')
 
     ! Clean up
     CALL semModel % Free()
@@ -77,4 +77,4 @@ USE SELF_LinearShallowWater
     CALL mesh % Free()
     CALL interp % Free()
 
-END PROGRAM LinearShallowWater_GravityWaveRelease
+END PROGRAM LinearShallowWater_GravityWaveRelease_UniformBlockMesh
