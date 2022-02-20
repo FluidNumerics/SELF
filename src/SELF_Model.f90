@@ -974,8 +974,10 @@ CONTAINS
     ! Local
     CHARACTER(8) :: zoneID
     INTEGER :: fUnit
-    INTEGER :: iEl, i 
+    INTEGER :: iEl, i, iVar
     CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
+    CHARACTER(LEN=self_FormatLength) :: fmat
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
     TYPE(Scalar1D) :: solution
@@ -1024,8 +1026,18 @@ CONTAINS
       FORM='formatted', &
       STATUS='replace')
 
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "X","solution"'
+    tecHeader = 'VARIABLES = "X", "Y"'
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
+    ENDDO
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
+
+    ! Create format statement
+    WRITE(fmat,*) this % solution % nvar+1
+    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
 
     DO iEl = 1, this % solution % nElem
 
@@ -1035,8 +1047,8 @@ CONTAINS
 
       DO i = 0, this % solution % interp % M
 
-        WRITE(fUnit,'(2(E15.7,1x))') x % interior % hostData(i,1,iEl), &
-                                     solution % interior % hostData(i,1,iEl)
+        WRITE(fUnit,fmat) x % interior % hostData(i,1,iEl), &
+                          solution % interior % hostData(i,1:this % solution % nvar,iEl)
 
       ENDDO
 
@@ -1057,6 +1069,10 @@ CONTAINS
     TYPE(Mesh2D),INTENT(in),TARGET :: mesh
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
     TYPE(MPILayer),INTENT(in),TARGET :: decomp
+    ! Local
+    INTEGER :: ivar
+    CHARACTER(LEN=3) :: ivarChar
+    CHARACTER(LEN=25) :: varname
 
     this % decomp => decomp
     this % mesh => mesh
@@ -1072,6 +1088,14 @@ CONTAINS
     CALL this % flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % source % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nVar,this % mesh % nElem)
+
+    ! set default metadata
+    DO ivar = 1,nvar
+      WRITE(ivarChar,'(I3.3)') ivar
+      varname="solution"//TRIM(ivarChar)
+      CALL this % solution % SetName(ivar,varname)
+      CALL this % solution % SetUnits(ivar,"[null]")
+    ENDDO
 
   END SUBROUTINE Init_Model2D
 
@@ -1561,8 +1585,10 @@ CONTAINS
     ! Local
     CHARACTER(8) :: zoneID
     INTEGER :: fUnit
-    INTEGER :: iEl, i, j 
+    INTEGER :: iEl, i, j, iVar 
     CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
+    CHARACTER(LEN=self_FormatLength) :: fmat
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
     TYPE(Scalar2D) :: solution
@@ -1605,14 +1631,21 @@ CONTAINS
     ! Map the solution to the target grid
     CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
    
-    ! Let's write some tecplot!! 
      OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(tecFile), &
       FORM='formatted', &
       STATUS='replace')
 
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y","solution"'
+    tecHeader = 'VARIABLES = "X", "Y"'
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
+    ENDDO
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
+
+    ! Create format statement
+    WRITE(fmat,*) this % solution % nvar+2
+    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
 
     DO iEl = 1, this % solution % nElem
 
@@ -1624,9 +1657,9 @@ CONTAINS
       DO j = 0, this % solution % interp % M
         DO i = 0, this % solution % interp % M
 
-          WRITE(fUnit,'(3(E15.7,1x))') x % interior % hostData(1,i,j,1,iEl), &
-                                       x % interior % hostData(2,i,j,1,iEl), &
-                                       solution % interior % hostData(i,j,1,iEl)
+          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
+                            x % interior % hostData(2,i,j,1,iEl), &
+                            solution % interior % hostData(i,j,1:this % solution % nvar,iEl)
 
         ENDDO
       ENDDO

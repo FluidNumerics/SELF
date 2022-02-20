@@ -347,7 +347,7 @@ CONTAINS
     INTEGER,INTENT(in) :: ivar
     CHARACTER(*),INTENT(in) :: description
 
-    CALL SELFStorage % meta(ivar) % SetName(description) 
+    CALL SELFStorage % meta(ivar) % SetDescription(description) 
 
   END SUBROUTINE SetDescription_DataObj
 
@@ -358,7 +358,7 @@ CONTAINS
     INTEGER,INTENT(in) :: ivar
     CHARACTER(*),INTENT(in) :: units
 
-    CALL SELFStorage % meta(ivar) % SetName(units) 
+    CALL SELFStorage % meta(ivar) % SetUnits(units) 
 
   END SUBROUTINE SetUnits_DataObj
 
@@ -581,6 +581,7 @@ CONTAINS
 
     ALLOCATE( SELFStorage % meta(1:nVar) )
     ALLOCATE( SELFStorage % eqn(1:nVar) )
+ 
 
   END SUBROUTINE Init_Scalar2D
 

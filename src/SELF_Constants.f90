@@ -87,7 +87,9 @@ INTEGER, PARAMETER :: SELF_FILE_DEFAULT_LENGTH=500
   CHARACTER(1),PARAMETER :: nada = ' '
   CHARACTER(6),PARAMETER :: MsgFmt = '(2x,A)'
   INTEGER,PARAMETER :: self_FileNameLength = 500
+  INTEGER,PARAMETER :: self_TecplotHeaderLength = 500
   INTEGER,PARAMETER :: self_EquationLength = 210
+  INTEGER,PARAMETER :: self_FormatLength=30
   INTEGER,PARAMETER :: self_QuadratureTypeCharLength = 50
   INTEGER,PARAMETER :: self_IntegratorTypeCharLength = 50
 
