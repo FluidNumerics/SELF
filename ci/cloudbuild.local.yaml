@@ -6,6 +6,7 @@ steps:
          '--build-arg','GPU_TARGET=${_GPU_TARGET}',
          '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
          '--build-arg','PREC=${_PREC}',
+         '--build-arg','FFLAGS=${_FFLAGS}',
          '-f',
          'docker/nvidia/Dockerfile',
          '.',
@@ -24,5 +25,4 @@ substitutions:
   _PREC: 'double'
   _GPU_TARGET: 'sm_72'
   _HIP_PLATFORM: 'nvidia'
-
-
+  _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
