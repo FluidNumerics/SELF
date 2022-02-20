@@ -20,10 +20,36 @@ MODULE SELF_Advection2D
     PROCEDURE :: SourceMethod => Source_Advection2D
     PROCEDURE :: FluxMethod => Flux_Advection2D
     PROCEDURE :: RiemannSolver => RiemannSolver_Advection2D
+    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Advection2D
 
   END TYPE Advection2D
 
 CONTAINS
+
+  SUBROUTINE SetBoundaryCondition_Advection2D(this)
+    IMPLICIT NONE
+    CLASS(Advection2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: i,iSide,iEl,iVar,e2      
+
+    DO iEl = 1, this % solution % nElem
+      DO iSide = 1, 4
+        DO iVar = 1, this % solution % nVar
+          DO i = 0, this % solution % interp % N
+
+            e2 = this % mesh % self_sideInfo % hostData(3,iSide,iEl)
+
+            IF( e2 == 0 )THEN
+              this % solution % extBoundary % hostData(i,iVar,iSide,iEl) = 0.0_prec
+            ENDIF
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+
+  END SUBROUTINE SetBoundaryCondition_Advection2D 
 
   SUBROUTINE Source_Advection2D(this)
     IMPLICIT NONE

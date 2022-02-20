@@ -224,11 +224,11 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
+    SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(vector,dsdx,N,nVar,nEl) &
       bind(c,name="ContravariantProjection_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: physVector,compVector,dsdx
+      TYPE(c_ptr) :: vector,dsdx
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper
   END INTERFACE
@@ -1845,47 +1845,45 @@ CONTAINS
     END IF
   END SUBROUTINE MapToTensor_MappedVector2D
 
-  SUBROUTINE ContravariantProjection_MappedVector2D(physVector,geometry,compVector,gpuAccel)
+  SUBROUTINE ContravariantProjection_MappedVector2D(vector,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ContravariantProjection_MappedVector2D"
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
-    CLASS(MappedVector2D),INTENT(in) :: physVector
+    CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
-    TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
     INTEGER :: i,j,ivar,iel
     REAL(prec) :: Fx, Fy
 
     IF (gpuAccel) THEN
 
-      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
-                                                              compVector % interior % deviceData, &
+      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
-                                                              physVector % interp % N, &
-                                                              physVector % nVar, &
-                                                              physVector % nElem)
+                                                              vector % interp % N, &
+                                                              vector % nVar, &
+                                                              vector % nElem)
 
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
       ! to project onto computational space
-      DO iel = 1,physVector % nElem
-        DO ivar = 1,physVector % nVar
-          DO j = 0,physVector % interp % N
-            DO i = 0,physVector % interp % N
+      DO iel = 1,vector % nElem
+        DO ivar = 1,vector % nVar
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
 
-              Fx = physVector % interior % hostData(1,i,j,ivar,iel)
-              Fy = physVector % interior % hostData(2,i,j,ivar,iel)
+              Fx = vector % interior % hostData(1,i,j,ivar,iel)
+              Fy = vector % interior % hostData(2,i,j,ivar,iel)
 
-              compVector % interior % hostData(1,i,j,ivar,iel) = &
+              vector % interior % hostData(1,i,j,ivar,iel) = &
                 geometry % dsdx % interior % hostData(1,1,i,j,1,iel)*Fx + &
                 geometry % dsdx % interior % hostData(2,1,i,j,1,iel)*Fy
 
-              compVector % interior % hostData(2,i,j,ivar,iel) = &
+              vector % interior % hostData(2,i,j,ivar,iel) = &
                 geometry % dsdx % interior % hostData(1,2,i,j,1,iel)*Fx + &
                 geometry % dsdx % interior % hostData(2,2,i,j,1,iel)*Fy
 

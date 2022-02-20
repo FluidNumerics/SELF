@@ -731,16 +731,13 @@ CONTAINS
     ! Local
     INTEGER :: i, iVar, iEl
 
-!      CALL this % solution % AverageSides()
-!      CALL this % solution % DiffSides()
-!      CALL this % SetBoundaryCondition()
-      CALL this % PreTendency()
-      CALL this % solution % BoundaryInterp(this % gpuAccel)
-      CALL this % SetBoundaryCondition()
-      CALL this % SourceMethod()
-      CALL this % RiemannSolver()
-      CALL this % FluxMethod()
-      CALL this % CalculateFluxDivergence()
+    CALL this % PreTendency()
+    CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % SetBoundaryCondition()
+    CALL this % SourceMethod()
+    CALL this % RiemannSolver()
+    CALL this % FluxMethod()
+    CALL this % CalculateFluxDivergence()
 
     IF( this % gpuAccel )THEN
 
@@ -1065,6 +1062,7 @@ CONTAINS
     this % mesh => mesh
     this % geometry => geometry
     this % gpuAccel = .FALSE.
+    this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -1263,7 +1261,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
 
-      CALL this % flux % ContravariantProjection(this % geometry, this % flux, this % gpuAccel)
+      CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
 
   END SUBROUTINE ReprojectFlux_Model2D
 
@@ -1274,7 +1272,7 @@ CONTAINS
     CLASS(Model2D),INTENT(inout) :: this
 
       IF (this % fluxDivMethod == SELF_SPLITFORM_FLUX) THEN
-        CALL this % velocity % ContravariantProjection(this % geometry, this % compVelocity, this % gpuAccel)
+        CALL this % velocity % ContravariantProjection(this % geometry, this % gpuAccel)
 
         IF (this % gpuAccel) THEN
           CALL this % flux % interp % VectorDGDivergence_2D(this % flux % interior % deviceData, &
@@ -1310,16 +1308,15 @@ CONTAINS
     ! Local
     INTEGER :: i, j, iVar, iEl
 
-!      CALL this % solution % AverageSides()
-!      CALL this % solution % DiffSides()
-      CALL this % PreTendency()
-      CALL this % solution % BoundaryInterp(this % gpuAccel)
-      CALL this % SetBoundaryCondition()
-      CALL this % SourceMethod()
-      CALL this % RiemannSolver()
-      CALL this % FluxMethod()
-      CALL this % ReprojectFlux()
-      CALL this % CalculateFluxDivergence()
+    CALL this % PreTendency()
+    CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % solution % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+    CALL this % SetBoundaryCondition()
+    CALL this % SourceMethod()
+    CALL this % RiemannSolver()
+    CALL this % FluxMethod()
+    CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
+    CALL this % CalculateFluxDivergence()
 
     IF( this % gpuAccel )THEN
 
