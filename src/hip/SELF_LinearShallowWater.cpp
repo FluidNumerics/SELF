@@ -50,6 +50,33 @@ extern "C"
     SetBoundaryCondition_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*solution, *extBoundary, *nHat, *sideInfo, N, nVar);
   }
 }
+
+__global__ void Source_LinearShallowWater_gpu(real *source, real *solution, real f, int N, int nVar){
+
+  // Get the array indices from the GPU thread IDs
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+    if( iVar == 0 ){
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = -f*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+    } else if ( iVar == 1) {
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = f*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+    } else if ( iVar == 2) {
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = 0.0;
+    }
+}
+
+extern "C"
+{
+  void Source_LinearShallowWater_gpu_wrapper(real **source, real **solution, real f, int N, int nVar, int nEl)
+  {
+    Source_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*source, *solution, f, N, nVar);
+  }
+}
+
+
 __global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real g, real H, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs

@@ -45,6 +45,18 @@ MODULE SELF_LinearShallowWater
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE Source_LinearShallowWater_gpu_wrapper(source, solution, f, N, nVar, nEl) &
+      bind(c,name="Source_LinearShallowWater_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: source, solution
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      REAL(c_prec),VALUE :: f
+    END SUBROUTINE Source_LinearShallowWater_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE Flux_LinearShallowWater_gpu_wrapper(flux, solution, g, H, N, nVar, nEl) &
       bind(c,name="Flux_LinearShallowWater_gpu_wrapper")
       USE iso_c_binding
@@ -175,17 +187,30 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    DO iEl = 1, this % source % nElem
-      DO j = 0, this % source % interp % N
-        DO i = 0, this % source % interp % N
+    IF( this % gpuAccel )THEN
 
-          this % source % interior % hostData(i,j,1,iEl) = -this % fCori*this % solution % interior % hostData(i,j,2,iEl)
-          this % source % interior % hostData(i,j,2,iEl) = this % fCori*this % solution % interior % hostData(i,j,1,iEl)
-          this % source % interior % hostData(i,j,3,iEl) = 0.0_prec
+      CALL Source_LinearShallowWater_gpu_wrapper(this % source % interior % deviceData,&
+             this % solution % interior % deviceData, &
+             this % fCori,&
+             this % source % interp % N, &
+             this % solution % nVar, &
+             this % solution % nElem )
 
+    ELSE
+
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+
+            this % source % interior % hostData(i,j,1,iEl) = -this % fCori*this % solution % interior % hostData(i,j,2,iEl)
+            this % source % interior % hostData(i,j,2,iEl) = this % fCori*this % solution % interior % hostData(i,j,1,iEl)
+            this % source % interior % hostData(i,j,3,iEl) = 0.0_prec
+
+          ENDDO
         ENDDO
       ENDDO
-    ENDDO
+
+    ENDIF
 
   END SUBROUTINE Source_LinearShallowWater
 
