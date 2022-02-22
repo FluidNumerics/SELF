@@ -68,6 +68,18 @@ MODULE SELF_LinearShallowWater
     END SUBROUTINE Flux_LinearShallowWater_gpu_wrapper
   END INTERFACE
 
+  INTERFACE
+    SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper(flux, solution, extBoundary, nHat, nScale, g, H, N, nVar, nEl) &
+      bind(c,name="RiemannSolver_LinearShallowWater_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: flux, solution, extBoundary, nHat, nScale
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      REAL(c_prec),VALUE :: g, H
+    END SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper
+  END INTERFACE
+
 CONTAINS
 
   SUBROUTINE Init_LinearShallowWater(this,nvar,mesh,geometry,decomp)
@@ -272,36 +284,52 @@ CONTAINS
     REAL(prec) :: c, unL, unR, etaL, etaR, wL, wR
 
 
-    DO iEl = 1, this % solution % nElem
-      DO iSide = 1, 4
-        DO i = 0, this % solution % interp % N
+    IF( this % gpuAccel )THEN
 
-           ! Get the boundary normals on cell edges from the mesh geometry
-           nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
-           nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
-           c = sqrt( this % g * this % H )
+      CALL RiemannSolver_LinearShallowWater_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
+             this % solution % boundary % deviceData, &
+             this % solution % extBoundary % deviceData, &
+             this % geometry % nHat % boundary % deviceData, &
+             this % geometry % nScale % boundary % deviceData, &
+             this % g, this % H, &
+             this % solution % interp % N, &
+             this % solution % nVar, &
+             this % solution % nElem)
 
-           ! Calculate the normal velocity at the cell edges
-           unL = this % solution % boundary % hostData(i,1,iSide,iEl)*nHat(1)+&
-                 this % solution % boundary % hostData(i,2,iSide,iEl)*nHat(2)
+    ELSE
 
-           unR = this % solution % extBoundary % hostData(i,1,iSide,iEl)*nHat(1)+&
-                 this % solution % extBoundary % hostData(i,2,iSide,iEl)*nHat(2)
+      DO iEl = 1, this % solution % nElem
+        DO iSide = 1, 4
+          DO i = 0, this % solution % interp % N
 
-           etaL = this % solution % boundary % hostData(i,3,iSide,iEl)
-           etaR = this % solution % extBoundary % hostData(i,3,iSide,iEl)
+             ! Get the boundary normals on cell edges from the mesh geometry
+             nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+             nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
+             c = sqrt( this % g * this % H )
 
-           ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
-           wL = 0.5_prec*(unL/this % g + etaL/c)
-           wR = 0.5_prec*(unR/this % g - etaR/c)
+             ! Calculate the normal velocity at the cell edges
+             unL = this % solution % boundary % hostData(i,1,iSide,iEl)*nHat(1)+&
+                   this % solution % boundary % hostData(i,2,iSide,iEl)*nHat(2)
 
-           this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = this % g*c*( wL - wR )*nHat(1)*nmag
-           this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = this % g*c*( wL - wR )*nHat(2)*nmag
-           this % flux % boundaryNormal % hostData(i,3,iSide,iEl) = c*c*( wL + wR )*nmag
+             unR = this % solution % extBoundary % hostData(i,1,iSide,iEl)*nHat(1)+&
+                   this % solution % extBoundary % hostData(i,2,iSide,iEl)*nHat(2)
 
+             etaL = this % solution % boundary % hostData(i,3,iSide,iEl)
+             etaR = this % solution % extBoundary % hostData(i,3,iSide,iEl)
+
+             ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
+             wL = 0.5_prec*(unL/this % g + etaL/c)
+             wR = 0.5_prec*(unR/this % g - etaR/c)
+
+             this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = this % g*c*( wL - wR )*nHat(1)*nmag
+             this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = this % g*c*( wL - wR )*nHat(2)*nmag
+             this % flux % boundaryNormal % hostData(i,3,iSide,iEl) = c*c*( wL + wR )*nmag
+
+          ENDDO
         ENDDO
       ENDDO
-    ENDDO
+
+    ENDIF
 
   END SUBROUTINE RiemannSolver_LinearShallowWater
 
