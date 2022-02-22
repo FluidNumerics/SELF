@@ -34,6 +34,17 @@ MODULE SELF_LinearShallowWater
   END TYPE LinearShallowWater
 
   INTERFACE
+    SUBROUTINE SetBoundaryCondition_LinearShallowWater_gpu_wrapper(solution, extBoundary, nHat, sideInfo, N, nVar, nEl) &
+      bind(c,name="SetBoundaryCondition_LinearShallowWater_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: solution, extBoundary, nHat, sideInfo
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE SetBoundaryCondition_LinearShallowWater_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE Flux_LinearShallowWater_gpu_wrapper(flux, solution, g, H, N, nVar, nEl) &
       bind(c,name="Flux_LinearShallowWater_gpu_wrapper")
       USE iso_c_binding
@@ -107,40 +118,54 @@ CONTAINS
     REAL(prec) :: u, v, nhat(1:2)
 
 
-    DO iEl = 1, this % solution % nElem
-      DO iSide = 1, 4
-          DO i = 0, this % solution % interp % N
+    IF( this % gpuAccel )THEN
 
-            bcid = this % mesh % self_sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
-            e2 = this % mesh % self_sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
-            IF( e2 == 0 )THEN
-              IF( bcid == SELF_BC_RADIATION )THEN
+      CALL SetBoundaryCondition_LinearShallowWater_gpu_wrapper( this % solution % boundary % deviceData,&
+            this % solution % extBoundary % deviceData, &
+            this % geometry % nHat % boundary % deviceData, &
+            this % mesh % self_sideInfo % deviceData, &
+            this % solution % interp % N, &
+            this % solution % nVar, &
+            this % solution % nElem)
 
-                this % solution % extBoundary % hostData(i,1,iSide,iEl) = 0.0_prec
-                this % solution % extBoundary % hostData(i,2,iSide,iEl) = 0.0_prec
-                this % solution % extBoundary % hostData(i,3,iSide,iEl) = 0.0_prec
+    ELSE
 
-              ELSEIF( bcid == SELF_BC_NONORMALFLOW )THEN
+      DO iEl = 1, this % solution % nElem
+        DO iSide = 1, 4
+            DO i = 0, this % solution % interp % N
 
-                nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
-                u = this % solution % boundary % hostData(i,1,iSide,iEl) 
-                v = this % solution % boundary % hostData(i,2,iSide,iEl) 
-                this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
-                this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
-                this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
+              bcid = this % mesh % self_sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
+              e2 = this % mesh % self_sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+              IF( e2 == 0 )THEN
+                IF( bcid == SELF_BC_RADIATION )THEN
 
-              ELSE ! Default boundary condition is radiation
+                  this % solution % extBoundary % hostData(i,1,iSide,iEl) = 0.0_prec
+                  this % solution % extBoundary % hostData(i,2,iSide,iEl) = 0.0_prec
+                  this % solution % extBoundary % hostData(i,3,iSide,iEl) = 0.0_prec
 
-                this % solution % extBoundary % hostData(i,1,iSide,iEl) = 0.0_prec
-                this % solution % extBoundary % hostData(i,2,iSide,iEl) = 0.0_prec
-                this % solution % extBoundary % hostData(i,3,iSide,iEl) = 0.0_prec
+                ELSEIF( bcid == SELF_BC_NONORMALFLOW )THEN
 
+                  nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+                  u = this % solution % boundary % hostData(i,1,iSide,iEl) 
+                  v = this % solution % boundary % hostData(i,2,iSide,iEl) 
+                  this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
+                  this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
+                  this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
+
+                ELSE ! Default boundary condition is radiation
+
+                  this % solution % extBoundary % hostData(i,1,iSide,iEl) = 0.0_prec
+                  this % solution % extBoundary % hostData(i,2,iSide,iEl) = 0.0_prec
+                  this % solution % extBoundary % hostData(i,3,iSide,iEl) = 0.0_prec
+
+                ENDIF
               ENDIF
-            ENDIF
 
-          ENDDO
+            ENDDO
+        ENDDO
       ENDDO
-    ENDDO
+
+    ENDIF
 
   END SUBROUTINE SetBoundaryCondition_LinearShallowWater 
 
