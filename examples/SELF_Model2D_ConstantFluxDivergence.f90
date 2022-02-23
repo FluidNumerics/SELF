@@ -30,6 +30,7 @@ USE SELF_Model
   REAL(prec) :: nhat(1:2),nmag,fn
   REAL(prec) :: dFError(1:nvar)
   LOGICAL :: fail 
+  CHARACTER(LEN=255) :: SELF_PREFIX
 
     fail = .FALSE.
     ! Initialize a domain decomposition
@@ -41,10 +42,11 @@ USE SELF_Model
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % UniformBlockMesh(N,(/nXe,nYe/),(/0.0_prec,Lx,0.0_prec,Ly/))
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"Block2D/Block2D_mesh.h5")
 
     ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % GenerateFromMesh(mesh,interp)

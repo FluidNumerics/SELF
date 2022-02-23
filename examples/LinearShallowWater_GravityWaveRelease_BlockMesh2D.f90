@@ -23,6 +23,7 @@ USE SELF_LinearShallowWater
   TYPE(LinearShallowWater),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
+  CHARACTER(LEN=255) :: SELF_PREFIX
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -33,8 +34,8 @@ USE SELF_LinearShallowWater
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % UniformBlockMesh(N,(/10,10/),(/-1.0_prec,1.0_prec,-1.0_prec,1.0_prec/))
-    !CALL mesh % Read_ISMv2('./mesh/Circle.mesh')
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"Block2D/Block2D_mesh.h5")
 
     ! Generate a decomposition
      CALL decomp % GenerateDecomposition(mesh)

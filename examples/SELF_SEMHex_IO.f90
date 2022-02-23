@@ -28,6 +28,7 @@ USE SELF_Geometry
   REAL(prec) :: Jerror
   INTEGER :: i,j,k,iSide,row,col,iEl
   LOGICAL :: fail
+  CHARACTER(LEN=255) :: SELF_PREFIX
 
     fail = .FALSE.
 
@@ -35,7 +36,8 @@ USE SELF_Geometry
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % UniformBlockMesh(N,(/nXe,nYe,nZe/),(/0.0_prec,Lx,0.0_prec,Ly,0.0_prec,Lz/))
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"Block3D/Block3D_mesh.h5")
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % GenerateFromMesh(mesh,interp)

@@ -25,6 +25,7 @@ USE SELF_Advection2D
   TYPE(MPILayer),TARGET :: decomp
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocityField(1:2)
+  CHARACTER(LEN=255) :: SELF_PREFIX
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -35,7 +36,8 @@ USE SELF_Advection2D
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % UniformBlockMesh(N,(/nXe,nYe/),(/0.0_prec,Lx,0.0_prec,Ly/))
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"Block2D/Block2D_mesh.h5")
 
     ! Generate a decomposition
     CALL decomp % GenerateDecomposition(mesh)
