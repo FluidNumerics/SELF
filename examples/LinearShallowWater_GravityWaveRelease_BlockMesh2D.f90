@@ -52,9 +52,9 @@ USE SELF_LinearShallowWater
     CALL semModel % EnableGPUAccel()
 
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                        ", &
-                         "v = 0.0                        ", &
-                         "n = exp( -( (x^2 + y^2 )/0.01 )"/)
+    initialCondition = (/"u = 0.0                                         ", &
+                         "v = 0.0                                         ", &
+                         "n = 0.01*exp( -( ((x-0.5)^2 + (y-0.5)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
 
     ! Write the initial condition to file
