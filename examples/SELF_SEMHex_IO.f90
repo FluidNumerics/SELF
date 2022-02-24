@@ -37,10 +37,11 @@ USE SELF_Geometry
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"Block3D/Block3D_mesh.h5")
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block3D/Block3D_mesh.h5")
 
     ! Generate geometry (metric terms) from the mesh elements
-    CALL geometry % GenerateFromMesh(mesh,interp)
+    CALL geometry % Init(interp,mesh % nElem)
+    CALL geometry % GenerateFromMesh(mesh)
 
     dxdsExpect(1,1) = 0.5_prec*Lx/REAL(nXe,prec)
     dxdsExpect(2,1) = 0.0_prec

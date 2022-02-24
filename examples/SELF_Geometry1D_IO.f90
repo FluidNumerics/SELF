@@ -32,7 +32,8 @@ USE SELF_Geometry
     CALL mesh % UniformBlockMesh(N,nXe,(/0.0_prec,Lx/))
 
     ! Generate geometry (metric terms) from the mesh elements
-    CALL geometry % GenerateFromMesh(mesh,interp)
+    CALL geometry % Init(interp,mesh % nElem)
+    CALL geometry % GenerateFromMesh(mesh)
 
     dxdsExpect = 0.5_prec*Lx/REAL(nXe,prec)
     error = 0.0_prec

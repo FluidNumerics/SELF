@@ -37,7 +37,7 @@ CONTAINS
         DO iVar = 1, this % solution % nVar
           DO i = 0, this % solution % interp % N
 
-            e2 = this % mesh % self_sideInfo % hostData(3,iSide,iEl)
+            e2 = this % mesh % sideInfo % hostData(3,iSide,iEl)
 
             IF( e2 == 0 )THEN
               this % solution % extBoundary % hostData(i,iVar,iSide,iEl) = 0.0_prec

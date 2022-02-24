@@ -43,13 +43,14 @@ USE SELF_Model
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"Block2D/Block2D_mesh.h5")
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
 
     ! Generate a decomposition
     CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
-    CALL geometry % GenerateFromMesh(mesh,interp)
+    CALL geometry % Init(interp,mesh % nElem)
+    CALL geometry % GenerateFromMesh(mesh)
 
     ! Initialize the model
     CALL semModel % Init(nvar,mesh,geometry,decomp)

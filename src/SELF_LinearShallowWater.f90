@@ -147,7 +147,7 @@ CONTAINS
       CALL SetBoundaryCondition_LinearShallowWater_gpu_wrapper( this % solution % boundary % deviceData,&
             this % solution % extBoundary % deviceData, &
             this % geometry % nHat % boundary % deviceData, &
-            this % mesh % self_sideInfo % deviceData, &
+            this % mesh % sideInfo % deviceData, &
             this % solution % interp % N, &
             this % solution % nVar, &
             this % solution % nElem)
@@ -158,8 +158,8 @@ CONTAINS
         DO iSide = 1, 4
             DO i = 0, this % solution % interp % N
 
-              bcid = this % mesh % self_sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
-              e2 = this % mesh % self_sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+              bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
+              e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
               IF( e2 == 0 )THEN
                 IF( bcid == SELF_BC_RADIATION )THEN
 
