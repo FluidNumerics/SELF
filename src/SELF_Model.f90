@@ -73,6 +73,9 @@ MODULE SELF_Model
 
     PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
     PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
+    PROCEDURE(ReadModel),DEFERRED :: ReadModel
+    PROCEDURE(WriteModel),DEFERRED :: WriteModel
+    PROCEDURE(WriteTecplot),DEFERRED :: WriteTecplot
 
     GENERIC :: SetTimeIntegrator => SetTimeIntegrator_withInt, &
                                     SetTimeIntegrator_withChar
@@ -130,8 +133,8 @@ MODULE SELF_Model
 
 !    PROCEDURE :: ReprojectFlux => ReprojectFlux_Model1D
 
-    PROCEDURE :: Read => Read_Model1D
-    PROCEDURE :: Write => Write_Model1D
+    PROCEDURE :: ReadModel => Read_Model1D
+    PROCEDURE :: WriteModel => Write_Model1D
     PROCEDURE :: WriteTecplot => WriteTecplot_Model1D
 
   END TYPE Model1D
@@ -173,8 +176,8 @@ MODULE SELF_Model
 
     PROCEDURE :: ReprojectFlux => ReprojectFlux_Model2D
 
-    PROCEDURE :: Read => Read_Model2D
-    PROCEDURE :: Write => Write_Model2D
+    PROCEDURE :: ReadModel => Read_Model2D
+    PROCEDURE :: WriteModel => Write_Model2D
     PROCEDURE :: WriteTecplot => WriteTecplot_Model2D
 
   END TYPE Model2D
@@ -196,6 +199,35 @@ MODULE SELF_Model
       CLASS(Model),INTENT(inout) :: this
     END SUBROUTINE CalculateTendency
   END INTERFACE
+
+  INTERFACE
+    SUBROUTINE WriteModel(this, filename)
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model), INTENT(in) :: this
+      CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    END SUBROUTINE WriteModel
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ReadModel(this, filename)
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model), INTENT(inout) :: this
+      CHARACTER(*), INTENT(in) :: filename
+    END SUBROUTINE ReadModel
+  END INTERFACE
+
+
+  INTERFACE
+    SUBROUTINE WriteTecplot(this, filename)
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model), INTENT(inout) :: this
+      CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    END SUBROUTINE WriteTecplot
+  END INTERFACE
+
 
 
   INTERFACE
@@ -444,7 +476,7 @@ CONTAINS
       this % gpuAccel = .TRUE.
     ELSE
       this % gpuAccel = .FALSE.
-      ! TO DO : Warning to user that no GPU is available
+      PRINT*, 'Warning : GPU acceleration requested, but no GPU is available'
     ENDIF
 
   END SUBROUTINE EnableGPUAccel_Model
@@ -460,7 +492,7 @@ CONTAINS
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
 
-  SUBROUTINE ForwardStep_Model(this,tn,dt)
+  SUBROUTINE ForwardStep_Model(this,tn,dt,ioInterval)
   !!  Forward steps the model using the associated tendency procedure and time integrator
   !!
   !!  If the final time `tn` is provided, the model is forward stepped to that final time,
@@ -468,56 +500,92 @@ CONTAINS
   !!  
   !!  If a time step is provided through the interface, the model time step size is updated
   !!  and that time step is used to update the model
+  !!
+  !! If ioInterval is provided, file IO will be conducted every ioInterval seconds until tn 
+  !! is reached
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
     REAL(prec),OPTIONAL,INTENT(in) :: tn
     REAL(prec),OPTIONAL,INTENT(in) :: dt
+    REAL(prec),OPTIONAL,INTENT(in) :: ioInterval
     ! Local
-    INTEGER :: nSteps
+    REAL(prec) :: targetTime, tNext
+    INTEGER :: i, nIO
     
 
     IF (PRESENT(dt)) THEN
       this % dt = dt
     ENDIF
 
+
     IF (PRESENT(tn)) THEN
-      nSteps = INT( (tn - this % t)/(this % dt) )
+      targetTime = tn
     ELSE
-      nSteps = 1
+      targetTime = this % t + this % dt
     ENDIF
 
     SELECT CASE (this % timeIntegrator)
 
       CASE (SELF_EULER)
 
-        CALL this % ForwardStepEuler(nSteps)
-        this % t = tn
+        IF (PRESENT(ioInterval)) THEN
+          nIO = INT( (targetTime - this % t)/ioInterval )
+          DO i = 1, nIO
+            tNext = this % t + ioInterval
+            CALL this % ForwardStepEuler(tNext)
+            CALL this % WriteModel()
+            CALL this % WriteTecplot()
+          ENDDO
+
+        ELSE
+          CALL this % ForwardStepEuler(targetTime)
+        ENDIF
 
 !      CASE RK3
 !
 !        CALL this % ForwardStepRK3(nSteps)
 
       CASE DEFAULT
+
         ! TODO : Warn user that time integrator not valid, default to Euler
-        CALL this % ForwardStepEuler(nSteps)
+        IF (PRESENT(ioInterval)) THEN
+          nIO = INT( (targetTime - this % t)/ioInterval )
+          DO i = 1, nIO
+            tNext = this % t + ioInterval
+            CALL this % ForwardStepEuler(tNext)
+            CALL this % WriteModel()
+            CALL this % WriteTecplot()
+          ENDDO
+
+        ELSE
+          CALL this % ForwardStepEuler(targetTime)
+        ENDIF
+
 
     END SELECT
 
   END SUBROUTINE ForwardStep_Model
 
-  SUBROUTINE ForwardStepEuler_Model(this,nSteps)
+  SUBROUTINE ForwardStepEuler_Model(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
-    INTEGER,INTENT(in) :: nSteps
+    REAL(prec), INTENT(in) :: tn
     ! Local
-    INTEGER :: i
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
 
-    DO i = 1, nSteps
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+    DO WHILE (this % t < tn)
 
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
       CALL this % CalculateTendency()
       CALL this % UpdateSolution()
+      this % t = this % t + this % dt
 
     ENDDO 
+
+    this % dt = dtLim
 
   END SUBROUTINE ForwardStepEuler_Model
 
@@ -731,16 +799,13 @@ CONTAINS
     ! Local
     INTEGER :: i, iVar, iEl
 
-!      CALL this % solution % AverageSides()
-!      CALL this % solution % DiffSides()
-!      CALL this % SetBoundaryCondition()
-      CALL this % PreTendency()
-      CALL this % solution % BoundaryInterp(this % gpuAccel)
-      CALL this % SetBoundaryCondition()
-      CALL this % SourceMethod()
-      CALL this % RiemannSolver()
-      CALL this % FluxMethod()
-      CALL this % CalculateFluxDivergence()
+    CALL this % PreTendency()
+    CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % SetBoundaryCondition()
+    CALL this % SourceMethod()
+    CALL this % RiemannSolver()
+    CALL this % FluxMethod()
+    CALL this % CalculateFluxDivergence()
 
     IF( this % gpuAccel )THEN
 
@@ -977,8 +1042,10 @@ CONTAINS
     ! Local
     CHARACTER(8) :: zoneID
     INTEGER :: fUnit
-    INTEGER :: iEl, i 
+    INTEGER :: iEl, i, iVar
     CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
+    CHARACTER(LEN=self_FormatLength) :: fmat
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
     TYPE(Scalar1D) :: solution
@@ -1027,8 +1094,18 @@ CONTAINS
       FORM='formatted', &
       STATUS='replace')
 
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "X","solution"'
+    tecHeader = 'VARIABLES = "X", "Y"'
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
+    ENDDO
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
+
+    ! Create format statement
+    WRITE(fmat,*) this % solution % nvar+1
+    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
 
     DO iEl = 1, this % solution % nElem
 
@@ -1038,8 +1115,8 @@ CONTAINS
 
       DO i = 0, this % solution % interp % M
 
-        WRITE(fUnit,'(2(E15.7,1x))') x % interior % hostData(i,1,iEl), &
-                                     solution % interior % hostData(i,1,iEl)
+        WRITE(fUnit,fmat) x % interior % hostData(i,1,iEl), &
+                          solution % interior % hostData(i,1:this % solution % nvar,iEl)
 
       ENDDO
 
@@ -1060,11 +1137,16 @@ CONTAINS
     TYPE(Mesh2D),INTENT(in),TARGET :: mesh
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
     TYPE(MPILayer),INTENT(in),TARGET :: decomp
+    ! Local
+    INTEGER :: ivar
+    CHARACTER(LEN=3) :: ivarChar
+    CHARACTER(LEN=25) :: varname
 
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
     this % gpuAccel = .FALSE.
+    this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -1074,6 +1156,14 @@ CONTAINS
     CALL this % flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % source % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nVar,this % mesh % nElem)
+
+    ! set default metadata
+    DO ivar = 1,nvar
+      WRITE(ivarChar,'(I3.3)') ivar
+      varname="solution"//TRIM(ivarChar)
+      CALL this % solution % SetName(ivar,varname)
+      CALL this % solution % SetUnits(ivar,"[null]")
+    ENDDO
 
   END SUBROUTINE Init_Model2D
 
@@ -1263,7 +1353,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
 
-      CALL this % flux % ContravariantProjection(this % geometry, this % flux, this % gpuAccel)
+      CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
 
   END SUBROUTINE ReprojectFlux_Model2D
 
@@ -1274,7 +1364,7 @@ CONTAINS
     CLASS(Model2D),INTENT(inout) :: this
 
       IF (this % fluxDivMethod == SELF_SPLITFORM_FLUX) THEN
-        CALL this % velocity % ContravariantProjection(this % geometry, this % compVelocity, this % gpuAccel)
+        CALL this % velocity % ContravariantProjection(this % geometry, this % gpuAccel)
 
         IF (this % gpuAccel) THEN
           CALL this % flux % interp % VectorDGDivergence_2D(this % flux % interior % deviceData, &
@@ -1310,16 +1400,15 @@ CONTAINS
     ! Local
     INTEGER :: i, j, iVar, iEl
 
-!      CALL this % solution % AverageSides()
-!      CALL this % solution % DiffSides()
-      CALL this % PreTendency()
-      CALL this % solution % BoundaryInterp(this % gpuAccel)
-      CALL this % SetBoundaryCondition()
-      CALL this % SourceMethod()
-      CALL this % RiemannSolver()
-      CALL this % FluxMethod()
-      CALL this % ReprojectFlux()
-      CALL this % CalculateFluxDivergence()
+    CALL this % PreTendency()
+    CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % solution % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+    CALL this % SetBoundaryCondition()
+    CALL this % SourceMethod()
+    CALL this % RiemannSolver()
+    CALL this % FluxMethod()
+    CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
+    CALL this % CalculateFluxDivergence()
 
     IF( this % gpuAccel )THEN
 
@@ -1564,8 +1653,10 @@ CONTAINS
     ! Local
     CHARACTER(8) :: zoneID
     INTEGER :: fUnit
-    INTEGER :: iEl, i, j 
+    INTEGER :: iEl, i, j, iVar 
     CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
+    CHARACTER(LEN=self_FormatLength) :: fmat
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
     TYPE(Scalar2D) :: solution
@@ -1608,14 +1699,21 @@ CONTAINS
     ! Map the solution to the target grid
     CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
    
-    ! Let's write some tecplot!! 
      OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(tecFile), &
       FORM='formatted', &
       STATUS='replace')
 
-    ! TO DO :: Create header from solution metadata 
-    WRITE(fUnit,*) 'VARIABLES = "X", "Y","solution"'
+    tecHeader = 'VARIABLES = "X", "Y"'
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
+    ENDDO
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
+
+    ! Create format statement
+    WRITE(fmat,*) this % solution % nvar+2
+    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
 
     DO iEl = 1, this % solution % nElem
 
@@ -1627,9 +1725,9 @@ CONTAINS
       DO j = 0, this % solution % interp % M
         DO i = 0, this % solution % interp % M
 
-          WRITE(fUnit,'(3(E15.7,1x))') x % interior % hostData(1,i,j,1,iEl), &
-                                       x % interior % hostData(2,i,j,1,iEl), &
-                                       solution % interior % hostData(i,j,1,iEl)
+          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
+                            x % interior % hostData(2,i,j,1,iEl), &
+                            solution % interior % hostData(i,j,1:this % solution % nvar,iEl)
 
         ENDDO
       ENDDO

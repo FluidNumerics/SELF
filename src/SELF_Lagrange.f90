@@ -1619,14 +1619,14 @@ CONTAINS
             dfLoc = 0.0_prec
             DO ii = 0,myPoly % N
               dfLoc = dfLoc + myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
-                                 myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
+                              myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl)
             END DO
 
             dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
-                                                   myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
+                             myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
                                myPoly % qWeights % hostData(i) + &
-                               (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
-                                myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
+                            (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
+                             myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
                                myPoly % qWeights % hostData(j)
             dF(i,j,iVar,iEl) = dFLoc
 

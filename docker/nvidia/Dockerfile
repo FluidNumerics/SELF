@@ -2,6 +2,7 @@ FROM gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3 as builder
 ARG GPU_TARGET=sm_72
 ARG HIP_PLATFORM=nvidia
 ARG PREC=double
+ARG FFLAGS="-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow"
 
 # Install SELF
 COPY . /build
@@ -13,7 +14,10 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     SELF_PREFIX=/opt/self \
     PREC=${PREC} \
     GPU_TARGET=${GPU_TARGET} \
+    SELF_FFLAGS=${FFLAGS} \
     make
+
+ENV SELF_PREFIX=/opt/self
 
 # Bare OS image to run the installed executables
 #FROM nvidia/cuda:11.2.1-base

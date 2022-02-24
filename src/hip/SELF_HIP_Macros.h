@@ -36,3 +36,14 @@
 #define SCB_3D_INDEX(i,j,iVar,iSide,iel,N,nVar) i+(N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel)))
 #define VEB_3D_INDEX(dir,i,j,iVar,iSide,iel,N,nVar) dir-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel))))
 #define TEB_3D_INDEX(row,col,i,j,iVar,iSide,iel,N,nVar) row-1 + 3*(col-1 + 3*(i + (N+1)*(j + (N+1)*(iVar + nVar*(iSide-1 + 6*iel)))))
+
+// Boundary condition flags //
+//
+//  Conditions on the solution
+#define SELF_BC_PRESCRIBED 100
+#define SELF_BC_RADIATION 101
+#define SELF_BC_NONORMALFLOW 102
+
+// Conditions on the solution gradients
+#define SELF_BC_PRESCRIBED_STRESS 200
+#define SELF_BC_NOSTRESS 201

@@ -224,11 +224,11 @@ MODULE SELF_MappedData
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(physVector,compVector,dsdx,N,nVar,nEl) &
+    SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper(vector,dsdx,N,nVar,nEl) &
       bind(c,name="ContravariantProjection_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: physVector,compVector,dsdx
+      TYPE(c_ptr) :: vector,dsdx
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ContravariantProjection_MappedVector2D_gpu_wrapper
   END INTERFACE
@@ -385,66 +385,66 @@ MODULE SELF_MappedData
 
   INTERFACE
     SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedScalar3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedScalar3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedVector3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedVector3D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper(extBoundary,boundary, &
-                                                       self_sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
+                                                       sideInfo,elemToRank,rankId,offset,N,nVar,nEl) &
       bind(c,name="SideExchange_MappedTensor3D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
-      TYPE(c_ptr) :: extBoundary,boundary,self_sideInfo,elemToRank
+      TYPE(c_ptr) :: extBoundary,boundary,sideInfo,elemToRank
       INTEGER(C_INT),VALUE :: rankId,offset,N,nVar,nEl
     END SUBROUTINE SideExchange_MappedTensor3D_gpu_wrapper
   END INTERFACE
@@ -744,7 +744,7 @@ CONTAINS
 
       CALL SideExchange_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                    scalar % boundary % deviceData, &
-                                                   mesh % self_sideInfo % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
@@ -756,11 +756,11 @@ CONTAINS
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
           e2 = e2Global - offset
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
@@ -1078,7 +1078,7 @@ CONTAINS
 
       CALL SideExchange_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
                                                    scalar % boundary % deviceData, &
-                                                   mesh % self_sideInfo % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
@@ -1092,11 +1092,11 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
-          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
           e2 = e2Global - offset
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
           
 
           IF (bcid == 0) THEN
@@ -1523,7 +1523,7 @@ CONTAINS
 
       CALL SideExchange_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                    vector % boundary % deviceData, &
-                                                   mesh % self_sideInfo % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
@@ -1537,11 +1537,11 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
           e2 = e2Global - offset
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
@@ -1845,47 +1845,45 @@ CONTAINS
     END IF
   END SUBROUTINE MapToTensor_MappedVector2D
 
-  SUBROUTINE ContravariantProjection_MappedVector2D(physVector,geometry,compVector,gpuAccel)
+  SUBROUTINE ContravariantProjection_MappedVector2D(vector,geometry,gpuAccel)
 #undef __FUNC__
 #define __FUNC__ "ContravariantProjection_MappedVector2D"
     ! Takes a vector that has physical space coordinate directions (x,y,z) and projects the vector
     ! into the the contravariant basis vector directions. Keep in mind that the contravariant basis
     ! vectors are really the Jacobian weighted contravariant basis vectors
     IMPLICIT NONE
-    CLASS(MappedVector2D),INTENT(in) :: physVector
+    CLASS(MappedVector2D),INTENT(inout) :: vector
     TYPE(SEMQuad),INTENT(in) :: geometry
     LOGICAL,INTENT(in) :: gpuAccel
-    TYPE(MappedVector2D),INTENT(inout) :: compVector
     ! Local
     INTEGER :: i,j,ivar,iel
     REAL(prec) :: Fx, Fy
 
     IF (gpuAccel) THEN
 
-      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(physVector % interior % deviceData, &
-                                                              compVector % interior % deviceData, &
+      CALL ContravariantProjection_MappedVector2D_gpu_wrapper(vector % interior % deviceData, &
                                                               geometry % dsdx % interior % deviceData, &
-                                                              physVector % interp % N, &
-                                                              physVector % nVar, &
-                                                              physVector % nElem)
+                                                              vector % interp % N, &
+                                                              vector % nVar, &
+                                                              vector % nElem)
 
     ELSE
       ! Assume that tensor(j,i) is vector i, component j
       ! => dot product is done along first dimension
       ! to project onto computational space
-      DO iel = 1,physVector % nElem
-        DO ivar = 1,physVector % nVar
-          DO j = 0,physVector % interp % N
-            DO i = 0,physVector % interp % N
+      DO iel = 1,vector % nElem
+        DO ivar = 1,vector % nVar
+          DO j = 0,vector % interp % N
+            DO i = 0,vector % interp % N
 
-              Fx = physVector % interior % hostData(1,i,j,ivar,iel)
-              Fy = physVector % interior % hostData(2,i,j,ivar,iel)
+              Fx = vector % interior % hostData(1,i,j,ivar,iel)
+              Fy = vector % interior % hostData(2,i,j,ivar,iel)
 
-              compVector % interior % hostData(1,i,j,ivar,iel) = &
+              vector % interior % hostData(1,i,j,ivar,iel) = &
                 geometry % dsdx % interior % hostData(1,1,i,j,1,iel)*Fx + &
                 geometry % dsdx % interior % hostData(2,1,i,j,1,iel)*Fy
 
-              compVector % interior % hostData(2,i,j,ivar,iel) = &
+              vector % interior % hostData(2,i,j,ivar,iel) = &
                 geometry % dsdx % interior % hostData(1,2,i,j,1,iel)*Fx + &
                 geometry % dsdx % interior % hostData(2,2,i,j,1,iel)*Fy
 
@@ -2006,7 +2004,7 @@ CONTAINS
 
       CALL SideExchange_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
                                                    vector % boundary % deviceData, &
-                                                   mesh % self_sideInfo % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
@@ -2020,11 +2018,11 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
-          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
           e2 = e2Global - offset
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN ! Interior
 
@@ -2546,7 +2544,7 @@ CONTAINS
 
       CALL SideExchange_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                    tensor % boundary % deviceData, &
-                                                   mesh % self_sideInfo % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
@@ -2559,11 +2557,11 @@ CONTAINS
 
       DO e1 = 1,mesh % nElem
         DO s1 = 1,4
-          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
           e2 = e2Global - offset
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
@@ -2752,7 +2750,7 @@ CONTAINS
 
       CALL SideExchange_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
                                                    tensor % boundary % deviceData, &
-                                                   mesh % self_sideInfo % deviceData, &
+                                                   mesh % sideInfo % deviceData, &
                                                    decomp % elemToRank % deviceData, &
                                                    decomp % rankId, &
                                                    offset, &
@@ -2764,11 +2762,11 @@ CONTAINS
       CALL tensor % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
-          e2Global = mesh % self_sideInfo % hostData(3,s1,e1)
+          e2Global = mesh % sideInfo % hostData(3,s1,e1)
           e2 = e2Global - offset
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN
 
@@ -2972,13 +2970,13 @@ CONTAINS
       DO e1 = 1,scalar % nElem
         DO s1 = 1,4
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
           IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
+            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+            globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
@@ -3024,7 +3022,7 @@ CONTAINS
       IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedScalar2D_gpu_wrapper(scalar % extBoundary % deviceData, &
-                                                  mesh % self_sideInfo % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
                                                   scalar % interp % N, &
@@ -3034,16 +3032,16 @@ CONTAINS
         DO e1 = 1,scalar % nElem
           DO s1 = 1,4
 
-            e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
             IF (bcid == 0) THEN ! Interior Element
               r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
               IF (r2 /= mpiHandler % rankId) THEN
 
-                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
                 ! Need to update extBoundary with flip applied
                 IF (flip == 1) THEN
@@ -3092,13 +3090,13 @@ CONTAINS
       DO e1 = 1,vector % nElem
         DO s1 = 1,4
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
           IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
+            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+            globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
@@ -3145,7 +3143,7 @@ CONTAINS
       IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedVector2D_gpu_wrapper(vector % extBoundary % deviceData, &
-                                                  mesh % self_sideInfo % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
                                                   vector % interp % N, &
@@ -3155,16 +3153,16 @@ CONTAINS
         DO e1 = 1,vector % nElem
           DO s1 = 1,4
 
-            e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
             IF (bcid == 0) THEN ! Interior Element
               r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
               IF (r2 /= mpiHandler % rankId) THEN
 
-                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
                 ! Need to update extBoundary with flip applied
                 IF (flip == 1) THEN
@@ -3212,13 +3210,13 @@ CONTAINS
       DO e1 = 1,tensor % nElem
         DO s1 = 1,4
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
           IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+            globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
@@ -3265,7 +3263,7 @@ CONTAINS
       IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedTensor2D_gpu_wrapper(tensor % extBoundary % deviceData, &
-                                                  mesh % self_sideInfo % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
                                                   tensor % interp % N, &
@@ -3275,16 +3273,16 @@ CONTAINS
         DO e1 = 1,tensor % nElem
           DO s1 = 1,4
 
-            e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
             IF (bcid == 0) THEN ! Interior Element
               r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
               IF (r2 /= mpiHandler % rankId) THEN
 
-                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
                 ! Need to update extBoundary with flip applied
                 IF (flip == 1) THEN
@@ -3333,14 +3331,14 @@ CONTAINS
       DO e1 = 1,scalar % nElem
         DO s1 = 1,6
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
           IF( e2 > 0 )THEN
             r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
             IF (r2 /= mpiHandler % rankId) THEN
 
-              s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-              globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
+              s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+              globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
               msgCount = msgCount + 1
               CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,:,s1,e1), &
@@ -3389,7 +3387,7 @@ CONTAINS
       IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedScalar3D_gpu_wrapper(scalar % extBoundary % deviceData, &
-                                                  mesh % self_sideInfo % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
                                                   scalar % interp % N, &
@@ -3399,16 +3397,16 @@ CONTAINS
         DO e1 = 1,scalar % nElem
           DO s1 = 1,6
 
-            e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
             IF( bcid == 0 )THEN ! Interior Element
               r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
               IF (r2 /= mpiHandler % rankId) THEN
 
-                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
                 ! Need to update extBoundary with flip applied
                 IF (flip == 1) THEN
@@ -3513,13 +3511,13 @@ CONTAINS
       DO e1 = 1,vector % nElem
         DO s1 = 1,6
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
           IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
+            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+            globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,:,s1,e1), &
@@ -3565,7 +3563,7 @@ CONTAINS
       IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedVector3D_gpu_wrapper(vector % extBoundary % deviceData, &
-                                                  mesh % self_sideInfo % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
                                                   vector % interp % N, &
@@ -3575,16 +3573,16 @@ CONTAINS
         DO e1 = 1,vector % nElem
           DO s1 = 1,6
 
-            e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
             IF (bcid == 0) THEN ! Interior Element
               r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
               IF (r2 /= mpiHandler % rankId) THEN
 
-                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
                 IF (flip == 1) THEN
 
@@ -3686,13 +3684,13 @@ CONTAINS
       DO e1 = 1,tensor % nElem
         DO s1 = 1,6
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
+          e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
           r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
           IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-            globalSideId = ABS(mesh % self_sideInfo % hostdata(2,s1,e1))
+            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+            globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
             msgCount = msgCount + 1
             CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,:,s1,e1), &
@@ -3739,7 +3737,7 @@ CONTAINS
       IF (gpuAccel) THEN
 
         CALL ApplyFlip_MappedTensor3D_gpu_wrapper(tensor % extBoundary % deviceData, &
-                                                  mesh % self_sideInfo % deviceData, &
+                                                  mesh % sideInfo % deviceData, &
                                                   mpiHandler % elemToRank % deviceData, &
                                                   mpiHandler % rankId, &
                                                   tensor % interp % N, &
@@ -3749,16 +3747,16 @@ CONTAINS
         DO e1 = 1,tensor % nElem
           DO s1 = 1,6
 
-            e2 = mesh % self_sideInfo % hostData(3,s1,e1) ! Neighbor Element
-            bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+            e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
+            bcid = mesh % sideInfo % hostData(5,s1,e1)
             IF (bcid == 0) THEN ! Interior Element
               r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
               IF (r2 /= mpiHandler % rankId) THEN
 
-                s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-                flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-                globalSideId = mesh % self_sideInfo % hostdata(2,s1,e1)
+                s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+                flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+                globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
                 IF (flip == 1) THEN
 

@@ -268,7 +268,7 @@ extern "C"
 }
 
 // ContravariantProjection_MappedVector2D_gpu
-__global__ void ContravariantProjection_MappedVector2D_gpu(real *physVector, real *compVector, real *dsdx, int N, int nVar){
+__global__ void ContravariantProjection_MappedVector2D_gpu(real *vector, real *dsdx, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -276,22 +276,22 @@ __global__ void ContravariantProjection_MappedVector2D_gpu(real *physVector, rea
   size_t j = threadIdx.y;
 
 
-    real Fx = physVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
-    real Fy = physVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
+    real Fx = vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
+    real Fy = vector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
 
-    compVector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*Fx+
-						     dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*Fy;
+    vector[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)]*Fx+
+                			         dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)]*Fy;
 
-    compVector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*Fx+
-						     dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*Fy;
+    vector[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)]*Fx+
+						 dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)]*Fy;
   
 }
 
 extern "C"
 {
-  void ContravariantProjection_MappedVector2D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
+  void ContravariantProjection_MappedVector2D_gpu_wrapper(real **vector, real **dsdx, int N, int nVar, int nEl)
   {
-    ContravariantProjection_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
+    ContravariantProjection_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *dsdx, N, nVar);
   } 
 }
 

@@ -171,32 +171,20 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Geometry1D
 
-  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh,interp,meshQuadrature)
+  SUBROUTINE GenerateFromMesh_Geometry1D(myGeom,mesh)
     ! Generates the geometry for a 1-D mesh ( set of line segments )
     ! Assumes that mesh is using Gauss-Lobatto quadrature and the degree is given by mesh % nGeo
     IMPLICIT NONE
-    CLASS(Geometry1D),INTENT(out) :: myGeom
+    CLASS(Geometry1D),INTENT(inout) :: myGeom
     TYPE(Mesh1D),INTENT(in) :: mesh
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel,i,nid
     TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Scalar1D) :: xMesh
-    INTEGER :: quadrature
 
-    IF (PRESENT(meshQuadrature)) THEN
-      quadrature = meshQuadrature
-    ELSE
-      quadrature = GAUSS_LOBATTO
-    END IF
-
-    CALL myGeom % Init(interp,mesh % nElem)
-
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
-    ! cqDegree, cqType grid
-    CALL meshToModel % Init(mesh % nGeo, quadrature,&
-            interp % N, interp % controlNodeType )
+    CALL meshToModel % Init(mesh % nGeo, mesh % quadrature,&
+            myGeom % x % interp % N, &
+            myGeom % x % interp % controlNodeType )
 
     CALL xMesh % Init(meshToModel,&
                       1,mesh % nElem)
@@ -205,7 +193,7 @@ CONTAINS
     nid = 1
     DO iel = 1,mesh % nElem
       DO i = 0,mesh % nGeo
-        xMesh % interior % hostData(i,1,iel) = mesh % hopr_nodeCoords % hostData(nid)
+        xMesh % interior % hostData(i,1,iel) = mesh % nodeCoords % hostData(nid)
         nid = nid + 1
       END DO
     END DO
@@ -401,47 +389,28 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_SEMQuad
 
-  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh,interp,meshQuadrature)
-    ! Assumes that
-    !  * mesh is using Chebyshev-Gauss-Lobatto quadrature
-    !  * the degree is given by mesh % nGeo
-    !  * mesh only has quadrilateral elements
-    !
+  SUBROUTINE GenerateFromMesh_SEMQuad(myGeom,mesh)
     IMPLICIT NONE
-    CLASS(SEMQuad),INTENT(out) :: myGeom
+    CLASS(SEMQuad),INTENT(inout) :: myGeom
     TYPE(Mesh2D),INTENT(in) :: mesh
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel
     INTEGER :: i,j,nid
     TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Vector2D) :: xMesh
-    INTEGER :: quadrature
 
-    IF (PRESENT(meshQuadrature)) THEN
-      quadrature = meshQuadrature
-    ELSE
-      quadrature = GAUSS_LOBATTO
-    END IF
+    CALL meshToModel % Init(mesh % nGeo, &
+            mesh % quadrature, &
+            myGeom % x % interp % N, &
+            myGeom % x % interp % controlNodeType )
 
-    CALL myGeom % Init(interp,mesh % nElem)
-
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
-    ! cqDegree, cqType grid
-    CALL meshToModel % Init(mesh % nGeo, quadrature,&
-            interp % N, interp % controlNodeType )
-
-    CALL xMesh % Init(meshToModel,&
-                      1,mesh % nElem)
+    CALL xMesh % Init(meshToModel,1,mesh % nElem)
 
     ! Set the element internal mesh locations
-    nid = 1
-    DO iel = 1,mesh % nElem
-      DO j = 0,mesh % nGeo
-        DO i = 0,mesh % nGeo
-          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % hopr_nodeCoords % hostData(1:2,nid)
-          nid = nid + 1
+    DO iel = 1, mesh % nElem
+      DO j = 0, mesh % nGeo
+        DO i = 0, mesh % nGeo
+          xMesh % interior % hostData(1:2,i,j,1,iel) = mesh % nodeCoords % hostData(1:2,i,j,iel)
         END DO
       END DO
     END DO
@@ -544,9 +513,8 @@ CONTAINS
               fac*myGeom % dsdx % boundary % hostData(1:2,1,i,1,k,iEl)/mag
 
           ENDIF
+
           ! Set the directionality for dsdx on the boundaries
-          ! This is primarily used for DG gradient calculations,
-          ! which do not use nHat for the boundary terms.
           myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl) = & 
               myGeom % dsdx % boundary % hostData(1:2,1:2,i,1,k,iEl)*fac
 
@@ -775,48 +743,29 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_SEMHex
 
-  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh,interp,meshQuadrature)
-    ! Assumes that
-    !  * mesh is using Chebyshev-Gauss-Lobatto quadrature
-    !  * the degree is given by mesh % nGeo
-    !  * mesh only has quadrilateral elements
-    !
+  SUBROUTINE GenerateFromMesh_SEMHex(myGeom,mesh)
     IMPLICIT NONE
-    CLASS(SEMHex),INTENT(out) :: myGeom
+    CLASS(SEMHex),INTENT(inout) :: myGeom
     TYPE(Mesh3D),INTENT(in) :: mesh
-    TYPE(Lagrange),POINTER,INTENT(in) :: interp
-    INTEGER,INTENT(in),OPTIONAL :: meshQuadrature
     ! Local
     INTEGER :: iel
     INTEGER :: i,j,k,nid
     TYPE(Lagrange),TARGET :: meshToModel
     TYPE(Vector3D) :: xMesh
-    INTEGER :: quadrature
 
-    IF (PRESENT(meshQuadrature)) THEN
-      quadrature = meshQuadrature
-    ELSE
-      quadrature = GAUSS_LOBATTO
-    END IF
-
-    CALL myGeom % Init(interp,mesh % nElem)
-
-    ! Create a scalar1D class to map from nGeo,Gauss-Lobatto grid to
-    ! cqDegree, cqType grid
-    CALL meshToModel % Init(mesh % nGeo, quadrature,&
-            interp % N, interp % controlNodeType )
+    CALL meshToModel % Init(mesh % nGeo, mesh % quadrature,&
+            myGeom % x % interp % N, &
+            myGeom % x % interp % controlNodeType )
 
     CALL xMesh % Init(meshToModel,&
                       1,mesh % nElem)
 
     ! Set the element internal mesh locations
-    nid = 1
     DO iel = 1,mesh % nElem
       DO k = 0,mesh % nGeo
         DO j = 0,mesh % nGeo
           DO i = 0,mesh % nGeo
-            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % hopr_nodeCoords % hostData(1:3,nid)
-            nid = nid + 1
+            xMesh % interior % hostData(1:3,i,j,k,1,iel) = mesh % nodeCoords % hostData(1:3,i,j,k,iel)
           END DO
         END DO
       END DO
@@ -857,10 +806,10 @@ CONTAINS
       DO e1 = 1,mesh % nElem
         DO s1 = 1,6
 
-          e2 = mesh % self_sideInfo % hostData(3,s1,e1)
-          s2 = mesh % self_sideInfo % hostData(4,s1,e1)/10
-          flip = mesh % self_sideInfo % hostData(4,s1,e1) - s2*10
-          bcid = mesh % self_sideInfo % hostData(5,s1,e1)
+          e2 = mesh % sideInfo % hostData(3,s1,e1)
+          s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+          flip = mesh % sideInfo % hostData(4,s1,e1) - s2*10
+          bcid = mesh % sideInfo % hostData(5,s1,e1)
 
           IF (bcid == 0) THEN ! Interior
 

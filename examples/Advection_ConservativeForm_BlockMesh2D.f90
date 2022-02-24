@@ -7,15 +7,15 @@ USE SELF_Geometry
 USE SELF_Advection2D
 
   INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
-  INTEGER, PARAMETER :: quadrature = GAUSS_LOBATTO ! Quadrature
+  INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
   INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
-  INTEGER, PARAMETER :: nXe = 10 ! Number of elements in the x-direction
-  INTEGER, PARAMETER :: nYe = 10 ! Number of elements in the y-direction
+  INTEGER, PARAMETER :: nXe = 5 ! Number of elements in the x-direction
+  INTEGER, PARAMETER :: nYe = 5 ! Number of elements in the y-direction
   INTEGER, PARAMETER :: nvar = 1 ! The number of tracer fields
   REAL(prec), PARAMETER :: Lx = 1.0_prec ! Length of the domain in the x-direction 
   REAL(prec), PARAMETER :: Ly = 1.0_prec ! Length of the domain in the y-direction 
   REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
-  REAL(prec), PARAMETER :: tn = 0.5_prec ! File time 
+  REAL(prec), PARAMETER :: tn = 0.25_prec ! File time 
 
 
   TYPE(Lagrange),TARGET :: interp
@@ -25,6 +25,7 @@ USE SELF_Advection2D
   TYPE(MPILayer),TARGET :: decomp
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocityField(1:2)
+  CHARACTER(LEN=255) :: SELF_PREFIX
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -35,13 +36,15 @@ USE SELF_Advection2D
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % UniformBlockMesh(N,(/nXe,nYe/),(/0.0_prec,Lx,0.0_prec,Ly/))
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
 
     ! Generate a decomposition
     CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
-    CALL geometry % GenerateFromMesh(mesh,interp)
+    CALL geometry % Init(interp,mesh % nElem)
+    CALL geometry % GenerateFromMesh(mesh)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
@@ -57,26 +60,26 @@ USE SELF_Advection2D
     CALL semModel % SetVelocityField( velocityField )
 
     ! Set the initial condition
-    initialCondition = (/"s = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2 )/0.1 )"/)
+    initialCondition = (/"s = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
 
     ! Write the initial condition to file
-    CALL semModel % Write()
+    CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-   ! CALL semModel % SetTimeIntegrator("Euler")
+    CALL semModel % SetTimeIntegrator("Euler")
 
    ! ! Set your time step
-   ! semModel % dt = dt
+    semModel % dt = dt
 
    ! ! Forward step the semModel and do the file io
-   ! CALL semModel % ForwardStep( tn = tn )
+    CALL semModel % ForwardStep( tn = tn )
 
 
    ! ! Manually write the last semModel state
-   ! CALL semModel % Write()
-   ! CALL semModel % WriteTecplot()
+    CALL semModel % WriteModel()
+    CALL semModel % WriteTecplot()
 
     ! Clean up
     CALL semModel % Free()
