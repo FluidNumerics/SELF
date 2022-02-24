@@ -779,7 +779,6 @@ CONTAINS
         DO i = 0, nGeo
           nid = i+1 + (nGeo+1)*(j + (nGeo+1)*((nGeo+1)*(eid-1)))
           myMesh % nodeCoords % hostData(1:2,i,j,eid) = hopr_nodeCoords % hostData(1:2,nid)
-!          PRINT*,myMesh % nodeCoords % hostData(1:2,i,j,eid)
           myMesh % globalNodeIDs % hostData(i,j,eid) = hopr_globalNodeIDs % hostData(nid)
         ENDDO
       ENDDO
@@ -800,7 +799,6 @@ CONTAINS
         myMesh % sideInfo % hostData(1:5,lsid,eid) = hopr_sideInfo % hostData(1:5,iSide)
         ! Adjust the secondary side index for 2-D
         myMesh % sideInfo % hostData(4,lsid,eid) = myMesh % sideInfo % hostData(4,lsid,eid)-10
-
       ENDDO
     ENDDO
 
@@ -1058,17 +1056,14 @@ CONTAINS
         nloc2(1:2) = nid2(1:2,s1,e1)
 
         IF (bcid == 0) THEN
-          nShifts = 0
           theyMatch = CompareArray( nloc1, nloc2, 2 )
 
           IF( theyMatch )THEN
-            EXIT
+            myMesh % sideInfo % hostData(4,s1,e1) = 10*s2
           ELSE
-            nShifts = 1
-            EXIT
+            myMesh % sideInfo % hostData(4,s1,e1) = 10*s2+1
           ENDIF
 
-          myMesh % sideInfo % hostData(4,s1,e1) = 10*s2+nShifts
 
         ENDIF
 
