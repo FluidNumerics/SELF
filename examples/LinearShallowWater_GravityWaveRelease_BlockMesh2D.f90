@@ -1,4 +1,4 @@
-PROGRAM LinearShallowWater_GravityWaveRelease_UniformBlockMesh
+PROGRAM LinearShallowWater_GravityWaveRelease
 
 USE SELF_Constants
 USE SELF_Lagrange
@@ -80,4 +80,4 @@ USE SELF_LinearShallowWater
     CALL mesh % Free()
     CALL interp % Free()
 
-END PROGRAM LinearShallowWater_GravityWaveRelease_UniformBlockMesh
+END PROGRAM LinearShallowWater_GravityWaveRelease

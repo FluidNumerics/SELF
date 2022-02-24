@@ -236,6 +236,8 @@ MODULE SELF_Mesh
     PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_Mesh2D
     PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_Mesh2D
 
+    PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh2D
+
     GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh2D_serial!,Read_HOPr_Mesh2D_parallel
     PROCEDURE,PRIVATE :: Read_HOPr_Mesh2D_serial!,Read_HOPr_Mesh2D_parallel
 
@@ -265,6 +267,8 @@ MODULE SELF_Mesh
 
     GENERIC,PUBLIC :: Read_HOPr => Read_HOPr_Mesh3D_serial,Read_HOPr_Mesh3D_parallel
     PROCEDURE,PRIVATE :: Read_HOPr_Mesh3D_serial,Read_HOPr_Mesh3D_parallel
+
+    PROCEDURE,PUBLIC :: ResetBoundaryConditionType => ResetBoundaryConditionType_Mesh3D
 
     PROCEDURE,PUBLIC :: Write_Mesh => Write_Mesh3D
 
@@ -682,13 +686,39 @@ CONTAINS
 
   END SUBROUTINE UpdateDevice_Mesh2D
 
+  SUBROUTINE ResetBoundaryConditionType_Mesh2D(myMesh,bcid)
+    !! This method can be used to reset all of the boundary elements
+    !! boundary condition type to the desired value.
+    !!
+    !! Note that ALL physical boundaries will be set to have this boundary 
+    !! condition
+    IMPLICIT NONE
+    CLASS(Mesh2D),INTENT(inout) :: myMesh
+    INTEGER, INTENT(in) :: bcid
+    ! Local
+    INTEGER :: iSide,iEl,e2      
+
+    DO iEl = 1, myMesh % nElem
+      DO iSide = 1, 4
+
+        e2 = myMesh % sideInfo % hostData(3,iSide,iEl)
+
+        IF( e2 == 0 )THEN
+          myMesh % sideInfo % hostData(5,iSide,iEl) = bcid
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE ResetBoundaryConditionType_Mesh2D 
+
   SUBROUTINE Read_HOPr_Mesh2D_serial(myMesh,meshFile)
-    ! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
-    ! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
-    ! 
-    ! This reader assumes that an extruded 3-D mesh is created with a single
-    ! extrusion layer in HOPr so that the element connectivity information
-    ! is preserved.
+    !! From https://www.hopr-project.org/externals/Meshformat.pdf, Algorithm 6
+    !! Adapted for 2D Mesh : Note that HOPR does not have 2D mesh output.
+    !! 
+    !! This reader assumes that an extruded 3-D mesh is created with a single
+    !! extrusion layer in HOPr so that the element connectivity information
+    !! is preserved.
     IMPLICIT NONE
     CLASS(Mesh2D),INTENT(out) :: myMesh
     CHARACTER(*),INTENT(in) :: meshFile
@@ -1224,6 +1254,32 @@ CONTAINS
     CALL myMesh % BCType % UpdateDevice()
 
   END SUBROUTINE UpdateDevice_Mesh3D
+
+  SUBROUTINE ResetBoundaryConditionType_Mesh3D(myMesh,bcid)
+    !! This method can be used to reset all of the boundary elements
+    !! boundary condition type to the desired value.
+    !!
+    !! Note that ALL physical boundaries will be set to have this boundary 
+    !! condition
+    IMPLICIT NONE
+    CLASS(Mesh3D),INTENT(inout) :: myMesh
+    INTEGER, INTENT(in) :: bcid
+    ! Local
+    INTEGER :: iSide,iEl,e2      
+
+    DO iEl = 1, myMesh % nElem
+      DO iSide = 1, 6
+
+        e2 = myMesh % sideInfo % hostData(3,iSide,iEl)
+
+        IF( e2 == 0 )THEN
+          myMesh % sideInfo % hostData(5,iSide,iEl) = bcid
+        ENDIF
+
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE ResetBoundaryConditionType_Mesh3D 
 
   SUBROUTINE RecalculateFlip_Mesh3D(myMesh,decomp)  
     IMPLICIT NONE

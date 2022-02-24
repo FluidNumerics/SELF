@@ -13,9 +13,8 @@ USE SELF_LinearShallowWater
   INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
   INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
   REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
-  REAL(prec), PARAMETER :: tn = 1.5_prec ! Total simulation time
+  REAL(prec), PARAMETER :: tn = 2.0_prec ! Total simulation time
   REAL(prec), PARAMETER :: ioInterval = 0.025_prec ! File IO interval
-
 
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
@@ -42,8 +41,10 @@ USE SELF_LinearShallowWater
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
-    !CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
     CALL geometry % GenerateFromMesh(mesh)
+
+    ! Reset the boundary condition to reflecting
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
