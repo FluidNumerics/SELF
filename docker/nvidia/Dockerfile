@@ -17,6 +17,8 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     SELF_FFLAGS=${FFLAGS} \
     make
 
+ENV SELF_PREFIX=/opt/self
+
 # Bare OS image to run the installed executables
 #FROM nvidia/cuda:11.2.1-base
 #
