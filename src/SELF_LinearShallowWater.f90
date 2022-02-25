@@ -109,6 +109,7 @@ CONTAINS
     this % fCori = 0.0_prec
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -318,8 +319,12 @@ CONTAINS
              etaR = this % solution % extBoundary % hostData(i,3,iSide,iEl)
 
              ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
-             wL = 0.5_prec*(unL/this % g + etaL/c)
-             wR = 0.5_prec*(unR/this % g - etaR/c)
+             !wL = 0.5_prec*(unL/this % g + etaL/c)
+             !wR = 0.5_prec*(unR/this % g - etaR/c)
+
+             !this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = this % g*c*( wL - wR )*nHat(1)*nmag
+             !this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = this % g*c*( wL - wR )*nHat(2)*nmag
+             !this % flux % boundaryNormal % hostData(i,3,iSide,iEl) = c*c*( wL + wR )*nmag
 
              this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = this % g*c*( wL - wR )*nHat(1)*nmag
              this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = this % g*c*( wL - wR )*nHat(2)*nmag
