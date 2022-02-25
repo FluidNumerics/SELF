@@ -3,7 +3,6 @@ Copyright 2020-2022 Fluid Numerics LLC
 
 [![Documentation Status](https://readthedocs.org/projects/self/badge/?version=latest)](https://self.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/FluidNumerics/SELF/branch/master/graph/badge.svg)](https://codecov.io/gh/FluidNumerics/SELF)
-[![Discord Chat](https://img.shields.io/discord/308323056592486420.svg)](https://discord.gg/57aNxcpYMW)  
 [![Youtube](https://img.shields.io/youtube/channel/views/UCpd92vU2HjjTPup-AIN0pkg?style=social)](https://www.youtube.com/playlist?list=PLRO4xf5MdhAv9CNTETor75rANZtBqPVgQ)
 
 
