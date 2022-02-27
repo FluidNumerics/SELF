@@ -534,7 +534,7 @@ CONTAINS
     OPEN(output_unit, ENCODING='utf-8')
     str = ucs2_'t\u1D62 ='//TRIM(modelTime)
     WRITE(output_unit,'(A)',ADVANCE='no') str
-    str = ucs2_'  |  entropy ='//TRIM(entropy)
+    str = ucs2_'  |  e\u1D62 ='//TRIM(entropy)
     WRITE(output_unit,'(A)',ADVANCE='yes') str
 
 
@@ -728,9 +728,15 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
       ENDIF
+
+
 
   END SUBROUTINE SetSolutionFromEqn_Model1D 
 
@@ -747,6 +753,10 @@ CONTAINS
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
@@ -1283,8 +1293,11 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
-
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
@@ -1349,8 +1362,11 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
-
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
