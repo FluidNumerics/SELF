@@ -21,10 +21,52 @@ MODULE SELF_Advection2D
     PROCEDURE :: FluxMethod => Flux_Advection2D
     PROCEDURE :: RiemannSolver => RiemannSolver_Advection2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Advection2D
+    
+    ! Overridden Methods
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_Advection2D
 
   END TYPE Advection2D
 
 CONTAINS
+
+  SUBROUTINE CalculateEntropy_Advection2D(this)
+  !! Base method for calculating entropy of a model
+  !! Calculates the entropy as the integration of the 
+  !! squared tracer over the domain
+    IMPLICIT NONE
+    CLASS(Advection2D), INTENT(inout) :: this
+    ! Local
+    INTEGER :: i, j, iVar, iEl
+    REAL(prec) :: Jacobian, s
+    REAL(prec) :: wi,wj
+
+    ! TO DO : GPU reduction
+
+    this % entropy = 0.0_prec
+
+    DO iEl = 1, this % geometry % x % nElem
+      DO iVar = 1, this % geometry % x % nVar
+        DO j = 0, this % geometry % x % interp % N
+          DO i = 0, this % geometry % x % interp % N
+
+            ! Coordinate mapping Jacobian
+            Jacobian = this % geometry % J % interior % hostData(i,j,1,iEl)
+
+            ! Quadrature weights
+            wi = this % geometry % x % interp % qWeights % hostData(i) 
+            wj = this % geometry % x % interp % qWeights % hostData(j) 
+
+            ! Solution
+            s = this % solution % interior % hostData(i,j,iVar,iEl)
+
+            this % entropy = this % entropy + s*s*Jacobian*wi*wj
+
+          ENDDO
+        ENDDO
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE CalculateEntropy_Advection2D
 
   SUBROUTINE SetBoundaryCondition_Advection2D(this)
     IMPLICIT NONE
