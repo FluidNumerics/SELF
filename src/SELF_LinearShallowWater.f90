@@ -165,9 +165,7 @@ CONTAINS
             v = this % solution % interior % hostData(i,j,2,iEl)
             eta = this % solution % interior % hostData(i,j,3,iEl)
 
-            
-
-            this % entropy = this % entropy + ( 0.5_prec*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
+            this % entropy = this % entropy + 0.5_prec*( this % H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
 
           ENDDO
         ENDDO
