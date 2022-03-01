@@ -7,7 +7,6 @@
 MODULE SELF_Mesh
 
   USE SELF_Constants
-  USE SELF_HashTable
   USE SELF_Lagrange
   USE SELF_Data
   USE SELF_SupportRoutines

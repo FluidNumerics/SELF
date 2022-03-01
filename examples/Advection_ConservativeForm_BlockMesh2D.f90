@@ -16,8 +16,10 @@ USE SELF_Advection2D
   REAL(prec), PARAMETER :: Ly = 1.0_prec ! Length of the domain in the y-direction 
   REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
   REAL(prec), PARAMETER :: tn = 0.25_prec ! File time 
+  REAL(prec), PARAMETER :: ioInterval = 0.25_prec ! File IO interval
 
 
+  REAL(prec) :: referenceEntropy
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
   TYPE(SEMQuad),TARGET :: geometry
@@ -53,7 +55,7 @@ USE SELF_Advection2D
     CALL semModel % solution % SetName(1,'Tracer')
 
     ! Enable GPU Acceleration (if a GPU is found) !
-    !CALL semModel % EnableGPUAccel()
+    CALL semModel % EnableGPUAccel()
 
     ! Set the velocity field
     velocityField = (/"vx=1.0","vy=1.0"/)
@@ -62,6 +64,7 @@ USE SELF_Advection2D
     ! Set the initial condition
     initialCondition = (/"s = exp( -( (x-0.5-t)^2 + (y-0.5-t)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
+    referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
     CALL semModel % WriteModel()
@@ -74,12 +77,31 @@ USE SELF_Advection2D
     semModel % dt = dt
 
    ! ! Forward step the semModel and do the file io
-    CALL semModel % ForwardStep( tn = tn )
-
+    CALL semModel % ForwardStep( tn = tn, ioInterval = ioInterval )
 
    ! ! Manually write the last semModel state
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
+
+    ! Error checking !
+    IF( semModel % entropy /= semModel % entropy )THEN
+      PRINT*, "Model entropy is not a number"
+      STOP 2
+    ENDIF
+
+    IF( semModel % entropy >= HUGE(1.0_prec) )THEN
+      PRINT*, "Model entropy is infinite."
+      STOP 1
+    ENDIF
+
+    IF( semModel % entropy > referenceEntropy )THEN
+      PRINT*, "Warning : final entropy greater than initial entropy"
+      ! Currently do nothing in this situation, since
+      ! conservative solvers in mapped geometries may
+      ! not be entropy conservative.
+      ! However, throwing this warning will bring some
+      ! visibility
+    ENDIF
 
     ! Clean up
     CALL semModel % Free()
