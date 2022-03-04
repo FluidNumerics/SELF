@@ -634,9 +634,23 @@ CONTAINS
             CALL this % ReportEntropy()
         ENDIF
 
-!      CASE RK3
-!
-!        CALL this % ForwardStepRK3(nSteps)
+      CASE (SELF_RK3)
+        IF (PRESENT(ioInterval)) THEN
+          nIO = INT( (targetTime - this % t)/ioInterval )
+          DO i = 1, nIO
+            tNext = this % t + ioInterval
+            CALL this % ForwardStepRK3(tNext)
+            CALL this % WriteModel()
+            CALL this % WriteTecplot()
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
+          ENDDO
+
+        ELSE
+          CALL this % ForwardStepRK3(targetTime)
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
+        ENDIF
 
       CASE DEFAULT
 
@@ -648,6 +662,8 @@ CONTAINS
             CALL this % ForwardStepEuler(tNext)
             CALL this % WriteModel()
             CALL this % WriteTecplot()
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
           ENDDO
 
         ELSE
