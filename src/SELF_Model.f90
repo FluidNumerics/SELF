@@ -60,6 +60,9 @@ MODULE SELF_Model
     REAL(prec) :: dt
     REAL(prec) :: t
 
+    ! Standard Diagnostics
+    REAL(prec) :: entropy ! Mathematical entropy function for the model
+
     CONTAINS
 
     PROCEDURE :: ForwardStep => ForwardStep_Model
@@ -72,6 +75,9 @@ MODULE SELF_Model
     PROCEDURE :: FluxMethod => Flux_Model
     PROCEDURE :: RiemannSolver => RiemannSolver_Model
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Model
+
+    PROCEDURE :: ReportEntropy => ReportEntropy_Model
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_Model
 
     PROCEDURE(UpdateSolution),DEFERRED :: UpdateSolution
     PROCEDURE(CalculateTendency),DEFERRED :: CalculateTendency
@@ -527,6 +533,51 @@ CONTAINS
 
   END SUBROUTINE DisableGPUAccel_Model
 
+  SUBROUTINE CalculateEntropy_Model(this)
+  !! Base method for calculating entropy of a model
+  !! When this method is not overridden, the entropy
+  !! is simply set to 0.0. When you develop a model
+  !! built on top of this abstract class or one of its
+  !! children, it is recommended that you define a
+  !! convex mathematical entropy function that is used
+  !! as a measure of the model stability.
+    IMPLICIT NONE
+    CLASS(Model), INTENT(inout) :: this
+
+      this % entropy = 0.0_prec
+
+  END SUBROUTINE CalculateEntropy_Model
+
+  SUBROUTINE ReportEntropy_Model(this)
+  !! Base method for reporting the entropy of a model
+  !! to stdout. Only override this procedure if additional
+  !! reporting is needed. Alternatively, if you think
+  !! additional reporting would be valuable for all models,
+  !! open a pull request with modifications to this base 
+  !! method.
+    USE, INTRINSIC :: ISO_FORTRAN_ENV
+    IMPLICIT NONE
+    CLASS(Model), INTENT(in) :: this
+    ! Local
+    INTEGER, PARAMETER :: ucs2 = selected_char_kind('ISO_10646')
+    CHARACTER(KIND=ucs2, len=20) :: modelTime
+    CHARACTER(KIND=ucs2, len=20) :: entropy
+    CHARACTER(KIND=ucs2, len=:), ALLOCATABLE :: str
+
+    ! Copy the time and entropy to a string
+    WRITE(modelTime,"(ES16.7E3)") this % t
+    WRITE(entropy,"(ES16.7E3)") this % entropy
+
+    ! Write the output to STDOUT 
+    OPEN(output_unit, ENCODING='utf-8')
+    str = ucs2_'t\u1D62 ='//TRIM(modelTime)
+    WRITE(output_unit,'(A)',ADVANCE='no') str
+    str = ucs2_'  |  e\u1D62 ='//TRIM(entropy)
+    WRITE(output_unit,'(A)',ADVANCE='yes') str
+
+
+  END SUBROUTINE ReportEntropy_Model
+
   ! ////////////////////////////////////// !
   !       Time Integrators                 !
 
@@ -573,10 +624,14 @@ CONTAINS
             CALL this % ForwardStepEuler(tNext)
             CALL this % WriteModel()
             CALL this % WriteTecplot()
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
           ENDDO
 
         ELSE
           CALL this % ForwardStepEuler(targetTime)
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
         ENDIF
 
 !      CASE RK3
@@ -739,9 +794,15 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
       ENDIF
+
+
 
   END SUBROUTINE SetSolutionFromEqn_Model1D 
 
@@ -758,6 +819,10 @@ CONTAINS
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
@@ -1337,8 +1402,11 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
-
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
@@ -1403,8 +1471,11 @@ CONTAINS
       ENDDO
 
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
-
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
