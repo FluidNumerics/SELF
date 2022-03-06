@@ -16,7 +16,8 @@ USE SELF_ShallowWater
   REAL(prec), PARAMETER :: tn = 0.001_prec ! Total simulation time
   REAL(prec), PARAMETER :: ioInterval = 0.001_prec ! File IO interval
 
-
+  REAL(prec) :: referenceEntropy
+  REAL(prec) :: solutionMax(1:3)
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
   TYPE(SEMQuad),TARGET :: geometry
@@ -60,8 +61,8 @@ USE SELF_ShallowWater
     initialCondition = (/"u = 0.0", &
                          "v = 0.0", &
                          "H = 1.0"/)
-    ! TO DO : Set Topography Method                 
     CALL semModel % SetSolution( initialCondition )
+    referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
     CALL semModel % WriteModel()
@@ -78,6 +79,34 @@ USE SELF_ShallowWater
 
     !! Manually write the last semModel state
     CALL semModel % WriteModel('solution.pickup.h5')
+
+    ! Error checking !
+    IF( semModel % entropy /= semModel % entropy )THEN
+      PRINT*, "Model entropy is not a number"
+      STOP 2
+    ENDIF
+
+    IF( semModel % entropy >= HUGE(1.0_prec) )THEN
+      PRINT*, "Model entropy is infinite."
+      STOP 1
+    ENDIF
+
+    IF( semModel % entropy > referenceEntropy )THEN
+      PRINT*, "Warning : final entropy greater than initial entropy"
+      ! Currently do nothing in this situation, since
+      ! conservative solvers in mapped geometries may
+      ! not be entropy conservative.
+      ! However, throwing this warning will bring some
+      ! visibility
+    ENDIF
+
+    ! Check the solution !
+    solutionMax = semModel % solution % AbsMaxInterior() 
+    IF( solutionMax(1) > 0.0_prec .OR. solutionMax(2) > 0.0_prec)THEN
+      PRINT*, "Non-zero velocity field detected for quiescent fluid."
+      PRINT*, solutionMax
+      STOP 1
+    ENDIF
 
     ! Clean up
     CALL semModel % Free()
