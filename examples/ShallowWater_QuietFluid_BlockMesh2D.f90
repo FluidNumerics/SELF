@@ -15,6 +15,7 @@ USE SELF_ShallowWater
   REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
   REAL(prec), PARAMETER :: tn = 0.001_prec ! Total simulation time
   REAL(prec), PARAMETER :: ioInterval = 0.001_prec ! File IO interval
+  REAL(prec), PARAMETER :: tolerance=1000.0_prec*epsilon(1.0_prec) ! Error tolerance
 
   REAL(prec) :: referenceEntropy
   REAL(prec) :: solutionMax(1:3)
@@ -24,6 +25,7 @@ USE SELF_ShallowWater
   TYPE(ShallowWater),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
+  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=255) :: SELF_PREFIX
 
     ! Initialize a domain decomposition
@@ -54,8 +56,9 @@ USE SELF_ShallowWater
 
     ! Enable GPU Acceleration (if a GPU is found) !
     CALL semModel % EnableGPUAccel()
-
-    CALL semModel % SetTopography("h=1.0")
+ 
+    topography = "h = 1.0"
+    CALL semModel % SetTopography(topography)
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0", &
@@ -102,7 +105,7 @@ USE SELF_ShallowWater
 
     ! Check the solution !
     solutionMax = semModel % solution % AbsMaxInterior() 
-    IF( solutionMax(1) > 0.0_prec .OR. solutionMax(2) > 0.0_prec)THEN
+    IF( solutionMax(1) > tolerance .OR. solutionMax(2) > tolerance)THEN
       PRINT*, "Non-zero velocity field detected for quiescent fluid."
       PRINT*, solutionMax
       STOP 1

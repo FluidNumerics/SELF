@@ -19,7 +19,7 @@ MODULE SELF_ShallowWater
     REAL(prec) :: fCori ! coriolis parameter ( 1/s )
     REAL(prec) :: g     ! gravity ( m/s^2) 
     TYPE(MappedScalar2D) :: H ! bottom topography ( m )
-    TYPE(MappedVector2D) :: hGrad ! bottom topography gradient ( m/m )
+    TYPE(MappedVector2D) :: gradH ! bottom topography gradient ( m/m )
 
 
     CONTAINS
@@ -119,7 +119,7 @@ CONTAINS
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % H % Init(geometry % x % interp,1,this % mesh % nElem)
-    CALL this % Hgrad % Init(geometry % x % interp,1,this % mesh % nElem)
+    CALL this % gradH % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -157,7 +157,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(ShallowWater),INTENT(inout) :: this
     !
-    INTEGER :: iEl, j, i
+    INTEGER :: iEl, iSide, j, i
     REAL(prec) :: H
 
 
@@ -177,17 +177,29 @@ CONTAINS
         ENDDO 
       ENDDO 
 
-      CALL this % velocity % BoundaryInterp(gpuAccel=.FALSE.)
+      DO iEl = 1, this % solution % nElem
+        DO iSide = 1, 4
+          DO i = 0, this % solution % interp % N
+
+            H = this % solution % boundary % hostData(i,3,iSide,iEl)
+
+            this % velocity % boundary % hostData(1,i,1,iSide,iEl) = &
+                    this % solution % boundary % hostData(i,1,iSide,iEl)/H 
+
+            this % velocity % boundary % hostData(2,i,1,iSide,iEl) = &
+                    this % solution % boundary % hostData(i,2,iSide,iEl)/H 
+          ENDDO
+        ENDDO
+      ENDDO
 
       CALL this % velocity % SideExchange(this % mesh, this % decomp, this % gpuAccel)
-
 
   END SUBROUTINE PreTendency_ShallowWater
 
   SUBROUTINE SetTopographyFromChar_ShallowWater(this, eqnChar) 
     IMPLICIT NONE
     CLASS(ShallowWater),INTENT(inout) :: this
-    CHARACTER,INTENT(in) :: eqnChar
+    CHARACTER(*),INTENT(in) :: eqnChar
 
       CALL this % H % SetEquation(1, eqnChar)
 
@@ -195,10 +207,10 @@ CONTAINS
 
       CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
 
-      !CALL this % H % Gradient( this % geometry, &
-      !                          this % gradH, &
-      !                          selfStrongForm, &
-      !                          .FALSE.)
+      CALL this % H % Gradient( this % geometry, &
+                                this % gradH, &
+                                selfStrongForm, &
+                                .FALSE.)
 
       IF( this % gpuAccel )THEN
         CALL this % H % UpdateDevice()
@@ -218,10 +230,10 @@ CONTAINS
 
       CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
 
-      !CALL this % H % Gradient( this % geometry, &
-      !                          this % gradH, &
-      !                          selfStrongForm, &
-      !                          .FALSE.)
+      CALL this % H % Gradient( this % geometry, &
+                                this % gradH, &
+                                selfStrongForm, &
+                                .FALSE.)
 
       IF( this % gpuAccel )THEN
         CALL this % H % UpdateDevice()
@@ -262,6 +274,7 @@ CONTAINS
                   this % solution % extBoundary % hostData(i,1,iSide,iEl) = 0.0_prec
                   this % solution % extBoundary % hostData(i,2,iSide,iEl) = 0.0_prec
                   this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % H % boundary % hostData(i,1,iSide,iEl)
+                  !PRINT*, "Radiation Boundary, H :",this % solution % extBoundary % hostData(i,3,iSide,iEl) 
 
                 ELSEIF( bcid == SELF_BC_NONORMALFLOW )THEN
 
@@ -313,12 +326,12 @@ CONTAINS
             this % source % interior % hostData(i,j,1,iEl) = &
                     -this % fCori*this % solution % interior % hostData(i,j,2,iEl) +&
                     this % g*this % solution % interior % hostData(i,j,3,iEl)*&
-                    this % hGrad % interior % hostData(1,i,j,1,iEl)
+                    this % gradH % interior % hostData(1,i,j,1,iEl)
 
             this % source % interior % hostData(i,j,2,iEl) = &
                     this % fCori*this % solution % interior % hostData(i,j,1,iEl) +&
                     this % g*this % solution % interior % hostData(i,j,3,iEl)*&
-                    this % hGrad % interior % hostData(2,i,j,1,iEl)
+                    this % gradH % interior % hostData(2,i,j,1,iEl)
 
             this % source % interior % hostData(i,j,3,iEl) = 0.0_prec
 
@@ -371,7 +384,7 @@ CONTAINS
                       this % solution % interior % hostData(i,j,2,iEl) ! Hv
 
                 ! (Hv^2 + (gH^2)/2)
-                this % flux % interior % hostData(1,i,j,iVar,iEl) = &
+                this % flux % interior % hostData(2,i,j,iVar,iEl) = &
                       this % velocity % interior % hostData(2,i,j,1,iEl)*& ! v
                       this % solution % interior % hostData(i,j,2,iEl)+& ! Hv
                       0.5_prec*this % g*this % solution % interior % hostData(i,j,3,iEl)*&
@@ -456,16 +469,16 @@ CONTAINS
              fluxR(2) = HvR*unR + this % g*HR*HR*0.5_prec*nHat(2)
              fluxR(3) = HuR*nHat(1) + HvR*nHat(2)
 
-             alpha = MAX( (unL+cL), (unR+cR), &
-                          (unL-cL), (unR-cR) )
+             alpha = MAX( ABS(unL+cL), ABS(unR+cR), &
+                          ABS(unL-cL), ABS(unR-cR) )
 
              ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
              this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = 0.5_prec*( &
-                     fluxL(1) + fluxR(1) - alpha*( HuR - HuL ) )*nmag
+                     fluxL(1) + fluxR(1) + alpha*( HuL - HuR ) )*nmag
              this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = 0.5_prec*( &
-                     fluxL(2) + fluxR(2) - alpha*( HvR - HvL ) )*nmag
+                     fluxL(2) + fluxR(2) + alpha*( HvL - HvR ) )*nmag
              this % flux % boundaryNormal % hostData(i,3,iSide,iEl) = 0.5_prec*( &
-                     fluxL(3) + fluxR(3) - alpha*( HR - HL ) )*nmag
+                     fluxL(3) + fluxR(3) + alpha*( HL - HR ) )*nmag
 
           ENDDO
         ENDDO
