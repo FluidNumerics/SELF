@@ -154,6 +154,16 @@ MODULE SELF_MappedData
   END TYPE MappedTensor3D
 
   INTERFACE
+    SUBROUTINE Gradient_MappedScalar2D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
+      bind(c,name="Gradient_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,dsdx,jacobian,gradF,dMatrix
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE Gradient_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE JacobianWeight_MappedScalar1D_gpu_wrapper(scalar,dxds,N,nVar,nEl) &
       bind(c,name="JacobianWeight_MappedScalar1D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -839,7 +849,7 @@ CONTAINS
 
   END SUBROUTINE BassiRebaySides_MappedScalar2D
 
-  SUBROUTINE Gradient_MappedScalar2D(scalar,workTensor,geometry,gradF,dForm,gpuAccel)
+  SUBROUTINE Gradient_MappedScalar2D(scalar,geometry,gradF,dForm,gpuAccel)
     ! Strong Form Operator - (Conservative Form)
     !
     ! Calculates the gradient of a scalar 2D function using the conservative form of the
@@ -850,47 +860,79 @@ CONTAINS
     ! where the sum over i is implied.
     IMPLICIT NONE
     CLASS(MappedScalar2D),INTENT(in) :: scalar
-    TYPE(MappedTensor2D),INTENT(inout) :: workTensor
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(MappedVector2D),INTENT(inout) :: gradF
     INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
-
-    CALL scalar % ContravariantWeight(geometry,workTensor,gpuAccel)
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+    REAL(prec) :: gF(1:2)
 
     IF (dForm == selfWeakDGForm) THEN
 
-      IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
-                                                         workTensor % boundary % deviceData, &
-                                                         gradF % interior % deviceData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      ELSE
-        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
-                                                         workTensor % boundary % hostData, &
-                                                         gradF % interior % hostData, &
-                                                         workTensor % nVar, &
-                                                         workTensor % nElem)
-      END IF
+       PRINT*, 'Scalar2D Gradient : Weak form of the gradient has not been implemented yet'
+!      IF (gpuAccel) THEN
+!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
+!                                                         workTensor % boundary % deviceData, &
+!                                                         gradF % interior % deviceData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      ELSE
+!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
+!                                                         workTensor % boundary % hostData, &
+!                                                         gradF % interior % hostData, &
+!                                                         workTensor % nVar, &
+!                                                         workTensor % nElem)
+!      END IF
 
     ELSEIF (dForm == selfStrongForm) THEN
 
+
       IF (gpuAccel) THEN
-        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % deviceData, &
-                                                       gradF % interior % deviceData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
+        CALL Gradient_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+                                                 geometry % dsdx % interior % deviceData, &
+                                                 geometry % J % interior % deviceData, &
+                                                 gradF % interior % deviceData, &
+                                                 scalar % interp % dMatrix % deviceData, &
+                                                 scalar % interp % N, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
+
       ELSE
-        CALL workTensor % interp % TensorDivergence_2D(workTensor % interior % hostData, &
-                                                       gradF % interior % hostData, &
-                                                       workTensor % nVar, &
-                                                       workTensor % nElem)
+
+        DO iEl = 1, scalar % nElem
+          DO iVar = 1, scalar % nVar
+            DO j = 0, scalar % interp % N
+              DO i = 0, scalar % interp % N
+
+                gF(1:2) = 0.0_prec
+                DO ii = 0, scalar % interp % N
+
+                  gF(1) = gF(1) + scalar % interp % dMatrix % hostData(ii,i)*&
+                                  scalar % interior % hostData(ii,j,iVar,iEl)*&
+                                  geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl) + &
+                                  scalar % interp % dMatrix % hostData(ii,j)*&
+                                  scalar % interior % hostData(i,ii,iVar,iEl)*&
+                                  geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
+
+                  gF(2) = gF(2) + scalar % interp % dMatrix % hostData(ii,i)*&
+                                  scalar % interior % hostData(ii,j,iVar,iEl)*&
+                                  geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl) + &
+                                  scalar % interp % dMatrix % hostData(ii,j)*&
+                                  scalar % interior % hostData(i,ii,iVar,iEl)*&
+                                  geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
+                END DO
+                gradF % interior % hostData(1:2,i,j,iVar,iEl) = gF(1:2)/geometry % J % interior % hostData(i,j,1,iEl)
+
+              END DO
+            END DO
+          END DO
+        END DO
+
       END IF
 
     END IF
 
-    CALL gradF % JacobianWeight(geometry,gpuAccel)
 
   END SUBROUTINE Gradient_MappedScalar2D
 

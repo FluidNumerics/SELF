@@ -18,9 +18,9 @@ MODULE SELF_Model
 !   Time integration parameters
 
 !     Runge-Kutta 3rd Order, low storage constants
-  REAL(prec),PARAMETER :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
-  REAL(prec),PARAMETER :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
-  REAL(prec),PARAMETER :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
+  REAL(prec),PARAMETER,PRIVATE :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
+  REAL(prec),PARAMETER,PRIVATE :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
+  REAL(prec),PARAMETER,PRIVATE :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
 
 ! 
   INTEGER, PARAMETER :: SELF_EULER = 100
@@ -67,6 +67,8 @@ MODULE SELF_Model
 
     PROCEDURE :: ForwardStep => ForwardStep_Model
     PROCEDURE :: ForwardStepEuler => ForwardStepEuler_Model 
+    PROCEDURE :: ForwardStepRK3 => ForwardStepRK3_Model 
+    PROCEDURE(UpdateGRK3),DEFERRED :: UpdateGRK3
 
     PROCEDURE :: PreTendency => PreTendency_Model
     PROCEDURE :: SourceMethod => Source_Model
@@ -111,6 +113,7 @@ MODULE SELF_Model
     TYPE(MappedScalar1D) :: source
     TYPE(MappedScalar1D) :: fluxDivergence
     TYPE(MappedScalar1D) :: dSdt
+    TYPE(MappedScalar1D) :: workSol
     TYPE(MPILayer),POINTER :: decomp
     TYPE(Mesh1D),POINTER :: mesh
     TYPE(Geometry1D),POINTER :: geometry
@@ -124,6 +127,7 @@ MODULE SELF_Model
     PROCEDURE :: UpdateDevice => UpdateDevice_Model1D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model1D
+    PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model1D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model1D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model1D
 
@@ -154,6 +158,7 @@ MODULE SELF_Model
     TYPE(MappedScalar2D) :: source
     TYPE(MappedScalar2D) :: fluxDivergence
     TYPE(MappedScalar2D) :: dSdt
+    TYPE(MappedScalar2D) :: workSol
     TYPE(MPILayer),POINTER :: decomp
     TYPE(Mesh2D),POINTER :: mesh
     TYPE(SEMQuad),POINTER :: geometry
@@ -167,6 +172,7 @@ MODULE SELF_Model
     PROCEDURE :: UpdateDevice => UpdateDevice_Model2D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
+    PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
 
@@ -187,6 +193,15 @@ MODULE SELF_Model
     PROCEDURE :: WriteTecplot => WriteTecplot_Model2D
 
   END TYPE Model2D
+
+  INTERFACE 
+    SUBROUTINE UpdateGRK3( this, m )
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model),INTENT(inout) :: this
+      INTEGER,INTENT(in) :: m
+    END SUBROUTINE UpdateGRK3
+  END INTERFACE
 
   INTERFACE 
     SUBROUTINE UpdateSolution( this, dt )
@@ -235,7 +250,6 @@ MODULE SELF_Model
   END INTERFACE
 
 
-
   INTERFACE
     SUBROUTINE UpdateSolution_Model1D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
       bind(c,name="UpdateSolution_Model1D_gpu_wrapper")
@@ -249,6 +263,18 @@ MODULE SELF_Model
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE UpdateGRK3_Model1D_gpu_wrapper(grk3, solution, dSdt, rk3_a, rk3_g, dt, N, nVar, nEl) &
+      bind(c,name="UpdateGRK3_Model1D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: grk3, solution, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      REAL(c_prec),VALUE :: rk3_a, rk3_g, dt
+    END SUBROUTINE UpdateGRK3_Model1D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
       bind(c,name="UpdateSolution_Model2D_gpu_wrapper")
       USE iso_c_binding
@@ -258,6 +284,18 @@ MODULE SELF_Model
       INTEGER(C_INT),VALUE :: N,nVar,nEl
       REAL(c_prec),VALUE :: dt
     END SUBROUTINE UpdateSolution_Model2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE UpdateGRK3_Model2D_gpu_wrapper(grk3, solution, dSdt, rk3_a, rk3_g, dt, N, nVar, nEl) &
+      bind(c,name="UpdateGRK3_Model2D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: grk3, solution, dSdt
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      REAL(c_prec),VALUE :: rk3_a, rk3_g, dt
+    END SUBROUTINE UpdateGRK3_Model2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -386,8 +424,8 @@ CONTAINS
         CASE ("RK3")
           this % timeIntegrator = SELF_RK3
 
-        CASE ("RK4")
-          this % timeIntegrator = SELF_RK4
+!        CASE ("RK4")
+!          this % timeIntegrator = SELF_RK4
 
         CASE DEFAULT
           this % timeIntegrator = SELF_EULER
@@ -596,9 +634,23 @@ CONTAINS
             CALL this % ReportEntropy()
         ENDIF
 
-!      CASE RK3
-!
-!        CALL this % ForwardStepRK3(nSteps)
+      CASE (SELF_RK3)
+        IF (PRESENT(ioInterval)) THEN
+          nIO = INT( (targetTime - this % t)/ioInterval )
+          DO i = 1, nIO
+            tNext = this % t + ioInterval
+            CALL this % ForwardStepRK3(tNext)
+            CALL this % WriteModel()
+            CALL this % WriteTecplot()
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
+          ENDDO
+
+        ELSE
+          CALL this % ForwardStepRK3(targetTime)
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
+        ENDIF
 
       CASE DEFAULT
 
@@ -610,6 +662,8 @@ CONTAINS
             CALL this % ForwardStepEuler(tNext)
             CALL this % WriteModel()
             CALL this % WriteTecplot()
+            CALL this % CalculateEntropy()
+            CALL this % ReportEntropy()
           ENDDO
 
         ELSE
@@ -644,6 +698,32 @@ CONTAINS
 
   END SUBROUTINE ForwardStepEuler_Model
 
+  SUBROUTINE ForwardStepRK3_Model(this,tn)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: tn
+    ! Local
+    INTEGER :: m
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
+
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+    DO WHILE (this % t < tn)
+
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
+      DO m = 1, 3
+        CALL this % CalculateTendency()
+        CALL this % UpdateGRK3(m)
+        this % t = this % t + rk3_b(m)*this % dt
+      ENDDO
+
+    ENDDO 
+
+    this % dt = dtLim
+
+  END SUBROUTINE ForwardStepRK3_Model
+
   SUBROUTINE Init_Model1D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(out) :: this
@@ -658,6 +738,7 @@ CONTAINS
     this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -672,6 +753,7 @@ CONTAINS
     CLASS(Model1D),INTENT(inout) :: this
 
     CALL this % solution % Free()
+    CALL this % workSol % Free()
     CALL this % velocity % Free()
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
@@ -846,6 +928,47 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateSolution_Model1D
+
+  SUBROUTINE UpdateGRK3_Model1D(this,m)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGRK3_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                           this % solution % interior % deviceData, &
+                                           this % dSdt % interior % deviceData, &
+                                           rk3_a(m),rk3_g(m),this % dt, &
+                                           this % solution % interp % N, &
+                                           this % solution % nVar, &
+                                           this % solution % nElem ) 
+                                      
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO i = 0, this % solution % interp % N
+
+            this % workSol % interior % hostData(i,iVar,iEl) = rk3_a(m)*&
+                   this % workSol % interior % hostData(i,iVar,iEl) + &
+                   this % dSdt % interior % hostData(i,iVar,iEl)
+
+
+            this % solution % interior % hostData(i,iVar,iEl) = &
+                    this % solution % interior % hostData(i,iVar,iEl) + &
+                    rk3_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateGRK3_Model1D
 
   SUBROUTINE CalculateFluxDivergence_Model1D(this)
     IMPLICIT NONE
@@ -1214,6 +1337,7 @@ CONTAINS
     this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -1237,6 +1361,7 @@ CONTAINS
     CLASS(Model2D),INTENT(inout) :: this
 
     CALL this % solution % Free()
+    CALL this % workSol % Free()
     CALL this % velocity % Free()
     CALL this % compVelocity % Free()
     CALL this % dSdt % Free()
@@ -1419,6 +1544,49 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateSolution_Model2D
+
+  SUBROUTINE UpdateGRK3_Model2D(this,m)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, j, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGRK3_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                           this % solution % interior % deviceData, &
+                                           this % dSdt % interior % deviceData, &
+                                           rk3_a(m),rk3_g(m),this % dt, &
+                                           this % solution % interp % N, &
+                                           this % solution % nVar, &
+                                           this % solution % nElem ) 
+                                      
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
+
+              this % workSol % interior % hostData(i,j,iVar,iEl) = rk3_a(m)*&
+                     this % workSol % interior % hostData(i,j,iVar,iEl) + &
+                     this % dSdt % interior % hostData(i,j,iVar,iEl)
+
+
+              this % solution % interior % hostData(i,j,iVar,iEl) = &
+                      this % solution % interior % hostData(i,j,iVar,iEl) + &
+                      rk3_g(m)*this % dt*this % workSol % interior % hostData(i,j,iVar,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateGRK3_Model2D
 
   SUBROUTINE ReprojectFlux_Model2D(this) 
     IMPLICIT NONE
