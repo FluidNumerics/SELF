@@ -989,6 +989,7 @@ CONTAINS
 
     CALL this % PreTendency()
     CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % solution % SideExchange(this % mesh, this % decomp, this % gpuAccel)
     CALL this % SetBoundaryCondition()
     CALL this % SourceMethod()
     CALL this % RiemannSolver()

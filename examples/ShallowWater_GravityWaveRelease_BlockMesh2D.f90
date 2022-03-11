@@ -1,11 +1,11 @@
-PROGRAM LinearShallowWater_GravityWaveRelease
+PROGRAM ShallowWater_GravityWaveRelease
 
 USE SELF_Constants
 USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_CLI
-USE SELF_LinearShallowWater
+USE SELF_ShallowWater
 
   IMPLICIT NONE
 
@@ -21,7 +21,7 @@ USE SELF_LinearShallowWater
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
   TYPE(SEMQuad),TARGET :: geometry
-  TYPE(LinearShallowWater),TARGET :: semModel
+  TYPE(ShallowWater),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
@@ -49,7 +49,6 @@ USE SELF_LinearShallowWater
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
-    !CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
     CALL geometry % GenerateFromMesh(mesh)
 
     ! Initialize the semModel
@@ -58,10 +57,13 @@ USE SELF_LinearShallowWater
     ! Enable GPU Acceleration (if a GPU is found) !
     CALL semModel % EnableGPUAccel()
 
+    topography = "h = 1.0"
+    CALL semModel % SetTopography(topography)
+
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                                         ", &
-                         "v = 0.0                                         ", &
-                         "n = 0.01*exp( -( ((x-0.5)^2 + (y-0.5)^2 )/0.01 )"/)
+    initialCondition = (/"Hu = 0.0                                            ", &
+                         "Hv = 0.0                                            ", &
+                         "H = 1.0+0.01*exp( -( ((x-0.5)^2 + (y-0.5)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
     referenceEntropy = semModel % entropy
 
@@ -70,7 +72,7 @@ USE SELF_LinearShallowWater
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("Euler")
+    CALL semModel % SetTimeIntegrator("rk3")
 
     ! Set your time step
     semModel % dt = dt
@@ -109,4 +111,4 @@ USE SELF_LinearShallowWater
     CALL interp % Free()
     CALL args % Free()
 
-END PROGRAM LinearShallowWater_GravityWaveRelease
+END PROGRAM ShallowWater_GravityWaveRelease
