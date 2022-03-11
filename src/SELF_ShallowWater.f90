@@ -26,6 +26,7 @@ MODULE SELF_ShallowWater
 
     ! Overridden Methods
     PROCEDURE :: Init => Init_ShallowWater
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_ShallowWater
 
     PROCEDURE :: PreTendency => PreTendency_ShallowWater
 
@@ -144,6 +145,47 @@ CONTAINS
     CALL this % solution % SetDescription(3,"Total fluid thickness")
 
   END SUBROUTINE Init_ShallowWater
+
+  SUBROUTINE CalculateEntropy_ShallowWater(this)
+  !! Base method for calculating entropy of a model
+  !! Calculates the entropy as the integration of the 
+  !! squared tracer over the domain
+    IMPLICIT NONE
+    CLASS(ShallowWater), INTENT(inout) :: this
+    ! Local
+    INTEGER :: i, j, iVar, iEl
+    REAL(prec) :: Jacobian, Hu, Hv, H, b
+    REAL(prec) :: wi,wj
+
+    ! TO DO : GPU reduction
+
+    this % entropy = 0.0_prec
+
+    DO iEl = 1, this % geometry % x % nElem
+        DO j = 0, this % geometry % x % interp % N
+          DO i = 0, this % geometry % x % interp % N
+
+            ! Coordinate mapping Jacobian
+            Jacobian = this % geometry % J % interior % hostData(i,j,1,iEl)
+
+            ! Quadrature weights
+            wi = this % geometry % x % interp % qWeights % hostData(i) 
+            wj = this % geometry % x % interp % qWeights % hostData(j) 
+
+            ! Solution
+            Hu = this % solution % interior % hostData(i,j,1,iEl)
+            Hv = this % solution % interior % hostData(i,j,2,iEl)
+            H = this % solution % interior % hostData(i,j,3,iEl)
+            b = this % H % interior % hostData(i,j,1,iEl)
+
+            this % entropy = this % entropy + ( 0.5_prec*( Hu*Hu/H + Hv*Hv/H ) + &
+                                                0.5_prec*this % g*H*H - this % g*H*b )*Jacobian*wi*wj
+
+          ENDDO
+        ENDDO
+    ENDDO
+
+  END SUBROUTINE CalculateEntropy_ShallowWater
 
   SUBROUTINE PreTendency_ShallowWater(this)
     !! Calculate the velocity at element interior and element boundaries
