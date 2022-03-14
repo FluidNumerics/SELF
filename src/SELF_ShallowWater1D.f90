@@ -14,9 +14,7 @@ MODULE SELF_ShallowWater1D
 
   TYPE,EXTENDS(Model1D) :: ShallowWater1D
     !! iVar = 1 ~> u velocity component
-    !! iVar = 2 ~> v velocity component
-    !! iVar = 3 ~> free surface height
-    REAL(prec) :: fCori ! coriolis parameter ( 1/s )
+    !! iVar = 2 ~> free surface height
     REAL(prec) :: g     ! gravity ( m/s^2) 
     TYPE(MappedScalar1D) :: H ! bottom topography ( m )
     TYPE(MappedScalar1D) :: gradH ! bottom topography gradient ( m/m )
@@ -55,17 +53,17 @@ MODULE SELF_ShallowWater1D
 !    END SUBROUTINE SetBoundaryCondition_ShallowWater1D_gpu_wrapper
 !  END INTERFACE
 !
-!  INTERFACE
-!    SUBROUTINE Source_ShallowWater1D_gpu_wrapper(source, solution, f, N, nVar, nEl) &
-!      bind(c,name="Source_ShallowWater1D_gpu_wrapper")
-!      USE iso_c_binding
-!      USE SELF_Constants
-!      IMPLICIT NONE
-!      TYPE(c_ptr) :: source, solution
-!      INTEGER(C_INT),VALUE :: N,nVar,nEl
-!      REAL(c_prec),VALUE :: f
-!    END SUBROUTINE Source_ShallowWater1D_gpu_wrapper
-!  END INTERFACE
+  INTERFACE
+    SUBROUTINE Source_ShallowWater1D_gpu_wrapper(source, solution, gradH, g, N, nVar, nEl) &
+      bind(c,name="Source_ShallowWater1D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: source, solution, gradH
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      REAL(c_prec),VALUE :: g
+    END SUBROUTINE Source_ShallowWater1D_gpu_wrapper
+  END INTERFACE
 !
 !  INTERFACE
 !    SUBROUTINE Flux_ShallowWater1D_gpu_wrapper(flux, solution, g, H, N, nVar, nEl) &
@@ -116,7 +114,6 @@ CONTAINS
     this % gpuAccel = .FALSE.
     this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
     this % g = 1.0_prec
-    this % fCori = 0.0_prec
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % H % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -281,18 +278,29 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-      DO iEl = 1, this % source % nElem
-        DO i = 0, this % source % interp % N
+      IF( this % gpuAccel )THEN
 
-          this % source % interior % hostData(i,1,iEl) = &
-                  this % g*this % solution % interior % hostData(i,2,iEl)*&
-                  this % gradH % interior % hostData(i,1,iEl)
+       CALL Source_ShallowWater1D_gpu_wrapper(this % source % interior % deviceData, &
+                                              this % solution % interior % deviceData, &
+                                              this % gradH % interior % deviceData, &
+                                              this % g, &
+                                              this % source % interp % N, &
+                                              this % solution % nVar, &
+                                              this % solution % nElem )
 
-          this % source % interior % hostData(i,2,iEl) = 0.0_prec
+      ELSE
+        DO iEl = 1, this % source % nElem
+          DO i = 0, this % source % interp % N
 
+            this % source % interior % hostData(i,1,iEl) = &
+                    this % g*this % solution % interior % hostData(i,2,iEl)*&
+                    this % gradH % interior % hostData(i,1,iEl)
+
+            this % source % interior % hostData(i,2,iEl) = 0.0_prec
+
+          ENDDO
         ENDDO
-      ENDDO
-
+      ENDIF
 
   END SUBROUTINE Source_ShallowWater1D
 
