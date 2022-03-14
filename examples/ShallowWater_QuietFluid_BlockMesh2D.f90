@@ -5,6 +5,7 @@ USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_ShallowWater
+USE SELF_CLI
 
   IMPLICIT NONE
 
@@ -24,9 +25,14 @@ USE SELF_ShallowWater
   TYPE(SEMQuad),TARGET :: geometry
   TYPE(ShallowWater),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
+  TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=255) :: SELF_PREFIX
+
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
+    CALL args % LoadFromCLI()
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -117,5 +123,6 @@ USE SELF_ShallowWater
     CALL geometry % Free()
     CALL mesh % Free()
     CALL interp % Free()
+    CALL args % Free()
 
 END PROGRAM ShallowWater_QuietFluid

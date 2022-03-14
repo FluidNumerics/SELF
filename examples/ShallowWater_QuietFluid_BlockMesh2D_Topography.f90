@@ -5,6 +5,7 @@ USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_ShallowWater
+USE SELF_CLI
 
   IMPLICIT NONE
 
@@ -24,9 +25,14 @@ USE SELF_ShallowWater
   TYPE(SEMQuad),TARGET :: geometry
   TYPE(ShallowWater),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
+  TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=255) :: SELF_PREFIX
+
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
+    CALL args % LoadFromCLI()
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -57,13 +63,13 @@ USE SELF_ShallowWater
     ! Enable GPU Acceleration (if a GPU is found) !
     CALL semModel % EnableGPUAccel()
  
-    topography = "h = exp( -((x-0.5)^2 + (y-0.5)^2)/0.01 )"
+    topography = "h = 1.0 - 0.2*exp( -((x-0.5)^2 + (y-0.5)^2)/0.01 )"
     CALL semModel % SetTopography(topography)
 
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                                 ", &
-                         "v = 0.0                                 ", &
-                         "H = exp( -((x-0.5)^2 + (y-0.5)^2)/0.01 )"/)
+    initialCondition = (/"u = 0.0                                           ", &
+                         "v = 0.0                                           ", &
+                         "H = 1.0 - 0.2*exp( -((x-0.5)^2 + (y-0.5)^2)/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
     referenceEntropy = semModel % entropy
 
@@ -108,7 +114,7 @@ USE SELF_ShallowWater
     IF( solutionMax(1) > tolerance .OR. solutionMax(2) > tolerance)THEN
       PRINT*, "Non-zero velocity field detected for quiescent fluid."
       PRINT*, solutionMax
-      STOP 1
+      !STOP 1
     ENDIF
 
     ! Clean up
@@ -117,5 +123,6 @@ USE SELF_ShallowWater
     CALL geometry % Free()
     CALL mesh % Free()
     CALL interp % Free()
+    CALL args % Free()
 
 END PROGRAM ShallowWater_QuietFluid

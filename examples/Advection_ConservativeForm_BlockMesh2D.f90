@@ -5,6 +5,7 @@ USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_Advection2D
+USE SELF_CLI
 
   INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
   INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
@@ -25,9 +26,15 @@ USE SELF_Advection2D
   TYPE(SEMQuad),TARGET :: geometry
   TYPE(Advection2D),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
+  TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocityField(1:2)
   CHARACTER(LEN=255) :: SELF_PREFIX
+
+
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
+    CALL args % LoadFromCLI()
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -109,5 +116,6 @@ USE SELF_Advection2D
     CALL geometry % Free()
     CALL mesh % Free()
     CALL interp % Free()
+    CALL args % Free()
 
 END PROGRAM Advection_ConservativeForm_2D

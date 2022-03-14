@@ -5,6 +5,7 @@ USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_LinearShallowWater
+USE SELF_CLI
 
   IMPLICIT NONE
 
@@ -23,8 +24,13 @@ USE SELF_LinearShallowWater
   TYPE(SEMQuad),TARGET :: geometry
   TYPE(LinearShallowWater),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
+  TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=255) :: SELF_PREFIX
+
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
+    CALL args % LoadFromCLI()
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -101,5 +107,6 @@ USE SELF_LinearShallowWater
     CALL geometry % Free()
     CALL mesh % Free()
     CALL interp % Free()
+    CALL args % Free()
 
 END PROGRAM LinearShallowWater_GravityWaveRelease

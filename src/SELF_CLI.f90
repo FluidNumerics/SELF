@@ -37,10 +37,10 @@ MODULE SELF_CLI
   ! External Modules
   USE json_module
   USE FLAP
+  USE ISO_FORTRAN_ENV
 
   TYPE,PUBLIC :: CLI
     TYPE(JSON_FILE) :: json
-    TYPE(JSON_CORE) :: conf
     TYPE(COMMAND_LINE_INTERFACE) :: cliObj
     CHARACTER(SELF_FILE_DEFAULT_LENGTH) :: config
 
@@ -50,6 +50,18 @@ MODULE SELF_CLI
       PROCEDURE, PUBLIC :: Free => Free_CLI
       PROCEDURE, PRIVATE :: SetOptions_CLI
       PROCEDURE, PUBLIC :: LoadFromCLI
+
+      GENERIC, PUBLIC :: Get_CLI => Get_CLI_int32, &
+                                    Get_CLI_int64, &
+                                    Get_CLI_real32, &
+                                    Get_CLI_real64, &
+                                    Get_CLI_logical
+
+      PROCEDURE, PRIVATE :: Get_CLI_int32
+      PROCEDURE, PRIVATE :: Get_CLI_int64
+      PROCEDURE, PRIVATE :: Get_CLI_real32
+      PROCEDURE, PRIVATE :: Get_CLI_real64
+      PROCEDURE, PRIVATE :: Get_CLI_logical
 
   END TYPE CLI 
 
@@ -229,13 +241,8 @@ MODULE SELF_CLI
     CHARACTER(SELF_JSON_DEFAULT_VALUE_LENGTH) :: tmpVal
     CHARACTER(LEN=:),ALLOCATABLE :: cliObjLong
     LOGICAL :: found
-    TYPE(JSON_VALUE),POINTER :: p
 
       CALL this % json % info('self_model.options',n_children=nopts)
-
-      ! Initialize the configuration !
-      CALL this % conf % initialize()
-      CALL this % conf % create_object(p,'')
 
       DO i = 1, nopts
       
@@ -255,19 +262,91 @@ MODULE SELF_CLI
 
         CALL this % json % update( TRIM(jsonKey), TRIM(tmpVal), found )
 
-        ! Create a map between the CLI command and the value
-        ! associated in the conf lookup dictionary.
-        CALL this % conf % add(p, TRIM(cliObjLong), TRIM(tmpVal) ) 
-
         IF( ALLOCATED(cliObjLong) ) DEALLOCATE(cliObjLong)
 
       ENDDO
 
   END SUBROUTINE LoadFromCLI
 
-  !FUNCTION Get_CLI_int64( this, option ) RESULT( res )
-  !  IMPLICIT NONE
-  !  CLASS(CLI), INTENT(in) 
-  !END FUNCTION Get_CLI_int64
+  SUBROUTINE Get_CLI_int32( this, option, res )
+    IMPLICIT NONE
+    CLASS(CLI), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: option
+    INTEGER(int32), INTENT(out) :: res 
+    ! Local
+    INTEGER :: error
+
+      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
+      IF( error /= 0 )THEN
+        PRINT*, "Configuration key not found : "//TRIM(option)
+        STOP 1
+      ENDIF
+
+  END SUBROUTINE Get_CLI_int32
+
+  SUBROUTINE Get_CLI_int64( this, option, res )
+    IMPLICIT NONE
+    CLASS(CLI), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: option
+    INTEGER(int64), INTENT(out) :: res 
+    ! Local
+    INTEGER :: error
+
+      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
+      IF( error /= 0 )THEN
+        PRINT*, "Configuration key not found : "//TRIM(option)
+        STOP 1
+      ENDIF
+
+  END SUBROUTINE Get_CLI_int64
+
+  SUBROUTINE Get_CLI_real32( this, option, res )
+    IMPLICIT NONE
+    CLASS(CLI), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: option
+    REAL(real32), INTENT(out) :: res 
+    ! Local
+    INTEGER :: error
+
+      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
+      IF( error /= 0 )THEN
+        PRINT*, "Configuration key not found : "//TRIM(option)
+        STOP 1
+      ENDIF
+
+  END SUBROUTINE Get_CLI_real32
+
+  SUBROUTINE Get_CLI_real64( this, option, res )
+    IMPLICIT NONE
+    CLASS(CLI), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: option
+    REAL(real64), INTENT(out) :: res 
+    ! Local
+    INTEGER :: error
+
+      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
+      IF( error /= 0 )THEN
+        PRINT*, "Configuration key not found : "//TRIM(option)
+        STOP 1
+      ENDIF
+
+  END SUBROUTINE Get_CLI_real64
+
+  SUBROUTINE Get_CLI_logical( this, option, res )
+    IMPLICIT NONE
+    CLASS(CLI), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: option
+    LOGICAL, INTENT(out) :: res 
+    ! Local
+    INTEGER :: error
+
+      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
+      IF( error /= 0 )THEN
+        PRINT*, "Configuration key not found : "//TRIM(option)
+        STOP 1
+      ENDIF
+
+  END SUBROUTINE Get_CLI_logical
+
 
 END MODULE SELF_CLI
