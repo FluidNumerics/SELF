@@ -9,13 +9,17 @@ USE SELF_CLI
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
-  INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
-  INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
   INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
-  REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
-  REAL(prec), PARAMETER :: tn = 2.0_prec ! Total simulation time
-  REAL(prec), PARAMETER :: ioInterval = 2.0_prec ! File IO interval
+
+  REAL(prec) :: dt
+  REAL(prec) :: ioInterval
+  REAL(prec) :: tn
+  INTEGER :: N ! Control Degree
+  INTEGER :: M ! Target degree
+  INTEGER :: quadrature
+  CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
+  LOGICAL :: mpiRequested
+  LOGICAL :: gpuRequested
 
 
   REAL(prec) :: referenceEntropy
@@ -31,6 +35,16 @@ USE SELF_CLI
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
     CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
     CALL args % LoadFromCLI()
+
+    CALL args % Get_CLI('--output-interval',ioInterval)
+    CALL args % Get_CLI('--end-time',tn)
+    CALL args % Get_CLI('--time-step',dt)
+    CALL args % Get_CLI('--mpi',mpiRequested)
+    CALL args % Get_CLI('--gpu',gpuRequested)
+    CALL args % Get_CLI('--control-degree',N)
+    CALL args % Get_CLI('--control-quadrature',qChar)
+    quadrature = GetIntForChar(qChar)
+    CALL args % Get_CLI('--target-degree',M)
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently

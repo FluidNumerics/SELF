@@ -9,13 +9,17 @@ USE SELF_LinearShallowWater
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
-  INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
-  INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
   INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
-  REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
-  REAL(prec), PARAMETER :: tn = 1.0_prec ! Total simulation time
-  REAL(prec), PARAMETER :: ioInterval = 1.0_prec ! File IO interval
+
+  REAL(prec) :: dt
+  REAL(prec) :: ioInterval
+  REAL(prec) :: tn
+  INTEGER :: N ! Control Degree
+  INTEGER :: M ! Target degree
+  INTEGER :: quadrature
+  CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
+  LOGICAL :: mpiRequested
+  LOGICAL :: gpuRequested
 
   REAL(prec) :: referenceEntropy
   TYPE(Lagrange),TARGET :: interp
@@ -33,10 +37,21 @@ USE SELF_LinearShallowWater
     CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
     CALL args % LoadFromCLI()
 
+    CALL args % Get_CLI('--output-interval',ioInterval)
+    CALL args % Get_CLI('--end-time',tn)
+    CALL args % Get_CLI('--time-step',dt)
+    CALL args % Get_CLI('--mpi',mpiRequested)
+    CALL args % Get_CLI('--gpu',gpuRequested)
+    CALL args % Get_CLI('--control-degree',N)
+    CALL args % Get_CLI('--control-quadrature',qChar)
+    quadrature = GetIntForChar(qChar)
+    CALL args % Get_CLI('--target-degree',M)
+
+
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
-    CALL decomp % Init(enableMPI=.FALSE.)
+    CALL decomp % Init(enableMPI=mpiRequested)
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
@@ -56,7 +71,9 @@ USE SELF_LinearShallowWater
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
     ! Enable GPU Acceleration (if a GPU is found) !
-    CALL semModel % EnableGPUAccel()
+    IF( gpuRequested )THEN
+      CALL semModel % EnableGPUAccel()
+    ENDIF
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0                                         ", &

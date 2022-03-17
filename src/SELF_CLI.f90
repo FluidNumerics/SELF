@@ -55,13 +55,15 @@ MODULE SELF_CLI
                                     Get_CLI_int64, &
                                     Get_CLI_real32, &
                                     Get_CLI_real64, &
-                                    Get_CLI_logical
+                                    Get_CLI_logical, &
+                                    Get_CLI_char
 
       PROCEDURE, PRIVATE :: Get_CLI_int32
       PROCEDURE, PRIVATE :: Get_CLI_int64
       PROCEDURE, PRIVATE :: Get_CLI_real32
       PROCEDURE, PRIVATE :: Get_CLI_real64
       PROCEDURE, PRIVATE :: Get_CLI_logical
+      PROCEDURE, PRIVATE :: Get_CLI_char
 
   END TYPE CLI 
 
@@ -347,6 +349,22 @@ MODULE SELF_CLI
       ENDIF
 
   END SUBROUTINE Get_CLI_logical
+
+  SUBROUTINE Get_CLI_char( this, option, res )
+    IMPLICIT NONE
+    CLASS(CLI), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: option
+    CHARACTER(*), INTENT(out) :: res 
+    ! Local
+    INTEGER :: error
+
+      CALL this % cliObj % get(val=res,switch=TRIM(option),error=error)
+      IF( error /= 0 )THEN
+        PRINT*, "Configuration key not found : "//TRIM(option)
+        STOP 1
+      ENDIF
+
+  END SUBROUTINE Get_CLI_char
 
 
 END MODULE SELF_CLI
