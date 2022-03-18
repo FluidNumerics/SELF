@@ -25,6 +25,7 @@ MODULE SELF_MappedData
   TYPE,EXTENDS(Scalar1D),PUBLIC :: MappedScalar1D
 
   CONTAINS
+    PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar1D
     GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
     PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar1D
@@ -611,6 +612,91 @@ CONTAINS
     ENDDO
 
   END SUBROUTINE SetInteriorFromEquation_MappedScalar1D
+
+  SUBROUTINE SideExchange_MappedScalar1D(scalar,mesh,decomp,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(inout) :: scalar
+    TYPE(Mesh1D),INTENT(in) :: mesh
+    TYPE(MPILayer),INTENT(inout) :: decomp
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: e1,e2,s1,s2,e2Global
+    INTEGER :: flip,bcid
+    INTEGER :: i1,i2,ivar
+    INTEGER :: neighborRank
+    INTEGER :: rankId, offset
+
+      rankId = decomp % rankId
+      offset = decomp % offsetElem % hostData(rankId)
+
+  !  IF (gpuAccel) THEN
+
+  !    CALL scalar % boundary % UpdateHost()
+  !    CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+  !    CALL decomp % FinalizeMPIExchangeAsync()
+  !    CALL scalar % extBoundary % UpdateDevice()
+
+  !    CALL SideExchange_MappedScalar1D_gpu_wrapper(scalar % extBoundary % deviceData, &
+  !                                                 scalar % boundary % deviceData, &
+  !                                                 mesh % sideInfo % deviceData, &
+  !                                                 decomp % elemToRank % deviceData, &
+  !                                                 decomp % rankId, &
+  !                                                 offset, &
+  !                                                 scalar % interp % N, &
+  !                                                 scalar % nvar, &
+  !                                                 scalar % nElem)
+  !  ELSE
+
+      !CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
+      DO e1 = 1,mesh % nElem
+        
+        IF( e1 == 1 )THEN
+
+          s1 = 2
+          e2 = e1 + 1
+          s2 = 1
+          !neighborRank = decomp % elemToRank % hostData(e2Global)
+          DO ivar = 1,scalar % nvar
+            scalar % extBoundary % hostData(ivar,s1,e1) = scalar % boundary % hostData(ivar,s2,e2)
+          ENDDO
+
+        ELSEIF( e1 == mesh % nElem )THEN
+
+          s1 = 1
+          e2 = e1 - 1
+          s2 = 2
+          !neighborRank = decomp % elemToRank % hostData(e2Global)
+          DO ivar = 1,scalar % nvar
+            scalar % extBoundary % hostData(ivar,s1,e1) = scalar % boundary % hostData(ivar,s2,e2)
+          ENDDO
+
+        ELSE
+
+          s1 = 1
+          e2 = e1 - 1
+          s2 = 2
+          !neighborRank = decomp % elemToRank % hostData(e2Global)
+          DO ivar = 1,scalar % nvar
+            scalar % extBoundary % hostData(ivar,s1,e1) = scalar % boundary % hostData(ivar,s2,e2)
+          ENDDO
+
+          s1 = 2
+          e2 = e1 + 1
+          s2 = 1
+          !neighborRank = decomp % elemToRank % hostData(e2Global)
+          DO ivar = 1,scalar % nvar
+            scalar % extBoundary % hostData(ivar,s1,e1) = scalar % boundary % hostData(ivar,s2,e2)
+          ENDDO
+
+        ENDIF
+
+      ENDDO
+
+      !CALL decomp % FinalizeMPIExchangeAsync()
+
+  !  END IF
+
+  END SUBROUTINE SideExchange_MappedScalar1D
 
   SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,dForm,gpuAccel)
     ! Strong Form Operator

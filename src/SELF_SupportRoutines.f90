@@ -823,6 +823,36 @@ CONTAINS
 
   END FUNCTION UpperCase
 !
+  FUNCTION GetIntForChar(charFlag) RESULT(intFlag)
+  !! This method is used to return the integer flag from a char for constants
+  !! defined in SELF_Constants.f90
+  !!
+    IMPLICIT NONE
+    CHARACTER(*),INTENT(in) :: charFlag
+    INTEGER :: intFlag
+
+    SELECT CASE( UpperCase(TRIM(charFlag)) )
+
+      CASE ("GAUSS")
+        intFlag = GAUSS
+
+      CASE ("GAUSS-LOBATTO")
+        intFlag = GAUSS_LOBATTO
+
+      CASE ("CHEBYSHEV-GAUSS")
+        intFlag = CHEBYSHEV_GAUSS
+
+      CASE ("CHEBYSHEV-GAUSS-LOBATTO")
+        intFlag = CHEBYSHEV_GAUSS_LOBATTO
+
+      CASE ("UNIFORM")
+        intFlag = UNIFORM
+
+    END SELECT
+
+  END FUNCTION GetIntForChar
+
+!
   FUNCTION TimeStamp(time,units) RESULT(timeStampString)
     IMPLICIT NONE
     REAL(prec)    :: time

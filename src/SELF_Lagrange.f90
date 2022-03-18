@@ -1265,7 +1265,7 @@ CONTAINS
           END DO
 
           ! Boundary Contribution
-          df(i,iVar,iEl) = df(i,iVar,iEl) + (bf(iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) - &
+          df(i,iVar,iEl) = df(i,iVar,iEl) + (bf(iVar,2,iEl)*myPoly % bMatrix % hostData(i,1) + &
                                              bf(iVar,1,iEl)*myPoly % bMatrix % hostData(i,0))/ &
                            myPoly % qWeights % hostData(i)
 

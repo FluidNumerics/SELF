@@ -5,19 +5,19 @@ USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_Advection2D
+USE SELF_CLI
 
-  INTEGER, PARAMETER :: N = 7 ! Polynomial degree of solution
-  INTEGER, PARAMETER :: quadrature = GAUSS ! Quadrature
-  INTEGER, PARAMETER :: M = 15 ! Number of points in the uniform plotting mesh
-  INTEGER, PARAMETER :: nXe = 5 ! Number of elements in the x-direction
-  INTEGER, PARAMETER :: nYe = 5 ! Number of elements in the y-direction
   INTEGER, PARAMETER :: nvar = 1 ! The number of tracer fields
-  REAL(prec), PARAMETER :: Lx = 1.0_prec ! Length of the domain in the x-direction 
-  REAL(prec), PARAMETER :: Ly = 1.0_prec ! Length of the domain in the y-direction 
-  REAL(prec), PARAMETER :: dt = 0.001_prec ! Time step size
-  REAL(prec), PARAMETER :: tn = 0.25_prec ! File time 
-  REAL(prec), PARAMETER :: ioInterval = 0.25_prec ! File IO interval
 
+  REAL(prec) :: dt
+  REAL(prec) :: ioInterval
+  REAL(prec) :: tn
+  INTEGER :: N ! Control Degree
+  INTEGER :: M ! Target degree
+  INTEGER :: quadrature
+  CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
+  LOGICAL :: mpiRequested
+  LOGICAL :: gpuRequested
 
   REAL(prec) :: referenceEntropy
   TYPE(Lagrange),TARGET :: interp
@@ -25,14 +25,30 @@ USE SELF_Advection2D
   TYPE(SEMQuad),TARGET :: geometry
   TYPE(Advection2D),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
+  TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocityField(1:2)
   CHARACTER(LEN=255) :: SELF_PREFIX
 
+
+    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
+    CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
+    CALL args % LoadFromCLI()
+
+    CALL args % Get_CLI('--output-interval',ioInterval)
+    CALL args % Get_CLI('--end-time',tn)
+    CALL args % Get_CLI('--time-step',dt)
+    CALL args % Get_CLI('--mpi',mpiRequested)
+    CALL args % Get_CLI('--gpu',gpuRequested)
+    CALL args % Get_CLI('--control-degree',N)
+    CALL args % Get_CLI('--control-quadrature',qChar)
+    quadrature = GetIntForChar(qChar)
+    CALL args % Get_CLI('--target-degree',M)
+
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
-    CALL decomp % Init(enableMPI=.FALSE.)
+    CALL decomp % Init(enableMPI=mpiRequested)
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
@@ -54,8 +70,10 @@ USE SELF_Advection2D
     ! Set the solution name
     CALL semModel % solution % SetName(1,'Tracer')
 
-    ! Enable GPU Acceleration (if a GPU is found) !
-    CALL semModel % EnableGPUAccel()
+    IF( gpuRequested )THEN
+      ! Enable GPU Acceleration (if a GPU is found) !
+      CALL semModel % EnableGPUAccel()
+    ENDIF
 
     ! Set the velocity field
     velocityField = (/"vx=1.0","vy=1.0"/)
@@ -109,5 +127,6 @@ USE SELF_Advection2D
     CALL geometry % Free()
     CALL mesh % Free()
     CALL interp % Free()
+    CALL args % Free()
 
 END PROGRAM Advection_ConservativeForm_2D
