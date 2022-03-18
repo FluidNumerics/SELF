@@ -19,6 +19,13 @@ moveGCNOFiles(){
 }
 
 moveGCDAFiles(){
+  # This method is used to apply the correct file extension
+  # for gcovr to be able to match up the gcda file to the 
+  # source code.
+  #
+  # This is only needed because the SELF build system applies
+  # the .f.o extension to object files created from our .f90
+  # files.
 
   for file in $(ls $SELF_BUILD_DIR/src/*.gcda); do
     dest=$(echo $file | sed 's/\.f//g')
@@ -51,6 +58,7 @@ for file in $(ls $SELF_INSTALL_DIR/examples/*); do
 
   moveGCDAFiles
 
+  # Create a coverage file for this test.
   covFile=$(echo $file | awk -F "/" '{print $NF}')
   gcovr -r /build --json -o "/build/$covFile.json"
   tomerge+="-a /build/$covFile.json "
