@@ -16,31 +16,31 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     make
 
 # Bare OS image to run the installed executables
-#FROM nvidia/cuda:11.2.1-base
-#
-#COPY --from=builder /build /build
-#COPY --from=builder /opt/rocm /opt/rocm
-#COPY --from=builder /opt/spack-environment /opt/spack-environment
-#COPY --from=builder /opt/software /opt/software
-#COPY --from=builder /opt/view /opt/view
-#COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
-#
-#ENV DEBIAN_FRONTEND=noninteractive   \
-#    LANGUAGE=en_US.UTF-8 \
-#    LANG=en_US.UTF-8 \
-#    LC_ALL=en_US.UTF-8
-#
-#RUN apt-get -yqq update \
-# && apt-get -yqq install --no-install-recommends \
-#        g++ \
-#        gcc \
-#        gfortran \
-#        libelf-dev \
-#        gcovr \
-#
-# && rm -rf /var/lib/apt/lists/*
-#
-#COPY --from=builder /opt/self /opt/self
+FROM ubuntu:20.04
+
+COPY --from=builder /build /build
+COPY --from=builder /opt/rocm /opt/rocm
+COPY --from=builder /opt/spack-environment /opt/spack-environment
+COPY --from=builder /opt/software /opt/software
+COPY --from=builder /opt/view /opt/view
+COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
+
+ENV DEBIAN_FRONTEND=noninteractive   \
+    LANGUAGE=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+RUN apt-get -yqq update \
+ && apt-get -yqq install --no-install-recommends \
+        g++ \
+        gcc \
+        gfortran \
+        libelf-dev \
+        gcovr \
+
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/self /opt/self
 
 ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l"]
 
