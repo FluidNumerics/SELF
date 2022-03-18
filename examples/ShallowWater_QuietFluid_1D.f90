@@ -1,15 +1,17 @@
-PROGRAM LinearShallowWater_GravityWaveRelease
+PROGRAM ShallowWater_QuietFluid
 
 USE SELF_Constants
 USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
-USE SELF_LinearShallowWater
+USE SELF_ShallowWater1D
 USE SELF_CLI
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
+  INTEGER, PARAMETER :: nvar = 2 ! The number prognostic variables
+  INTEGER, PARAMETER :: nX = 10
+  REAL(prec), PARAMETER :: tolerance=1000.0_prec*epsilon(1.0_prec) ! Error tolerance
 
   REAL(prec) :: dt
   REAL(prec) :: ioInterval
@@ -21,15 +23,16 @@ USE SELF_CLI
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
 
-
   REAL(prec) :: referenceEntropy
+  REAL(prec) :: solutionMax(1:2)
   TYPE(Lagrange),TARGET :: interp
-  TYPE(Mesh2D),TARGET :: mesh
-  TYPE(SEMQuad),TARGET :: geometry
-  TYPE(LinearShallowWater),TARGET :: semModel
+  TYPE(Mesh1D),TARGET :: mesh
+  TYPE(Geometry1D),TARGET :: geometry
+  TYPE(ShallowWater1D),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
+  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=255) :: SELF_PREFIX
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -55,27 +58,27 @@ USE SELF_CLI
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Circle/Circle_mesh.h5")
+    CALL mesh % UniformBlockMesh(1,nX,(/0.0_prec,1.0_prec/))
 
     ! Generate a decomposition
      CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
-    !CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
     CALL geometry % GenerateFromMesh(mesh)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
     ! Enable GPU Acceleration (if a GPU is found) !
-    CALL semModel % EnableGPUAccel()
+    !CALL semModel % EnableGPUAccel()
+ 
+    topography = "h = 1.0"
+    CALL semModel % SetTopography(topography)
 
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                             ", &
-                         "v = 0.0                             ", &
-                         "n = 0.01*exp( -( (x^2 + y^2 )/0.01 )"/)
+    initialCondition = (/"u = 0.0", &
+                         "H = 1.0"/)
     CALL semModel % SetSolution( initialCondition )
     referenceEntropy = semModel % entropy
 
@@ -83,8 +86,8 @@ USE SELF_CLI
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
-    ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("Euler")
+    ! Set the time integrator (euler, rk3)
+    CALL semModel % SetTimeIntegrator("rk3")
 
     ! Set your time step
     semModel % dt = dt
@@ -115,6 +118,14 @@ USE SELF_CLI
       ! visibility
     ENDIF
 
+    ! Check the solution !
+    solutionMax = semModel % solution % AbsMaxInterior() 
+    IF( solutionMax(1) > tolerance)THEN
+      PRINT*, "Non-zero velocity field detected for quiescent fluid."
+      PRINT*, solutionMax
+      STOP 1
+    ENDIF
+
     ! Clean up
     CALL semModel % Free()
     CALL decomp % Free()
@@ -123,4 +134,4 @@ USE SELF_CLI
     CALL interp % Free()
     CALL args % Free()
 
-END PROGRAM LinearShallowWater_GravityWaveRelease
+END PROGRAM ShallowWater_QuietFluid

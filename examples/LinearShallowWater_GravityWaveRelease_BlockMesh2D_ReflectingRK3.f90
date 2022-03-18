@@ -56,15 +56,17 @@ USE SELF_CLI
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Circle/Circle_mesh.h5")
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
 
     ! Generate a decomposition
      CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
-    !CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
     CALL geometry % GenerateFromMesh(mesh)
+
+    ! Reset the boundary condition to reflecting
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
@@ -73,9 +75,9 @@ USE SELF_CLI
     CALL semModel % EnableGPUAccel()
 
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                             ", &
-                         "v = 0.0                             ", &
-                         "n = 0.01*exp( -( (x^2 + y^2 )/0.01 )"/)
+    initialCondition = (/"u = 0.0                                         ", &
+                         "v = 0.0                                         ", &
+                         "n = 0.01*exp( -( ((x-0.5)^2 + (y-0.5)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
     referenceEntropy = semModel % entropy
 
@@ -84,7 +86,7 @@ USE SELF_CLI
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("Euler")
+    CALL semModel % SetTimeIntegrator("rk3")
 
     ! Set your time step
     semModel % dt = dt

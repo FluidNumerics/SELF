@@ -30,6 +30,20 @@ builds = [{name="main-v100-double",
            gpu_target="sm_72",
            hip_platform="nvidia",
            prec="single"
+           zone="us-west1-b"},
+          {name="dev-mi100-double",
+           description="Double precision build targeting AMD MI100 GPU for PR's to develop branch",
+           branch="develop",
+           gpu_target="gfx906",
+           hip_platform="amd",
+           prec="double"
+           zone="us-west1-b"},
+          {name="develop-mi100-single",
+           description="Single precision build targeting AMD MI100 GPU for PR's to develop branch",
+           branch="develop",
+           gpu_target="gfx906",
+           hip_platform="amd",
+           prec="single"
            zone="us-west1-b"}
 
 ]

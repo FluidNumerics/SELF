@@ -24,6 +24,7 @@ MODULE SELF_LinearShallowWater
 
     ! Overridden Methods
     PROCEDURE :: Init => Init_LinearShallowWater
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_LinearShallowWater
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_LinearShallowWater
@@ -109,6 +110,7 @@ CONTAINS
     this % fCori = 0.0_prec
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -132,6 +134,45 @@ CONTAINS
     CALL this % solution % SetDescription(3,"Free surface height anomaly")
 
   END SUBROUTINE Init_LinearShallowWater
+
+  SUBROUTINE CalculateEntropy_LinearShallowWater(this)
+  !! Base method for calculating entropy of a model
+  !! Calculates the entropy as the integration of the 
+  !! squared tracer over the domain
+    IMPLICIT NONE
+    CLASS(LinearShallowWater), INTENT(inout) :: this
+    ! Local
+    INTEGER :: i, j, iVar, iEl
+    REAL(prec) :: Jacobian, u, v, eta
+    REAL(prec) :: wi,wj
+
+    ! TO DO : GPU reduction
+
+    this % entropy = 0.0_prec
+
+    DO iEl = 1, this % geometry % x % nElem
+        DO j = 0, this % geometry % x % interp % N
+          DO i = 0, this % geometry % x % interp % N
+
+            ! Coordinate mapping Jacobian
+            Jacobian = this % geometry % J % interior % hostData(i,j,1,iEl)
+
+            ! Quadrature weights
+            wi = this % geometry % x % interp % qWeights % hostData(i) 
+            wj = this % geometry % x % interp % qWeights % hostData(j) 
+
+            ! Solution
+            u = this % solution % interior % hostData(i,j,1,iEl)
+            v = this % solution % interior % hostData(i,j,2,iEl)
+            eta = this % solution % interior % hostData(i,j,3,iEl)
+
+            this % entropy = this % entropy + 0.5_prec*( this % H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
+
+          ENDDO
+        ENDDO
+    ENDDO
+
+  END SUBROUTINE CalculateEntropy_LinearShallowWater
 
   SUBROUTINE SetBoundaryCondition_LinearShallowWater(this)
     IMPLICIT NONE
