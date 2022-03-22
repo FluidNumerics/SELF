@@ -78,7 +78,6 @@ ARG GPU_TARGET=sm_72
 ARG HIP_PLATFORM=nvidia
 ARG PREC=double
 
-
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
 RUN mkdir /opt/spack-environment \
@@ -116,7 +115,7 @@ RUN cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
 
 # Bare OS image to run the installed executables
-FROM nvidia/cuda:11.2.1-base
+FROM nvidia/cuda:11.2.1-devel
 
 COPY --from=builder /opt/rocm /opt/rocm
 COPY --from=builder /opt/spack-environment /opt/spack-environment

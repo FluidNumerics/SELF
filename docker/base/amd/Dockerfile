@@ -34,6 +34,8 @@ RUN apt-get -yqq update \
  && pip3 install boto3 \
  && rm -rf /var/lib/apt/lists/*
 
+
+# Install rocm
 RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
     echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.3/ xenial main' | tee /etc/apt/sources.list.d/rocm.list &&\
     apt-get -yqq update && \

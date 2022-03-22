@@ -6,6 +6,16 @@ ARG PREC=double
 # Install SELF
 COPY . /build
 
+ENV DEBIAN_FRONTEND=noninteractive   \
+    LANGUAGE=en_US.UTF-8 \
+    LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
+RUN apt-get -yqq update \
+ && apt-get -yqq install --no-install-recommends \
+        build-essential \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN . /etc/profile.d/z10_spack_environment.sh && \
     cd /build && \
     HIP_PLATFORM=${HIP_PLATFORM} \
@@ -37,7 +47,6 @@ RUN apt-get -yqq update \
         gfortran \
         libelf-dev \
         gcovr \
-
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /opt/self /opt/self
