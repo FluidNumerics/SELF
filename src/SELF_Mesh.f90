@@ -428,7 +428,7 @@ CONTAINS
     TYPE(hfInt32_r1) :: globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
@@ -495,7 +495,7 @@ CONTAINS
     TYPE(hfInt32_r1) :: globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
@@ -739,7 +739,7 @@ CONTAINS
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
@@ -1470,7 +1470,7 @@ CONTAINS
     TYPE(hfInt32_r1) :: hopr_globalNodeIDs
     TYPE(hfInt32_r2) :: bcType
 
-    CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+    CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
     CALL ReadAttribute_HDF5(fileId,'Ngeo',nGeo)
