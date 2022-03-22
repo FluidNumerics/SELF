@@ -10,66 +10,45 @@ steps:
          'docker/nvidia/Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+         'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}']
 
-- id: Run Tests (Serial)
-  name: 'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}'
-  secretEnv: ['CODECOV_TOKEN']
+- id: Build Singularity Image
+  name: 'quay.io/singularity/singularity:v3.7.1'
+  args: ['build',
+         'self.sif',
+         'docker-daemon://gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}']
+
+- id: Fluid Run
+  name: 'gcr.io/research-computing-cloud/fluid-run'
   args: 
-  - '-c'
-  - | 
-
-      source /etc/profile.d/z10_spack_environment.sh
-
-      for file in $(ls /opt/self/examples/*); do
-        echo $file
-        $file
-      done
-
-      mv /build/*.gcda /build/examples/
-      mv /build/*.gcno /build/examples/
-      
-      for file in $(ls /build/src/*.gcno); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      for file in $(ls /build/src/*.gcda); do
-        dest=$(echo $file | sed 's/\.f//g')
-        echo "$file -> $dest"
-        cp $file $dest
-      done
-
-      gcovr -x -o coverage.xml \
-            -r /build 
-
-      rm /build/src/*.gcov
-      rm /build/examples/*.gcov
-
-      curl -Os https://uploader.codecov.io/latest/linux/codecov
-      chmod +x codecov
-      ./codecov -t $$CODECOV_TOKEN \
-                -R /build/ \
-                --sha ${COMMIT_SHA} \
-                --branch ${BRANCH_NAME}
+  - '--build-id=${BUILD_ID}'
+  - '--git-sha=${COMMIT_SHA}'
+  - '--project=${PROJECT_ID}'
+  - '--zone=${_ZONE}'
+  - '--artifact-type=singularity'
+  - '--singularity-image=self.sif'
+  - '--env-file=ci/singularity_envs'
+  - '--compiler="${_COMPILER}"'
+  - '--target-arch=${_TARGET_ARCH}'
+  - '--cluster-type=rcc-ephemeral'
+  - '--ci-file=ci/fluid-run.yaml'
+  - '--rcc-tfvars=ci/fluid.auto.tfvars'
+  - '--save-results'
 
 
-images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+#images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
 
 options:
   diskSizeGb: 100
 
-timeout: 3600s
-
-availableSecrets:
-  secretManager:
-    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
-      env: 'CODECOV_TOKEN'
+timeout: 7200s
 
 substitutions:
   _PREC: 'single'
   _GPU_TARGET: 'sm_72'
   _HIP_PLATFORM: 'nvidia'
+  _TARGET_ARCH: 'x86_64'
+  _COMPILER: 'gcc@9.4.0'
+  _ZONE: 'us-west1-b'
 
 
