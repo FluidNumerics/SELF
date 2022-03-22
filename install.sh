@@ -4,7 +4,7 @@
 #
 # VIEW - The path to the spack environment view.
 # SELF_PREFIX - The path to install SELF. Defaults to $VIEW
-# GPU_TARGET - GPU microarchitecture code to build for. Defaults to gfx900 (AMD MI100)
+# GPU_TARGET - GPU microarchitecture code to build for. Defaults to gfx908 (AMD MI100)
 # PREC - Floating point precision to build with
 # SELF_FFLAGS - compiler flags to build SELF
 
@@ -12,7 +12,7 @@
 : "${VIEW:=${HOME}/view/self}"
 : "${SELF_PREFIX:=${VIEW}}"
 
-: "${GPU_TARGET:=gfx900}"
+: "${GPU_TARGET:=gfx908}"
 : "${PREC:=double}"
 : "${SELF_FFLAGS:="-cpp -pg -g -O3"}"
 
