@@ -1,0 +1,30 @@
+
+steps:
+- id: Build Docker Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
+         '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
+         '--build-arg','PREC=${_PREC}',
+         '-f',
+         'docker/nvidia/Dockerfile',
+         '.',
+         '-t',
+         'gcr.io/${PROJECT_ID}/self:dev-${_PREC}-${_GPU_TARGET}']
+
+images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_PREC}-${_GPU_TARGET}']
+
+options:
+  diskSizeGb: 100
+
+timeout: 7200s
+
+substitutions:
+  _PREC: 'single'
+  _GPU_TARGET: 'sm_72'
+  _HIP_PLATFORM: 'nvidia'
+  _TARGET_ARCH: 'x86_64'
+  _COMPILER: 'gcc@9.4.0'
+  _ZONE: 'us-west1-b'
+
+
