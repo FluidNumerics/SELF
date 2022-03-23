@@ -13,6 +13,20 @@ variable "builds" {
   description = "List of build triggers and their settings to configure for pull requests"
 }
 
+variable "branch_builds" {
+  type = list(object({
+    name = string
+    description = string
+    branch = string
+    gpu_target = string
+    prec = string
+    hip_platform = string
+    zone = string
+    }))
+  default = []
+  description = "List of build triggers and their settings to configure for pull requests"
+}
+
 variable "bq_location" {
   type = string
   description = "Valid location for Big Query Dataset. https://cloud.google.com/bigquery/docs/locations"
