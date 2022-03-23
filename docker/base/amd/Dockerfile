@@ -134,6 +134,8 @@ RUN apt-get -yqq update \
         gcc \
         gfortran \
         gcovr \
+        build-essential \
+        libelf-dev \
  && rm -rf /var/lib/apt/lists/*
 
 
