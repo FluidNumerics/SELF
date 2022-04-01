@@ -1,0 +1,13 @@
+
+steps:
+- id: Build Codecov Builder
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '.',
+         '-f',
+         'docker/codecov/Dockerfile',
+         '-t',
+         'gcr.io/${PROJECT_ID}/codecov:latest']
+  waitFor: ["-"]
+
+images: ['gcr.io/${PROJECT_ID}/codecov:latest']

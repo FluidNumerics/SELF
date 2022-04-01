@@ -7,31 +7,28 @@ steps:
          '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
          '--build-arg','PREC=${_PREC}',
          '-f',
-         'docker/nvidia/Dockerfile',
+         'docker/${_HIP_PLATFORM}/Dockerfile',
          '.',
          '-t',
          'self:pr']
 
 - id: Run Tests (Serial)
   name: 'self:pr'
-  secretEnv: ['CODECOV_TOKEN']
   args: 
   - '-c'
   - | 
-
       ./ci/serial_cb_test.sh
-
       rm /build/src/*.gcov
       rm /build/examples/*.gcov
 
-      curl -Os https://uploader.codecov.io/latest/linux/codecov
-      chmod +x codecov
-      ./codecov -t $$CODECOV_TOKEN \
-                -R /build/ \
-                --sha ${COMMIT_SHA} \
-                --branch ${BRANCH_NAME} \
-                --pr ${_PR_NUMBER}
-
+- id: Upload coverage to codecov
+  name: 'gcr.io/${PROJECT_ID}/codecov'
+  secretEnv: ['CODECOV_TOKEN']
+  args: ['-t', '$$CODECOV_TOKEN',
+         '-R', '/build/',
+         '--sha', '${COMMIT_SHA}',
+         '--branch' '${BRANCH_NAME}',
+         '--pr', '${_PR_NUMBER}']
 
 options:
   diskSizeGb: 100

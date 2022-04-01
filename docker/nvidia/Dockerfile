@@ -21,7 +21,8 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
 # Bare OS image to run the installed executables
 FROM nvidia/cuda:11.2.1-base
 
-COPY --from=builder /build /build
+COPY --from=builder /build/src /build/src
+COPY --from=builder /build/examples /build/examples
 COPY --from=builder /opt/rocm /opt/rocm
 COPY --from=builder /opt/spack-environment /opt/spack-environment
 COPY --from=builder /opt/software /opt/software
