@@ -42,5 +42,7 @@ RUN apt-get -yqq update \
 
 COPY --from=builder /opt/self /opt/self
 
+ENV SELF_PREFIX=/opt/self
+
 ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l"]
 
