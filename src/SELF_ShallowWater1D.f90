@@ -27,6 +27,7 @@ MODULE SELF_ShallowWater1D
     PROCEDURE :: CalculateEntropy => CalculateEntropy_ShallowWater1D
 
     PROCEDURE :: PreTendency => PreTendency_ShallowWater1D
+!    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_ShallowWater1D
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_ShallowWater1D
@@ -303,6 +304,18 @@ CONTAINS
       ENDIF
 
   END SUBROUTINE Source_ShallowWater1D
+
+!  SUBROUTINE CalculateFluxDivergence_ShallowWater1D(this)
+!    IMPLICIT NONE
+!    CLASS(ShallowWater1D),INTENT(inout) :: this
+!
+!    CALL this % flux % Derivative(this % geometry, &
+!                                  this % fluxDivergence, &
+!                                  selfWeakDGForm,&
+!                                  this % gpuAccel)
+!
+!
+!  END SUBROUTINE CalculateFluxDivergence_ShallowWater1D
 
   SUBROUTINE Flux_ShallowWater1D(this)
     IMPLICIT NONE

@@ -987,6 +987,7 @@ CONTAINS
                                   selfWeakDGForm,&
                                   this % gpuAccel)
 
+
   END SUBROUTINE CalculateFluxDivergence_Model1D
 
   SUBROUTINE CalculateTendency_Model1D(this)
@@ -1291,7 +1292,7 @@ CONTAINS
       FORM='formatted', &
       STATUS='replace')
 
-    tecHeader = 'VARIABLES = "X", "Y"'
+    tecHeader = 'VARIABLES = "X"'
     DO iVar = 1, this % solution % nVar
       tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
     ENDDO
