@@ -37,7 +37,7 @@ RUN apt-get -yqq update \
 
 # Install rocm
 RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.3/ xenial main' | tee /etc/apt/sources.list.d/rocm.list &&\
+    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.5.2/ ubuntu main' | tee /etc/apt/sources.list.d/rocm.list &&\
     apt-get -yqq update && \
     apt-get -yqq install rocm-dev rocm-libs
 
@@ -83,7 +83,7 @@ FROM bootstrap as builder
 RUN mkdir /opt/spack-environment \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
-&&   echo "  - hipfort@4.3.0" \
+&&   echo "  - hipfort@4.5.2" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
 &&   echo "  - feq-parse@1.1.0" \
@@ -97,7 +97,7 @@ RUN mkdir /opt/spack-environment \
 &&   echo "    hip:" \
 &&   echo "      buildable: false" \
 &&   echo "      externals:" \
-&&   echo "      - spec: hip@4.3.0" \
+&&   echo "      - spec: hip@4.5.2" \
 &&   echo "        prefix: /opt/rocm/" \
 &&   echo "  concretization: together" \
 &&   echo "  config:" \

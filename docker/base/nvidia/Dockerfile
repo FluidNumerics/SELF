@@ -9,7 +9,14 @@ ENV DEBIAN_FRONTEND=noninteractive   \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-RUN apt-get -yqq update \
+RUN rm /etc/apt/sources.list.d/cuda.list \
+ && rm /etc/apt/sources.list.d/nvidia-ml.list \
+ && apt-key del 7fa2af80 \
+ && apt-get -y update \
+ && apt-get install -y --no-install-recommends wget \
+ && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+ && dpkg -i cuda-keyring_1.0-1_all.deb \
+ && apt-get -yqq update \
  && apt-get -yqq install --no-install-recommends \
         build-essential \
         ca-certificates \
@@ -35,7 +42,7 @@ RUN apt-get -yqq update \
  && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.3/ xenial main' | tee /etc/apt/sources.list.d/rocm.list &&\
+    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.5.2/ ubuntu main' | tee /etc/apt/sources.list.d/rocm.list &&\
     apt-get -yqq update && \
     apt-get -yqq install rocm-dev rocm-libs
 
@@ -83,7 +90,7 @@ ARG PREC=double
 RUN mkdir /opt/spack-environment \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
-&&   echo "  - hipfort@4.3.0" \
+&&   echo "  - hipfort@4.5.2" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
 &&   echo "  - feq-parse@1.1.0" \
@@ -97,7 +104,7 @@ RUN mkdir /opt/spack-environment \
 &&   echo "    hip:" \
 &&   echo "      buildable: false" \
 &&   echo "      externals:" \
-&&   echo "      - spec: hip@4.3.0" \
+&&   echo "      - spec: hip@4.5.2" \
 &&   echo "        prefix: /opt/rocm/" \
 &&   echo "  concretization: together" \
 &&   echo "  config:" \
@@ -128,7 +135,14 @@ ENV DEBIAN_FRONTEND=noninteractive   \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-RUN apt-get -yqq update \
+RUN rm /etc/apt/sources.list.d/cuda.list \
+ && rm /etc/apt/sources.list.d/nvidia-ml.list \
+ && apt-key del 7fa2af80 \
+ && apt-get -y update \
+ && apt-get install -y --no-install-recommends wget \
+ && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+ && dpkg -i cuda-keyring_1.0-1_all.deb \
+ && apt-get -yqq update \
  && apt-get -yqq install --no-install-recommends \
         g++ \
         gcc \

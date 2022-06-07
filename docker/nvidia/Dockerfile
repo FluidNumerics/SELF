@@ -1,4 +1,4 @@
-FROM gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3 as builder
+FROM gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.5.2 as builder
 ARG GPU_TARGET=sm_72
 ARG HIP_PLATFORM=nvidia
 ARG PREC=double
@@ -34,7 +34,9 @@ ENV DEBIAN_FRONTEND=noninteractive   \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-RUN apt-get -yqq update \
+RUN rm /etc/apt/sources.list.d/cuda.list \
+ && rm /etc/apt/sources.list.d/nvidia-ml.list \
+ && apt-get -yqq update \
  && apt-get -yqq install --no-install-recommends \
         g++ \
         gcc \
