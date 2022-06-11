@@ -25,13 +25,14 @@ MODULE SELF_CompressibleIdealGas2D
     !! iVar = 2 ~> Pressure
     !! iVar = 3 ~> Enthalpy
     !! iVar = 4 ~> Sound Speed
-    !! (Planned) iVar = 5 ~> In-Situ Temperature
+    !! iVar = 5 ~> In-Situ Temperature
     !!
     TYPE(MappedScalar2D) :: prescribedSolution
     TYPE(MappedScalar2D) :: requiredDiagnostics
     REAL(prec) :: expansionFactor
     REAL(prec) :: Cp ! Heat capacity at constant pressure ( J/g/K )
     REAL(prec) :: Cv ! Heat capacity at constant volume ( J/g/K )
+    REAL(prec) :: R ! Ideal gas constant (J/kg/K)
 
 
     CONTAINS
@@ -55,11 +56,16 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetPrescribedSolutionFromEqn_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
 
+    PROCEDURE :: SetCp => SetCp_CompressibleIdealGas2D
+    PROCEDURE :: SetCv => SetCv_CompressibleIdealGas2D
+    PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
+
     PROCEDURE :: CalculateVelocity => CalculateVelocity_CompressibleIdealGas2D
     PROCEDURE :: CalculateKineticEnergy => CalculateKineticEnergy_CompressibleIdealGas2D
     PROCEDURE :: EquationOfState => EquationOfState_CompressibleIdealGas2D
     PROCEDURE :: CalculateSoundSpeed => CalculateSoundSpeed_CompressibleIdealGas2D
     PROCEDURE :: CalculateEnthalpy => CalculateEnthalpy_CompressibleIdealGas2D
+    PROCEDURE :: CalculateTemperature => CalculateTemperature_CompressibleIdealGas2D
 
   END TYPE CompressibleIdealGas2D
 
@@ -321,6 +327,16 @@ CONTAINS
 
   END SUBROUTINE SetCv_CompressibleIdealGas2D
 
+  SUBROUTINE SetGasConstant_CompressibleIdealGas2D(this, R)
+  !! Accessor routine to set the ideal gas constant
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: R
+
+      this % R = R
+
+  END SUBROUTINE SetGasConstant_CompressibleIdealGas2D
+
   SUBROUTINE CalculateKineticEnergy_CompressibleIdealGas2D(this)
     !! Calculates the kinetic energy from momentum and density
     !! and stores the output in the requiredDiagnostics output.
@@ -530,6 +546,38 @@ CONTAINS
       ENDDO
 
   END SUBROUTINE CalculateEnthalpy_CompressibleIdealGas2D
+
+  SUBROUTINE CalculateTemperature_CompressibleIdealGas2D(this)
+  !! Calculate the in-situ temperature from the internal energy
+  !! using the ideal gas relationship
+  !!
+  !! Esys = 3/2 RT
+  !!
+  !!  T = 2/3*e/R
+  !! 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, j, i
+    REAL(prec) :: rho, rhoE, rhoKE
+
+      DO iEl = 1, this % solution % nElem
+        DO j = 0, this % solution % interp % N
+          DO i = 0, this % solution % interp % N
+
+            rho = this % solution % interior % hostData(i,j,3,iEl)
+            rhoE = this % solution % interior % hostData(i,j,4,iEl)
+            rhoKE = this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl)
+
+            this % requiredDiagnostics % interior % hostData(i,j,teIndex,iEl) = &
+                    (2.0_prec/3.0_prec)*((rhoE - rhoKE)/rho)/this % R
+
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE CalculateTemperature_CompressibleIdealGas2D
 
   SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
