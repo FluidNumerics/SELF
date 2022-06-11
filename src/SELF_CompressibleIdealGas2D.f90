@@ -27,8 +27,11 @@ MODULE SELF_CompressibleIdealGas2D
     !! iVar = 4 ~> Sound Speed
     !! (Planned) iVar = 5 ~> In-Situ Temperature
     !!
+    TYPE(MappedScalar2D) :: prescribedSolution
     TYPE(MappedScalar2D) :: requiredDiagnostics
     REAL(prec) :: expansionFactor
+    REAL(prec) :: Cp ! Heat capacity at constant pressure ( J/g/K )
+    REAL(prec) :: Cv ! Heat capacity at constant volume ( J/g/K )
 
 
     CONTAINS
@@ -45,6 +48,13 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
 
     ! New Methods
+    GENERIC :: SetPrescribedSolution => SetPrescribedSolutionFromChar_CompressibleIdealGas2D,&
+                              SetPrescribedSolutionFromEqn_CompressibleIdealGas2D,&
+                              SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromChar_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromEqn_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
+
     PROCEDURE :: CalculateVelocity => CalculateVelocity_CompressibleIdealGas2D
     PROCEDURE :: CalculateKineticEnergy => CalculateKineticEnergy_CompressibleIdealGas2D
     PROCEDURE :: EquationOfState => EquationOfState_CompressibleIdealGas2D
@@ -57,6 +67,8 @@ MODULE SELF_CompressibleIdealGas2D
   INTEGER, PARAMETER, PRIVATE :: prIndex = 2 ! Index for pressure
   INTEGER, PARAMETER, PRIVATE :: enIndex = 3 ! Index for enthalpy
   INTEGER, PARAMETER, PRIVATE :: soIndex = 4 ! Index for sound speed
+  INTEGER, PARAMETER, PRIVATE :: teIndex = 5 ! Index for in-situ temperature
+  INTEGER, PARAMETER, PRIVATE :: nRequiredDiagnostics = 5
 
  ! INTERFACE
  !   SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(solution, extBoundary, nHat, sideInfo, N, nVar, nEl) &
@@ -131,7 +143,8 @@ CONTAINS
     this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
-    CALL this % requiredDiagnostics % Init(geometry % x % interp,4,this % mesh % nElem)
+    CALL this % prescribedSolution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % requiredDiagnostics % Init(geometry % x % interp,nRequiredDiagnostics,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -175,6 +188,11 @@ CONTAINS
     CALL this % requiredDiagnostics % SetUnits(4,"m/s")
     CALL this % requiredDiagnostics % SetDescription(4,"Sound speed")
 
+    CALL this % requiredDiagnostics % SetName(5,"T")
+    CALL this % requiredDiagnostics % SetUnits(5,"K")
+    CALL this % requiredDiagnostics % SetDescription(5,"In-Situ Temperature")
+
+
   END SUBROUTINE Init_CompressibleIdealGas2D
 
   SUBROUTINE Free_CompressibleIdealGas2D(this)
@@ -182,6 +200,7 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
 
     CALL this % solution % Free()
+    CALL this % prescribedSolution % Free()
     CALL this % requiredDiagnostics % Free()
     CALL this % workSol % Free()
     CALL this % velocity % Free()
@@ -193,6 +212,114 @@ CONTAINS
     CALL this % fluxDivergence % Free()
 
   END SUBROUTINE Free_CompressibleIdealGas2D
+
+  SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D(this, eqn) 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn(1:this % prescribedSolution % nVar)
+    ! Local
+    INTEGER :: iVar
+
+      ! Copy the equation parser
+      DO iVar = 1, this % prescribedSolution % nVar
+        CALL this % prescribedSolution % SetEquation(ivar, eqn(iVar) % equation)
+      ENDDO
+
+      CALL this % prescribedSolution % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+
+      IF( this % gpuAccel )THEN
+        CALL this % prescribedSolution % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D 
+
+  SUBROUTINE SetPrescribedSolutionFromChar_CompressibleIdealGas2D(this, eqnChar) 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % prescribedSolution % nVar)
+    ! Local
+    INTEGER :: iVar
+
+      DO iVar = 1, this % prescribedSolution % nVar
+        CALL this % prescribedSolution % SetEquation(ivar, eqnChar(iVar))
+      ENDDO
+
+      CALL this % prescribedSolution % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+
+      IF( this % gpuAccel )THEN
+        CALL this % prescribedSolution % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetPrescribedSolutionFromChar_CompressibleIdealGas2D
+
+  SUBROUTINE SetPrescribedSolutionFromSolution_CompressibleIdealGas2D(this) 
+  !! Sets the prescribed solution using the current solution attribute
+  !! This can be useful for situations where you want to set the
+  !! boundary conditions and initial conditions to be identical
+  !!
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+
+      DO iEl = 1, this % source % nElem
+        DO iVar = 1, this % source % nvar
+          DO j = 0, this % source % interp % N
+            DO i = 0, this % source % interp % N
+
+              this % prescribedSolution % interior % hostData(i,j,iVar,iEl) = &
+                this % solution % interior % hostData(i,j,iVar,iEl)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+      CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+
+      IF( this % gpuAccel )THEN
+        CALL this % prescribedSolution % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
+
+  SUBROUTINE SetCp_CompressibleIdealGas2D(this, Cp)
+  !! Accessor routine to set the heat capacity at constant pressure
+  !! Also updates the expansionFactor attribute when called.
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: Cp
+
+      this % Cp = Cp
+      this % expansionFactor = this % Cp/this % Cv
+
+  END SUBROUTINE SetCp_CompressibleIdealGas2D
+
+  SUBROUTINE SetCv_CompressibleIdealGas2D(this, Cv)
+  !! Accessor routine to set the heat capacity at constant volume
+  !! Also updates the expansionFactor attribute when called.
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: Cv
+
+      this % Cv = Cv
+      this % expansionFactor = this % Cp/this % Cv
+
+  END SUBROUTINE SetCv_CompressibleIdealGas2D
 
   SUBROUTINE CalculateKineticEnergy_CompressibleIdealGas2D(this)
     !! Calculates the kinetic energy from momentum and density
@@ -375,7 +502,6 @@ CONTAINS
         ENDDO
       ENDDO
 
-
   END SUBROUTINE CalculateSoundSpeed_CompressibleIdealGas2D
 
   SUBROUTINE CalculateEnthalpy_CompressibleIdealGas2D(this)
@@ -383,7 +509,6 @@ CONTAINS
     !! and pressure field and stores the output in the 
     !! requiredDiagnostics attribute
     !!
-
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
@@ -404,7 +529,6 @@ CONTAINS
         ENDDO
       ENDDO
 
-
   END SUBROUTINE CalculateEnthalpy_CompressibleIdealGas2D
 
   SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
@@ -421,7 +545,6 @@ CONTAINS
     ! Local
     INTEGER :: iEl, iSide, j, i
     REAL(prec) :: rho
-
 
       ! Calculate the velocity field from
       ! the momentum and density
@@ -474,30 +597,42 @@ CONTAINS
 
       DO iEl = 1, this % solution % nElem
         DO iSide = 1, 4
-            DO i = 0, this % solution % interp % N
+          DO i = 0, this % solution % interp % N
 
-              bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
-              e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
-              IF( e2 == 0 )THEN
-                IF( bcid == SELF_BC_NONORMALFLOW )THEN
+            bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
+            e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+            IF( e2 == 0 )THEN
+              IF( bcid == SELF_BC_NONORMALFLOW )THEN
 
-                  nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
-                  u = this % solution % boundary % hostData(i,1,iSide,iEl) 
-                  v = this % solution % boundary % hostData(i,2,iSide,iEl) 
-                  this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
-                  this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
-                  this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
-                  this % solution % extBoundary % hostData(i,4,iSide,iEl) = this % solution % boundary % hostData(i,4,iSide,iEl)
-                  this % solution % extBoundary % hostData(i,5,iSide,iEl) = this % solution % boundary % hostData(i,5,iSide,iEl)
+                nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+                u = this % solution % boundary % hostData(i,1,iSide,iEl) 
+                v = this % solution % boundary % hostData(i,2,iSide,iEl) 
+                this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
+                this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
+                this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
+                this % solution % extBoundary % hostData(i,4,iSide,iEl) = this % solution % boundary % hostData(i,4,iSide,iEl)
+                this % solution % extBoundary % hostData(i,5,iSide,iEl) = this % solution % boundary % hostData(i,5,iSide,iEl)
 
-                ENDIF
+              ELSEIF( bcid == SELF_BC_PRESCRIBED )THEN
+
+                this % solution % extBoundary % hostData(i,1,iSide,iEl) = &
+                        this % prescribedSolution % boundary % hostData(i,1,iSide,iEl)
+                this % solution % extBoundary % hostData(i,2,iSide,iEl) = &
+                        this % prescribedSolution % boundary % hostData(i,2,iSide,iEl)
+                this % solution % extBoundary % hostData(i,3,iSide,iEl) = &
+                        this % prescribedSolution % boundary % hostData(i,3,iSide,iEl)
+                this % solution % extBoundary % hostData(i,4,iSide,iEl) = &
+                        this % prescribedSolution % boundary % hostData(i,4,iSide,iEl)
+                this % solution % extBoundary % hostData(i,5,iSide,iEl) = &
+                        this % prescribedSolution % boundary % hostData(i,5,iSide,iEl)
+
               ENDIF
 
-            ENDDO
+            ENDIF
+
+          ENDDO
         ENDDO
       ENDDO
-
-!    ENDIF
 
   END SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D 
 
