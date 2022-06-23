@@ -16,7 +16,7 @@ MODULE SELF_LinearShallowWater
     !! iVar = 1 ~> u velocity component
     !! iVar = 2 ~> v velocity component
     !! iVar = 3 ~> free surface height
-    REAL(prec) :: fCori ! coriolis parameter ( 1/s )
+    TYPE(MappedScalar2D) :: fCori ! bottom topography ( m )
     REAL(prec) :: g     ! gravity ( m/s^2) 
     REAL(prec) :: H     ! fluid thickness ( m ) 
 
@@ -31,6 +31,12 @@ MODULE SELF_LinearShallowWater
     PROCEDURE :: FluxMethod => Flux_LinearShallowWater
     PROCEDURE :: RiemannSolver => RiemannSolver_LinearShallowWater
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_LinearShallowWater
+
+    ! New Methods
+    GENERIC :: SetCoriolis => SetCoriolisFromChar_LinearShallowWater,&
+                              SetCoriolisFromEqn_LinearShallowWater
+    PROCEDURE,PRIVATE :: SetCoriolisFromChar_LinearShallowWater
+    PROCEDURE,PRIVATE :: SetCoriolisFromEqn_LinearShallowWater
 
   END TYPE LinearShallowWater
 
@@ -51,9 +57,8 @@ MODULE SELF_LinearShallowWater
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: source, solution
+      TYPE(c_ptr) :: source, solution, f
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: f
     END SUBROUTINE Source_LinearShallowWater_gpu_wrapper
   END INTERFACE
 
@@ -107,10 +112,10 @@ CONTAINS
     this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
     this % g = 1.0_prec
     this % H = 1.0_prec
-    this % fCori = 0.0_prec
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % fCori % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -173,7 +178,45 @@ CONTAINS
     ENDDO
 
   END SUBROUTINE CalculateEntropy_LinearShallowWater
+  
+  SUBROUTINE SetCoriolisFromEqn_LinearShallowWater(this, eqn) 
+    IMPLICIT NONE
+    CLASS(LinearShallowWater),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn
+    ! Local
+    INTEGER :: iVar
 
+      ! Copy the equation parser
+      CALL this % fCori % SetEquation(ivar, eqn % equation)
+
+      CALL this % fCori % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % fCori % BoundaryInterp( gpuAccel = .FALSE. )
+
+
+      IF( this % gpuAccel )THEN
+        CALL this % fCori % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetCoriolisFromEqn_LinearShallowWater
+  
+  SUBROUTINE SetCoriolisFromChar_LinearShallowWater(this, eqnChar) 
+    IMPLICIT NONE
+    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: iVar
+
+      CALL this % fCori % SetEquation(ivar, eqnChar)
+
+      CALL this % fCori % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % fCori % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % fCori % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetCoriolisFromChar_LinearShallowWater
+  
   SUBROUTINE SetBoundaryCondition_LinearShallowWater(this)
     IMPLICIT NONE
     CLASS(LinearShallowWater),INTENT(inout) :: this
@@ -244,7 +287,7 @@ CONTAINS
 
       CALL Source_LinearShallowWater_gpu_wrapper(this % source % interior % deviceData,&
              this % solution % interior % deviceData, &
-             this % fCori,&
+             this % fCori % interior % deviceData,&
              this % source % interp % N, &
              this % solution % nVar, &
              this % solution % nElem )
@@ -255,8 +298,10 @@ CONTAINS
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
 
-            this % source % interior % hostData(i,j,1,iEl) = -this % fCori*this % solution % interior % hostData(i,j,2,iEl)
-            this % source % interior % hostData(i,j,2,iEl) = this % fCori*this % solution % interior % hostData(i,j,1,iEl)
+            this % source % interior % hostData(i,j,1,iEl) = -this % fCori % interior % hostData(i,j,1,iEl)*&
+                    this % solution % interior % hostData(i,j,2,iEl)
+            this % source % interior % hostData(i,j,2,iEl) = this % fCori % interior % hostData(i,j,1,iEl)*&
+                    this % solution % interior % hostData(i,j,1,iEl)
             this % source % interior % hostData(i,j,3,iEl) = 0.0_prec
 
           ENDDO
