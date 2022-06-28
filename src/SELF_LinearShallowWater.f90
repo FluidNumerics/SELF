@@ -37,6 +37,8 @@ MODULE SELF_LinearShallowWater
                               SetCoriolisFromEqn_LinearShallowWater
     PROCEDURE,PRIVATE :: SetCoriolisFromChar_LinearShallowWater
     PROCEDURE,PRIVATE :: SetCoriolisFromEqn_LinearShallowWater
+    
+    PROCEDURE :: DiagnoseGeostrophicVelocity => DiagnoseGeostrophicVelocity_LinearShallowWater
 
   END TYPE LinearShallowWater
 
@@ -183,11 +185,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(LinearShallowWater),INTENT(inout) :: this
     TYPE(EquationParser),INTENT(in) :: eqn
-    ! Local
-    INTEGER :: iVar
 
       ! Copy the equation parser
-      CALL this % fCori % SetEquation(ivar, eqn % equation)
+      CALL this % fCori % SetEquation(1, eqn % equation)
 
       CALL this % fCori % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % fCori % BoundaryInterp( gpuAccel = .FALSE. )
@@ -203,10 +203,9 @@ CONTAINS
     IMPLICIT NONE
     CLASS(LinearShallowWater),INTENT(inout) :: this
     CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
-    ! Local
-    INTEGER :: iVar
 
-      CALL this % fCori % SetEquation(ivar, eqnChar)
+
+      CALL this % fCori % SetEquation(1, eqnChar)
 
       CALL this % fCori % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % fCori % BoundaryInterp( gpuAccel = .FALSE. )
@@ -276,6 +275,52 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE SetBoundaryCondition_LinearShallowWater 
+  
+  SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater( this )
+  !! Sets the velocity components (solution 1-2) to 0 and then diagnoses the
+  !! the velocity field using a balance of the pressure gradient force
+  !! and the coriolis force
+    IMPLICIT NONE
+    CLASS(LinearShallowWater), INTENT(inout) :: this
+     ! Local
+    INTEGER :: i,j,iEl,iVar  
+    
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+          
+            ! u velocity component
+            this % solution % interior % hostData(i,j,1,iEl) = 0.0_prec 
+            
+            ! v velocity component
+            this % solution % interior % hostData(i,j,2,iEl) = 0.0_prec
+            
+          ENDDO
+        ENDDO
+      ENDDO
+      
+      ! Calculate tendency
+      CALL this % CalculateTendency()
+      
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+          
+            ! u velocity component
+            this % solution % interior % hostData(i,j,1,iEl) = -this % dSdt % interior % hostData(i,j,2,iEl)/&
+              this % fCori % interior % hostData(i,j,1,iEl)
+            
+            ! v velocity component
+            this % solution % interior % hostData(i,j,2,iEl) = this % dSdt % interior % hostData(i,j,1,iEl)/&
+              this % fCori % interior % hostData(i,j,1,iEl)
+            
+          ENDDO
+        ENDDO
+      ENDDO
+
+                                                  
+    
+  END SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater
 
   SUBROUTINE Source_LinearShallowWater(this)
     IMPLICIT NONE
@@ -298,9 +343,9 @@ CONTAINS
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
 
-            this % source % interior % hostData(i,j,1,iEl) = -this % fCori % interior % hostData(i,j,1,iEl)*&
+            this % source % interior % hostData(i,j,1,iEl) = this % fCori % interior % hostData(i,j,1,iEl)*&
                     this % solution % interior % hostData(i,j,2,iEl)
-            this % source % interior % hostData(i,j,2,iEl) = this % fCori % interior % hostData(i,j,1,iEl)*&
+            this % source % interior % hostData(i,j,2,iEl) = -this % fCori % interior % hostData(i,j,1,iEl)*&
                     this % solution % interior % hostData(i,j,1,iEl)
             this % source % interior % hostData(i,j,3,iEl) = 0.0_prec
 

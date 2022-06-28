@@ -60,9 +60,9 @@ __global__ void Source_LinearShallowWater_gpu(real *source, real *solution, real
   size_t j = threadIdx.y;
 
     if( iVar == 0 ){
-      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = -f[SC_2D_INDEX(i,j,1,iEl,N,1)]*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = f[SC_2D_INDEX(i,j,1,iEl,N,1)]*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
     } else if ( iVar == 1) {
-      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = f[SC_2D_INDEX(i,j,1,iEl,N,1)]*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = -f[SC_2D_INDEX(i,j,1,iEl,N,1)]*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
     } else if ( iVar == 2) {
       source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = 0.0;
     }
