@@ -76,6 +76,15 @@ MODULE SELF_CompressibleIdealGas2D
   INTEGER, PARAMETER, PRIVATE :: teIndex = 5 ! Index for in-situ temperature
   INTEGER, PARAMETER, PRIVATE :: nRequiredDiagnostics = 5
 
+  ! Static fluid state for "air" at stp
+  REAL(prec), PARAMETER :: Cp_stpAir = 1.005_prec
+  REAL(prec), PARAMETER :: Cv_stpAir = 0.718_prec
+  REAL(prec), PARAMETER :: R_stpAir = 287.0_prec
+  REAL(prec), PARAMETER :: rho_stpAir = 287.0_prec
+  REAL(prec), PARAMETER :: T_stpAir = 273.0_prec
+  REAL(prec), PARAMETER :: e_stpAir = 1.5_prec*R_stpAir*T_stpAir
+
+
  ! INTERFACE
  !   SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(solution, extBoundary, nHat, sideInfo, N, nVar, nEl) &
  !     bind(c,name="SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
@@ -219,6 +228,34 @@ CONTAINS
 
   END SUBROUTINE Free_CompressibleIdealGas2D
 
+  SUBROUTINE SetDefaultState_CompressibleIdealGas2D(this)
+  !! Sets the default fluid state as "air" at STP with
+  !! no motion
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+            this % solution % interior % hostData(i,j,1,iEl) = 0.0_prec ! rho*u
+            this % solution % interior % hostData(i,j,2,iEl) = 0.0_prec ! rho*v
+            this % solution % interior % hostData(i,j,3,iEl) = rho_stpAir ! rho
+            this % solution % interior % hostData(i,j,4,iEl) = rho_stpAir*e_stpAir ! rho*E
+          ENDDO
+        ENDDO
+      ENDDO
+
+      CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetDefaultState_CompressibleIdealGas2D
+
   SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D(this, eqn) 
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
@@ -233,10 +270,6 @@ CONTAINS
 
       CALL this % prescribedSolution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
-
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % prescribedSolution % UpdateDevice()
