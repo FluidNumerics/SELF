@@ -59,6 +59,7 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetCp => SetCp_CompressibleIdealGas2D
     PROCEDURE :: SetCv => SetCv_CompressibleIdealGas2D
     PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
+    PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
 
     PROCEDURE :: CalculateVelocity => CalculateVelocity_CompressibleIdealGas2D
     PROCEDURE :: CalculateKineticEnergy => CalculateKineticEnergy_CompressibleIdealGas2D
@@ -228,7 +229,7 @@ CONTAINS
 
   END SUBROUTINE Free_CompressibleIdealGas2D
 
-  SUBROUTINE SetDefaultState_CompressibleIdealGas2D(this)
+  SUBROUTINE SetStaticSTP_CompressibleIdealGas2D(this)
   !! Sets the default fluid state as "air" at STP with
   !! no motion
     IMPLICIT NONE
@@ -236,6 +237,9 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
+      CALL this % SetCv( Cv_stpAir )
+      CALL this % SetCp( Cp_stpAir )
+      
       DO iEl = 1, this % source % nElem
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
@@ -247,14 +251,13 @@ CONTAINS
         ENDDO
       ENDDO
 
-      CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
       ENDIF
 
-  END SUBROUTINE SetDefaultState_CompressibleIdealGas2D
+  END SUBROUTINE SetStaticSTP_CompressibleIdealGas2D
 
   SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D(this, eqn) 
     IMPLICIT NONE
@@ -344,6 +347,9 @@ CONTAINS
     REAL(prec), INTENT(in) :: Cp
 
       this % Cp = Cp
+      IF( this % Cv == 0.0_prec )THEN
+        PRINT*, "Warning : Expansion factor not set; Cv = 0"
+      ENDIF
       this % expansionFactor = this % Cp/this % Cv
 
   END SUBROUTINE SetCp_CompressibleIdealGas2D
@@ -792,7 +798,7 @@ CONTAINS
                       this % requiredDiagnostics % interior % hostData(i,j,enIndex,iEl) !rho*u*H
 
                 this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                      this % velocity % interior % hostData(2,i,j,2,iEl)*&
+                      this % velocity % interior % hostData(2,i,j,1,iEl)*&
                       this % requiredDiagnostics % interior % hostData(i,j,enIndex,iEl) !rho*v*H
 
 
@@ -807,6 +813,8 @@ CONTAINS
   END SUBROUTINE Flux_CompressibleIdealGas2D
 
   SUBROUTINE RiemannSolver_CompressibleIdealGas2D(this)
+  !! Approximate Riemann Solver for the Compressible Navier-Stokes equations
+  !! The Riemann Solver implemented here is the Local Lax-Friedrichs.
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
