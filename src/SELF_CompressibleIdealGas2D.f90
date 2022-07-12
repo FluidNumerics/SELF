@@ -29,6 +29,7 @@ MODULE SELF_CompressibleIdealGas2D
     !!
     TYPE(MappedScalar2D) :: prescribedSolution
     TYPE(MappedScalar2D) :: requiredDiagnostics
+    TYPE(MappedScalar2D) :: prescribedDiagnostics
     REAL(prec) :: expansionFactor
     REAL(prec) :: Cp ! Heat capacity at constant pressure ( J/g/K )
     REAL(prec) :: Cv ! Heat capacity at constant volume ( J/g/K )
@@ -41,6 +42,9 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: Init => Init_CompressibleIdealGas2D
     PROCEDURE :: Free => Free_CompressibleIdealGas2D
     PROCEDURE :: PreTendency => PreTendency_CompressibleIdealGas2D
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_CompressibleIdealGas2D
+    
+    PROCEDURE :: WriteTecplot => WriteTecplot_CompressibleIdealGas2D
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_CompressibleIdealGas2D
@@ -161,6 +165,7 @@ CONTAINS
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % prescribedSolution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % requiredDiagnostics % Init(geometry % x % interp,nRequiredDiagnostics,this % mesh % nElem)
+    CALL this % prescribedDiagnostics % Init(geometry % x % interp,nRequiredDiagnostics,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -218,6 +223,7 @@ CONTAINS
     CALL this % solution % Free()
     CALL this % prescribedSolution % Free()
     CALL this % requiredDiagnostics % Free()
+    CALL this % prescribedDiagnostics % Free()
     CALL this % workSol % Free()
     CALL this % velocity % Free()
     CALL this % compVelocity % Free()
@@ -239,6 +245,7 @@ CONTAINS
 
       CALL this % SetCv( Cv_stpAir )
       CALL this % SetCp( Cp_stpAir )
+      CALL this % SetGasConstant( R_stpAir )
       
       DO iEl = 1, this % source % nElem
         DO j = 0, this % source % interp % N
@@ -252,7 +259,12 @@ CONTAINS
       ENDDO
 
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
-
+      CALL this % PreTendency( )
+      
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+      
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
       ENDIF
@@ -294,9 +306,6 @@ CONTAINS
       CALL this % prescribedSolution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % prescribedSolution % UpdateDevice()
@@ -314,10 +323,12 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-      DO iEl = 1, this % source % nElem
-        DO iVar = 1, this % source % nvar
-          DO j = 0, this % source % interp % N
-            DO i = 0, this % source % interp % N
+      CALL this % PreTendency()
+      
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nvar
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
 
               this % prescribedSolution % interior % hostData(i,j,iVar,iEl) = &
                 this % solution % interior % hostData(i,j,iVar,iEl)
@@ -326,15 +337,36 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+      
+      DO iEl = 1, this % requiredDiagnostics % nElem
+        DO iVar = 1, this % requiredDiagnostics % nVar
+          DO j = 0, this % requiredDiagnostics % interp % N
+            DO i = 0, this % requiredDiagnostics % interp % N
+
+              this % prescribedDiagnostics % interior % hostData(i,j,iVar,iEl) = &
+                this % requiredDiagnostics % interior % hostData(i,j,iVar,iEl)
+              
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
 
       CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
+      CALL this % prescribedDiagnostics % BoundaryInterp( gpuAccel = .FALSE. )
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
-
+      !PRINT*, MINVAL( this % requiredDiagnostics % interior % hostData(:,:,prIndex,:) ),&
+      !        MAXVAL( this % requiredDiagnostics % interior % hostData(:,:,prIndex,:) ),&
+      !        MINVAL( this % requiredDiagnostics % boundary % hostData(:,prIndex,:,:) ),&
+      !        MAXVAL( this % requiredDiagnostics % boundary % hostData(:,prIndex,:,:) )
+      !        
+      !PRINT*, MINVAL( this % prescribedDiagnostics % interior % hostData(:,:,prIndex,:) ),&
+      !        MAXVAL( this % prescribedDiagnostics % interior % hostData(:,:,prIndex,:) ),&
+      !        MINVAL( this % prescribedDiagnostics % boundary % hostData(:,prIndex,:,:) ),&
+      !        MAXVAL( this % prescribedDiagnostics % boundary % hostData(:,prIndex,:,:) )
+              
       IF( this % gpuAccel )THEN
         CALL this % prescribedSolution % UpdateDevice()
+        CALL this % prescribedDiagnostics % UpdateDevice()
       ENDIF
 
   END SUBROUTINE SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
@@ -375,6 +407,41 @@ CONTAINS
       this % R = R
 
   END SUBROUTINE SetGasConstant_CompressibleIdealGas2D
+  
+  SUBROUTINE CalculateEntropy_CompressibleIdealGas2D(this)
+  !! 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, j, i
+    REAL(prec) :: Jacobian, wi, wj
+    REAL(prec) :: P, rho
+          
+      this % entropy = 0.0_prec
+
+      DO iEl = 1, this % geometry % x % nElem
+        DO j = 0, this % geometry % x % interp % N
+          DO i = 0, this % geometry % x % interp % N
+
+            ! Coordinate mapping Jacobian
+            Jacobian = this % geometry % J % interior % hostData(i,j,1,iEl)
+
+            ! Quadrature weights
+            wi = this % geometry % x % interp % qWeights % hostData(i) 
+            wj = this % geometry % x % interp % qWeights % hostData(j)
+            
+            rho = this % solution % interior % hostData(i,j,3,iEl)
+            P = this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl)
+            
+            this % entropy = this % entropy - &
+              rho*(log(P) - this % expansionFactor*log(rho))/&
+              (this % expansionFactor - 1.0_prec)*wi*wj*Jacobian
+          
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
 
   SUBROUTINE CalculateKineticEnergy_CompressibleIdealGas2D(this)
     !! Calculates the kinetic energy from momentum and density
@@ -419,17 +486,18 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl, iSide, j, i
+    REAL(prec) :: rho, rhoU, rhoV
 
       DO iEl = 1, this % solution % nElem
         DO j = 0, this % solution % interp % N
           DO i = 0, this % solution % interp % N
 
+            rhoU = this % solution % interior % hostData(i,j,1,iEl)
+            rhoV = this % solution % interior % hostData(i,j,2,iEl)
+            rho = this % solution % interior % hostData(i,j,3,iEl)
+
             this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl) = 0.5_prec*&
-                    (this % solution % interior % hostData(i,j,1,iEl)*&
-                    this % solution % interior % hostData(i,j,1,iEl)-&
-                    this % solution % interior % hostData(i,j,2,iEl)*&
-                    this % solution % interior % hostData(i,j,2,iEl))/&
-                    this % solution % interior % hostData(i,j,4,iEl)
+                    (rhoU*rhoU+rhoV*rhoV)/rho
 
           ENDDO
         ENDDO
@@ -449,19 +517,18 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho
+    REAL(prec) :: rho, rhoU, rhoV
 
       DO iEl = 1, this % solution % nElem
         DO j = 0, this % solution % interp % N
           DO i = 0, this % solution % interp % N
 
+            rhoU = this % solution % interior % hostData(i,j,1,iEl)
+            rhoV = this % solution % interior % hostData(i,j,2,iEl)
             rho = this % solution % interior % hostData(i,j,3,iEl)
 
-            this % velocity % interior % hostData(1,i,j,1,iEl) = &
-                    this % solution % interior % hostData(i,j,1,iEl)/rho 
-
-            this % velocity % interior % hostData(2,i,j,1,iEl) = &
-                    this % solution % interior % hostData(i,j,2,iEl)/rho
+            this % velocity % interior % hostData(1,i,j,1,iEl) = rhoU/rho 
+            this % velocity % interior % hostData(2,i,j,1,iEl) = rhoV/rho
 
           ENDDO
         ENDDO
@@ -500,7 +567,7 @@ CONTAINS
             rhoKE = this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl)
 
             this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl) = &
-                    (this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)/rho
+                    (this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)
 
           ENDDO
         ENDDO
@@ -698,7 +765,16 @@ CONTAINS
                 this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
                 this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
                 this % solution % extBoundary % hostData(i,4,iSide,iEl) = this % solution % boundary % hostData(i,4,iSide,iEl)
-                this % solution % extBoundary % hostData(i,5,iSide,iEl) = this % solution % boundary % hostData(i,5,iSide,iEl)
+                
+                this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) =&
+                  this % solution % extBoundary % hostData(i,1,iSide,iEl)/&
+                  this % solution % extBoundary % hostData(i,3,iSide,iEl)
+                this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) = &
+                  this % solution % extBoundary % hostData(i,2,iSide,iEl)/&
+                  this % solution % extBoundary % hostData(i,3,iSide,iEl)
+                
+                this % requiredDiagnostics % extBoundary % hostData(1,1:nRequiredDiagnostics,iSide,iEl) = &
+                  this % requiredDiagnostics % boundary % hostData(1,1:nRequiredDiagnostics,iSide,iEl)
 
               ELSEIF( bcid == SELF_BC_PRESCRIBED )THEN
 
@@ -710,8 +786,17 @@ CONTAINS
                         this % prescribedSolution % boundary % hostData(i,3,iSide,iEl)
                 this % solution % extBoundary % hostData(i,4,iSide,iEl) = &
                         this % prescribedSolution % boundary % hostData(i,4,iSide,iEl)
-                this % solution % extBoundary % hostData(i,5,iSide,iEl) = &
-                        this % prescribedSolution % boundary % hostData(i,5,iSide,iEl)
+                    
+                this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) = &
+                  this % solution % boundary % hostData(i,1,iSide,iEl)/&
+                  this % solution % boundary % hostData(i,3,iSide,iEl)
+                this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) = &
+                  this % solution % boundary % hostData(i,2,iSide,iEl)/&
+                  this % solution % boundary % hostData(i,3,iSide,iEl)
+                  
+                this % requiredDiagnostics % extBoundary % hostData(i,1:nRequiredDiagnostics,iSide,iEl) = &
+                   this % prescribedDiagnostics % boundary % hostData(i,1:nRequiredDiagnostics,iSide,iEl)
+                
 
               ENDIF
 
@@ -755,8 +840,8 @@ CONTAINS
         DO iVar = 1, this % solution % nVar
           DO j = 0, this % solution % interp % N
             DO i = 0, this % solution % interp % N
-
-              IF ( iVar == 1 )THEN !
+            
+              IF ( iVar == 1 )THEN ! rho*u
 
                 ! rho*u*u + p 
                 this % flux % interior % hostData(1,i,j,iVar,iEl) = &
@@ -769,7 +854,7 @@ CONTAINS
                       this % velocity % interior % hostData(2,i,j,1,iEl)*& ! v
                       this % solution % interior % hostData(i,j,1,iEl) ! rho*u
 
-              ELSEIF ( iVar == 2 )THEN !
+              ELSEIF ( iVar == 2 )THEN ! rho*v
 
                 ! rho*v*u
                 this % flux % interior % hostData(1,i,j,iVar,iEl) = &
@@ -781,7 +866,6 @@ CONTAINS
                       this % velocity % interior % hostData(2,i,j,1,iEl)*& ! v
                       this % solution % interior % hostData(i,j,2,iEl)+& ! rho*v
                       this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl)
-
 
 
               ELSEIF ( iVar == 3 )THEN ! density
@@ -800,7 +884,6 @@ CONTAINS
                 this % flux % interior % hostData(2,i,j,iVar,iEl) = &
                       this % velocity % interior % hostData(2,i,j,1,iEl)*&
                       this % requiredDiagnostics % interior % hostData(i,j,enIndex,iEl) !rho*v*H
-
 
               ENDIF
 
@@ -865,17 +948,21 @@ CONTAINS
              fluxL(2) = unL*this % solution % boundary % hostData(i,2,iSide,iEl) +&
                         this % requiredDiagnostics % boundary % hostData(i,prIndex,iSide,iEl)*nHat(2)
 
-             fluxL(3) = unL*this % solution % boundary % hostData(i,3,iSide,iEl)
+             fluxL(3) = this % solution % boundary % hostData(i,1,iSide,iEl)*nHat(1)+&
+                        this % solution % boundary % hostData(i,2,iSide,iEl)*nHat(2)
+                        
              fluxL(4) = unL*this % requiredDiagnostics % boundary % hostData(i,enIndex,iSide,iEl)
 
-             fluxR(1) = unL*this % solution % extBoundary % hostData(i,1,iSide,iEl) +&
+             fluxR(1) = unR*this % solution % extBoundary % hostData(i,1,iSide,iEl) +&
                         this % requiredDiagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(1)
 
-             fluxR(2) = unL*this % solution % extBoundary % hostData(i,2,iSide,iEl) +&
+             fluxR(2) = unR*this % solution % extBoundary % hostData(i,2,iSide,iEl) +&
                         this % requiredDiagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(2)
 
-             fluxR(3) = unL*this % solution % extBoundary % hostData(i,3,iSide,iEl)
-             fluxR(4) = unL*this % requiredDiagnostics % extBoundary % hostData(i,enIndex,iSide,iEl)
+             fluxR(3) = this % solution % extBoundary % hostData(i,1,iSide,iEl)*nHat(1)+&
+                        this % solution % extBoundary % hostData(i,2,iSide,iEl)*nHat(2)
+                        
+             fluxR(4) = unR*this % requiredDiagnostics % extBoundary % hostData(i,enIndex,iSide,iEl)
 
              jump(1:4) = this % solution % boundary % hostData(i,1:4,iSide,iEl)-&
                          this % solution % extBoundary % hostData(i,1:4,iSide,iEl)
@@ -884,8 +971,7 @@ CONTAINS
                           ABS(unL-cL), ABS(unR-cR) )
 
              ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
-             this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) = 0.5_prec*( &
-                     fluxL(1:4) + fluxR(1:4) + alpha*( jump(1:4) ) )*nmag
+             this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) =  ( fluxL(1:4) + fluxR(1:4) + alpha*jump(1:4) )*nmag
 
           ENDDO
         ENDDO
@@ -894,5 +980,164 @@ CONTAINS
 !    ENDIF
 
   END SUBROUTINE RiemannSolver_CompressibleIdealGas2D
+  
+    SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this, filename)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    CHARACTER(*), INTENT(in), OPTIONAL :: filename
+    ! Local
+    CHARACTER(8) :: zoneID
+    INTEGER :: fUnit
+    INTEGER :: iEl, i, j, iVar 
+    CHARACTER(LEN=self_FileNameLength) :: tecFile
+    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
+    CHARACTER(LEN=self_FormatLength) :: fmat
+    CHARACTER(13) :: timeStampString
+    CHARACTER(5) :: rankString
+    TYPE(Scalar2D) :: solution
+    TYPE(Scalar2D) :: diagnostics
+    TYPE(Vector2D) :: x
+    TYPE(Lagrange),TARGET :: interp
+
+    IF( PRESENT(filename) )THEN
+      tecFile = filename
+    ELSE
+      timeStampString = TimeStamp(this % t, 's')
+
+      IF( this % decomp % mpiEnabled )THEN
+        WRITE(rankString,'(I5.5)') this % decomp % rankId 
+        tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
+      ELSE
+        tecFile = 'solution.'//timeStampString//'.tec'
+      ENDIF
+
+    ENDIF
+                      
+    IF( this % gpuAccel )THEN
+      ! Copy data to the CPU
+      CALL this % solution % interior % UpdateHost()
+    ENDIF
+
+    ! Create an interpolant for the uniform grid
+    CALL interp % Init(this % solution % interp % M,&
+            this % solution % interp % targetNodeType,&
+            this % solution % interp % N, &
+            this % solution % interp % controlNodeType)
+
+    CALL solution % Init( interp, &
+            this % solution % nVar, this % solution % nElem )
+
+    CALL x % Init( interp, 1, this % solution % nElem )
+
+    ! Map the mesh positions to the target grid
+    CALL this % geometry % x % GridInterp(x, gpuAccel=.FALSE.)
+
+    ! Map the solution to the target grid
+    CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+   
+     OPEN( UNIT=NEWUNIT(fUnit), &
+      FILE= TRIM(tecFile), &
+      FORM='formatted', &
+      STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y"'
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
+    ENDDO
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
+
+    ! Create format statement
+    WRITE(fmat,*) this % solution % nvar+2
+    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+
+    DO iEl = 1, this % solution % nElem
+
+      ! TO DO :: Get the global element ID 
+      WRITE(zoneID,'(I8.8)') iEl
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % solution % interp % M+1,&
+                                                 ', J=',this % solution % interp % M+1
+
+      DO j = 0, this % solution % interp % M
+        DO i = 0, this % solution % interp % M
+
+          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
+                            x % interior % hostData(2,i,j,1,iEl), &
+                            solution % interior % hostData(i,j,1:this % solution % nvar,iEl)
+
+        ENDDO
+      ENDDO
+
+    ENDDO
+
+    CLOSE(UNIT=fUnit)
+    
+ 
+      timeStampString = TimeStamp(this % t, 's')
+
+      IF( this % decomp % mpiEnabled )THEN
+        WRITE(rankString,'(I5.5)') this % decomp % rankId 
+        tecFile = 'diagnostics.'//rankString//'.'//timeStampString//'.tec'
+      ELSE
+        tecFile = 'diagnostics.'//timeStampString//'.tec'
+      ENDIF
+
+                      
+    IF( this % gpuAccel )THEN
+      ! Copy data to the CPU
+      CALL this % requiredDiagnostics % interior % UpdateHost()
+    ENDIF
+
+
+    CALL diagnostics % Init( interp, &
+            this % requiredDiagnostics % nVar, this % requiredDiagnostics % nElem )
+
+
+    ! Map the solution to the target grid
+    CALL this % requiredDiagnostics % GridInterp(diagnostics,gpuAccel=.FALSE.)
+   
+     OPEN( UNIT=NEWUNIT(fUnit), &
+      FILE= TRIM(tecFile), &
+      FORM='formatted', &
+      STATUS='replace')
+
+    tecHeader = 'VARIABLES = "X", "Y"'
+    DO iVar = 1, this % requiredDiagnostics % nVar
+      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % requiredDiagnostics % meta(iVar) % name)//'"'
+    ENDDO
+
+    WRITE(fUnit,*) TRIM(tecHeader) 
+
+    ! Create format statement
+    WRITE(fmat,*) this % requiredDiagnostics % nvar+2
+    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+
+    DO iEl = 1, this % solution % nElem
+
+      ! TO DO :: Get the global element ID 
+      WRITE(zoneID,'(I8.8)') iEl
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % solution % interp % M+1,&
+                                                 ', J=',this % solution % interp % M+1
+
+      DO j = 0, this % solution % interp % M
+        DO i = 0, this % solution % interp % M
+
+          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
+                            x % interior % hostData(2,i,j,1,iEl), &
+                            diagnostics % interior % hostData(i,j,1:this % requiredDiagnostics % nvar,iEl)
+
+        ENDDO
+      ENDDO
+
+    ENDDO
+
+    CLOSE(UNIT=fUnit)
+
+    CALL x % Free()
+    CALL solution % Free()
+    CALL diagnostics % Free()
+    CALL interp % Free()
+
+  END SUBROUTINE WriteTecplot_CompressibleIdealGas2D
 
 END MODULE SELF_CompressibleIdealGas2D
