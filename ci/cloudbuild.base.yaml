@@ -7,7 +7,7 @@ steps:
          '-f',
          'docker/base/nvidia/Dockerfile',
          '-t',
-         'gcr.io/${PROJECT_ID}/self-base:nvidia-cuda11.2.1-rocm4.5.2']
+         'gcr.io/${PROJECT_ID}/self-base:nvidia-cuda11.2.1-rocm4.5']
 
 - id: Build AMD Base Image
   name: 'gcr.io/cloud-builders/docker'
@@ -16,7 +16,7 @@ steps:
          '-f',
          'docker/base/amd/Dockerfile',
          '-t',
-         'gcr.io/${PROJECT_ID}/self-base:amd-rocm4.5.2']
+         'gcr.io/${PROJECT_ID}/self-base:amd-rocm4.5']
   waitFor: ["-"]
 
 - id: Build Codecov Builder
@@ -29,8 +29,8 @@ steps:
          'gcr.io/${PROJECT_ID}/codecov:latest']
   waitFor: ["-"]
 
-images: ['gcr.io/${PROJECT_ID}/self-base:nvidia-cuda11.2.1-rocm4.5.2',
-         'gcr.io/${PROJECT_ID}/self-base:amd-rocm4.5.2',
+images: ['gcr.io/${PROJECT_ID}/self-base:nvidia-cuda11.2.1-rocm4.5',
+         'gcr.io/${PROJECT_ID}/self-base:amd-rocm4.5',
          'gcr.io/${PROJECT_ID}/codecov:latest']
 
 

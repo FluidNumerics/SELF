@@ -1,4 +1,4 @@
-FROM gcr.io/self-fluids/self-base:amd-rocm4.5.2 as builder
+FROM gcr.io/self-fluids/self-base:amd-rocm4.5 as builder
 ARG GPU_TARGET=gfx900
 ARG HIP_PLATFORM=amd
 ARG PREC=double
