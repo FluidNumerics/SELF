@@ -84,10 +84,10 @@ MODULE SELF_CompressibleIdealGas2D
   ! Static fluid state for "air" at stp
   REAL(prec), PARAMETER :: Cp_stpAir = 1.005_prec
   REAL(prec), PARAMETER :: Cv_stpAir = 0.718_prec
-  REAL(prec), PARAMETER :: R_stpAir = 287.0_prec
-  REAL(prec), PARAMETER :: rho_stpAir = 287.0_prec
-  REAL(prec), PARAMETER :: T_stpAir = 273.0_prec
-  REAL(prec), PARAMETER :: e_stpAir = 1.5_prec*R_stpAir*T_stpAir
+  REAL(prec), PARAMETER :: R_stpAir = 287.0_prec ! J/kg/K
+  REAL(prec), PARAMETER :: rho_stpAir = 1.2754_prec ! kg/m^3
+  REAL(prec), PARAMETER :: T_stpAir = 273.0_prec ! K
+  REAL(prec), PARAMETER :: e_stpAir = 1.5_prec*R_stpAir*T_stpAir ! J/kg
 
 
  ! INTERFACE
@@ -354,16 +354,6 @@ CONTAINS
       CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
       CALL this % prescribedDiagnostics % BoundaryInterp( gpuAccel = .FALSE. )
 
-      !PRINT*, MINVAL( this % requiredDiagnostics % interior % hostData(:,:,prIndex,:) ),&
-      !        MAXVAL( this % requiredDiagnostics % interior % hostData(:,:,prIndex,:) ),&
-      !        MINVAL( this % requiredDiagnostics % boundary % hostData(:,prIndex,:,:) ),&
-      !        MAXVAL( this % requiredDiagnostics % boundary % hostData(:,prIndex,:,:) )
-      !        
-      !PRINT*, MINVAL( this % prescribedDiagnostics % interior % hostData(:,:,prIndex,:) ),&
-      !        MAXVAL( this % prescribedDiagnostics % interior % hostData(:,:,prIndex,:) ),&
-      !        MINVAL( this % prescribedDiagnostics % boundary % hostData(:,prIndex,:,:) ),&
-      !        MAXVAL( this % prescribedDiagnostics % boundary % hostData(:,prIndex,:,:) )
-              
       IF( this % gpuAccel )THEN
         CALL this % prescribedSolution % UpdateDevice()
         CALL this % prescribedDiagnostics % UpdateDevice()
@@ -592,10 +582,15 @@ CONTAINS
     !!
     !! where gamma = Cp/Cv is the expansion coefficient,
     !! rho is the fluid density, and e is the internal energy.
+    !! 
+    !! Using the equation of state,
+    !! 
+    !!  (\gamma-1)*e = p/\rho
     !!
     !! We calculate $e$ as
     !!
     !!   e = (\rho*E - 0.5_prec*\rho*KE)/\rho
+    !!   
     !!
     !! where rho*E is the total energy, a prognostic variable, modelled
     !! by this class, $\rho*KE$ is the kinetic energy (a required diagnostic)
@@ -606,19 +601,17 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho, rhoE, rhoKE
+    REAL(prec) :: rho, p
 
       DO iEl = 1, this % solution % nElem
         DO j = 0, this % solution % interp % N
           DO i = 0, this % solution % interp % N
 
             rho = this % solution % interior % hostData(i,j,3,iEl)
-            rhoE = this % solution % interior % hostData(i,j,4,iEl)
-            rhoKE = this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl)
+            p = this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl)
 
             this % requiredDiagnostics % interior % hostData(i,j,soIndex,iEl) = &
-                    sqrt((this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)/rho)
-
+                    sqrt(this % expansionFactor*p/rho)
 
           ENDDO
         ENDDO
@@ -954,7 +947,7 @@ CONTAINS
              fluxL(4) = unL*this % requiredDiagnostics % boundary % hostData(i,enIndex,iSide,iEl)
 
              fluxR(1) = unR*this % solution % extBoundary % hostData(i,1,iSide,iEl) +&
-                        this % requiredDiagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(1)
+                       this % requiredDiagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(1)
 
              fluxR(2) = unR*this % solution % extBoundary % hostData(i,2,iSide,iEl) +&
                         this % requiredDiagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(2)
@@ -971,7 +964,7 @@ CONTAINS
                           ABS(unL-cL), ABS(unR-cR) )
 
              ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
-             this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) =  ( fluxL(1:4) + fluxR(1:4) + alpha*jump(1:4) )*nmag
+             this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) =  0.5_prec*( fluxL(1:4) + fluxR(1:4) + alpha*jump(1:4) )*nmag
 
           ENDDO
         ENDDO

@@ -28,7 +28,6 @@ USE SELF_CompressibleIdealGas2D
   TYPE(CompressibleIdealGas2D),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
-  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=255) :: SELF_PREFIX
 
 
@@ -56,6 +55,9 @@ USE SELF_CompressibleIdealGas2D
 
     ! Create a uniform block mesh
     CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
+    
+    ! Reset the boundary condition to prescribed
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
 
     ! Generate a decomposition
     CALL decomp % GenerateDecomposition(mesh)
@@ -71,15 +73,18 @@ USE SELF_CompressibleIdealGas2D
     !CALL semModel % EnableGPUAccel()
 
     CALL semModel % SetStaticSTP()
-    
     referenceEntropy = semModel % entropy
 
+    ! Uses the initial condition to set the prescribed state
+    ! for model boundary conditions
+    CALL semModel % SetPrescribedSolution()
+    
     ! Write the initial condition to file
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("rk3")
+    CALL semModel % SetTimeIntegrator("euler")
 
     ! Set your time step
     semModel % dt = dt
@@ -93,12 +98,12 @@ USE SELF_CompressibleIdealGas2D
     ! Error checking !
     IF( semModel % entropy /= semModel % entropy )THEN
       PRINT*, "Model entropy is not a number"
-      STOP 2
+      !STOP 2
     ENDIF
 
     IF( semModel % entropy >= HUGE(1.0_prec) )THEN
       PRINT*, "Model entropy is infinite."
-      STOP 1
+     ! STOP 1
     ENDIF
 
     IF( semModel % entropy > referenceEntropy )THEN
