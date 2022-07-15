@@ -2101,19 +2101,15 @@ CONTAINS
     TYPE(hfReal_r1),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r1_serial
@@ -2125,19 +2121,15 @@ CONTAINS
     TYPE(hfReal_r2),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:2)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r2_serial
@@ -2149,19 +2141,15 @@ CONTAINS
     TYPE(hfReal_r3),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:3)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r3_serial
@@ -2173,19 +2161,15 @@ CONTAINS
     TYPE(hfReal_r4),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:4)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r4_serial
@@ -2197,19 +2181,15 @@ CONTAINS
     TYPE(hfReal_r5),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:5)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r5_serial
@@ -2221,19 +2201,15 @@ CONTAINS
     TYPE(hfReal_r6),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:6)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r6_serial
@@ -2245,19 +2221,15 @@ CONTAINS
     TYPE(hfReal_r7),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:7)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(prec,H5_REAL_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_real_r7_serial
@@ -2272,16 +2244,13 @@ CONTAINS
     INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r1_serial
@@ -2293,19 +2262,15 @@ CONTAINS
     TYPE(hfInt32_r2),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:2)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r2_serial
@@ -2317,19 +2282,15 @@ CONTAINS
     TYPE(hfInt32_r3),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:3)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r3_serial
@@ -2341,19 +2302,15 @@ CONTAINS
     TYPE(hfInt32_r4),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:4)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r4_serial
@@ -2365,19 +2322,15 @@ CONTAINS
     TYPE(hfInt32_r5),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:5)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r5_serial
@@ -2389,19 +2342,15 @@ CONTAINS
     TYPE(hfInt32_r6),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:6)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r6_serial
@@ -2413,19 +2362,15 @@ CONTAINS
     TYPE(hfInt32_r7),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:7)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT32,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int32_r7_serial
@@ -2437,19 +2382,15 @@ CONTAINS
     TYPE(hfInt64_r1),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r1_serial
@@ -2461,19 +2402,15 @@ CONTAINS
     TYPE(hfInt64_r2),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:2)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r2_serial
@@ -2485,19 +2422,15 @@ CONTAINS
     TYPE(hfInt64_r3),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:3)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r3_serial
@@ -2512,16 +2445,13 @@ CONTAINS
     INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:4)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r4_serial
@@ -2533,19 +2463,15 @@ CONTAINS
     TYPE(hfInt64_r5),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:5)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r5_serial
@@ -2557,19 +2483,15 @@ CONTAINS
     TYPE(hfInt64_r6),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:6)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r6_serial
@@ -2581,19 +2503,15 @@ CONTAINS
     TYPE(hfInt64_r7),INTENT(inout) :: hfArray
     ! Local
     INTEGER(HID_T) :: dsetId
-    INTEGER(HID_T) :: dtypeId
     INTEGER(HID_T) :: dims(1:7)
     INTEGER :: error
-    INTEGER :: aRank
 
-    aRank = RANK(hfArray % hostData)
+    dims = SHAPE(hfArray % hostData)
 
     CALL h5dopen_f(fileId,arrayName,dsetId,error)
-    CALL h5dget_type_f(dsetId,dtypeId,error)
 
-    CALL h5dread_f(dsetId,dtypeId,hfArray % hostData,dims,error)
+    CALL h5dread_f(dsetId,h5kind_to_type(INT64,H5_INTEGER_KIND),hfArray % hostData,dims,error)
 
-    CALL h5tclose_f(dtypeId,error)
     CALL h5dclose_f(dsetId,error)
 
   END SUBROUTINE ReadArray_HDF5_int64_r7_serial
