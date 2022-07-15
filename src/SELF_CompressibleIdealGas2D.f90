@@ -423,7 +423,7 @@ CONTAINS
             rho = this % solution % interior % hostData(i,j,3,iEl)
             P = this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl)
             
-            this % entropy = this % entropy - &
+            this % entropy = this % entropy + &
               rho*(log(P) - this % expansionFactor*log(rho))/&
               (this % expansionFactor - 1.0_prec)*wi*wj*Jacobian
           
@@ -759,17 +759,21 @@ CONTAINS
                 this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
                 this % solution % extBoundary % hostData(i,4,iSide,iEl) = this % solution % boundary % hostData(i,4,iSide,iEl)
                 
+                ! x-component of the velocity
                 this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) =&
                   this % solution % extBoundary % hostData(i,1,iSide,iEl)/&
-                  this % solution % extBoundary % hostData(i,3,iSide,iEl)
+                  this % solution % boundary % hostData(i,3,iSide,iEl)
+                  
+                ! y-component of the velocity
                 this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) = &
                   this % solution % extBoundary % hostData(i,2,iSide,iEl)/&
-                  this % solution % extBoundary % hostData(i,3,iSide,iEl)
+                  this % solution % boundary % hostData(i,3,iSide,iEl)
                 
+                ! Prolong the diagnostic values to the external state
                 this % requiredDiagnostics % extBoundary % hostData(1,1:nRequiredDiagnostics,iSide,iEl) = &
                   this % requiredDiagnostics % boundary % hostData(1,1:nRequiredDiagnostics,iSide,iEl)
 
-              ELSEIF( bcid == SELF_BC_PRESCRIBED )THEN
+              ELSEIF( bcid == SELF_BC_PRESCRIBED .OR. bcid == SELF_BC_RADIATION )THEN
 
                 this % solution % extBoundary % hostData(i,1,iSide,iEl) = &
                         this % prescribedSolution % boundary % hostData(i,1,iSide,iEl)
