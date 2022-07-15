@@ -96,7 +96,7 @@ USE SELF_LinearShallowWater
     coriolis = "f = 10^(-4) + (10^(-11))*y"
     CALL semModel % SetCoriolis( coriolis )
     
-    ! To Do : Add method for setting velocity from geostrophy
+    ! Get the geostrophic velocity from the free surface height field
     CALL semModel % DiagnoseGeostrophicVelocity()
 
     ! Write the initial condition to file

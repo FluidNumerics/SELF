@@ -57,7 +57,7 @@ USE SELF_CompressibleIdealGas2D
     CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
     
     ! Reset the boundary condition to prescribed
-    CALL mesh % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
 
     ! Generate a decomposition
     CALL decomp % GenerateDecomposition(mesh)
