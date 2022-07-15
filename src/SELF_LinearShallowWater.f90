@@ -306,12 +306,12 @@ CONTAINS
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
           
-            ! u velocity component
-            this % solution % interior % hostData(i,j,1,iEl) = -this % dSdt % interior % hostData(i,j,2,iEl)/&
+            ! u velocity component = ( - g \eta_y ) / f
+            this % solution % interior % hostData(i,j,1,iEl) = this % dSdt % interior % hostData(i,j,2,iEl)/&
               this % fCori % interior % hostData(i,j,1,iEl)
             
-            ! v velocity component
-            this % solution % interior % hostData(i,j,2,iEl) = this % dSdt % interior % hostData(i,j,1,iEl)/&
+            ! v velocity component = - ( - g \eta_x ) / f
+            this % solution % interior % hostData(i,j,2,iEl) = -this % dSdt % interior % hostData(i,j,1,iEl)/&
               this % fCori % interior % hostData(i,j,1,iEl)
             
           ENDDO
