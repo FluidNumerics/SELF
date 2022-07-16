@@ -356,6 +356,7 @@ CONTAINS
     INTEGER,INTENT(in) :: upBound
 
     ALLOCATE (this % hostData(loBound:upBound))
+    this % hostData = 0.0_prec
 
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
@@ -372,6 +373,8 @@ CONTAINS
     ALLOCATE (this % hostData(loBound(1):upBound(1), &
                               loBound(2):upBound(2)))
 
+    this % hostData = 0.0_prec
+
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
     END IF
@@ -387,6 +390,7 @@ CONTAINS
     ALLOCATE (this % hostData(loBound(1):upBound(1), &
                               loBound(2):upBound(2), &
                               loBound(3):upBound(3)))
+    this % hostData = 0.0_prec
 
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
@@ -404,6 +408,7 @@ CONTAINS
                               loBound(2):upBound(2), &
                               loBound(3):upBound(3), &
                               loBound(4):upBound(4)))
+    this % hostData = 0.0_prec
 
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
@@ -422,6 +427,7 @@ CONTAINS
                               loBound(3):upBound(3), &
                               loBound(4):upBound(4), &
                               loBound(5):upBound(5)))
+    this % hostData = 0.0_prec
 
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
@@ -441,6 +447,7 @@ CONTAINS
                               loBound(4):upBound(4), &
                               loBound(5):upBound(5), &
                               loBound(6):upBound(6)))
+    this % hostData = 0.0_prec
 
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
@@ -461,6 +468,7 @@ CONTAINS
                               loBound(5):upBound(5), &
                               loBound(6):upBound(6), &
                               loBound(7):upBound(7)))
+    this % hostData = 0.0_prec
 
     IF (GPUAvailable()) THEN
       CALL hipCheck(hipMalloc(this % deviceData,SIZEOF(this % hostData)))
