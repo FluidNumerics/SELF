@@ -65,12 +65,7 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
     PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
 
-    PROCEDURE :: CalculateVelocity => CalculateVelocity_CompressibleIdealGas2D
-    PROCEDURE :: CalculateKineticEnergy => CalculateKineticEnergy_CompressibleIdealGas2D
-    PROCEDURE :: EquationOfState => EquationOfState_CompressibleIdealGas2D
-    PROCEDURE :: CalculateSoundSpeed => CalculateSoundSpeed_CompressibleIdealGas2D
-    PROCEDURE :: CalculateEnthalpy => CalculateEnthalpy_CompressibleIdealGas2D
-    PROCEDURE :: CalculateTemperature => CalculateTemperature_CompressibleIdealGas2D
+    PROCEDURE :: CalculateDiagnostics => CalculateDiagnostics_CompressibleIdealGas2D
 
   END TYPE CompressibleIdealGas2D
 
@@ -433,226 +428,12 @@ CONTAINS
 
   END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
 
-  SUBROUTINE CalculateKineticEnergy_CompressibleIdealGas2D(this)
-    !! Calculates the kinetic energy from momentum and density
-    !! and stores the output in the requiredDiagnostics output.
-    !!
-    !! We recognize there are two ways we can calculate the kinetic
-    !! energy with the given prognostic and diagnostic variables 
-    !! we track.
-    !!
-    !! Option 1.
-    !!
-    !!   Use the velocity field diagnostic with the prognostic density.
-    !!   This would result in
-    !!
-    !!    KE = 0.5_prec*rho*( u*u + v*v )
-    !!
-    !!   where 
-    !!
-    !!     u = (rho*u)/rho
-    !!     v = (rho*v)/rho
-    !!
-    !! Option 2. 
-    !!
-    !!   Use the prognostic momentum and density fields. This would
-    !!   result in
-    !!
-    !!    KE = 0.5_prec*( (rho*u)*(rho*u) + (rho*v)*(rho*v) )/rho
-    !!
-    !! Analytically, the two options are identical. In floating point
-    !! arithmetic, these are different.
-    !!
-    !! It's currently unclear which option is more advantageous (and when),
-    !! and I am arbitrarily implementing Option 2.
-    !!
-    !! If you find a good reason to use Option 1, or some other approach to 
-    !! calculate kinetic energy that is more advantageous, develop an
-    !! example that highlights the benefits of your approach and open a
-    !! pull request.
-    !!
-
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho, rhoU, rhoV
-
-      DO iEl = 1, this % solution % nElem
-        DO j = 0, this % solution % interp % N
-          DO i = 0, this % solution % interp % N
-
-            rhoU = this % solution % interior % hostData(i,j,1,iEl)
-            rhoV = this % solution % interior % hostData(i,j,2,iEl)
-            rho = this % solution % interior % hostData(i,j,3,iEl)
-
-            this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl) = 0.5_prec*&
-                    (rhoU*rhoU+rhoV*rhoV)/rho
-
-          ENDDO
-        ENDDO
-      ENDDO
-
-  END SUBROUTINE CalculateKineticEnergy_CompressibleIdealGas2D
-
-  SUBROUTINE CalculateVelocity_CompressibleIdealGas2D(this)
-    !! Calculates the velocity field from momentum and stores
-    !! the output in the velocity attribute.
-    !!
-    !!     u = (rho*u)/rho
-    !!     v = (rho*v)/rho
-    !!
-
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho, rhoU, rhoV
-
-      DO iEl = 1, this % solution % nElem
-        DO j = 0, this % solution % interp % N
-          DO i = 0, this % solution % interp % N
-
-            rhoU = this % solution % interior % hostData(i,j,1,iEl)
-            rhoV = this % solution % interior % hostData(i,j,2,iEl)
-            rho = this % solution % interior % hostData(i,j,3,iEl)
-
-            this % velocity % interior % hostData(1,i,j,1,iEl) = rhoU/rho 
-            this % velocity % interior % hostData(2,i,j,1,iEl) = rhoV/rho
-
-          ENDDO
-        ENDDO
-      ENDDO
-
-  END SUBROUTINE CalculateVelocity_CompressibleIdealGas2D
-
-  SUBROUTINE EquationOfState_CompressibleIdealGas2D(this)
-    !! Calculates the fluid pressure given other diagnostic fields.
-    !! We use the Ideal Gas Law
-    !! 
-    !!    p = (\gamma-1)*\rho*e
-    !!
-    !! where $\gamma = \frac{C_p}{C_v}$ is the expansion coefficient,
-    !! $\rho$ is the fluid density, and $e$ is the internal energy.
-    !!
-    !! We calculate $rho*e$ as
-    !!
-    !!   rho*e = (rho*E - 0.5_prec*rho*KE)
-    !!
-    !! where rho*E is the total energy, a prognostic variable, modelled
-    !! by this class, and 
-
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho, rhoE, rhoKE
-
-      DO iEl = 1, this % solution % nElem
-        DO j = 0, this % solution % interp % N
-          DO i = 0, this % solution % interp % N
-
-            rho = this % solution % interior % hostData(i,j,3,iEl)
-            rhoE = this % solution % interior % hostData(i,j,4,iEl)
-            rhoKE = this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl)
-
-            this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl) = &
-                    (this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)
-
-          ENDDO
-        ENDDO
-      ENDDO
-
-
-  END SUBROUTINE EquationOfState_CompressibleIdealGas2D
-
-  SUBROUTINE CalculateSoundSpeed_CompressibleIdealGas2D(this)
-    !! Calculates the speed of sound given other diagnostic fields.
-    !! We use the Ideal Gas Law
-    !!
-    !!    p = (\gamma-1)*\rho*e
-    !!
-    !! The speed of sound is defined through the relation
-    !!
-    !!   \frac{\partial P}{\partial \rho} = c^{2}
-    !!
-    !! Then, we have that
-    !!
-    !!   c = ((\gamma-1)*e)^{1/2}
-    !!
-    !! where gamma = Cp/Cv is the expansion coefficient,
-    !! rho is the fluid density, and e is the internal energy.
-    !! 
-    !! Using the equation of state,
-    !! 
-    !!  (\gamma-1)*e = p/\rho
-    !!
-    !! We calculate $e$ as
-    !!
-    !!   e = (\rho*E - 0.5_prec*\rho*KE)/\rho
-    !!   
-    !!
-    !! where rho*E is the total energy, a prognostic variable, modelled
-    !! by this class, $\rho*KE$ is the kinetic energy (a required diagnostic)
-    !! and, $\rho$ is the density ( a prognostic variable ).
-    !!
-
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho, p
-
-      DO iEl = 1, this % solution % nElem
-        DO j = 0, this % solution % interp % N
-          DO i = 0, this % solution % interp % N
-
-            rho = this % solution % interior % hostData(i,j,3,iEl)
-            p = this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl)
-
-            this % requiredDiagnostics % interior % hostData(i,j,soIndex,iEl) = &
-                    sqrt(this % expansionFactor*p/rho)
-
-          ENDDO
-        ENDDO
-      ENDDO
-
-  END SUBROUTINE CalculateSoundSpeed_CompressibleIdealGas2D
-
-  SUBROUTINE CalculateEnthalpy_CompressibleIdealGas2D(this)
-    !! Calculates the dynamic enthalpy from the total energy
-    !! and pressure field and stores the output in the 
-    !! requiredDiagnostics attribute
-    !!
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rhoE, pressure
-
-      DO iEl = 1, this % solution % nElem
-        DO j = 0, this % solution % interp % N
-          DO i = 0, this % solution % interp % N
-
-            rhoE = this % solution % interior % hostData(i,j,4,iEl)
-            pressure = this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl)
-
-            this % requiredDiagnostics % interior % hostData(i,j,enIndex,iEl) = &
-                    rhoE + pressure
-
-          ENDDO
-        ENDDO
-      ENDDO
-
-  END SUBROUTINE CalculateEnthalpy_CompressibleIdealGas2D
-
   SUBROUTINE CalculateTemperature_CompressibleIdealGas2D(this)
   !! Calculate the in-situ temperature from the internal energy
   !! using the ideal gas relationship
   !!
   !! Esys = 3/2 RT
   !!
-  !!  T = 2/3*e/R
   !! 
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
@@ -668,8 +449,6 @@ CONTAINS
             rhoE = this % solution % interior % hostData(i,j,4,iEl)
             rhoKE = this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl)
 
-            this % requiredDiagnostics % interior % hostData(i,j,teIndex,iEl) = &
-                    (2.0_prec/3.0_prec)*((rhoE - rhoKE)/rho)/this % R
 
 
           ENDDO
@@ -677,6 +456,143 @@ CONTAINS
       ENDDO
 
   END SUBROUTINE CalculateTemperature_CompressibleIdealGas2D
+
+  SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D(this)
+    !! Calculates 
+    !!  * kinetic energy 
+    !!  * velocity
+    !!  * pressure 
+    !!  * speed of sound
+    !!  * enthalpy
+    !!  * in-situ temperature
+    !!
+    !! Kinetic Energy
+    !!
+    !!  We recognize there are two ways we can calculate the kinetic
+    !!  energy with the given prognostic and diagnostic variables 
+    !!  we track.
+    !!
+    !!  Option 1.
+    !!
+    !!    Use the velocity field diagnostic with the prognostic density.
+    !!    This would result in
+    !!
+    !!     KE = 0.5_prec*rho*( u*u + v*v )
+    !!
+    !!    where 
+    !!
+    !!      u = (rho*u)/rho
+    !!      v = (rho*v)/rho
+    !!
+    !!  Option 2. 
+    !!
+    !!    Use the prognostic momentum and density fields. This would
+    !!    result in
+    !! 
+    !!     KE = 0.5_prec*( (rho*u)*(rho*u) + (rho*v)*(rho*v) )/rho
+    !! 
+    !!  Analytically, the two options are identical. In floating point
+    !!  arithmetic, these are different.
+    !! 
+    !!  It's currently unclear which option is more advantageous (and when),
+    !!  and I am arbitrarily implementing Option 2.
+    !! 
+    !!  If you find a good reason to use Option 1, or some other approach to 
+    !!  calculate kinetic energy that is more advantageous, develop an
+    !!  example that highlights the benefits of your approach and open a
+    !!  pull request.
+    !!
+    !! Pressure
+    !!
+    !!  We use the Ideal Gas Law
+    !!  
+    !!     p = (\gamma-1)*\rho*e
+    !! 
+    !!  where $\gamma = \frac{C_p}{C_v}$ is the expansion coefficient,
+    !!  $\rho$ is the fluid density, and $e$ is the internal energy.
+    !! 
+    !!  We calculate $rho*e$ as
+    !! 
+    !!    rho*e = (rho*E - 0.5_prec*rho*KE)
+    !! 
+    !!  where rho*E is the total energy, a prognostic variable, modelled
+    !!  by this class, and 
+    !!
+    !! Sound Speed
+    !!
+    !!  The speed of sound is defined through the relation
+    !! 
+    !!    \frac{\partial P}{\partial \rho} = c^{2}
+    !! 
+    !!  Then, we have that
+    !! 
+    !!    c = ((\gamma-1)*e)^{1/2}
+    !! 
+    !!  where gamma = Cp/Cv is the expansion coefficient,
+    !!  rho is the fluid density, and e is the internal energy.
+    !!  
+    !!  Using the equation of state,
+    !!  
+    !!   (\gamma-1)*e = p/\rho
+    !! 
+    !!  We calculate $e$ as
+    !! 
+    !!    e = (\rho*E - 0.5_prec*\rho*KE)/\rho
+    !!    
+    !! 
+    !!  where rho*E is the total energy, a prognostic variable, modelled
+    !!  by this class, $\rho*KE$ is the kinetic energy (a required diagnostic)
+    !!  and, $\rho$ is the density ( a prognostic variable ).
+    !!
+    !! In-Situ Temperature
+    !!
+    !!    T = 2/3*e/R
+    !!
+
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, j, i
+    REAL(prec) :: rho, rhoU, rhoV, rhoE, rhoKE, p
+
+      DO iEl = 1, this % solution % nElem
+        DO j = 0, this % solution % interp % N
+          DO i = 0, this % solution % interp % N
+
+            rhoU = this % solution % interior % hostData(i,j,1,iEl)
+            rhoV = this % solution % interior % hostData(i,j,2,iEl)
+            rho = this % solution % interior % hostData(i,j,3,iEl)
+            rhoE = this % solution % interior % hostData(i,j,4,iEl)
+            rhoKE = 0.5_prec*(rhoU*rhoU+rhoV*rhoV)/rho
+            p = (this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)
+
+            ! Velocity
+            this % velocity % interior % hostData(1,i,j,1,iEl) = rhoU/rho 
+            this % velocity % interior % hostData(2,i,j,1,iEl) = rhoV/rho
+
+
+            ! Kinetic Energy
+            this % requiredDiagnostics % interior % hostData(i,j,keIndex,iEl) = rhoKE
+
+            ! Pressure
+            this % requiredDiagnostics % interior % hostData(i,j,prIndex,iEl) = p
+
+            ! Speed of sound
+            this % requiredDiagnostics % interior % hostData(i,j,soIndex,iEl) = &
+                    sqrt(this % expansionFactor*p/rho)
+
+            ! Enthalpy
+            this % requiredDiagnostics % interior % hostData(i,j,enIndex,iEl) = rhoE + p
+
+            ! In-Situ Temperature
+            this % requiredDiagnostics % interior % hostData(i,j,teIndex,iEl) = &
+                    (2.0_prec/3.0_prec)*((rhoE - rhoKE)/rho)/this % R
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D
 
   SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
@@ -691,38 +607,39 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho
 
-      ! Calculate the velocity field from
-      ! the momentum and density
-      CALL this % CalculateVelocity()
+      CALL this % CalculateDiagnostics()
 
-      ! Calculate the kinetic energy from
-      ! the momentum and density
-      CALL this % CalculateKineticEnergy()
+      !! Calculate the velocity field from
+      !! the momentum and density
+      !CALL this % CalculateVelocity()
 
-      ! Calculate the pressure using an
-      ! equation of state.
-      ! Requires knowledge of the fluid kinetic energy
-      ! and total energy (to diagnose internal energy)
-      ! and therefore depends on the CalculateKineticEnergy
-      ! call above
-      CALL this % EquationOfState()
+      !! Calculate the kinetic energy from
+      !! the momentum and density
+      !CALL this % CalculateKineticEnergy()
 
-      ! Calculate the speed of sound
-      ! Requires knowledge of the fluid pressure and 
-      ! therefore depends on the EquationofState call above
-      CALL this % CalculateSoundSpeed()
+      !! Calculate the pressure using an
+      !! equation of state.
+      !! Requires knowledge of the fluid kinetic energy
+      !! and total energy (to diagnose internal energy)
+      !! and therefore depends on the CalculateKineticEnergy
+      !! call above
+      !CALL this % EquationOfState()
 
-      ! Calculates the fluid enthalpy
-      ! Requires knowledge of the fluid pressure
-      ! and total energy and therefore depends on
-      ! the EquationOfState call above.
-      CALL this % CalculateEnthalpy()
+      !! Calculate the speed of sound
+      !! Requires knowledge of the fluid pressure and 
+      !! therefore depends on the EquationofState call above
+      !CALL this % CalculateSoundSpeed()
 
-      ! Calculates the Fluid Temperature
-      ! Requires knowledge of the internal energy
-      CALL this % CalculateTemperature()
+      !! Calculates the fluid enthalpy
+      !! Requires knowledge of the fluid pressure
+      !! and total energy and therefore depends on
+      !! the EquationOfState call above.
+      !CALL this % CalculateEnthalpy()
+
+      !! Calculates the Fluid Temperature
+      !! Requires knowledge of the internal energy
+      !CALL this % CalculateTemperature()
 
       ! Interpolate velocity and required diagnostics to the element boundaries
       CALL this % velocity % BoundaryInterp(this % gpuAccel)
