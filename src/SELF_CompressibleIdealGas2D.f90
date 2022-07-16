@@ -710,10 +710,8 @@ CONTAINS
       CALL this % EquationOfState()
 
       ! Calculate the speed of sound
-      ! Requires knowledge of the fluid kinetic energy
-      ! and total energy (to diagnose internal energy)
-      ! and therefore depends on the CalculateKineticEnergy
-      ! call above
+      ! Requires knowledge of the fluid pressure and 
+      ! therefore depends on the EquationofState call above
       CALL this % CalculateSoundSpeed()
 
       ! Calculates the fluid enthalpy
@@ -774,9 +772,9 @@ CONTAINS
                   this % solution % boundary % hostData(i,3,iSide,iEl)
                 
                 ! Prolong the diagnostic values to the external state
-                this % requiredDiagnostics % extBoundary % hostData(1,1:nDiagnostics,iSide,iEl) = &
-                  this % requiredDiagnostics % boundary % hostData(1,1:nDiagnostics,iSide,iEl)
-
+                this % requiredDiagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
+                  this % requiredDiagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
+           
               ELSEIF( bcid == SELF_BC_PRESCRIBED .OR. bcid == SELF_BC_RADIATION )THEN
 
                 this % solution % extBoundary % hostData(i,1,iSide,iEl) = &
@@ -797,7 +795,6 @@ CONTAINS
                   
                 this % requiredDiagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
                    this % prescribedDiagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
-                
 
               ENDIF
 
