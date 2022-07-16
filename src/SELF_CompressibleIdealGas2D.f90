@@ -79,7 +79,7 @@ MODULE SELF_CompressibleIdealGas2D
   INTEGER, PARAMETER, PRIVATE :: enIndex = 3 ! Index for enthalpy
   INTEGER, PARAMETER, PRIVATE :: soIndex = 4 ! Index for sound speed
   INTEGER, PARAMETER, PRIVATE :: teIndex = 5 ! Index for in-situ temperature
-  INTEGER, PARAMETER, PRIVATE :: nRequiredDiagnostics = 5
+  INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
 
   ! Static fluid state for "air" at stp
   REAL(prec), PARAMETER :: Cp_stpAir = 1.005_prec
@@ -164,8 +164,8 @@ CONTAINS
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % prescribedSolution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
-    CALL this % requiredDiagnostics % Init(geometry % x % interp,nRequiredDiagnostics,this % mesh % nElem)
-    CALL this % prescribedDiagnostics % Init(geometry % x % interp,nRequiredDiagnostics,this % mesh % nElem)
+    CALL this % requiredDiagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
+    CALL this % prescribedDiagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -258,16 +258,16 @@ CONTAINS
         ENDDO
       ENDDO
 
-      CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
+      IF( this % gpuAccel )THEN
+        CALL this % solution % interior % UpdateDevice()
+      ENDIF
+
+      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
       CALL this % PreTendency( )
       
       ! Store the entropy for this state
       CALL this % CalculateEntropy()
       CALL this % ReportEntropy()
-      
-      IF( this % gpuAccel )THEN
-        CALL this % solution % UpdateDevice()
-      ENDIF
 
   END SUBROUTINE SetStaticSTP_CompressibleIdealGas2D
 
@@ -722,6 +722,10 @@ CONTAINS
       ! the EquationOfState call above.
       CALL this % CalculateEnthalpy()
 
+      ! Calculates the Fluid Temperature
+      ! Requires knowledge of the internal energy
+      CALL this % CalculateTemperature()
+
       ! Interpolate velocity and required diagnostics to the element boundaries
       CALL this % velocity % BoundaryInterp(this % gpuAccel)
       CALL this % requiredDiagnostics % BoundaryInterp(this % gpuAccel)
@@ -770,8 +774,8 @@ CONTAINS
                   this % solution % boundary % hostData(i,3,iSide,iEl)
                 
                 ! Prolong the diagnostic values to the external state
-                this % requiredDiagnostics % extBoundary % hostData(1,1:nRequiredDiagnostics,iSide,iEl) = &
-                  this % requiredDiagnostics % boundary % hostData(1,1:nRequiredDiagnostics,iSide,iEl)
+                this % requiredDiagnostics % extBoundary % hostData(1,1:nDiagnostics,iSide,iEl) = &
+                  this % requiredDiagnostics % boundary % hostData(1,1:nDiagnostics,iSide,iEl)
 
               ELSEIF( bcid == SELF_BC_PRESCRIBED .OR. bcid == SELF_BC_RADIATION )THEN
 
@@ -791,8 +795,8 @@ CONTAINS
                   this % solution % boundary % hostData(i,2,iSide,iEl)/&
                   this % solution % boundary % hostData(i,3,iSide,iEl)
                   
-                this % requiredDiagnostics % extBoundary % hostData(i,1:nRequiredDiagnostics,iSide,iEl) = &
-                   this % prescribedDiagnostics % boundary % hostData(i,1:nRequiredDiagnostics,iSide,iEl)
+                this % requiredDiagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
+                   this % prescribedDiagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
                 
 
               ENDIF
