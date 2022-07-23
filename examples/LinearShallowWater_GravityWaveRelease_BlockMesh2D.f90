@@ -64,7 +64,6 @@ USE SELF_LinearShallowWater
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
-    !CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
     CALL geometry % GenerateFromMesh(mesh)
 
     ! Initialize the semModel
@@ -87,7 +86,7 @@ USE SELF_LinearShallowWater
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("Euler")
+    CALL semModel % SetTimeIntegrator("rk3")
 
     ! Set your time step
     semModel % dt = dt

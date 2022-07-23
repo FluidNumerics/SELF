@@ -29,8 +29,8 @@ __global__ void SetBoundaryCondition_LinearShallowWater_gpu( real *solution, rea
       real eta = solution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
 
       extBoundary[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)] = (ny*ny-nx*ny)*u-2.0*nx*ny*v;
-      extBoundary[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)] = (nx*nx-ny*ny)*v-2.0*nx*ny*u;
-      extBoundary[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)] = eta;
+      extBoundary[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)] = (nx*nx-ny*ny)*v-2.0*nx*ny*u;
+      extBoundary[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)] = eta;
 
     } else {
 
@@ -60,11 +60,11 @@ __global__ void Source_LinearShallowWater_gpu(real *source, real *solution, real
   size_t j = threadIdx.y;
 
     if( iVar == 0 ){
-      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = f[SC_2D_INDEX(i,j,1,iEl,N,1)]*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = f[SC_2D_INDEX(i,j,0,iEl,N,1)]*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
     } else if ( iVar == 1) {
-      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = -f[SC_2D_INDEX(i,j,1,iEl,N,1)]*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = -f[SC_2D_INDEX(i,j,0,iEl,N,1)]*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
     } else if ( iVar == 2) {
-      source[SC_2D_INDEX(i,j,iVar,iEl,N,1)] = 0.0;
+      source[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 0.0;
     }
 }
 
@@ -86,14 +86,14 @@ __global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real g, 
   size_t j = threadIdx.y;
 
     if( iVar == 0 ){
-      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,1)] = g*solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
-      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,1)] = 0.0;
+      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = g*solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
+      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 0.0;
     } else if ( iVar == 1) {
-      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,1)] = 0.0;
-      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,1)] = g*solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
+      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 0.0;
+      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = g*solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
     } else if ( iVar == 2) {
-      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,1)] = H*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
-      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,1)] = H*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = H*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = H*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
     }
 }
 

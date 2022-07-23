@@ -225,7 +225,7 @@ MODULE SELF_Model
     SUBROUTINE WriteModel(this, filename)
       IMPORT Model
       IMPLICIT NONE
-      CLASS(Model), INTENT(in) :: this
+      CLASS(Model), INTENT(inout) :: this
       CHARACTER(*), INTENT(in), OPTIONAL :: filename
     END SUBROUTINE WriteModel
   END INTERFACE
@@ -1034,7 +1034,7 @@ CONTAINS
 
   SUBROUTINE Write_Model1D(this,fileName)
     IMPLICIT NONE
-    CLASS(Model1D),INTENT(in) :: this
+    CLASS(Model1D),INTENT(inout) :: this
     CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
@@ -1056,6 +1056,11 @@ CONTAINS
     ELSE
       timeStampString = TimeStamp(this % t, 's')
       pickupFile = 'solution.'//timeStampString//'.h5'
+    ENDIF
+
+    IF( this % gpuAccel ) THEN
+      CALL this % solution % UpdateHost()
+      CALL this % solutionGradient % UpdateHost()
     ENDIF
 
     IF (this % decomp % mpiEnabled) THEN
@@ -1230,6 +1235,9 @@ CONTAINS
     END IF
 
     CALL Close_HDF5(fileId)
+    IF( this % gpuAccel )THEN
+      CALL this % solution % interior % UpdateDevice()
+    ENDIF
 
   END SUBROUTINE Read_Model1D
 
@@ -1264,11 +1272,6 @@ CONTAINS
 
     ENDIF
                       
-    IF( this % gpuAccel )THEN
-      ! Copy data to the CPU
-      CALL this % solution % interior % UpdateHost()
-    ENDIF
-
     ! Create an interpolant for the uniform grid
     CALL interp % Init(this % solution % interp % M,&
             this % solution % interp % targetNodeType,&
@@ -1430,13 +1433,13 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
-
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
       ENDIF
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
   END SUBROUTINE SetSolutionFromEqn_Model2D 
 
@@ -1499,13 +1502,13 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
-
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
       ENDIF
+
+      ! Store the entropy for this state
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
 
   END SUBROUTINE SetSolutionFromChar_Model2D
 
@@ -1690,7 +1693,7 @@ CONTAINS
 
   SUBROUTINE Write_Model2D(this,fileName)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(in) :: this
+    CLASS(Model2D),INTENT(inout) :: this
     CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
@@ -1712,6 +1715,11 @@ CONTAINS
     ELSE
       timeStampString = TimeStamp(this % t, 's')
       pickupFile = 'solution.'//timeStampString//'.h5'
+    ENDIF
+
+    IF( this % gpuAccel ) THEN
+      CALL this % solution % UpdateHost()
+      CALL this % solutionGradient % UpdateHost()
     ENDIF
 
     IF (this % decomp % mpiEnabled) THEN
@@ -1893,6 +1901,10 @@ CONTAINS
 
     CALL Close_HDF5(fileId)
 
+    IF( this % gpuAccel )THEN
+      CALL this % solution % interior % UpdateDevice()
+    ENDIF
+
   END SUBROUTINE Read_Model2D
 
   SUBROUTINE WriteTecplot_Model2D(this, filename)
@@ -1926,11 +1938,6 @@ CONTAINS
 
     ENDIF
                       
-    IF( this % gpuAccel )THEN
-      ! Copy data to the CPU
-      CALL this % solution % interior % UpdateHost()
-    ENDIF
-
     ! Create an interpolant for the uniform grid
     CALL interp % Init(this % solution % interp % M,&
             this % solution % interp % targetNodeType,&

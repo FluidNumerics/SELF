@@ -153,30 +153,32 @@ CONTAINS
     REAL(prec) :: Jacobian, u, v, eta
     REAL(prec) :: wi,wj
 
-    ! TO DO : GPU reduction
+    IF( this % gpuAccel ) THEN
+      CALL this % solution % interior % UpdateHost()
+    ENDIF
 
     this % entropy = 0.0_prec
 
     DO iEl = 1, this % geometry % x % nElem
-        DO j = 0, this % geometry % x % interp % N
-          DO i = 0, this % geometry % x % interp % N
+      DO j = 0, this % geometry % x % interp % N
+        DO i = 0, this % geometry % x % interp % N
 
-            ! Coordinate mapping Jacobian
-            Jacobian = this % geometry % J % interior % hostData(i,j,1,iEl)
+          ! Coordinate mapping Jacobian
+          Jacobian = this % geometry % J % interior % hostData(i,j,1,iEl)
 
-            ! Quadrature weights
-            wi = this % geometry % x % interp % qWeights % hostData(i) 
-            wj = this % geometry % x % interp % qWeights % hostData(j) 
+          ! Quadrature weights
+          wi = this % geometry % x % interp % qWeights % hostData(i) 
+          wj = this % geometry % x % interp % qWeights % hostData(j) 
 
-            ! Solution
-            u = this % solution % interior % hostData(i,j,1,iEl)
-            v = this % solution % interior % hostData(i,j,2,iEl)
-            eta = this % solution % interior % hostData(i,j,3,iEl)
+          ! Solution
+          u = this % solution % interior % hostData(i,j,1,iEl)
+          v = this % solution % interior % hostData(i,j,2,iEl)
+          eta = this % solution % interior % hostData(i,j,3,iEl)
 
-            this % entropy = this % entropy + 0.5_prec*( this % H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
+          this % entropy = this % entropy + 0.5_prec*( this % H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
 
-          ENDDO
         ENDDO
+      ENDDO
     ENDDO
 
   END SUBROUTINE CalculateEntropy_LinearShallowWater
@@ -192,7 +194,6 @@ CONTAINS
       CALL this % fCori % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % fCori % BoundaryInterp( gpuAccel = .FALSE. )
 
-
       IF( this % gpuAccel )THEN
         CALL this % fCori % UpdateDevice()
       ENDIF
@@ -203,7 +204,6 @@ CONTAINS
     IMPLICIT NONE
     CLASS(LinearShallowWater),INTENT(inout) :: this
     CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
-
 
       CALL this % fCori % SetEquation(1, eqnChar)
 
@@ -223,7 +223,6 @@ CONTAINS
     INTEGER :: iEl, iSide, i
     INTEGER :: bcid, e2
     REAL(prec) :: u, v, nhat(1:2)
-
 
     IF( this % gpuAccel )THEN
 
@@ -298,9 +297,17 @@ CONTAINS
           ENDDO
         ENDDO
       ENDDO
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % interior % UpdateDevice()
+      ENDIF
       
       ! Calculate tendency
       CALL this % CalculateTendency()
+
+      IF( this % gpuAccel )THEN
+        CALL this % dSdt % interior % UpdateHost()
+      ENDIF
       
       DO iEl = 1, this % source % nElem
         DO j = 0, this % source % interp % N
@@ -318,7 +325,9 @@ CONTAINS
         ENDDO
       ENDDO
 
-                                                  
+      IF( this % gpuAccel )THEN
+        CALL this % solution % interior % UpdateDevice()
+      ENDIF
     
   END SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater
 
