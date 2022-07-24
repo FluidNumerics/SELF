@@ -50,7 +50,6 @@ USE SELF_LinearShallowWater
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
 
-
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
@@ -70,7 +69,7 @@ USE SELF_LinearShallowWater
     CALL geometry % GenerateFromMesh(mesh)
     
     ! Reset the boundary condition to reflecting
-    CALL mesh % ResetBoundaryConditionType(SELF_BC_RADIATION)
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
