@@ -6,6 +6,8 @@ Copyright 2020-2022 Fluid Numerics LLC
 [![Youtube](https://img.shields.io/youtube/channel/subscribers/UCW5e-TavOnw1AABGH-VMbRg?style=social)](https://www.youtube.com/channel/UCW5e-TavOnw1AABGH-VMbRg?sub_confirmation=1)
 [![Reddit](https://img.shields.io/reddit/subreddit-subscribers/fluidnumerics?style=social)](https://www.reddit.com/r/FluidNumerics/)
 
+Join the [Higher Order Methods Slack group](https://join.slack.com/t/higherordermethods/shared_invite/zt-1da6fpyjo-c4yNNXD_o0F3Yrxe8isgJg)
+
 SELF is licensed for use under the [Anti-Corporatist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
 
 ## About
