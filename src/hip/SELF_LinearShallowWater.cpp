@@ -77,7 +77,7 @@ extern "C"
 }
 
 
-__global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real g, real H, int N, int nVar){
+__global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real *H, real g, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs
   size_t iVar = blockIdx.x;
@@ -92,20 +92,20 @@ __global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real g, 
       flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 0.0;
       flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = g*solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
     } else if ( iVar == 2) {
-      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = H*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
-      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = H*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+      flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = H[SC_2D_INDEX(i,j,0,iEl,N,1)]*solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+      flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = H[SC_2D_INDEX(i,j,0,iEl,N,1)]*solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
     }
 }
 
 extern "C"
 {
-  void Flux_LinearShallowWater_gpu_wrapper(real **flux, real **solution, real g, real H, int N, int nVar, int nEl)
+  void Flux_LinearShallowWater_gpu_wrapper(real **flux, real **solution, real **H, real g,int N, int nVar, int nEl)
   {
-    Flux_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, g, H, N, nVar);
+    Flux_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, *H, g, N, nVar);
   }
 }
 
-__global__ void RiemannSolver_LinearShallowWater_gpu( real *flux, real *solution, real *extBoundary, real *nHat, real *nScale, real g, real H, int N, int nVar ){
+__global__ void RiemannSolver_LinearShallowWater_gpu( real *flux, real *solution, real *extBoundary, real *H, real *nHat, real *nScale, real g, int N, int nVar ){
 
   size_t iSide = blockIdx.x+1;
   size_t iEl = blockIdx.y;
@@ -123,7 +123,7 @@ __global__ void RiemannSolver_LinearShallowWater_gpu( real *flux, real *solution
   real etaL = solution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
   real etaR = extBoundary[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
 
-  real c = sqrt(g*H);
+  real c = sqrt(g*H[SCB_2D_INDEX(i,0,iSide,iEl,N,1)]);
 
   real wL = 0.5*(unL/g + etaL/c);
   real wR = 0.5*(unR/g - etaR/c);
@@ -138,8 +138,8 @@ __global__ void RiemannSolver_LinearShallowWater_gpu( real *flux, real *solution
 
 extern "C"
 {
-  void RiemannSolver_LinearShallowWater_gpu_wrapper( real **flux, real **solution, real **extBoundary, real **nHat, real **nScale, real g, real H, int N, int nVar, int nEl)
+  void RiemannSolver_LinearShallowWater_gpu_wrapper( real **flux, real **solution, real **extBoundary, real **H, real **nHat, real **nScale, real g, int N, int nVar, int nEl)
   {
-    RiemannSolver_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extBoundary, *nHat, *nScale, g, H, N, nVar);
+    RiemannSolver_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extBoundary, *H, *nHat, *nScale, g, N, nVar);
   }
 }

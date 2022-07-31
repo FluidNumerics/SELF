@@ -76,7 +76,7 @@ USE SELF_LinearShallowWater
     
     ! Set gravity acceleration and fluid depth
     semModel % g = g
-    semModel % H = H
+    CALL semModel % SetBathymetry( H )
 
     ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
