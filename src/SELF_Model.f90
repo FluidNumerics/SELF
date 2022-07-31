@@ -818,9 +818,6 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
@@ -844,9 +841,6 @@ CONTAINS
       CALL this % solution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % solution % BoundaryInterp( gpuAccel = .FALSE. )
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateDevice()
@@ -1437,10 +1431,6 @@ CONTAINS
         CALL this % solution % UpdateDevice()
       ENDIF
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
-
   END SUBROUTINE SetSolutionFromEqn_Model2D 
 
   SUBROUTINE SetVelocityFieldFromEqn_Model2D(this, eqn) 
@@ -1506,9 +1496,6 @@ CONTAINS
         CALL this % solution % UpdateDevice()
       ENDIF
 
-      ! Store the entropy for this state
-      CALL this % CalculateEntropy()
-      CALL this % ReportEntropy()
 
   END SUBROUTINE SetSolutionFromChar_Model2D
 

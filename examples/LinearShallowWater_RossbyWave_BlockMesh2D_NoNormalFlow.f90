@@ -88,7 +88,6 @@ USE SELF_LinearShallowWater
                          "v = 0.0                                             ", &
                          "n = 10^(-2)*exp( -( (x^2 + y^2 )/(2.0*10.0^(10)) ) )"/)
     CALL semModel % SetSolution( initialCondition )
-    referenceEntropy = semModel % entropy
 
     ! Set the coriolis parameter
     coriolis = "f = 10^(-4) + 2.0*(10^(-11))*y"
@@ -96,6 +95,9 @@ USE SELF_LinearShallowWater
     
     ! Get the geostrophic velocity from the free surface height field
     CALL semModel % DiagnoseGeostrophicVelocity()
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
+    referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
     CALL semModel % WriteModel()

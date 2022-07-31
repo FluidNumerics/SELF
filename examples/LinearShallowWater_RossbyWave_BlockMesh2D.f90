@@ -74,22 +74,20 @@ USE SELF_LinearShallowWater
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
-    
-    ! Set gravity acceleration and fluid depth
-    semModel % g = g
-    CALL semModel % SetBathymetry( H )
-
     ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
     ENDIF
+    
+    ! Set gravity acceleration and fluid depth
+    semModel % g = g
+    CALL semModel % SetBathymetry( H )
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0                                             ", &
                          "v = 0.0                                             ", &
                          "n = 10^(-2)*exp( -( (x^2 + y^2 )/(2.0*10.0^(10)) ) )"/)
     CALL semModel % SetSolution( initialCondition )
-    referenceEntropy = semModel % entropy
 
     ! Set the coriolis parameter
     coriolis = "f = 10^(-4) + 2.0*(10^(-11))*y"
@@ -97,6 +95,9 @@ USE SELF_LinearShallowWater
     
     ! Get the geostrophic velocity from the free surface height field
     CALL semModel % DiagnoseGeostrophicVelocity()
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
+    referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
     CALL semModel % WriteModel()

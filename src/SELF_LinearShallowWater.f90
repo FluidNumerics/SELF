@@ -404,7 +404,7 @@ CONTAINS
       IF( this % gpuAccel )THEN
         CALL this % solution % interior % UpdateDevice()
       ENDIF
-    
+
   END SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater
 
   SUBROUTINE Source_LinearShallowWater(this)
