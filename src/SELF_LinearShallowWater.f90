@@ -16,14 +16,15 @@ MODULE SELF_LinearShallowWater
     !! iVar = 1 ~> u velocity component
     !! iVar = 2 ~> v velocity component
     !! iVar = 3 ~> free surface height
-    TYPE(MappedScalar2D) :: fCori ! bottom topography ( m )
+    TYPE(MappedScalar2D) :: fCori ! Coriolis parameter ( 1/s )
+    TYPE(MappedScalar2D) :: H ! bottom topography ( m )
     REAL(prec) :: g     ! gravity ( m/s^2) 
-    REAL(prec) :: H     ! fluid thickness ( m ) 
 
     CONTAINS
 
     ! Overridden Methods
     PROCEDURE :: Init => Init_LinearShallowWater
+    PROCEDURE :: Free => Free_LinearShallowWater
     PROCEDURE :: CalculateEntropy => CalculateEntropy_LinearShallowWater
 
     ! Concretized Methods
@@ -37,6 +38,13 @@ MODULE SELF_LinearShallowWater
                               SetCoriolisFromEqn_LinearShallowWater
     PROCEDURE,PRIVATE :: SetCoriolisFromChar_LinearShallowWater
     PROCEDURE,PRIVATE :: SetCoriolisFromEqn_LinearShallowWater
+
+    GENERIC :: SetBathymetry => SetBathymetryFromChar_LinearShallowWater,&
+                              SetBathymetryFromEqn_LinearShallowWater, &
+                              SetBathymetryFromConstant_LinearShallowWater
+    PROCEDURE,PRIVATE :: SetBathymetryFromChar_LinearShallowWater
+    PROCEDURE,PRIVATE :: SetBathymetryFromEqn_LinearShallowWater
+    PROCEDURE,PRIVATE :: SetBathymetryFromConstant_LinearShallowWater
     
     PROCEDURE :: DiagnoseGeostrophicVelocity => DiagnoseGeostrophicVelocity_LinearShallowWater
 
@@ -65,26 +73,26 @@ MODULE SELF_LinearShallowWater
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Flux_LinearShallowWater_gpu_wrapper(flux, solution, g, H, N, nVar, nEl) &
+    SUBROUTINE Flux_LinearShallowWater_gpu_wrapper(flux, solution, H, g, N, nVar, nEl) &
       bind(c,name="Flux_LinearShallowWater_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: flux, solution
+      TYPE(c_ptr) :: flux, solution, H
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: g, H
+      REAL(c_prec),VALUE :: g
     END SUBROUTINE Flux_LinearShallowWater_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper(flux, solution, extBoundary, nHat, nScale, g, H, N, nVar, nEl) &
+    SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper(flux, solution, extBoundary, H, nHat, nScale, g, N, nVar, nEl) &
       bind(c,name="RiemannSolver_LinearShallowWater_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: flux, solution, extBoundary, nHat, nScale
+      TYPE(c_ptr) :: flux, solution, extBoundary, H, nHat, nScale
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: g, H
+      REAL(c_prec),VALUE :: g
     END SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper
   END INTERFACE
 
@@ -113,11 +121,11 @@ CONTAINS
     this % gpuAccel = .FALSE.
     this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
     this % g = 1.0_prec
-    this % H = 1.0_prec
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % fCori % Init(geometry % x % interp,1,this % mesh % nElem)
+    CALL this % H % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -142,6 +150,24 @@ CONTAINS
 
   END SUBROUTINE Init_LinearShallowWater
 
+  SUBROUTINE Free_LinearShallowWater(this)
+    IMPLICIT NONE
+    CLASS(LinearShallowWater),INTENT(inout) :: this
+
+    CALL this % solution % Free()
+    CALL this % fCori % Free()
+    CALL this % H % Free()
+    CALL this % workSol % Free()
+    CALL this % velocity % Free()
+    CALL this % compVelocity % Free()
+    CALL this % dSdt % Free()
+    CALL this % solutionGradient % Free()
+    CALL this % flux % Free()
+    CALL this % source % Free()
+    CALL this % fluxDivergence % Free()
+
+  END SUBROUTINE Free_LinearShallowWater
+
   SUBROUTINE CalculateEntropy_LinearShallowWater(this)
   !! Base method for calculating entropy of a model
   !! Calculates the entropy as the integration of the 
@@ -150,7 +176,7 @@ CONTAINS
     CLASS(LinearShallowWater), INTENT(inout) :: this
     ! Local
     INTEGER :: i, j, iVar, iEl
-    REAL(prec) :: Jacobian, u, v, eta
+    REAL(prec) :: Jacobian, u, v, eta, H
     REAL(prec) :: wi,wj
 
     IF( this % gpuAccel ) THEN
@@ -175,7 +201,10 @@ CONTAINS
           v = this % solution % interior % hostData(i,j,2,iEl)
           eta = this % solution % interior % hostData(i,j,3,iEl)
 
-          this % entropy = this % entropy + 0.5_prec*( this % H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
+          H = this % H % interior % hostData(i,j,1,iEl)
+
+          this % entropy = this % entropy + &
+                  0.5_prec*( H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
 
         ENDDO
       ENDDO
@@ -215,7 +244,54 @@ CONTAINS
       ENDIF
 
   END SUBROUTINE SetCoriolisFromChar_LinearShallowWater
+
+  SUBROUTINE SetBathymetryFromEqn_LinearShallowWater(this, eqn) 
+    IMPLICIT NONE
+    CLASS(LinearShallowWater),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn
+
+      ! Copy the equation parser
+      CALL this % H % SetEquation(1, eqn % equation)
+
+      CALL this % H % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % H % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetBathymetryFromEqn_LinearShallowWater
   
+  SUBROUTINE SetBathymetryFromChar_LinearShallowWater(this, eqnChar) 
+    IMPLICIT NONE
+    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
+
+      CALL this % H % SetEquation(1, eqnChar)
+
+      CALL this % H % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % H % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetBathymetryFromChar_LinearShallowWater
+
+  SUBROUTINE SetBathymetryFromConstant_LinearShallowWater(this, H) 
+    IMPLICIT NONE
+    CLASS(LinearShallowWater),INTENT(inout) :: this
+    REAL(prec),INTENT(in) :: H
+
+      this % H % interior % hostData = H
+      CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
+
+      IF( this % gpuAccel )THEN
+        CALL this % H % UpdateDevice()
+      ENDIF
+
+  END SUBROUTINE SetBathymetryFromConstant_LinearShallowWater
+
   SUBROUTINE SetBoundaryCondition_LinearShallowWater(this)
     IMPLICIT NONE
     CLASS(LinearShallowWater),INTENT(inout) :: this
@@ -328,7 +404,7 @@ CONTAINS
       IF( this % gpuAccel )THEN
         CALL this % solution % interior % UpdateDevice()
       ENDIF
-    
+
   END SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater
 
   SUBROUTINE Source_LinearShallowWater(this)
@@ -376,7 +452,8 @@ CONTAINS
 
       CALL Flux_LinearShallowWater_gpu_wrapper(this % flux % interior % deviceData,&
                                                this % solution % interior % deviceData, &
-                                               this % g, this % H, this % solution % interp % N, &
+                                               this % H % interior % deviceData, &
+                                               this % g, this % solution % interp % N, &
                                                this % solution % nVar, this % solution % nElem)
 
     ELSE
@@ -401,10 +478,12 @@ CONTAINS
 
               ELSEIF ( iVar == 3 )THEN ! free surface height
                 this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                      this % H*this % solution % interior % hostData(i,j,1,iEl)
+                      this % H % interior % hostData(i,j,1,iEl)*&
+                      this % solution % interior % hostData(i,j,1,iEl)
 
                 this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                      this % H*this % solution % interior % hostData(i,j,2,iEl)
+                      this % H % interior % hostData(i,j,1,iEl)*&
+                      this % solution % interior % hostData(i,j,2,iEl)
               ENDIF
 
             ENDDO
@@ -429,9 +508,10 @@ CONTAINS
       CALL RiemannSolver_LinearShallowWater_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
              this % solution % boundary % deviceData, &
              this % solution % extBoundary % deviceData, &
+             this % H % boundary % deviceData, &
              this % geometry % nHat % boundary % deviceData, &
              this % geometry % nScale % boundary % deviceData, &
-             this % g, this % H, &
+             this % g, &
              this % solution % interp % N, &
              this % solution % nVar, &
              this % solution % nElem)
@@ -445,7 +525,7 @@ CONTAINS
              ! Get the boundary normals on cell edges from the mesh geometry
              nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
              nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
-             c = sqrt( this % g * this % H )
+             c = sqrt( this % g * this % H % boundary % hostData(i,1,iSide,iEl) )
 
              ! Calculate the normal velocity at the cell edges
              unL = this % solution % boundary % hostData(i,1,iSide,iEl)*nHat(1)+&

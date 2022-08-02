@@ -80,6 +80,8 @@ USE SELF_CLI
     initialCondition = (/"u = 0.0", &
                          "H = 1.0"/)
     CALL semModel % SetSolution( initialCondition )
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file

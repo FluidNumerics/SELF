@@ -73,6 +73,8 @@ USE SELF_CompressibleIdealGas2D
     !CALL semModel % EnableGPUAccel()
 
     CALL semModel % SetStaticSTP()
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy
 
     ! Uses the initial condition to set the prescribed state

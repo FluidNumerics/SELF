@@ -79,6 +79,8 @@ USE SELF_ShallowWater
                          "Hv = 0.0                                            ", &
                          "H = 1.0+0.01*exp( -( ((x-0.5)^2 + (y-0.5)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
