@@ -80,7 +80,7 @@ USE SELF_LinearShallowWater
     
     ! Set gravity acceleration and fluid depth
     semModel % g = g
-    H = "H = 1000.0 + (10^(-4))*y"
+    H = "H = 1000.0 + 2.0*(10^(-4))*y"
     CALL semModel % SetBathymetry( H )
 
     ! Set the initial condition
