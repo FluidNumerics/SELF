@@ -660,37 +660,6 @@ CONTAINS
 
       CALL this % CalculateDiagnostics()
 
-      !! Calculate the velocity field from
-      !! the momentum and density
-      !CALL this % CalculateVelocity()
-
-      !! Calculate the kinetic energy from
-      !! the momentum and density
-      !CALL this % CalculateKineticEnergy()
-
-      !! Calculate the pressure using an
-      !! equation of state.
-      !! Requires knowledge of the fluid kinetic energy
-      !! and total energy (to diagnose internal energy)
-      !! and therefore depends on the CalculateKineticEnergy
-      !! call above
-      !CALL this % EquationOfState()
-
-      !! Calculate the speed of sound
-      !! Requires knowledge of the fluid pressure and 
-      !! therefore depends on the EquationofState call above
-      !CALL this % CalculateSoundSpeed()
-
-      !! Calculates the fluid enthalpy
-      !! Requires knowledge of the fluid pressure
-      !! and total energy and therefore depends on
-      !! the EquationOfState call above.
-      !CALL this % CalculateEnthalpy()
-
-      !! Calculates the Fluid Temperature
-      !! Requires knowledge of the internal energy
-      !CALL this % CalculateTemperature()
-
       ! Interpolate velocity and required diagnostics to the element boundaries
       CALL this % velocity % BoundaryInterp(this % gpuAccel)
       CALL this % requiredDiagnostics % BoundaryInterp(this % gpuAccel)
