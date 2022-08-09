@@ -70,8 +70,12 @@ USE SELF_CLI
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
-    ! Enable GPU Acceleration (if a GPU is found) !
-    CALL semModel % EnableGPUAccel()
+    IF( gpuRequested )THEN
+      CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
+    ENDIF
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0                             ", &

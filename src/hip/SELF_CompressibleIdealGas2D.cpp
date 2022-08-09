@@ -57,7 +57,7 @@ __global__ void Flux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real
           solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]+ // rho*v
           requiredDiagnostics[SC_2D_INDEX(i,j,1,iEl,N,nDiag)];
   }
-  else if (iVar == 3)
+  else if (iVar == 2)
   {// density
     flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
           solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)]; //rho*u
@@ -65,7 +65,7 @@ __global__ void Flux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real
     flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
           solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)]; //rho*v
   }
-  else if (iVar == 4)
+  else if (iVar == 3)
   { // total energy (rho*u*H)
 
     flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
@@ -75,7 +75,6 @@ __global__ void Flux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real
     flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
           velocity[VE_2D_INDEX(2,i,j,0,iEl,N,1)]*
           requiredDiagnostics[SC_2D_INDEX(i,j,2,iEl,N,nDiag)]; //rho*v*H
-
   }
 
 }
@@ -110,7 +109,6 @@ __global__ void RiemannSolver_CompressibleIdealGas2D_gpu(real *flux,
   // Get the boundary normals on cell edges from the mesh geometry
   real nx = nHat[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)];
   real ny = nHat[VEB_2D_INDEX(2,i,0,iSide,iEl,N,1)];
-  real nmag = nScale[SCB_2D_INDEX(i,0,iSide,iEl,N,1)];
 
   // Calculate the normal velocity at the cell edges
   real unL = velocity[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)]*nx+
@@ -122,17 +120,15 @@ __global__ void RiemannSolver_CompressibleIdealGas2D_gpu(real *flux,
   real cL = diagnostics[SCB_2D_INDEX(i,3,iSide,iEl,N,nDiag)];
   real cR = extDiagnostics[SCB_2D_INDEX(i,3,iSide,iEl,N,nDiag)];
 
-  real jump = solution[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)]-
-              extSolution[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)];
-
   real fluxL = 0.0;
   real fluxR = 0.0;
   if (iVar == 0)
   {
+
     fluxL = unL*solution[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)] +
              diagnostics[SCB_2D_INDEX(i,1,iSide,iEl,N,nDiag)]*nx;
 
-    fluxR = unR*extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)] +
+    fluxR = unR*extSolution[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)] +
              extDiagnostics[SCB_2D_INDEX(i,1,iSide,iEl,N,nDiag)]*nx;
   }
   else if (iVar == 1)
@@ -146,10 +142,10 @@ __global__ void RiemannSolver_CompressibleIdealGas2D_gpu(real *flux,
   else if (iVar == 2)
   {
     fluxL = solution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)]*nx+
-            solution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)]*ny;
+            solution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)]*ny;
 
     fluxR = extSolution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)]*nx+
-            extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)]*ny;
+            extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)]*ny;
   }
   else if (iVar == 3)
   {
@@ -158,14 +154,19 @@ __global__ void RiemannSolver_CompressibleIdealGas2D_gpu(real *flux,
   }
  
 #ifdef DOUBLE_PRECISION
-  real maxUn = fmax(fabs(unL),fabs(unR));
-  real maxC = fmax(fabs(cL),fabs(cR));
+  real alpha = fmax(fabs(unL+cL),fabs(unR+cR));
+  alpha = fmax(alpha,fabs(unR-cR));
+  alpha = fmax(alpha,fabs(unR+cR));
 #else
-  real maxUn = fmaxf(fabsf(unL),fabsf(unR));
-  real maxC = fmaxf(fabsf(cL),fabsf(cR));
+  real alpha = fmaxf(fabsf(unL+cL),fabsf(unR+cR));
+  alpha = fmaxf(alpha,fabsf(unR-cR));
+  alpha = fmaxf(alpha,fabsf(unR+cR));
 #endif
 
-  real alpha = maxUn + maxC;
+  real jump = solution[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)]-
+              extSolution[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)];
+  real nmag = nScale[SCB_2D_INDEX(i,0,iSide,iEl,N,1)];
+
 
   // Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
   flux[SCB_2D_INDEX(i,iVar,iSide,iEl,N,nVar)] =  0.5*( fluxL + fluxR + alpha*jump )*nmag;
@@ -196,7 +197,6 @@ __global__ void SetBoundaryCondition_CompressibleIdealGas2D_gpu(real *solution,
 		                                                real *extSolution, 
 								real *prescribedSolution, 
 								real *nHat, 
-								real *velocity,
 								real *extVelocity,
 								int *sideInfo, 
 								int N, int nVar){
@@ -222,38 +222,32 @@ __global__ void SetBoundaryCondition_CompressibleIdealGas2D_gpu(real *solution,
       extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)] = (nx*nx - ny*ny)*rhoV - 2.0*nx*ny*rhoU;
       extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)] = solution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
       extSolution[SCB_2D_INDEX(i,3,iSide,iEl,N,nVar)] = solution[SCB_2D_INDEX(i,3,iSide,iEl,N,nVar)];
-      
-      // x-component of the velocity
-      extVelocity[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)] =
-        extSolution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)]/
-        extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
-        
-      // y-component of the velocity
-      extVelocity[VEB_2D_INDEX(2,i,0,iSide,iEl,N,1)] =
-        extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)]/
-        extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
     } 
-    else if (bcid == SELF_BC_PRESCRIBED || bcid == SELF_BC_RADIATION )
+    else if (bcid == SELF_BC_PRESCRIBED || bcid == SELF_BC_RADIATION)
     {
+      extSolution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)] = 
+              prescribedSolution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)];
+
       extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)] = 
               prescribedSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)];
+
       extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)] = 
               prescribedSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
+
       extSolution[SCB_2D_INDEX(i,3,iSide,iEl,N,nVar)] = 
               prescribedSolution[SCB_2D_INDEX(i,3,iSide,iEl,N,nVar)];
-      extSolution[SCB_2D_INDEX(i,4,iSide,iEl,N,nVar)] = 
-              prescribedSolution[SCB_2D_INDEX(i,4,iSide,iEl,N,nVar)];
 
-      // x-component of the velocity
-      extVelocity[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)] =
-        extSolution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)]/
-        extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
-
-      // y-component of the velocity
-      extVelocity[VEB_2D_INDEX(2,i,0,iSide,iEl,N,1)] =
-        extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)]/
-        extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
     }
+
+    // x-component of the velocity
+    extVelocity[VEB_2D_INDEX(1,i,0,iSide,iEl,N,1)] =
+      extSolution[SCB_2D_INDEX(i,0,iSide,iEl,N,nVar)]/
+      extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
+
+    // y-component of the velocity
+    extVelocity[VEB_2D_INDEX(2,i,0,iSide,iEl,N,1)] =
+      extSolution[SCB_2D_INDEX(i,1,iSide,iEl,N,nVar)]/
+      extSolution[SCB_2D_INDEX(i,2,iSide,iEl,N,nVar)];
   }
 
 }
@@ -291,7 +285,6 @@ extern "C"
   void SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(real **solution, 
 		                                               real **extSolution, 
 		                                               real **prescribedSolution, 
-							       real **velocity, 
 							       real **extVelocity, 
 							       real **diagnostics, 
 							       real **extDiagnostics, 
@@ -306,9 +299,8 @@ extern "C"
     SetBoundaryCondition_CompressibleIdealGas2D_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*solution, 
 		                                                                            *extSolution,
 											    *prescribedSolution,
-											    *velocity,
-											    *extVelocity,
 											    *nHat, 
+											    *extVelocity,
 											    *sideInfo, 
 											    N, nVar);
 
@@ -316,7 +308,7 @@ extern "C"
 		                                                                                           *extDiagnostics,
 													   *prescribedDiagnostics,
 													   *sideInfo, 
-													   N, nVar);
+													   N, nDiag);
   }
 }
 

@@ -70,7 +70,12 @@ USE SELF_CompressibleIdealGas2D
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
     ! Enable GPU Acceleration (if a GPU is found) !
-    !CALL semModel % EnableGPUAccel()
+    IF( gpuRequested )THEN
+      CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
+    ENDIF
 
     CALL semModel % SetStaticSTP()
     CALL semModel % CalculateEntropy()

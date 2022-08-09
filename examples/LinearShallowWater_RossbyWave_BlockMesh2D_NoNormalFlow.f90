@@ -78,9 +78,11 @@ USE SELF_LinearShallowWater
     semModel % g = g
     CALL semModel % SetBathymetry( H )
 
-    ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
     ENDIF
 
     ! Set the initial condition

@@ -74,9 +74,12 @@ USE SELF_LinearShallowWater
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
-    ! Enable GPU Acceleration (if a GPU is found) !
+
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
     ENDIF
     
     ! Set gravity acceleration and fluid depth
