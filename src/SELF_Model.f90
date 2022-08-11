@@ -63,6 +63,9 @@ MODULE SELF_Model
     ! Standard Diagnostics
     REAL(prec) :: entropy ! Mathematical entropy function for the model
 
+    ! Domain Decomposition
+    TYPE(MPILayer),POINTER :: decomp
+
     CONTAINS
 
     PROCEDURE :: ForwardStep => ForwardStep_Model
@@ -114,7 +117,6 @@ MODULE SELF_Model
     TYPE(MappedScalar1D) :: fluxDivergence
     TYPE(MappedScalar1D) :: dSdt
     TYPE(MappedScalar1D) :: workSol
-    TYPE(MPILayer),POINTER :: decomp
     TYPE(Mesh1D),POINTER :: mesh
     TYPE(Geometry1D),POINTER :: geometry
 
@@ -159,7 +161,6 @@ MODULE SELF_Model
     TYPE(MappedScalar2D) :: fluxDivergence
     TYPE(MappedScalar2D) :: dSdt
     TYPE(MappedScalar2D) :: workSol
-    TYPE(MPILayer),POINTER :: decomp
     TYPE(Mesh2D),POINTER :: mesh
     TYPE(SEMQuad),POINTER :: geometry
 
@@ -564,17 +565,18 @@ CONTAINS
     CHARACTER(KIND=ucs2, len=20) :: entropy
     CHARACTER(KIND=ucs2, len=:), ALLOCATABLE :: str
 
-    ! Copy the time and entropy to a string
-    WRITE(modelTime,"(ES16.7E3)") this % t
-    WRITE(entropy,"(ES16.7E3)") this % entropy
-
-    ! Write the output to STDOUT 
-    OPEN(output_unit, ENCODING='utf-8')
-    str = ucs2_'t\u1D62 ='//TRIM(modelTime)
-    WRITE(output_unit,'(A)',ADVANCE='no') str
-    str = ucs2_'  |  e\u1D62 ='//TRIM(entropy)
-    WRITE(output_unit,'(A)',ADVANCE='yes') str
-
+    IF( this % decomp % rankId == 0 )THEN
+      ! Copy the time and entropy to a string
+      WRITE(modelTime,"(ES16.7E3)") this % t
+      WRITE(entropy,"(ES16.7E3)") this % entropy
+  
+      ! Write the output to STDOUT 
+      OPEN(output_unit, ENCODING='utf-8')
+      str = ucs2_'t\u1D62 ='//TRIM(modelTime)
+      WRITE(output_unit,'(A)',ADVANCE='no') str
+      str = ucs2_'  |  e\u1D62 ='//TRIM(entropy)
+      WRITE(output_unit,'(A)',ADVANCE='yes') str
+    ENDIF
 
   END SUBROUTINE ReportEntropy_Model
 
@@ -1714,30 +1716,31 @@ CONTAINS
       CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
 
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
-      solOffset(1:4) = (/0,0,1,firstElem/)
-      solGlobalDims(1:4) = (/this % solution % interp % N, &
-                             this % solution % interp % N, &
+      solOffset(1:4) = (/0,0,0,firstElem/)
+      solGlobalDims(1:4) = (/this % solution % interp % N+1, &
+                             this % solution % interp % N+1, &
                              this % solution % nVar, &
                              this % decomp % nElem/)
 
 
-      xOffset(1:5) = (/1,0,0,1,firstElem/)
+
+      xOffset(1:5) = (/0,0,0,0,firstElem/)
       xGlobalDims(1:5) = (/2, &
-                           this % solution % interp % N, &
-                           this % solution % interp % N, &
+                           this % solution % interp % N+1, &
+                           this % solution % interp % N+1, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 
       ! Offsets and dimensions for element boundary data
-      bOffset(1:4) = (/0,1,1,firstElem/)
-      bGlobalDims(1:4) = (/this % solution % interp % N, &
+      bOffset(1:4) = (/0,0,0,firstElem/)
+      bGlobalDims(1:4) = (/this % solution % interp % N+1, &
                            this % solution % nVar, &
                            4,&
                            this % decomp % nElem/)
 
-      bxOffset(1:5) = (/1,0,1,1,firstElem/)
+      bxOffset(1:5) = (/0,0,0,0,firstElem/)
       bxGlobalDims(1:5) = (/2,&
-                           this % solution % interp % N, &
+                           this % solution % interp % N+1, &
                            this % solution % nVar, &
                            4,&
                            this % decomp % nElem/)
@@ -1745,19 +1748,18 @@ CONTAINS
       
       CALL CreateGroup_HDF5(fileId,'/quadrature')
 
-      IF( this % decomp % rankId == 0 )THEN
-        CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                             this % solution % interp % controlPoints)
+      CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
+                           this % solution % interp % controlPoints)
 
-        CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                             this % solution % interp % qWeights)
+      CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
+                           this % solution % interp % qWeights)
 
-        CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                             this % solution % interp % dgMatrix)
+      CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
+                           this % solution % interp % dgMatrix)
 
-        CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                             this % solution % interp % dMatrix)
-      ENDIF
+      CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
+                           this % solution % interp % dMatrix)
+
 
       CALL CreateGroup_HDF5(fileId,'/state')
 

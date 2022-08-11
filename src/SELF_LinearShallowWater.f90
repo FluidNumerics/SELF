@@ -178,12 +178,13 @@ CONTAINS
     INTEGER :: i, j, iVar, iEl
     REAL(prec) :: Jacobian, u, v, eta, H
     REAL(prec) :: wi,wj
+    REAL(prec) :: entropy
 
     IF( this % gpuAccel ) THEN
       CALL this % solution % interior % UpdateHost()
     ENDIF
 
-    this % entropy = 0.0_prec
+    entropy = 0.0_prec
 
     DO iEl = 1, this % geometry % x % nElem
       DO j = 0, this % geometry % x % interp % N
@@ -203,12 +204,14 @@ CONTAINS
 
           H = this % H % interior % hostData(i,j,1,iEl)
 
-          this % entropy = this % entropy + &
+          entropy = entropy + &
                   0.5_prec*( H*(u*u + v*v) + this % g*eta*eta )*Jacobian*wi*wj
 
         ENDDO
       ENDDO
     ENDDO
+
+    CALL this % decomp % GlobalReduce( entropy, this % entropy )
 
   END SUBROUTINE CalculateEntropy_LinearShallowWater
   

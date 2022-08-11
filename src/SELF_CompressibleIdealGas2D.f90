@@ -431,13 +431,14 @@ CONTAINS
     INTEGER :: iEl, iSide, j, i
     REAL(prec) :: Jacobian, wi, wj
     REAL(prec) :: P, rho
+    REAL(prec) :: entropy
           
       IF( this % gpuAccel ) THEN
         CALL this % solution % interior % UpdateHost()
         CALL this % diagnostics % interior % UpdateHost()
       ENDIF
 
-      this % entropy = 0.0_prec
+      entropy = 0.0_prec
 
       DO iEl = 1, this % geometry % x % nElem
         DO j = 0, this % geometry % x % interp % N
@@ -453,13 +454,15 @@ CONTAINS
             rho = this % solution % interior % hostData(i,j,3,iEl)
             P = this % diagnostics % interior % hostData(i,j,prIndex,iEl)
             
-            this % entropy = this % entropy + &
+            entropy = entropy + &
               rho*(log(P) - this % expansionFactor*log(rho))/&
               (this % expansionFactor - 1.0_prec)*wi*wj*Jacobian
           
           ENDDO
         ENDDO
       ENDDO
+
+      CALL this % decomp % GlobalReduce( entropy, this % entropy )
 
   END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
 
