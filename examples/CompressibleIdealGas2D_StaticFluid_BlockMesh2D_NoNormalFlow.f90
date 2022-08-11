@@ -48,7 +48,7 @@ USE SELF_CompressibleIdealGas2D
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
-    CALL decomp % Init(enableMPI=.FALSE.)
+    CALL decomp % Init(enableMPI=mpiRequested)
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
@@ -129,5 +129,6 @@ USE SELF_CompressibleIdealGas2D
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM CompressibleIdealGas2D_StaticFluid

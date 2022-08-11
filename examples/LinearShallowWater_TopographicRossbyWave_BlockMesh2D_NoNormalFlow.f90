@@ -145,5 +145,6 @@ USE SELF_LinearShallowWater
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM LinearShallowWater_GravityWaveRelease

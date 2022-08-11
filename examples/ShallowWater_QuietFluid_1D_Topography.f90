@@ -133,5 +133,6 @@ USE SELF_CLI
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM ShallowWater_QuietFluid
