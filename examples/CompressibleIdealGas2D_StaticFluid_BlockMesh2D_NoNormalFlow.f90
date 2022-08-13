@@ -54,22 +54,11 @@ USE SELF_CompressibleIdealGas2D
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
     
     ! Reset the boundary condition to prescribed
     CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
 
-    ! Generate a decomposition
-    CALL decomp % GenerateDecomposition(mesh)
-
-    ! Generate geometry (metric terms) from the mesh elements
-    CALL geometry % Init(interp,mesh % nElem)
-    CALL geometry % GenerateFromMesh(mesh)
-
-    ! Initialize the semModel
-    CALL semModel % Init(nvar,mesh,geometry,decomp)
-
-    ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
       ! Update the device for the whole model

@@ -49,17 +49,14 @@ USE SELF_CLI
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
-    CALL decomp % Init(enableMPI=.FALSE.)
+    CALL decomp % Init(enableMPI=mpiRequested)
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Circle/Circle_mesh.h5")
-
-    ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Circle/Circle_mesh.h5",decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
