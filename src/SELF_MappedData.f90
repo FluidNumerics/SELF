@@ -828,8 +828,8 @@ CONTAINS
     INTEGER :: neighborRank
     INTEGER :: rankId, offset
 
-      rankId = decomp % rankId
-      offset = decomp % offsetElem % hostData(rankId)
+    rankId = decomp % rankId
+    offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -847,6 +847,7 @@ CONTAINS
                                                    scalar % interp % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
+
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
