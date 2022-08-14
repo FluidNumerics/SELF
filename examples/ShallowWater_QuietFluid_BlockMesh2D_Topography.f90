@@ -58,14 +58,11 @@ USE SELF_CLI
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
 
     ! Reset the boundary condition to reflecting
     !CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
     CALL mesh % ResetBoundaryConditionType(SELF_BC_RADIATION)
-
-    ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -140,5 +137,6 @@ USE SELF_CLI
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM ShallowWater_QuietFluid

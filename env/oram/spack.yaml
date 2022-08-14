@@ -1,10 +1,10 @@
 spack:
-  view: ${HOME}/view/self
+  view: ${MYGROUP}/view/oram/self
   config:
-    install_tree: ${HOME}/software/self
+    install_tree: ${MYGROUP}/software/oram/self
   specs:
-  - hipfort@4.5.2
-  - hdf5@1.12.0+cxx+fortran+mpi
+  - hdf5@1.12.2+cxx+fortran+mpi
+  - hipfort@5.1.3
   - json-fortran@7.1.0
   - feq-parse@1.1.0
   - flap@master
@@ -17,5 +17,10 @@ spack:
     hip:
       buildable: false
       externals:
-      - spec: hip@4.5.2
+      - spec: hip@5.1.3
         prefix: /opt/rocm/
+    openssh:
+      buildable: false
+      externals:
+      - spec: openssh@9.0p1
+        prefix: /usr

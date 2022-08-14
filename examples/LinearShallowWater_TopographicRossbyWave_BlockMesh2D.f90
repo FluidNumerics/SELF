@@ -59,10 +59,7 @@ USE SELF_LinearShallowWater
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5")
-
-    ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5",decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -73,14 +70,17 @@ USE SELF_LinearShallowWater
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
-    ! Enable GPU Acceleration (if a GPU is found) !
+
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
     ENDIF
     
     ! Set gravity acceleration and fluid depth
     semModel % g = g
-    H = "H = 1000.0 + (10^(-4))*y"
+    H = "H = 1000.0 + 2.0*(10^(-4))*y"
     CALL semModel % SetBathymetry( H )
 
     ! Set the initial condition
@@ -142,5 +142,6 @@ USE SELF_LinearShallowWater
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM LinearShallowWater_GravityWaveRelease

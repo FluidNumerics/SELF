@@ -1,0 +1,26 @@
+spack:
+  view: ${MYGROUP}/view/moog/self
+  config:
+    install_tree: ${MYGROUP}/software/moog/self
+  specs:
+  - hdf5@1.12.2+cxx+fortran+mpi
+  - hipfort@4.5.2
+  - json-fortran@7.1.0
+  - feq-parse@1.1.0
+  - flap@master
+  packages:
+    cuda:
+      buildable: false
+      externals:
+      - spec: cuda@11.2.0
+        prefix: /usr/local/cuda
+    hip:
+      buildable: false
+      externals:
+      - spec: hip@4.5.2
+        prefix: /opt/rocm/
+    openssh:
+      buildable: false
+      externals:
+      - spec: openssh@9.0p1
+        prefix: /usr

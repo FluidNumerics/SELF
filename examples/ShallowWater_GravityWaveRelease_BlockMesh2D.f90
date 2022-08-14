@@ -56,10 +56,7 @@ USE SELF_ShallowWater
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
-
-    ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -126,5 +123,6 @@ USE SELF_ShallowWater
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM ShallowWater_GravityWaveRelease

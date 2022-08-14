@@ -1307,27 +1307,26 @@ extern "C"
 __global__ void ApplyFlip_MappedScalar2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y;
+  size_t s1 = blockIdx.y+1;
   size_t e1 = blockIdx.z;
   size_t i1 = threadIdx.x;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
   int i2 = N-i1;
+  int neighborRank = elemToRank[e2];
 
-  __shared__ real extBuff[16];
+  if(bcid == 0){ // Interior Element
+    if( neighborRank /= rankId ){ // Side shared with another rank
+      if(flip == 1){ // Neighboring elements have different orientation
 
-  extBuff[i1] = extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)];
+        __shared__ real extBuff[16];
+        extBuff[i1] = extBoundary[SCB_2D_INDEX(i2,ivar,s1,e1,N,nVar)];
+        __syncthreads();
 
-  __syncthreads();
-
-  if(bcid == 0){
-    int neighborRank = elemToRank[e2];
-    if( neighborRank /= rankId ){
-      if(flip == 1){
-        extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = extBuff[i2];
+        extBoundary[SCB_2D_INDEX(i1,ivar,s1,e1,N,nVar)] = extBuff[i1];
       }
     }
   }
@@ -1346,28 +1345,33 @@ extern "C"
 __global__ void ApplyFlip_MappedVector2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y;
+  size_t s1 = blockIdx.y+1;
   size_t e1 = blockIdx.z;
-  size_t dir = threadIdx.x;
-  size_t i1 = threadIdx.y;
+  size_t i1 = threadIdx.x;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
   int i2 = N-i1;
+  int neighborRank = elemToRank[e2];
 
-  __shared__ real extBuff[32];
-
-  extBuff[dir+2*i1] = extBoundary[VEB_2D_INDEX(dir+1,i1,ivar,s1,e1,N,nVar)];
-
-  __syncthreads();
 
   if(bcid == 0){
-    int neighborRank = elemToRank[e2];
     if( neighborRank /= rankId ){
       if(flip == 1){
-        extBoundary[VEB_2D_INDEX(dir+1,i1,ivar,s1,e1,N,nVar)] = extBuff[dir+2*i2];
+
+        __shared__ real extBuff[16];
+        extBuff[i1] = extBoundary[VEB_2D_INDEX(1,i2,ivar,s1,e1,N,nVar)];
+        __syncthreads();
+
+        extBoundary[VEB_2D_INDEX(1,i1,ivar,s1,e1,N,nVar)] = extBuff[i1];
+
+        extBuff[i1] = extBoundary[VEB_2D_INDEX(2,i2,ivar,s1,e1,N,nVar)];
+        __syncthreads();
+
+        extBoundary[VEB_2D_INDEX(2,i1,ivar,s1,e1,N,nVar)] = extBuff[i2];
+
       }
     }
   }
@@ -1378,7 +1382,7 @@ extern "C"
 {
   void ApplyFlip_MappedVector2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
-    ApplyFlip_MappedVector2D_gpu<<<dim3(nVar,4,nEl), dim3(2,N+1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    ApplyFlip_MappedVector2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
   }
 
 }
@@ -1386,16 +1390,16 @@ extern "C"
 __global__ void ApplyFlip_MappedTensor2D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y;
+  size_t s1 = blockIdx.y+1;
   size_t e1 = blockIdx.z;
   size_t row = threadIdx.x;
   size_t col = threadIdx.y;
   size_t i1 = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
   int i2 = N-i1;
 
   __shared__ real extBuff[64];
@@ -1427,15 +1431,15 @@ extern "C"
 __global__ void ApplyFlip_MappedScalar3D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y;
+  size_t s1 = blockIdx.y+1;
   size_t e1 = blockIdx.z;
   size_t i1 = threadIdx.x;
   size_t j1 = threadIdx.x;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
 
   __shared__ real extBuff[256];
 
@@ -1482,16 +1486,16 @@ extern "C"
 __global__ void ApplyFlip_MappedVector3D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y;
+  size_t s1 = blockIdx.y+1;
   size_t e1 = blockIdx.z;
   size_t dir = threadIdx.x;
   size_t i1 = threadIdx.y;
   size_t j1 = threadIdx.z;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
 
   __shared__ real extBuff[768];
 
@@ -1539,7 +1543,7 @@ extern "C"
 __global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, int *sideInfo, int *elemToRank, int rankId, int N, int nVar){
 
   size_t ivar = blockIdx.x;
-  size_t s1 = blockIdx.y;
+  size_t s1 = blockIdx.y+1;
   size_t e1 = blockIdx.z;
   size_t dir = threadIdx.x;
   size_t i1 = threadIdx.y;
@@ -1547,10 +1551,10 @@ __global__ void ApplyFlip_MappedTensor3D_gpu(real *extBoundary, int *sideInfo, i
   size_t row = dir/3;
   size_t col = dir - dir*row;
   
-  int e2 = sideInfo[INDEX3(2,s1,e1,5,4)];
-  int s2 = sideInfo[INDEX3(3,s1,e1,5,4)]/10;
-  int flip = sideInfo[INDEX3(3,s1,e1,5,4)]-s2*10;
-  int bcid = sideInfo[INDEX3(4,s1,e1,5,4)];
+  int e2 = sideInfo[INDEX3(2,s1-1,e1,5,4)];
+  int s2 = sideInfo[INDEX3(3,s1-1,e1,5,4)]/10;
+  int flip = sideInfo[INDEX3(3,s1-1,e1,5,4)]-s2*10;
+  int bcid = sideInfo[INDEX3(4,s1-1,e1,5,4)];
 
   __shared__ real extBuff[2304];
 

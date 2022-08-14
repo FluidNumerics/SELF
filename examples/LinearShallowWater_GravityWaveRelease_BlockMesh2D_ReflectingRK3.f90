@@ -49,17 +49,14 @@ USE SELF_CLI
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
-    CALL decomp % Init(enableMPI=.FALSE.)
+    CALL decomp % Init(enableMPI=mpiRequested)
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
-
-    ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -71,8 +68,12 @@ USE SELF_CLI
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
-    ! Enable GPU Acceleration (if a GPU is found) !
-    CALL semModel % EnableGPUAccel()
+    IF( gpuRequested )THEN
+      CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
+    ENDIF
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0                                         ", &
@@ -126,5 +127,6 @@ USE SELF_CLI
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM LinearShallowWater_GravityWaveRelease

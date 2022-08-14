@@ -61,7 +61,7 @@ USE SELF_CLI
     CALL mesh % UniformBlockMesh(1,nX,(/0.0_prec,1.0_prec/))
 
     ! Generate a decomposition
-     CALL decomp % GenerateDecomposition(mesh)
+    CALL decomp % GenerateDecomposition(mesh % nElem, 1)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -133,5 +133,6 @@ USE SELF_CLI
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM ShallowWater_QuietFluid

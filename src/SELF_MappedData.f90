@@ -828,8 +828,8 @@ CONTAINS
     INTEGER :: neighborRank
     INTEGER :: rankId, offset
 
-      rankId = decomp % rankId
-      offset = decomp % offsetElem % hostData(rankId)
+    rankId = decomp % rankId
+    offset = decomp % offsetElem % hostData(rankId)
 
     IF (gpuAccel) THEN
 
@@ -847,6 +847,7 @@ CONTAINS
                                                    scalar % interp % N, &
                                                    scalar % nvar, &
                                                    scalar % nElem)
+
     ELSE
 
       CALL scalar % MPIExchangeAsync(decomp,mesh,resetCount=.TRUE.)
@@ -3099,28 +3100,30 @@ CONTAINS
         DO s1 = 1,4
 
           e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
-          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+          IF( e2 > 0 )THEN
+            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF (r2 /= mpiHandler % rankId) THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
-            globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
+              s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+              globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
-            msgCount = msgCount + 1
-            CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
-                           (scalar % interp % N + 1)*scalar % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests(msgCount),iError)
+              msgCount = msgCount + 1
+              CALL MPI_IRECV(scalar % extBoundary % hostData(:,:,s1,e1), &
+                             (scalar % interp % N + 1)*scalar % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
 
-            msgCount = msgCount + 1
-            CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
-                           (scalar % interp % N + 1)*scalar % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests(msgCount),iError)
+              msgCount = msgCount + 1
+              CALL MPI_ISEND(scalar % boundary % hostData(:,:,s1,e1), &
+                             (scalar % interp % N + 1)*scalar % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
+            END IF
           END IF
 
         END DO
@@ -3219,30 +3222,32 @@ CONTAINS
         DO s1 = 1,4
 
           e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
-          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+          IF( e2 > 0 )THEN
+            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF (r2 /= mpiHandler % rankId) THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
-            globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
+              s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+              globalSideId = ABS(mesh % sideInfo % hostdata(2,s1,e1))
 
-            msgCount = msgCount + 1
-            CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
-                           2*(vector % interp % N + 1)*vector % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests(msgCount),iError)
+              msgCount = msgCount + 1
+              CALL MPI_IRECV(vector % extBoundary % hostData(:,:,:,s1,e1), &
+                             2*(vector % interp % N + 1)*vector % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
 
-            msgCount = msgCount + 1
-            CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
-                           2*(vector % interp % N + 1)*vector % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests(msgCount),iError)
+              msgCount = msgCount + 1
+              CALL MPI_ISEND(vector % boundary % hostData(:,:,:,s1,e1), &
+                             2*(vector % interp % N + 1)*vector % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
 
-          END IF
+            END IF
+          ENDIF
 
         END DO
       END DO
@@ -3339,29 +3344,31 @@ CONTAINS
         DO s1 = 1,4
 
           e2 = mesh % sideInfo % hostData(3,s1,e1) ! Neighbor Element
-          r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
+          IF( e2 > 0 )THEN
+            r2 = mpiHandler % elemToRank % hostData(e2) ! Neighbor Rank
 
-          IF (r2 /= mpiHandler % rankId) THEN
+            IF (r2 /= mpiHandler % rankId) THEN
 
-            s2 = mesh % sideInfo % hostData(4,s1,e1)/10
-            globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
+              s2 = mesh % sideInfo % hostData(4,s1,e1)/10
+              globalSideId = mesh % sideInfo % hostdata(2,s1,e1)
 
-            msgCount = msgCount + 1
-            CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
-                           4*(tensor % interp % N + 1)*tensor % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests(msgCount),iError)
+              msgCount = msgCount + 1
+              CALL MPI_IRECV(tensor % extBoundary % hostData(:,:,:,:,s1,e1), &
+                             4*(tensor % interp % N + 1)*tensor % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
 
-            msgCount = msgCount + 1
-            CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
-                           4*(tensor % interp % N + 1)*tensor % nVar, &
-                           mpiHandler % mpiPrec, &
-                           r2,globalSideId, &
-                           mpiHandler % mpiComm, &
-                           mpiHandler % requests(msgCount),iError)
+              msgCount = msgCount + 1
+              CALL MPI_ISEND(tensor % boundary % hostData(:,:,:,:,s1,e1), &
+                             4*(tensor % interp % N + 1)*tensor % nVar, &
+                             mpiHandler % mpiPrec, &
+                             r2,globalSideId, &
+                             mpiHandler % mpiComm, &
+                             mpiHandler % requests(msgCount),iError)
 
+            END IF
           END IF
 
         END DO

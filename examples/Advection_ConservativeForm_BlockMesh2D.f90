@@ -55,10 +55,7 @@ USE SELF_CLI
 
     ! Create a uniform block mesh
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
-
-    ! Generate a decomposition
-    CALL decomp % GenerateDecomposition(mesh)
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -130,5 +127,6 @@ USE SELF_CLI
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM Advection_ConservativeForm_2D

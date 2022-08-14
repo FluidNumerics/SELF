@@ -48,19 +48,16 @@ USE SELF_CompressibleIdealGas2D
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
     ! atrocious with the uniform block mesh
-    CALL decomp % Init(enableMPI=.FALSE.)
+    CALL decomp % Init(enableMPI=mpiRequested)
 
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5")
+    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
     
     ! Reset the boundary condition to prescribed
     CALL mesh % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
-
-    ! Generate a decomposition
-    CALL decomp % GenerateDecomposition(mesh)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -70,8 +67,13 @@ USE SELF_CompressibleIdealGas2D
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
     ! Enable GPU Acceleration (if a GPU is found) !
-    !CALL semModel % EnableGPUAccel()
-
+    IF( gpuRequested )THEN
+      CALL semModel % EnableGPUAccel()
+      ! Update the device for the whole model
+      ! This ensures that the mesh, geometry, and default state match on the GPU
+      CALL semModel % UpdateDevice()
+    ENDIF
+ 
     CALL semModel % SetStaticSTP()
     CALL semModel % CalculateEntropy()
     CALL semModel % ReportEntropy()
@@ -124,5 +126,6 @@ USE SELF_CompressibleIdealGas2D
     CALL mesh % Free()
     CALL interp % Free()
     CALL args % Free()
+    CALL decomp % Finalize()
 
 END PROGRAM CompressibleIdealGas2D_StaticFluid
