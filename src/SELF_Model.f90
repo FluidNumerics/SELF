@@ -60,7 +60,7 @@ MODULE SELF_Model
     INTEGER :: fluxDivMethod
 
     ! Time integration attributes
-    PROCEDURE(SELF_timeIntegrator), POINTER :: timeStepper => Euler_timeStepper 
+    PROCEDURE(SELF_timeIntegrator), POINTER :: timeIntegrator => Euler_timeIntegrator 
     REAL(prec) :: dt
     REAL(prec) :: t
 
@@ -74,12 +74,12 @@ MODULE SELF_Model
 
     PROCEDURE :: ForwardStep => ForwardStep_Model
 
-!    PROCEDURE :: Null_timeStepper 
+!    PROCEDURE :: Null_timeIntegrator 
 
-    PROCEDURE :: Euler_timeStepper 
+    PROCEDURE :: Euler_timeIntegrator 
 
     ! Runge-Kutta methods
-    PROCEDURE :: LowStorageRK3_timeStepper 
+    PROCEDURE :: LowStorageRK3_timeIntegrator 
     PROCEDURE(UpdateGRK3),DEFERRED :: UpdateGRK3
 
     PROCEDURE :: PreTendency => PreTendency_Model
@@ -416,11 +416,11 @@ CONTAINS
       SELECT CASE ( integrator )
 
         CASE ( SELF_EULER )
-          this % timeStepper => Euler_timeStepper
+          this % timeIntegrator => Euler_timeIntegrator
         CASE ( SELF_RK3 )
-          this % timeStepper => LowStorageRK3_timeStepper
+          this % timeIntegrator => LowStorageRK3_timeIntegrator
         CASE DEFAULT
-          this % timeStepper => LowStorageRK3_timeStepper
+          this % timeIntegrator => LowStorageRK3_timeIntegrator
 
       END SELECT
 
@@ -449,13 +449,13 @@ CONTAINS
       SELECT CASE (TRIM(upperCaseInt))
 
         CASE ("EULER")
-          this % timeStepper => Euler_timeStepper
+          this % timeIntegrator => Euler_timeIntegrator
 
         CASE ("RK3")
-          this % timeStepper => LowStorageRK3_timeStepper
+          this % timeIntegrator => LowStorageRK3_timeIntegrator
 
         CASE DEFAULT
-          this % timeStepper => LowStorageRK3_timeStepper
+          this % timeIntegrator => LowStorageRK3_timeIntegrator
 
 
       END SELECT
@@ -644,7 +644,7 @@ CONTAINS
       nIO = INT( (targetTime - this % t)/ioInterval )
       DO i = 1, nIO
         tNext = this % t + ioInterval
-        CALL this % timeStepper(tNext)
+        CALL this % timeIntegrator(tNext)
         this % t = tNext
         CALL this % WriteModel()
         CALL this % WriteTecplot()
@@ -653,7 +653,7 @@ CONTAINS
       ENDDO
 
     ELSE
-      CALL this % timeStepper(targetTime)
+      CALL this % timeIntegrator(targetTime)
       this % t = targetTime
       CALL this % CalculateEntropy()
       CALL this % ReportEntropy()
@@ -661,16 +661,16 @@ CONTAINS
 
   END SUBROUTINE ForwardStep_Model
 
-!  SUBROUTINE Null_timeStepper(this,tn)
+!  SUBROUTINE Null_timeIntegrator(this,tn)
 !    IMPLICIT NONE
 !    CLASS(Model),INTENT(inout) :: this
 !    REAL(prec), INTENT(in) :: tn
 !
 !      this % t = tn
 !
-!  END SUBROUTINE Null_timeStepper
+!  END SUBROUTINE Null_timeIntegrator
 
-  SUBROUTINE Euler_timeStepper(this,tn)
+  SUBROUTINE Euler_timeIntegrator(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
     REAL(prec), INTENT(in) :: tn
@@ -691,9 +691,9 @@ CONTAINS
 
     this % dt = dtLim
 
-  END SUBROUTINE Euler_timeStepper
+  END SUBROUTINE Euler_timeIntegrator
 
-  SUBROUTINE LowStorageRK3_timeStepper(this,tn)
+  SUBROUTINE LowStorageRK3_timeIntegrator(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
     REAL(prec), INTENT(in) :: tn
@@ -717,7 +717,7 @@ CONTAINS
 
     this % dt = dtLim
 
-  END SUBROUTINE LowStorageRK3_timeStepper
+  END SUBROUTINE LowStorageRK3_timeIntegrator
 
   SUBROUTINE Init_Model1D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
