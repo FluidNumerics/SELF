@@ -19,6 +19,11 @@ MODULE SELF_Model
 
 
 
+  ! Runge-Kutta 2nd Order (Low Storage)
+  REAL(prec),PARAMETER,PRIVATE :: rk2_a(1:2) = (/0.0_prec,-0.5_prec/)
+  REAL(prec),PARAMETER,PRIVATE :: rk2_b(1:2) = (/0.5_prec,0.5_prec/)
+  REAL(prec),PARAMETER,PRIVATE :: rk2_g(1:2) = (/0.5_prec,1.0_prec/)
+
   ! Williamson's Runge-Kutta 3rd Order (Low Storage)
   REAL(prec),PARAMETER,PRIVATE :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
   REAL(prec),PARAMETER,PRIVATE :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
@@ -101,6 +106,9 @@ MODULE SELF_Model
     PROCEDURE :: Euler_timeIntegrator 
 
     ! Runge-Kutta methods
+    PROCEDURE :: LowStorageRK2_timeIntegrator 
+    PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK2
+
     PROCEDURE :: LowStorageRK3_timeIntegrator 
     PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK3
 
@@ -163,6 +171,7 @@ MODULE SELF_Model
     PROCEDURE :: UpdateDevice => UpdateDevice_Model1D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model1D
+    PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model1D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model1D
     PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model1D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model1D
@@ -206,6 +215,7 @@ MODULE SELF_Model
     PROCEDURE :: UpdateDevice => UpdateDevice_Model2D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
+    PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model2D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model2D
     PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
@@ -442,6 +452,8 @@ CONTAINS
 
         CASE ( SELF_EULER )
           this % timeIntegrator => Euler_timeIntegrator
+        CASE ( SELF_RK2 )
+          this % timeIntegrator => LowStorageRK2_timeIntegrator
         CASE ( SELF_RK3 )
           this % timeIntegrator => LowStorageRK3_timeIntegrator
         CASE ( SELF_RK4 )
@@ -477,6 +489,9 @@ CONTAINS
 
         CASE ("EULER")
           this % timeIntegrator => Euler_timeIntegrator
+
+        CASE ("RK2")
+          this % timeIntegrator => LowStorageRK2_timeIntegrator
 
         CASE ("RK3")
           this % timeIntegrator => LowStorageRK3_timeIntegrator
@@ -712,6 +727,36 @@ CONTAINS
     this % dt = dtLim
 
   END SUBROUTINE Euler_timeIntegrator
+
+  SUBROUTINE LowStorageRK2_timeIntegrator(this,tn)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: tn
+    ! Local
+    INTEGER :: m
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
+    REAL(prec) :: t0
+
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+    DO WHILE (this % t < tn)
+
+      t0 = this % t
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
+      DO m = 1, 2
+        CALL this % CalculateTendency()
+        CALL this % UpdateGRK2(m)
+        this % t = t0 + rk2_b(m)*this % dt
+      ENDDO
+
+      this % t = t0 + this % dt
+
+    ENDDO 
+
+    this % dt = dtLim
+
+  END SUBROUTINE LowStorageRK2_timeIntegrator
 
   SUBROUTINE LowStorageRK3_timeIntegrator(this,tn)
     IMPLICIT NONE
@@ -971,6 +1016,47 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateSolution_Model1D
+
+  SUBROUTINE UpdateGRK2_Model1D(this,m)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGRK_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          this % dSdt % interior % deviceData, &
+                                          rk2_a(m),rk2_g(m),this % dt, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+                                      
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO i = 0, this % solution % interp % N
+
+            this % workSol % interior % hostData(i,iVar,iEl) = rk2_a(m)*&
+                   this % workSol % interior % hostData(i,iVar,iEl) + &
+                   this % dSdt % interior % hostData(i,iVar,iEl)
+
+
+            this % solution % interior % hostData(i,iVar,iEl) = &
+                    this % solution % interior % hostData(i,iVar,iEl) + &
+                    rk2_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateGRK2_Model1D
 
   SUBROUTINE UpdateGRK3_Model1D(this,m)
     IMPLICIT NONE
@@ -1626,6 +1712,49 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateSolution_Model2D
+
+  SUBROUTINE UpdateGRK2_Model2D(this,m)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, j, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGRK_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          this % dSdt % interior % deviceData, &
+                                          rk2_a(m),rk2_g(m),this % dt, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+                                     
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
+
+              this % workSol % interior % hostData(i,j,iVar,iEl) = rk2_a(m)*&
+                     this % workSol % interior % hostData(i,j,iVar,iEl) + &
+                     this % dSdt % interior % hostData(i,j,iVar,iEl)
+
+
+              this % solution % interior % hostData(i,j,iVar,iEl) = &
+                      this % solution % interior % hostData(i,j,iVar,iEl) + &
+                      rk2_g(m)*this % dt*this % workSol % interior % hostData(i,j,iVar,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateGRK2_Model2D
 
   SUBROUTINE UpdateGRK3_Model2D(this,m)
     IMPLICIT NONE
