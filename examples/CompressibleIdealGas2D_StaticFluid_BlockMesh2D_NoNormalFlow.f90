@@ -18,6 +18,7 @@ USE SELF_CompressibleIdealGas2D
   INTEGER :: M ! Target degree
   INTEGER :: quadrature
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
+  CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
 
@@ -44,6 +45,7 @@ USE SELF_CompressibleIdealGas2D
     CALL args % Get_CLI('--control-quadrature',qChar)
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
+    CALL args % Get_CLI('--integrator',integrator)
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -79,8 +81,8 @@ USE SELF_CompressibleIdealGas2D
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
-    ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("euler")
+    ! Set the time integrator
+    CALL semModel % SetTimeIntegrator(TRIM(integrator))
 
     ! Set your time step
     semModel % dt = dt

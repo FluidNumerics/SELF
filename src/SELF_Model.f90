@@ -17,10 +17,34 @@ MODULE SELF_Model
 ! //////////////////////////////////////////////// !
 !   Time integration parameters
 
-!     Runge-Kutta 3rd Order, low storage constants
+
+
+  ! Williamson's Runge-Kutta 3rd Order (Low Storage)
   REAL(prec),PARAMETER,PRIVATE :: rk3_a(1:3) = (/0.0_prec,-5.0_prec/9.0_prec,-153.0_prec/128.0_prec/)
   REAL(prec),PARAMETER,PRIVATE :: rk3_b(1:3) = (/0.0_prec,1.0_prec/3.0_prec,3.0_prec/4.0_prec/)
   REAL(prec),PARAMETER,PRIVATE :: rk3_g(1:3) = (/1.0_prec/3.0_prec,15.0_prec/16.0_prec,8.0_prec/15.0_prec/)
+
+  ! Carpenter-Kennedy Runge-Kuttta 4th Order (Low Storage)
+  REAL(prec),PARAMETER,PRIVATE :: rk4_a(1:5) = (/0.0_prec, &
+          -1.0_prec, &
+          -1.0_prec/3.0_prec+2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+          -2.0_prec**(1.0_prec/3.0_prec)-2.0_prec**(2.0_prec/3.0_prec)-2.0_prec, &
+          -1.0_prec+2.0_prec**(1.0_prec/3.0_prec) /)
+
+  REAL(prec),PARAMETER,PRIVATE :: rk4_b(1:5) = (/ 0.0_prec, &
+          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+          1.0_prec/3.0_prec-2.0_prec**(1.0_prec/3.0_prec)/3.0_prec-2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+          1.0_prec/)
+  
+  REAL(prec),PARAMETER,PRIVATE :: rk4_g(1:5) = (/&
+          2.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/3.0_prec+2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+          -2.0_prec**(2.0_prec/3.0_prec)/6.0_prec+1.0_prec/6.0_prec, &
+          -1.0_prec/3.0_prec-2.0_prec*2.0_prec**(1.0_prec/3.0_prec)/3.0_prec-2.0_prec**(2.0_prec/3.0_prec)/3.0_prec, &
+          1.0_prec/3.0_prec-2.0_prec**(1.0_prec/3.0_prec)/3.0_prec-2.0_prec**(2.0_prec/3.0_prec)/6.0_prec, &
+          1.0_prec/3.0_prec+2.0_prec**(1.0_prec/3.0_prec)/6.0_prec+2.0_prec**(2.0_prec/3.0_prec)/12.0_prec /)
+
+
 
 ! 
   INTEGER, PARAMETER :: SELF_EULER = 100
@@ -74,13 +98,14 @@ MODULE SELF_Model
 
     PROCEDURE :: ForwardStep => ForwardStep_Model
 
-!    PROCEDURE :: Null_timeIntegrator 
-
     PROCEDURE :: Euler_timeIntegrator 
 
     ! Runge-Kutta methods
     PROCEDURE :: LowStorageRK3_timeIntegrator 
-    PROCEDURE(UpdateGRK3),DEFERRED :: UpdateGRK3
+    PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK3
+
+    PROCEDURE :: LowStorageRK4_timeIntegrator 
+    PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK4
 
     PROCEDURE :: PreTendency => PreTendency_Model
     PROCEDURE :: SourceMethod => Source_Model
@@ -117,7 +142,7 @@ MODULE SELF_Model
 
   END TYPE Model
 
-  TYPE,EXTENDS(Model),ABSTRACT :: Model1D
+  TYPE,EXTENDS(Model) :: Model1D
     TYPE(MappedScalar1D) :: solution
     TYPE(MappedScalar1D) :: solutionGradient
     TYPE(MappedScalar1D) :: velocity
@@ -139,6 +164,7 @@ MODULE SELF_Model
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model1D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model1D
+    PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model1D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model1D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model1D
 
@@ -151,8 +177,6 @@ MODULE SELF_Model
                               SetVelocityFieldFromEqn_Model1D
     PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Model1D
     PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Model1D
-
-!    PROCEDURE :: ReprojectFlux => ReprojectFlux_Model1D
 
     PROCEDURE :: ReadModel => Read_Model1D
     PROCEDURE :: WriteModel => Write_Model1D
@@ -183,6 +207,7 @@ MODULE SELF_Model
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model2D
+    PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model2D
     PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
     PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
 
@@ -215,12 +240,12 @@ MODULE SELF_Model
   END INTERFACE 
 
   INTERFACE 
-    SUBROUTINE UpdateGRK3( this, m )
+    SUBROUTINE UpdateGRK( this, m )
       IMPORT Model
       IMPLICIT NONE
       CLASS(Model),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
-    END SUBROUTINE UpdateGRK3
+    END SUBROUTINE UpdateGRK
   END INTERFACE
 
   INTERFACE 
@@ -283,15 +308,15 @@ MODULE SELF_Model
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK3_Model1D_gpu_wrapper(grk3, solution, dSdt, rk3_a, rk3_g, dt, N, nVar, nEl) &
-      bind(c,name="UpdateGRK3_Model1D_gpu_wrapper")
+    SUBROUTINE UpdateGRK_Model1D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, N, nVar, nEl) &
+      bind(c,name="UpdateGRK_Model1D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: grk3, solution, dSdt
+      TYPE(c_ptr) :: grk, solution, dSdt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: rk3_a, rk3_g, dt
-    END SUBROUTINE UpdateGRK3_Model1D_gpu_wrapper
+      REAL(c_prec),VALUE :: rk_a, rk_g, dt
+    END SUBROUTINE UpdateGRK_Model1D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -307,15 +332,15 @@ MODULE SELF_Model
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK3_Model2D_gpu_wrapper(grk3, solution, dSdt, rk3_a, rk3_g, dt, N, nVar, nEl) &
-      bind(c,name="UpdateGRK3_Model2D_gpu_wrapper")
+    SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, N, nVar, nEl) &
+      bind(c,name="UpdateGRK_Model2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: grk3, solution, dSdt
+      TYPE(c_ptr) :: grk, solution, dSdt
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: rk3_a, rk3_g, dt
-    END SUBROUTINE UpdateGRK3_Model2D_gpu_wrapper
+      REAL(c_prec),VALUE :: rk_a, rk_g, dt
+    END SUBROUTINE UpdateGRK_Model2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -419,6 +444,8 @@ CONTAINS
           this % timeIntegrator => Euler_timeIntegrator
         CASE ( SELF_RK3 )
           this % timeIntegrator => LowStorageRK3_timeIntegrator
+        CASE ( SELF_RK4 )
+          this % timeIntegrator => LowStorageRK4_timeIntegrator
         CASE DEFAULT
           this % timeIntegrator => LowStorageRK3_timeIntegrator
 
@@ -454,9 +481,11 @@ CONTAINS
         CASE ("RK3")
           this % timeIntegrator => LowStorageRK3_timeIntegrator
 
+        CASE ("RK4")
+          this % timeIntegrator => LowStorageRK4_timeIntegrator
+
         CASE DEFAULT
           this % timeIntegrator => LowStorageRK3_timeIntegrator
-
 
       END SELECT
 
@@ -661,15 +690,6 @@ CONTAINS
 
   END SUBROUTINE ForwardStep_Model
 
-!  SUBROUTINE Null_timeIntegrator(this,tn)
-!    IMPLICIT NONE
-!    CLASS(Model),INTENT(inout) :: this
-!    REAL(prec), INTENT(in) :: tn
-!
-!      this % t = tn
-!
-!  END SUBROUTINE Null_timeIntegrator
-
   SUBROUTINE Euler_timeIntegrator(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
@@ -701,23 +721,57 @@ CONTAINS
     INTEGER :: m
     REAL(prec) :: tRemain
     REAL(prec) :: dtLim
+    REAL(prec) :: t0
 
     dtLim = this % dt ! Get the max time step size from the dt attribute
     DO WHILE (this % t < tn)
 
+      t0 = this % t
       tRemain = tn - this % t
       this % dt = MIN( dtLim, tRemain )
       DO m = 1, 3
         CALL this % CalculateTendency()
         CALL this % UpdateGRK3(m)
-        this % t = this % t + rk3_b(m)*this % dt
+        this % t = t0 + rk3_b(m)*this % dt
       ENDDO
+
+      this % t = t0 + this % dt
 
     ENDDO 
 
     this % dt = dtLim
 
   END SUBROUTINE LowStorageRK3_timeIntegrator
+
+  SUBROUTINE LowStorageRK4_timeIntegrator(this,tn)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: tn
+    ! Local
+    INTEGER :: m
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
+    REAL(prec) :: t0
+
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+    DO WHILE (this % t < tn)
+
+      t0 = this % t
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
+      DO m = 1, 5
+        CALL this % CalculateTendency()
+        CALL this % UpdateGRK4(m)
+        this % t = t0 + rk4_b(m)*this % dt
+      ENDDO
+
+      this % t = t0 + this % dt
+
+    ENDDO 
+
+    this % dt = dtLim
+
+  END SUBROUTINE LowStorageRK4_timeIntegrator
 
   SUBROUTINE Init_Model1D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
@@ -927,13 +981,13 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGRK3_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
-                                           this % solution % interior % deviceData, &
-                                           this % dSdt % interior % deviceData, &
-                                           rk3_a(m),rk3_g(m),this % dt, &
-                                           this % solution % interp % N, &
-                                           this % solution % nVar, &
-                                           this % solution % nElem ) 
+      CALL UpdateGRK_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          this % dSdt % interior % deviceData, &
+                                          rk3_a(m),rk3_g(m),this % dt, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
                                       
 
     ELSE
@@ -958,6 +1012,47 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateGRK3_Model1D
+
+  SUBROUTINE UpdateGRK4_Model1D(this,m)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGRK_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          this % dSdt % interior % deviceData, &
+                                          rk4_a(m),rk4_g(m),this % dt, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+                                      
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO i = 0, this % solution % interp % N
+
+            this % workSol % interior % hostData(i,iVar,iEl) = rk4_a(m)*&
+                   this % workSol % interior % hostData(i,iVar,iEl) + &
+                   this % dSdt % interior % hostData(i,iVar,iEl)
+
+
+            this % solution % interior % hostData(i,iVar,iEl) = &
+                    this % solution % interior % hostData(i,iVar,iEl) + &
+                    rk4_g(m)*this % dt*this % workSol % interior % hostData(i,iVar,iEl)
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateGRK4_Model1D
 
   SUBROUTINE CalculateFluxDivergence_Model1D(this)
     IMPLICIT NONE
@@ -1541,14 +1636,14 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL UpdateGRK3_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
-                                           this % solution % interior % deviceData, &
-                                           this % dSdt % interior % deviceData, &
-                                           rk3_a(m),rk3_g(m),this % dt, &
-                                           this % solution % interp % N, &
-                                           this % solution % nVar, &
-                                           this % solution % nElem ) 
-                                      
+      CALL UpdateGRK_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          this % dSdt % interior % deviceData, &
+                                          rk3_a(m),rk3_g(m),this % dt, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+                                     
 
     ELSE
 
@@ -1574,6 +1669,48 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateGRK3_Model2D
+
+  SUBROUTINE UpdateGRK4_Model2D(this,m)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, j, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGRK_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          this % dSdt % interior % deviceData, &
+                                          rk4_a(m),rk4_g(m),this % dt, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+                                     
+
+    ELSE
+
+      DO iEl = 1, this % solution % nElem
+        DO iVar = 1, this % solution % nVar
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
+
+              this % workSol % interior % hostData(i,j,iVar,iEl) = rk4_a(m)*&
+                     this % workSol % interior % hostData(i,j,iVar,iEl) + &
+                     this % dSdt % interior % hostData(i,j,iVar,iEl)
+
+              this % solution % interior % hostData(i,j,iVar,iEl) = &
+                      this % solution % interior % hostData(i,j,iVar,iEl) + &
+                      rk4_g(m)*this % dt*this % workSol % interior % hostData(i,j,iVar,iEl)
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDDO
+
+    ENDIF
+
+  END SUBROUTINE UpdateGRK4_Model2D
 
   SUBROUTINE ReprojectFlux_Model2D(this) 
     IMPLICIT NONE
