@@ -19,6 +19,22 @@ MODULE SELF_Model
 
 
 
+  ! Adams-Bashforth 2nd Order
+  REAL(prec),PARAMETER,PRIVATE :: ab2_weight(1:2) = (/1.5_prec,&
+                                                      -0.5_prec/)
+
+  ! Adams-Bashforth 3rd Order
+  REAL(prec),PARAMETER,PRIVATE :: ab3_weight(1:3) = (/23.0_prec/12.0_prec,&
+                                                      -4.0_prec/3.0_prec,&
+                                                      5.0_prec/12.0_prec/)
+
+  ! Adams-Bashforth 4th Order
+  REAL(prec),PARAMETER,PRIVATE :: ab4_weight(1:4) = (/55.0_prec/24.0_prec, &
+                                                      -59.0_prec/24.0_prec, &
+                                                      37.0_prec/24.0_prec, &
+                                                      -3.0_prec/8.0_prec/)
+
+
   ! Runge-Kutta 2nd Order (Low Storage)
   REAL(prec),PARAMETER,PRIVATE :: rk2_a(1:2) = (/0.0_prec,-0.5_prec/)
   REAL(prec),PARAMETER,PRIVATE :: rk2_b(1:2) = (/0.5_prec,0.5_prec/)
@@ -105,6 +121,16 @@ MODULE SELF_Model
 
     PROCEDURE :: Euler_timeIntegrator 
 
+    ! Adams-Bashforth Methods
+    PROCEDURE(ResizeWorkSol),DEFERRED :: ResizeWorkSol
+
+    PROCEDURE :: AdamsBashforth2_timeIntegrator
+    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB2
+
+!    PROCEDURE :: AdamsBashforth3_timeIntegrator
+!    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB2
+!    PROCEDURE :: AdamsBashforth4_timeIntegrator
+
     ! Runge-Kutta methods
     PROCEDURE :: LowStorageRK2_timeIntegrator 
     PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK2
@@ -171,6 +197,11 @@ MODULE SELF_Model
     PROCEDURE :: UpdateDevice => UpdateDevice_Model1D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model1D
+
+    PROCEDURE :: ResizeWorkSol => ResizeWorkSol_Model1D
+
+    PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model1D
+
     PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model1D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model1D
     PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model1D
@@ -215,6 +246,11 @@ MODULE SELF_Model
     PROCEDURE :: UpdateDevice => UpdateDevice_Model2D
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
+
+    PROCEDURE :: ResizeWorkSol => ResizeWorkSol_Model2D
+
+    PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model2D
+
     PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model2D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model2D
     PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model2D
@@ -248,6 +284,24 @@ MODULE SELF_Model
       REAL(prec), INTENT(in) :: tn
     END SUBROUTINE SELF_timeIntegrator
   END INTERFACE 
+
+  INTERFACE 
+    SUBROUTINE ResizeWorkSol( this, m )
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model),INTENT(inout) :: this
+      INTEGER,INTENT(in) :: m
+    END SUBROUTINE ResizeWorkSol
+  END INTERFACE
+
+  INTERFACE 
+    SUBROUTINE UpdateGAB( this, m )
+      IMPORT Model
+      IMPLICIT NONE
+      CLASS(Model),INTENT(inout) :: this
+      INTEGER,INTENT(in) :: m
+    END SUBROUTINE UpdateGAB
+  END INTERFACE
 
   INTERFACE 
     SUBROUTINE UpdateGRK( this, m )
@@ -452,6 +506,13 @@ CONTAINS
 
         CASE ( SELF_EULER )
           this % timeIntegrator => Euler_timeIntegrator
+        CASE ( SELF_AB2 )
+          this % timeIntegrator => AdamsBashforth2_timeIntegrator
+          CALL this % ResizeWorkSol(2)
+!        CASE ( SELF_AB3 )
+!          this % timeIntegrator => AdamsBashforth3_timeIntegrator
+!        CASE ( SELF_AB4 )
+!          this % timeIntegrator => AdamsBashforth4_timeIntegrator
         CASE ( SELF_RK2 )
           this % timeIntegrator => LowStorageRK2_timeIntegrator
         CASE ( SELF_RK3 )
@@ -489,6 +550,16 @@ CONTAINS
 
         CASE ("EULER")
           this % timeIntegrator => Euler_timeIntegrator
+
+        CASE ("AB2")
+          this % timeIntegrator => AdamsBashforth2_timeIntegrator
+          CALL this % ResizeWorkSol(2)
+
+!        CASE ("AB3")
+!          this % timeIntegrator => AdamsBashforth3_timeIntegrator
+!
+!        CASE ("AB4")
+!          this % timeIntegrator => AdamsBashforth4_timeIntegrator
 
         CASE ("RK2")
           this % timeIntegrator => LowStorageRK2_timeIntegrator
@@ -728,6 +799,44 @@ CONTAINS
 
   END SUBROUTINE Euler_timeIntegrator
 
+  SUBROUTINE AdamsBashforth2_timeIntegrator(this,tn)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: tn
+    ! Local
+    INTEGER :: m
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
+    REAL(prec) :: t0
+
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+    t0 = this % t
+
+    ! Do a single step with RK2
+    ! Initialize the worksol attribute
+    CALL this % UpdateGAB2(0)
+    CALL this % LowStorageRK2_timeIntegrator(t0+this%dt)
+
+    DO WHILE (this % t < tn)
+
+      t0 = this % t
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
+
+      CALL this % UpdateGAB2(2) ! Store the solution in worksol and store the interpolated
+                                ! solution in the solution attribute for tendency calculation
+      CALL this % CalculateTendency()
+      CALL this % UpdateGAB2(1) ! Reset the solution from the worksol
+      CALL this % UpdateSolution()
+
+      this % t = t0 + this % dt
+
+    ENDDO 
+
+    this % dt = dtLim
+
+  END SUBROUTINE AdamsBashforth2_timeIntegrator
+
   SUBROUTINE LowStorageRK2_timeIntegrator(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
@@ -856,6 +965,23 @@ CONTAINS
     CALL this % fluxDivergence % Free()
 
   END SUBROUTINE Free_Model1D
+
+  SUBROUTINE ResizeWorkSol_Model1D(this,m)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: nVar
+
+      ! Free space, if necessary
+      CALL this % workSol % Free()            
+
+      ! Reallocate with increased variable dimension for 
+      ! storing "m" copies of solution data
+      nVar = this % solution % nVar
+      CALL this % workSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
+
+  END SUBROUTINE ResizeWorkSol_Model1D
 
   SUBROUTINE UpdateHost_Model1D(this)
     IMPLICIT NONE
@@ -1016,6 +1142,77 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateSolution_Model1D
+
+  SUBROUTINE UpdateGAB2_Model1D(this,m)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, nVar, iVar, iEl
+
+!    IF (this % gpuAccel) THEN
+!
+!      CALL UpdateGAB_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
+!                                          this % solution % interior % deviceData, &
+!                                          this % dSdt % interior % deviceData, &
+!                                          rk2_a(m),rk2_g(m),this % dt, &
+!                                          this % solution % interp % N, &
+!                                          this % solution % nVar, &
+!                                          this % solution % nElem ) 
+!                                      
+!
+!    ELSE
+
+     ! ab2_weight
+     IF( m == 0 )THEN ! Initialization step - store the solution in the workSol
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             this % workSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSEIF( m == 1 )THEN ! Copy the solution back from worksol
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             this % solution % interior % hostData(i,iVar,iEl) = this % workSol % interior % hostData(i,iVar,iEl)
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
+            ! create an interpolated solution to use for tendency calculation
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             ! Bump the last solution
+             nVar = this % solution % nVar
+             this % workSol % interior % hostData(i,nVar+iVar,iEl) = this % workSol % interior % hostData(i,iVar,iEl)
+
+             ! Store the new solution
+             this % workSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+
+             this % solution % interior % hostData(i,iVar,iEl) = &
+                     1.5_prec*this % workSol % interior % hostData(i,iVar,iEl)-&
+                     0.5_prec*this % workSol % interior % hostData(i,nVar+iVar,iEl)
+           ENDDO
+         ENDDO
+       ENDDO
+     ENDIF
+       
+!    ENDIF
+
+  END SUBROUTINE UpdateGAB2_Model1D
 
   SUBROUTINE UpdateGRK2_Model1D(this,m)
     IMPLICIT NONE
@@ -1547,6 +1744,23 @@ CONTAINS
 
   END SUBROUTINE Free_Model2D
 
+  SUBROUTINE ResizeWorkSol_Model2D(this,m)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: nVar
+
+      ! Free space, if necessary
+      CALL this % workSol % Free()            
+
+      ! Reallocate with increased variable dimension for 
+      ! storing "m" copies of solution data
+      nVar = this % solution % nVar
+      CALL this % workSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
+
+  END SUBROUTINE ResizeWorkSol_Model2D
+
   SUBROUTINE UpdateHost_Model2D(this)
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
@@ -1712,6 +1926,86 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateSolution_Model2D
+
+  SUBROUTINE UpdateGAB2_Model2D(this,m)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, j, nVar, iVar, iEl
+
+!    IF (this % gpuAccel) THEN
+!
+!      CALL UpdateGAB_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
+!                                          this % solution % interior % deviceData, &
+!                                          this % dSdt % interior % deviceData, &
+!                                          rk2_a(m),rk2_g(m),this % dt, &
+!                                          this % solution % interp % N, &
+!                                          this % solution % nVar, &
+!                                          this % solution % nElem ) 
+!                                      
+!
+!    ELSE
+
+     ! ab2_weight
+     IF( m == 0 )THEN ! Initialization step - store the solution in the workSol
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               this % workSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSEIF( m == 1 )THEN ! Reset solution
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               this % solution % interior % hostData(i,j,iVar,iEl) = this % workSol % interior % hostData(i,j,iVar,iEl)
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+
+     ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
+          ! create an interpolated solution to use for tendency calculation
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               
+               ! Bump the last solution
+               nVar = this % solution % nVar
+               this % workSol % interior % hostData(i,j,nVar+iVar,iEl) = this % workSol % interior % hostData(i,j,iVar,iEl)
+
+               ! Store the new solution
+               this % workSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+
+               this % solution % interior % hostData(i,j,iVar,iEl) = &
+                       1.5_prec*this % workSol % interior % hostData(i,j,iVar,iEl)-&
+                       0.5_prec*this % workSol % interior % hostData(i,j,nVar+iVar,iEl)
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ENDIF
+       
+!    ENDIF
+
+  END SUBROUTINE UpdateGAB2_Model2D
 
   SUBROUTINE UpdateGRK2_Model2D(this,m)
     IMPLICIT NONE
