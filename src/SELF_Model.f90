@@ -19,10 +19,6 @@ MODULE SELF_Model
 
 
 
-  ! Adams-Bashforth 2nd Order
-  REAL(prec),PARAMETER,PRIVATE :: ab2_weight(1:2) = (/1.5_prec,&
-                                                      -0.5_prec/)
-
   ! Adams-Bashforth 3rd Order
   REAL(prec),PARAMETER,PRIVATE :: ab3_weight(1:3) = (/23.0_prec/12.0_prec,&
                                                       -4.0_prec/3.0_prec,&
@@ -122,13 +118,14 @@ MODULE SELF_Model
     PROCEDURE :: Euler_timeIntegrator 
 
     ! Adams-Bashforth Methods
-    PROCEDURE(ResizeWorkSol),DEFERRED :: ResizeWorkSol
+    PROCEDURE(ResizePrevSol),DEFERRED :: ResizePrevSol
 
     PROCEDURE :: AdamsBashforth2_timeIntegrator
     PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB2
 
 !    PROCEDURE :: AdamsBashforth3_timeIntegrator
-!    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB2
+!    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB3
+
 !    PROCEDURE :: AdamsBashforth4_timeIntegrator
 
     ! Runge-Kutta methods
@@ -185,6 +182,7 @@ MODULE SELF_Model
     TYPE(MappedScalar1D) :: fluxDivergence
     TYPE(MappedScalar1D) :: dSdt
     TYPE(MappedScalar1D) :: workSol
+    TYPE(MappedScalar1D) :: prevSol
     TYPE(Mesh1D),POINTER :: mesh
     TYPE(Geometry1D),POINTER :: geometry
 
@@ -198,7 +196,7 @@ MODULE SELF_Model
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model1D
 
-    PROCEDURE :: ResizeWorkSol => ResizeWorkSol_Model1D
+    PROCEDURE :: ResizePrevSol => ResizePrevSol_Model1D
 
     PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model1D
 
@@ -234,6 +232,7 @@ MODULE SELF_Model
     TYPE(MappedScalar2D) :: fluxDivergence
     TYPE(MappedScalar2D) :: dSdt
     TYPE(MappedScalar2D) :: workSol
+    TYPE(MappedScalar2D) :: prevSol
     TYPE(Mesh2D),POINTER :: mesh
     TYPE(SEMQuad),POINTER :: geometry
 
@@ -247,7 +246,7 @@ MODULE SELF_Model
 
     PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
 
-    PROCEDURE :: ResizeWorkSol => ResizeWorkSol_Model2D
+    PROCEDURE :: ResizePrevSol => ResizePrevSol_Model2D
 
     PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model2D
 
@@ -286,12 +285,12 @@ MODULE SELF_Model
   END INTERFACE 
 
   INTERFACE 
-    SUBROUTINE ResizeWorkSol( this, m )
+    SUBROUTINE ResizePrevSol( this, m )
       IMPORT Model
       IMPLICIT NONE
       CLASS(Model),INTENT(inout) :: this
       INTEGER,INTENT(in) :: m
-    END SUBROUTINE ResizeWorkSol
+    END SUBROUTINE ResizePrevSol
   END INTERFACE
 
   INTERFACE 
@@ -372,13 +371,24 @@ MODULE SELF_Model
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK_Model1D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, N, nVar, nEl) &
+    SUBROUTINE UpdateGAB2_Model1D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+      bind(c,name="UpdateGAB2_Model1D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: prevsol, solution
+      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+    END SUBROUTINE UpdateGAB2_Model1D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE UpdateGRK_Model1D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
       bind(c,name="UpdateGRK_Model1D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(c_ptr) :: grk, solution, dSdt
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
       REAL(c_prec),VALUE :: rk_a, rk_g, dt
     END SUBROUTINE UpdateGRK_Model1D_gpu_wrapper
   END INTERFACE
@@ -396,13 +406,24 @@ MODULE SELF_Model
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, N, nVar, nEl) &
+    SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+      bind(c,name="UpdateGAB2_Model2D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: prevsol, solution
+      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+    END SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
       bind(c,name="UpdateGRK_Model2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(c_ptr) :: grk, solution, dSdt
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
+      INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
       REAL(c_prec),VALUE :: rk_a, rk_g, dt
     END SUBROUTINE UpdateGRK_Model2D_gpu_wrapper
   END INTERFACE
@@ -508,7 +529,7 @@ CONTAINS
           this % timeIntegrator => Euler_timeIntegrator
         CASE ( SELF_AB2 )
           this % timeIntegrator => AdamsBashforth2_timeIntegrator
-          CALL this % ResizeWorkSol(2)
+          CALL this % ResizePrevSol(2)
 !        CASE ( SELF_AB3 )
 !          this % timeIntegrator => AdamsBashforth3_timeIntegrator
 !        CASE ( SELF_AB4 )
@@ -553,7 +574,7 @@ CONTAINS
 
         CASE ("AB2")
           this % timeIntegrator => AdamsBashforth2_timeIntegrator
-          CALL this % ResizeWorkSol(2)
+          CALL this % ResizePrevSol(2)
 
 !        CASE ("AB3")
 !          this % timeIntegrator => AdamsBashforth3_timeIntegrator
@@ -813,7 +834,7 @@ CONTAINS
     t0 = this % t
 
     ! Do a single step with RK2
-    ! Initialize the worksol attribute
+    ! Initialize the prevsol attribute
     CALL this % UpdateGAB2(0)
     CALL this % LowStorageRK2_timeIntegrator(t0+this%dt)
 
@@ -823,10 +844,10 @@ CONTAINS
       tRemain = tn - this % t
       this % dt = MIN( dtLim, tRemain )
 
-      CALL this % UpdateGAB2(2) ! Store the solution in worksol and store the interpolated
+      CALL this % UpdateGAB2(2) ! Store the solution in prevsol and store the interpolated
                                 ! solution in the solution attribute for tendency calculation
       CALL this % CalculateTendency()
-      CALL this % UpdateGAB2(1) ! Reset the solution from the worksol
+      CALL this % UpdateGAB2(1) ! Reset the solution from the prevsol
       CALL this % UpdateSolution()
 
       this % t = t0 + this % dt
@@ -837,6 +858,44 @@ CONTAINS
 
   END SUBROUTINE AdamsBashforth2_timeIntegrator
 
+!  SUBROUTINE AdamsBashforth3_timeIntegrator(this,tn)
+!    IMPLICIT NONE
+!    CLASS(Model),INTENT(inout) :: this
+!    REAL(prec), INTENT(in) :: tn
+!    ! Local
+!    INTEGER :: m
+!    REAL(prec) :: tRemain
+!    REAL(prec) :: dtLim
+!    REAL(prec) :: t0
+!
+!    dtLim = this % dt ! Get the max time step size from the dt attribute
+!    t0 = this % t
+!
+!    ! Do two steps with RK3
+!    ! Initialize the worksol attribute
+!    CALL this % UpdateGAB3(0)
+!    CALL this % LowStorageRK3_timeIntegrator(t0+this%dt)
+!
+!    DO WHILE (this % t < tn)
+!
+!      t0 = this % t
+!      tRemain = tn - this % t
+!      this % dt = MIN( dtLim, tRemain )
+!
+!      CALL this % UpdateGAB2(2) ! Store the solution in worksol and store the interpolated
+!                                ! solution in the solution attribute for tendency calculation
+!      CALL this % CalculateTendency()
+!      CALL this % UpdateGAB2(1) ! Reset the solution from the worksol
+!      CALL this % UpdateSolution()
+!
+!      this % t = t0 + this % dt
+!
+!    ENDDO 
+!
+!    this % dt = dtLim
+!
+!  END SUBROUTINE AdamsBashforth3_timeIntegrator
+!
   SUBROUTINE LowStorageRK2_timeIntegrator(this,tn)
     IMPLICIT NONE
     CLASS(Model),INTENT(inout) :: this
@@ -942,6 +1001,7 @@ CONTAINS
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -957,6 +1017,7 @@ CONTAINS
 
     CALL this % solution % Free()
     CALL this % workSol % Free()
+    CALL this % prevSol % Free()
     CALL this % velocity % Free()
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
@@ -966,7 +1027,7 @@ CONTAINS
 
   END SUBROUTINE Free_Model1D
 
-  SUBROUTINE ResizeWorkSol_Model1D(this,m)
+  SUBROUTINE ResizePrevSol_Model1D(this,m)
     IMPLICIT NONE
     CLASS(Model1D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
@@ -974,14 +1035,14 @@ CONTAINS
     INTEGER :: nVar
 
       ! Free space, if necessary
-      CALL this % workSol % Free()            
+      CALL this % prevSol % Free()            
 
       ! Reallocate with increased variable dimension for 
       ! storing "m" copies of solution data
       nVar = this % solution % nVar
-      CALL this % workSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
+      CALL this % prevSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
 
-  END SUBROUTINE ResizeWorkSol_Model1D
+  END SUBROUTINE ResizePrevSol_Model1D
 
   SUBROUTINE UpdateHost_Model1D(this)
     IMPLICIT NONE
@@ -1150,39 +1211,38 @@ CONTAINS
     ! Local
     INTEGER :: i, nVar, iVar, iEl
 
-!    IF (this % gpuAccel) THEN
-!
-!      CALL UpdateGAB_Model1D_gpu_wrapper( this % workSol % interior % deviceData, &
-!                                          this % solution % interior % deviceData, &
-!                                          this % dSdt % interior % deviceData, &
-!                                          rk2_a(m),rk2_g(m),this % dt, &
-!                                          this % solution % interp % N, &
-!                                          this % solution % nVar, &
-!                                          this % solution % nElem ) 
-!                                      
-!
-!    ELSE
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGAB2_Model1D_gpu_wrapper( this % prevSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          m, &
+                                          this % prevsol % nVar, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+
+    ELSE
 
      ! ab2_weight
-     IF( m == 0 )THEN ! Initialization step - store the solution in the workSol
+     IF( m == 0 )THEN ! Initialization step - store the solution in the prevSol
 
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO i = 0, this % solution % interp % N
 
-             this % workSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+             this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
            ENDDO
          ENDDO
        ENDDO
 
-     ELSEIF( m == 1 )THEN ! Copy the solution back from worksol
+     ELSEIF( m == 1 )THEN ! Copy the solution back from prevsol
 
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO i = 0, this % solution % interp % N
 
-             this % solution % interior % hostData(i,iVar,iEl) = this % workSol % interior % hostData(i,iVar,iEl)
+             this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
            ENDDO
          ENDDO
@@ -1197,20 +1257,20 @@ CONTAINS
 
              ! Bump the last solution
              nVar = this % solution % nVar
-             this % workSol % interior % hostData(i,nVar+iVar,iEl) = this % workSol % interior % hostData(i,iVar,iEl)
+             this % prevSol % interior % hostData(i,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
 
              ! Store the new solution
-             this % workSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+             this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
 
              this % solution % interior % hostData(i,iVar,iEl) = &
-                     1.5_prec*this % workSol % interior % hostData(i,iVar,iEl)-&
-                     0.5_prec*this % workSol % interior % hostData(i,nVar+iVar,iEl)
+                     1.5_prec*this % prevSol % interior % hostData(i,iVar,iEl)-&
+                     0.5_prec*this % prevSol % interior % hostData(i,nVar+iVar,iEl)
            ENDDO
          ENDDO
        ENDDO
      ENDIF
        
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE UpdateGAB2_Model1D
 
@@ -1227,6 +1287,7 @@ CONTAINS
                                           this % solution % interior % deviceData, &
                                           this % dSdt % interior % deviceData, &
                                           rk2_a(m),rk2_g(m),this % dt, &
+                                          this % worksol % nVar, &
                                           this % solution % interp % N, &
                                           this % solution % nVar, &
                                           this % solution % nElem ) 
@@ -1268,6 +1329,7 @@ CONTAINS
                                           this % solution % interior % deviceData, &
                                           this % dSdt % interior % deviceData, &
                                           rk3_a(m),rk3_g(m),this % dt, &
+                                          this % worksol % nVar, &
                                           this % solution % interp % N, &
                                           this % solution % nVar, &
                                           this % solution % nElem ) 
@@ -1309,6 +1371,7 @@ CONTAINS
                                           this % solution % interior % deviceData, &
                                           this % dSdt % interior % deviceData, &
                                           rk4_a(m),rk4_g(m),this % dt, &
+                                          this % worksol % nVar, &
                                           this % solution % interp % N, &
                                           this % solution % nVar, &
                                           this % solution % nElem ) 
@@ -1710,6 +1773,7 @@ CONTAINS
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -1734,6 +1798,7 @@ CONTAINS
 
     CALL this % solution % Free()
     CALL this % workSol % Free()
+    CALL this % prevSol % Free()
     CALL this % velocity % Free()
     CALL this % compVelocity % Free()
     CALL this % dSdt % Free()
@@ -1744,7 +1809,7 @@ CONTAINS
 
   END SUBROUTINE Free_Model2D
 
-  SUBROUTINE ResizeWorkSol_Model2D(this,m)
+  SUBROUTINE ResizePrevSol_Model2D(this,m)
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
@@ -1752,14 +1817,14 @@ CONTAINS
     INTEGER :: nVar
 
       ! Free space, if necessary
-      CALL this % workSol % Free()            
+      CALL this % prevSol % Free()            
 
       ! Reallocate with increased variable dimension for 
       ! storing "m" copies of solution data
       nVar = this % solution % nVar
-      CALL this % workSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
+      CALL this % prevSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
 
-  END SUBROUTINE ResizeWorkSol_Model2D
+  END SUBROUTINE ResizePrevSol_Model2D
 
   SUBROUTINE UpdateHost_Model2D(this)
     IMPLICIT NONE
@@ -1934,28 +1999,28 @@ CONTAINS
     ! Local
     INTEGER :: i, j, nVar, iVar, iEl
 
-!    IF (this % gpuAccel) THEN
-!
-!      CALL UpdateGAB_Model2D_gpu_wrapper( this % workSol % interior % deviceData, &
-!                                          this % solution % interior % deviceData, &
-!                                          this % dSdt % interior % deviceData, &
-!                                          rk2_a(m),rk2_g(m),this % dt, &
-!                                          this % solution % interp % N, &
-!                                          this % solution % nVar, &
-!                                          this % solution % nElem ) 
-!                                      
-!
-!    ELSE
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGAB2_Model2D_gpu_wrapper( this % prevSol % interior % deviceData, &
+                                           this % solution % interior % deviceData, &
+                                           m, &
+                                           this % prevsol % nVar, &
+                                           this % solution % interp % N, &
+                                           this % solution % nVar, &
+                                           this % solution % nElem ) 
+                                      
+
+    ELSE
 
      ! ab2_weight
-     IF( m == 0 )THEN ! Initialization step - store the solution in the workSol
+     IF( m == 0 )THEN ! Initialization step - store the solution in the prevSol
 
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO j = 0, this % solution % interp % N
              DO i = 0, this % solution % interp % N
 
-               this % workSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+               this % prevSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
 
              ENDDO
            ENDDO
@@ -1969,7 +2034,7 @@ CONTAINS
            DO j = 0, this % solution % interp % N
              DO i = 0, this % solution % interp % N
 
-               this % solution % interior % hostData(i,j,iVar,iEl) = this % workSol % interior % hostData(i,j,iVar,iEl)
+               this % solution % interior % hostData(i,j,iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
 
              ENDDO
            ENDDO
@@ -1988,14 +2053,14 @@ CONTAINS
                
                ! Bump the last solution
                nVar = this % solution % nVar
-               this % workSol % interior % hostData(i,j,nVar+iVar,iEl) = this % workSol % interior % hostData(i,j,iVar,iEl)
+               this % prevSol % interior % hostData(i,j,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
 
                ! Store the new solution
-               this % workSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+               this % prevSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
 
                this % solution % interior % hostData(i,j,iVar,iEl) = &
-                       1.5_prec*this % workSol % interior % hostData(i,j,iVar,iEl)-&
-                       0.5_prec*this % workSol % interior % hostData(i,j,nVar+iVar,iEl)
+                       1.5_prec*this % prevSol % interior % hostData(i,j,iVar,iEl)-&
+                       0.5_prec*this % prevSol % interior % hostData(i,j,nVar+iVar,iEl)
              ENDDO
            ENDDO
          ENDDO
@@ -2003,7 +2068,7 @@ CONTAINS
 
      ENDIF
        
-!    ENDIF
+    ENDIF
 
   END SUBROUTINE UpdateGAB2_Model2D
 
@@ -2020,6 +2085,7 @@ CONTAINS
                                           this % solution % interior % deviceData, &
                                           this % dSdt % interior % deviceData, &
                                           rk2_a(m),rk2_g(m),this % dt, &
+                                          this % worksol % nVar, &
                                           this % solution % interp % N, &
                                           this % solution % nVar, &
                                           this % solution % nElem ) 
@@ -2063,6 +2129,7 @@ CONTAINS
                                           this % solution % interior % deviceData, &
                                           this % dSdt % interior % deviceData, &
                                           rk3_a(m),rk3_g(m),this % dt, &
+                                          this % worksol % nVar, &
                                           this % solution % interp % N, &
                                           this % solution % nVar, &
                                           this % solution % nElem ) 
@@ -2106,6 +2173,7 @@ CONTAINS
                                           this % solution % interior % deviceData, &
                                           this % dSdt % interior % deviceData, &
                                           rk4_a(m),rk4_g(m),this % dt, &
+                                          this % workSol % nVar, &
                                           this % solution % interp % N, &
                                           this % solution % nVar, &
                                           this % solution % nElem ) 

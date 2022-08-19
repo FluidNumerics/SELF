@@ -194,6 +194,7 @@ CONTAINS
     CALL this % diagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
     CALL this % prescribedDiagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)

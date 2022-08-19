@@ -19,22 +19,60 @@ extern "C"
   }
 }
 
-__global__ void UpdateGRK_Model1D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int N, int nVar){
+__global__ void UpdateGAB2_Model1D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
   size_t i = threadIdx.x;
 
-    grk[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = rk_a*grk[SC_1D_INDEX(i,iVar,iEl,N,nVar)] + dSdt[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
-    solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)] += rk_g*dt*grk[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+  if( m == 0 ){
+
+    prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)] = solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 1 ) {
+
+    solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)];
+
+  }
+  else if( m == 2 ) {
+
+    prevsol[SC_1D_INDEX(i,nVar+iVar,iEl,N,nPrev)] = prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)];
+
+    prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)] = solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+
+    solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = 1.5*prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)]-
+	    0.5*prevsol[SC_1D_INDEX(i,nVar+iVar,iEl,N,nPrev)];
+
+  }
 
 }
 
 extern "C"
 {
-  void UpdateGRK_Model1D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int N, int nVar, int nEl)
+  void UpdateGAB2_Model1D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
-    UpdateGRK_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, N, nVar);
+    UpdateGAB2_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+  }
+}
+
+
+__global__ void UpdateGRK_Model1D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+
+    grk[SC_1D_INDEX(i,iVar,iEl,N,nWork)] = rk_a*grk[SC_1D_INDEX(i,iVar,iEl,N,nWork)] + dSdt[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+    solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)] += rk_g*dt*grk[SC_1D_INDEX(i,iVar,iEl,N,nWork)];
+
+}
+
+extern "C"
+{
+  void UpdateGRK_Model1D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar, int nEl)
+  {
+    UpdateGRK_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, nWork, N, nVar);
   }
 }
 
@@ -57,23 +95,61 @@ extern "C"
   }
 }
 
-__global__ void UpdateGRK_Model2D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int N, int nVar){
+__global__ void UpdateGAB2_Model2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
   size_t i = threadIdx.x;
   size_t j = threadIdx.y;
 
-    grk[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = rk_a*grk[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] + dSdt[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
-    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += rk_g*dt*grk[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+  if( m == 0 ){
+
+    prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)] = solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 1 ) {
+
+    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)];
+
+  }
+  else {
+
+    prevsol[SC_2D_INDEX(i,j,nVar+iVar,iEl,N,nPrev)] = prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)];
+
+    prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)] = solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 1.5*prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)]-
+	    0.5*prevsol[SC_2D_INDEX(i,j,nVar+iVar,iEl,N,nPrev)];
+
+  }
 
 }
 
 extern "C"
 {
-  void UpdateGRK_Model2D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int N, int nVar, int nEl)
+  void UpdateGAB2_Model2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
-    UpdateGRK_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, N, nVar);
+    UpdateGAB2_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+  }
+}
+
+__global__ void UpdateGRK_Model2D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+    grk[SC_2D_INDEX(i,j,iVar,iEl,N,nWork)] = rk_a*grk[SC_2D_INDEX(i,j,iVar,iEl,N,nWork)] + dSdt[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] += rk_g*dt*grk[SC_2D_INDEX(i,j,iVar,iEl,N,nWork)];
+
+}
+
+extern "C"
+{
+  void UpdateGRK_Model2D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar, int nEl)
+  {
+    UpdateGRK_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, nWork, N, nVar);
   }
 }
 

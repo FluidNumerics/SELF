@@ -120,6 +120,7 @@ CONTAINS
     CALL this % H % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % gradH % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
+    CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
