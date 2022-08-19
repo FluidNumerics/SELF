@@ -20,12 +20,6 @@ MODULE SELF_Model
 
 
 
-  ! Adams-Bashforth 4th Order
-  REAL(prec),PARAMETER,PRIVATE :: ab4_weight(1:4) = (/55.0_prec/24.0_prec, &
-                                                      -59.0_prec/24.0_prec, &
-                                                      37.0_prec/24.0_prec, &
-                                                      -3.0_prec/8.0_prec/)
-
 
   ! Runge-Kutta 2nd Order (Low Storage)
   REAL(prec),PARAMETER,PRIVATE :: rk2_a(1:2) = (/0.0_prec,-0.5_prec/)
@@ -122,7 +116,8 @@ MODULE SELF_Model
     PROCEDURE :: AdamsBashforth3_timeIntegrator
     PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB3
 
-!    PROCEDURE :: AdamsBashforth4_timeIntegrator
+    PROCEDURE :: AdamsBashforth4_timeIntegrator
+    PROCEDURE(UpdateGAB),DEFERRED :: UpdateGAB4
 
     ! Runge-Kutta methods
     PROCEDURE :: LowStorageRK2_timeIntegrator 
@@ -196,6 +191,7 @@ MODULE SELF_Model
 
     PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model1D
     PROCEDURE :: UpdateGAB3 => UpdateGAB3_Model1D
+    PROCEDURE :: UpdateGAB4 => UpdateGAB4_Model1D
 
     PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model1D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model1D
@@ -247,6 +243,7 @@ MODULE SELF_Model
 
     PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model2D
     PROCEDURE :: UpdateGAB3 => UpdateGAB3_Model2D
+    PROCEDURE :: UpdateGAB4 => UpdateGAB4_Model2D
 
     PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model2D
     PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model2D
@@ -392,6 +389,17 @@ MODULE SELF_Model
   END INTERFACE
 
   INTERFACE
+    SUBROUTINE UpdateGAB4_Model1D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+      bind(c,name="UpdateGAB4_Model1D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: prevsol, solution
+      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+    END SUBROUTINE UpdateGAB4_Model1D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE UpdateGRK_Model1D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
       bind(c,name="UpdateGRK_Model1D_gpu_wrapper")
       USE iso_c_binding
@@ -435,6 +443,17 @@ MODULE SELF_Model
       TYPE(c_ptr) :: prevsol, solution
       INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
     END SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+      bind(c,name="UpdateGAB4_Model2D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: prevsol, solution
+      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+    END SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -554,8 +573,9 @@ CONTAINS
         CASE ( SELF_AB3 )
           this % timeIntegrator => AdamsBashforth3_timeIntegrator
           CALL this % ResizePrevSol(3)
-!        CASE ( SELF_AB4 )
-!          this % timeIntegrator => AdamsBashforth4_timeIntegrator
+        CASE ( SELF_AB4 )
+          this % timeIntegrator => AdamsBashforth4_timeIntegrator
+          CALL this % ResizePrevSol(4)
         CASE ( SELF_RK2 )
           this % timeIntegrator => LowStorageRK2_timeIntegrator
         CASE ( SELF_RK3 )
@@ -601,9 +621,10 @@ CONTAINS
         CASE ("AB3")
           this % timeIntegrator => AdamsBashforth3_timeIntegrator
           CALL this % ResizePrevSol(3)
-!
-!        CASE ("AB4")
-!          this % timeIntegrator => AdamsBashforth4_timeIntegrator
+
+        CASE ("AB4")
+          this % timeIntegrator => AdamsBashforth4_timeIntegrator
+          CALL this % ResizePrevSol(4)
 
         CASE ("RK2")
           this % timeIntegrator => LowStorageRK2_timeIntegrator
@@ -892,13 +913,14 @@ CONTAINS
     REAL(prec) :: t0
 
     dtLim = this % dt ! Get the max time step size from the dt attribute
-    t0 = this % t
 
     ! Do two time steps with RK3
     ! Initialize the prevsol attribute
+    t0 = this % t
     CALL this % UpdateGAB3(0)
     CALL this % LowStorageRK3_timeIntegrator(t0+this%dt)
 
+    t0 = this % t
     CALL this % UpdateGAB3(1)
     CALL this % LowStorageRK3_timeIntegrator(t0+this%dt)
 
@@ -921,6 +943,52 @@ CONTAINS
     this % dt = dtLim
 
   END SUBROUTINE AdamsBashforth3_timeIntegrator
+
+  SUBROUTINE AdamsBashforth4_timeIntegrator(this,tn)
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: tn
+    ! Local
+    INTEGER :: m
+    REAL(prec) :: tRemain
+    REAL(prec) :: dtLim
+    REAL(prec) :: t0
+
+    dtLim = this % dt ! Get the max time step size from the dt attribute
+
+    ! Do three time steps with RK4
+    ! Initialize the prevsol attribute
+    t0 = this % t
+    CALL this % UpdateGAB4(0)
+    CALL this % LowStorageRK4_timeIntegrator(t0+this%dt)
+
+    t0 = this % t
+    CALL this % UpdateGAB4(1)
+    CALL this % LowStorageRK4_timeIntegrator(t0+this%dt)
+
+    t0 = this % t
+    CALL this % UpdateGAB4(2)
+    CALL this % LowStorageRK4_timeIntegrator(t0+this%dt)
+
+    DO WHILE (this % t < tn)
+
+      t0 = this % t
+      tRemain = tn - this % t
+      this % dt = MIN( dtLim, tRemain )
+
+      CALL this % UpdateGAB4(4) ! Store the solution in prevsol and store the interpolated
+                                ! solution in the solution attribute for tendency calculation
+      CALL this % CalculateTendency()
+      CALL this % UpdateGAB4(3) ! Reset the solution from the prevsol
+      CALL this % UpdateSolution()
+
+      this % t = t0 + this % dt
+
+    ENDDO 
+
+    this % dt = dtLim
+
+  END SUBROUTINE AdamsBashforth4_timeIntegrator
 
   SUBROUTINE LowStorageRK2_timeIntegrator(this,tn)
     IMPLICIT NONE
@@ -1386,6 +1454,107 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateGAB3_Model1D
+
+  SUBROUTINE UpdateGAB4_Model1D(this,m)
+    IMPLICIT NONE
+    CLASS(Model1D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, nVar, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGAB4_Model1D_gpu_wrapper( this % prevSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          m, &
+                                          this % prevsol % nVar, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+
+    ELSE
+
+     IF( m == 0 )THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
+
+       nVar = this % solution % nVar
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             this % prevSol % interior % hostData(i,2*nVar+iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSEIF( m == 1 )THEN ! Initialization step - store the solution in the prevSol at ivar
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             this % prevSol % interior % hostData(i,nVar+iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSEIF( m == 2 )THEN ! Initialization step - store the solution in the prevSol at ivar
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+
+     ELSEIF( m == 3 )THEN ! Copy the solution back from the most recent prevsol
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             this % solution % interior % hostData(i,iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
+            ! create an interpolated solution to use for tendency calculation
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO i = 0, this % solution % interp % N
+
+             ! Bump the last two stored solutions
+             nVar = this % solution % nVar
+             this % prevSol % interior % hostData(i,3*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,2*nVar+iVar,iEl)
+             this % prevSol % interior % hostData(i,2*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,nVar+iVar,iEl)
+             this % prevSol % interior % hostData(i,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)
+
+             ! Store the new solution
+             this % prevSol % interior % hostData(i,iVar,iEl) = this % solution % interior % hostData(i,iVar,iEl)
+
+             this % solution % interior % hostData(i,iVar,iEl) = &
+                     (55.0_prec*this % prevSol % interior % hostData(i,iVar,iEl)-&
+                      59.0_prec*this % prevSol % interior % hostData(i,nVar+iVar,iEl)+&
+                      37.0_prec*this % prevSol % interior % hostData(i,2*nVar+iVar,iEl)-&
+                      9.0_prec*this % prevSol % interior % hostData(i,3*nVar+iVar,iEl))/24.0_prec
+
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ENDIF
+       
+    ENDIF
+
+  END SUBROUTINE UpdateGAB4_Model1D
 
   SUBROUTINE UpdateGRK2_Model1D(this,m)
     IMPLICIT NONE
@@ -2158,6 +2327,7 @@ CONTAINS
      ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
           ! create an interpolated solution to use for tendency calculation
 
+       nVar = this % solution % nVar
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO j = 0, this % solution % interp % N
@@ -2165,7 +2335,6 @@ CONTAINS
 
                
                ! Bump the last solution
-               nVar = this % solution % nVar
                this % prevSol % interior % hostData(i,j,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
 
                ! Store the new solution
@@ -2251,13 +2420,13 @@ CONTAINS
      ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
             ! create an interpolated solution to use for tendency calculation
 
+       nVar = this % solution % nVar
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO j = 0, this % solution % interp % N
              DO i = 0, this % solution % interp % N
 
                ! Bump the last two stored solutions
-               nVar = this % solution % nVar
                this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,nVar+iVar,iEl)
                this % prevSol % interior % hostData(i,j,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
 
@@ -2278,6 +2447,118 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE UpdateGAB3_Model2D
+
+  SUBROUTINE UpdateGAB4_Model2D(this,m)
+    IMPLICIT NONE
+    CLASS(Model2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: m
+    ! Local
+    INTEGER :: i, j, nVar, iVar, iEl
+
+    IF (this % gpuAccel) THEN
+
+      CALL UpdateGAB4_Model2D_gpu_wrapper( this % prevSol % interior % deviceData, &
+                                          this % solution % interior % deviceData, &
+                                          m, &
+                                          this % prevsol % nVar, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % solution % nElem ) 
+
+    ELSE
+
+     IF( m == 0 )THEN ! Initialization step - store the solution in the prevSol at nvar+ivar
+
+       nVar = this % solution % nVar
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSEIF( m == 1 )THEN ! Initialization step - store the solution in the prevSol at ivar
+
+       nVar = this % solution % nVar
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               this % prevSol % interior % hostData(i,j,nVar+iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSEIF( m == 2 )THEN ! Initialization step - store the solution in the prevSol at ivar
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               this % prevSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+
+     ELSEIF( m == 3 )THEN ! Copy the solution back from the most recent prevsol
+
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               this % solution % interior % hostData(i,j,iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
+            ! create an interpolated solution to use for tendency calculation
+
+       nVar = this % solution % nVar
+       DO iEl = 1, this % solution % nElem
+         DO iVar = 1, this % solution % nVar
+           DO j = 0, this % solution % interp % N
+             DO i = 0, this % solution % interp % N
+
+               ! Bump the last two stored solutions
+               this % prevSol % interior % hostData(i,j,3*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl)
+               this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,nVar+iVar,iEl)
+               this % prevSol % interior % hostData(i,j,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
+
+               ! Store the new solution
+               this % prevSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
+
+               this % solution % interior % hostData(i,j,iVar,iEl) = &
+                       (55.0_prec*this % prevSol % interior % hostData(i,j,iVar,iEl)-&
+                        59.0_prec*this % prevSol % interior % hostData(i,j,nVar+iVar,iEl)+&
+                        37.0_prec*this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl)-&
+                        9.0_prec*this % prevSol % interior % hostData(i,j,3*nVar+iVar,iEl))/24.0_prec
+
+             ENDDO
+           ENDDO
+         ENDDO
+       ENDDO
+
+     ENDIF
+       
+    ENDIF
+
+  END SUBROUTINE UpdateGAB4_Model2D
 
   SUBROUTINE UpdateGRK2_Model2D(this,m)
     IMPLICIT NONE

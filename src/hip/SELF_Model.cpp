@@ -99,6 +99,58 @@ extern "C"
   }
 }
 
+__global__ void UpdateGAB4_Model1D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+
+  if( m == 0 ){
+
+    prevsol[SC_1D_INDEX(i,2*nVar+iVar,iEl,N,nPrev)] = solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 1 ){
+
+    prevsol[SC_1D_INDEX(i,nVar+iVar,iEl,N,nPrev)] = solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 2 ){
+
+    prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)] = solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 3 ) {
+
+    solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)];
+
+  }
+  else {
+
+
+    prevsol[SC_1D_INDEX(i,3*nVar+iVar,iEl,N,nPrev)] = prevsol[SC_1D_INDEX(i,2*nVar+iVar,iEl,N,nPrev)];
+
+    prevsol[SC_1D_INDEX(i,2*nVar+iVar,iEl,N,nPrev)] = prevsol[SC_1D_INDEX(i,nVar+iVar,iEl,N,nPrev)];
+
+    prevsol[SC_1D_INDEX(i,nVar+iVar,iEl,N,nPrev)] = prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)];
+
+    solution[SC_1D_INDEX(i,iVar,iEl,N,nVar)] = (55.0*prevsol[SC_1D_INDEX(i,iVar,iEl,N,nPrev)]-
+	    59.0*prevsol[SC_1D_INDEX(i,nVar+iVar,iEl,N,nPrev)] +
+	    37.0*prevsol[SC_1D_INDEX(i,2*nVar+iVar,iEl,N,nPrev)]-
+	    9.0*prevsol[SC_1D_INDEX(i,3*nVar+iVar,iEl,N,nPrev)])/24.0;
+
+  }
+
+}
+
+extern "C"
+{
+  void UpdateGAB4_Model1D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
+  {
+    UpdateGAB4_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+  }
+}
+
 __global__ void UpdateGRK_Model1D_gpu(real *grk, real *solution, real *dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar){
 
   size_t iVar = blockIdx.x;
@@ -180,7 +232,7 @@ __global__ void UpdateGAB3_Model2D_gpu(real *prevsol, real *solution, int m, int
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
   size_t i = threadIdx.x;
-  size_t j = threadIdx.x;
+  size_t j = threadIdx.y;
 
   if( m == 0 ){
 
@@ -216,6 +268,59 @@ extern "C"
   void UpdateGAB3_Model2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
     UpdateGAB3_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+  }
+}
+
+__global__ void UpdateGAB4_Model2D_gpu(real *prevsol, real *solution, int m, int nPrev, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  if( m == 0 ){
+
+    prevsol[SC_2D_INDEX(i,j,2*nVar+iVar,iEl,N,nPrev)] = solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 1 ){
+
+    prevsol[SC_2D_INDEX(i,j,nVar+iVar,iEl,N,nPrev)] = solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 2 ){
+
+    prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)] = solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
+
+  }
+  else if( m == 3 ) {
+
+    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)];
+
+  }
+  else {
+
+
+    prevsol[SC_2D_INDEX(i,j,3*nVar+iVar,iEl,N,nPrev)] = prevsol[SC_2D_INDEX(i,j,2*nVar+iVar,iEl,N,nPrev)];
+
+    prevsol[SC_2D_INDEX(i,j,2*nVar+iVar,iEl,N,nPrev)] = prevsol[SC_2D_INDEX(i,j,nVar+iVar,iEl,N,nPrev)];
+
+    prevsol[SC_2D_INDEX(i,j,nVar+iVar,iEl,N,nPrev)] = prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)];
+
+    solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = (55.0*prevsol[SC_2D_INDEX(i,j,iVar,iEl,N,nPrev)]-
+	    59.0*prevsol[SC_2D_INDEX(i,j,nVar+iVar,iEl,N,nPrev)] +
+	    37.0*prevsol[SC_2D_INDEX(i,j,2*nVar+iVar,iEl,N,nPrev)]-
+	    9.0*prevsol[SC_2D_INDEX(i,j,3*nVar+iVar,iEl,N,nPrev)])/24.0;
+
+  }
+
+}
+
+extern "C"
+{
+  void UpdateGAB4_Model2D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
+  {
+    UpdateGAB4_Model2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
   }
 }
 
