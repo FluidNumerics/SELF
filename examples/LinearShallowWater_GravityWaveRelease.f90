@@ -4,8 +4,8 @@ USE SELF_Constants
 USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
-USE SELF_LinearShallowWater
 USE SELF_CLI
+USE SELF_LinearShallowWater
 
   IMPLICIT NONE
 
@@ -21,7 +21,6 @@ USE SELF_CLI
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
 
-
   REAL(prec) :: referenceEntropy
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
@@ -30,7 +29,10 @@ USE SELF_CLI
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
+  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=500) :: meshfile
+
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
     CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
@@ -45,6 +47,11 @@ USE SELF_CLI
     CALL args % Get_CLI('--control-quadrature',qChar)
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
+    CALL args % Get_CLI('--mesh',meshfile)
+
+    IF( TRIM(meshfile) == '')THEN
+      meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5"
+    ENDIF
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -55,17 +62,16 @@ USE SELF_CLI
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Circle/Circle_mesh.h5",decomp)
+    CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
-    !CALL geometry % GenerateFromMesh(mesh,interp,meshQuadrature=GAUSS_LOBATTO)
     CALL geometry % GenerateFromMesh(mesh)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
+    ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
       ! Update the device for the whole model
@@ -74,9 +80,9 @@ USE SELF_CLI
     ENDIF
 
     ! Set the initial condition
-    initialCondition = (/"u = 0.0                             ", &
-                         "v = 0.0                             ", &
-                         "n = 0.01*exp( -( (x^2 + y^2 )/0.01 )"/)
+    initialCondition = (/"u = 0.0                                         ", &
+                         "v = 0.0                                         ", &
+                         "n = 0.01*exp( -( ((x-0.5)^2 + (y-0.5)^2 )/0.01 )"/)
     CALL semModel % SetSolution( initialCondition )
     CALL semModel % CalculateEntropy()
     CALL semModel % ReportEntropy()
@@ -87,7 +93,7 @@ USE SELF_CLI
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("Euler")
+    CALL semModel % SetTimeIntegrator("rk3")
 
     ! Set your time step
     semModel % dt = dt

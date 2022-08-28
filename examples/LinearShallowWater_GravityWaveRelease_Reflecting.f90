@@ -31,6 +31,7 @@ USE SELF_CLI
   TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
   CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=500) :: meshfile
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
     CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
@@ -45,6 +46,11 @@ USE SELF_CLI
     CALL args % Get_CLI('--control-quadrature',qChar)
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
+    CALL args % Get_CLI('--mesh',meshfile)
+
+    IF( TRIM(meshfile) == '')THEN
+      meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5"
+    ENDIF
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -55,8 +61,7 @@ USE SELF_CLI
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
+    CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -89,7 +94,7 @@ USE SELF_CLI
     CALL semModel % WriteTecplot()
 
     ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("rk3")
+    CALL semModel % SetTimeIntegrator("Euler")
 
     ! Set your time step
     semModel % dt = dt

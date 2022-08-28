@@ -34,6 +34,7 @@ USE SELF_LinearShallowWater
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: coriolis
   CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=500) :: meshfile
 
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -49,7 +50,11 @@ USE SELF_LinearShallowWater
     CALL args % Get_CLI('--control-quadrature',qChar)
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
+    CALL args % Get_CLI('--mesh',meshfile)
 
+    IF( TRIM(meshfile) == '')THEN
+      meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5"
+    ENDIF
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -60,7 +65,7 @@ USE SELF_LinearShallowWater
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
     ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5",decomp)
+    CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
