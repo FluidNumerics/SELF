@@ -9,7 +9,7 @@ MODULE SELF_ShallowWater
   USE SELF_Metadata
   USE SELF_Mesh
   USE SELF_MappedData
-  USE SELF_Model
+  USE SELF_Model2D
 
 
   TYPE,EXTENDS(Model2D) :: ShallowWater

@@ -4,7 +4,7 @@ USE SELF_Constants
 USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
-USE SELF_Model
+USE SELF_Model2D
 
   IMPLICIT NONE
 

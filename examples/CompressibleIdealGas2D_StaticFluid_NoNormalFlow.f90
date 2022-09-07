@@ -30,6 +30,7 @@ USE SELF_CompressibleIdealGas2D
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
   CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=500) :: meshfile
 
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -46,6 +47,11 @@ USE SELF_CompressibleIdealGas2D
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
     CALL args % Get_CLI('--integrator',integrator)
+    CALL args % Get_CLI('--mesh',meshfile)
+
+    IF( TRIM(meshfile) == '')THEN
+      meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5"
+    ENDIF
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -55,11 +61,18 @@ USE SELF_CompressibleIdealGas2D
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
-    ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5",decomp)
+    ! Read in mesh file
+    CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
     
     ! Reset the boundary condition to prescribed
     CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
+
+    ! Generate geometry (metric terms) from the mesh elements
+    CALL geometry % Init(interp,mesh % nElem)
+    CALL geometry % GenerateFromMesh(mesh)
+
+    ! Initialize the semModel
+    CALL semModel % Init(nvar,mesh,geometry,decomp)
 
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()

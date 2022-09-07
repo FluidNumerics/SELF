@@ -9,7 +9,7 @@ MODULE SELF_Burgers1D
   USE SELF_Metadata
   USE SELF_Mesh
   USE SELF_MappedData
-  USE SELF_Model
+  USE SELF_Model1D
 
 
   TYPE,EXTENDS(Model1D) :: Burgers1D

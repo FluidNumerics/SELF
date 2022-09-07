@@ -11,6 +11,7 @@ USE SELF_LinearShallowWater
 
   INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
   REAL(prec), PARAMETER :: g = 10.0 ! Acceleration of gravity (m/s^2)
+  REAL(prec), PARAMETER :: H = 1000.0 ! Fluid depth (m)
 
   REAL(prec) :: dt
   REAL(prec) :: ioInterval
@@ -30,9 +31,10 @@ USE SELF_LinearShallowWater
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
+  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: coriolis
-  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: H
   CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=500) :: meshfile
 
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -48,7 +50,11 @@ USE SELF_LinearShallowWater
     CALL args % Get_CLI('--control-quadrature',qChar)
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
+    CALL args % Get_CLI('--mesh',meshfile)
 
+    IF( TRIM(meshfile) == '')THEN
+      meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5"
+    ENDIF
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -58,8 +64,8 @@ USE SELF_LinearShallowWater
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
-    ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5",decomp)
+    ! Read the mesh file in
+    CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -80,8 +86,8 @@ USE SELF_LinearShallowWater
     
     ! Set gravity acceleration and fluid depth
     semModel % g = g
-    H = "H = 1000.0 + 2.0*(10^(-4))*y"
     CALL semModel % SetBathymetry( H )
+
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0                                             ", &
@@ -90,7 +96,7 @@ USE SELF_LinearShallowWater
     CALL semModel % SetSolution( initialCondition )
 
     ! Set the coriolis parameter
-    coriolis = "f = 10^(-4)"
+    coriolis = "f = 10^(-4) + 2.0*(10^(-11))*y"
     CALL semModel % SetCoriolis( coriolis )
     
     ! Get the geostrophic velocity from the free surface height field

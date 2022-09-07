@@ -64,7 +64,7 @@ USE SELF_LinearShallowWater
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
-    ! Create a uniform block mesh
+    ! Read the mesh file in
     CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
 
     ! Generate geometry (metric terms) from the mesh elements

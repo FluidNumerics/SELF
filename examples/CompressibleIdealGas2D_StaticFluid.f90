@@ -1,17 +1,15 @@
-PROGRAM LinearShallowWater_GravityWaveRelease
+PROGRAM CompressibleIdealGas2D_StaticFluid
 
 USE SELF_Constants
 USE SELF_Lagrange
 USE SELF_Mesh
 USE SELF_Geometry
 USE SELF_CLI
-USE SELF_LinearShallowWater
+USE SELF_CompressibleIdealGas2D
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
-  REAL(prec), PARAMETER :: g = 10.0 ! Acceleration of gravity (m/s^2)
-  REAL(prec), PARAMETER :: H = 1000.0 ! Fluid depth (m)
+  INTEGER, PARAMETER :: nvar = 4 ! The number prognostic variables
 
   REAL(prec) :: dt
   REAL(prec) :: ioInterval
@@ -20,6 +18,7 @@ USE SELF_LinearShallowWater
   INTEGER :: M ! Target degree
   INTEGER :: quadrature
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
+  CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
 
@@ -27,13 +26,11 @@ USE SELF_LinearShallowWater
   TYPE(Lagrange),TARGET :: interp
   TYPE(Mesh2D),TARGET :: mesh
   TYPE(SEMQuad),TARGET :: geometry
-  TYPE(LinearShallowWater),TARGET :: semModel
+  TYPE(CompressibleIdealGas2D),TARGET :: semModel
   TYPE(MPILayer),TARGET :: decomp
   TYPE(CLI) :: args
-  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
-  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: topography
-  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: coriolis
   CHARACTER(LEN=255) :: SELF_PREFIX
+  CHARACTER(LEN=500) :: meshfile
 
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -49,6 +46,12 @@ USE SELF_LinearShallowWater
     CALL args % Get_CLI('--control-quadrature',qChar)
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
+    CALL args % Get_CLI('--integrator',integrator)
+    CALL args % Get_CLI('--mesh',meshfile)
+
+    IF( TRIM(meshfile) == '')THEN
+      meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5"
+    ENDIF
 
     ! Initialize a domain decomposition
     ! Here MPI is disabled, since scaling is currently
@@ -58,52 +61,42 @@ USE SELF_LinearShallowWater
     ! Create an interpolant
     CALL interp % Init(N,quadrature,M,UNIFORM)
 
-    ! Create a uniform block mesh
-    CALL mesh % Read_HOPr(TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5",decomp)
+    ! Read in mesh file
+    CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
+    
+    ! Reset the boundary condition to prescribed
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
     CALL geometry % GenerateFromMesh(mesh)
-    
-    ! Reset the boundary condition to reflecting
-    CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
 
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
-    
-    ! Set gravity acceleration and fluid depth
-    semModel % g = g
-    CALL semModel % SetBathymetry( H )
 
+    ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
       ! Update the device for the whole model
       ! This ensures that the mesh, geometry, and default state match on the GPU
       CALL semModel % UpdateDevice()
     ENDIF
-
-    ! Set the initial condition
-    initialCondition = (/"u = 0.0                                             ", &
-                         "v = 0.0                                             ", &
-                         "n = 10^(-2)*exp( -( (x^2 + y^2 )/(2.0*10.0^(10)) ) )"/)
-    CALL semModel % SetSolution( initialCondition )
-
-    ! Set the coriolis parameter
-    coriolis = "f = 10^(-4) + 2.0*(10^(-11))*y"
-    CALL semModel % SetCoriolis( coriolis )
-    
-    ! Get the geostrophic velocity from the free surface height field
-    CALL semModel % DiagnoseGeostrophicVelocity()
+ 
+    CALL semModel % SetStaticSTP()
     CALL semModel % CalculateEntropy()
     CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy
 
+    ! Uses the initial condition to set the prescribed state
+    ! for model boundary conditions
+    CALL semModel % SetPrescribedSolution()
+    
     ! Write the initial condition to file
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
-    ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("rk3")
+    ! Set the time integrator
+    CALL semModel % SetTimeIntegrator(TRIM(integrator))
 
     ! Set your time step
     semModel % dt = dt
@@ -143,4 +136,4 @@ USE SELF_LinearShallowWater
     CALL args % Free()
     CALL decomp % Finalize()
 
-END PROGRAM LinearShallowWater_GravityWaveRelease
+END PROGRAM CompressibleIdealGas2D_StaticFluid
