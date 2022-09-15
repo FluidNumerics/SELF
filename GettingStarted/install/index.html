@@ -1,0 +1,680 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="SELF Documentation">
+      
+      
+        <meta name="author" content="Fluid Numerics">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.5.1">
+    
+    
+      
+        <title>Installation - Spectral Element Library in Fortran</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2e8b5541.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#install-self" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-header__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spectral Element Library in Fortran
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Installation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Spectral Element Library in Fortran" class="md-nav__button md-logo" aria-label="Spectral Element Library in Fortran" data-md-component="logo">
+      
+  <img src="../../assets/images/logo-fluid-numerics.png" alt="logo">
+
+    </a>
+    Spectral Element Library in Fortran
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fluidnumerics/SELF" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub/fluidnumerics/SELF
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          GettingStarted
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="GettingStarted" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          GettingStarted
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Installation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Installation
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bare-metal-install" class="md-nav__link">
+    Bare Metal Install
+  </a>
+  
+    <nav class="md-nav" aria-label="Bare Metal Install">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-self-dependencies" class="md-nav__link">
+    Install SELF Dependencies
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-self_1" class="md-nav__link">
+    Install SELF
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-a-docker-container" class="md-nav__link">
+    Build a Docker Container
+  </a>
+  
+    <nav class="md-nav" aria-label="Build a Docker Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-base-containers" class="md-nav__link">
+    Installing Base Containers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Examples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Examples" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Examples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../Examples/LinearShallowWater/RossbyWave/" class="md-nav__link">
+        LinearShallowWater
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#bare-metal-install" class="md-nav__link">
+    Bare Metal Install
+  </a>
+  
+    <nav class="md-nav" aria-label="Bare Metal Install">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-self-dependencies" class="md-nav__link">
+    Install SELF Dependencies
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-self_1" class="md-nav__link">
+    Install SELF
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-a-docker-container" class="md-nav__link">
+    Build a Docker Container
+  </a>
+  
+    <nav class="md-nav" aria-label="Build a Docker Container">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installing-base-containers" class="md-nav__link">
+    Installing Base Containers
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/fluidnumerics/SELF/edit/main/docs/mkdocs/GettingStarted/install.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="install-self">Install SELF</h1>
+<p>The Spectral Element Library in Fortran can be built provided the following dependencies are met</p>
+<ul>
+<li>Fortran 2008 compliant compiler</li>
+<li>MPI, e.g. <a href="https://www.open-mpi.org/">OpenMPI</a></li>
+<li><a href="https://www.gnu.org/software/make/">GNU Make</a></li>
+<li><a href="https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html">ROCm</a> ( &gt;= 4.2 )</li>
+<li><a href="https://github.com/ROCmSoftwarePlatform/hipfort">HIPFort</a> ( &gt;= 4.2 ; Must be built with the Fortran compiler you will build SELF with. )</li>
+<li><a href="https://www.hdfgroup.org/solutions/hdf5/">HDF5</a></li>
+<li><a href="https://github.com/FluidNumerics/feq-parse">FEQParse</a></li>
+<li><a href="https://github.com/szaghi/FLAP">FLAP</a></li>
+<li><a href="https://github.com/jacobwilliams/json-fortran">JSON-Fortran</a></li>
+</ul>
+<h2 id="bare-metal-install">Bare Metal Install</h2>
+<h3 id="install-self-dependencies">Install SELF Dependencies</h3>
+<p>Before getting started, make sure that you the following installed on your system : </p>
+<ul>
+<li>C++ Compiler (<code>g++</code> recommended)</li>
+<li>Fortran Compiler (<code>gfortran</code> recommended)</li>
+<li>GNU Make</li>
+<li><a href="https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html">ROCm</a></li>
+</ul>
+<p>Keep in mind that ROCm is officially supported only on CentOS, RHEL, Ubuntu, and SLES 15.</p>
+<p>On Ubuntu, you can install these dependencies using the following</p>
+<pre><code>sudo apt-get update
+sudo apt-get install gcc g++ gfortran build-essential libnuma-dev
+sudo apt install wget gnupg2
+wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
+echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.3/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
+sudo apt update
+sudo apt install rocm-dev
+sudo reboot
+</code></pre>
+<p>To help install the remainder of SELF's dependencies, we recommend that you use <a href="https://spack.io">Spack</a>. SELF comes with a Spack environment file that can be used to create a spack environment on your system.</p>
+<p>First, install Spack</p>
+<pre><code>git clone https://github.com/spack/spack ~/spack
+source ~/spack/share/spack/setup-env.sh
+</code></pre>
+<p>Download the SELF source code and activate the spack environment</p>
+<pre><code>git clone https://github.com/fluidnumerics/SELF ~/SELF
+spack env activate -d ~/SELF/env
+</code></pre>
+<p>Once the environment is activated, show which packages will be installed and verify the output appears like what is shown below</p>
+<pre><code>$ spack find
+==&gt; In environment /home/joe/SELF/env
+==&gt; Root specs
+feq-parse@1.1.0  flap@master  hdf5@1.12.0 +cxx+fortran+mpi  hipfort@4.5.2  json-fortran@7.1.0
+
+==&gt; 0 installed packages
+</code></pre>
+<p>Next, you can install the dependencies</p>
+<pre><code>spack install
+</code></pre>
+<p>Keep in mind, this installation process can take up to two hours.</p>
+<h3 id="install-self_1">Install SELF</h3>
+<p>SELF comes with a <a href="https://github.com/FluidNumerics/SELF/blob/main/install.sh">simple bash script</a> that can be used to install SELF. Provided you followed the steps above to install SELF dependencies, you can simply run this script.</p>
+<pre><code>cd ~/SELF
+./install.sh
+</code></pre>
+<p>This will install SELF under <code>${HOME}/view/self</code>. By default, this script is configured to build with serial, MPI, and GPU support with the target GPU set to AMD MI100 (<code>gfx900</code>). To change the behavior of the installation script, you can set the following environment variables before calling the script</p>
+<ul>
+<li><code>VIEW</code> - The path to the spack environment view.</li>
+<li><code>SELF_PREFIX</code> - The path to install SELF. Defaults to :code:<code>$VIEW</code></li>
+<li><code>GPU_TARGET</code> - GPU microarchitecture code to build for. Defaults to :code:<code>gfx900</code> (AMD MI100)</li>
+<li><code>PREC</code> - Floating point precision to build with. Defaults to :code:<code>double</code>. Change to :code:<code>single</code> to build using 32-bit floating point arithmetic.</li>
+<li><code>SELF_FFLAGS</code> - compiler flags to build SELF.</li>
+</ul>
+<h2 id="build-a-docker-container">Build a Docker Container</h2>
+<p>SELF comes with Dockerfiles to create builds that target specific GPU platforms. To build Docker containers, you will need to install <a href="https://www.docker.com/">Docker</a>. The SELF build process for Docker containers involves two steps</p>
+<ol>
+<li>Build a base container with all of the necessary dependencies</li>
+<li>Build SELF for the target architecture using the appropriate base container.</li>
+</ol>
+<p>We've opted to split the build process into these two distinct stages, since installing SELF's dependencies takes 1-2 hours. Further, the Docker container builds are used as part of the continuous integration process and this approach reduces the costs associated with Google Cloud Build.</p>
+<h3 id="installing-base-containers">Installing Base Containers</h3>
+<p>Base containers are hosted by Fluid Numerics at :code:<code>gcr.io/self-fluids/self-base</code>. Tags are used to mark the target platform in addition to the ROCm version and CUDA version (if applicable). For example, :code:<code>gcr.io/self-fluids/self-base:amd-rocm4.3</code> is the base container used for build SELF for AMD GPU's using ROCm 4.3. Below is a list of currently available base container</p>
+<ul>
+<li><code>gcr.io/self-fluids/self-base:amd-rocm4.3</code></li>
+<li><code>gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3</code></li>
+</ul>
+<p>To access these base containers, you need to be a <code>"SELF Member" under HigherOrderMethods &lt;https://opencollective.com/higher-order-methods/contribute/self-member-35220/checkout&gt;</code>_</p>
+<p>Alternatively, you will need to build base container image. Container recipes for base containers can be found under :code:<code>SELF/docker/base/{HIP_PLATFORM}</code>, where :code:<code>{HIP_PLATFORM}</code> is one of :code:<code>nvidia</code> or :code:<code>amd</code>. To install the base containers locally, you can run</p>
+<p>.. code-block:: shell</p>
+<pre><code>docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3
+docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:amd-rocm4.3
+</code></pre>
+<h1 id="build-with-cloud-build-local-recommended">Build with Cloud-Build-Local (Recommended)</h1>
+<p>To build a Docker container with SELF pre-installed, the SELF repository comes with a Cloud Build pipeline for use on your local system. This pipeline will execute :code:<code>docker run</code> with the appropriate Dockerfile, depending on the target GPU architecture specified in the build substitutions. To use cloud-build-local, you will need to install <code>Docker &lt;https://www.docker.com/&gt;</code><em>, the <code>gcloud CLI, and google-cloud-sdk-cloud-build-local &lt;https://cloud.google.com/sdk/docs/install&gt;</code></em>.</p>
+<p>Once installed, you can simply build SELF using the following command from the root of the SELF repository.</p>
+<p>.. code-block:: shell</p>
+<p>$ cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false .</p>
+<p>By default, this will build SELF with double precision floating point arithmetic and with GPU kernels offloaded to Nvidia V100 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available</p>
+<ul>
+<li>:code:<code>_PREC</code> : The floating point precision to use in SELF; either :code:<code>single</code> or :code:<code>double</code></li>
+<li>:code:<code>_GPU_TARGET</code>: GPU microarchitecture code to build for. Defaults to :code:<code>sm_72</code> (Nvidia V100)</li>
+<li>:code:<code>_HIP_PLATFORM</code>: The value to set for the :code:<code>HIP_PLATFORM</code> environment variable. Either <code>nvidia</code> or <code>amd</code></li>
+</ul>
+<p>As an example, you can specify these substitution variables using something like the following</p>
+<p>.. code-block:: shell</p>
+<p>$ cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false . --substitutions=_PREC=single,_GPU_TARGET=gfx900,_HIP_PLATFORM=amd</p>
+<p>The Dockerfile that :code:<code>cloud-build-local</code> uses for the build recipe is under :code:<code>SELF/docker/${_HIP_PLATFORM}/Dockerfile</code>. The resulting Docker image when using :code:<code>cloud-build-local</code> is :code:<code>self:dev-${_PREC}-${_GPU_TARGET}</code></p>
+<h1 id="build-with-docker">Build with Docker</h1>
+<p>If you prefer to build SELF using Docker directly, you can easily do so using the Dockerfile recipes under the :code:<code>SELF/docker/{HIP_PLATFORM}</code> directory. The :code:<code>{HIP_PLATFORM}</code> is either :code:<code>nvidia</code> or :code:<code>amd</code>. </p>
+<p>args: ['build',
+         '--build-arg','GPU_TARGET=<span class="arithmatex">\({_GPU_TARGET}',
+         '--build-arg','HIP_PLATFORM=\)</span>{_HIP_PLATFORM}',
+         '--build-arg','PREC=<span class="arithmatex">\({_PREC}',
+         '-f',
+         'docker/\)</span>{_HIP_PLATFORM}/Dockerfile',
+         '.',
+         '-t',
+         'self:dev-<span class="arithmatex">\({_PREC}-\)</span>{_GPU_TARGET}']</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Home
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../../Examples/LinearShallowWater/RossbyWave/" class="md-footer__link md-footer__link--next" aria-label="Next: LinearShallowWater" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              LinearShallowWater
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.ecf98df9.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d691e9de.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
