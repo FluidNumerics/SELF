@@ -84,9 +84,9 @@ cd ~/SELF
 This will install SELF under `${HOME}/view/self`. By default, this script is configured to build with serial, MPI, and GPU support with the target GPU set to AMD MI100 (`gfx900`). To change the behavior of the installation script, you can set the following environment variables before calling the script
 
 * `VIEW` - The path to the spack environment view.
-* `SELF_PREFIX` - The path to install SELF. Defaults to :code:`$VIEW`
-* `GPU_TARGET` - GPU microarchitecture code to build for. Defaults to :code:`gfx900` (AMD MI100)
-* `PREC` - Floating point precision to build with. Defaults to :code:`double`. Change to :code:`single` to build using 32-bit floating point arithmetic.
+* `SELF_PREFIX` - The path to install SELF. Defaults to `$VIEW`
+* `GPU_TARGET` - GPU microarchitecture code to build for. Defaults to `gfx900` (AMD MI100)
+* `PREC` - Floating point precision to build with. Defaults to `double`. Change to `single` to build using 32-bit floating point arithmetic.
 * `SELF_FFLAGS` - compiler flags to build SELF.
 
 
@@ -100,14 +100,14 @@ SELF comes with Dockerfiles to create builds that target specific GPU platforms.
 We've opted to split the build process into these two distinct stages, since installing SELF's dependencies takes 1-2 hours. Further, the Docker container builds are used as part of the continuous integration process and this approach reduces the costs associated with Google Cloud Build.
 
 ### Installing Base Containers
-Base containers are hosted by Fluid Numerics at :code:`gcr.io/self-fluids/self-base`. Tags are used to mark the target platform in addition to the ROCm version and CUDA version (if applicable). For example, :code:`gcr.io/self-fluids/self-base:amd-rocm4.3` is the base container used for build SELF for AMD GPU's using ROCm 4.3. Below is a list of currently available base container
+Base containers are hosted by Fluid Numerics at `gcr.io/self-fluids/self-base`. Tags are used to mark the target platform in addition to the ROCm version and CUDA version (if applicable). For example, `gcr.io/self-fluids/self-base:amd-rocm4.3` is the base container used for build SELF for AMD GPU's using ROCm 4.3. Below is a list of currently available base container
 
 * `gcr.io/self-fluids/self-base:amd-rocm4.3`
 * `gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3`
 
 To access these base containers, you need to be a `"SELF Member" under HigherOrderMethods <https://opencollective.com/higher-order-methods/contribute/self-member-35220/checkout>`_
 
-Alternatively, you will need to build base container image. Container recipes for base containers can be found under :code:`SELF/docker/base/{HIP_PLATFORM}`, where :code:`{HIP_PLATFORM}` is one of :code:`nvidia` or :code:`amd`. To install the base containers locally, you can run
+Alternatively, you will need to build base container image. Container recipes for base containers can be found under `SELF/docker/base/{HIP_PLATFORM}`, where `{HIP_PLATFORM}` is one of `nvidia` or `amd`. To install the base containers locally, you can run
 
 .. code-block:: shell
 
@@ -116,43 +116,40 @@ Alternatively, you will need to build base container image. Container recipes fo
 
 
 
-Build with Cloud-Build-Local (Recommended)
-============================================
-To build a Docker container with SELF pre-installed, the SELF repository comes with a Cloud Build pipeline for use on your local system. This pipeline will execute :code:`docker run` with the appropriate Dockerfile, depending on the target GPU architecture specified in the build substitutions. To use cloud-build-local, you will need to install `Docker <https://www.docker.com/>`_, the `gcloud CLI, and google-cloud-sdk-cloud-build-local <https://cloud.google.com/sdk/docs/install>`_.
+### Build with Cloud-Build-Local (Recommended)
+To build a Docker container with SELF pre-installed, the SELF repository comes with a Cloud Build pipeline for use on your local system. This pipeline will execute `docker run` with the appropriate Dockerfile, depending on the target GPU architecture specified in the build substitutions. To use cloud-build-local, you will need to install [Docker](https://www.docker.com/), the [gcloud CLI, and google-cloud-sdk-cloud-build-local](https://cloud.google.com/sdk/docs/install).
 
 Once installed, you can simply build SELF using the following command from the root of the SELF repository.
 
-.. code-block:: shell
-
-   $ cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false .
+```
+cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false .
+```
 
 By default, this will build SELF with double precision floating point arithmetic and with GPU kernels offloaded to Nvidia V100 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available
 
-* :code:`_PREC` : The floating point precision to use in SELF; either :code:`single` or :code:`double`
-* :code:`_GPU_TARGET`: GPU microarchitecture code to build for. Defaults to :code:`sm_72` (Nvidia V100)
-* :code:`_HIP_PLATFORM`: The value to set for the :code:`HIP_PLATFORM` environment variable. Either `nvidia` or `amd`
+* `_PREC` : The floating point precision to use in SELF; either `single` or `double`
+* `_GPU_TARGET`: GPU microarchitecture code to build for. Defaults to `sm_72` (Nvidia V100)
+* `_HIP_PLATFORM`: The value to set for the `HIP_PLATFORM` environment variable. Either `nvidia` or `amd`
 
 As an example, you can specify these substitution variables using something like the following
 
 
-.. code-block:: shell
-
-   $ cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false . --substitutions=_PREC=single,_GPU_TARGET=gfx900,_HIP_PLATFORM=amd
-
-
-The Dockerfile that :code:`cloud-build-local` uses for the build recipe is under :code:`SELF/docker/${_HIP_PLATFORM}/Dockerfile`. The resulting Docker image when using :code:`cloud-build-local` is :code:`self:dev-${_PREC}-${_GPU_TARGET}`
+```
+cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false . --substitutions=_PREC=single,_GPU_TARGET=gfx900,_HIP_PLATFORM=amd
+```
 
 
-Build with Docker
-==================
-If you prefer to build SELF using Docker directly, you can easily do so using the Dockerfile recipes under the :code:`SELF/docker/{HIP_PLATFORM}` directory. The :code:`{HIP_PLATFORM}` is either :code:`nvidia` or :code:`amd`. 
+The Dockerfile that `cloud-build-local` uses for the build recipe is under `SELF/docker/${_HIP_PLATFORM}/Dockerfile`. The resulting Docker image when using `cloud-build-local` is `self:dev-${_PREC}-${_GPU_TARGET}`
 
-  args: ['build',
-         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
-         '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
-         '--build-arg','PREC=${_PREC}',
-         '-f',
-         'docker/${_HIP_PLATFORM}/Dockerfile',
-         '.',
-         '-t',
-         'self:dev-${_PREC}-${_GPU_TARGET}']
+
+
+### Build with Docker
+If you prefer to build SELF using Docker directly, you can easily do so using the Dockerfile recipes under the `SELF/docker/{HIP_PLATFORM}` directory. The `{HIP_PLATFORM}` is either `nvidia` or `amd`. 
+
+```
+docker build --build-arg GPU_TARGET=${_GPU_TARGET} \
+             --build-arg HIP_PLATFORM=${_HIP_PLATFORM} \
+             --build-arg PREC=${_PREC} \
+             -f docker/${_HIP_PLATFORM}/Dockerfile \
+             . -t self:dev-${_PREC}-${_GPU_TARGET}
+```

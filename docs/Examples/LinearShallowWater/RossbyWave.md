@@ -35,6 +35,8 @@ $$
     \eta(t=0) = 0.01e^{ -( (x^2 + y^2 )/(2.0*10.0^{10}) )}
 $$
 
+![Rossby Wave Initial Condition](./rossbywave_initialcondition.png){ align=center }
+
 The initial velocity field is calculated by using the pressure gradient force and using geostrophic balance; in SELF, this is handled by the `LinearShallowWater % DiagnoseGeostrophicVelocity` type bound procedure after setting the initial free surface height.
 
 ### Boundary Conditions
@@ -50,7 +52,10 @@ The remaining parameters for the problem are as follows
 
 ## Runtimes
 
-To benchmark this example, we run the simulation for 2 days of simulation time, using a time-step of a half-second.
+To benchmark this example, we run the simulation for 10 days of simulation time, using a time-step of a half-second.
+The solution after 10 days looks like the image shown below.
+
+![Rossby Wave Initial Condition](./rossbywave_day10.png){ align=center }
 
 ```
 $SELF_PREFIX/examples/LinearShallowWater_Rossbywave -dt 0.5 -tn 172800 -int "rk3"
