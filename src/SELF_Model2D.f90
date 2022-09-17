@@ -893,12 +893,16 @@ CONTAINS
     INTEGER(HID_T) :: fileId
     INTEGER(HID_T) :: solOffset(1:4)
     INTEGER(HID_T) :: xOffset(1:5)
+    INTEGER(HID_T) :: vOffset(1:5)
     INTEGER(HID_T) :: bOffset(1:4)
     INTEGER(HID_T) :: bxOffset(1:5)
+    INTEGER(HID_T) :: bvOffset(1:5)
     INTEGER(HID_T) :: solGlobalDims(1:4)
     INTEGER(HID_T) :: xGlobalDims(1:5)
+    INTEGER(HID_T) :: vGlobalDims(1:5)
     INTEGER(HID_T) :: bGlobalDims(1:4)
     INTEGER(HID_T) :: bxGlobalDims(1:5)
+    INTEGER(HID_T) :: bvGlobalDims(1:5)
     INTEGER :: firstElem
     ! Local
     CHARACTER(LEN=self_FileNameLength) :: pickupFile
@@ -933,6 +937,13 @@ CONTAINS
       xGlobalDims(1:5) = (/2, &
                            this % solution % interp % N+1, &
                            this % solution % interp % N+1, &
+                           1, &
+                           this % decomp % nElem/)
+
+      vOffset(1:5) = (/0,0,0,0,firstElem/)
+      vGlobalDims(1:5) = (/2, &
+                           this % solution % interp % N+1, &
+                           this % solution % interp % N+1, &
                            this % solution % nVar, &
                            this % decomp % nElem/)
 
@@ -945,6 +956,13 @@ CONTAINS
 
       bxOffset(1:5) = (/0,0,0,0,firstElem/)
       bxGlobalDims(1:5) = (/2,&
+                           this % solution % interp % N+1, &
+                           1, &
+                           4,&
+                           this % decomp % nElem/)
+
+      bvOffset(1:5) = (/0,0,0,0,firstElem/)
+      bvGlobalDims(1:5) = (/2,&
                            this % solution % interp % N+1, &
                            this % solution % nVar, &
                            4,&
@@ -988,10 +1006,10 @@ CONTAINS
                            this % fluxDivergence % interior,solOffset,solGlobalDims)
 
       CALL WriteArray_HDF5(fileId,'/state/interior/flux', &
-                           this % flux % interior,xOffset,xGlobalDims)
+                           this % flux % interior,xOffset,vGlobalDims)
 
       CALL WriteArray_HDF5(fileId,'/state/boundary/flux', &
-                           this % flux % boundary,bxOffset,bxGlobalDims)
+                           this % flux % boundary,bxOffset,bvGlobalDims)
 
       CALL WriteArray_HDF5(fileId,'/state/interior/solutionGradient', &
                            this % solutionGradient % interior,xOffset,xGlobalDims)
