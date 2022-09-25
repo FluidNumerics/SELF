@@ -19,6 +19,8 @@ SELF_LIBDIR = $(SELF_DIR)/build/lib/
 SELF_BINDIR = $(SELF_DIR)/build/bin/
 SELF_EXADIR = $(SELF_DIR)/build/examples/
 
+
+
 vpath %.f90 $(SELF_SRCDIR)
 vpath %.cpp $(SELF_SRCDIR)/hip
 vpath %.h $(SELF_SRCDIR) $(SELF_SRCDIR)/hip
@@ -57,21 +59,21 @@ SELF_CPP_SRCS = SELF_Lagrange \
                 SELF_ShallowWater1D \
                 SELF_CompressibleIdealGas2D
 
-SELF_EXAMPLES = Advection_ConservativeForm_BlockMesh2D \
-                Burgers1D_StationaryShock \
-                CompressibleIdealGas2D_StaticFluid \
-                CompressibleIdealGas2D_StaticFluid_NoNormalFlow \
-                LinearShallowWater_GravityWaveRelease \
-                LinearShallowWater_GravityWaveRelease_Reflecting \
-                LinearShallowWater_RossbyWave \
-                LinearShallowWater_RossbyWave_NoNormalFlow \
-                LinearShallowWater_TopographicRossbyWave \
-                SELF_Model2D_ConstantFluxDivergence \
-                ShallowWater_GravityWaveRelease_BlockMesh2D \
-                ShallowWater_QuietFluid_1D \
-                ShallowWater_QuietFluid_1D_Topography \
-                ShallowWater_QuietFluid_BlockMesh2D \
-                ShallowWater_QuietFluid_BlockMesh2D_Topography
+SELF_EXAMPLES = Advection2D/ConservativeForm \
+                Burgers1D/StationaryShock \
+                CompressibleIdealGas2D/StaticFluid \
+                CompressibleIdealGas2D/StaticFluid_NoNormalFlow \
+                CompressibleIdealGas2D/ConstantVelocity \
+                LinearShallowWater2D/GravityWaveRelease \
+                LinearShallowWater2D/GravityWaveRelease_Reflecting \
+                LinearShallowWater2D/PlanetaryRossbyWave \
+                LinearShallowWater2D/PlanetaryRossbyWave_NoNormalFlow \
+                LinearShallowWater2D/TopographicRossbyWave \
+                ShallowWater2D/GravityWaveRelease \
+                ShallowWater1D/QuietFluid \
+                ShallowWater1D/QuietFluid_Topography \
+                ShallowWater2D/QuietFluid \
+                ShallowWater2D/QuietFluid_Topography
 
 SELF_LIBS = self
 
@@ -92,15 +94,21 @@ examples: $(SELF_EXAS)
 
 
 self_clean:
-	rm -f $(SELF_BINDIR)*
-	rm -f $(SELF_LIBDIR)*.a
+	rm -rf $(SELF_BUILDDIRS)
 	rm -f $(SELF_MODDIR)*.mod
 	rm -f $(SELF_SRCDIR)*.o
 	rm -f $(SELF_HIPDIR)*.o
-	rm -f $(SELF_EXASRCDIR)*.o
+	rm -f $(SELF_EXASRCDIR)/Advection2D/*.o \
+              $(SELF_EXASRCDIR)/Burgers1D/*.o \
+              $(SELF_EXASRCDIR)/CompressibleIdealGas2D/*.o \
+              $(SELF_EXASRCDIR)/LinearShallowWater2D/*.o \
+              $(SELF_EXASRCDIR)/ShallowWater1D/*.o \
+              $(SELF_EXASRCDIR)/ShallowWater2D/*.o
+
 
 $(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS)
 	$(FC) -c $(SELF_FFLAGS) -I$(SELF_INCDIR) $< -o $<.o
+	mkdir -p $(SELF_EXADIR)/$(shell basename $(shell dirname $<))
 	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_HIPDIR)*.o $(SELF_SRCDIR)*.o  $<.o $(SELF_FLIBS) -o $@
 
 $(SELF_LIBDIR)libself.a: $(SELF_OBJS)
@@ -115,6 +123,7 @@ $(SELF_HIPDIR)%.cpp.o: %.cpp
 
 # Dependency on build tree existence
 $(SELF_OBJS): | $(SELF_BUILDDIRS)
+
 
 $(SELF_BUILDDIRS):
 	mkdir -p $@
