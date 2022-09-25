@@ -35,6 +35,7 @@ USE SELF_LinearShallowWater
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: coriolis
   CHARACTER(LEN=255) :: SELF_PREFIX
   CHARACTER(LEN=500) :: meshfile
+  CHARACTER(LEN=10)  :: timeIntegrator
 
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -51,6 +52,7 @@ USE SELF_LinearShallowWater
     quadrature = GetIntForChar(qChar)
     CALL args % Get_CLI('--target-degree',M)
     CALL args % Get_CLI('--mesh',meshfile)
+    CALL args % Get_CLI('--integrator',timeIntegrator)
 
     IF( TRIM(meshfile) == '')THEN
       meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/GeophysicalBlock2DMedium/Block2D_mesh.h5"
@@ -108,8 +110,8 @@ USE SELF_LinearShallowWater
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
 
-    ! Set the time integrator (euler, rk3, rk4)
-    CALL semModel % SetTimeIntegrator("rk3")
+    ! Set the time integrator (euler, rk2, rk3, rk4, ab2, ab3, ab4)
+    CALL semModel % SetTimeIntegrator(TRIM(timeIntegrator))
 
     ! Set your time step
     semModel % dt = dt
