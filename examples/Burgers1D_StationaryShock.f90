@@ -69,9 +69,6 @@ USE SELF_CLI
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
-    ! Enable GPU Acceleration (if a GPU is found) !
-    !CALL semModel % EnableGPUAccel()
- 
     ! Set the initial condition
     initialCondition = (/"u = -x"/)
     CALL semModel % SetSolution( initialCondition )
@@ -108,11 +105,6 @@ USE SELF_CLI
 
     IF( semModel % entropy > referenceEntropy )THEN
       PRINT*, "Warning : final entropy greater than initial entropy"
-      ! Currently do nothing in this situation, since
-      ! conservative solvers in mapped geometries may
-      ! not be entropy conservative.
-      ! However, throwing this warning will bring some
-      ! visibility
     ENDIF
 
     ! Clean up

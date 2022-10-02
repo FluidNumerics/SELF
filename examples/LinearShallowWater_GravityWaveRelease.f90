@@ -10,6 +10,8 @@ USE SELF_LinearShallowWater
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: nvar = 3 ! The number prognostic variables
+  REAL(prec), PARAMETER :: g = 1.0 ! Acceleration of gravity (m/s^2)
+  REAL(prec), PARAMETER :: H = 1.0 ! Fluid depth (m)
 
   REAL(prec) :: dt
   REAL(prec) :: ioInterval
@@ -78,6 +80,10 @@ USE SELF_LinearShallowWater
       ! This ensures that the mesh, geometry, and default state match on the GPU
       CALL semModel % UpdateDevice()
     ENDIF
+
+    ! Set gravity acceleration and fluid depth
+    semModel % g = g
+    CALL semModel % SetBathymetry( H )
 
     ! Set the initial condition
     initialCondition = (/"u = 0.0                                         ", &

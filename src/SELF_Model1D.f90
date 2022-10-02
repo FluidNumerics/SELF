@@ -247,8 +247,6 @@ CONTAINS
         CALL this % solution % UpdateDevice()
       ENDIF
 
-
-
   END SUBROUTINE SetSolutionFromEqn_Model1D 
 
   SUBROUTINE SetSolutionFromChar_Model1D(this, eqnChar) 
