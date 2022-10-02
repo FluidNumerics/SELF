@@ -247,8 +247,6 @@ CONTAINS
         CALL this % solution % UpdateDevice()
       ENDIF
 
-
-
   END SUBROUTINE SetSolutionFromEqn_Model1D 
 
   SUBROUTINE SetSolutionFromChar_Model1D(this, eqnChar) 
@@ -546,6 +544,7 @@ CONTAINS
 
      ELSEIF( m == 1 )THEN ! Initialization step - store the solution in the prevSol at ivar
 
+       nVar = this % solution % nVar
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO i = 0, this % solution % interp % N
@@ -584,12 +583,12 @@ CONTAINS
      ELSE ! Main looping section - nVar the previous solution, store the new solution, and 
             ! create an interpolated solution to use for tendency calculation
 
+       nVar = this % solution % nVar
        DO iEl = 1, this % solution % nElem
          DO iVar = 1, this % solution % nVar
            DO i = 0, this % solution % interp % N
 
              ! Bump the last two stored solutions
-             nVar = this % solution % nVar
              this % prevSol % interior % hostData(i,3*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,2*nVar+iVar,iEl)
              this % prevSol % interior % hostData(i,2*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,nVar+iVar,iEl)
              this % prevSol % interior % hostData(i,nVar+iVar,iEl) = this % prevSol % interior % hostData(i,iVar,iEl)

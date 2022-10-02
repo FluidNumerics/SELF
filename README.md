@@ -8,7 +8,7 @@ Copyright 2020-2022 Fluid Numerics LLC
 
 Join the [Higher Order Methods Slack group](https://join.slack.com/t/higherordermethods/shared_invite/zt-1da6fpyjo-c4yNNXD_o0F3Yrxe8isgJg)
 
-SELF is licensed for use under the [Anti-Corporatist Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
+SELF is licensed for use under the [Researcher Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
 
 ## About
 SELF is an object-oriented Fortran library that support the implementation of Spectral Element Methods for solving partial differential equations.
@@ -18,24 +18,15 @@ The SELF API is designed based on the assumption that SEM developers and researc
 ## Support
 
 ### Documentation
-* [**API Documentation**](https://fluidnumerics.github.io/SELF/ford/)
-* [**ReadTheDocs** *(Work in Progress)*](https://self.readthedocs.io/en/latest/)
+[**User & Developer Documentation**](https://fluidnumerics.github.io/SELF)
+[**API Documentation**](https://fluidnumerics.github.io/SELF/ford/)
 
 ### Community
 
-#### Open Collective
-SELF is part of the Higher Order Methods Collective, which is fiscally hosted by [WATERCHaNGE](https://www.waterchange.org).
-You can keep track of updates and announcements for livestreams and training events at the [**Higher Order Methods Open Collective **](https://opencollective.com/higher-order-methods).
-
-You can support SELF and related educational activities focused on numerical analysis and higher order methods for solving conservation laws by contributing to the Open Collective.
-[![Open Collective](https://github.com/opencollective/opencollective-images/blob/main/src/static/images/contribute.svg)](https://opencollective.com/higher-order-methods/contribute)
-
 
 ### Maintainers
-* [Joseph Schoonover, Fluid Numerics LLC](https://fluidnumerics.com/people/joe-schoonover)
-* **You** Want to become a maintainer ? Reach out to support@fluidnumerics.com
+* [Joseph Schoonover, Fluid Numerics LLC](https://fluidnumerics.com/people)
 
 If you'd like to contribute, see [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
-
 If you need help, [open an issue](https://github.com/FluidNumerics/SELF/issues/new)
 

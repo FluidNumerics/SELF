@@ -10,6 +10,8 @@ include $(SELF_DIR)/make.dependencies
 # Directories with source code
 SELF_SRCDIR = $(SELF_DIR)/src/
 SELF_HIPDIR = $(SELF_DIR)/src/hip/
+SELF_MODELDIR = $(SELF_DIR)/src/models/
+SELF_MODELHIPDIR = $(SELF_DIR)/src/models/hip/
 SELF_EXASRCDIR = $(SELF_DIR)/examples/
 
 
@@ -39,25 +41,27 @@ SELF_F90_SRCS = SELF_Constants \
                 SELF_MappedData \
                 SELF_Model \
                 SELF_Model1D \
-                SELF_Model2D \
-                SELF_Advection2D \
-                SELF_LinearShallowWater \
-                SELF_ShallowWater \
-                SELF_ShallowWater1D \
-                SELF_Burgers1D \
-                SELF_CompressibleIdealGas2D
+                SELF_Model2D
 
 SELF_CPP_SRCS = SELF_Lagrange \
                 SELF_Data \
                 SELF_MappedData \
                 SELF_Geometry \
                 SELF_Model1D \
-                SELF_Model2D \
-                SELF_Advection2D \
-                SELF_LinearShallowWater \
-                SELF_ShallowWater \
-                SELF_ShallowWater1D \
-                SELF_CompressibleIdealGas2D
+                SELF_Model2D
+                
+SELF_F90_MODELS = SELF_Advection2D \
+                  SELF_LinearShallowWater \
+                  SELF_ShallowWater \
+                  SELF_ShallowWater1D \
+                  SELF_Burgers1D \
+                  SELF_CompressibleIdealGas2D
+
+SELF_CPP_MODELS = SELF_Advection2D \
+                  SELF_LinearShallowWater \
+                  SELF_ShallowWater \
+                  SELF_ShallowWater1D \
+                  SELF_CompressibleIdealGas2D
 
 SELF_EXAMPLES = Advection2D/ConservativeForm \
                 Burgers1D/StationaryShock \
@@ -79,11 +83,14 @@ SELF_LIBS = self
 
 SELF_OBJS = $(addprefix $(SELF_SRCDIR), $(addsuffix .f.o, $(SELF_F90_SRCS)))
 SELF_OBJS += $(addprefix $(SELF_HIPDIR), $(addsuffix .cpp.o, $(SELF_CPP_SRCS)))
+SELF_MODEL_OBJS = $(addprefix $(SELF_MODELDIR), $(addsuffix .f.o, $(SELF_F90_MODELS)))
+SELF_MODEL_OBJS += $(addprefix $(SELF_MODELHIPDIR), $(addsuffix .cpp.o, $(SELF_CPP_MODELS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_BINDIR) $(SELF_EXADIR) $(SELF_TESTDIR)
 
 # Example programs
 SELF_EXAS = $(addprefix $(SELF_EXADIR), $(SELF_EXAMPLES))
+
 
 # Recipes
 #
@@ -106,14 +113,20 @@ self_clean:
               $(SELF_EXASRCDIR)/ShallowWater2D/*.o
 
 
-$(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS)
+$(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS) $(SELF_MODEL_OBJS)
 	$(FC) -c $(SELF_FFLAGS) -I$(SELF_INCDIR) $< -o $<.o
 	mkdir -p $(SELF_EXADIR)/$(shell basename $(shell dirname $<))
-	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_HIPDIR)*.o $(SELF_SRCDIR)*.o  $<.o $(SELF_FLIBS) -o $@
+	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_HIPDIR)*.o $(SELF_SRCDIR)*.o $(SELF_MODELHIPDIR)*.o $(SELF_MODELDIR)*.o $<.o $(SELF_FLIBS) -o $@
 
-$(SELF_LIBDIR)libself.a: $(SELF_OBJS)
+$(SELF_LIBDIR)libself.a: $(SELF_OBJS) $(SELF_MODEL_OBJS)
 	rm -f $@
 	$(AR) -cq $@ $^
+
+$(SELF_MODELDIR)%.f.o: %.f90
+	$(FC) -J$(SELF_INCDIR) $(SELF_FFLAGS) $(SELF_FLIBS) -c $< -o $@
+
+$(SELF_MODELHIPDIR)%.cpp.o: $(SELF_MODELHIPDIR)%.cpp
+	$(FC) $(SELF_CXXFLAGS) -I$(SELF_HIPDIR) -c $< -o $@
 
 $(SELF_SRCDIR)%.f.o: %.f90
 	$(FC) -J$(SELF_INCDIR) $(SELF_FFLAGS) $(SELF_FLIBS) -c $< -o $@
