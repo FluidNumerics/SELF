@@ -41,8 +41,9 @@ MODULE SELF_MappedData
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar2D
     PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar2D
 
-    GENERIC,PUBLIC :: Gradient => Gradient_MappedScalar2D
-    PROCEDURE,PRIVATE :: Gradient_MappedScalar2D
+    PROCEDURE,PUBLIC :: GradientSF => GradientSF_MappedScalar2D ! Strong-Form Gradient
+    PROCEDURE,PUBLIC :: GradientBR => GradientBR_MappedScalar2D ! Bassi-Rebay Gradient
+
     PROCEDURE,PRIVATE :: ContravariantWeight => ContravariantWeight_MappedScalar2D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar2D
 
@@ -155,13 +156,13 @@ MODULE SELF_MappedData
   END TYPE MappedTensor3D
 
   INTERFACE
-    SUBROUTINE Gradient_MappedScalar2D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
-      bind(c,name="Gradient_MappedScalar2D_gpu_wrapper")
+    SUBROUTINE GradientSF_MappedScalar2D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
+      bind(c,name="GradientSF_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
       IMPLICIT NONE
       TYPE(c_ptr) :: scalar,dsdx,jacobian,gradF,dMatrix
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE Gradient_MappedScalar2D_gpu_wrapper
+    END SUBROUTINE GradientSF_MappedScalar2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -936,92 +937,147 @@ CONTAINS
 
   END SUBROUTINE BassiRebaySides_MappedScalar2D
 
-  SUBROUTINE Gradient_MappedScalar2D(scalar,geometry,gradF,dForm,gpuAccel)
-    ! Strong Form Operator - (Conservative Form)
-    !
-    ! Calculates the gradient of a scalar 2D function using the conservative form of the
-    ! mapped gradient operator
-    !
-    ! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
-    !
-    ! where the sum over i is implied.
+  SUBROUTINE GradientBR_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
+    !! Calculates the gradient of a scalar 2D function using a bassi-rebay method
+    !!
+    !! This method will call the BassiRebaySides method, which assumes the SideExchange
+    !! has already been completed, to update the avgBoundary attribute.
+    !!
+    IMPLICIT NONE
+    CLASS(MappedScalar2D),INTENT(inout) :: scalar
+    TYPE(SEMQuad),INTENT(in) :: geometry
+    TYPE(MappedVector2D),INTENT(inout) :: gradF
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER    :: i,j,ii,iVar,iEl
+    REAL(prec) :: gF(1:2)
+     
+    CALL scalar % BassiRebaySides( gpuAccel )
+
+    IF( gpuAccel )THEN
+
+      PRINT*, 'Scalar2D Gradient : Weak form of the gradient has not been implemented yet'
+    ELSE
+
+     DO iEl = 1, scalar % nElem
+       DO iVar = 1, scalar % nVar
+         DO j = 0, scalar % interp % N
+           DO i = 0, scalar % interp % N
+
+             gF(1:2) = 0.0_prec
+             DO ii = 0, scalar % interp % N
+
+               gF(1) = gF(1) + scalar % interp % dgMatrix % hostData(ii,i)*&
+                               scalar % interior % hostData(ii,j,iVar,iEl)*&
+                               geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl) + &
+                               scalar % interp % dgMatrix % hostData(ii,j)*&
+                               scalar % interior % hostData(i,ii,iVar,iEl)*&
+                               geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
+
+               gF(2) = gF(2) + scalar % interp % dgMatrix % hostData(ii,i)*&
+                               scalar % interior % hostData(ii,j,iVar,iEl)*&
+                               geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl) + &
+                               scalar % interp % dgMatrix % hostData(ii,j)*&
+                               scalar % interior % hostData(i,ii,iVar,iEl)*&
+                               geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
+             END DO
+
+             ! Boundary Contribution
+             gF(1) = gF(1) + &
+                     (scalar % avgBoundary % hostData(j,iVar,2,iEl)*scalar % interp % bMatrix % hostData(i,1)*&
+                      geometry % nHat % boundary % hostData(1,j,1,2,iEl) + &
+                      scalar % avgBoundary % hostData(j,iVar,4,iEl)*scalar % interp % bMatrix % hostData(i,0)*&
+                      geometry % nHat % boundary % hostData(1,j,1,4,iEl))/ &
+                     scalar % interp % qWeights % hostData(i) +&
+                     (scalar % avgBoundary % hostData(i,iVar,3,iEl)*scalar % interp % bMatrix % hostData(j,1)*&
+                      geometry % nHat % boundary % hostData(1,i,1,3,iEl) + &
+                      scalar % avgBoundary % hostData(i,iVar,1,iEl)*scalar % interp % bMatrix % hostData(j,0)*&
+                      geometry % nHat % boundary % hostData(1,i,1,1,iEl))/ &
+                     scalar % interp % qWeights % hostData(j)
+
+             gF(2) = gF(2) + &
+                     (scalar % avgBoundary % hostData(j,iVar,2,iEl)*scalar % interp % bMatrix % hostData(i,1)*&
+                      geometry % nHat % boundary % hostData(2,j,1,2,iEl) + &
+                      scalar % avgBoundary % hostData(j,iVar,4,iEl)*scalar % interp % bMatrix % hostData(i,0)*&
+                      geometry % nHat % boundary % hostData(2,j,1,4,iEl))/ &
+                     scalar % interp % qWeights % hostData(i) +&
+                     (scalar % avgBoundary % hostData(i,iVar,3,iEl)*scalar % interp % bMatrix % hostData(j,1)*&
+                      geometry % nHat % boundary % hostData(2,i,1,3,iEl) + &
+                      scalar % avgBoundary % hostData(i,iVar,1,iEl)*scalar % interp % bMatrix % hostData(j,0)*&
+                      geometry % nHat % boundary % hostData(2,i,1,1,iEl))/ &
+                     scalar % interp % qWeights % hostData(j)
+
+             gradF % interior % hostData(1:2,i,j,iVar,iEl) = gF(1:2)/geometry % J % interior % hostData(i,j,1,iEl)
+
+           END DO
+         END DO
+       END DO
+     END DO
+
+    ENDIF
+
+  END SUBROUTINE GradientBR_MappedScalar2D
+
+  SUBROUTINE GradientSF_MappedScalar2D(scalar,geometry,gradF,gpuAccel)
+    !! Calculates the gradient of a scalar 2D function using the conservative form of the
+    !! mapped gradient operator
+    !!
+    !! \grad_{phys}( f ) =  (1 / J)*(\partial / \partial \xi_i ( J\vec{a}_i f )
+    !!
+    !! where the sum over i is implied.
     IMPLICIT NONE
     CLASS(MappedScalar2D),INTENT(in) :: scalar
     TYPE(SEMQuad),INTENT(in) :: geometry
     TYPE(MappedVector2D),INTENT(inout) :: gradF
-    INTEGER,INTENT(in) :: dForm
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
     REAL(prec) :: gF(1:2)
 
-    IF (dForm == selfWeakDGForm) THEN
+    IF (gpuAccel) THEN
+      CALL GradientSF_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+                                               geometry % dsdx % interior % deviceData, &
+                                               geometry % J % interior % deviceData, &
+                                               gradF % interior % deviceData, &
+                                               scalar % interp % dMatrix % deviceData, &
+                                               scalar % interp % N, &
+                                               scalar % nVar, &
+                                               scalar % nElem)
 
-       PRINT*, 'Scalar2D Gradient : Weak form of the gradient has not been implemented yet'
-!      IF (gpuAccel) THEN
-!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % deviceData, &
-!                                                         workTensor % boundary % deviceData, &
-!                                                         gradF % interior % deviceData, &
-!                                                         workTensor % nVar, &
-!                                                         workTensor % nElem)
-!      ELSE
-!        CALL workTensor % interp % TensorDGDivergence_2D(workTensor % interior % hostData, &
-!                                                         workTensor % boundary % hostData, &
-!                                                         gradF % interior % hostData, &
-!                                                         workTensor % nVar, &
-!                                                         workTensor % nElem)
-!      END IF
+    ELSE
 
-    ELSEIF (dForm == selfStrongForm) THEN
+      DO iEl = 1, scalar % nElem
+        DO iVar = 1, scalar % nVar
+          DO j = 0, scalar % interp % N
+            DO i = 0, scalar % interp % N
 
+              gF(1:2) = 0.0_prec
+              DO ii = 0, scalar % interp % N
 
-      IF (gpuAccel) THEN
-        CALL Gradient_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
-                                                 geometry % dsdx % interior % deviceData, &
-                                                 geometry % J % interior % deviceData, &
-                                                 gradF % interior % deviceData, &
-                                                 scalar % interp % dMatrix % deviceData, &
-                                                 scalar % interp % N, &
-                                                 scalar % nVar, &
-                                                 scalar % nElem)
+                gF(1) = gF(1) + scalar % interp % dMatrix % hostData(ii,i)*&
+                                scalar % interior % hostData(ii,j,iVar,iEl)*&
+                                geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl) + &
+                                scalar % interp % dMatrix % hostData(ii,j)*&
+                                scalar % interior % hostData(i,ii,iVar,iEl)*&
+                                geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
 
-      ELSE
-
-        DO iEl = 1, scalar % nElem
-          DO iVar = 1, scalar % nVar
-            DO j = 0, scalar % interp % N
-              DO i = 0, scalar % interp % N
-
-                gF(1:2) = 0.0_prec
-                DO ii = 0, scalar % interp % N
-
-                  gF(1) = gF(1) + scalar % interp % dMatrix % hostData(ii,i)*&
-                                  scalar % interior % hostData(ii,j,iVar,iEl)*&
-                                  geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl) + &
-                                  scalar % interp % dMatrix % hostData(ii,j)*&
-                                  scalar % interior % hostData(i,ii,iVar,iEl)*&
-                                  geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
-
-                  gF(2) = gF(2) + scalar % interp % dMatrix % hostData(ii,i)*&
-                                  scalar % interior % hostData(ii,j,iVar,iEl)*&
-                                  geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl) + &
-                                  scalar % interp % dMatrix % hostData(ii,j)*&
-                                  scalar % interior % hostData(i,ii,iVar,iEl)*&
-                                  geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
-                END DO
-                gradF % interior % hostData(1:2,i,j,iVar,iEl) = gF(1:2)/geometry % J % interior % hostData(i,j,1,iEl)
-
+                gF(2) = gF(2) + scalar % interp % dMatrix % hostData(ii,i)*&
+                                scalar % interior % hostData(ii,j,iVar,iEl)*&
+                                geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl) + &
+                                scalar % interp % dMatrix % hostData(ii,j)*&
+                                scalar % interior % hostData(i,ii,iVar,iEl)*&
+                                geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
               END DO
+              gradF % interior % hostData(1:2,i,j,iVar,iEl) = gF(1:2)/geometry % J % interior % hostData(i,j,1,iEl)
+
             END DO
           END DO
         END DO
-
-      END IF
+      END DO
 
     END IF
 
-
-  END SUBROUTINE Gradient_MappedScalar2D
+  END SUBROUTINE GradientSF_MappedScalar2D
 
   SUBROUTINE ContravariantWeight_MappedScalar2D(scalar,geometry,workTensor,gpuAccel)
 #undef __FUNC__

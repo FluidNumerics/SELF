@@ -76,8 +76,8 @@ extern "C"
   }
 }
 
-// Gradient_MappedScalar2D_gpu
-__global__ void Gradient_MappedScalar2D_gpu(real *scalar, real *dsdx, real *jacobian, real *gradF, real *dMatrix, int N, int nVar){
+// GradientSF_MappedScalar2D_gpu
+__global__ void GradientSF_MappedScalar2D_gpu(real *scalar, real *dsdx, real *jacobian, real *gradF, real *dMatrix, int N, int nVar){
 
   size_t iVar = blockIdx.x;
   size_t iEl = blockIdx.y;
@@ -109,9 +109,9 @@ __global__ void Gradient_MappedScalar2D_gpu(real *scalar, real *dsdx, real *jaco
 
 extern "C"
 {
-  void Gradient_MappedScalar2D_gpu_wrapper(real **scalar, real **dsdx, real **jacobian, real **gradF, real **dMatrix, int N, int nVar, int nEl)
+  void GradientSF_MappedScalar2D_gpu_wrapper(real **scalar, real **dsdx, real **jacobian, real **gradF, real **dMatrix, int N, int nVar, int nEl)
   {
-    Gradient_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *dsdx, *jacobian, *gradF, *dMatrix, N, nVar);
+    GradientSF_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *dsdx, *jacobian, *gradF, *dMatrix, N, nVar);
   }
 }
 

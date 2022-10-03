@@ -250,10 +250,9 @@ CONTAINS
 
       CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
 
-      CALL this % H % Gradient( this % geometry, &
-                                this % gradH, &
-                                selfStrongForm, &
-                                .FALSE.)
+      CALL this % H % GradientSF( this % geometry, &
+                                  this % gradH, &
+                                  .FALSE.)
 
       IF( this % gpuAccel )THEN
         CALL this % H % UpdateDevice()
@@ -273,10 +272,9 @@ CONTAINS
 
       CALL this % H % BoundaryInterp( gpuAccel = .FALSE. )
 
-      CALL this % H % Gradient( this % geometry, &
-                                this % gradH, &
-                                selfStrongForm, &
-                                .FALSE.)
+      CALL this % H % GradientSF( this % geometry, &
+                                  this % gradH, &
+                                  .FALSE.)
 
       IF( this % gpuAccel )THEN
         CALL this % H % UpdateDevice()
