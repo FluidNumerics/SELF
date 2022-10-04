@@ -192,10 +192,50 @@
           Learning
         </label>
 <ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_1" id="__nav_3_1" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_1">
+          Theory
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Theory" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_3_1">
+<span class="md-nav__icon md-icon"></span>
+          Theory
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="../../Learning/Errors/">
+<a class="md-nav__link" href="../../Learning/SpectralApproximations/">
         Spectral Approximations
       </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Learning/DifferentialGeometry/">
+        Differential Geometry
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3_2" id="__nav_3_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3_2">
+          Code
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-label="Code" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="__nav_3_2">
+<span class="md-nav__icon md-icon"></span>
+          Code
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../Learning/SoftwareArchitecture/">
+        Software Architecture
+      </a>
+</li>
+</ul>
+</nav>
 </li>
 </ul>
 </nav>
@@ -335,7 +375,7 @@
 sudo apt-get install gcc g++ gfortran build-essential libnuma-dev
 sudo apt install wget gnupg2
 wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
-echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.3/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
+echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
 sudo apt update
 sudo apt install rocm-dev
 sudo reboot
@@ -386,12 +426,13 @@ feq-parse@1.1.0  flap@master  hdf5@1.12.0 +cxx+fortran+mpi  hipfort@4.5.2  json-
 <ul>
 <li><code>gcr.io/self-fluids/self-base:amd-rocm4.3</code></li>
 <li><code>gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3</code></li>
+<li><code>gcr.io/self-fluids/self-base:amd-rocm5.2</code></li>
+<li><code>gcr.io/self-fluids/self-base:nvidia-cuda11.4.2-rocm5.2</code></li>
 </ul>
-<p>To access these base containers, you need to be a <code>"SELF Member" under HigherOrderMethods &lt;https://opencollective.com/higher-order-methods/contribute/self-member-35220/checkout&gt;</code>_</p>
+<p>To access these base containers, reach out to support@fluidnumerics.com to arrange a subscription.</p>
 <p>Alternatively, you will need to build base container image. Container recipes for base containers can be found under <code>SELF/docker/base/{HIP_PLATFORM}</code>, where <code>{HIP_PLATFORM}</code> is one of <code>nvidia</code> or <code>amd</code>. To install the base containers locally, you can run</p>
-<p>.. code-block:: shell</p>
-<pre><code>docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3
-docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:amd-rocm4.3
+<pre><code>docker build . -f docker/base/nvidia/Dockerfile -t self-base:nvidia-cuda11.4.2-rocm5.2
+docker build . -f docker/base/amd/Dockerfile -t self-base:amd-rocm5.2
 </code></pre>
 <h3 id="build-with-cloud-build-local-recommended">Build with Cloud-Build-Local (Recommended)</h3>
 <p>To build a Docker container with SELF pre-installed, the SELF repository comes with a Cloud Build pipeline for use on your local system. This pipeline will execute <code>docker run</code> with the appropriate Dockerfile, depending on the target GPU architecture specified in the build substitutions. To use cloud-build-local, you will need to install <a href="https://www.docker.com/">Docker</a>, the <a href="https://cloud.google.com/sdk/docs/install">gcloud CLI, and google-cloud-sdk-cloud-build-local</a>.</p>
@@ -435,7 +476,7 @@ docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:
             </div>
 </div>
 </a>
-<a aria-label="Next: Spectral Approximations" class="md-footer__link md-footer__link--next" href="../../Learning/Errors/" rel="next">
+<a aria-label="Next: Spectral Approximations" class="md-footer__link md-footer__link--next" href="../../Learning/SpectralApproximations/" rel="next">
 <div class="md-footer__title">
 <div class="md-ellipsis">
 <span class="md-footer__direction">
