@@ -31,7 +31,7 @@ sudo apt-get update
 sudo apt-get install gcc g++ gfortran build-essential libnuma-dev
 sudo apt install wget gnupg2
 wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
-echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.3/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
+echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
 sudo apt update
 sudo apt install rocm-dev
 sudo reboot
@@ -104,15 +104,17 @@ Base containers are hosted by Fluid Numerics at `gcr.io/self-fluids/self-base`. 
 
 * `gcr.io/self-fluids/self-base:amd-rocm4.3`
 * `gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3`
+* `gcr.io/self-fluids/self-base:amd-rocm5.2`
+* `gcr.io/self-fluids/self-base:nvidia-cuda11.4.2-rocm5.2`
 
-To access these base containers, you need to be a `"SELF Member" under HigherOrderMethods <https://opencollective.com/higher-order-methods/contribute/self-member-35220/checkout>`_
+To access these base containers, reach out to support@fluidnumerics.com to arrange a subscription.
 
 Alternatively, you will need to build base container image. Container recipes for base containers can be found under `SELF/docker/base/{HIP_PLATFORM}`, where `{HIP_PLATFORM}` is one of `nvidia` or `amd`. To install the base containers locally, you can run
 
-.. code-block:: shell
-
-    docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:nvidia-cuda11.2.1-rocm4.3
-    docker build . -f docker/base/nvidia/Dockerfile -t gcr.io/self-fluids/self-base:amd-rocm4.3
+```
+docker build . -f docker/base/nvidia/Dockerfile -t self-base:nvidia-cuda11.4.2-rocm5.2
+docker build . -f docker/base/amd/Dockerfile -t self-base:amd-rocm5.2
+```
 
 
 

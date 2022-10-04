@@ -11,7 +11,7 @@ If you prefer working in Python, our team is actively working on building out a 
 
 ## Support
 
-SELF is made available as a free and open-source software to give you the opportunity to work with the code at your own pace and expense. You can report bugs, issues, and feature requests using the repository's issue tracker. SELF developers will prioritize tasks based on paying customer demand (first) and community demand (second).
+SELF is made available as a free and open-source software to give you the opportunity to work with the code at your own pace and expense. You can report bugs, issues, and feature requests using the repository's issue tracker. Fluid Numerics, the developers of SELF, will prioritize tasks based on paying customer demand (first) and community demand (second).
 
 Fluid Numerics LLC provides a range of professional services for any of the following
 
