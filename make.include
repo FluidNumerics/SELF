@@ -22,7 +22,6 @@ SELF_BINDIR = $(SELF_DIR)/build/bin/
 SELF_EXADIR = $(SELF_DIR)/build/examples/
 
 
-
 vpath %.f90 $(SELF_SRCDIR)
 vpath %.cpp $(SELF_SRCDIR)/hip
 vpath %.h $(SELF_SRCDIR) $(SELF_SRCDIR)/hip
@@ -64,6 +63,7 @@ SELF_CPP_MODELS = SELF_Advection2D \
                   SELF_CompressibleIdealGas2D
 
 SELF_EXAMPLES = GradientBR_Test \
+                GradientSF_Test \
                 Advection2D/ConservativeForm \
                 Burgers1D/StationaryShock \
                 CompressibleIdealGas2D/StaticFluid \
@@ -106,7 +106,10 @@ self_clean:
 	rm -f $(SELF_MODDIR)*.mod
 	rm -f $(SELF_SRCDIR)*.o
 	rm -f $(SELF_HIPDIR)*.o
-	rm -f $(SELF_EXASRCDIR)/Advection2D/*.o \
+	rm -f $(SELF_MODELDIR)*.o
+	rm -f $(SELF_MODELHIPDIR)*.o
+	rm -f $(SELF_EXASRCDIR)/*.o \
+	      $(SELF_EXASRCDIR)/Advection2D/*.o \
               $(SELF_EXASRCDIR)/Burgers1D/*.o \
               $(SELF_EXASRCDIR)/CompressibleIdealGas2D/*.o \
               $(SELF_EXASRCDIR)/LinearShallowWater2D/*.o \

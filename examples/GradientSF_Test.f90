@@ -1,4 +1,4 @@
-PROGRAM GradientBR_Test
+PROGRAM GradientSF_Test
 
 USE SELF_Constants
 USE SELF_Lagrange
@@ -34,9 +34,6 @@ USE SELF_Model2D
   CHARACTER(LEN=SELF_EQUATION_LENGTH) :: coriolis
   CHARACTER(LEN=255) :: SELF_PREFIX
   CHARACTER(LEN=500) :: meshfile
-  REAL(prec) :: absDiff, maxXerr, maxYerr
-  INTEGER :: iEl, i, j 
-
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
     CALL args % Init( TRIM(SELF_PREFIX)//"/etc/cli/default.json")
@@ -100,12 +97,8 @@ USE SELF_Model2D
 
     CALL exact % solutionGradient % SetInteriorFromEquation( geometry, 0.0_prec )
 
-
-    ! Estimate gradient using Bassi-Rebay method
-    semModel % solution % extBoundary % hostData = 0.0_prec ! Set the boundary conditions
-    CALL semModel % solution % SideExchange(mesh, decomp, semModel % gpuAccel) ! SideExchange (update interior edges)
-
-    CALL semModel % solution % GradientBR(geometry, &
+    ! Estimate gradient using strong form method
+    CALL semModel % solution % GradientSF(geometry, &
                                           semModel % solutionGradient, &
                                           semModel % gpuAccel)
 
@@ -123,4 +116,4 @@ USE SELF_Model2D
     CALL args % Free()
     CALL decomp % Finalize()
 
-END PROGRAM GradientBR_Test
+END PROGRAM GradientSF_Test

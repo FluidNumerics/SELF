@@ -950,7 +950,8 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
-    REAL(prec) :: gF(1:2)
+    REAL(prec) :: gFx, gFy
+    REAL(prec) :: f1, f2
      
     CALL scalar % BassiRebaySides( gpuAccel )
 
@@ -964,50 +965,81 @@ CONTAINS
          DO j = 0, scalar % interp % N
            DO i = 0, scalar % interp % N
 
-             gF(1:2) = 0.0_prec
+             gFx = 0.0_prec
+             gFy = 0.0_prec
              DO ii = 0, scalar % interp % N
 
-               gF(1) = gF(1) + scalar % interp % dgMatrix % hostData(ii,i)*&
-                               scalar % interior % hostData(ii,j,iVar,iEl)*&
-                               geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl) + &
-                               scalar % interp % dgMatrix % hostData(ii,j)*&
-                               scalar % interior % hostData(i,ii,iVar,iEl)*&
-                               geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
+               f1 = scalar % interior % hostData(ii,j,iVar,iEl)*&
+                      geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl)
 
-               gF(2) = gF(2) + scalar % interp % dgMatrix % hostData(ii,i)*&
-                               scalar % interior % hostData(ii,j,iVar,iEl)*&
-                               geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl) + &
-                               scalar % interp % dgMatrix % hostData(ii,j)*&
-                               scalar % interior % hostData(i,ii,iVar,iEl)*&
-                               geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
+               f2 = scalar % interior % hostData(i,ii,iVar,iEl)*&
+                      geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
+
+               gFx = gFx + scalar % interp % dgMatrix % hostData(ii,i)*f1 +&
+                               scalar % interp % dgMatrix % hostData(ii,j)*f2
+
+               f1 = scalar % interior % hostData(ii,j,iVar,iEl)*&
+                      geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl)
+
+               f2 = scalar % interior % hostData(i,ii,iVar,iEl)*&
+                      geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
+
+               gFy = gFy + scalar % interp % dgMatrix % hostData(ii,i)*f1 +&
+                               scalar % interp % dgMatrix % hostData(ii,j)*f2
+
              END DO
 
              ! Boundary Contribution
-             gF(1) = gF(1) + &
-                     (scalar % avgBoundary % hostData(j,iVar,2,iEl)*scalar % interp % bMatrix % hostData(i,1)*&
-                      geometry % nHat % boundary % hostData(1,j,1,2,iEl) + &
-                      scalar % avgBoundary % hostData(j,iVar,4,iEl)*scalar % interp % bMatrix % hostData(i,0)*&
-                      geometry % nHat % boundary % hostData(1,j,1,4,iEl))/ &
-                     scalar % interp % qWeights % hostData(i) +&
-                     (scalar % avgBoundary % hostData(i,iVar,3,iEl)*scalar % interp % bMatrix % hostData(j,1)*&
-                      geometry % nHat % boundary % hostData(1,i,1,3,iEl) + &
-                      scalar % avgBoundary % hostData(i,iVar,1,iEl)*scalar % interp % bMatrix % hostData(j,0)*&
-                      geometry % nHat % boundary % hostData(1,i,1,1,iEl))/ &
+             f1 = scalar % avgBoundary % hostData(j,iVar,2,iEl)*&
+                     geometry % nHat % boundary % hostData(1,j,1,2,iEl)*&
+                     geometry % nScale % boundary % hostData(j,1,2,iEl) ! East
+
+             f2 = scalar % avgBoundary % hostData(j,iVar,4,iEl)*&
+                     geometry % nHat % boundary % hostData(1,j,1,4,iEl)*&
+                     geometry % nScale % boundary % hostData(j,1,4,iEl) ! West
+
+             gFx = gFx + (f1*scalar % interp % bMatrix % hostData(i,1) + &
+                          f2*scalar % interp % bMatrix % hostData(i,0))/ &
+                     scalar % interp % qWeights % hostData(i)
+
+             f1 = scalar % avgBoundary % hostData(i,iVar,3,iEl)*&
+                     geometry % nHat % boundary % hostData(1,i,1,3,iEl)*&
+                     geometry % nScale % boundary % hostData(i,1,3,iEl) ! North
+
+             f2 = scalar % avgBoundary % hostData(i,iVar,1,iEl)*&
+                     geometry % nHat % boundary % hostData(1,i,1,1,iEl)*&
+                     geometry % nScale % boundary % hostData(i,1,1,iEl) ! South
+
+             gFx = gFx + (f1*scalar % interp % bMatrix % hostData(j,1) + &
+                          f2*scalar % interp % bMatrix % hostData(j,0))/ &
                      scalar % interp % qWeights % hostData(j)
 
-             gF(2) = gF(2) + &
-                     (scalar % avgBoundary % hostData(j,iVar,2,iEl)*scalar % interp % bMatrix % hostData(i,1)*&
-                      geometry % nHat % boundary % hostData(2,j,1,2,iEl) + &
-                      scalar % avgBoundary % hostData(j,iVar,4,iEl)*scalar % interp % bMatrix % hostData(i,0)*&
-                      geometry % nHat % boundary % hostData(2,j,1,4,iEl))/ &
-                     scalar % interp % qWeights % hostData(i) +&
-                     (scalar % avgBoundary % hostData(i,iVar,3,iEl)*scalar % interp % bMatrix % hostData(j,1)*&
-                      geometry % nHat % boundary % hostData(2,i,1,3,iEl) + &
-                      scalar % avgBoundary % hostData(i,iVar,1,iEl)*scalar % interp % bMatrix % hostData(j,0)*&
-                      geometry % nHat % boundary % hostData(2,i,1,1,iEl))/ &
+             f1 = scalar % avgBoundary % hostData(j,iVar,2,iEl)*&
+                     geometry % nHat % boundary % hostData(2,j,1,2,iEl)*&
+                     geometry % nScale % boundary % hostData(j,1,2,iEl) ! East
+
+             f2 = scalar % avgBoundary % hostData(j,iVar,4,iEl)*&
+                     geometry % nHat % boundary % hostData(2,j,1,4,iEl)*&
+                     geometry % nScale % boundary % hostData(j,1,4,iEl) ! West
+
+             gFy = gFy + (f1*scalar % interp % bMatrix % hostData(i,1) + &
+                          f2*scalar % interp % bMatrix % hostData(i,0))/ &
+                     scalar % interp % qWeights % hostData(i)
+
+             f1 = scalar % avgBoundary % hostData(i,iVar,3,iEl)*&
+                     geometry % nHat % boundary % hostData(2,i,1,3,iEl)*&
+                     geometry % nScale % boundary % hostData(i,1,3,iEl) ! North
+
+             f2 = scalar % avgBoundary % hostData(i,iVar,1,iEl)*&
+                     geometry % nHat % boundary % hostData(2,i,1,1,iEl)*&
+                     geometry % nScale % boundary % hostData(i,1,1,iEl) ! South
+
+             gFy = gFy + (f1*scalar % interp % bMatrix % hostData(j,1) + &
+                          f2*scalar % interp % bMatrix % hostData(j,0))/ &
                      scalar % interp % qWeights % hostData(j)
 
-             gradF % interior % hostData(1:2,i,j,iVar,iEl) = gF(1:2)/geometry % J % interior % hostData(i,j,1,iEl)
+             gradF % interior % hostData(1,i,j,iVar,iEl) = gFx/geometry % J % interior % hostData(i,j,1,iEl)
+             gradF % interior % hostData(2,i,j,iVar,iEl) = gFy/geometry % J % interior % hostData(i,j,1,iEl)
 
            END DO
          END DO
@@ -1032,7 +1064,8 @@ CONTAINS
     LOGICAL,INTENT(in) :: gpuAccel
     ! Local
     INTEGER    :: i,j,ii,iVar,iEl
-    REAL(prec) :: gF(1:2)
+    REAL(prec) :: gFx, gFy
+    REAL(prec) :: f1, f2
 
     IF (gpuAccel) THEN
       CALL GradientSF_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
@@ -1046,29 +1079,38 @@ CONTAINS
 
     ELSE
 
+
       DO iEl = 1, scalar % nElem
         DO iVar = 1, scalar % nVar
           DO j = 0, scalar % interp % N
             DO i = 0, scalar % interp % N
 
-              gF(1:2) = 0.0_prec
+              gFx = 0.0_prec
+              gFy = 0.0_prec
               DO ii = 0, scalar % interp % N
 
-                gF(1) = gF(1) + scalar % interp % dMatrix % hostData(ii,i)*&
-                                scalar % interior % hostData(ii,j,iVar,iEl)*&
-                                geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl) + &
-                                scalar % interp % dMatrix % hostData(ii,j)*&
-                                scalar % interior % hostData(i,ii,iVar,iEl)*&
-                                geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
+                f1 = scalar % interior % hostData(ii,j,iVar,iEl)*&
+                       geometry % dsdx % interior % hostData(1,1,ii,j,1,iEl)
 
-                gF(2) = gF(2) + scalar % interp % dMatrix % hostData(ii,i)*&
-                                scalar % interior % hostData(ii,j,iVar,iEl)*&
-                                geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl) + &
-                                scalar % interp % dMatrix % hostData(ii,j)*&
-                                scalar % interior % hostData(i,ii,iVar,iEl)*&
-                                geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
+                f2 = scalar % interior % hostData(i,ii,iVar,iEl)*&
+                       geometry % dsdx % interior % hostData(1,2,i,ii,1,iEl)
+
+                gFx = gFx + scalar % interp % dMatrix % hostData(ii,i)*f1 +&
+                                scalar % interp % dMatrix % hostData(ii,j)*f2
+
+                f1 = scalar % interior % hostData(ii,j,iVar,iEl)*&
+                       geometry % dsdx % interior % hostData(2,1,ii,j,1,iEl)
+
+                f2 = scalar % interior % hostData(i,ii,iVar,iEl)*&
+                       geometry % dsdx % interior % hostData(2,2,i,ii,1,iEl)
+
+                gFy = gFy + scalar % interp % dMatrix % hostData(ii,i)*f1 +&
+                                scalar % interp % dMatrix % hostData(ii,j)*f2
+
               END DO
-              gradF % interior % hostData(1:2,i,j,iVar,iEl) = gF(1:2)/geometry % J % interior % hostData(i,j,1,iEl)
+
+              gradF % interior % hostData(1,i,j,iVar,iEl) = gFx/geometry % J % interior % hostData(i,j,1,iEl)
+              gradF % interior % hostData(2,i,j,iVar,iEl) = gFy/geometry % J % interior % hostData(i,j,1,iEl)
 
             END DO
           END DO
