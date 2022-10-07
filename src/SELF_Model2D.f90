@@ -1133,6 +1133,7 @@ CONTAINS
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
     TYPE(Scalar2D) :: solution
+    TYPE(Vector2D) :: solutionGradient
     TYPE(Vector2D) :: x
     TYPE(Lagrange),TARGET :: interp
 
@@ -1159,6 +1160,9 @@ CONTAINS
     CALL solution % Init( interp, &
             this % solution % nVar, this % solution % nElem )
 
+    CALL solutionGradient % Init( interp, &
+            this % solution % nVar, this % solution % nElem )
+
     CALL x % Init( interp, 1, this % solution % nElem )
 
     ! Map the mesh positions to the target grid
@@ -1166,6 +1170,9 @@ CONTAINS
 
     ! Map the solution to the target grid
     CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+    ! Map the solution to the target grid
+    CALL this % solutionGradient % GridInterp(solutionGradient,gpuAccel=.FALSE.)
    
      OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(tecFile), &
@@ -1177,10 +1184,18 @@ CONTAINS
       tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
     ENDDO
 
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "d/dx('//TRIM(this % solution % meta(iVar) % name)//')"'
+    ENDDO
+
+    DO iVar = 1, this % solution % nVar
+      tecHeader = TRIM(tecHeader)//', "d/dy('//TRIM(this % solution % meta(iVar) % name)//')"'
+    ENDDO
+
     WRITE(fUnit,*) TRIM(tecHeader) 
 
     ! Create format statement
-    WRITE(fmat,*) this % solution % nvar+2
+    WRITE(fmat,*) 3*this % solution % nvar+2
     fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
 
     DO iEl = 1, this % solution % nElem
@@ -1195,7 +1210,9 @@ CONTAINS
 
           WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
                             x % interior % hostData(2,i,j,1,iEl), &
-                            solution % interior % hostData(i,j,1:this % solution % nvar,iEl)
+                            solution % interior % hostData(i,j,1:this % solution % nvar,iEl), &
+                            solutionGradient % interior % hostData(1,i,j,1:this % solution % nvar,iEl), &
+                            solutionGradient % interior % hostData(2,i,j,1:this % solution % nvar,iEl)
 
         ENDDO
       ENDDO

@@ -76,6 +76,97 @@ extern "C"
   }
 }
 
+// GradientBR_MappedScalar2D_gpu
+__global__ void GradientBR_MappedScalar2D_gpu(real *scalar, real *avgBoundary, real *dsdx, real *jacobian, real* nHat, real *nScale, real *gradF, real *dgMatrix, real *bMatrix, real *qWeights, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  real gfx = 0.0;
+  real gfy = 0.0;
+  real f1, f2;
+
+  for( int ii=0; ii < N+1; ii++ ){
+	  
+    f1 = scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(1,1,ii,j,0,iEl,N,1)];
+    
+    f2 = scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(1,2,i,ii,0,iEl,N,1)];
+
+    gfx += dgMatrix[ii+i*(N+1)]*f1+
+           dgMatrix[ii+j*(N+1)]*f2;
+
+    f1 = scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(2,1,ii,j,0,iEl,N,1)];
+    
+    f2 = scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*
+	 dsdx[TE_2D_INDEX(2,2,i,ii,0,iEl,N,1)];
+
+    gfy += dgMatrix[ii+i*(N+1)]*f1+
+           dgMatrix[ii+j*(N+1)]*f2;
+
+  }
+
+  // East
+  f1 = avgBoundary[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,j,0,2,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,2,iEl,N,1)];
+  // West
+  f2 = avgBoundary[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,j,0,4,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,4,iEl,N,1)];
+
+  gfx += (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = avgBoundary[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,i,0,3,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,3,iEl,N,1)];
+  // South
+  f2 = avgBoundary[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(1,i,0,1,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,1,iEl,N,1)];
+
+  gfx += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  // East
+  f1 = avgBoundary[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,j,0,2,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,2,iEl,N,1)];
+  // West
+  f2 = avgBoundary[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,j,0,4,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(j,0,4,iEl,N,1)];
+
+  gfy += (f1*bMatrix[i+N+1] + f2*bMatrix[i])/qWeights[i];
+
+  // North
+  f1 = avgBoundary[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,i,0,3,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,3,iEl,N,1)];
+  // South
+  f2 = avgBoundary[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*
+	  nHat[VEB_2D_INDEX(2,i,0,1,iEl,N,1)]*
+	  nScale[SCB_2D_INDEX(i,0,1,iEl,N,1)];
+
+  gfy += (f1*bMatrix[j+N+1] + f2*bMatrix[j])/qWeights[j];
+
+  gradF[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = gfx/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
+  gradF[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = gfy/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];
+
+}
+
+extern "C"
+{
+  void GradientBR_MappedScalar2D_gpu_wrapper(real **scalar, real **avgBoundary, real **dsdx, real **jacobian, real **nHat, real **nScale, real **gradF, real **dgMatrix, real **bMatrix, real **qWeights, int N, int nVar, int nEl)
+  {
+    GradientBR_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *avgBoundary, *dsdx, *jacobian, *nHat, *nScale, *gradF, *dgMatrix, *bMatrix, *qWeights, N, nVar);
+  }
+}
+
 // GradientSF_MappedScalar2D_gpu
 __global__ void GradientSF_MappedScalar2D_gpu(real *scalar, real *dsdx, real *jacobian, real *gradF, real *dMatrix, int N, int nVar){
 
@@ -89,17 +180,17 @@ __global__ void GradientSF_MappedScalar2D_gpu(real *scalar, real *dsdx, real *ja
   for( int ii=0; ii < N+1; ii++ ){
     gf[0] += dMatrix[ii+i*(N+1)]*
 	       scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
-	       dsdx[TE_2D_INDEX(1,1,ii,j,iVar,iEl,N,nVar)]+
+	       dsdx[TE_2D_INDEX(1,1,ii,j,0,iEl,N,1)]+
              dMatrix[ii+j*(N+1)]*
                scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*   	       
-               dsdx[TE_2D_INDEX(1,2,i,ii,iVar,iEl,N,nVar)];
+               dsdx[TE_2D_INDEX(1,2,i,ii,0,iEl,N,1)];
 
     gf[1] += dMatrix[ii+i*(N+1)]*
 	       scalar[SC_2D_INDEX(ii,j,iVar,iEl,N,nVar)]*
-	       dsdx[TE_2D_INDEX(2,1,ii,j,iVar,iEl,N,nVar)]+
+	       dsdx[TE_2D_INDEX(2,1,ii,j,0,iEl,N,1)]+
              dMatrix[ii+j*(N+1)]*
                scalar[SC_2D_INDEX(i,ii,iVar,iEl,N,nVar)]*   	       
-               dsdx[TE_2D_INDEX(2,2,i,ii,iVar,iEl,N,nVar)];
+               dsdx[TE_2D_INDEX(2,2,i,ii,0,iEl,N,1)];
 
   }
   gradF[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = gf[0]/jacobian[SC_2D_INDEX(i,j,0,iEl,N,1)];

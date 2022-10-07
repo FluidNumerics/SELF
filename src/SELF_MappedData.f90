@@ -156,6 +156,17 @@ MODULE SELF_MappedData
   END TYPE MappedTensor3D
 
   INTERFACE
+    SUBROUTINE GradientBR_MappedScalar2D_gpu_wrapper(scalar,avgBoundary,dsdx,jacobian,nHat,nScale,&
+                    gradF,dgMatrix,bMatrix,qWeights,N,nVar,nEl) &
+      bind(c,name="GradientBR_MappedScalar2D_gpu_wrapper")
+      USE ISO_C_BINDING
+      IMPLICIT NONE
+      TYPE(c_ptr) :: scalar,avgBoundary,dsdx,jacobian,nHat,nScale,gradF,dgMatrix,bMatrix,qWeights
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE GradientBR_MappedScalar2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
     SUBROUTINE GradientSF_MappedScalar2D_gpu_wrapper(scalar,dsdx,jacobian,gradF,dMatrix,N,nVar,nEl) &
       bind(c,name="GradientSF_MappedScalar2D_gpu_wrapper")
       USE ISO_C_BINDING
@@ -957,7 +968,19 @@ CONTAINS
 
     IF( gpuAccel )THEN
 
-      PRINT*, 'Scalar2D Gradient : Weak form of the gradient has not been implemented yet'
+      CALL GradientBR_MappedScalar2D_gpu_wrapper(scalar % interior % deviceData, &
+                                                 scalar % avgBoundary % deviceData, &
+                                                 geometry % dsdx % interior % deviceData, &
+                                                 geometry % J % interior % deviceData, &
+                                                 geometry % nHat % boundary % deviceData, &
+                                                 geometry % nScale % boundary % deviceData, &
+                                                 gradF % interior % deviceData, &
+                                                 scalar % interp % dgMatrix % deviceData, &
+                                                 scalar % interp % bMatrix % deviceData, &
+                                                 scalar % interp % qWeights % deviceData, &
+                                                 scalar % interp % N, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
     ELSE
 
      DO iEl = 1, scalar % nElem
