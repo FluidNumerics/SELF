@@ -79,13 +79,10 @@ MODULE SELF_Model
 !   Model Formulations
 !
   INTEGER, PARAMETER :: SELF_FORMULATION_LENGTH = 30 ! max length of integrator methods when specified as char
-  INTEGER, PARAMETER :: SELF_CONSERVATIVE_FLUX = 0
-  INTEGER, PARAMETER :: SELF_SPLITFORM_FLUX = 1
 
 
   TYPE,ABSTRACT :: Model
     LOGICAL :: gpuAccel
-    INTEGER :: fluxDivMethod
 
     ! Time integration attributes
     PROCEDURE(SELF_timeIntegrator), POINTER :: timeIntegrator => Euler_timeIntegrator 
@@ -127,6 +124,7 @@ MODULE SELF_Model
     PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK4
 
     PROCEDURE :: PreTendency => PreTendency_Model
+    PROCEDURE :: PostFluxDivergence => PostFluxDivergence_Model
     PROCEDURE :: SourceMethod => Source_Model
     PROCEDURE :: FluxMethod => Flux_Model
     PROCEDURE :: RiemannSolver => RiemannSolver_Model
@@ -148,11 +146,6 @@ MODULE SELF_Model
 
     PROCEDURE :: SetSimulationTime
     PROCEDURE :: GetSimulationTime
-
-    GENERIC :: SetFluxMethod => SetFluxMethod_withInt, &
-                                    SetFluxMethod_withChar
-    PROCEDURE,PRIVATE :: SetFluxMethod_withInt
-    PROCEDURE,PRIVATE :: SetFluxMethod_withChar
 
     PROCEDURE :: EnableGPUAccel => EnableGPUAccel_Model
     PROCEDURE :: DisableGPUAccel => DisableGPUAccel_Model
@@ -259,6 +252,20 @@ CONTAINS
       RETURN
 
   END SUBROUTINE PreTendency_Model
+
+  SUBROUTINE PostFluxDivergence_Model(this)
+    !! PostFluxDivergence is a template routine that is used to house any additional calculations
+    !! that you want to execute just before the tendency is calculated.
+    !!
+    !! The intention is to provide a method that can be overridden through type-extension, to handle
+    !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+      RETURN
+
+  END SUBROUTINE PostFluxDivergence_Model
 
   SUBROUTINE Source_Model(this)
     !!
@@ -386,64 +393,6 @@ CONTAINS
       END SELECT
 
   END SUBROUTINE SetTimeIntegrator_withChar
-
-  SUBROUTINE SetFluxMethod_withInt(this,fluxDivMethod)
-    !! Sets the method for calculating the flux divergence, using an integer flag
-    !!
-    !! Valid options for `fluxDivMethod` are
-    !!
-    !!    SELF_CONSERVATIVE_FLUX
-    !!    SELF_SPLITFORM_FLUX
-    !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    INTEGER, INTENT(in) :: fluxDivMethod
-
-      this % fluxDivMethod = fluxDivMethod
-
-  END SUBROUTINE SetFluxMethod_withInt
-
-  SUBROUTINE SetFluxMethod_withChar(this,fluxDivMethod)
-    !! Sets the method for calculating the flux divergence, using a character input
-    !!
-    !! Valid options for flux method are
-    !!
-    !!   "conservative"
-    !!   "split" or "splitform" or "split form" or "split-form"
-    !!
-    !! Note that the character provided is not case-sensitive
-    !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-    CHARACTER(*), INTENT(in) :: fluxDivMethod
-    ! Local
-    CHARACTER(SELF_FORMULATION_LENGTH) :: upperCaseInt
-
-      upperCaseInt = UpperCase(TRIM(fluxDivMethod))
-
-      SELECT CASE (TRIM(upperCaseInt))
-
-        CASE ("CONSERVATIVE")
-          this % fluxDivMethod = SELF_CONSERVATIVE_FLUX
-
-        CASE ("SPLIT")
-          this % fluxDivMethod = SELF_SPLITFORM_FLUX
-
-        CASE ("SPLITFORM")
-          this % fluxDivMethod = SELF_SPLITFORM_FLUX
-
-        CASE ("SPLIT FORM")
-          this % fluxDivMethod = SELF_SPLITFORM_FLUX
-
-        CASE ("SPLIT-FORM")
-          this % fluxDivMethod = SELF_SPLITFORM_FLUX
-
-        CASE DEFAULT
-          this % fluxDivMethod = SELF_CONSERVATIVE_FLUX
-
-      END SELECT
-
-  END SUBROUTINE SetFluxMethod_withChar
 
   SUBROUTINE GetSimulationTime(this,t)
     !! Returns the current simulation time stored in the model % t attribute

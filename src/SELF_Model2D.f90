@@ -155,7 +155,6 @@ CONTAINS
     this % mesh => mesh
     this % geometry => geometry
     this % gpuAccel = .FALSE.
-    this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
 
     CALL this % solution % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
@@ -804,39 +803,13 @@ CONTAINS
   END SUBROUTINE ReprojectFlux_Model2D
 
   SUBROUTINE CalculateFluxDivergence_Model2D(this)
-    !! Calculates the divergence of the flux vector using either the split-form or conservative formulation.
-    !! If the split-form is used, you need to set the velocity field
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
 
-      IF (this % fluxDivMethod == SELF_SPLITFORM_FLUX) THEN
-        CALL this % velocity % ContravariantProjection(this % geometry, this % gpuAccel)
-
-        IF (this % gpuAccel) THEN
-          CALL this % flux % interp % VectorDGDivergence_2D(this % flux % interior % deviceData, &
-                                                           this % solution % interior % deviceData, &
-                                                           this % compVelocity % interior % deviceData, &
-                                                           this % flux % boundaryNormal % deviceData, &
-                                                           this % fluxDivergence % interior % deviceData, &
-                                                           this % flux % nvar, &
-                                                           this % flux % nelem)
-        ELSE
-          CALL this % flux % interp % VectorDGDivergence_2D(this % flux % interior % hostData, &
-                                                           this % solution % interior % hostData, &
-                                                           this % compVelocity % interior % hostData, &
-                                                           this % flux % boundaryNormal % hostData, &
-                                                           this % fluxDivergence % interior % hostData, &
-                                                           this % flux % nvar, &
-                                                           this % flux % nelem)
-        END IF
-
-      ELSE ! Conservative Form
-
-        CALL this % flux % Divergence(this % geometry, &
-                                      this % fluxDivergence, &
-                                      selfWeakDGForm,&
-                                      this % gpuAccel)
-      ENDIF
+      CALL this % flux % Divergence(this % geometry, &
+                                    this % fluxDivergence, &
+                                    selfWeakDGForm,&
+                                    this % gpuAccel)
 
   END SUBROUTINE CalculateFluxDivergence_Model2D
 
@@ -855,6 +828,7 @@ CONTAINS
     CALL this % FluxMethod()
     CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
     CALL this % CalculateFluxDivergence()
+    CALL this % PostFluxDivergence()
 
     IF( this % gpuAccel )THEN
 

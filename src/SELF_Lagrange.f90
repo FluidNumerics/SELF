@@ -151,10 +151,8 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorDivergence_2D => VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDivergence_2D_cpu,VectorDivergence_2D_gpu
 
-    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu,&
-                                     VectorDGSplitDivergence_2D_cpu,VectorDGSplitDivergence_2D_gpu
+    GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
-    PROCEDURE,PRIVATE :: VectorDGSplitDivergence_2D_cpu,VectorDGSplitDivergence_2D_gpu
 
     GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
     PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
@@ -416,17 +414,6 @@ MODULE SELF_Lagrange
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
-  END INTERFACE
-
-  INTERFACE
-   SUBROUTINE VectorDGSplitDivergence_2D_gpu_wrapper(dgMatrixT_dev,&
-                   dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,s_dev,v_dev,bf_dev,df_dev,N,nVar,nEl) &
-      bind(c,name="VectorDGSplitDivergence_2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: dgMatrixT_dev,dMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,s_dev,v_dev,bf_dev,df_dev
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE VectorDGSplitDivergence_2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -1652,73 +1639,6 @@ CONTAINS
                                            nVariables,nElements)
 
   END SUBROUTINE VectorDGDivergence_2D_gpu
-
-  SUBROUTINE VectorDGSplitDivergence_2D_cpu(myPoly,f,s,c,bF,dF,nVariables,nElements)
-    !! This method calculates the divergence of a vector "f" using a split-form
-    !! method assuming the vector takes the form $f=c*s$, where "c" is an
-    !! advective velocity and "s" is usually a prognostic variable in a solver
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)     :: nVariables,nElements
-    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: s(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: c(1:2,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
-    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
-    ! Local
-    INTEGER    :: i,j,ii,iVar,iEl
-    REAL(prec) :: dfLoc
-
-    DO iEl = 1,nElements
-      DO iVar = 1,nVariables
-        DO j = 0,myPoly % N
-          DO i = 0,myPoly % N
-
-            dfLoc = 0.0_prec
-            DO ii = 0,myPoly % N
-              dFLoc = dFLoc + 0.5_prec*(&
-                myPoly % dgMatrix % hostData(ii,i)*f(1,ii,j,iVar,iEl) + &
-                myPoly % dgMatrix % hostData(ii,j)*f(2,i,ii,iVar,iEl) + &
-                s(i,j,iVar,iEl)*(c(1,ii,j,1,iEl)-c(1,i,j,1,iEl))* &
-                myPoly % dMatrix % hostData(ii,i) + &
-                s(i,j,iVar,iEl)*(c(1,i,ii,1,iEl)-c(1,i,j,1,iEl))* &
-                myPoly % dMatrix % hostData(ii,j))
-            END DO
-
-            dFLoc = dFLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
-                             myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
-                               myPoly % qWeights % hostData(i) + &
-                               (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
-                                myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
-                               myPoly % qWeights % hostData(j)
-            dF(i,j,iVar,iEl) = dFLoc
-
-          END DO
-        END DO
-      END DO
-    END DO
-
-  END SUBROUTINE VectorDGSplitDivergence_2D_cpu
-
-  SUBROUTINE VectorDGSplitDivergence_2D_gpu(myPoly,f_dev,s_dev,c_dev,bF_dev,dF_dev,nVariables,nElements)
-    IMPLICIT NONE
-    CLASS(Lagrange),INTENT(in) :: myPoly
-    INTEGER,INTENT(in)         :: nVariables,nElements
-    TYPE(c_ptr),INTENT(in)     :: f_dev
-    TYPE(c_ptr),INTENT(in)     :: s_dev
-    TYPE(c_ptr),INTENT(in)     :: c_dev
-    TYPE(c_ptr),INTENT(in)     :: bF_dev
-    TYPE(c_ptr),INTENT(out)    :: dF_dev
-
-    CALL VectorDGSplitDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
-                                           myPoly % dMatrix % deviceData, &
-                                           myPoly % bMatrix % deviceData, &
-                                           myPoly % qWeights % deviceData, &
-                                           f_dev,s_dev,c_dev,bF_dev,dF_dev,&
-                                           myPoly % N, &
-                                           nVariables,nElements)
-
-  END SUBROUTINE VectorDGSplitDivergence_2D_gpu
 
   SUBROUTINE VectorCurl_2D_cpu(myPoly,f,dF,nVariables,nElements)
     IMPLICIT NONE

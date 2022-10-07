@@ -113,7 +113,6 @@ CONTAINS
     this % mesh => mesh
     this % geometry => geometry
     this % gpuAccel = .FALSE.
-    this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
     this % g = 1.0_prec
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)

@@ -114,7 +114,6 @@ CONTAINS
     this % mesh => mesh
     this % geometry => geometry
     this % gpuAccel = .FALSE.
-    this % fluxDivMethod = SELF_CONSERVATIVE_FLUX 
     this % g = 1.0_prec
     this % fCori = 0.0_prec
 
