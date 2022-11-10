@@ -87,7 +87,7 @@ extern "C"
   }
 }
 
-__global__ void RiemannSolver_CompressibleIdealGas2D_gpu(real *flux, 
+__global__ void NaiveLLF_CompressibleIdealGas2D_gpu(real *flux, 
 		                                         real *solution, 
 							 real *extSolution, 
 							 real *velocity, 
@@ -175,7 +175,7 @@ __global__ void RiemannSolver_CompressibleIdealGas2D_gpu(real *flux,
 
 extern "C"
 {
-  void RiemannSolver_CompressibleIdealGas2D_gpu_wrapper(real **flux, 
+  void NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(real **flux, 
 		                                        real **solution, 
 		                                        real **extSolution, 
 							real **velocity, 
@@ -189,7 +189,7 @@ extern "C"
 							int nDiag, 
 							int nEl)
   {
-    RiemannSolver_CompressibleIdealGas2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extSolution, *velocity, *extVelocity, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
+    NaiveLLF_CompressibleIdealGas2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extSolution, *velocity, *extVelocity, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
   }
 }
 

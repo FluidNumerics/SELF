@@ -123,8 +123,9 @@ MODULE SELF_Model
     PROCEDURE :: LowStorageRK4_timeIntegrator 
     PROCEDURE(UpdateGRK),DEFERRED :: UpdateGRK4
 
+!    PROCEDURE :: CrankNicholson_timeIntegrator
+
     PROCEDURE :: PreTendency => PreTendency_Model
-    PROCEDURE :: PostFluxDivergence => PostFluxDivergence_Model
     PROCEDURE :: SourceMethod => Source_Model
     PROCEDURE :: FluxMethod => Flux_Model
     PROCEDURE :: RiemannSolver => RiemannSolver_Model
@@ -252,20 +253,6 @@ CONTAINS
       RETURN
 
   END SUBROUTINE PreTendency_Model
-
-  SUBROUTINE PostFluxDivergence_Model(this)
-    !! PostFluxDivergence is a template routine that is used to house any additional calculations
-    !! that you want to execute just before the tendency is calculated.
-    !!
-    !! The intention is to provide a method that can be overridden through type-extension, to handle
-    !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
-    !!
-    IMPLICIT NONE
-    CLASS(Model),INTENT(inout) :: this
-
-      RETURN
-
-  END SUBROUTINE PostFluxDivergence_Model
 
   SUBROUTINE Source_Model(this)
     !!
@@ -572,7 +559,7 @@ CONTAINS
     t0 = this % t
 
     ! Do a single step with RK2
-    ! Initialize the prevsol attribute
+    ! Initialize the PrevSol attribute
     CALL this % UpdateGAB2(0)
     CALL this % LowStorageRK2_timeIntegrator(t0+this%dt)
 
@@ -582,10 +569,10 @@ CONTAINS
       tRemain = tn - this % t
       this % dt = MIN( dtLim, tRemain )
 
-      CALL this % UpdateGAB2(2) ! Store the solution in prevsol and store the interpolated
+      CALL this % UpdateGAB2(2) ! Store the solution in PrevSol and store the interpolated
                                 ! solution in the solution attribute for tendency calculation
       CALL this % CalculateTendency()
-      CALL this % UpdateGAB2(1) ! Reset the solution from the prevsol
+      CALL this % UpdateGAB2(1) ! Reset the solution from the PrevSol
       CALL this % UpdateSolution()
 
       this % t = t0 + this % dt
@@ -609,7 +596,7 @@ CONTAINS
     dtLim = this % dt ! Get the max time step size from the dt attribute
 
     ! Do two time steps with RK3
-    ! Initialize the prevsol attribute
+    ! Initialize the PrevSol attribute
     t0 = this % t
     CALL this % UpdateGAB3(0)
     CALL this % LowStorageRK3_timeIntegrator(t0+this%dt)
@@ -624,10 +611,10 @@ CONTAINS
       tRemain = tn - this % t
       this % dt = MIN( dtLim, tRemain )
 
-      CALL this % UpdateGAB3(3) ! Store the solution in prevsol and store the interpolated
+      CALL this % UpdateGAB3(3) ! Store the solution in PrevSol and store the interpolated
                                 ! solution in the solution attribute for tendency calculation
       CALL this % CalculateTendency()
-      CALL this % UpdateGAB3(2) ! Reset the solution from the prevsol
+      CALL this % UpdateGAB3(2) ! Reset the solution from the PrevSol
       CALL this % UpdateSolution()
 
       this % t = t0 + this % dt
@@ -651,7 +638,7 @@ CONTAINS
     dtLim = this % dt ! Get the max time step size from the dt attribute
 
     ! Do three time steps with RK4
-    ! Initialize the prevsol attribute
+    ! Initialize the PrevSol attribute
     t0 = this % t
     CALL this % UpdateGAB4(0)
     CALL this % LowStorageRK4_timeIntegrator(t0+this%dt)
@@ -670,10 +657,10 @@ CONTAINS
       tRemain = tn - this % t
       this % dt = MIN( dtLim, tRemain )
 
-      CALL this % UpdateGAB4(4) ! Store the solution in prevsol and store the interpolated
+      CALL this % UpdateGAB4(4) ! Store the solution in PrevSol and store the interpolated
                                 ! solution in the solution attribute for tendency calculation
       CALL this % CalculateTendency()
-      CALL this % UpdateGAB4(3) ! Reset the solution from the prevsol
+      CALL this % UpdateGAB4(3) ! Reset the solution from the PrevSol
       CALL this % UpdateSolution()
 
       this % t = t0 + this % dt
@@ -773,5 +760,57 @@ CONTAINS
     this % dt = dtLim
 
   END SUBROUTINE LowStorageRK4_timeIntegrator
+
+!  SUBROUTINE CrankNicholson_timeIntegrator(this,tn)
+!    !! Solves the equation formed by the Crank Nicholson method
+!    !! using JFNK, where the Krylov solver is chosen to be
+!    !! BiCG-Stabilized.
+!    IMPLICIT NONE
+!    CLASS(Model),INTENT(inout) :: this
+!    REAL(prec), INTENT(in) :: tn
+!    ! Local
+!    INTEGER :: m
+!    REAL(prec) :: tRemain
+!    REAL(prec) :: dtLim
+!    REAL(prec) :: t0
+!
+!    dtLim = this % dt ! Get the max time step size from the dt attribute
+!    DO WHILE (this % t < tn)
+!
+!      t0 = this % t
+!      tRemain = tn - this % t
+!      this % dt = MIN( dtLim, tRemain )
+!      ! Copy existing solution to old solution
+!
+!      ! Evaluate tendency with old solution
+!
+!      ! Calculate r_k (fixed) -> Store in PrevSol
+!
+!      ! Calculate Fk(m-1)
+!
+!      DO m = 1, SELF_maxJFNKiterations
+!
+!        
+!        ! Linear iterations on Jk(m-1) dS(m) = -Fk(m-1)
+!        CALL this % JFNKLinearSolver(t0+dt) ! Use PrevSol to store Fk(m-1), sk(m-1), dSm, rk
+!                                            ! Linear solver updates
+!                                            ! dSm, sk(m), and Fk(m)
+!
+!        ! Check for convergence
+!        !  >> global reduction on dSm (either l2 or lmax)
+!        !  >> global reduction on Fkm1 (either l2 or lmax)
+!        !
+!        !    -> Both done as reduction on PrevSol attribute - reduction over grid, not variables
+!        !
+!
+!      ENDDO
+!
+!      this % t = t0 + this % dt
+!
+!    ENDDO 
+!
+!    this % dt = dtLim
+!
+!  END SUBROUTINE CrankNicholson_timeIntegrator
 
 END MODULE SELF_Model

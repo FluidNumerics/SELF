@@ -764,7 +764,6 @@ CONTAINS
     CALL this % RiemannSolver()
     CALL this % FluxMethod()
     CALL this % CalculateFluxDivergence()
-    CALL this % PostFluxDivergence()
 
     IF( this % gpuAccel )THEN
 

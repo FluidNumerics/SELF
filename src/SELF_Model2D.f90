@@ -828,7 +828,6 @@ CONTAINS
     CALL this % FluxMethod()
     CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
     CALL this % CalculateFluxDivergence()
-    CALL this % PostFluxDivergence()
 
     IF( this % gpuAccel )THEN
 

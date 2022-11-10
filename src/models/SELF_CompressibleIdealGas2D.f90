@@ -26,6 +26,7 @@ MODULE SELF_CompressibleIdealGas2D
     !! iVar = 4 ~> Sound Speed
     !! iVar = 5 ~> In-Situ Temperature
     !!
+    PROCEDURE(RiemannFlux_CompressibleIdealGas2D), POINTER :: RiemannFlux => NaiveLLF_CompressibleIdealGas2D
     TYPE(MappedScalar2D) :: prescribedSolution
     TYPE(MappedScalar2D) :: diagnostics
     TYPE(MappedScalar2D) :: prescribedDiagnostics
@@ -52,6 +53,15 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
 
     ! New Methods
+    
+    ! Riemann Fluxes
+    PROCEDURE :: NaiveLLF_CompressibleIdealGas2D
+
+    GENERIC :: SetRiemannFlux => SetRiemannFlux_withInt, &
+                                    SetRiemannFlux_withChar
+    PROCEDURE,PRIVATE :: SetRiemannFlux_withInt
+    PROCEDURE,PRIVATE :: SetRiemannFlux_withChar
+
     GENERIC :: SetVelocity => SetVelocityFromChar_CompressibleIdealGas2D,&
                               SetVelocityFromEqn_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetVelocityFromChar_CompressibleIdealGas2D
@@ -73,6 +83,14 @@ MODULE SELF_CompressibleIdealGas2D
 
   END TYPE CompressibleIdealGas2D
 
+  ! ---------------------------------------- !
+  ! Riemann Flux integer flags
+  !
+  INTEGER, PARAMETER :: SELF_NLLF_CIG2D = 500 ! Naive Local Lax Friedrich's Riemann Flux
+
+  ! ---------------------------------------- !
+  ! Diagnostics variable indices
+  !
   INTEGER, PARAMETER, PRIVATE :: keIndex = 1 ! Index for kinetic energy
   INTEGER, PARAMETER, PRIVATE :: prIndex = 2 ! Index for pressure
   INTEGER, PARAMETER, PRIVATE :: enIndex = 3 ! Index for enthalpy
@@ -80,13 +98,24 @@ MODULE SELF_CompressibleIdealGas2D
   INTEGER, PARAMETER, PRIVATE :: teIndex = 5 ! Index for in-situ temperature
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
 
+  ! ---------------------------------------- ! 
   ! Static fluid state for "air" at stp
+  !  > To do : move to json input file
+  !
   REAL(prec), PARAMETER :: Cp_stpAir = 1.005_prec
   REAL(prec), PARAMETER :: Cv_stpAir = 0.718_prec
   REAL(prec), PARAMETER :: R_stpAir = 287.0_prec ! J/kg/K
   REAL(prec), PARAMETER :: rho_stpAir = 1.2754_prec ! kg/m^3
   REAL(prec), PARAMETER :: T_stpAir = 273.0_prec ! K
   REAL(prec), PARAMETER :: e_stpAir = 1.5_prec*R_stpAir*T_stpAir ! J/kg
+
+  INTERFACE
+    SUBROUTINE RiemannFlux_CompressibleIdealGas2D(this)
+      IMPORT CompressibleIdealGas2D
+      IMPLICIT NONE
+      CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    END SUBROUTINE RiemannFlux_CompressibleIdealGas2D
+  END INTERFACE 
 
   INTERFACE
     SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(solution, &
@@ -132,10 +161,10 @@ MODULE SELF_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE RiemannSolver_CompressibleIdealGas2D_gpu_wrapper(flux, &
+    SUBROUTINE NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(flux, &
                     solution, extSolution, velocity, extVelocity, diagnostics, &
                     extDiagnostics, nHat, nScale, N, nVar, nDiag, nEl) &
-      bind(c,name="RiemannSolver_CompressibleIdealGas2D_gpu_wrapper")
+      bind(c,name="NaiveLLF_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
@@ -149,7 +178,7 @@ MODULE SELF_CompressibleIdealGas2D
       TYPE(c_ptr) :: nHat
       TYPE(c_ptr) :: nScale
       INTEGER(C_INT),VALUE :: N,nVar,nDiag,nEl
-    END SUBROUTINE RiemannSolver_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE NaiveLLF_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -190,6 +219,7 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
+    this % RiemannFlux => NaiveLLF_CompressibleIdealGas2D
     this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -264,6 +294,42 @@ CONTAINS
     CALL this % fluxDivergence % Free()
 
   END SUBROUTINE Free_CompressibleIdealGas2D
+
+  SUBROUTINE SetRiemannFlux_withInt(this,fluxMethod)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    INTEGER, INTENT(in) :: fluxMethod
+
+      SELECT CASE ( fluxMethod )
+
+        CASE ( SELF_NLLF_CIG2D )
+          this % RiemannFlux => NaiveLLF_CompressibleIdealGas2D
+        CASE DEFAULT
+          this % RiemannFlux => NaiveLLF_CompressibleIdealGas2D
+
+      END SELECT
+
+  END SUBROUTINE SetRiemannFlux_withInt
+
+  SUBROUTINE SetRiemannFlux_withChar(this,fluxMethod)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CHARACTER(*), INTENT(in) :: fluxMethod
+    ! Local
+    CHARACTER(SELF_INTEGRATOR_LENGTH) :: upperCaseInt
+
+      upperCaseInt = UpperCase(TRIM(fluxMethod))
+
+      SELECT CASE (TRIM(upperCaseInt))
+
+        CASE ( "NAIVELLF" )
+          this % RiemannFlux => NaiveLLF_CompressibleIdealGas2D
+        CASE DEFAULT
+          this % RiemannFlux => NaiveLLF_CompressibleIdealGas2D
+
+      END SELECT
+
+  END SUBROUTINE SetRiemannFlux_withChar
 
   SUBROUTINE SetStaticSTP_CompressibleIdealGas2D(this)
   !! Sets the default fluid state as "air" at STP with
@@ -957,6 +1023,19 @@ CONTAINS
   END SUBROUTINE Flux_CompressibleIdealGas2D
 
   SUBROUTINE RiemannSolver_CompressibleIdealGas2D(this)
+  !! This overridden method serves as a wrapper that calls
+  !! the RiemannFlux procedure pointer. This design allows
+  !! users to dynamically select the type of Riemann solver
+  !! to use
+
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+
+      CALL this % RiemannFlux()
+
+  END SUBROUTINE RiemannSolver_CompressibleIdealGas2D
+
+  SUBROUTINE NaiveLLF_CompressibleIdealGas2D(this)
   !! Approximate Riemann Solver for the Compressible Navier-Stokes equations
   !! The Riemann Solver implemented here is the Local Lax-Friedrichs.
     IMPLICIT NONE
@@ -973,7 +1052,7 @@ CONTAINS
 
     IF( this % gpuAccel )THEN
 
-      CALL RiemannSolver_CompressibleIdealGas2D_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
+      CALL NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
              this % solution % boundary % deviceData, &
              this % solution % extBoundary % deviceData, &
              this % velocity % boundary % deviceData, &
@@ -1044,7 +1123,7 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE RiemannSolver_CompressibleIdealGas2D
+  END SUBROUTINE NaiveLLF_CompressibleIdealGas2D
   
   SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this, filename)
     IMPLICIT NONE
