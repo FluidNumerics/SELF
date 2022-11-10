@@ -52,6 +52,11 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
 
     ! New Methods
+    GENERIC :: SetVelocity => SetVelocityFromChar_CompressibleIdealGas2D,&
+                              SetVelocityFromEqn_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetVelocityFromChar_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetVelocityFromEqn_CompressibleIdealGas2D
+
     GENERIC :: SetPrescribedSolution => SetPrescribedSolutionFromChar_CompressibleIdealGas2D,&
                               SetPrescribedSolutionFromEqn_CompressibleIdealGas2D,&
                               SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
@@ -296,6 +301,110 @@ CONTAINS
       ENDIF
       
   END SUBROUTINE SetStaticSTP_CompressibleIdealGas2D
+
+  SUBROUTINE SetVelocityFromEqn_CompressibleIdealGas2D(this, eqn)
+  !! Sets the fluid velocity field using the provided equation parser
+  !! The momentum is then updated using the current fluid density field.
+  !! From here, the PreTendency method is called to set other diagnostics
+  !!
+  !! The total energy field is calculated using the internal energy (diagnosed from the
+  !! in-situ temperature) and the new kinetic energy field. 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn(1:2)
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: rho, u, v, temperature, internalE, KE
+
+      DO iVar = 1, 2
+        CALL this % velocity % SetEquation(ivar, eqn(iVar) % equation)
+      ENDDO
+
+      CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+            rho = this % solution % interior % hostData(i,j,3,iEl)
+            u = this % velocity % interior % hostData(1,i,j,1,iEl)
+            v = this % velocity % interior % hostData(2,i,j,1,iEl)
+            temperature = this % diagnostics % interior % hostData(i,j,teIndex,iEl)
+            internalE = 1.5_prec*rho*this % R*temperature ! Internal energy
+            KE = rho*(u*u+v*v)*0.5_prec
+
+            this % solution % interior % hostData(i,j,1,iEl) = rho*u  ! rho*u
+            this % solution % interior % hostData(i,j,2,iEl) = rho*v ! rho*v
+            this % solution % interior % hostData(i,j,4,iEl) = internalE + KE ! rho*E
+          ENDDO
+        ENDDO
+      ENDDO
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
+      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
+      CALL this % PreTendency( )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateHost()
+        CALL this % diagnostics % UpdateHost()
+      ENDIF
+      
+  END SUBROUTINE SetVelocityFromEqn_CompressibleIdealGas2D
+
+  SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D(this, eqnChar)
+  !! Sets the fluid velocity field using the provided equation parser
+  !! The momentum is then updated using the current fluid density field.
+  !! From here, the PreTendency method is called to set other diagnostics
+  !!
+  !! The total energy field is calculated using the internal energy (diagnosed from the
+  !! in-situ temperature) and the new kinetic energy field. 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: rho, u, v, temperature, internalE, KE
+
+      DO iVar = 1, 2
+        CALL this % velocity % SetEquation(ivar, eqnChar(iVar))
+      ENDDO
+
+      CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+            rho = this % solution % interior % hostData(i,j,3,iEl)
+            u = this % velocity % interior % hostData(1,i,j,1,iEl)
+            v = this % velocity % interior % hostData(2,i,j,1,iEl)
+            temperature = this % diagnostics % interior % hostData(i,j,teIndex,iEl)
+            internalE = 1.5_prec*rho*this % R*temperature ! Internal energy
+            KE = rho*(u*u+v*v)*0.5_prec
+
+            this % solution % interior % hostData(i,j,1,iEl) = rho*u  ! rho*u
+            this % solution % interior % hostData(i,j,2,iEl) = rho*v ! rho*v
+            this % solution % interior % hostData(i,j,4,iEl) = internalE + KE ! rho*E
+          ENDDO
+        ENDDO
+      ENDDO
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
+      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
+      CALL this % PreTendency( )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateHost()
+        CALL this % diagnostics % UpdateHost()
+      ENDIF
+      
+  END SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D
 
   SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D(this, eqn) 
     IMPLICIT NONE

@@ -19,7 +19,7 @@ USE SELF_CompressibleIdealGas2D
   INTEGER :: quadrature
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
-  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: initialCondition(1:nvar)
+  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocity(1:2)
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
 
@@ -87,20 +87,18 @@ USE SELF_CompressibleIdealGas2D
     CALL semModel % SetStaticSTP() ! Set field and parameters to STP
 
     ! Adjust the initial condition to have stationary and uniform flow
-    initialCondition = (/"U = 1.2754*1.0            ", &
-                         "V = 0.0                   ", &
-                         "r = 1.2754                ", &
-                         "e = 1.5*1.2754*287.0*273.0"/)
-    CALL semModel % SetSolution( initialCondition )
+    velocity = (/"u = 1.0", &
+                 "v = 0.0" /)
+    CALL semModel % SetVelocity( velocity )
+
+    ! Uses the initial condition to set the prescribed state
+    ! for model boundary conditions
+    CALL semModel % SetPrescribedSolution()
 
     CALL semModel % CalculateEntropy()
     CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy
 
-    ! Uses the initial condition to set the prescribed state
-    ! for model boundary conditions
-    CALL semModel % SetPrescribedSolution()
-    
     ! Write the initial condition to file
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
