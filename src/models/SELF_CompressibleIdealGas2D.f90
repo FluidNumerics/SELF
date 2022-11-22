@@ -21,20 +21,32 @@ MODULE SELF_CompressibleIdealGas2D
 
     !! For the diagnostics attribute, we use the following convention
     !! iVar = 1 ~> Kinetic Energy
-    !! iVar = 2 ~> Pressure
+    !! -iVar = 2 ~> Pressure
     !! iVar = 3 ~> Enthalpy
     !! iVar = 4 ~> Sound Speed
     !! iVar = 5 ~> In-Situ Temperature
     !!
+    !! primitive variables
+    !!  u = rho*u/rho ~> x-component of velocity
+    !!  v = rho*v/rho ~> y-component of velocity
+    !!  rho = rho ~> density
+    !!  p = p(rho,e) ~> equation of state
+    !!
     PROCEDURE(RiemannFlux_CompressibleIdealGas2D), POINTER :: RiemannFlux => NaiveLLF_CompressibleIdealGas2D
-    TYPE(MappedScalar2D) :: prescribedSolution
+
+    TYPE(MappedScalar2D) :: primitive ! Contains primitive variables 
+    TYPE(MappedScalar2D) :: entropyVars ! Contains entropy variables
+
     TYPE(MappedScalar2D) :: diagnostics
+
+    TYPE(MappedScalar2D) :: prescribedSolution
+    TYPE(MappedScalar2D) :: prescribedPrimitive
     TYPE(MappedScalar2D) :: prescribedDiagnostics
+
     REAL(prec) :: expansionFactor
     REAL(prec) :: Cp ! Heat capacity at constant pressure ( J/g/K )
     REAL(prec) :: Cv ! Heat capacity at constant volume ( J/g/K )
     REAL(prec) :: R ! Ideal gas constant (J/kg/K)
-
 
     CONTAINS
 
@@ -79,7 +91,9 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
     PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
 
-    PROCEDURE :: CalculateDiagnostics => CalculateDiagnostics_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: CalculateDiagnostics
+    PROCEDURE,PRIVATE :: ConservativeToPrimitive
+    !PROCEDURE,PRIVATE :: ConservativeToEntropy
 
   END TYPE CompressibleIdealGas2D
 
@@ -92,11 +106,11 @@ MODULE SELF_CompressibleIdealGas2D
   ! Diagnostics variable indices
   !
   INTEGER, PARAMETER, PRIVATE :: keIndex = 1 ! Index for kinetic energy
-  INTEGER, PARAMETER, PRIVATE :: prIndex = 2 ! Index for pressure
-  INTEGER, PARAMETER, PRIVATE :: enIndex = 3 ! Index for enthalpy
-  INTEGER, PARAMETER, PRIVATE :: soIndex = 4 ! Index for sound speed
-  INTEGER, PARAMETER, PRIVATE :: teIndex = 5 ! Index for in-situ temperature
-  INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 5
+!  INTEGER, PARAMETER, PRIVATE :: prIndex = 2 ! Index for pressure
+  INTEGER, PARAMETER, PRIVATE :: enIndex = 2 ! Index for enthalpy
+  INTEGER, PARAMETER, PRIVATE :: soIndex = 3 ! Index for sound speed
+  INTEGER, PARAMETER, PRIVATE :: teIndex = 4 ! Index for in-situ temperature
+  INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 4
 
   ! ---------------------------------------- ! 
   ! Static fluid state for "air" at stp
@@ -119,8 +133,9 @@ MODULE SELF_CompressibleIdealGas2D
 
   INTERFACE
     SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(solution, &
-                    extSolution, prescribedSolution, extVelocity, diagnostics, &
-                    extDiagnostics, prescribedDiagnostics, nHat, sideInfo, N, nVar, nDiag, nEl) &
+                    extSolution, prescribedSolution, primitive, extPrimitive, &
+                    prescribedPrimitive, diagnostics, extDiagnostics, &
+                    prescribedDiagnostics, nHat, sideInfo, N, nVar, nDiag, nEl) &
       bind(c,name="SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
@@ -128,7 +143,9 @@ MODULE SELF_CompressibleIdealGas2D
       TYPE(c_ptr) :: solution
       TYPE(c_ptr) :: extSolution
       TYPE(c_ptr) :: prescribedSolution
-      TYPE(c_ptr) :: extVelocity
+      TYPE(c_ptr) :: primitive
+      TYPE(c_ptr) :: extPrimitive
+      TYPE(c_ptr) :: prescribedPrimitive
       TYPE(c_ptr) :: diagnostics
       TYPE(c_ptr) :: extDiagnostics
       TYPE(c_ptr) :: prescribedDiagnostics
@@ -150,19 +167,19 @@ MODULE SELF_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Flux_CompressibleIdealGas2D_gpu_wrapper(flux, solution, velocity, diagnostics, N, nVar, nDiag, nEl) &
+    SUBROUTINE Flux_CompressibleIdealGas2D_gpu_wrapper(flux, solution, primitive, N, nVar, nEl) &
       bind(c,name="Flux_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: flux, solution, velocity, diagnostics
-      INTEGER(C_INT),VALUE :: N,nVar,nDiag,nEl
+      TYPE(c_ptr) :: flux, solution, primitive
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE Flux_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(flux, &
-                    solution, extSolution, velocity, extVelocity, diagnostics, &
+                    solution, extSolution, primitive, extPrimitive, diagnostics, &
                     extDiagnostics, nHat, nScale, N, nVar, nDiag, nEl) &
       bind(c,name="NaiveLLF_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
@@ -171,8 +188,8 @@ MODULE SELF_CompressibleIdealGas2D
       TYPE(c_ptr) :: flux
       TYPE(c_ptr) :: solution
       TYPE(c_ptr) :: extSolution
-      TYPE(c_ptr) :: velocity
-      TYPE(c_ptr) :: extVelocity
+      TYPE(c_ptr) :: primitive
+      TYPE(c_ptr) :: extPrimitive
       TYPE(c_ptr) :: diagnostics
       TYPE(c_ptr) :: extDiagnostics
       TYPE(c_ptr) :: nHat
@@ -183,18 +200,30 @@ MODULE SELF_CompressibleIdealGas2D
 
   INTERFACE
     SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper(solution, &
-                   velocity, diagnostics, expansionFactor, R, N, nVar, &
+                   diagnostics, expansionFactor, R, N, nVar, &
                    nDiag, nEl) &
       bind(c,name="CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(c_ptr) :: solution
-      TYPE(c_ptr) :: velocity
       TYPE(c_ptr) :: diagnostics
       REAL(c_prec),VALUE :: expansionFactor, R
       INTEGER(C_INT),VALUE :: N,nVar,nDiag,nEl
     END SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper
+  END INTERFACE
+  INTERFACE
+    SUBROUTINE ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper(solution, &
+                   primitive, expansionFactor, N, nVar, nEl) &
+      bind(c,name="ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: solution
+      TYPE(c_ptr) :: primitive
+      REAL(c_prec),VALUE :: expansionFactor
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
 
 CONTAINS
@@ -236,6 +265,10 @@ CONTAINS
     CALL this % source % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
 
+    CALL this % primitive % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % prescribedPrimitive % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % entropyVars % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+
     ! First three variables are treated as u, v, eta
     ! Any additional are treated as passive tracers 
     CALL this % solution % SetName(1,"rho*u")
@@ -258,21 +291,33 @@ CONTAINS
     CALL this % diagnostics % SetUnits(1,"kg/m/s^2")
     CALL this % diagnostics % SetDescription(1,"Kinetic energy per unit volume")
 
-    CALL this % diagnostics % SetName(2,"P")
+    CALL this % diagnostics % SetName(2,"H")
     CALL this % diagnostics % SetUnits(2,"kg/m/s^2")
-    CALL this % diagnostics % SetDescription(2,"Fluid pressure")
+    CALL this % diagnostics % SetDescription(2,"Density weighted enthalpy")
 
-    CALL this % diagnostics % SetName(3,"H")
-    CALL this % diagnostics % SetUnits(3,"kg/m/s^2")
-    CALL this % diagnostics % SetDescription(3,"Density weighted enthalpy")
+    CALL this % diagnostics % SetName(3,"c")
+    CALL this % diagnostics % SetUnits(3,"m/s")
+    CALL this % diagnostics % SetDescription(3,"Sound speed")
 
-    CALL this % diagnostics % SetName(4,"c")
-    CALL this % diagnostics % SetUnits(4,"m/s")
-    CALL this % diagnostics % SetDescription(4,"Sound speed")
+    CALL this % diagnostics % SetName(4,"T")
+    CALL this % diagnostics % SetUnits(4,"K")
+    CALL this % diagnostics % SetDescription(4,"In-Situ Temperature")
 
-    CALL this % diagnostics % SetName(5,"T")
-    CALL this % diagnostics % SetUnits(5,"K")
-    CALL this % diagnostics % SetDescription(5,"In-Situ Temperature")
+    CALL this % primitive % SetName(1,"u")
+    CALL this % primitive % SetUnits(1,"m/s")
+    CALL this % primitive % SetDescription(1,"Fluid velocity x-component")
+
+    CALL this % primitive % SetName(2,"v")
+    CALL this % primitive % SetUnits(2,"m/s")
+    CALL this % primitive % SetDescription(2,"Fluid velocity x-component")
+
+    CALL this % primitive % SetName(3,"rho")
+    CALL this % primitive % SetUnits(3,"kg/m^3")
+    CALL this % primitive % SetDescription(3,"Fluid density")
+
+    CALL this % primitive % SetName(4,"P")
+    CALL this % primitive % SetUnits(4,"kg/m/s^2")
+    CALL this % primitive % SetDescription(4,"Fluid pressure")
 
   END SUBROUTINE Init_CompressibleIdealGas2D
 
@@ -292,6 +337,9 @@ CONTAINS
     CALL this % flux % Free()
     CALL this % source % Free()
     CALL this % fluxDivergence % Free()
+    CALL this % primitive % Free()
+    CALL this % prescribedPrimitive % Free()
+    CALL this % entropyVars % Free()
 
   END SUBROUTINE Free_CompressibleIdealGas2D
 
@@ -363,6 +411,7 @@ CONTAINS
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateHost()
+        CALL this % primitive % UpdateHost()
         CALL this % diagnostics % UpdateHost()
       ENDIF
       
@@ -383,19 +432,19 @@ CONTAINS
     REAL(prec) :: rho, u, v, temperature, internalE, KE
 
       DO iVar = 1, 2
-        CALL this % velocity % SetEquation(ivar, eqn(iVar) % equation)
+        CALL this % primitive % SetEquation(ivar, eqn(iVar) % equation)
       ENDDO
 
-      CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+      CALL this % primitive % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % primitive % BoundaryInterp( gpuAccel = .FALSE. )
 
       DO iEl = 1, this % source % nElem
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
             rho = this % solution % interior % hostData(i,j,3,iEl)
-            u = this % velocity % interior % hostData(1,i,j,1,iEl)
-            v = this % velocity % interior % hostData(2,i,j,1,iEl)
-            temperature = this % diagnostics % interior % hostData(i,j,teIndex,iEl)
+            u = this % primitive % interior % hostData(i,j,1,iEl)
+            v = this % primitive % interior % hostData(i,j,2,iEl)
+            temperature = this % diagnostics % interior % hostData(i,j,4,iEl)
             internalE = 1.5_prec*rho*this % R*temperature ! Internal energy
             KE = rho*(u*u+v*v)*0.5_prec
 
@@ -415,6 +464,7 @@ CONTAINS
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateHost()
+        CALL this % primitive % UpdateHost()
         CALL this % diagnostics % UpdateHost()
       ENDIF
       
@@ -435,19 +485,19 @@ CONTAINS
     REAL(prec) :: rho, u, v, temperature, internalE, KE
 
       DO iVar = 1, 2
-        CALL this % velocity % SetEquation(ivar, eqnChar(iVar))
+        CALL this % primitive % SetEquation(ivar, eqnChar(iVar))
       ENDDO
 
-      CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-      CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
+      CALL this % primitive % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % primitive % BoundaryInterp( gpuAccel = .FALSE. )
 
       DO iEl = 1, this % source % nElem
         DO j = 0, this % source % interp % N
           DO i = 0, this % source % interp % N
             rho = this % solution % interior % hostData(i,j,3,iEl)
-            u = this % velocity % interior % hostData(1,i,j,1,iEl)
-            v = this % velocity % interior % hostData(2,i,j,1,iEl)
-            temperature = this % diagnostics % interior % hostData(i,j,teIndex,iEl)
+            u = this % primitive % interior % hostData(i,j,1,iEl)
+            v = this % primitive % interior % hostData(i,j,2,iEl)
+            temperature = this % diagnostics % interior % hostData(i,j,4,iEl)
             internalE = 1.5_prec*rho*this % R*temperature ! Internal energy
             KE = rho*(u*u+v*v)*0.5_prec
 
@@ -467,6 +517,7 @@ CONTAINS
 
       IF( this % gpuAccel )THEN
         CALL this % solution % UpdateHost()
+        CALL this % primitive % UpdateHost()
         CALL this % diagnostics % UpdateHost()
       ENDIF
       
@@ -507,7 +558,6 @@ CONTAINS
       CALL this % prescribedSolution % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
 
-
       IF( this % gpuAccel )THEN
         CALL this % prescribedSolution % UpdateDevice()
       ENDIF
@@ -531,6 +581,9 @@ CONTAINS
 
               this % prescribedSolution % interior % hostData(i,j,iVar,iEl) = &
                 this % solution % interior % hostData(i,j,iVar,iEl)
+
+              this % prescribedPrimitive % interior % hostData(i,j,iVar,iEl) = &
+                this % primitive % interior % hostData(i,j,iVar,iEl)
               
             ENDDO
           ENDDO
@@ -551,10 +604,12 @@ CONTAINS
       ENDDO
 
       CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
+      CALL this % prescribedPrimitive % BoundaryInterp( gpuAccel = .FALSE. )
       CALL this % prescribedDiagnostics % BoundaryInterp( gpuAccel = .FALSE. )
 
       IF( this % gpuAccel )THEN
         CALL this % prescribedSolution % UpdateDevice()
+        CALL this % prescribedPrimitive % UpdateDevice()
         CALL this % prescribedDiagnostics % UpdateDevice()
       ENDIF
 
@@ -626,7 +681,7 @@ CONTAINS
             wj = this % geometry % x % interp % qWeights % hostData(j)
             
             rho = this % solution % interior % hostData(i,j,3,iEl)
-            P = this % diagnostics % interior % hostData(i,j,prIndex,iEl)
+            P = this % primitive % interior % hostData(i,j,4,iEl)
             
             entropy = entropy + &
               rho*(log(P) - this % expansionFactor*log(rho))/&
@@ -640,11 +695,36 @@ CONTAINS
 
   END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
 
-  SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D(this)
+  SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
+    !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
+    !! PreTendency is a template routine that is used to house any additional calculations
+    !! that you want to execute at the beginning of the tendency calculation routine.
+    !! This default PreTendency simply returns back to the caller without executing any instructions
+    !!
+    !! The intention is to provide a method that can be overridden through type-extension, to handle
+    !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
+    !!
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+
+      CALL this % CalculateDiagnostics()
+      CALL this % ConservativeToPrimitive()
+      !CALL this % ConservativeToEntropy()
+
+      ! Interpolate velocity and required diagnostics to the element boundaries
+      CALL this % primitive % BoundaryInterp(this % gpuAccel)
+      CALL this % diagnostics % BoundaryInterp(this % gpuAccel)
+
+      ! Perform any MPI exchanges for the velocity and the required diagnostics
+      ! across shared element faces between neighboring processes.
+      CALL this % primitive % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+      CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+
+  END SUBROUTINE PreTendency_CompressibleIdealGas2D
+
+  SUBROUTINE CalculateDiagnostics(this)
     !! Calculates 
     !!  * kinetic energy 
-    !!  * velocity
-    !!  * pressure 
     !!  * speed of sound
     !!  * enthalpy
     !!  * in-situ temperature
@@ -736,13 +816,12 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl, iSide, j, i
-    REAL(prec) :: rho, rhoU, rhoV, rhoE, rhoKE, p
+    REAL(prec) :: rho, rhoU, rhoV, u, v, rhoE, rhoKE, p
 
       IF( this % gpuAccel )THEN
 
         CALL CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper( & 
           this % solution % interior % deviceData, &
-          this % velocity % interior % deviceData, &
           this % diagnostics % interior % deviceData, &
           this % expansionFactor, &
           this % R, &
@@ -761,29 +840,23 @@ CONTAINS
               rhoV = this % solution % interior % hostData(i,j,2,iEl)
               rho = this % solution % interior % hostData(i,j,3,iEl)
               rhoE = this % solution % interior % hostData(i,j,4,iEl)
-              rhoKE = 0.5_prec*(rhoU*rhoU+rhoV*rhoV)/rho
+              u = rhoU/rho
+              v = rhoV/rho
+              rhoKE = 0.5_prec*(rhoU*u+rhoV*v)
               p = (this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)
 
-              ! Velocity
-              this % velocity % interior % hostData(1,i,j,1,iEl) = rhoU/rho 
-              this % velocity % interior % hostData(2,i,j,1,iEl) = rhoV/rho
-
-
               ! Kinetic Energy
-              this % diagnostics % interior % hostData(i,j,keIndex,iEl) = rhoKE
-
-              ! Pressure
-              this % diagnostics % interior % hostData(i,j,prIndex,iEl) = p
-
-              ! Speed of sound
-              this % diagnostics % interior % hostData(i,j,soIndex,iEl) = &
-                      sqrt(this % expansionFactor*p/rho)
+              this % diagnostics % interior % hostData(i,j,1,iEl) = rhoKE
 
               ! Enthalpy
-              this % diagnostics % interior % hostData(i,j,enIndex,iEl) = rhoE + p
+              this % diagnostics % interior % hostData(i,j,2,iEl) = rhoE + p
+
+              ! Speed of sound
+              this % diagnostics % interior % hostData(i,j,3,iEl) = &
+                      sqrt(this % expansionFactor*p/rho)
 
               ! In-Situ Temperature
-              this % diagnostics % interior % hostData(i,j,teIndex,iEl) = &
+              this % diagnostics % interior % hostData(i,j,4,iEl) = &
                       (2.0_prec/3.0_prec)*((rhoE - rhoKE)/rho)/this % R
 
             ENDDO
@@ -792,34 +865,50 @@ CONTAINS
 
       ENDIF
 
-  END SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D
+  END SUBROUTINE CalculateDiagnostics
 
-  SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
-    !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
-    !! PreTendency is a template routine that is used to house any additional calculations
-    !! that you want to execute at the beginning of the tendency calculation routine.
-    !! This default PreTendency simply returns back to the caller without executing any instructions
-    !!
-    !! The intention is to provide a method that can be overridden through type-extension, to handle
-    !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
-    !!
+  SUBROUTINE ConservativeToPrimitive(this)
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl, iSide, j, i
+    REAL(prec) :: rhoU, rhoV, rho, u, v, rhoE, rhoKE, p
 
-      CALL this % CalculateDiagnostics()
+      IF( this % gpuAccel )THEN
 
-      ! Interpolate velocity and required diagnostics to the element boundaries
-      CALL this % velocity % BoundaryInterp(this % gpuAccel)
-      CALL this % diagnostics % BoundaryInterp(this % gpuAccel)
+        CALL ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper( & 
+          this % solution % interior % deviceData, &
+          this % primitive % interior % deviceData, &
+          this % expansionFactor, &
+          this % solution % interp % N, &
+          this % solution % nVar, &
+          this % solution % nElem )
 
-      ! Perform any MPI exchanges for the velocity and the required diagnostics
-      ! across shared element faces between neighboring processes.
-      CALL this % velocity % SideExchange(this % mesh, this % decomp, this % gpuAccel)
-      CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+      ELSE
+        DO iEl = 1, this % solution % nElem
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
 
-  END SUBROUTINE PreTendency_CompressibleIdealGas2D
+              rhoU = this % solution % interior % hostData(i,j,1,iEl)
+              rhoV = this % solution % interior % hostData(i,j,2,iEl)
+              rho = this % solution % interior % hostData(i,j,3,iEl)
+              rhoE = this % solution % interior % hostData(i,j,4,iEl)
+              u = rhoU/rho
+              v = rhoV/rho
+              rhoKE = 0.5_prec*(rhoU*u+rhoV*v)
+              p = (this % expansionFactor - 1.0_prec)*(rhoE - rhoKE)
+
+              this % primitive % interior % hostData(i,j,1,iEl) = u 
+              this % primitive % interior % hostData(i,j,2,iEl) = v
+              this % primitive % interior % hostData(i,j,3,iEl) = rho 
+              this % primitive % interior % hostData(i,j,4,iEl) = p
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDIF
+
+  END SUBROUTINE ConservativeToPrimitive
 
   SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D(this)
     IMPLICIT NONE
@@ -836,10 +925,12 @@ CONTAINS
           this % solution % boundary % deviceData, &
           this % solution % extBoundary % deviceData, &
           this % prescribedSolution % boundary % deviceData, &
-          this % velocity % extBoundary % deviceData, &
+          this % primitive % boundary % deviceData, &
+          this % primitive % extBoundary % deviceData, &
+          this % prescribedPrimitive % boundary % deviceData, &
           this % diagnostics % boundary % deviceData, &
           this % diagnostics % extBoundary % deviceData, &
-          this % prescribedDiagnostics % boundary % deviceData, & 
+          this % prescribedDiagnostics % boundary % deviceData, &
           this % geometry % nHat % boundary % deviceData, &
           this % mesh % sideInfo % deviceData, &
           this % solution % interp % N, &
@@ -858,31 +949,40 @@ CONTAINS
 
                 DO i = 0, this % solution % interp % N
                   nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+                  ! Conservative variables
                   u = this % solution % boundary % hostData(i,1,iSide,iEl) 
                   v = this % solution % boundary % hostData(i,2,iSide,iEl) 
-                  this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
-                  this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
-                  this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
-                  this % solution % extBoundary % hostData(i,4,iSide,iEl) = this % solution % boundary % hostData(i,4,iSide,iEl)
+                  this % solution % extBoundary % hostData(i,1,iSide,iEl) = &
+                          (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
+                  this % solution % extBoundary % hostData(i,2,iSide,iEl) = &
+                          (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
+                  this % solution % extBoundary % hostData(i,3,iSide,iEl) = &
+                          this % solution % boundary % hostData(i,3,iSide,iEl)
+                  this % solution % extBoundary % hostData(i,4,iSide,iEl) = &
+                          this % solution % boundary % hostData(i,4,iSide,iEl)
                   
-                  ! x-component of the velocity
-                  this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) =&
-                    this % solution % extBoundary % hostData(i,1,iSide,iEl)/&
-                    this % solution % boundary % hostData(i,3,iSide,iEl)
-                    
-                  ! y-component of the velocity
-                  this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) = &
-                    this % solution % extBoundary % hostData(i,2,iSide,iEl)/&
-                    this % solution % boundary % hostData(i,3,iSide,iEl)
+                  ! Primitive variables
+                  u = this % primitive % boundary % hostData(i,1,iSide,iEl) 
+                  v = this % primitive % boundary % hostData(i,2,iSide,iEl) 
+                  this % primitive % extBoundary % hostData(i,1,iSide,iEl) = &
+                          (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
+                  this % primitive % extBoundary % hostData(i,2,iSide,iEl) = &
+                          (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
+                  this % primitive % extBoundary % hostData(i,3,iSide,iEl) = &
+                          this % primitive % boundary % hostData(i,3,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,4,iSide,iEl) = &
+                          this % primitive % boundary % hostData(i,4,iSide,iEl)
                   
                   ! Prolong the diagnostic values to the external state
                   this % diagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
                     this % diagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
+
                 ENDDO
              
               ELSEIF( bcid == SELF_BC_PRESCRIBED .OR. bcid == SELF_BC_RADIATION )THEN
 
                 DO i = 0, this % solution % interp % N
+
                   this % solution % extBoundary % hostData(i,1,iSide,iEl) = &
                           this % prescribedSolution % boundary % hostData(i,1,iSide,iEl)
                   this % solution % extBoundary % hostData(i,2,iSide,iEl) = &
@@ -892,15 +992,19 @@ CONTAINS
                   this % solution % extBoundary % hostData(i,4,iSide,iEl) = &
                           this % prescribedSolution % boundary % hostData(i,4,iSide,iEl)
                       
-                  this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) = &
-                    this % solution % boundary % hostData(i,1,iSide,iEl)/&
-                    this % solution % boundary % hostData(i,3,iSide,iEl)
-                  this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) = &
-                    this % solution % boundary % hostData(i,2,iSide,iEl)/&
-                    this % solution % boundary % hostData(i,3,iSide,iEl)
-                    
+
+                  this % primitive % extBoundary % hostData(i,1,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,1,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,2,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,2,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,3,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,3,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,4,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,4,iSide,iEl)
+
                   this % diagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
-                     this % prescribedDiagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
+                    this % prescribedDiagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
+
                 ENDDO
 
               ENDIF
@@ -955,11 +1059,9 @@ CONTAINS
       IF (this % gpuAccel) THEN
         CALL Flux_CompressibleIdealGas2D_gpu_wrapper( this % flux % interior % deviceData,&
                 this % solution % interior % deviceData, &
-                this % velocity % interior % deviceData, &
-                this % diagnostics % interior % deviceData, &
+                this % primitive % interior % deviceData, &
                 this % solution % interp % N, &
                 this % solution % nVar, &
-                this % diagnostics % nVar, &
                 this % solution % nElem )
 
       ELSE
@@ -972,27 +1074,27 @@ CONTAINS
 
                   ! rho*u*u + p 
                   this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % velocity % interior % hostData(1,i,j,1,iEl)*& ! u
+                        this % primitive % interior % hostData(i,j,1,iEl)*& ! u
                         this % solution % interior % hostData(i,j,1,iEl)+& ! rho*u
-                        this % diagnostics % interior % hostData(i,j,prIndex,iEl)
+                        this % primitive % interior % hostData(i,j,4,iEl)
 
                   ! rho*u*v
                   this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % velocity % interior % hostData(2,i,j,1,iEl)*& ! v
+                        this % primitive % interior % hostData(i,j,2,iEl)*& ! v
                         this % solution % interior % hostData(i,j,1,iEl) ! rho*u
 
                 ELSEIF ( iVar == 2 )THEN ! rho*v
 
                   ! rho*v*u
                   this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % velocity % interior % hostData(1,i,j,1,iEl)*& ! u
+                        this % primitive % interior % hostData(i,j,1,iEl)*& ! u
                         this % solution % interior % hostData(i,j,2,iEl) ! rho*v
 
                   ! rho*v*v + p
                   this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % velocity % interior % hostData(2,i,j,1,iEl)*& ! v
+                        this % primitive % interior % hostData(i,j,2,iEl)*& ! v
                         this % solution % interior % hostData(i,j,2,iEl)+& ! rho*v
-                        this % diagnostics % interior % hostData(i,j,prIndex,iEl)
+                        this % primitive % interior % hostData(i,j,4,iEl) ! pressure
 
 
                 ELSEIF ( iVar == 3 )THEN ! density
@@ -1005,12 +1107,12 @@ CONTAINS
                 ELSEIF ( iVar == 4 )THEN ! total energy (rho*u*H)
 
                   this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % velocity % interior % hostData(1,i,j,1,iEl)*&
-                        this % diagnostics % interior % hostData(i,j,enIndex,iEl) !rho*u*H
+                        this % primitive % interior % hostData(i,j,1,iEl)*&
+                        this % diagnostics % interior % hostData(i,j,2,iEl) !rho*u*H
 
                   this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % velocity % interior % hostData(2,i,j,1,iEl)*&
-                        this % diagnostics % interior % hostData(i,j,enIndex,iEl) !rho*v*H
+                        this % primitive % interior % hostData(i,j,2,iEl)*&
+                        this % diagnostics % interior % hostData(i,j,2,iEl) !rho*v*H
 
                 ENDIF
 
@@ -1055,8 +1157,8 @@ CONTAINS
       CALL NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
              this % solution % boundary % deviceData, &
              this % solution % extBoundary % deviceData, &
-             this % velocity % boundary % deviceData, &
-             this % velocity % extBoundary % deviceData, &
+             this % primitive % boundary % deviceData, &
+             this % primitive % extBoundary % deviceData, &
              this % diagnostics % boundary % deviceData, &
              this % diagnostics % extBoundary % deviceData, &
              this % geometry % nHat % boundary % deviceData, &
@@ -1077,42 +1179,41 @@ CONTAINS
              nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
 
              ! Calculate the normal velocity at the cell edges
-             unL = this % velocity % boundary % hostData(1,i,1,iSide,iEl)*nHat(1)+&
-                   this % velocity % boundary % hostData(2,i,1,iSide,iEl)*nHat(2)
+             unL = this % primitive % boundary % hostData(i,1,iSide,iEl)*nHat(1)+&
+                   this % primitive % boundary % hostData(i,2,iSide,iEl)*nHat(2)
 
-             unR = this % velocity % extBoundary % hostData(1,i,1,iSide,iEl)*nHat(1)+&
-                   this % velocity % extBoundary % hostData(2,i,1,iSide,iEl)*nHat(2)
-
-             cL = this % diagnostics % boundary % hostData(i,soIndex,iSide,iEl)
-             cR = this % diagnostics % extBoundary % hostData(i,soIndex,iSide,iEl)
+             unR = this % primitive % extBoundary % hostData(i,1,iSide,iEl)*nHat(1)+&
+                   this % primitive % extBoundary % hostData(i,2,iSide,iEl)*nHat(2)
 
              fluxL(1) = unL*this % solution % boundary % hostData(i,1,iSide,iEl) +&
-                        this % diagnostics % boundary % hostData(i,prIndex,iSide,iEl)*nHat(1)
+                        this % primitive % boundary % hostData(i,4,iSide,iEl)*nHat(1)
 
              fluxL(2) = unL*this % solution % boundary % hostData(i,2,iSide,iEl) +&
-                        this % diagnostics % boundary % hostData(i,prIndex,iSide,iEl)*nHat(2)
+                        this % primitive % boundary % hostData(i,4,iSide,iEl)*nHat(2)
 
              fluxL(3) = this % solution % boundary % hostData(i,1,iSide,iEl)*nHat(1)+&
                         this % solution % boundary % hostData(i,2,iSide,iEl)*nHat(2)
                         
-             fluxL(4) = unL*this % diagnostics % boundary % hostData(i,enIndex,iSide,iEl)
+             fluxL(4) = unL*this % diagnostics % boundary % hostData(i,2,iSide,iEl)
 
              fluxR(1) = unR*this % solution % extBoundary % hostData(i,1,iSide,iEl) +&
-                       this % diagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(1)
+                       this % primitive % extBoundary % hostData(i,4,iSide,iEl)*nHat(1)
 
              fluxR(2) = unR*this % solution % extBoundary % hostData(i,2,iSide,iEl) +&
-                        this % diagnostics % extBoundary % hostData(i,prIndex,iSide,iEl)*nHat(2)
+                        this % primitive % extBoundary % hostData(i,4,iSide,iEl)*nHat(2)
 
              fluxR(3) = this % solution % extBoundary % hostData(i,1,iSide,iEl)*nHat(1)+&
                         this % solution % extBoundary % hostData(i,2,iSide,iEl)*nHat(2)
                         
-             fluxR(4) = unR*this % diagnostics % extBoundary % hostData(i,enIndex,iSide,iEl)
+             fluxR(4) = unR*this % diagnostics % extBoundary % hostData(i,2,iSide,iEl)
 
              jump(1:4) = this % solution % boundary % hostData(i,1:4,iSide,iEl)-&
                          this % solution % extBoundary % hostData(i,1:4,iSide,iEl)
 
-             alpha = MAX( ABS(unL+cL), ABS(unR+cR), &
-                          ABS(unL-cL), ABS(unR-cR) )
+             cL = this % diagnostics % boundary % hostData(i,3,iSide,iEl)
+             cR = this % diagnostics % extBoundary % hostData(i,3,iSide,iEl)
+
+             alpha = MAX( ABS(unL), ABS(unR) ) + MAX( ABS(cL), ABS(cR) )
 
              ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
              this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) =  0.5_prec*( fluxL(1:4) + fluxR(1:4) + alpha*jump(1:4) )*nmag
@@ -1124,6 +1225,79 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE NaiveLLF_CompressibleIdealGas2D
+
+!  SUBROUTINE ShimaEtAl_CompressibleIdealGas2D(this)
+!  !! Adapted from Trixi-Framework/Trixi.jl for Fortran and HIPFort
+!  !!  https://github.com/trixi-framework/Trixi.jl/blob/main/src/equations/compressible_euler_2d.jl
+!  !!
+!  !! This flux is is a modification of the original kinetic energy preserving two-point flux by
+!  !! - Yuichi Kuya, Kosuke Totani and Soshi Kawai (2018)
+!  !!   Kinetic energy and entropy preserving schemes for compressible flows
+!  !!   by split convective forms
+!  !!   [DOI: 10.1016/j.jcp.2018.08.058](https://doi.org/10.1016/j.jcp.2018.08.058)
+!  !! The modification is in the energy flux to guarantee pressure equilibrium and was developed by
+!  !! - Nao Shima, Yuichi Kuya, Yoshiharu Tamaki, Soshi Kawai (JCP 2020)
+!  !!   Preventing spurious pressure oscillations in split convective form discretizations for
+!  !!   compressible flows
+!  !!   [DOI: 10.1016/j.jcp.2020.110060](https://doi.org/10.1016/j.jcp.2020.110060)
+!    IMPLICIT NONE
+!    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+!    ! Local
+!    ! Local
+!    INTEGER :: i,iSide,iEl
+!    REAL(prec) :: nhat(1:2), nmag
+!    REAL(prec) :: cL, cR, unL, unR, HL, HR, HuL, HuR, HvL, HvR
+!    REAL(prec) :: alpha
+!    REAL(prec) :: fluxL(1:4)
+!    REAL(prec) :: fluxR(1:4)
+!    REAL(prec) :: jump(1:4)
+!
+!      DO iEl = 1, this % solution % nElem
+!        DO iSide = 1, 4
+!          DO i = 0, this % solution % interp % N
+!
+!            ! Get the boundary normals on cell edges from the mesh geometry
+!            nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+!            nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
+!
+!            unL = this % velocity % boundary % hostData(1,i,1,iSide,iEl)*nhat(1) +&
+!                  this % velocity % boundary % hostData(2,i,1,iSide,iEl)*nhat(2)
+!
+!            unR = this % velocity % extBoundary % hostData(1,i,1,iSide,iEl)*nhat(1) +&
+!                  this % velocity % extBoundary % hostData(2,i,1,iSide,iEl)*nhat(2)
+!
+!            rhoAvg = 0.5_prec*(this % solution % boundary % hostData(i,3,iSide,iEl) +&
+!                     this % solution % extBoundary % hostData(i,3,iSide,iEl))
+!
+!            uAvg = 0.5_prec*(this % velocity % boundary % hostData(1,i,1,iSide,iEl) +&
+!                     this % velocity % extBoundary % hostData(1,i,1,iSide,iEl))
+!
+!            vAvg = 0.5_prec*(this % velocity % boundary % hostData(2,i,1,iSide,iEl) +&
+!                     this % velocity % extBoundary % hostData(2,i,1,iSide,iEl))
+!
+!            unAvg = 0.5_prec*( unL + unR )
+!
+!            pAvg = 0.5_prec*(this % diagnostics % boundary % hostData(i,prIndex,iSide,iEl) +&
+!                     this % diagnostics % extBoundary % hostData(i,prIndex,iSide,iEl))
+!
+!            v2Avg = 0.5_prec*( this % velocity % boundary % hostData(1,i,1,iSide,iEl)*&
+!                              this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) +&
+!                              this % velocity % boundary % hostData(2,i,1,iSide,iEl)*&
+!                              this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) )
+!
+!            this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = (rhoAvg*unAvg*uAvg + pAvg*nhat(1))*nMag
+!            this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = (rhoAvg*unAvg*vAvg + pAvg*nhat(2))*nMag
+!            this % flux % boundaryNormal % hostData(i,3,iSide,iEl) = (rhoAvg*unAvg)*nMag
+!            this % flux % boundaryNormal % hostData(i,4,iSide,iEl) = (rhoAvg*unAvg*v2Avg + pAvg*unAvg/(gamma-1.0_prec) + &
+!                                                                      0.5_prec*(pL*unR + pR*vnL))*nMag
+!
+!
+!          ENDDO
+!        ENDDO
+!      ENDDO
+!
+!
+!  END SUBROUTINE ShimaEtAl_CompressibleIdealGas2D
   
   SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this, filename)
     IMPLICIT NONE
