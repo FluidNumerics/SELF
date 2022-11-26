@@ -2,7 +2,7 @@
 #include "SELF_HIP_Macros.h"
 #include <cstdio>
 
-__global__ void Source_CompressibleIdealGas2D_gpu(real *source, real *solution, int N, int nVar){
+__global__ void Source_CompressibleIdealGas2D_gpu(real *source, real *solution, real *environmentalsGradient, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs
   size_t iVar = blockIdx.x;
@@ -10,15 +10,24 @@ __global__ void Source_CompressibleIdealGas2D_gpu(real *source, real *solution, 
   size_t i = threadIdx.x;
   size_t j = threadIdx.y;
 
-    source[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = 0.0;
+    real rhou = solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+    real rhov = solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+    real rho = solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
+    real gx = environmentalsGradient[VE_2D_INDEX(1,i,j,0,iEl,N,1)];
+    real gy = environmentalsGradient[VE_2D_INDEX(2,i,j,0,iEl,N,1)];
+
+    source[SC_2D_INDEX(i,j,0,iEl,N,nVar)] = -rho*gx;
+    source[SC_2D_INDEX(i,j,1,iEl,N,nVar)] = -rho*gy;
+    source[SC_2D_INDEX(i,j,2,iEl,N,nVar)] = 0.0;
+    source[SC_2D_INDEX(i,j,3,iEl,N,nVar)] = -rhou*gx-rhou*gy;
 
 }
 
 extern "C"
 {
-  void Source_CompressibleIdealGas2D_gpu_wrapper(real **source, real **solution, int N, int nVar, int nEl)
+  void Source_CompressibleIdealGas2D_gpu_wrapper(real **source, real **solution, real **environmentalsGradient, int N, int nVar, int nEl)
   {
-    Source_CompressibleIdealGas2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*source, *solution, N, nVar);
+    Source_CompressibleIdealGas2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*source, *solution, *environmentalsGradient, N, nVar);
   }
 }
 

@@ -36,6 +36,8 @@ MODULE SELF_CompressibleIdealGas2D
 
     TYPE(MappedScalar2D) :: primitive ! Contains primitive variables 
     TYPE(MappedScalar2D) :: entropyVars ! Contains entropy variables
+    TYPE(MappedScalar2D) :: environmentals ! Functions to describe environmental features (e.g. gravitational potential)
+    TYPE(MappedVector2D) :: environmentalsGradient ! Functions to describe environmental features (e.g. gravitational potential)
 
     TYPE(MappedScalar2D) :: diagnostics
 
@@ -78,6 +80,11 @@ MODULE SELF_CompressibleIdealGas2D
                               SetVelocityFromEqn_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetVelocityFromChar_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetVelocityFromEqn_CompressibleIdealGas2D
+
+    GENERIC :: SetGravity => SetGravityFromChar_CompressibleIdealGas2D,&
+                              SetGravityFromEqn_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetGravityFromChar_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetGravityFromEqn_CompressibleIdealGas2D
 
     GENERIC :: SetPrescribedSolution => SetPrescribedSolutionFromChar_CompressibleIdealGas2D,&
                               SetPrescribedSolutionFromEqn_CompressibleIdealGas2D,&
@@ -151,12 +158,12 @@ MODULE SELF_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper(source, solution, N, nVar, nEl) &
+    SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper(source, solution, environmentalsGradient, N, nVar, nEl) &
       bind(c,name="Source_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: source, solution
+      TYPE(c_ptr) :: source, solution, environmentalsGradient
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
@@ -265,6 +272,8 @@ CONTAINS
     CALL this % prescribedSolution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % diagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
     CALL this % prescribedDiagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
+    CALL this % environmentals % Init(geometry % x % interp,1,this % mesh % nElem)
+    CALL this % environmentalsGradient % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -329,6 +338,10 @@ CONTAINS
     CALL this % primitive % SetUnits(4,"kg/m/s^2")
     CALL this % primitive % SetDescription(4,"Fluid pressure")
 
+    CALL this % environmentals % SetName(1,"gp")
+    CALL this % environmentals % SetUnits(1,"m^2/s^2")
+    CALL this % environmentals % SetDescription(1,"Gravitational Potential")
+
   END SUBROUTINE Init_CompressibleIdealGas2D
 
   SUBROUTINE Free_CompressibleIdealGas2D(this)
@@ -339,6 +352,8 @@ CONTAINS
     CALL this % prescribedSolution % Free()
     CALL this % diagnostics % Free()
     CALL this % prescribedDiagnostics % Free()
+    CALL this % environmentals % Free()
+    CALL this % environmentalsGradient % Free()
     CALL this % workSol % Free()
     CALL this % velocity % Free()
     CALL this % compVelocity % Free()
@@ -532,6 +547,69 @@ CONTAINS
       ENDIF
       
   END SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D
+
+  SUBROUTINE SetGravityFromEqn_CompressibleIdealGas2D(this, eqn)
+  !! Sets the fluid velocity field using the provided equation parser
+  !! The momentum is then updated using the current fluid density field.
+  !! From here, the PreTendency method is called to set other diagnostics
+  !!
+  !! The total energy field is calculated using the internal energy (diagnosed from the
+  !! in-situ temperature) and the new kinetic energy field. 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    TYPE(EquationParser),INTENT(in) :: eqn
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+
+      CALL this % environmentals % SetEquation(1, eqn % equation)
+
+      CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % environmentals % BoundaryInterp( gpuAccel = .FALSE. )
+   
+      CALL this % environmentals % GradientBR( this % geometry, &
+                                               this % environmentalsGradient, &
+                                               .FALSE. )
+      
+      IF( this % gpuAccel )THEN
+        CALL this % environmentals % UpdateDevice()
+        CALL this % environmentalsGradient % UpdateDevice()
+      ENDIF
+
+      CALL this % environmentalsGradient % BoundaryInterp( gpuAccel = this % gpuAccel )
+      
+  END SUBROUTINE SetGravityFromEqn_CompressibleIdealGas2D
+
+  SUBROUTINE SetGravityFromChar_CompressibleIdealGas2D(this, eqnChar)
+  !! Sets the fluid velocity field using the provided equation parser
+  !! The momentum is then updated using the current fluid density field.
+  !! From here, the PreTendency method is called to set other diagnostics
+  !!
+  !! The total energy field is calculated using the internal energy (diagnosed from the
+  !! in-situ temperature) and the new kinetic energy field. 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CHARACTER(LEN=*),INTENT(in) :: eqnChar
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: rho, u, v, temperature, internalE, KE
+
+      CALL this % environmentals % SetEquation(1, eqnChar)
+
+      CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
+      CALL this % environmentals % BoundaryInterp( gpuAccel = .FALSE. )
+   
+      CALL this % environmentals % GradientBR( this % geometry, &
+                                               this % environmentalsGradient, &
+                                               .FALSE. )
+      
+      IF( this % gpuAccel )THEN
+        CALL this % environmentals % UpdateDevice()
+        CALL this % environmentalsGradient % UpdateDevice()
+      ENDIF
+
+      CALL this % environmentalsGradient % BoundaryInterp( gpuAccel = this % gpuAccel )
+      
+  END SUBROUTINE SetGravityFromChar_CompressibleIdealGas2D
 
   SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D(this, eqn) 
     IMPLICIT NONE
@@ -1080,11 +1158,13 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: rhou, rhov, rho, gx, gy
 
     IF( this % gpuAccel )THEN
 
       CALL Source_CompressibleIdealGas2D_gpu_wrapper( this % source % interior % deviceData, &
               this % solution % interior % deviceData, &
+              this % environmentalsGradient % interior % deviceData, &
               this % source % interp % N, &
               this % source % nVar, &
               this % source % nElem )
@@ -1092,15 +1172,22 @@ CONTAINS
     ELSE
 
       DO iEl = 1, this % source % nElem
-        DO iVar = 1, this % source % nvar
           DO j = 0, this % source % interp % N
             DO i = 0, this % source % interp % N
 
-              this % source % interior % hostData(i,j,iVar,iEl) = 0.0_prec
+              rhou = this % solution % interior % hostData(i,j,1,iEl)
+              rhov = this % solution % interior % hostData(i,j,2,iEl)
+              rho = this % solution % interior % hostData(i,j,3,iEl)
+              gx = this % environmentalsGradient % interior % hostData(1,i,j,1,iEl)
+              gy = this % environmentalsGradient % interior % hostData(2,i,j,1,iEl) 
+
+              this % source % interior % hostData(i,j,1,iEl) = -rho*gx ! (\rho u)_t = -\rho gx 
+              this % source % interior % hostData(i,j,2,iEl) = -rho*gy ! (\rho v)_t = -\rho gy 
+              this % source % interior % hostData(i,j,3,iEl) = 0.0 ! (\rho )_t = 0 
+              this % source % interior % hostData(i,j,4,iEl) = -rhou*gx-rhou*gy ! (\rho E )_t = -\rho u g_x - \rho u g_
 
             ENDDO
           ENDDO
-        ENDDO
       ENDDO
 
     ENDIF
