@@ -400,3 +400,43 @@ extern "C"
     ConservativeToPrimitive_CompressibleIdealGas2D_gpu<<<dim3(nEl,1,1), dim3(N+1,N+1,1), 0, 0>>>(*solution, *primitive, expansionFactor, N, nVar);
   }
 }
+
+__global__ void ConservativeToEntropy_CompressibleIdealGas2D_gpu(real *solution,
+		                                                real *entropy,
+								real expansionFactor,
+		                                                int N, 
+								int nVar){ 
+
+  size_t iEl = blockIdx.x;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  real rhoU = solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+  real rhoV = solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+  real rho = solution[SC_2D_INDEX(i,j,2,iEl,N,nVar)];
+  real E = solution[SC_2D_INDEX(i,j,3,iEl,N,nVar)];
+  real u = rhoU/rho;
+  real v = rhoV/rho;
+  real KE = 0.5*(u*rhoU+v*rhoV);
+  real p = (expansionFactor - 1.0)*(E - KE);
+  real s = log(p) - expansionFactor*log(rho);
+
+  entropy[SC_2D_INDEX(i,j,0,iEl,N,nVar)] = u*rho/p;
+  entropy[SC_2D_INDEX(i,j,1,iEl,N,nVar)] = v*rho/p;
+  entropy[SC_2D_INDEX(i,j,2,iEl,N,nVar)] = (expansionFactor - s)/(expansionFactor -1.0) - KE/p;
+  entropy[SC_2D_INDEX(i,j,3,iEl,N,nVar)] = -rho/p;
+
+}
+
+extern "C"
+{
+ void ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper(real **solution,
+		                                              real **entropy,
+							      real expansionFactor,
+		                                              int N, 
+							      int nVar, 
+							      int nEl)
+  {
+    ConservativeToEntropy_CompressibleIdealGas2D_gpu<<<dim3(nEl,1,1), dim3(N+1,N+1,1), 0, 0>>>(*solution, *entropy, expansionFactor, N, nVar);
+  }
+}

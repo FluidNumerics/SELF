@@ -93,7 +93,7 @@ MODULE SELF_CompressibleIdealGas2D
 
     PROCEDURE,PRIVATE :: CalculateDiagnostics
     PROCEDURE,PRIVATE :: ConservativeToPrimitive
-    !PROCEDURE,PRIVATE :: ConservativeToEntropy
+    PROCEDURE,PRIVATE :: ConservativeToEntropy
 
   END TYPE CompressibleIdealGas2D
 
@@ -105,11 +105,6 @@ MODULE SELF_CompressibleIdealGas2D
   ! ---------------------------------------- !
   ! Diagnostics variable indices
   !
-  INTEGER, PARAMETER, PRIVATE :: keIndex = 1 ! Index for kinetic energy
-!  INTEGER, PARAMETER, PRIVATE :: prIndex = 2 ! Index for pressure
-  INTEGER, PARAMETER, PRIVATE :: enIndex = 2 ! Index for enthalpy
-  INTEGER, PARAMETER, PRIVATE :: soIndex = 3 ! Index for sound speed
-  INTEGER, PARAMETER, PRIVATE :: teIndex = 4 ! Index for in-situ temperature
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 4
 
   ! ---------------------------------------- ! 
@@ -212,6 +207,7 @@ MODULE SELF_CompressibleIdealGas2D
       INTEGER(C_INT),VALUE :: N,nVar,nDiag,nEl
     END SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
+
   INTERFACE
     SUBROUTINE ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper(solution, &
                    primitive, expansionFactor, N, nVar, nEl) &
@@ -224,6 +220,20 @@ MODULE SELF_CompressibleIdealGas2D
       REAL(c_prec),VALUE :: expansionFactor
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper(solution, &
+                   entropy, expansionFactor, N, nVar, nEl) &
+      bind(c,name="ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper")
+      USE iso_c_binding
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(c_ptr) :: solution
+      TYPE(c_ptr) :: entropy
+      REAL(c_prec),VALUE :: expansionFactor
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
 
 CONTAINS
@@ -709,16 +719,18 @@ CONTAINS
 
       CALL this % CalculateDiagnostics()
       CALL this % ConservativeToPrimitive()
-      !CALL this % ConservativeToEntropy()
+      CALL this % ConservativeToEntropy()
 
       ! Interpolate velocity and required diagnostics to the element boundaries
       CALL this % primitive % BoundaryInterp(this % gpuAccel)
       CALL this % diagnostics % BoundaryInterp(this % gpuAccel)
+      CALL this % entropyVars % BoundaryInterp(this % gpuAccel)
 
       ! Perform any MPI exchanges for the velocity and the required diagnostics
       ! across shared element faces between neighboring processes.
       CALL this % primitive % SideExchange(this % mesh, this % decomp, this % gpuAccel)
       CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+      CALL this % entropyVars % SideExchange(this % mesh, this % decomp, this % gpuAccel)
 
   END SUBROUTINE PreTendency_CompressibleIdealGas2D
 
@@ -909,6 +921,51 @@ CONTAINS
       ENDIF
 
   END SUBROUTINE ConservativeToPrimitive
+
+  SUBROUTINE ConservativeToEntropy(this)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, j, i
+    REAL(prec) :: rhoU, rhoV, rho, u, v, E, KE, p, s
+
+      IF( this % gpuAccel )THEN
+
+        CALL ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper( & 
+          this % solution % interior % deviceData, &
+          this % entropyVars % interior % deviceData, &
+          this % expansionFactor, &
+          this % solution % interp % N, &
+          this % solution % nVar, &
+          this % solution % nElem )
+
+      ELSE
+        DO iEl = 1, this % solution % nElem
+          DO j = 0, this % solution % interp % N
+            DO i = 0, this % solution % interp % N
+
+              rhoU = this % solution % interior % hostData(i,j,1,iEl)
+              rhoV = this % solution % interior % hostData(i,j,2,iEl)
+              rho = this % solution % interior % hostData(i,j,3,iEl)
+              E = this % solution % interior % hostData(i,j,4,iEl)
+              u = rhoU/rho
+              v = rhoV/rho
+              KE = 0.5_prec*(rhoU*u+rhoV*v)
+              p = (this % expansionFactor - 1.0_prec)*(E - KE)
+              s = log(p) - this % expansionFactor*log(rho)
+
+              this % entropyVars % interior % hostData(i,j,1,iEl) = u*rho/p 
+              this % entropyVars % interior % hostData(i,j,2,iEl) = v*rho/p
+              this % entropyVars % interior % hostData(i,j,3,iEl) = (this % expansionFactor - s)/&
+                     (this % expansionFactor - 1.0_prec) - KE/p
+              this % entropyVars % interior % hostData(i,j,4,iEl) = -rho/p
+
+            ENDDO
+          ENDDO
+        ENDDO
+      ENDIF
+
+  END SUBROUTINE ConservativeToEntropy
 
   SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D(this)
     IMPLICIT NONE
