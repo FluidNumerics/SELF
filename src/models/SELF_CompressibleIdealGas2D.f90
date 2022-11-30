@@ -565,8 +565,9 @@ CONTAINS
 
       CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % environmentals % BoundaryInterp( gpuAccel = .FALSE. )
+      CALL this % environmentals % SideExchange(this % mesh, this % decomp, .FALSE.)
    
-      CALL this % environmentals % GradientBR( this % geometry, &
+      CALL this % environmentals % GradientSF( this % geometry, &
                                                this % environmentalsGradient, &
                                                .FALSE. )
       
@@ -597,8 +598,9 @@ CONTAINS
 
       CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
       CALL this % environmentals % BoundaryInterp( gpuAccel = .FALSE. )
+      CALL this % environmentals % SideExchange(this % mesh, this % decomp, .FALSE.)
    
-      CALL this % environmentals % GradientBR( this % geometry, &
+      CALL this % environmentals % GradientSF( this % geometry, &
                                                this % environmentalsGradient, &
                                                .FALSE. )
       
@@ -1458,6 +1460,7 @@ CONTAINS
     CHARACTER(5) :: rankString
     TYPE(Scalar2D) :: solution
     TYPE(Scalar2D) :: diagnostics
+    TYPE(Scalar2D) :: environmentals
     TYPE(Vector2D) :: x
     TYPE(Lagrange),TARGET :: interp
 
@@ -1479,59 +1482,9 @@ CONTAINS
       CALL this % solution % interior % UpdateHost()
     ENDIF
 
-    ! Create an interpolant for the uniform grid
-    CALL interp % Init(this % solution % interp % M,&
-            this % solution % interp % targetNodeType,&
-            this % solution % interp % N, &
-            this % solution % interp % controlNodeType)
-
-    CALL solution % Init( interp, &
-            this % solution % nVar, this % solution % nElem )
-
-    CALL x % Init( interp, 1, this % solution % nElem )
-
-    ! Map the mesh positions to the target grid
-    CALL this % geometry % x % GridInterp(x, gpuAccel=.FALSE.)
-
-    ! Map the solution to the target grid
-    CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
-   
-     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(tecFile), &
-      FORM='formatted', &
-      STATUS='replace')
-
-    tecHeader = 'VARIABLES = "X", "Y"'
-    DO iVar = 1, this % solution % nVar
-      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % solution % meta(iVar) % name)//'"'
-    ENDDO
-
-    WRITE(fUnit,*) TRIM(tecHeader) 
-
-    ! Create format statement
-    WRITE(fmat,*) this % solution % nvar+2
-    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
-
-    DO iEl = 1, this % solution % nElem
-
-      ! TO DO :: Get the global element ID 
-      WRITE(zoneID,'(I8.8)') iEl
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % solution % interp % M+1,&
-                                                 ', J=',this % solution % interp % M+1
-
-      DO j = 0, this % solution % interp % M
-        DO i = 0, this % solution % interp % M
-
-          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
-                            x % interior % hostData(2,i,j,1,iEl), &
-                            solution % interior % hostData(i,j,1:this % solution % nvar,iEl)
-
-        ENDDO
-      ENDDO
-
-    ENDDO
-
-    CLOSE(UNIT=fUnit)
+    CALL this % solution % WriteTecplot( this % geometry, &
+                                         this % decomp, &
+                                         tecFile )
  
     IF( this % decomp % mpiEnabled )THEN
       WRITE(rankString,'(I5.5)') this % decomp % rankId 
@@ -1544,53 +1497,24 @@ CONTAINS
       CALL this % diagnostics % interior % UpdateHost()
     ENDIF
 
-    CALL diagnostics % Init( interp, &
-            this % diagnostics % nVar, this % diagnostics % nElem )
+    CALL this % diagnostics % WriteTecplot( this % geometry, &
+                                         this % decomp, &
+                                         tecFile )
 
-    ! Map the solution to the target grid
-    CALL this % diagnostics % GridInterp(diagnostics,gpuAccel=.FALSE.)
-   
-     OPEN( UNIT=NEWUNIT(fUnit), &
-      FILE= TRIM(tecFile), &
-      FORM='formatted', &
-      STATUS='replace')
+    IF( this % decomp % mpiEnabled )THEN
+      WRITE(rankString,'(I5.5)') this % decomp % rankId 
+      tecFile = 'environmentals.'//rankString//'.'//timeStampString//'.tec'
+    ELSE
+      tecFile = 'environmentals.'//timeStampString//'.tec'
+    ENDIF
+                      
+    IF( this % gpuAccel )THEN
+      CALL this % environmentals % interior % UpdateHost()
+    ENDIF
 
-    tecHeader = 'VARIABLES = "X", "Y"'
-    DO iVar = 1, this % diagnostics % nVar
-      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % diagnostics % meta(iVar) % name)//'"'
-    ENDDO
-
-    WRITE(fUnit,*) TRIM(tecHeader) 
-
-    ! Create format statement
-    WRITE(fmat,*) this % diagnostics % nvar+2
-    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
-
-    DO iEl = 1, this % solution % nElem
-
-      ! TO DO :: Get the global element ID 
-      WRITE(zoneID,'(I8.8)') iEl
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % solution % interp % M+1,&
-                                                 ', J=',this % solution % interp % M+1
-
-      DO j = 0, this % solution % interp % M
-        DO i = 0, this % solution % interp % M
-
-          WRITE(fUnit,fmat) x % interior % hostData(1,i,j,1,iEl), &
-                            x % interior % hostData(2,i,j,1,iEl), &
-                            diagnostics % interior % hostData(i,j,1:this % diagnostics % nvar,iEl)
-
-        ENDDO
-      ENDDO
-
-    ENDDO
-
-    CLOSE(UNIT=fUnit)
-
-    CALL x % Free()
-    CALL solution % Free()
-    CALL diagnostics % Free()
-    CALL interp % Free()
+    CALL this % environmentals % WriteTecplot( this % geometry, &
+                                         this % decomp, &
+                                         tecFile )
 
   END SUBROUTINE WriteTecplot_CompressibleIdealGas2D
 

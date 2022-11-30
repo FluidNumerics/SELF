@@ -91,7 +91,7 @@ USE SELF_CompressibleIdealGas2D
     ! for model boundary conditions
     CALL semModel % SetPrescribedSolution()
 
-    CALL semModel % SetGravity( "p = 10.0*y" )
+    CALL semModel % SetGravity( "p = y" )
     
     ! Write the initial condition to file
     CALL semModel % WriteModel()
