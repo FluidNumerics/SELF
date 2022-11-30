@@ -22,6 +22,7 @@ USE SELF_CLI
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
+  integer :: i
 
   REAL(prec) :: referenceEntropy
   REAL(prec) :: solutionMax(1:2)
@@ -73,13 +74,12 @@ USE SELF_CLI
     ! Enable GPU Acceleration (if a GPU is found) !
     !CALL semModel % EnableGPUAccel()
  
-    topography = "h = 1.0-0.2*exp( -(x-0.5)^2 / 0.01 )"
+    topography = "h = 1.0-0.1*exp( -(x-0.5)^2 / 0.01 )"
     CALL semModel % SetTopography(topography)
+    CALL semModel % SetLakeAtRest()
 
-    ! Set the initial condition
-    initialCondition = (/"u = 0.0                             ", &
-                         "H = 1.0-0.2*exp( -(x-0.5)^2 / 0.01 )"/)
-    CALL semModel % SetSolution( initialCondition )
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
