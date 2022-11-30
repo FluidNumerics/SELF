@@ -28,6 +28,7 @@ MODULE SELF_ShallowWater1D
 
     PROCEDURE :: PreTendency => PreTendency_ShallowWater1D
 !    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_ShallowWater1D
+    PROCEDURE :: ProductRuleCorrection => ProductRuleCorrection_ShallowWater1D
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_ShallowWater1D
@@ -40,6 +41,8 @@ MODULE SELF_ShallowWater1D
                               SetTopographyFromEqn_ShallowWater1D
     PROCEDURE,PRIVATE :: SetTopographyFromChar_ShallowWater1D
     PROCEDURE,PRIVATE :: SetTopographyFromEqn_ShallowWater1D
+
+    PROCEDURE :: SetLakeAtRest => SetLakeAtRest_ShallowWater1D
 
   END TYPE ShallowWater1D
 
@@ -206,6 +209,24 @@ CONTAINS
 
   END SUBROUTINE PreTendency_ShallowWater1D
 
+
+  SUBROUTINE SetLakeAtRest_ShallowWater1D(this) 
+    IMPLICIT NONE
+    CLASS(ShallowWater1D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, i
+
+
+      DO iEl = 1, this % solution % nElem
+        DO i = 0, this % solution % interp % N
+          this % solution % interior % hostData(i,1,iEl) = 0.0_prec
+          this % solution % interior % hostData(i,2,iEl) = this % H % interior % hostData(i,1,iEl)
+        ENDDO
+      ENDDO
+
+
+  END SUBROUTINE SetLakeAtRest_ShallowWater1D
+
   SUBROUTINE SetTopographyFromChar_ShallowWater1D(this, eqnChar) 
     IMPLICIT NONE
     CLASS(ShallowWater1D),INTENT(inout) :: this
@@ -290,6 +311,7 @@ CONTAINS
                                               this % solution % nElem )
 
       ELSE
+
         DO iEl = 1, this % source % nElem
           DO i = 0, this % source % interp % N
 
@@ -301,21 +323,60 @@ CONTAINS
 
           ENDDO
         ENDDO
+
+        !CALL this % ProductRuleCorrection()
+
       ENDIF
 
   END SUBROUTINE Source_ShallowWater1D
 
-!  SUBROUTINE CalculateFluxDivergence_ShallowWater1D(this)
-!    IMPLICIT NONE
-!    CLASS(ShallowWater1D),INTENT(inout) :: this
-!
-!    CALL this % flux % Derivative(this % geometry, &
-!                                  this % fluxDivergence, &
-!                                  selfWeakDGForm,&
-!                                  this % gpuAccel)
-!
-!
-!  END SUBROUTINE CalculateFluxDivergence_ShallowWater1D
+  SUBROUTINE ProductRuleCorrection_ShallowWater1D(this)
+    !!
+    !! For this class, we use the PostfluxDivergence to add
+    !! split form correction terms to the momentum equation
+    !!
+    IMPLICIT NONE
+    CLASS(ShallowWater1D),INTENT(inout) :: this
+    INTEGER :: iEl, i, ii
+    REAL(prec) :: Dv, Dhv2, Dhv, Dh, Dh2, dmat
+    REAL(prec) :: hv, h, v
+    REAL(prec) :: hvi, hi, vi
+
+
+      DO iEl = 1, this % solution % nElem
+        DO i = 0, this % solution % interp % N
+
+          Dv = 0.0_prec
+          Dhv2 = 0.0_prec
+          Dhv = 0.0_prec
+          Dh2 = 0.0_prec
+
+          DO ii = 0, this % solution % interp % N 
+            hvi = this % solution % interior % hostData(ii,1,iEl)
+            hi = this % solution % interior % hostData(ii,2,iEl)
+            vi = this % velocity % interior % hostData(ii,1,iEl)
+            dmat = this % solution % interp % dMatrix % hostData(ii,i)
+
+            Dv = Dv + dmat*vi
+            Dhv2 = Dhv2 + dmat*hvi*vi
+            Dhv = Dhv + dmat*hvi
+            Dh2 = Dh2 + dmat*hi*hi
+            Dh = Dh + dmat*hi
+          ENDDO
+
+          hv = this % solution % interior % hostData(i,1,iEl)
+          h = this % solution % interior % hostData(i,2,iEl)
+          v = this % velocity % interior % hostData(i,1,iEl)
+
+          this % source % interior % hostData(i,1,iEl) = &
+                  this % source % interior % hostData(i,1,iEl) - &
+                             ( 0.5_prec*this % g*(2.0_prec*h*Dh - Dh2) ) / &
+                  this % geometry % dxds % interior % hostData(i,1,iEl)
+         
+        ENDDO
+      ENDDO
+
+  END SUBROUTINE ProductRuleCorrection_ShallowWater1D
 
   SUBROUTINE Flux_ShallowWater1D(this)
     IMPLICIT NONE
@@ -356,6 +417,7 @@ CONTAINS
     INTEGER :: i,iSide,iEl
     REAL(prec) :: cL, cR, unL, unR, HL, HR, HuL, HuR, HvL, HvR
     REAL(prec) :: alpha, nhat
+    REAL(prec) :: uAvg, hAvg, h2Avg
     REAL(prec) :: fluxL(1:2)
     REAL(prec) :: fluxR(1:2)
 
@@ -373,29 +435,38 @@ CONTAINS
            unL = this % velocity % boundary % hostData(1,iSide,iEl)
            unR = this % velocity % extBoundary % hostData(1,iSide,iEl)
 
-           cL = sqrt( this % g * this % solution % boundary % hostData(2,iSide,iEl))
-           cR = sqrt( this % g * this % solution % extBoundary % hostData(2,iSide,iEl))
-
-           HuL = this % solution % boundary % hostData(1,iSide,iEl)
-           HuR = this % solution % extBoundary % hostData(1,iSide,iEl)
-
            HL = this % solution % boundary % hostData(2,iSide,iEl)
            HR = this % solution % extBoundary % hostData(2,iSide,iEl)
 
-           fluxL(1) = (HuL*unL + this % g*HL*HL*0.5_prec)*nHat
-           fluxL(2) = HuL*nHat
+           uAvg = (unL+unR)*0.5_prec
+           hAvg = (hL+hR)*0.5_prec
+           h2Avg = (hL*hL + hR*hR)*0.5_prec
 
-           fluxR(1) = (HuR*unR + this % g*HR*HR*0.5_prec)*nHat
-           fluxR(2) = HuR*nHat
+           !cL = sqrt( this % g * this % solution % boundary % hostData(2,iSide,iEl))
+           !cR = sqrt( this % g * this % solution % extBoundary % hostData(2,iSide,iEl))
 
-           alpha = MAX( ABS(unL+cL), ABS(unR+cR), &
-                        ABS(unL-cL), ABS(unR-cR) )
+           ! Entropy conserving flux from Gassner et al. (2016)
+           this % flux % boundary % hostData(1,iSide,iEl) = ( &
+                   uAvg*uAvg*hAvg + 0.5_prec*this % g*h2Avg )*nHat
+
+           this % flux % boundary % hostData(2,iSide,iEl) = ( uAvg*hAvg )*nHat
+
+           !cL = sqrt( this % g * this % solution % boundary % hostData(2,iSide,iEl))
+           !cR = sqrt( this % g * this % solution % extBoundary % hostData(2,iSide,iEl))
+!           fluxL(1) = (HuL*unL + this % g*HL*HL*0.5_prec)*nHat
+!           fluxL(2) = HuL*nHat
+!
+!           fluxR(1) = (HuR*unR + this % g*HR*HR*0.5_prec)*nHat
+!           fluxR(2) = HuR*nHat
+!
+!           alpha = MAX( ABS(unL+cL), ABS(unR+cR), &
+!                        ABS(unL-cL), ABS(unR-cR) )
 
            ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
-           this % flux % boundary % hostData(1,iSide,iEl) = 0.5_prec*( &
-                   fluxL(1) + fluxR(1) + alpha*( HuL - HuR ) )
-           this % flux % boundary % hostData(2,iSide,iEl) = 0.5_prec*( &
-                   fluxL(2) + fluxR(2) + alpha*( HL - HR ) )
+!           this % flux % boundary % hostData(1,iSide,iEl) = 0.5_prec*( &
+!                   fluxL(1) + fluxR(1) + alpha*( HuL - HuR ) )
+!           this % flux % boundary % hostData(2,iSide,iEl) = 0.5_prec*( &
+!                   fluxL(2) + fluxR(2) + alpha*( HL - HR ) )
 
         ENDDO
       ENDDO
