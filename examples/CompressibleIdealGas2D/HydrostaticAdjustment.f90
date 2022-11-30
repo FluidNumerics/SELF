@@ -32,6 +32,8 @@ USE SELF_CompressibleIdealGas2D
   CHARACTER(LEN=255) :: SELF_PREFIX
   CHARACTER(LEN=500) :: meshfile
   CHARACTER(LEN=100) :: gravity
+  CHARACTER(LEN=5) :: rankString
+  CHARACTER(LEN=self_FileNameLength) :: tecFile
 
 
     CALL get_environment_variable("SELF_PREFIX", SELF_PREFIX)
@@ -92,6 +94,17 @@ USE SELF_CompressibleIdealGas2D
     CALL semModel % SetPrescribedSolution()
 
     CALL semModel % SetGravity( "p = y" )
+
+    IF( mpiRequested )THEN
+      WRITE(rankString,'(I5.5)') decomp % rankId 
+      tecFile = 'environmentals.'//rankString//'.tec'
+    ELSE
+      tecFile = 'environmentals.tec'
+    ENDIF
+                      
+    CALL semModel % environmentals % WriteTecplot( geometry, &
+                                                   decomp, &
+                                                   tecFile )
     
     ! Write the initial condition to file
     CALL semModel % WriteModel()
