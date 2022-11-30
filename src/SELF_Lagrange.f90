@@ -2743,7 +2743,6 @@ CONTAINS
     DO j = 0,myPoly % N
 
       lS(j) = 0.0_real64
-
       IF (AlmostEqual(sELocal,controlPoints(j))) THEN
         lS(j) = 1.0_real64
         xMatchesNode = .TRUE.
@@ -2752,6 +2751,9 @@ CONTAINS
     END DO
 
     IF (xMatchesNode) THEN
+      DO j = 0,myPoly % N
+        lAtS(j) = REAL(lS(j),prec)
+      END DO
       RETURN
     END IF
 
