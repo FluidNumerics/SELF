@@ -54,6 +54,8 @@ MODULE SELF_MappedData
 
     PROCEDURE,PUBLIC :: WriteTecplot => WriteTecplot_MappedScalar2D
 
+    PROCEDURE,PUBLIC :: Integral => Integral_MappedScalar2D
+
   END TYPE MappedScalar2D
 
   TYPE,EXTENDS(Scalar3D),PUBLIC :: MappedScalar3D
@@ -1264,6 +1266,49 @@ CONTAINS
     END IF
 
   END SUBROUTINE JacobianWeight_MappedScalar2D
+
+  FUNCTION Integral_MappedScalar2D(this, geometry, decomp, gpuAccel) RESULT( fRes )
+    !! Calculates the area integral the scalar over all of the geometry.
+    !! Global reduction is done across all MPI ranks when the domain
+    !! decomposition indicates MPI is enabled. 
+    IMPLICIT NONE
+    CLASS(MappedScalar2D) :: this
+    TYPE(SEMQuad) :: geometry
+    TYPE(MPILayer) :: decomp
+    LOGICAL :: gpuAccel
+    REAL(prec) :: fRes
+    ! Local
+    INTEGER :: i, j, iEl
+    REAL(prec) :: wi, wj, fint, Jacobian, f
+
+      IF( gpuAccel ) THEN
+        CALL this % interior % UpdateHost()
+      ENDIF
+
+      fint = 0.0_prec
+
+      DO iEl = 1, geometry % x % nElem
+        DO j = 0, geometry % x % interp % N
+          DO i = 0, geometry % x % interp % N
+
+            ! Coordinate mapping Jacobian
+            Jacobian = geometry % J % interior % hostData(i,j,1,iEl)
+
+            ! Quadrature weights
+            wi = geometry % x % interp % qWeights % hostData(i) 
+            wj = geometry % x % interp % qWeights % hostData(j)
+            
+            f = this % interior % hostData(i,j,4,iEl)
+            
+            fint = fint + f*wi*wj*Jacobian
+          
+          ENDDO
+        ENDDO
+      ENDDO
+
+      CALL decomp % GlobalReduce( fint, fRes )
+
+  END FUNCTION Integral_MappedScalar2D
 
   SUBROUTINE WriteTecplot_MappedScalar2D(this, geometry, decomp, filename)
     CLASS(MappedScalar2D), INTENT(inout) :: this
