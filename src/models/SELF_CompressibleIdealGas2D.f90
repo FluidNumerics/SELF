@@ -1503,16 +1503,16 @@ CONTAINS
 
     IF( this % decomp % mpiEnabled )THEN
       WRITE(rankString,'(I5.5)') this % decomp % rankId 
-      tecFile = 'environmentals.'//rankString//'.'//timeStampString//'.tec'
+      tecFile = 'primitive.'//rankString//'.'//timeStampString//'.tec'
     ELSE
-      tecFile = 'environmentals.'//timeStampString//'.tec'
+      tecFile = 'primitive.'//timeStampString//'.tec'
     ENDIF
                       
     IF( this % gpuAccel )THEN
-      CALL this % environmentals % interior % UpdateHost()
+      CALL this % primitive % interior % UpdateHost()
     ENDIF
 
-    CALL this % environmentals % WriteTecplot( this % geometry, &
+    CALL this % primitive % WriteTecplot( this % geometry, &
                                          this % decomp, &
                                          tecFile )
 
