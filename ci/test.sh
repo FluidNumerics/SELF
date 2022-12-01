@@ -47,6 +47,9 @@ cleanupGCDAFiles(){
 
 moveGCNOFiles
 tomerge=""
+
+ls $SELF_PREFIX/test/*
+
 for file in $(ls $SELF_PREFIX/test/*); do
 
   echo "Running Test : $file"

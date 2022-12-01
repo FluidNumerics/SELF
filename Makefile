@@ -57,7 +57,5 @@ include ${SELF_DIR}/make.include
 
 clean: self_clean
 
-# test:
-
 
 .PHONY: all clean
