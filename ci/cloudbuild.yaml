@@ -16,30 +16,31 @@ steps:
 - id: Run Tests (Serial)
   name: 'self:test'
   args: 
+  - '-c'
   - | 
       ./ci/test.sh
 
-      #- id: Upload coverage to codecov
-      #  name: 'gcr.io/${PROJECT_ID}/codecov'
-      #  secretEnv: ['CODECOV_TOKEN']
-      #  args: ['-t', '$$CODECOV_TOKEN',
-      #         '-R', '/build/',
-      #         '--sha', '${COMMIT_SHA}',
-      #         '--branch', '${BRANCH_NAME}',
-      #         '--pr', '${_PR_NUMBER}']
+- id: Upload coverage to codecov
+  name: 'gcr.io/${PROJECT_ID}/codecov'
+  secretEnv: ['CODECOV_TOKEN']
+  args: ['-t', '$$CODECOV_TOKEN',
+         '-R', '/build/',
+         '--sha', '${COMMIT_SHA}',
+         '--branch', '${BRANCH_NAME}',
+         '--pr', '${_PR_NUMBER}']
 
 options:
   diskSizeGb: 100
 
 timeout: 3600s
 
-  #availableSecrets:
-  #  secretManager:
-  #    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
-  #      env: 'CODECOV_TOKEN'
+availableSecrets:
+  secretManager:
+    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
+      env: 'CODECOV_TOKEN'
 
 substitutions:
-  _PREC: 'single'
+  _PREC: 'double'
   _GPU_TARGET: 'sm_72'
   _HIP_PLATFORM: 'nvidia'
   _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
