@@ -84,10 +84,10 @@ USE SELF_CompressibleIdealGas2D
     ENDIF
  
     ! Set the initial condition
-    CALL semModel % SetStaticSTP() ! Set field and parameters to STP
+    CALL semModel % SetStatic() ! Set field and parameters to STP
 
     ! Adjust the initial condition to have stationary and uniform flow
-    velocity = (/"u = 1.0", &
+    velocity = (/"u = 0.5", &
                  "v = 0.0" /)
     CALL semModel % SetVelocity( velocity )
 

@@ -68,6 +68,8 @@ SELF_TESTS = GradientBR_Test \
              Burgers1D_StationaryShock \
              CompressibleIdealGas2D_StaticFluid \
              CompressibleIdealGas2D_StaticFluid_NoNormalFlow \
+             CompressibleIdealGas2D_ConstantVelocity \
+             CompressibleIdealGas2D_HydrostaticAdjustment \
              LinearShallowWater2D_GravityWaveRelease \
              LinearShallowWater2D_GravityWaveRelease_Reflecting \
              LinearShallowWater2D_PlanetaryRossbyWave \
@@ -118,7 +120,6 @@ self_clean:
 
 $(SELF_EXAS): $(SELF_DIR)/build/%: %.f90 $(SELF_OBJS) $(SELF_MODEL_OBJS)
 	$(FC) -c $(SELF_FFLAGS) -I$(SELF_INCDIR) $< -o $<.o
-	mkdir -p $(SELF_EXADIR)/$(shell basename $(shell dirname $<))
 	$(FC) $(SELF_FFLAGS) -I$(SELF_INCDIR) $(SELF_HIPDIR)*.o $(SELF_SRCDIR)*.o $(SELF_MODELHIPDIR)*.o $(SELF_MODELDIR)*.o $<.o $(SELF_FLIBS) -o $@
 
 $(SELF_LIBDIR)libself.a: $(SELF_OBJS) $(SELF_MODEL_OBJS)

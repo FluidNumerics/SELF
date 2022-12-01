@@ -97,6 +97,7 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetCp => SetCp_CompressibleIdealGas2D
     PROCEDURE :: SetCv => SetCv_CompressibleIdealGas2D
     PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
+    PROCEDURE :: SetStatic => SetStatic_CompressibleIdealGas2D
     PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
 
     PROCEDURE,PRIVATE :: CalculateDiagnostics
@@ -404,6 +405,45 @@ CONTAINS
       END SELECT
 
   END SUBROUTINE SetRiemannFlux_withChar
+
+  SUBROUTINE SetStatic_CompressibleIdealGas2D(this)
+  !! Sets the default fluid state with uniform 
+  !! density and temperature and no motion with
+  !! speed of sound as ~ 2 m/s
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+
+      CALL this % SetCv( Cv_stpAir )
+      CALL this % SetCp( Cp_stpAir )
+      CALL this % SetGasConstant( 1.0_prec )
+      
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+            this % solution % interior % hostData(i,j,1,iEl) = 0.0_prec ! rho*u
+            this % solution % interior % hostData(i,j,2,iEl) = 0.0_prec ! rho*v
+            this % solution % interior % hostData(i,j,3,iEl) = rho_stpAir ! rho
+            this % solution % interior % hostData(i,j,4,iEl) = rho_stpAir*10.0_prec ! rho*E
+          ENDDO
+        ENDDO
+      ENDDO
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
+      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
+      CALL this % PreTendency( )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateHost()
+        CALL this % primitive % UpdateHost()
+        CALL this % diagnostics % UpdateHost()
+      ENDIF
+      
+  END SUBROUTINE SetStatic_CompressibleIdealGas2D
 
   SUBROUTINE SetStaticSTP_CompressibleIdealGas2D(this)
   !! Sets the default fluid state as "air" at STP with
@@ -859,9 +899,6 @@ CONTAINS
       CALL this % primitive % SideExchange(this % mesh, this % decomp, this % gpuAccel)
       CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
       CALL this % entropyVars % SideExchange(this % mesh, this % decomp, this % gpuAccel)
-
-      !
-      CALL this % CheckMinMax()
 
   END SUBROUTINE PreTendency_CompressibleIdealGas2D
 
