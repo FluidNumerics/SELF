@@ -1,24 +1,5 @@
 
 steps:
-- id: Build Nvidia Image
-  name: 'gcr.io/cloud-builders/docker'
-  args: ['build',
-         '.',
-         '-f',
-         'docker/base/nvidia/Dockerfile',
-         '-t',
-         'gcr.io/${PROJECT_ID}/self-base:nvidia-cuda11.2.1-rocm4.5']
-
-- id: Build AMD Base Image
-  name: 'gcr.io/cloud-builders/docker'
-  args: ['build',
-         '.',
-         '-f',
-         'docker/base/amd/Dockerfile',
-         '-t',
-         'gcr.io/${PROJECT_ID}/self-base:amd-rocm4.5']
-  waitFor: ["-"]
-
 - id: Build Codecov Builder
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
@@ -29,13 +10,7 @@ steps:
          'gcr.io/${PROJECT_ID}/codecov:latest']
   waitFor: ["-"]
 
-images: ['gcr.io/${PROJECT_ID}/self-base:nvidia-cuda11.2.1-rocm4.5',
-         'gcr.io/${PROJECT_ID}/self-base:amd-rocm4.5',
-         'gcr.io/${PROJECT_ID}/codecov:latest']
+images: ['gcr.io/${PROJECT_ID}/codecov:latest']
 
 
-options:
-  machineType: 'E2_HIGHCPU_32'
-  diskSizeGb: 500
-
-timeout: 14400s
+timeout: 600s

@@ -12,14 +12,14 @@ SELF_SRCDIR = $(SELF_DIR)/src/
 SELF_HIPDIR = $(SELF_DIR)/src/hip/
 SELF_MODELDIR = $(SELF_DIR)/src/models/
 SELF_MODELHIPDIR = $(SELF_DIR)/src/models/hip/
-SELF_EXASRCDIR = $(SELF_DIR)/examples/
+SELF_EXASRCDIR = $(SELF_DIR)/test/
 
 
 # Out-of-source build directories
 SELF_INCDIR = $(SELF_DIR)/build/include/
 SELF_LIBDIR = $(SELF_DIR)/build/lib/
 SELF_BINDIR = $(SELF_DIR)/build/bin/
-SELF_EXADIR = $(SELF_DIR)/build/examples/
+SELF_EXADIR = $(SELF_DIR)/build/test/
 
 
 vpath %.f90 $(SELF_SRCDIR)
@@ -62,24 +62,22 @@ SELF_CPP_MODELS = SELF_Advection2D \
                   SELF_ShallowWater1D \
                   SELF_CompressibleIdealGas2D
 
-SELF_EXAMPLES = GradientBR_Test \
-                GradientSF_Test \
-                Advection2D/ConservativeForm \
-                Burgers1D/StationaryShock \
-                CompressibleIdealGas2D/StaticFluid \
-                CompressibleIdealGas2D/StaticFluid_NoNormalFlow \
-                CompressibleIdealGas2D/ConstantVelocity \
-                CompressibleIdealGas2D/HydrostaticAdjustment \
-                LinearShallowWater2D/GravityWaveRelease \
-                LinearShallowWater2D/GravityWaveRelease_Reflecting \
-                LinearShallowWater2D/PlanetaryRossbyWave \
-                LinearShallowWater2D/PlanetaryRossbyWave_NoNormalFlow \
-                LinearShallowWater2D/TopographicRossbyWave \
-                ShallowWater2D/GravityWaveRelease \
-                ShallowWater1D/QuietFluid \
-                ShallowWater1D/QuietFluid_Topography \
-                ShallowWater2D/QuietFluid \
-                ShallowWater2D/QuietFluid_Topography
+SELF_TESTS = GradientBR_Test \
+             GradientSF_Test \
+             Advection2D_ConservativeForm \
+             Burgers1D_StationaryShock \
+             CompressibleIdealGas2D_StaticFluid \
+             CompressibleIdealGas2D_StaticFluid_NoNormalFlow \
+             LinearShallowWater2D_GravityWaveRelease \
+             LinearShallowWater2D_GravityWaveRelease_Reflecting \
+             LinearShallowWater2D_PlanetaryRossbyWave \
+             LinearShallowWater2D_PlanetaryRossbyWave_NoNormalFlow \
+             LinearShallowWater2D_TopographicRossbyWave \
+             ShallowWater2D_GravityWaveRelease \
+             ShallowWater1D_QuietFluid \
+             ShallowWater1D_QuietFluid_Topography \
+             ShallowWater2D_QuietFluid \
+             ShallowWater2D_QuietFluid_Topography
 
 SELF_LIBS = self
 
@@ -91,7 +89,7 @@ SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_BINDIR) $(SELF_EXADIR) $(SELF_TESTDIR)
 
 # Example programs
-SELF_EXAS = $(addprefix $(SELF_EXADIR), $(SELF_EXAMPLES))
+SELF_EXAS = $(addprefix $(SELF_EXADIR), $(SELF_TESTS))
 
 
 # Recipes

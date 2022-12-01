@@ -67,6 +67,7 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
 
     ! New Methods
+    PROCEDURE :: CheckMinMax => CheckMinMax_CompressibleIdealGas2D
     
     ! Riemann Fluxes
     PROCEDURE :: NaiveLLF_CompressibleIdealGas2D
@@ -785,6 +786,53 @@ CONTAINS
 
   END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
 
+  SUBROUTINE CheckMinMax_CompressibleIdealGas2D(this)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    ! Local
+    INTEGER :: iVar
+
+
+    IF( this % gpuAccel )THEN
+      CALL this % solution % UpdateHost()
+      CALL this % environmentals % UpdateHost()
+      CALL this % primitive % UpdateHost()
+      CALL this % diagnostics % UpdateHost()
+    ENDIF
+
+    PRINT*, '---------------------'
+    DO iVar = 1, this % solution % nVar
+      PRINT*, TRIM(this % solution % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % solution % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % solution % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    DO iVar = 1, this % environmentals % nVar
+      PRINT*, TRIM(this % environmentals % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % environmentals % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % environmentals % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    DO iVar = 1, this % primitive % nVar
+      PRINT*, TRIM(this % primitive % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % primitive % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % primitive % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    DO iVar = 1, this % diagnostics % nVar
+      PRINT*, TRIM(this % diagnostics % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % diagnostics % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % diagnostics % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    PRINT*, '---------------------'
+
+  END SUBROUTINE CheckMinMax_CompressibleIdealGas2D
+
   SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
     !! PreTendency is a template routine that is used to house any additional calculations
@@ -811,6 +859,9 @@ CONTAINS
       CALL this % primitive % SideExchange(this % mesh, this % decomp, this % gpuAccel)
       CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
       CALL this % entropyVars % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+
+      !
+      CALL this % CheckMinMax()
 
   END SUBROUTINE PreTendency_CompressibleIdealGas2D
 
@@ -1185,7 +1236,7 @@ CONTAINS
 
               this % source % interior % hostData(i,j,1,iEl) = -rho*gx ! (\rho u)_t = -\rho gx 
               this % source % interior % hostData(i,j,2,iEl) = -rho*gy ! (\rho v)_t = -\rho gy 
-              this % source % interior % hostData(i,j,3,iEl) = 0.0 ! (\rho )_t = 0 
+              this % source % interior % hostData(i,j,3,iEl) = 0.0_prec ! (\rho )_t = 0 
               this % source % interior % hostData(i,j,4,iEl) = -rhou*gx-rhou*gy ! (\rho E )_t = -\rho u g_x - \rho u g_
 
             ENDDO

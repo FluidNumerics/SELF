@@ -16,14 +16,27 @@ steps:
 - id: Run Tests (Serial)
   name: 'self:test'
   args: 
-  - '-c'
   - | 
       ./ci/test.sh
+
+      #- id: Upload coverage to codecov
+      #  name: 'gcr.io/${PROJECT_ID}/codecov'
+      #  secretEnv: ['CODECOV_TOKEN']
+      #  args: ['-t', '$$CODECOV_TOKEN',
+      #         '-R', '/build/',
+      #         '--sha', '${COMMIT_SHA}',
+      #         '--branch', '${BRANCH_NAME}',
+      #         '--pr', '${_PR_NUMBER}']
 
 options:
   diskSizeGb: 100
 
-timeout: 7200s
+timeout: 3600s
+
+  #availableSecrets:
+  #  secretManager:
+  #    - versionName: projects/self-fluids/secrets/codecov-token/versions/1
+  #      env: 'CODECOV_TOKEN'
 
 substitutions:
   _PREC: 'single'
