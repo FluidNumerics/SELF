@@ -23,11 +23,15 @@ steps:
 - id: Upload coverage to codecov
   name: 'gcr.io/${PROJECT_ID}/codecov'
   secretEnv: ['CODECOV_TOKEN']
-  args: ['-t', '$$CODECOV_TOKEN',
-         '-R', '/build/',
-         '--sha', '${COMMIT_SHA}',
-         '--branch', '${BRANCH_NAME}',
-         '--pr', '${_PR_NUMBER}']
+  entrypoint: "/bin/bash"
+  args: 
+  - "-c"
+  - |
+     /usr/local/bin/codecov -t "$$CODECOV_TOKEN" \
+                            -R "/build/" \
+                            --sha "${COMMIT_SHA}" \
+                            --branch "${BRANCH_NAME}" \
+                            --pr "${_PR_NUMBER}"
 
 options:
   diskSizeGb: 100
