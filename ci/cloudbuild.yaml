@@ -11,10 +11,10 @@ steps:
          'Dockerfile',
          '.',
          '-t',
-         'self:test']
+         'self:${SHORT_SHA}-${_GPU_TARGET}']
 
 - id: Run Tests (Serial)
-  name: 'self:test'
+  name: 'self:${SHORT_SHA}-${_GPU_TARGET}'
   args: 
   - '-c'
   - | 
@@ -31,8 +31,9 @@ steps:
 
 options:
   diskSizeGb: 100
+  machineType: 'E2_HIGHCPU_8'
 
-timeout: 3600s
+timeout: 14400s
 
 availableSecrets:
   secretManager:
