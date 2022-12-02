@@ -11,7 +11,7 @@ RUN apt-get -yqq update \
         wget \
  && rm -rf /var/lib/apt/lists/*
 
-RUN wget --no-check-certificate https://github.com/codecov/uploader/releases/download/v0.1.20/codecov-linux && \
+RUN wget --no-check-certificate https://github.com/codecov/uploader/releases/download/v0.3.2/codecov-linux && \
     mv codecov-linux /usr/local/bin/codecov && \
     chmod +x /usr/local/bin/codecov
 
