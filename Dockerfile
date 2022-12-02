@@ -122,7 +122,7 @@ ARG FFLAGS="-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe
 COPY . /workspace
 
 RUN . /etc/profile.d/z10_spack_environment.sh && \
-    cd /build && \
+    cd /workspace && \
     HIP_PLATFORM=${HIP_PLATFORM} \
     SELF_DIR=/workspace/ \
     SELF_PREFIX=/opt/self \
