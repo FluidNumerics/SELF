@@ -33,11 +33,8 @@ RUN apt-get clean \
         wget \
         gcovr \
  && locale-gen en_US.UTF-8 \
- && pip3 install boto3 \
  && rm -rf /var/lib/apt/lists/*
 
-#RUN curl -s https://repo.radeon.com/rocm/rocm.gpg.key | sudo gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/rocm.gpg --import &&\
-#    chmod 644 /etc/apt/trusted.gpg.d/rocm.gpg &&\
 RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
     echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2.3/ ubuntu main' | tee /etc/apt/sources.list.d/rocm.list &&\
     apt-get -yqq update && \
