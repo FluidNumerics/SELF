@@ -119,12 +119,12 @@ ARG PREC=double
 ARG FFLAGS="-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow"
 
 # Install SELF
-COPY . /workspace
+COPY . /build
 
 RUN . /etc/profile.d/z10_spack_environment.sh && \
-    cd /workspace && \
+    cd /build && \
     HIP_PLATFORM=${HIP_PLATFORM} \
-    SELF_DIR=/workspace/ \
+    SELF_DIR=/build/ \
     SELF_PREFIX=/opt/self \
     PREC=${PREC} \
     GPU_TARGET=${GPU_TARGET} \

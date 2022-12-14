@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-export SELF_BUILD_DIR=/workspace
+export SELF_BUILD_DIR=/build
 export SELF_PREFIX=/opt/self
 
 
@@ -64,12 +64,14 @@ for file in $(ls $SELF_PREFIX/test/*); do
 
   # Create a coverage file for this test.
   covFile=$(echo $file | awk -F "/" '{print $NF}')
-  gcovr -r ${SELF_BUILD_DIR} --json -o "/build/$covFile.json"
-  tomerge+="-a /build/$covFile.json "
+  gcovr -r ${SELF_BUILD_DIR} --json -o "${SELF_BUILD_DIR}/$covFile.json"
+  tomerge+="-a ${SELF_BUILD_DIR}/$covFile.json "
 
   cleanupGCDAFiles
 
 done
 
-  gcovr $tomerge
-  gcovr $tomerge -x -o ${SELF_BUILD_DIR}/coverage.xml
+gcovr $tomerge
+gcovr $tomerge -x -o ${SELF_BUILD_DIR}/coverage.xml
+
+[ -d "/workspace" ] && cp ${SELF_BUILD_DIR}/coverage.xml /workspace
