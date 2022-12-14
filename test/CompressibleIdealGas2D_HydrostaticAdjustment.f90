@@ -106,9 +106,6 @@ USE SELF_CompressibleIdealGas2D
                                                    decomp, &
                                                    tecFile )
     
-    ! Write the initial condition to file
-    CALL semModel % WriteModel()
-    CALL semModel % WriteTecplot()
 
     ! Set the time integrator
     CALL semModel % SetTimeIntegrator(TRIM(integrator))
@@ -118,13 +115,13 @@ USE SELF_CompressibleIdealGas2D
 
     CALL semModel % CheckMinMax()
 
-    !! Forward step the semModel and do the file io
-    CALL semModel % ForwardStep( tn = tn, ioInterval = ioInterval )
+    CALL semModel % HydrostaticAdjustment( 0.0001_prec )
 
     CALL semModel % CheckMinMax()
 
-    !! Manually write the last semModel state
-    CALL semModel % WriteModel('solution.pickup.h5')
+    ! Write the initial condition to file
+    CALL semModel % WriteModel()
+    CALL semModel % WriteTecplot()
 
     ! Error checking !
     IF( semModel % entropy /= semModel % entropy )THEN

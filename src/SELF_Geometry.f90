@@ -54,6 +54,7 @@ MODULE SELF_Geometry
     PROCEDURE,PUBLIC :: CalculateMetricTerms => CalculateMetricTerms_SEMQuad
     PROCEDURE,PRIVATE :: CalculateContravariantBasis => CalculateContravariantBasis_SEMQuad
 
+    PROCEDURE,PUBLIC :: CovariantArcMin => CovariantArcMin_SEMQuad
     PROCEDURE :: Write => Write_SEMQuad
     PROCEDURE :: WriteTecplot => WriteTecplot_SEMQuad
 
@@ -549,6 +550,36 @@ CONTAINS
     ENDIF
 
   END SUBROUTINE CalculateMetricTerms_SEMQuad
+
+  FUNCTION CovariantArcMin_SEMQuad(myGeom) RESULT(dxMin)
+    IMPLICIT NONE
+    CLASS(SEMQuad) :: myGeom
+    REAL(prec) :: dxMin
+    ! Local
+    INTEGER :: i, j, iEl, N
+    REAL(prec) :: dx, dy
+    REAL(prec) :: dxds(1:2,1:2)
+    REAL(prec) :: ds(0:myGeom % dxds % interp % N,&
+                     0:myGeom % dxds % interp % N,&
+                     1:myGeom % nElem)
+
+    N = myGeom % dxds % interp % N
+    DO iEl = 1,myGeom % nElem
+      DO j = 0, N
+        DO i = 0, N
+
+          dxds =  myGeom % dxds % interior % hostData(1:2,1:2,i,j,1,iEl)
+          dx = SQRT(dxds(1,1)**2 + dxds(1,2)**2)
+          dy = SQRT(dxds(2,1)**2 + dxds(2,2)**2)
+          ds(i,j,iEl) = 2.0_prec*MIN(dx,dy)/(REAL(N,prec)**2)
+
+        ENDDO
+      ENDDO
+    ENDDO
+
+    dxMin = MINVAL(ds) 
+
+  END FUNCTION CovariantArcMin_SEMQuad
 
   SUBROUTINE Write_SEMQuad(myGeom,fileName)
     IMPLICIT NONE
