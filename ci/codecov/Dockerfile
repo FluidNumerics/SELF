@@ -18,5 +18,10 @@ RUN wget --no-check-certificate https://github.com/codecov/uploader/releases/dow
 FROM ubuntu:20.04
 COPY --from=builder /usr/local/bin/codecov /usr/local/bin/codecov
 
+RUN apt-get -yqq update \
+ && apt-get -yqq install --no-install-recommends \
+        git \
+ && rm -rf /var/lib/apt/lists/*
+
 ENTRYPOINT ["/usr/local/bin/codecov"]
 
