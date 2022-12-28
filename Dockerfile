@@ -129,7 +129,10 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     PREC=${PREC} \
     GPU_TARGET=${GPU_TARGET} \
     SELF_FFLAGS=${FFLAGS} \
-    make
+    make && \
+    mkdir /opt/self/ci && \
+    cp /build/ci/test.sh /opt/self/ci/test.sh && \
+    chmod 755 /opt/self/ci/test.sh
 
 ## Bare OS image to run the installed executables
 #FROM nvidia/cuda:11.8.0-devel

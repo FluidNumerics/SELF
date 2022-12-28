@@ -60,6 +60,14 @@ for file in $(ls $SELF_PREFIX/test/*); do
     exit $rc
   fi
 
+  # GPU accelerated
+  $file --gpu
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "$file failed!"
+    exit $rc
+  fi
+
   moveGCDAFiles
 
   # Create a coverage file for this test.
