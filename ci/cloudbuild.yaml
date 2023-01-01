@@ -11,10 +11,10 @@ steps:
          'Dockerfile',
          '.',
          '-t',
-         'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_GPU_TARGET}']
+         'gcr.io/${PROJECT_ID}/self_${_GPU_TARGET}:${SHORT_SHA}']
 
 - id: Run Tests (Serial)
-  name: 'gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_GPU_TARGET}'
+  name: 'gcr.io/${PROJECT_ID}/self_${_GPU_TARGET}:${SHORT_SHA}'
   args: 
   - '-c'
   - | 
@@ -33,7 +33,7 @@ steps:
                             --pr "${_PR_NUMBER}"
 
 
-images: ['gcr.io/${PROJECT_ID}/self:${SHORT_SHA}-${_GPU_TARGET}']
+images: ['gcr.io/${PROJECT_ID}/self_${_GPU_TARGET}:${SHORT_SHA}']
 
 options:
   diskSizeGb: 100
