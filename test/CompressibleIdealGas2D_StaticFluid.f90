@@ -82,7 +82,7 @@ USE SELF_CompressibleIdealGas2D
       CALL semModel % UpdateDevice()
     ENDIF
  
-    CALL semModel % SetStaticSTP()
+    CALL semModel % SetStatic()
     CALL semModel % CalculateEntropy()
     CALL semModel % ReportEntropy()
     referenceEntropy = semModel % entropy

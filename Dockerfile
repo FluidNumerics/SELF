@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 as bootstrap
+FROM nvidia/cuda:11.8.0-devel-ubuntu20.04 as bootstrap
 
 ENV SPACK_ROOT=/opt/spack \
     CURRENTLY_BUILDING_DOCKER_IMAGE=1 \
@@ -9,7 +9,9 @@ ENV DEBIAN_FRONTEND=noninteractive   \
     LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
 
-RUN apt-get -yqq update \
+RUN apt-get clean \
+ && (apt-get update -y || apt-get update -y) \
+ && apt-get install -y --no-install-recommends wget \
  && apt-get -yqq install --no-install-recommends \
         build-essential \
         ca-certificates \
@@ -31,16 +33,12 @@ RUN apt-get -yqq update \
         wget \
         gcovr \
  && locale-gen en_US.UTF-8 \
- && pip3 install boto3 \
  && rm -rf /var/lib/apt/lists/*
 
-
-# Install rocm
 RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/4.5/ ubuntu main' | tee /etc/apt/sources.list.d/rocm.list &&\
+    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2.3/ ubuntu main' | tee /etc/apt/sources.list.d/rocm.list &&\
     apt-get -yqq update && \
     apt-get -yqq install rocm-dev
-
 
 RUN mkdir $SPACK_ROOT && cd $SPACK_ROOT && \
     git clone https://github.com/spack/spack.git . && git checkout develop  && \
@@ -78,13 +76,12 @@ CMD ["interactive-shell"]
 # Build stage with Spack pre-installed and ready to be used
 FROM bootstrap as builder
 
-
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
 RUN mkdir /opt/spack-environment \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
-&&   echo "  - hipfort@4.5.0" \
+&&   echo "  - hipfort@5.2.3" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
 &&   echo "  - feq-parse@1.1.0" \
@@ -93,14 +90,13 @@ RUN mkdir /opt/spack-environment \
 &&   echo "    cuda:" \
 &&   echo "      buildable: false" \
 &&   echo "      externals:" \
-&&   echo "      - spec: cuda@11.2.1" \
+&&   echo "      - spec: cuda@11.8.0" \
 &&   echo "        prefix: /usr/local/cuda" \
 &&   echo "    hip:" \
 &&   echo "      buildable: false" \
 &&   echo "      externals:" \
-&&   echo "      - spec: hip@4.5.0" \
+&&   echo "      - spec: hip@5.2.3" \
 &&   echo "        prefix: /opt/rocm/" \
-&&   echo "  concretization: together" \
 &&   echo "  config:" \
 &&   echo "    install_tree: /opt/software" \
 &&   echo "  view: /opt/view") > /opt/spack-environment/spack.yaml
@@ -113,23 +109,55 @@ RUN cd /opt/spack-environment && \
 
 # Modifications to the environment that are necessary to run
 RUN cd /opt/spack-environment && \
-    spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
+    spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh && \
+    echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/view/lib" >> /etc/profile.d/z10_spack_environment.sh
+
+FROM builder as sbuild
+ARG GPU_TARGET=sm_72
+ARG HIP_PLATFORM=nvidia
+ARG PREC=double
+ARG FFLAGS="-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow"
+
+# Install SELF
+COPY . /build
+
+RUN . /etc/profile.d/z10_spack_environment.sh && \
+    cd /build && \
+    HIP_PLATFORM=${HIP_PLATFORM} \
+    SELF_DIR=/build/ \
+    SELF_PREFIX=/opt/self \
+    PREC=${PREC} \
+    GPU_TARGET=${GPU_TARGET} \
+    SELF_FFLAGS=${FFLAGS} \
+    make && \
+    mkdir /opt/self/ci && \
+    cp /build/ci/test.sh /opt/self/ci/test.sh && \
+    chmod 755 /opt/self/ci/test.sh
 
 ## Bare OS image to run the installed executables
-#FROM ubuntu:20.04
+#FROM nvidia/cuda:11.8.0-devel
 #
 #COPY --from=builder /opt/rocm /opt/rocm
 #COPY --from=builder /opt/spack-environment /opt/spack-environment
 #COPY --from=builder /opt/software /opt/software
 #COPY --from=builder /opt/view /opt/view
 #COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
-#
+#COPY --from=sbuild /opt/self /opt/self
+#COPY --from=sbuild /workspace /workspace
+
 #ENV DEBIAN_FRONTEND=noninteractive   \
 #    LANGUAGE=en_US.UTF-8 \
 #    LANG=en_US.UTF-8 \
 #    LC_ALL=en_US.UTF-8
 #
-#RUN apt-get -yqq update \
+#RUN rm /etc/apt/sources.list.d/cuda.list \
+# && rm /etc/apt/sources.list.d/nvidia-ml.list \
+# && apt-key del 7fa2af80 \
+# && apt-get -y update \
+# && apt-get install -y --no-install-recommends wget \
+# && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+# && dpkg -i cuda-keyring_1.0-1_all.deb \
+# && apt-get -yqq update \
 # && apt-get -yqq install --no-install-recommends \
 #        g++ \
 #        gcc \
@@ -140,5 +168,5 @@ RUN cd /opt/spack-environment && \
 # && rm -rf /var/lib/apt/lists/*
 
 
-ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l"]
+ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c"]
 

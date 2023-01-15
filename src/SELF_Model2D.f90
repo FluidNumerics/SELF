@@ -956,6 +956,9 @@ CONTAINS
       CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
                            this % solution % interp % dMatrix)
 
+      CALL WriteArray_HDF5(fileId,'/quadrature/bmatrix', &
+                           this % solution % interp % bMatrix)
+
 
       CALL CreateGroup_HDF5(fileId,'/state')
 
@@ -1015,6 +1018,9 @@ CONTAINS
 
       CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
                            this % solution % interp % dMatrix)
+
+      CALL WriteArray_HDF5(fileId,'/quadrature/bmatrix', &
+                           this % solution % interp % bMatrix)
 
       CALL CreateGroup_HDF5(fileId,'/state')
 

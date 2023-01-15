@@ -19,6 +19,7 @@ USE SELF_CompressibleIdealGas2D
   INTEGER :: quadrature
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: qChar
   CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
+  CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocity(1:2)
   LOGICAL :: mpiRequested
   LOGICAL :: gpuRequested
 
@@ -65,7 +66,7 @@ USE SELF_CompressibleIdealGas2D
     CALL mesh % Read_HOPr(TRIM(meshfile),decomp)
     
     ! Reset the boundary condition to prescribed
-    CALL mesh % ResetBoundaryConditionType(SELF_BC_NONORMALFLOW)
+    CALL mesh % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
 
     ! Generate geometry (metric terms) from the mesh elements
     CALL geometry % Init(interp,mesh % nElem)
@@ -74,22 +75,30 @@ USE SELF_CompressibleIdealGas2D
     ! Initialize the semModel
     CALL semModel % Init(nvar,mesh,geometry,decomp)
 
+    ! Enable GPU Acceleration (if a GPU is found) !
     IF( gpuRequested )THEN
       CALL semModel % EnableGPUAccel()
       ! Update the device for the whole model
       ! This ensures that the mesh, geometry, and default state match on the GPU
       CALL semModel % UpdateDevice()
     ENDIF
+ 
+    ! Set the initial condition
+    CALL semModel % SetStatic() ! Set field and parameters to STP
 
-    CALL semModel % SetStaticSTP()
-    CALL semModel % CalculateEntropy()
-    CALL semModel % ReportEntropy()
-    referenceEntropy = semModel % entropy
+    ! Adjust the initial condition to have stationary and uniform flow
+    velocity = (/"u = 0.5", &
+                 "v = 0.0" /)
+    CALL semModel % SetVelocity( velocity )
 
     ! Uses the initial condition to set the prescribed state
     ! for model boundary conditions
     CALL semModel % SetPrescribedSolution()
-    
+
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
+    referenceEntropy = semModel % entropy
+
     ! Write the initial condition to file
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()

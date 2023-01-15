@@ -21,16 +21,19 @@ MODULE SELF_CompressibleIdealGas2D
 
     !! For the diagnostics attribute, we use the following convention
     !! iVar = 1 ~> Kinetic Energy
-    !! -iVar = 2 ~> Pressure
-    !! iVar = 3 ~> Enthalpy
-    !! iVar = 4 ~> Sound Speed
-    !! iVar = 5 ~> In-Situ Temperature
+    !! iVar = 2 ~> Enthalpy
+    !! iVar = 3 ~> Sound Speed
+    !! iVar = 4 ~> In-Situ Temperature
     !!
     !! primitive variables
     !!  u = rho*u/rho ~> x-component of velocity
     !!  v = rho*v/rho ~> y-component of velocity
     !!  rho = rho ~> density
     !!  p = p(rho,e) ~> equation of state
+    !!
+    !! environmentals
+    !!  iVar = 1 ~> gravitational potential
+    !!  iVar = 2 ~> Linear momentum drag
     !!
     PROCEDURE(RiemannFlux_CompressibleIdealGas2D), POINTER :: RiemannFlux => NaiveLLF_CompressibleIdealGas2D
 
@@ -67,6 +70,9 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
 
     ! New Methods
+    PROCEDURE :: CheckMinMax => CheckMinMax_CompressibleIdealGas2D
+
+    PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_CompressibleIdealGas2D
     
     ! Riemann Fluxes
     PROCEDURE :: NaiveLLF_CompressibleIdealGas2D
@@ -76,27 +82,29 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetRiemannFlux_withInt
     PROCEDURE,PRIVATE :: SetRiemannFlux_withChar
 
-    GENERIC :: SetVelocity => SetVelocityFromChar_CompressibleIdealGas2D,&
-                              SetVelocityFromEqn_CompressibleIdealGas2D
+    GENERIC :: SetVelocity => SetVelocityFromChar_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetVelocityFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetVelocityFromEqn_CompressibleIdealGas2D
 
-    GENERIC :: SetGravity => SetGravityFromChar_CompressibleIdealGas2D,&
-                              SetGravityFromEqn_CompressibleIdealGas2D
+    GENERIC :: SetGravity => SetGravityFromChar_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetGravityFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetGravityFromEqn_CompressibleIdealGas2D
+
+    GENERIC :: SetDrag => SetDragFromChar_CompressibleIdealGas2D,&
+                              SetDragFromConstant_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetDragFromChar_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetDragFromConstant_CompressibleIdealGas2D
 
     GENERIC :: SetPrescribedSolution => SetPrescribedSolutionFromChar_CompressibleIdealGas2D,&
-                              SetPrescribedSolutionFromEqn_CompressibleIdealGas2D,&
                               SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetPrescribedSolutionFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromEqn_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
 
     PROCEDURE :: SetCp => SetCp_CompressibleIdealGas2D
     PROCEDURE :: SetCv => SetCv_CompressibleIdealGas2D
     PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
+    PROCEDURE :: SetStatic => SetStatic_CompressibleIdealGas2D
     PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
+
+    PROCEDURE :: AddThermalBubble
 
     PROCEDURE,PRIVATE :: CalculateDiagnostics
     PROCEDURE,PRIVATE :: ConservativeToPrimitive
@@ -113,6 +121,11 @@ MODULE SELF_CompressibleIdealGas2D
   ! Diagnostics variable indices
   !
   INTEGER, PARAMETER, PRIVATE :: nDiagnostics = 4
+
+  ! ---------------------------------------- !
+  ! Variables controlling hydrostatic adjustment
+  !
+  INTEGER, PARAMETER, PRIVATE :: hydrostaticAdjMaxIters = 1000
 
   ! ---------------------------------------- ! 
   ! Static fluid state for "air" at stp
@@ -272,8 +285,8 @@ CONTAINS
     CALL this % prescribedSolution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % diagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
     CALL this % prescribedDiagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
-    CALL this % environmentals % Init(geometry % x % interp,1,this % mesh % nElem)
-    CALL this % environmentalsGradient % Init(geometry % x % interp,1,this % mesh % nElem)
+    CALL this % environmentals % Init(geometry % x % interp,2,this % mesh % nElem)
+    CALL this % environmentalsGradient % Init(geometry % x % interp,2,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
@@ -404,6 +417,103 @@ CONTAINS
 
   END SUBROUTINE SetRiemannFlux_withChar
 
+  SUBROUTINE SetStatic_CompressibleIdealGas2D(this)
+  !! Sets the default fluid state with uniform 
+  !! density and temperature and no motion with
+  !! speed of sound as ~ 2 m/s
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+
+      CALL this % SetCv( Cv_stpAir )
+      CALL this % SetCp( Cp_stpAir )
+      CALL this % SetGasConstant( 1.0_prec )
+      
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+            this % solution % interior % hostData(i,j,1,iEl) = 0.0_prec ! rho*u
+            this % solution % interior % hostData(i,j,2,iEl) = 0.0_prec ! rho*v
+            this % solution % interior % hostData(i,j,3,iEl) = rho_stpAir ! rho
+            this % solution % interior % hostData(i,j,4,iEl) = rho_stpAir*10.0_prec ! rho*E
+          ENDDO
+        ENDDO
+      ENDDO
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
+      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
+      CALL this % PreTendency( )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateHost()
+        CALL this % primitive % UpdateHost()
+        CALL this % diagnostics % UpdateHost()
+      ENDIF
+      
+  END SUBROUTINE SetStatic_CompressibleIdealGas2D
+
+  SUBROUTINE AddThermalBubble(this,xc,R,Tmax)
+    !! Adds a temperature anomaly to the fluid state
+    !! The anomaly is a gaussian blob of radius R 
+    !! centered at xc with an extrema of Tmax.
+    !!
+    !! The density field is calculated so that the
+    !! background pressure field remains undisturbed
+    !!
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: xc(1:2)
+    REAL(prec), INTENT(in) :: R
+    REAL(prec), INTENT(in) :: Tmax
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+    REAL(prec) :: x(1:2)
+    REAL(prec) :: Tprime, Rg, T, P
+
+      Rg = this % R
+
+      DO iEl = 1, this % source % nElem
+        DO j = 0, this % source % interp % N
+          DO i = 0, this % source % interp % N
+
+            x = this % geometry % x % interior % hostData(1:2,i,j,1,iEl)
+
+            Tprime = Tmax*exp( -( (x(1) - xc(1))**2 + (x(2) - xc(2))**2 )/(2.0_prec*R*R) )
+
+            T = this % diagnostics % interior % hostData(i,j,4,iEl) + Tprime
+
+            P = this % primitive % interior % hostData(i,j,4,iEl)
+
+            ! Update the density
+            this % solution % interior % hostData(i,j,3,iEl) = &
+               this % solution % interior % hostData(i,j,3,iEl) + P/(Rg*T)
+
+            this % solution % interior % hostData(i,j,4,iEl) = &
+              1.5_prec*this % solution % interior % hostData(i,j,3,iEl)*Rg*T 
+
+          ENDDO
+        ENDDO
+      ENDDO
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateDevice()
+      ENDIF
+
+      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
+      CALL this % PreTendency( )
+
+      IF( this % gpuAccel )THEN
+        CALL this % solution % UpdateHost()
+        CALL this % primitive % UpdateHost()
+        CALL this % diagnostics % UpdateHost()
+      ENDIF
+      
+  END SUBROUTINE AddThermalBubble
+
   SUBROUTINE SetStaticSTP_CompressibleIdealGas2D(this)
   !! Sets the default fluid state as "air" at STP with
   !! no motion
@@ -441,59 +551,6 @@ CONTAINS
       ENDIF
       
   END SUBROUTINE SetStaticSTP_CompressibleIdealGas2D
-
-  SUBROUTINE SetVelocityFromEqn_CompressibleIdealGas2D(this, eqn)
-  !! Sets the fluid velocity field using the provided equation parser
-  !! The momentum is then updated using the current fluid density field.
-  !! From here, the PreTendency method is called to set other diagnostics
-  !!
-  !! The total energy field is calculated using the internal energy (diagnosed from the
-  !! in-situ temperature) and the new kinetic energy field. 
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    TYPE(EquationParser),INTENT(in) :: eqn(1:2)
-    ! Local
-    INTEGER :: i,j,iEl,iVar
-    REAL(prec) :: rho, u, v, temperature, internalE, KE
-
-      DO iVar = 1, 2
-        CALL this % primitive % SetEquation(ivar, eqn(iVar) % equation)
-      ENDDO
-
-      CALL this % primitive % SetInteriorFromEquation( this % geometry, this % t )
-      CALL this % primitive % BoundaryInterp( gpuAccel = .FALSE. )
-
-      DO iEl = 1, this % source % nElem
-        DO j = 0, this % source % interp % N
-          DO i = 0, this % source % interp % N
-            rho = this % solution % interior % hostData(i,j,3,iEl)
-            u = this % primitive % interior % hostData(i,j,1,iEl)
-            v = this % primitive % interior % hostData(i,j,2,iEl)
-            temperature = this % diagnostics % interior % hostData(i,j,4,iEl)
-            internalE = 1.5_prec*rho*this % R*temperature ! Internal energy
-            KE = rho*(u*u+v*v)*0.5_prec
-
-            this % solution % interior % hostData(i,j,1,iEl) = rho*u  ! rho*u
-            this % solution % interior % hostData(i,j,2,iEl) = rho*v ! rho*v
-            this % solution % interior % hostData(i,j,4,iEl) = internalE + KE ! rho*E
-          ENDDO
-        ENDDO
-      ENDDO
-
-      IF( this % gpuAccel )THEN
-        CALL this % solution % UpdateDevice()
-      ENDIF
-
-      CALL this % solution % BoundaryInterp( gpuAccel = this % gpuAccel )
-      CALL this % PreTendency( )
-
-      IF( this % gpuAccel )THEN
-        CALL this % solution % UpdateHost()
-        CALL this % primitive % UpdateHost()
-        CALL this % diagnostics % UpdateHost()
-      ENDIF
-      
-  END SUBROUTINE SetVelocityFromEqn_CompressibleIdealGas2D
 
   SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D(this, eqnChar)
   !! Sets the fluid velocity field using the provided equation parser
@@ -548,57 +605,18 @@ CONTAINS
       
   END SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D
 
-  SUBROUTINE SetGravityFromEqn_CompressibleIdealGas2D(this, eqn)
-  !! Sets the fluid velocity field using the provided equation parser
-  !! The momentum is then updated using the current fluid density field.
-  !! From here, the PreTendency method is called to set other diagnostics
-  !!
-  !! The total energy field is calculated using the internal energy (diagnosed from the
-  !! in-situ temperature) and the new kinetic energy field. 
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    TYPE(EquationParser),INTENT(in) :: eqn
-    ! Local
-    INTEGER :: i,j,iEl,iVar
-
-      CALL this % environmentals % SetEquation(1, eqn % equation)
-
-      CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
-      CALL this % environmentals % BoundaryInterp( gpuAccel = .FALSE. )
-      CALL this % environmentals % SideExchange(this % mesh, this % decomp, .FALSE.)
-   
-      CALL this % environmentals % GradientSF( this % geometry, &
-                                               this % environmentalsGradient, &
-                                               .FALSE. )
-      
-      IF( this % gpuAccel )THEN
-        CALL this % environmentals % UpdateDevice()
-        CALL this % environmentalsGradient % UpdateDevice()
-      ENDIF
-
-      CALL this % environmentalsGradient % BoundaryInterp( gpuAccel = this % gpuAccel )
-      
-  END SUBROUTINE SetGravityFromEqn_CompressibleIdealGas2D
-
   SUBROUTINE SetGravityFromChar_CompressibleIdealGas2D(this, eqnChar)
-  !! Sets the fluid velocity field using the provided equation parser
-  !! The momentum is then updated using the current fluid density field.
-  !! From here, the PreTendency method is called to set other diagnostics
-  !!
-  !! The total energy field is calculated using the internal energy (diagnosed from the
-  !! in-situ temperature) and the new kinetic energy field. 
+    !! Sets the gravitational acceleration from an equation input as a character
+    !! The interior points are set and then the strong form of the gradient is used
+    !! to calculate the gradient. After, environmentals and environmentalsGradient
+    !! fields are copied to device memory (if an accelerator device is present)
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     CHARACTER(LEN=*),INTENT(in) :: eqnChar
-    ! Local
-    INTEGER :: i,j,iEl,iVar
-    REAL(prec) :: rho, u, v, temperature, internalE, KE
 
       CALL this % environmentals % SetEquation(1, eqnChar)
 
       CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
-      CALL this % environmentals % BoundaryInterp( gpuAccel = .FALSE. )
-      CALL this % environmentals % SideExchange(this % mesh, this % decomp, .FALSE.)
    
       CALL this % environmentals % GradientSF( this % geometry, &
                                                this % environmentalsGradient, &
@@ -609,30 +627,49 @@ CONTAINS
         CALL this % environmentalsGradient % UpdateDevice()
       ENDIF
 
-      CALL this % environmentalsGradient % BoundaryInterp( gpuAccel = this % gpuAccel )
-      
   END SUBROUTINE SetGravityFromChar_CompressibleIdealGas2D
 
-  SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D(this, eqn) 
+  SUBROUTINE SetDragFromChar_CompressibleIdealGas2D(this, eqnChar)
+    !! Sets the momentum drag from an equation input as a character
+    !! The interior points are set and then copied to the device
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    TYPE(EquationParser),INTENT(in) :: eqn(1:this % prescribedSolution % nVar)
-    ! Local
-    INTEGER :: iVar
+    CHARACTER(LEN=*),INTENT(in) :: eqnChar
 
-      ! Copy the equation parser
-      DO iVar = 1, this % prescribedSolution % nVar
-        CALL this % prescribedSolution % SetEquation(ivar, eqn(iVar) % equation)
+      CALL this % environmentals % SetEquation(2, eqnChar)
+      CALL this % environmentals % SetInteriorFromEquation( this % geometry, this % t )
+      
+      IF( this % gpuAccel )THEN
+        CALL this % environmentals % UpdateDevice()
+      ENDIF
+      
+  END SUBROUTINE SetDragFromChar_CompressibleIdealGas2D
+
+  SUBROUTINE SetDragFromConstant_CompressibleIdealGas2D(this, Cd)
+    !! Sets the momentum drag from an equation input as a character
+    !! The interior points are set and then copied to the device
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: Cd
+    ! Local
+    INTEGER :: i,j,iEl,iVar
+
+      DO iEl = 1, this % solution % nElem
+        DO j = 0, this % solution % interp % N
+          DO i = 0, this % solution % interp % N
+
+            this % environmentals % interior % hostData(i,j,2,iEl) = Cd
+
+          ENDDO
+        ENDDO
       ENDDO
 
-      CALL this % prescribedSolution % SetInteriorFromEquation( this % geometry, this % t )
-      CALL this % prescribedSolution % BoundaryInterp( gpuAccel = .FALSE. )
-
+      
       IF( this % gpuAccel )THEN
-        CALL this % prescribedSolution % UpdateDevice()
+        CALL this % environmentals % UpdateDevice()
       ENDIF
-
-  END SUBROUTINE SetPrescribedSolutionFromEqn_CompressibleIdealGas2D 
+      
+  END SUBROUTINE SetDragFromConstant_CompressibleIdealGas2D
 
   SUBROUTINE SetPrescribedSolutionFromChar_CompressibleIdealGas2D(this, eqnChar) 
     IMPLICIT NONE
@@ -784,6 +821,136 @@ CONTAINS
       CALL this % decomp % GlobalReduce( entropy, this % entropy )
 
   END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
+
+  SUBROUTINE CheckMinMax_CompressibleIdealGas2D(this)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    ! Local
+    INTEGER :: iVar
+
+
+    IF( this % gpuAccel )THEN
+      CALL this % solution % UpdateHost()
+      CALL this % environmentals % UpdateHost()
+      CALL this % primitive % UpdateHost()
+      CALL this % diagnostics % UpdateHost()
+    ENDIF
+
+    PRINT*, '---------------------'
+    DO iVar = 1, this % solution % nVar
+      PRINT*, TRIM(this % solution % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % solution % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % solution % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    DO iVar = 1, this % environmentals % nVar
+      PRINT*, TRIM(this % environmentals % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % environmentals % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % environmentals % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    DO iVar = 1, this % primitive % nVar
+      PRINT*, TRIM(this % primitive % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % primitive % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % primitive % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    DO iVar = 1, this % diagnostics % nVar
+      PRINT*, TRIM(this % diagnostics % meta(iVar) % name)//" (t, min, max) :", &
+              this % t, &
+              MINVAL( this % diagnostics % interior % hostData(:,:,iVar,:) ), &
+              MAXVAL( this % diagnostics % interior % hostData(:,:,iVar,:) )
+    ENDDO
+
+    PRINT*, '---------------------'
+
+  END SUBROUTINE CheckMinMax_CompressibleIdealGas2D
+
+  SUBROUTINE HydrostaticAdjustment_CompressibleIdealGas2D(this,tolerance)
+    !! This method can be used to adjust a compressible fluid
+    !! to hydrostatic equilibrium. On input, the CompressibleIdealGas2D
+    !! object is expected to have the gravitational potential set to 
+    !! a non-zero field, the density and temperature fields are 
+    !! assumed uniform, and the velocity field corresponds to a motionless
+    !! fluid.
+    !!
+    !! To adjust the fluid to hydrostatic equilibrium, an artificial 
+    !! momentum drag term is introduced to the momentum equations. The model
+    !! is stepped forward until the fluid tendency absolute max value is
+    !! less than a specified tolerance (optional input).
+    !!
+    !! The drag coefficient size is chosen to be
+    !!
+    !!  Cd = \frac{max(c)}{min(\Delta x)}
+    !!
+    !! In this subroutine, the time step is chosen so that the sound-wave
+    !! maximum CFL number is 0.75
+    !!
+    !!   CFL = \frac{max(c) \Delta t}{min(\Delta x)} = 0.75
+    !! 
+    !!    \rightarrow \Delta t = 0.75\frac{min( \Delta x )}{\max{c}}
+    !!
+    !! After adjustment, the 
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: tolerance
+    ! Local
+    INTEGER :: i 
+    REAL(prec) :: dxMin
+    REAL(prec) :: diagMax(nDiagnostics)
+    REAL(prec) :: currentDt, currentTime, tn
+    REAL(prec) :: Cd
+    REAL(prec) :: dsdtMax(this % solution % nVar)
+    REAL(prec) :: sMax(this % solution % nVar)
+
+      dxMin = this % geometry % CovariantArcMin()
+      diagMax = this % diagnostics % AbsMaxInterior( ) ! Get the absolute max of the diagnostics 
+
+      PRINT*, "Min(dx) : ",dxMin
+      PRINT*, "Max(c) : ", diagMax(3)
+
+      ! Reassign the time step for the hydrostatic adjustment
+      ! so that the max CFL number is 0.5
+      currentDt = this % dt
+      this % dt = 0.5*dxMin/diagMax(3)
+      
+      PRINT*, "Adjusted time step size : ", this % dt
+
+      ! Calculate the drag coefficient
+      Cd = 0.5*diagMax(3)/dxMin
+
+      PRINT*, "Drag coefficient : ", Cd
+
+      CALL this % SetDrag( Cd )
+
+      ! Save the current time
+      currentTime = this % t
+
+      tn = 1000.0_prec*this % dt
+      DO i = 1, hydrostaticAdjMaxIters
+
+        this % t = 0.0_prec
+        CALL this % ForwardStep( tn )
+        
+        sMax = this % solution % AbsMaxInterior()
+
+        PRINT*, "Momentum Max : ", SQRT(sMax(1)**2 + sMax(2)**2)
+         
+        ! Check if momentum max is small in comparison to tolerance
+        IF( SQRT(sMax(1)**2 + sMax(2)**2) <= tolerance )THEN
+          PRINT*, "Reached hydrostatic equilibrium in ", i, " iterations"
+          EXIT
+        ENDIF
+      ENDDO
+
+      ! Reset delta t and time
+      this % dt = currentDt
+      this % t = currentTime
+
+  END SUBROUTINE HydrostaticAdjustment_CompressibleIdealGas2D
 
   SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
@@ -1160,7 +1327,7 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
-    REAL(prec) :: rhou, rhov, rho, gx, gy
+    REAL(prec) :: rhou, rhov, rho, gx, gy, Cd
 
     IF( this % gpuAccel )THEN
 
@@ -1177,15 +1344,17 @@ CONTAINS
           DO j = 0, this % source % interp % N
             DO i = 0, this % source % interp % N
 
+
               rhou = this % solution % interior % hostData(i,j,1,iEl)
               rhov = this % solution % interior % hostData(i,j,2,iEl)
               rho = this % solution % interior % hostData(i,j,3,iEl)
               gx = this % environmentalsGradient % interior % hostData(1,i,j,1,iEl)
               gy = this % environmentalsGradient % interior % hostData(2,i,j,1,iEl) 
+              Cd = this % environmentals % interior % hostData(i,j,2,iEl)
 
-              this % source % interior % hostData(i,j,1,iEl) = -rho*gx ! (\rho u)_t = -\rho gx 
-              this % source % interior % hostData(i,j,2,iEl) = -rho*gy ! (\rho v)_t = -\rho gy 
-              this % source % interior % hostData(i,j,3,iEl) = 0.0 ! (\rho )_t = 0 
+              this % source % interior % hostData(i,j,1,iEl) = -rho*gx -Cd*rhou ! (\rho u)_t = -\rho gx 
+              this % source % interior % hostData(i,j,2,iEl) = -rho*gy -Cd*rhov! (\rho v)_t = -\rho gy 
+              this % source % interior % hostData(i,j,3,iEl) = 0.0_prec ! (\rho )_t = 0 
               this % source % interior % hostData(i,j,4,iEl) = -rhou*gx-rhou*gy ! (\rho E )_t = -\rho u g_x - \rho u g_
 
             ENDDO

@@ -1,14 +1,13 @@
 # Spectral Element Libraries in Fortran (SELF)
 Copyright 2020-2022 Fluid Numerics LLC
 
-[![Documentation Status](https://readthedocs.org/projects/self/badge/?version=latest)](https://self.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/FluidNumerics/SELF/branch/main/graph/badge.svg?token=AKKSL5CWK6)](https://codecov.io/gh/FluidNumerics/SELF)
-[![Youtube](https://img.shields.io/youtube/channel/subscribers/UCW5e-TavOnw1AABGH-VMbRg?style=social)](https://www.youtube.com/channel/UCW5e-TavOnw1AABGH-VMbRg?sub_confirmation=1)
-[![Reddit](https://img.shields.io/reddit/subreddit-subscribers/fluidnumerics?style=social)](https://www.reddit.com/r/FluidNumerics/)
 
-Join the [Higher Order Methods Slack group](https://join.slack.com/t/higherordermethods/shared_invite/zt-1da6fpyjo-c4yNNXD_o0F3Yrxe8isgJg)
 
-SELF is licensed for use under the [Researcher Software License](./LICENSE). For other licensure, reach out to support@fluidnumerics.com.
+## Licensing
+SELF is licensed for use under a [non-commercial use visible-source license](./LICENSE). Fluid Numerics is a small business (with only two owner-employees!) and wants to make SELF available to researchers for academic use. Under the license, you can use, modify, and redistribute SELF so long as attribution is given to Fluid Numerics. However, since we are interested in protecting our time-and-effort investment in SELF, sale and commercial-use of SELF is prohibited under the license.
+
+If you are interested in commercial licensure and would like support from Fluid Numerics, reach out to support@fluidnumerics.com
 
 ## About
 SELF is an object-oriented Fortran library that support the implementation of Spectral Element Methods for solving partial differential equations.

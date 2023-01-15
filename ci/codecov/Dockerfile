@@ -11,12 +11,17 @@ RUN apt-get -yqq update \
         wget \
  && rm -rf /var/lib/apt/lists/*
 
-RUN wget --no-check-certificate https://github.com/codecov/uploader/releases/download/v0.1.20/codecov-linux && \
+RUN wget --no-check-certificate https://github.com/codecov/uploader/releases/download/v0.3.2/codecov-linux && \
     mv codecov-linux /usr/local/bin/codecov && \
     chmod +x /usr/local/bin/codecov
 
 FROM ubuntu:20.04
 COPY --from=builder /usr/local/bin/codecov /usr/local/bin/codecov
+
+RUN apt-get -yqq update \
+ && apt-get -yqq install --no-install-recommends \
+        git \
+ && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["/usr/local/bin/codecov"]
 
