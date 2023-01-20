@@ -134,6 +134,8 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     cp /build/ci/test.sh /opt/self/ci/test.sh && \
     chmod 755 /opt/self/ci/test.sh
 
+ENV SELF_PREFIX=/opt/self
+
 ## Bare OS image to run the installed executables
 #FROM nvidia/cuda:11.8.0-devel
 #
