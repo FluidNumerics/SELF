@@ -71,7 +71,7 @@ MODULE SELF_CompressibleIdealGas2D
 
     ! New Methods
     PROCEDURE :: CheckMinMax => CheckMinMax_CompressibleIdealGas2D
-
+    PROCEDURE :: SetMaxCFL => SetMaxCFL_CompressibleIdealGas2D
     PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_CompressibleIdealGas2D
     
     ! Riemann Fluxes
@@ -472,7 +472,7 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
     REAL(prec) :: x(1:2)
-    REAL(prec) :: Tprime, Rg, T, P
+    REAL(prec) :: Tprime, Rg, T
 
       Rg = this % R
 
@@ -486,12 +486,11 @@ CONTAINS
 
             T = this % diagnostics % interior % hostData(i,j,4,iEl) + Tprime
 
-            P = this % primitive % interior % hostData(i,j,4,iEl)
-
             ! Update the density
             this % solution % interior % hostData(i,j,3,iEl) = &
-               this % solution % interior % hostData(i,j,3,iEl) + P/(Rg*T)
+               this % solution % interior % hostData(i,j,3,iEl)*(1.0_prec - Tprime/T) 
 
+            ! Add internal energy
             this % solution % interior % hostData(i,j,4,iEl) = &
               1.5_prec*this % solution % interior % hostData(i,j,3,iEl)*Rg*T 
 
@@ -869,6 +868,35 @@ CONTAINS
 
   END SUBROUTINE CheckMinMax_CompressibleIdealGas2D
 
+  SUBROUTINE SetMaxCFL_CompressibleIdealGas2D(this, cfl)
+    !! This method uses the model grid and sound speed
+    !! to set the time step size so that the desired
+    !! maximum cfl number fixed.
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
+    REAL(prec), INTENT(in) :: cfl
+    REAL(prec) :: dxMin
+    REAL(prec) :: diagMax(nDiagnostics)
+    REAL(prec) :: currentDt, currentTime, tn
+    REAL(prec) :: Cd
+    REAL(prec) :: dsdtMax(this % solution % nVar)
+    REAL(prec) :: sMax(this % solution % nVar)
+
+      dxMin = this % geometry % CovariantArcMin()
+      diagMax = this % diagnostics % AbsMaxInterior( ) ! Get the absolute max of the diagnostics 
+
+      PRINT*, "Min(dx) : ",dxMin
+      PRINT*, "Max(c) : ", diagMax(3)
+
+      ! Reassign the time step for the hydrostatic adjustment
+      ! so that the max CFL number is 0.5
+      currentDt = this % dt
+      this % dt = cfl*dxMin/diagMax(3)
+      
+      PRINT*, "Adjusted time step size : ", this % dt
+
+  END SUBROUTINE SetMaxCFL_CompressibleIdealGas2D
+
   SUBROUTINE HydrostaticAdjustment_CompressibleIdealGas2D(this,tolerance)
     !! This method can be used to adjust a compressible fluid
     !! to hydrostatic equilibrium. On input, the CompressibleIdealGas2D
@@ -899,28 +927,23 @@ CONTAINS
     REAL(prec), INTENT(in) :: tolerance
     ! Local
     INTEGER :: i 
-    REAL(prec) :: dxMin
-    REAL(prec) :: diagMax(nDiagnostics)
     REAL(prec) :: currentDt, currentTime, tn
     REAL(prec) :: Cd
     REAL(prec) :: dsdtMax(this % solution % nVar)
     REAL(prec) :: sMax(this % solution % nVar)
+    REAL(prec) :: dxMin
+    REAL(prec) :: diagMax(nDiagnostics)
 
       dxMin = this % geometry % CovariantArcMin()
       diagMax = this % diagnostics % AbsMaxInterior( ) ! Get the absolute max of the diagnostics 
 
-      PRINT*, "Min(dx) : ",dxMin
-      PRINT*, "Max(c) : ", diagMax(3)
-
       ! Reassign the time step for the hydrostatic adjustment
       ! so that the max CFL number is 0.5
       currentDt = this % dt
-      this % dt = 0.5*dxMin/diagMax(3)
+      CALL this % SetMaxCFL( 0.5_prec )
       
-      PRINT*, "Adjusted time step size : ", this % dt
-
       ! Calculate the drag coefficient
-      Cd = 0.5*diagMax(3)/dxMin
+      Cd = 0.3*diagMax(3)/dxMin
 
       PRINT*, "Drag coefficient : ", Cd
 

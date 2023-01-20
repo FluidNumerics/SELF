@@ -14,6 +14,7 @@ USE SELF_CompressibleIdealGas2D
   REAL(prec) :: dt
   REAL(prec) :: ioInterval
   REAL(prec) :: tn
+  REAL(prec) :: cfl
   INTEGER :: N ! Control Degree
   INTEGER :: M ! Target degree
   INTEGER :: quadrature
@@ -43,6 +44,7 @@ USE SELF_CompressibleIdealGas2D
     CALL args % Get_CLI('--output-interval',ioInterval)
     CALL args % Get_CLI('--end-time',tn)
     CALL args % Get_CLI('--time-step',dt)
+    CALL args % Get_CLI('--cfl-max',cfl)
     CALL args % Get_CLI('--mpi',mpiRequested)
     CALL args % Get_CLI('--gpu',gpuRequested)
     CALL args % Get_CLI('--control-degree',N)
@@ -51,6 +53,9 @@ USE SELF_CompressibleIdealGas2D
     CALL args % Get_CLI('--target-degree',M)
     CALL args % Get_CLI('--integrator',integrator)
     CALL args % Get_CLI('--mesh',meshfile)
+
+    ! hard-set the cfl number (for testing purposes)
+    cfl = 0.5_prec
 
     IF( TRIM(meshfile) == '')THEN
       meshfile = TRIM(SELF_PREFIX)//"/etc/mesh/Block2D/Block2D_mesh.h5"
@@ -84,7 +89,6 @@ USE SELF_CompressibleIdealGas2D
       CALL semModel % UpdateDevice()
     ENDIF
 
-    !CALL semModel % SetStatic()
     CALL semModel % SetStaticSTP()
     CALL semModel % CalculateEntropy()
     CALL semModel % ReportEntropy()
@@ -116,13 +120,25 @@ USE SELF_CompressibleIdealGas2D
 
     CALL semModel % CheckMinMax()
 
-    CALL semModel % HydrostaticAdjustment( 0.0001_prec )
+    CALL semModel % HydrostaticAdjustment( 0.00001_prec )
+    CALL semModel % AddThermalBubble((/0.5_prec,0.25_prec/),& ! Bubble Center
+                                       0.05_prec,& ! Bubble Radius
+                                       1.0_prec) ! Temperature anomaly max
 
     CALL semModel % CheckMinMax()
+    CALL semModel % CalculateEntropy()
+    CALL semModel % ReportEntropy()
+    referenceEntropy = semModel % entropy
 
     ! Write the initial condition to file
     CALL semModel % WriteModel()
     CALL semModel % WriteTecplot()
+
+    CALL semModel % SetMaxCFL( cfl )
+    CALL semModel % ForwardStep( tn = tn, ioInterval = ioInterval )
+
+    !! Manually write the last semModel state
+    CALL semModel % WriteModel('solution.pickup.h5')
 
     ! Error checking !
     IF( semModel % entropy /= semModel % entropy )THEN
