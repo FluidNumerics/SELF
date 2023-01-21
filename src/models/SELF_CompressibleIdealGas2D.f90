@@ -171,12 +171,12 @@ MODULE SELF_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper(source, solution, environmentalsGradient, N, nVar, nEl) &
+    SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper(source, solution, environmentals, environmentalsGradient, N, nVar, nEl) &
       bind(c,name="Source_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(c_ptr) :: source, solution, environmentalsGradient
+      TYPE(c_ptr) :: source, solution, environmentals, environmentalsGradient
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
@@ -354,6 +354,10 @@ CONTAINS
     CALL this % environmentals % SetName(1,"gp")
     CALL this % environmentals % SetUnits(1,"m^2/s^2")
     CALL this % environmentals % SetDescription(1,"Gravitational Potential")
+
+    CALL this % environmentals % SetName(2,"Cd")
+    CALL this % environmentals % SetUnits(2,"1/s")
+    CALL this % environmentals % SetDescription(1,"Drag")
 
   END SUBROUTINE Init_CompressibleIdealGas2D
 
@@ -969,6 +973,9 @@ CONTAINS
         ENDIF
       ENDDO
 
+      ! Reset the drag
+      CALL this % SetDrag( 0.0_prec )
+
       ! Reset delta t and time
       this % dt = currentDt
       this % t = currentTime
@@ -1356,6 +1363,7 @@ CONTAINS
 
       CALL Source_CompressibleIdealGas2D_gpu_wrapper( this % source % interior % deviceData, &
               this % solution % interior % deviceData, &
+              this % environmentals % interior % deviceData, &
               this % environmentalsGradient % interior % deviceData, &
               this % source % interp % N, &
               this % source % nVar, &
@@ -1650,11 +1658,6 @@ CONTAINS
     CHARACTER(LEN=self_FormatLength) :: fmat
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
-    TYPE(Scalar2D) :: solution
-    TYPE(Scalar2D) :: diagnostics
-    TYPE(Scalar2D) :: environmentals
-    TYPE(Vector2D) :: x
-    TYPE(Lagrange),TARGET :: interp
 
     IF( PRESENT(filename) )THEN
       tecFile = filename
