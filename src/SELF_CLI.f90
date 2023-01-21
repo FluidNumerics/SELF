@@ -262,7 +262,7 @@ MODULE SELF_CLI
                   TRIM(arrayCount)//&
                   "].value" 
 
-        CALL this % json % update( TRIM(jsonKey), TRIM(tmpVal), found )
+        CALL this % json % update( TRIM(jsonKey), tmpVal, found )
 
         IF( ALLOCATED(cliObjLong) ) DEALLOCATE(cliObjLong)
 
