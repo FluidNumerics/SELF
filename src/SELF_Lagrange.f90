@@ -154,6 +154,12 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: VectorDGDivergence_2D => VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
     PROCEDURE,PRIVATE :: VectorDGDivergence_2D_cpu,VectorDGDivergence_2D_gpu
 
+    GENERIC,PUBLIC :: P2VectorDivergence_2D => P2VectorDivergence_2D_cpu,P2VectorDivergence_2D_gpu
+    PROCEDURE,PRIVATE :: P2VectorDivergence_2D_cpu,P2VectorDivergence_2D_gpu
+
+    GENERIC,PUBLIC :: P2VectorDGDivergence_2D => P2VectorDGDivergence_2D_cpu,P2VectorDGDivergence_2D_gpu
+    PROCEDURE,PRIVATE :: P2VectorDGDivergence_2D_cpu,P2VectorDGDivergence_2D_gpu
+
     GENERIC,PUBLIC :: VectorCurl_2D => VectorCurl_2D_cpu,VectorCurl_2D_gpu
     PROCEDURE,PRIVATE :: VectorCurl_2D_cpu,VectorCurl_2D_gpu
 
@@ -414,6 +420,26 @@ MODULE SELF_Lagrange
       TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
       INTEGER(C_INT),VALUE :: N,nVar,nEl
     END SUBROUTINE VectorDGDivergence_2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+    SUBROUTINE P2VectorDivergence_2D_gpu_wrapper(dMatrixT_dev,f_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="P2VectorDivergence_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dMatrixT_dev,f_dev,df_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE P2VectorDivergence_2D_gpu_wrapper
+  END INTERFACE
+
+  INTERFACE
+   SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper(dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev,N,nVar,nEl) &
+      bind(c,name="P2VectorDGDivergence_2D_gpu_wrapper")
+      USE iso_c_binding
+      IMPLICIT NONE
+      TYPE(c_ptr) :: dgMatrixT_dev,bMatrix_dev,qWeights_dev,f_dev,bf_dev,df_dev
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE P2VectorDGDivergence_2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -1679,6 +1705,103 @@ CONTAINS
                                    nVariables,nElements)
 
   END SUBROUTINE VectorCurl_2D_gpu
+
+  SUBROUTINE P2VectorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    INTEGER    :: i,j,n,iVar,iEl
+    REAL(prec) :: dfloc
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
+
+            dfloc = 0.0_prec
+            DO n = 0,myPoly % N
+              dfloc = dfloc + myPoly % dMatrix % hostData(n,i)*f(1,n,i,j,iVar,iEl) + &
+                              myPoly % dMatrix % hostData(n,j)*f(2,n,i,j,iVar,iEl)
+            END DO
+
+            dF(i,j,iVar,iEl) = 2.0_prec*dfloc
+
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE P2VectorDivergence_2D_cpu
+
+  SUBROUTINE P2VectorDivergence_2D_gpu(myPoly,f_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
+
+    CALL P2VectorDivergence_2D_gpu_wrapper(myPoly % dMatrix % deviceData, &
+                                         f_dev,dF_dev,myPoly % N, &
+                                         nVariables,nElements)
+
+  END SUBROUTINE P2VectorDivergence_2D_gpu
+
+  SUBROUTINE P2VectorDGDivergence_2D_cpu(myPoly,f,bF,dF,nVariables,nElements)
+    ! Assumes bF is the vector component in the direction normal to the boundary
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)     :: nVariables,nElements
+    REAL(prec),INTENT(in)  :: f(1:2,0:myPoly % N,0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    REAL(prec),INTENT(in)  :: bF(0:myPoly % N,1:nVariables,1:4,1:nElements)
+    REAL(prec),INTENT(out) :: dF(0:myPoly % N,0:myPoly % N,1:nVariables,1:nElements)
+    ! Local
+    REAL(prec) :: dfLoc
+    INTEGER    :: i,j,n,iVar,iEl
+
+    DO iEl = 1,nElements
+      DO iVar = 1,nVariables
+        DO j = 0,myPoly % N
+          DO i = 0,myPoly % N
+
+            dfLoc = 0.0_prec
+            DO n = 0,myPoly % N
+              dfLoc = dfLoc + myPoly % dgMatrix % hostData(n,i)*f(1,n,i,j,iVar,iEl) + &
+                              myPoly % dgMatrix % hostData(n,j)*f(2,n,i,j,iVar,iEl)
+            END DO
+
+            dfLoc = dfLoc + (myPoly % bMatrix % hostData(i,1)*bF(j,iVar,2,iEl) + &
+                             myPoly % bMatrix % hostData(i,0)*bF(j,iVar,4,iEl))/ &
+                               myPoly % qWeights % hostData(i) + &
+                            (myPoly % bMatrix % hostData(j,1)*bF(i,iVar,3,iEl) + &
+                             myPoly % bMatrix % hostData(j,0)*bF(i,iVar,1,iEl))/ &
+                               myPoly % qWeights % hostData(j)
+            dF(i,j,iVar,iEl) = dFLoc
+
+          END DO
+        END DO
+      END DO
+    END DO
+
+  END SUBROUTINE P2VectorDGDivergence_2D_cpu
+
+  SUBROUTINE P2VectorDGDivergence_2D_gpu(myPoly,f_dev,bF_dev,dF_dev,nVariables,nElements)
+    IMPLICIT NONE
+    CLASS(Lagrange),INTENT(in) :: myPoly
+    INTEGER,INTENT(in)         :: nVariables,nElements
+    TYPE(c_ptr),INTENT(in)     :: f_dev
+    TYPE(c_ptr),INTENT(in)     :: bF_dev
+    TYPE(c_ptr),INTENT(out)    :: dF_dev
+
+    CALL P2VectorDGDivergence_2D_gpu_wrapper(myPoly % dgMatrix % deviceData, &
+                                           myPoly % bMatrix % deviceData, &
+                                           myPoly % qWeights % deviceData, &
+                                           f_dev,bF_dev,dF_dev,myPoly % N, &
+                                           nVariables,nElements)
+
+  END SUBROUTINE P2VectorDGDivergence_2D_gpu
 
   SUBROUTINE TensorDivergence_2D_cpu(myPoly,f,dF,nVariables,nElements)
     ! Note that the divergence is taken over the first dimension (row dimension) of the tensor matrix

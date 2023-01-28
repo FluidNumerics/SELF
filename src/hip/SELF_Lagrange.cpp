@@ -830,6 +830,65 @@ extern "C"
   } 
 }
 
+// P2VectorDivergence_2D //
+__global__ void P2VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  real dfloc = 0.0;
+  for (int ii=0; ii<N+1; ii++) {
+    dfloc += f[P2VE_2D_INDEX(1,ii,i,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)]+ 
+             f[P2VE_2D_INDEX(2,ii,i,j,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+  }
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc; 
+
+}
+
+extern "C"
+{
+  void P2VectorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
+  {
+	  P2VectorDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+  } 
+}
+
+// VectorDGDivergence_2D //
+__global__ void P2VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real *qWeights, real *f, real *bf, real *df, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+  real dfloc = 0.0;
+  for (int ii =0; ii<N+1; ii++) {
+    dfloc += f[P2VE_2D_INDEX(1,ii,i,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
+             f[P2VE_2D_INDEX(2,ii,i,j,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
+  }
+
+  dfloc += (bf[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +
+            bf[SCB_2D_INDEX(j,iVar,4,iEl,N,nVar)]*bMatrix[i])/
+           qWeights[i] +
+           (bf[SCB_2D_INDEX(i,iVar,3,iEl,N,nVar)]*bMatrix[j+(N+1)] +
+            bf[SCB_2D_INDEX(i,iVar,1,iEl,N,nVar)]*bMatrix[j])/
+           qWeights[j];
+
+  df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc; 
+
+}
+
+extern "C"
+{
+  void P2VectorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
+  {
+	  P2VectorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+  } 
+}
+
+
 // VectorCurl_2D //
 __global__ void VectorCurl_2D_gpu(real *dMatrix, real *f, real *df, int N, int nVar){
 
