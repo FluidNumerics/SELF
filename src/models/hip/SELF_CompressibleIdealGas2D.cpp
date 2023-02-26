@@ -31,7 +31,7 @@ extern "C"
   }
 }
 
-__global__ void Flux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real *primitive, int N, int nVar){
+__global__ void SinglePointFlux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real *primitive, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs
   size_t iVar = blockIdx.x;
@@ -39,62 +39,129 @@ __global__ void Flux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real
   size_t i = threadIdx.x;
   size_t j = threadIdx.y;
 
+  /*
+  // Use shared memory to hold
+  // u, v, rhou, rhov, rhoE, p
+  __shared__ real u[64];
+  __shared__ real v[64];
+  __shared__ real rhou[64];
+  __shared__ real rhov[64];
+  __shared__ real rhoE[64];
+  __shared__ real p[64];
+
+
+  u[i+j*(N+1)] = primitive[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+  v[i+j*(N+1)] = primitive[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+  p[i+j*(N+1)] = primitive[SC_2D_INDEX(i,j,3,iEl,N,nVar)];
+  rhou[i+j*(N+1)] = solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)];
+  rhov[i+j*(N+1)] = solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)];
+  rhoE[i+j*(N+1)] = solution[SC_2D_INDEX(i,j,3,iEl,N,nVar)];
+
+  __syncthreads();
+
+  */
   if (iVar == 0)
   { // rho*u
 
-    // rho*u*u + p 
-    flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
-          primitive[SC_2D_INDEX(i,j,0,iEl,N,nVar)]* // u
-          solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]+ // rho*u
-          primitive[SC_2D_INDEX(i,j,3,iEl,N,nVar)];
+    for( int n = 0; n <= N; n++ ){
+      // rho*u*u + p 
+      flux[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(n,j,0,iEl,N,nVar)]* // u
+            solution[SC_2D_INDEX(n,j,iVar,iEl,N,nVar)]+ // rho*u
+            primitive[SC_2D_INDEX(n,j,3,iEl,N,nVar)];
 
-    // rho*u*v
-    flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
-          primitive[SC_2D_INDEX(i,j,1,iEl,N,nVar)]* // v
-          solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; // rho*u
+      // rho*u*v
+      flux[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(n,j,1,iEl,N,nVar)]* // v
+            solution[SC_2D_INDEX(n,j,iVar,iEl,N,nVar)]; // rho*u
+							//
+      // rho*u*u + p 
+      flux[P2PVE_2D_INDEX(1,2,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(i,n,0,iEl,N,nVar)]* // u
+            solution[SC_2D_INDEX(i,n,iVar,iEl,N,nVar)]+ // rho*u
+            primitive[SC_2D_INDEX(n,j,3,iEl,N,nVar)];
+
+      // rho*u*v
+      flux[P2PVE_2D_INDEX(2,2,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(i,n,1,iEl,N,nVar)]* // v
+            solution[SC_2D_INDEX(i,n,iVar,iEl,N,nVar)]; // rho*u
+    }
   }
   else if (iVar == 1)// rho*v
   {
-    // rho*v*u
-    flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
-          primitive[SC_2D_INDEX(i,j,0,iEl,N,nVar)]* // u
-          solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]; // rho*v
+    for( int n = 0; n <= N; n++ ){
+      // rho*v*u
+      flux[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(n,j,0,iEl,N,nVar)]* // u
+            solution[SC_2D_INDEX(n,j,iVar,iEl,N,nVar)]; // rho*v
 
-    // rho*v*v + p
-    flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
-          primitive[SC_2D_INDEX(i,j,1,iEl,N,nVar)]* // v
-          solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]+ // rho*v
-          primitive[SC_2D_INDEX(i,j,3,iEl,N,nVar)];
+      // rho*v*v + p
+      flux[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(n,j,1,iEl,N,nVar)]* // v
+            solution[SC_2D_INDEX(n,j,iVar,iEl,N,nVar)]+ // rho*v
+            primitive[SC_2D_INDEX(n,j,3,iEl,N,nVar)];
+
+      // rho*v*u
+      flux[P2PVE_2D_INDEX(1,2,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(i,n,0,iEl,N,nVar)]* // u
+            solution[SC_2D_INDEX(i,n,iVar,iEl,N,nVar)]; // rho*v
+
+      // rho*v*v + p
+      flux[P2PVE_2D_INDEX(2,2,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(i,n,1,iEl,N,nVar)]* // v
+            solution[SC_2D_INDEX(i,n,iVar,iEl,N,nVar)]+ // rho*v
+            primitive[SC_2D_INDEX(i,n,3,iEl,N,nVar)];
+    }
   }
   else if (iVar == 2)
   {// density
-    flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
-          solution[SC_2D_INDEX(i,j,0,iEl,N,nVar)]; //rho*u
+    for( int n = 0; n <= N; n++ ){
+      flux[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)] = 
+            solution[SC_2D_INDEX(n,j,0,iEl,N,nVar)]; //rho*u
 
-    flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
-          solution[SC_2D_INDEX(i,j,1,iEl,N,nVar)]; //rho*v
+      flux[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)] = 
+            solution[SC_2D_INDEX(n,j,1,iEl,N,nVar)]; //rho*v
+						     //
+      flux[P2PVE_2D_INDEX(1,2,n,i,j,iVar,iEl,N,nVar)] = 
+            solution[SC_2D_INDEX(i,n,0,iEl,N,nVar)]; //rho*u
+
+      flux[P2PVE_2D_INDEX(2,2,n,i,j,iVar,iEl,N,nVar)] = 
+            solution[SC_2D_INDEX(i,n,1,iEl,N,nVar)]; //rho*v
+    }
   }
   else if (iVar == 3)
   { // total energy (rho*u*H)
 
-    // Calculate Enthalpy
-    real H = ( solution[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)]+
-               primitive[SC_2D_INDEX(i,j,3,iEl,N,nVar)] );
+    for( int n = 0; n <= N; n++ ){
+      // Calculate Enthalpy
+      real H = ( solution[SC_2D_INDEX(n,j,iVar,iEl,N,nVar)]+
+                 primitive[SC_2D_INDEX(n,j,3,iEl,N,nVar)] );
 
-    flux[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)] = 
-          primitive[SC_2D_INDEX(i,j,0,iEl,N,nVar)]*H;
+      flux[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(n,j,0,iEl,N,nVar)]*H;
 
-    flux[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)] = 
-          primitive[SC_2D_INDEX(i,j,1,iEl,N,nVar)]*H;
+      flux[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(n,j,1,iEl,N,nVar)]*H;
+
+      // Calculate Enthalpy
+      H = ( solution[SC_2D_INDEX(i,n,iVar,iEl,N,nVar)]+
+                 primitive[SC_2D_INDEX(i,n,3,iEl,N,nVar)] );
+
+      flux[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(i,n,0,iEl,N,nVar)]*H;
+
+      flux[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)] = 
+            primitive[SC_2D_INDEX(i,n,1,iEl,N,nVar)]*H;
+    }
   }
 
 }
 
 extern "C"
 {
-  void Flux_CompressibleIdealGas2D_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
+  void SinglePointFlux_CompressibleIdealGas2D_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
   {
-    Flux_CompressibleIdealGas2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
+    SinglePointFlux_CompressibleIdealGas2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
   }
 }
 

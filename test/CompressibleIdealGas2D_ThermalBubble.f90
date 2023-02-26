@@ -123,7 +123,7 @@ USE SELF_CompressibleIdealGas2D
     CALL semModel % HydrostaticAdjustment( 0.00001_prec )
     CALL semModel % AddThermalBubble((/0.5_prec,0.25_prec/),& ! Bubble Center
                                        0.05_prec,& ! Bubble Radius
-                                       1.0_prec) ! Temperature anomaly max
+                                       20.0_prec) ! Temperature anomaly max
 
     CALL semModel % CheckMinMax()
     CALL semModel % CalculateEntropy()

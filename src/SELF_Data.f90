@@ -213,6 +213,27 @@ MODULE SELF_Data
 
   END TYPE Vector3D
 
+! ----------------- Two-point Vectors ----------------- !
+
+  TYPE,EXTENDS(SELF_DataObj),PUBLIC :: P2Vector2D
+
+    TYPE(hfReal_r6) :: interior
+    TYPE(hfReal_r7) :: physical
+    TYPE(hfReal_r5) :: boundary
+    TYPE(hfReal_r5) :: extBoundary
+    TYPE(hfReal_r4) :: boundaryNormal
+
+  CONTAINS
+
+    PROCEDURE,PUBLIC :: Init => Init_P2Vector2D
+    PROCEDURE,PUBLIC :: Free => Free_P2Vector2D
+    PROCEDURE,PUBLIC :: UpdateHost => UpdateHost_P2Vector2D
+    PROCEDURE,PUBLIC :: UpdateDevice => UpdateDevice_P2Vector2D
+
+    GENERIC,PUBLIC :: Divergence => Divergence_P2Vector2D
+    PROCEDURE,PRIVATE :: Divergence_P2Vector2D
+
+  END TYPE P2Vector2D
 ! ---------------------- Tensors ---------------------- !
 
   TYPE,EXTENDS(SELF_DataObj),PUBLIC :: Tensor2D
@@ -1426,6 +1447,126 @@ CONTAINS
     SELFOut % boundary % hostData = SELFin % boundary % hostData
 
   END SUBROUTINE Equals_Vector3D
+
+! -- P2Vector2D -- !
+
+  SUBROUTINE Init_P2Vector2D(SELFStorage,interp,nVar,nElem)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(out) :: SELFStorage
+    TYPE(Lagrange),TARGET,INTENT(in) :: interp
+    INTEGER,INTENT(in) :: nVar
+    INTEGER,INTENT(in) :: nElem
+    ! Local
+    INTEGER :: N
+
+    SELFStorage % interp => interp
+    SELFStorage % nVar = nVar
+    SELFStorage % nElem = nElem
+    N = interp % N
+
+
+    CALL SELFStorage % interior % Alloc(loBound=(/1,0,0,0,1,1/), &
+                                        upBound=(/2,N,N,N,nVar,nElem/))
+
+    CALL SELFStorage % physical % Alloc(loBound=(/1,1,0,0,0,1,1/), &
+                                        upBound=(/2,2,N,N,N,nVar,nElem/))
+
+    CALL SELFStorage % boundary % Alloc(loBound=(/1,0,1,1,1/), &
+                                        upBound=(/2,N,nVar,4,nElem/))
+
+    CALL SELFStorage % boundaryNormal % Alloc(loBound=(/0,1,1,1/), &
+                                        upBound=(/N,nVar,4,nElem/))
+
+    CALL SELFStorage % extBoundary % Alloc(loBound=(/1,0,1,1,1/), &
+                                           upBound=(/2,N,nVar,4,nElem/))
+
+    ALLOCATE( SELFStorage % meta(1:nVar) )
+    ALLOCATE( SELFStorage % eqn(1:2*nVar) )
+
+  END SUBROUTINE Init_P2Vector2D
+
+  SUBROUTINE Free_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+
+    SELFStorage % interp => NULL()
+    SELFStorage % nVar = 0
+    SELFStorage % nElem = 0
+    CALL SELFStorage % interior % Free()
+    CALL SELFStorage % physical % Free()
+    CALL SELFStorage % boundary % Free()
+    CALL SELFStorage % boundaryNormal % Free()
+    CALL SELFStorage % extBoundary % Free()
+
+    DEALLOCATE( SELFStorage % meta )
+    DEALLOCATE( SELFStorage % eqn )
+
+  END SUBROUTINE Free_P2Vector2D
+
+  SUBROUTINE UpdateHost_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+
+    CALL SELFStorage % interior % UpdateHost()
+    CALL SELFStorage % physical % UpdateHost()
+    CALL SELFStorage % boundary % UpdateHost()
+    CALL SELFStorage % boundaryNormal % UpdateHost()
+    CALL SELFStorage % extBoundary % UpdateHost()
+
+  END SUBROUTINE UpdateHost_P2Vector2D
+
+  SUBROUTINE UpdateDevice_P2Vector2D(SELFStorage)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(inout) :: SELFStorage
+
+    CALL SELFStorage % interior % UpdateDevice()
+    CALL SELFStorage % physical % UpdateDevice()
+    CALL SELFStorage % boundary % UpdateDevice()
+    CALL SELFStorage % boundaryNormal % UpdateDevice()
+    CALL SELFStorage % extBoundary % UpdateDevice()
+
+  END SUBROUTINE UpdateDevice_P2Vector2D
+
+  SUBROUTINE Divergence_P2Vector2D(SELFStorage,SELFOut,dForm,gpuAccel)
+    IMPLICIT NONE
+    CLASS(P2Vector2D),INTENT(in) :: SELFStorage
+    TYPE(Scalar2D),INTENT(inout) :: SELFOut
+    INTEGER,INTENT(in) :: dForm
+    LOGICAL,INTENT(in) :: gpuAccel
+
+    IF (dForm == selfWeakDGForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % deviceData, &
+                                                          SELFStorage % boundaryNormal % deviceData, &
+                                                          SELFout % interior % deviceData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % P2VectorDGDivergence_2D(SELFStorage % interior % hostData, &
+                                                          SELFStorage % boundaryNormal % hostData, &
+                                                          SELFout % interior % hostData, &
+                                                          SELFStorage % nVar, &
+                                                          SELFStorage % nElem)
+      END IF
+
+    ELSE IF (dForm == selfStrongForm) THEN
+
+      IF (gpuAccel) THEN
+        CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % deviceData, &
+                                                        SELFout % interior % deviceData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      ELSE
+        CALL SELFStorage % interp % P2VectorDivergence_2D(SELFStorage % interior % hostData, &
+                                                        SELFout % interior % hostData, &
+                                                        SELFStorage % nVar, &
+                                                        SELFStorage % nElem)
+      END IF
+
+    END IF
+
+  END SUBROUTINE Divergence_P2Vector2D
 
 ! -- Tensor2D -- !
 

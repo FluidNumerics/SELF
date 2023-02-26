@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Model2D
+MODULE SELF_ECModel2D
 
   USE SELF_SupportRoutines
   USE SELF_Metadata
@@ -15,11 +15,10 @@ MODULE SELF_Model2D
   USE FEQParse
   USE SELF_Model
 
-  TYPE,EXTENDS(Model) :: Model2D
+  TYPE,EXTENDS(Model) :: ECModel2D
     TYPE(MappedScalar2D)   :: solution
     TYPE(MappedVector2D)   :: solutionGradient
-    TYPE(MappedVector2D)   :: flux
-    TYPE(MappedP2Vector2D) :: p2flux
+    TYPE(MappedP2Vector2D) :: flux
     TYPE(MappedScalar2D)   :: source
     TYPE(MappedScalar2D)   :: fluxDivergence
     TYPE(MappedScalar2D)   :: dSdt
@@ -30,44 +29,44 @@ MODULE SELF_Model2D
 
     CONTAINS
 
-    PROCEDURE :: Init => Init_Model2D
-    PROCEDURE :: Free => Free_Model2D
+    PROCEDURE :: Init => Init_ECModel2D
+    PROCEDURE :: Free => Free_ECModel2D
 
-    PROCEDURE :: UpdateHost => UpdateHost_Model2D
-    PROCEDURE :: UpdateDevice => UpdateDevice_Model2D
+    PROCEDURE :: UpdateHost => UpdateHost_ECModel2D
+    PROCEDURE :: UpdateDevice => UpdateDevice_ECModel2D
 
-    PROCEDURE :: UpdateSolution => UpdateSolution_Model2D
+    PROCEDURE :: UpdateSolution => UpdateSolution_ECModel2D
 
-    PROCEDURE :: ResizePrevSol => ResizePrevSol_Model2D
+    PROCEDURE :: ResizePrevSol => ResizePrevSol_ECModel2D
 
-    PROCEDURE :: UpdateGAB2 => UpdateGAB2_Model2D
-    PROCEDURE :: UpdateGAB3 => UpdateGAB3_Model2D
-    PROCEDURE :: UpdateGAB4 => UpdateGAB4_Model2D
+    PROCEDURE :: UpdateGAB2 => UpdateGAB2_ECModel2D
+    PROCEDURE :: UpdateGAB3 => UpdateGAB3_ECModel2D
+    PROCEDURE :: UpdateGAB4 => UpdateGAB4_ECModel2D
 
-    PROCEDURE :: UpdateGRK2 => UpdateGRK2_Model2D
-    PROCEDURE :: UpdateGRK3 => UpdateGRK3_Model2D
-    PROCEDURE :: UpdateGRK4 => UpdateGRK4_Model2D
+    PROCEDURE :: UpdateGRK2 => UpdateGRK2_ECModel2D
+    PROCEDURE :: UpdateGRK3 => UpdateGRK3_ECModel2D
+    PROCEDURE :: UpdateGRK4 => UpdateGRK4_ECModel2D
 
-    PROCEDURE :: CalculateTendency => CalculateTendency_Model2D
-    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_Model2D
+    PROCEDURE :: CalculateTendency => CalculateTendency_ECModel2D
+    PROCEDURE :: CalculateFluxDivergence => CalculateFluxDivergence_ECModel2D
 
-    GENERIC :: SetSolution => SetSolutionFromChar_Model2D,&
-                              SetSolutionFromEqn_Model2D
-    PROCEDURE,PRIVATE :: SetSolutionFromChar_Model2D
-    PROCEDURE,PRIVATE :: SetSolutionFromEqn_Model2D
+    GENERIC :: SetSolution => SetSolutionFromChar_ECModel2D,&
+                              SetSolutionFromEqn_ECModel2D
+    PROCEDURE,PRIVATE :: SetSolutionFromChar_ECModel2D
+    PROCEDURE,PRIVATE :: SetSolutionFromEqn_ECModel2D
 
-!    GENERIC :: SetVelocityField => SetVelocityFieldFromChar_Model2D,&
-!                              SetVelocityFieldFromEqn_Model2D
-!    PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_Model2D
-!    PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_Model2D
+!    GENERIC :: SetVelocityField => SetVelocityFieldFromChar_ECModel2D,&
+!                              SetVelocityFieldFromEqn_ECModel2D
+!    PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_ECModel2D
+!    PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_ECModel2D
 
-    PROCEDURE :: ReprojectFlux => ReprojectFlux_Model2D
+    PROCEDURE :: ReprojectFlux => ReprojectFlux_ECModel2D
 
-    PROCEDURE :: ReadModel => Read_Model2D
-    PROCEDURE :: WriteModel => Write_Model2D
-    PROCEDURE :: WriteTecplot => WriteTecplot_Model2D
+    PROCEDURE :: ReadModel => Read_ECModel2D
+    PROCEDURE :: WriteModel => Write_ECModel2D
+    PROCEDURE :: WriteTecplot => WriteTecplot_ECModel2D
 
-  END TYPE Model2D
+  END TYPE ECModel2D
 
   INTERFACE
     SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
@@ -138,9 +137,9 @@ MODULE SELF_Model2D
 
 CONTAINS
 
-  SUBROUTINE Init_Model2D(this,nvar,mesh,geometry,decomp)
+  SUBROUTINE Init_ECModel2D(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(out) :: this
+    CLASS(ECModel2D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
     TYPE(Mesh2D),INTENT(in),TARGET :: mesh
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
@@ -161,7 +160,6 @@ CONTAINS
     CALL this % dSdt % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % p2flux % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % source % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nVar,this % mesh % nElem)
 
@@ -173,11 +171,11 @@ CONTAINS
       CALL this % solution % SetUnits(ivar,"[null]")
     ENDDO
 
-  END SUBROUTINE Init_Model2D
+  END SUBROUTINE Init_ECModel2D
 
-  SUBROUTINE Free_Model2D(this)
+  SUBROUTINE Free_ECModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
 
     CALL this % solution % Free()
     CALL this % workSol % Free()
@@ -185,15 +183,14 @@ CONTAINS
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
-    CALL this % p2flux % Free()
     CALL this % source % Free()
     CALL this % fluxDivergence % Free()
 
-  END SUBROUTINE Free_Model2D
+  END SUBROUTINE Free_ECModel2D
 
-  SUBROUTINE ResizePrevSol_Model2D(this,m)
+  SUBROUTINE ResizePrevSol_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: nVar
@@ -206,11 +203,11 @@ CONTAINS
       nVar = this % solution % nVar
       CALL this % prevSol % Init(this % geometry % x % interp,m*nVar,this % mesh % nElem)
 
-  END SUBROUTINE ResizePrevSol_Model2D
+  END SUBROUTINE ResizePrevSol_ECModel2D
 
-  SUBROUTINE UpdateHost_Model2D(this)
+  SUBROUTINE UpdateHost_ECModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
 
     CALL this % mesh % UpdateHost()
     CALL this % geometry % UpdateHost()
@@ -222,11 +219,11 @@ CONTAINS
     CALL this % source % UpdateHost()
     CALL this % fluxDivergence % UpdateHost()
 
-  END SUBROUTINE UpdateHost_Model2D
+  END SUBROUTINE UpdateHost_ECModel2D
 
-  SUBROUTINE UpdateDevice_Model2D(this)
+  SUBROUTINE UpdateDevice_ECModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
 
     CALL this % mesh % UpdateDevice()
     CALL this % geometry % UpdateDevice()
@@ -237,11 +234,11 @@ CONTAINS
     CALL this % source % UpdateDevice()
     CALL this % fluxDivergence % UpdateDevice()
 
-  END SUBROUTINE UpdateDevice_Model2D
+  END SUBROUTINE UpdateDevice_ECModel2D
 
-  SUBROUTINE SetSolutionFromEqn_Model2D(this, eqn) 
+  SUBROUTINE SetSolutionFromEqn_ECModel2D(this, eqn) 
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     TYPE(EquationParser),INTENT(in) :: eqn(1:this % solution % nVar)
     ! Local
     INTEGER :: iVar
@@ -258,11 +255,11 @@ CONTAINS
         CALL this % solution % UpdateDevice()
       ENDIF
 
-  END SUBROUTINE SetSolutionFromEqn_Model2D 
+  END SUBROUTINE SetSolutionFromEqn_ECModel2D 
 
- ! SUBROUTINE SetVelocityFieldFromEqn_Model2D(this, eqn) 
+ ! SUBROUTINE SetVelocityFieldFromEqn_ECModel2D(this, eqn) 
  !   IMPLICIT NONE
- !   CLASS(Model2D),INTENT(inout) :: this
+ !   CLASS(ECModel2D),INTENT(inout) :: this
  !   TYPE(EquationParser),INTENT(in) :: eqn(1:2)
 
  !     ! Copy the equation parser
@@ -281,11 +278,11 @@ CONTAINS
  !       CALL this % velocity % UpdateDevice()
  !     ENDIF
 
- ! END SUBROUTINE SetVelocityFieldFromEqn_Model2D 
+ ! END SUBROUTINE SetVelocityFieldFromEqn_ECModel2D 
 
- ! SUBROUTINE SetVelocityFieldFromChar_Model2D(this, eqnChar) 
+ ! SUBROUTINE SetVelocityFieldFromChar_ECModel2D(this, eqnChar) 
  !   IMPLICIT NONE
- !   CLASS(Model2D),INTENT(inout) :: this
+ !   CLASS(ECModel2D),INTENT(inout) :: this
  !   CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
 
  !     ! Set the x-component of the velocity
@@ -303,11 +300,11 @@ CONTAINS
  !       CALL this % velocity % UpdateDevice()
  !     ENDIF
 
- ! END SUBROUTINE SetVelocityFieldFromChar_Model2D
+ ! END SUBROUTINE SetVelocityFieldFromChar_ECModel2D
 
-  SUBROUTINE SetSolutionFromChar_Model2D(this, eqnChar) 
+  SUBROUTINE SetSolutionFromChar_ECModel2D(this, eqnChar) 
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % solution % nVar)
     ! Local
     INTEGER :: iVar
@@ -324,13 +321,13 @@ CONTAINS
       ENDIF
 
 
-  END SUBROUTINE SetSolutionFromChar_Model2D
+  END SUBROUTINE SetSolutionFromChar_ECModel2D
 
-  SUBROUTINE UpdateSolution_Model2D(this,dt)
+  SUBROUTINE UpdateSolution_ECModel2D(this,dt)
     !! Computes a solution update as `s=s+dt*dsdt`, where dt is either provided through the interface
-    !! or taken as the Model's stored time step size (model % dt)
+    !! or taken as the ECModel's stored time step size (model % dt)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     REAL(prec),OPTIONAL,INTENT(in) :: dt
     ! Local
     REAL(prec) :: dtLoc
@@ -370,11 +367,11 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE UpdateSolution_Model2D
+  END SUBROUTINE UpdateSolution_ECModel2D
 
-  SUBROUTINE UpdateGAB2_Model2D(this,m)
+  SUBROUTINE UpdateGAB2_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: i, j, nVar, iVar, iEl
@@ -450,11 +447,11 @@ CONTAINS
        
     ENDIF
 
-  END SUBROUTINE UpdateGAB2_Model2D
+  END SUBROUTINE UpdateGAB2_ECModel2D
 
-  SUBROUTINE UpdateGAB3_Model2D(this,m)
+  SUBROUTINE UpdateGAB3_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: i, j, nVar, iVar, iEl
@@ -544,11 +541,11 @@ CONTAINS
        
     ENDIF
 
-  END SUBROUTINE UpdateGAB3_Model2D
+  END SUBROUTINE UpdateGAB3_ECModel2D
 
-  SUBROUTINE UpdateGAB4_Model2D(this,m)
+  SUBROUTINE UpdateGAB4_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: i, j, nVar, iVar, iEl
@@ -656,11 +653,11 @@ CONTAINS
        
     ENDIF
 
-  END SUBROUTINE UpdateGAB4_Model2D
+  END SUBROUTINE UpdateGAB4_ECModel2D
 
-  SUBROUTINE UpdateGRK2_Model2D(this,m)
+  SUBROUTINE UpdateGRK2_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: i, j, iVar, iEl
@@ -700,11 +697,11 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE UpdateGRK2_Model2D
+  END SUBROUTINE UpdateGRK2_ECModel2D
 
-  SUBROUTINE UpdateGRK3_Model2D(this,m)
+  SUBROUTINE UpdateGRK3_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: i, j, iVar, iEl
@@ -744,11 +741,11 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE UpdateGRK3_Model2D
+  END SUBROUTINE UpdateGRK3_ECModel2D
 
-  SUBROUTINE UpdateGRK4_Model2D(this,m)
+  SUBROUTINE UpdateGRK4_ECModel2D(this,m)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     INTEGER, INTENT(in) :: m
     ! Local
     INTEGER :: i, j, iVar, iEl
@@ -787,30 +784,30 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE UpdateGRK4_Model2D
+  END SUBROUTINE UpdateGRK4_ECModel2D
 
-  SUBROUTINE ReprojectFlux_Model2D(this) 
+  SUBROUTINE ReprojectFlux_ECModel2D(this) 
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
 
       CALL this % flux % ContravariantProjection(this % geometry, this % gpuAccel)
 
-  END SUBROUTINE ReprojectFlux_Model2D
+  END SUBROUTINE ReprojectFlux_ECModel2D
 
-  SUBROUTINE CalculateFluxDivergence_Model2D(this)
+  SUBROUTINE CalculateFluxDivergence_ECModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
 
       CALL this % flux % Divergence(this % geometry, &
                                     this % fluxDivergence, &
                                     selfWeakDGForm,&
                                     this % gpuAccel)
 
-  END SUBROUTINE CalculateFluxDivergence_Model2D
+  END SUBROUTINE CalculateFluxDivergence_ECModel2D
 
-  SUBROUTINE CalculateTendency_Model2D(this)
+  SUBROUTINE CalculateTendency_ECModel2D(this)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     ! Local
     INTEGER :: i, j, iVar, iEl
 
@@ -851,11 +848,11 @@ CONTAINS
 
     ENDIF
 
-  END SUBROUTINE CalculateTendency_Model2D
+  END SUBROUTINE CalculateTendency_ECModel2D
 
-  SUBROUTINE Write_Model2D(this,fileName)
+  SUBROUTINE Write_ECModel2D(this,fileName)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
@@ -976,11 +973,11 @@ CONTAINS
       CALL WriteArray_HDF5(fileId,'/state/interior/fluxDivergence', &
                            this % fluxDivergence % interior,solOffset,solGlobalDims)
 
-      CALL WriteArray_HDF5(fileId,'/state/interior/flux', &
-                           this % flux % interior,xOffset,vGlobalDims)
-
-      CALL WriteArray_HDF5(fileId,'/state/boundary/flux', &
-                           this % flux % boundary,bxOffset,bvGlobalDims)
+!      CALL WriteArray_HDF5(fileId,'/state/interior/flux', &
+!                           this % flux % interior,xOffset,vGlobalDims)
+!
+!      CALL WriteArray_HDF5(fileId,'/state/boundary/flux', &
+!                           this % flux % boundary,bxOffset,bvGlobalDims)                         
 
       CALL WriteArray_HDF5(fileId,'/state/interior/solutionGradient', &
                            this % solutionGradient % interior,xOffset,xGlobalDims)
@@ -1051,11 +1048,11 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE Write_Model2D
+  END SUBROUTINE Write_ECModel2D
 
-  SUBROUTINE Read_Model2D(this,fileName)
+  SUBROUTINE Read_ECModel2D(this,fileName)
     IMPLICIT NONE
-    CLASS(Model2D),INTENT(inout) :: this
+    CLASS(ECModel2D),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
@@ -1091,11 +1088,11 @@ CONTAINS
       CALL this % solution % interior % UpdateDevice()
     ENDIF
 
-  END SUBROUTINE Read_Model2D
+  END SUBROUTINE Read_ECModel2D
 
-  SUBROUTINE WriteTecplot_Model2D(this, filename)
+  SUBROUTINE WriteTecplot_ECModel2D(this, filename)
     IMPLICIT NONE
-    CLASS(Model2D), INTENT(inout) :: this
+    CLASS(ECModel2D), INTENT(inout) :: this
     CHARACTER(*), INTENT(in), OPTIONAL :: filename
     ! Local
     CHARACTER(8) :: zoneID
@@ -1199,6 +1196,6 @@ CONTAINS
     CALL solution % Free() 
     CALL interp % Free()
 
-  END SUBROUTINE WriteTecplot_Model2D
+  END SUBROUTINE WriteTecplot_ECModel2D
 
-END MODULE SELF_Model2D
+END MODULE SELF_ECModel2D

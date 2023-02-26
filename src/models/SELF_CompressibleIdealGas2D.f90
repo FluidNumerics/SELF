@@ -9,9 +9,9 @@ MODULE SELF_CompressibleIdealGas2D
   USE SELF_Metadata
   USE SELF_Mesh
   USE SELF_MappedData
-  USE SELF_Model2D
+  USE SELF_ECModel2D
 
-  TYPE,EXTENDS(Model2D) :: CompressibleIdealGas2D
+  TYPE,EXTENDS(ECModel2D) :: CompressibleIdealGas2D
     !!
     !! For the solution attribute, we use the following convention
     !! iVar = 1 ~> rho*u (x-momentum)
@@ -65,7 +65,7 @@ MODULE SELF_CompressibleIdealGas2D
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_CompressibleIdealGas2D
-    PROCEDURE :: FluxMethod => Flux_CompressibleIdealGas2D
+    PROCEDURE :: FluxMethod => SinglePointFlux_CompressibleIdealGas2D
     PROCEDURE :: RiemannSolver => RiemannSolver_CompressibleIdealGas2D
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
 
@@ -182,14 +182,14 @@ MODULE SELF_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Flux_CompressibleIdealGas2D_gpu_wrapper(flux, solution, primitive, N, nVar, nEl) &
-      bind(c,name="Flux_CompressibleIdealGas2D_gpu_wrapper")
+    SUBROUTINE SinglePointFlux_CompressibleIdealGas2D_gpu_wrapper(flux, solution, primitive, N, nVar, nEl) &
+      bind(c,name="SinglePointFlux_CompressibleIdealGas2D_gpu_wrapper")
       USE iso_c_binding
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(c_ptr) :: flux, solution, primitive
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE Flux_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE SinglePointFlux_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
 
   INTERFACE
@@ -289,8 +289,6 @@ CONTAINS
     CALL this % environmentalsGradient % Init(geometry % x % interp,2,this % mesh % nElem)
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
-    CALL this % velocity % Init(geometry % x % interp,1,this % mesh % nElem)
-    CALL this % compVelocity % Init(geometry % x % interp,1,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % flux % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -368,8 +366,6 @@ CONTAINS
     CALL this % environmentals % Free()
     CALL this % environmentalsGradient % Free()
     CALL this % workSol % Free()
-    CALL this % velocity % Free()
-    CALL this % compVelocity % Free()
     CALL this % dSdt % Free()
     CALL this % solutionGradient % Free()
     CALL this % flux % Free()
@@ -1388,14 +1384,14 @@ CONTAINS
 
   END SUBROUTINE Source_CompressibleIdealGas2D
 
-  SUBROUTINE Flux_CompressibleIdealGas2D(this)
+  SUBROUTINE SinglePointFlux_CompressibleIdealGas2D(this)
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
-    INTEGER :: i,j,iEl,iVar
+    INTEGER :: i,j,n,iEl,iVar
 
       IF (this % gpuAccel) THEN
-        CALL Flux_CompressibleIdealGas2D_gpu_wrapper( this % flux % interior % deviceData,&
+        CALL SinglePointFlux_CompressibleIdealGas2D_gpu_wrapper( this % flux % interior % deviceData,&
                 this % solution % interior % deviceData, &
                 this % primitive % interior % deviceData, &
                 this % solution % interp % N, &
@@ -1403,54 +1399,101 @@ CONTAINS
                 this % solution % nElem )
 
       ELSE
+
         DO iEl = 1, this % solution % nElem
           DO iVar = 1, this % solution % nVar
             DO j = 0, this % solution % interp % N
               DO i = 0, this % solution % interp % N
-              
+
                 IF ( iVar == 1 )THEN ! rho*u
 
-                  ! rho*u*u + p 
-                  this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % primitive % interior % hostData(i,j,1,iEl)*& ! u
-                        this % solution % interior % hostData(i,j,1,iEl)+& ! rho*u
-                        this % primitive % interior % hostData(i,j,4,iEl)
+                  DO n = 0, this % solution % interp % N
+                    ! rho*u*u + p 
+                    this % flux % physical % hostData(1,1,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(n,j,1,iEl)*& ! u
+                          this % solution % interior % hostData(n,j,1,iEl)+& ! rho*u
+                          this % primitive % interior % hostData(n,j,4,iEl) )
 
-                  ! rho*u*v
-                  this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % primitive % interior % hostData(i,j,2,iEl)*& ! v
-                        this % solution % interior % hostData(i,j,1,iEl) ! rho*u
+                    ! rho*u*v
+                    this % flux % physical % hostData(2,1,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(n,j,2,iEl)*& ! v
+                          this % solution % interior % hostData(n,j,1,iEl) ) ! rho*u
+
+                    ! rho*u*u + p 
+                    this % flux % physical % hostData(1,2,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(i,n,1,iEl)*& ! u
+                          this % solution % interior % hostData(i,n,1,iEl)+& ! rho*u
+                          this % primitive % interior % hostData(i,n,4,iEl) )
+
+                    ! rho*u*v
+                    this % flux % physical % hostData(2,2,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(i,n,2,iEl)*& ! v
+                          this % solution % interior % hostData(i,n,1,iEl) ) ! rho*u
+                  ENDDO
 
                 ELSEIF ( iVar == 2 )THEN ! rho*v
 
-                  ! rho*v*u
-                  this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % primitive % interior % hostData(i,j,1,iEl)*& ! u
-                        this % solution % interior % hostData(i,j,2,iEl) ! rho*v
+                  DO n = 0, this % solution % interp % N
+                    ! rho*v*u
+                    this % flux % physical % hostData(1,1,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(n,j,1,iEl)*& ! u
+                          this % solution % interior % hostData(n,j,2,iEl) ) ! rho*v
 
-                  ! rho*v*v + p
-                  this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % primitive % interior % hostData(i,j,2,iEl)*& ! v
-                        this % solution % interior % hostData(i,j,2,iEl)+& ! rho*v
-                        this % primitive % interior % hostData(i,j,4,iEl) ! pressure
+                    ! rho*v*v + p
+                    this % flux % physical % hostData(2,1,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(n,j,2,iEl)*& ! v
+                          this % solution % interior % hostData(n,j,2,iEl)+& ! rho*v
+                          this % primitive % interior % hostData(n,j,4,iEl) ) ! pressure
+
+                    ! rho*v*u
+                    this % flux % physical % hostData(1,2,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(i,n,1,iEl)*& ! u
+                          this % solution % interior % hostData(i,n,2,iEl) ) ! rho*v
+
+                    ! rho*v*v + p
+                    this % flux % physical % hostData(2,2,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(i,n,2,iEl)*& ! v
+                          this % solution % interior % hostData(i,n,2,iEl)+& ! rho*v
+                          this % primitive % interior % hostData(i,n,4,iEl) ) ! pressure
+
+                  ENDDO
 
 
                 ELSEIF ( iVar == 3 )THEN ! density
-                  this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % solution % interior % hostData(i,j,1,iEl) !rho*u
+                        
+                  DO n = 0, this % solution % interp % N
+                    this % flux % physical % hostData(1,1,n,i,j,iVar,iEl) = &
+                          ( this % solution % interior % hostData(n,j,1,iEl) ) !rho*u
 
-                  this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % solution % interior % hostData(i,j,2,iEl) !rho*v
+                    this % flux % physical % hostData(2,1,n,i,j,iVar,iEl) = &
+                          ( this % solution % interior % hostData(n,j,2,iEl) ) !rho*v
+
+                    this % flux % physical % hostData(1,2,n,i,j,iVar,iEl) = &
+                          ( this % solution % interior % hostData(i,n,1,iEl) ) !rho*u
+
+                    this % flux % physical % hostData(2,2,n,i,j,iVar,iEl) = &
+                          ( this % solution % interior % hostData(i,n,2,iEl) ) !rho*v
+                  ENDDO
 
                 ELSEIF ( iVar == 4 )THEN ! total energy (rho*u*H)
 
-                  this % flux % interior % hostData(1,i,j,iVar,iEl) = &
-                        this % primitive % interior % hostData(i,j,1,iEl)*&
-                        this % diagnostics % interior % hostData(i,j,2,iEl) !rho*u*H
+                  DO n = 0, this % solution % interp % N
+                    this % flux % physical % hostData(1,1,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(n,j,1,iEl)*&
+                          this % diagnostics % interior % hostData(n,j,2,iEl) )!rho*u*H
 
-                  this % flux % interior % hostData(2,i,j,iVar,iEl) = &
-                        this % primitive % interior % hostData(i,j,2,iEl)*&
-                        this % diagnostics % interior % hostData(i,j,2,iEl) !rho*v*H
+                    this % flux % physical % hostData(2,1,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(n,j,2,iEl)*&
+                          this % diagnostics % interior % hostData(n,j,2,iEl) ) !rho*v*H
+
+                    this % flux % physical % hostData(1,2,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(i,n,1,iEl)*&
+                          this % diagnostics % interior % hostData(i,n,2,iEl) )!rho*u*H
+
+                    this % flux % physical % hostData(2,2,n,i,j,iVar,iEl) = &
+                          ( this % primitive % interior % hostData(i,n,2,iEl)*&
+                          this % diagnostics % interior % hostData(i,n,2,iEl) ) !rho*v*H
+                  ENDDO
 
                 ENDIF
 
@@ -1460,7 +1503,7 @@ CONTAINS
         ENDDO
       ENDIF
 
-  END SUBROUTINE Flux_CompressibleIdealGas2D
+  END SUBROUTINE SinglePointFlux_CompressibleIdealGas2D
 
   SUBROUTINE RiemannSolver_CompressibleIdealGas2D(this)
   !! This overridden method serves as a wrapper that calls
@@ -1564,79 +1607,6 @@ CONTAINS
 
   END SUBROUTINE NaiveLLF_CompressibleIdealGas2D
 
-!  SUBROUTINE ShimaEtAl_CompressibleIdealGas2D(this)
-!  !! Adapted from Trixi-Framework/Trixi.jl for Fortran and HIPFort
-!  !!  https://github.com/trixi-framework/Trixi.jl/blob/main/src/equations/compressible_euler_2d.jl
-!  !!
-!  !! This flux is is a modification of the original kinetic energy preserving two-point flux by
-!  !! - Yuichi Kuya, Kosuke Totani and Soshi Kawai (2018)
-!  !!   Kinetic energy and entropy preserving schemes for compressible flows
-!  !!   by split convective forms
-!  !!   [DOI: 10.1016/j.jcp.2018.08.058](https://doi.org/10.1016/j.jcp.2018.08.058)
-!  !! The modification is in the energy flux to guarantee pressure equilibrium and was developed by
-!  !! - Nao Shima, Yuichi Kuya, Yoshiharu Tamaki, Soshi Kawai (JCP 2020)
-!  !!   Preventing spurious pressure oscillations in split convective form discretizations for
-!  !!   compressible flows
-!  !!   [DOI: 10.1016/j.jcp.2020.110060](https://doi.org/10.1016/j.jcp.2020.110060)
-!    IMPLICIT NONE
-!    CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
-!    ! Local
-!    ! Local
-!    INTEGER :: i,iSide,iEl
-!    REAL(prec) :: nhat(1:2), nmag
-!    REAL(prec) :: cL, cR, unL, unR, HL, HR, HuL, HuR, HvL, HvR
-!    REAL(prec) :: alpha
-!    REAL(prec) :: fluxL(1:4)
-!    REAL(prec) :: fluxR(1:4)
-!    REAL(prec) :: jump(1:4)
-!
-!      DO iEl = 1, this % solution % nElem
-!        DO iSide = 1, 4
-!          DO i = 0, this % solution % interp % N
-!
-!            ! Get the boundary normals on cell edges from the mesh geometry
-!            nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
-!            nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
-!
-!            unL = this % velocity % boundary % hostData(1,i,1,iSide,iEl)*nhat(1) +&
-!                  this % velocity % boundary % hostData(2,i,1,iSide,iEl)*nhat(2)
-!
-!            unR = this % velocity % extBoundary % hostData(1,i,1,iSide,iEl)*nhat(1) +&
-!                  this % velocity % extBoundary % hostData(2,i,1,iSide,iEl)*nhat(2)
-!
-!            rhoAvg = 0.5_prec*(this % solution % boundary % hostData(i,3,iSide,iEl) +&
-!                     this % solution % extBoundary % hostData(i,3,iSide,iEl))
-!
-!            uAvg = 0.5_prec*(this % velocity % boundary % hostData(1,i,1,iSide,iEl) +&
-!                     this % velocity % extBoundary % hostData(1,i,1,iSide,iEl))
-!
-!            vAvg = 0.5_prec*(this % velocity % boundary % hostData(2,i,1,iSide,iEl) +&
-!                     this % velocity % extBoundary % hostData(2,i,1,iSide,iEl))
-!
-!            unAvg = 0.5_prec*( unL + unR )
-!
-!            pAvg = 0.5_prec*(this % diagnostics % boundary % hostData(i,prIndex,iSide,iEl) +&
-!                     this % diagnostics % extBoundary % hostData(i,prIndex,iSide,iEl))
-!
-!            v2Avg = 0.5_prec*( this % velocity % boundary % hostData(1,i,1,iSide,iEl)*&
-!                              this % velocity % extBoundary % hostData(1,i,1,iSide,iEl) +&
-!                              this % velocity % boundary % hostData(2,i,1,iSide,iEl)*&
-!                              this % velocity % extBoundary % hostData(2,i,1,iSide,iEl) )
-!
-!            this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = (rhoAvg*unAvg*uAvg + pAvg*nhat(1))*nMag
-!            this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = (rhoAvg*unAvg*vAvg + pAvg*nhat(2))*nMag
-!            this % flux % boundaryNormal % hostData(i,3,iSide,iEl) = (rhoAvg*unAvg)*nMag
-!            this % flux % boundaryNormal % hostData(i,4,iSide,iEl) = (rhoAvg*unAvg*v2Avg + pAvg*unAvg/(gamma-1.0_prec) + &
-!                                                                      0.5_prec*(pL*unR + pR*vnL))*nMag
-!
-!
-!          ENDDO
-!        ENDDO
-!      ENDDO
-!
-!
-!  END SUBROUTINE ShimaEtAl_CompressibleIdealGas2D
-  
   SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this, filename)
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D), INTENT(inout) :: this
@@ -1650,11 +1620,6 @@ CONTAINS
     CHARACTER(LEN=self_FormatLength) :: fmat
     CHARACTER(13) :: timeStampString
     CHARACTER(5) :: rankString
-    TYPE(Scalar2D) :: solution
-    TYPE(Scalar2D) :: diagnostics
-    TYPE(Scalar2D) :: environmentals
-    TYPE(Vector2D) :: x
-    TYPE(Lagrange),TARGET :: interp
 
     IF( PRESENT(filename) )THEN
       tecFile = filename

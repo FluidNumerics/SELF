@@ -20,6 +20,8 @@ MODULE SELF_ShallowWater
     REAL(prec) :: g     ! gravity ( m/s^2) 
     TYPE(MappedScalar2D) :: H ! bottom topography ( m )
     TYPE(MappedVector2D) :: gradH ! bottom topography gradient ( m/m )
+    TYPE(MappedVector2D) :: velocity
+    TYPE(MappedVector2D) :: compVelocity
 
 
     CONTAINS
@@ -127,6 +129,7 @@ CONTAINS
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % solutionGradient % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % flux % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % p2flux % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % source % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
 

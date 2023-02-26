@@ -425,6 +425,46 @@ extern "C"
   } 
 }
 
+// ContravariantProjection_MappedP2Vector2D_gpu
+__global__ void ContravariantProjection_MappedP2Vector2D_gpu(real *vector, real *physical, real *dsdx, int N, int nVar){
+
+  size_t iVar = blockIdx.x;
+  size_t iEl = blockIdx.y;
+  size_t i = threadIdx.x;
+  size_t j = threadIdx.y;
+
+
+  for( int n = 0; n < N; n++){
+
+    real Fx = physical[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)];
+    real Fy = physical[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)];
+
+    vector[P2VE_2D_INDEX(1,n,i,j,iVar,iEl,N,nVar)] = 
+	    0.5*( dsdx[TE_2D_INDEX(1,1,i,j,0,iEl,N,1)] +
+	          dsdx[TE_2D_INDEX(1,1,n,j,0,iEl,N,1)] )*Fx+
+            0.5*( dsdx[TE_2D_INDEX(2,1,i,j,0,iEl,N,1)] +
+                  dsdx[TE_2D_INDEX(2,1,n,j,0,iEl,N,1)] )*Fy;
+
+    Fx = physical[P2PVE_2D_INDEX(1,2,n,i,j,iVar,iEl,N,nVar)];
+    Fy = physical[P2PVE_2D_INDEX(2,2,n,i,j,iVar,iEl,N,nVar)];
+
+    vector[P2VE_2D_INDEX(2,n,i,j,iVar,iEl,N,nVar)] = 
+	    0.5*( dsdx[TE_2D_INDEX(1,2,i,j,0,iEl,N,1)] +
+	          dsdx[TE_2D_INDEX(1,2,i,n,0,iEl,N,1)] )*Fx+
+	    0.5*( dsdx[TE_2D_INDEX(2,2,i,j,0,iEl,N,1)] +
+	          dsdx[TE_2D_INDEX(2,2,i,n,0,iEl,N,1)] )*Fy;
+  }
+  
+}
+
+extern "C"
+{
+  void ContravariantProjection_MappedP2Vector2D_gpu_wrapper(real **vector, real **physical, real **dsdx, int N, int nVar, int nEl)
+  {
+    ContravariantProjection_MappedP2Vector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *physical, *dsdx, N, nVar);
+  } 
+}
+
 __global__ void ContravariantProjectionBoundary_MappedVector2D_gpu(real *physVector, real *boundaryNormal, real *nhat, int N, int nVar){
 
   size_t iSide = blockIdx.x+1;
