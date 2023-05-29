@@ -13,7 +13,6 @@ MODULE SELF_Mesh
   USE SELF_HDF5
   ! External Libs !
   USE HDF5
-  USE MPI
 
   USE hipfort
   USE hipfort_check

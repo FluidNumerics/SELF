@@ -40,6 +40,8 @@ MODULE SELF_CompressibleIdealGas2D
     TYPE(MappedScalar2D) :: primitive ! Contains primitive variables 
     TYPE(MappedScalar2D) :: entropyVars ! Contains entropy variables
     TYPE(MappedScalar2D) :: environmentals ! Functions to describe environmental features (e.g. gravitational potential)
+    
+    TYPE(MappedVector2D) :: primitiveGradient ! Gradient of the primitive variables
     TYPE(MappedVector2D) :: environmentalsGradient ! Functions to describe environmental features (e.g. gravitational potential)
 
     TYPE(MappedScalar2D) :: diagnostics
@@ -67,7 +69,12 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SourceMethod => Source_CompressibleIdealGas2D
     PROCEDURE :: FluxMethod => SinglePointFlux_CompressibleIdealGas2D
     PROCEDURE :: RiemannSolver => RiemannSolver_CompressibleIdealGas2D
+    PROCEDURE :: UpdateBoundary => UpdateBoundary_CompressibleIdealGas2D
+    
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
+    PROCEDURE,PRIVATE :: SetSolutionBoundaryCondition
+    PROCEDURE,PRIVATE :: SetPrimitiveBoundaryCondition
+    PROCEDURE,PRIVATE :: SetDiagnosticsBoundaryCondition
 
     ! New Methods
     PROCEDURE :: CheckMinMax => CheckMinMax_CompressibleIdealGas2D
@@ -283,14 +290,21 @@ CONTAINS
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % prescribedSolution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    
     CALL this % diagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
     CALL this % prescribedDiagnostics % Init(geometry % x % interp,nDiagnostics,this % mesh % nElem)
+    
     CALL this % environmentals % Init(geometry % x % interp,2,this % mesh % nElem)
+    
+    CALL this % solutionGradient % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    CALL this % primitiveGradient % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % environmentalsGradient % Init(geometry % x % interp,2,this % mesh % nElem)
+    
     CALL this % workSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % prevSol % Init(geometry % x % interp,nVar,this % mesh % nElem)
     CALL this % dSdt % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
-    CALL this % solutionGradient % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
+    
+    
     CALL this % flux % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % source % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
     CALL this % fluxDivergence % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -372,6 +386,7 @@ CONTAINS
     CALL this % source % Free()
     CALL this % fluxDivergence % Free()
     CALL this % primitive % Free()
+    CALL this % primitiveGradient % Free()
     CALL this % prescribedPrimitive % Free()
     CALL this % entropyVars % Free()
 
@@ -987,17 +1002,6 @@ CONTAINS
       CALL this % ConservativeToPrimitive()
       CALL this % ConservativeToEntropy()
 
-      ! Interpolate velocity and required diagnostics to the element boundaries
-      CALL this % primitive % BoundaryInterp(this % gpuAccel)
-      CALL this % diagnostics % BoundaryInterp(this % gpuAccel)
-      CALL this % entropyVars % BoundaryInterp(this % gpuAccel)
-
-      ! Perform any MPI exchanges for the velocity and the required diagnostics
-      ! across shared element faces between neighboring processes.
-      CALL this % primitive % SideExchange(this % mesh, this % decomp, this % gpuAccel)
-      CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
-      CALL this % entropyVars % SideExchange(this % mesh, this % decomp, this % gpuAccel)
-
   END SUBROUTINE PreTendency_CompressibleIdealGas2D
 
   SUBROUTINE CalculateDiagnostics(this)
@@ -1232,8 +1236,28 @@ CONTAINS
       ENDIF
 
   END SUBROUTINE ConservativeToEntropy
+  
+  SUBROUTINE UpdateBoundary_CompressibleIdealGas2D(this)
+  !! Interpolates the solution to element boundaries and performs the sideExchange
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    
+    ! Interpolate velocity and required diagnostics to the element boundaries
+    CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % primitive % BoundaryInterp(this % gpuAccel)
+    CALL this % diagnostics % BoundaryInterp(this % gpuAccel)
+    CALL this % entropyVars % BoundaryInterp(this % gpuAccel)
 
-  SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D(this)
+    ! Perform any MPI exchanges for the velocity and the required diagnostics
+    ! across shared element faces between neighboring processes.
+    CALL this % solution % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+    CALL this % primitive % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+    CALL this % diagnostics % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+    CALL this % entropyVars % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+  
+  END SUBROUTINE UpdateBoundary_CompressibleIdealGas2D
+  
+  SUBROUTINE SetSolutionBoundaryCondition(this)
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
     ! Local
@@ -1283,22 +1307,6 @@ CONTAINS
                           this % solution % boundary % hostData(i,3,iSide,iEl)
                   this % solution % extBoundary % hostData(i,4,iSide,iEl) = &
                           this % solution % boundary % hostData(i,4,iSide,iEl)
-                  
-                  ! Primitive variables
-                  u = this % primitive % boundary % hostData(i,1,iSide,iEl) 
-                  v = this % primitive % boundary % hostData(i,2,iSide,iEl) 
-                  this % primitive % extBoundary % hostData(i,1,iSide,iEl) = &
-                          (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
-                  this % primitive % extBoundary % hostData(i,2,iSide,iEl) = &
-                          (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
-                  this % primitive % extBoundary % hostData(i,3,iSide,iEl) = &
-                          this % primitive % boundary % hostData(i,3,iSide,iEl)
-                  this % primitive % extBoundary % hostData(i,4,iSide,iEl) = &
-                          this % primitive % boundary % hostData(i,4,iSide,iEl)
-                  
-                  ! Prolong the diagnostic values to the external state
-                  this % diagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
-                    this % diagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
 
                 ENDDO
              
@@ -1314,19 +1322,6 @@ CONTAINS
                           this % prescribedSolution % boundary % hostData(i,3,iSide,iEl)
                   this % solution % extBoundary % hostData(i,4,iSide,iEl) = &
                           this % prescribedSolution % boundary % hostData(i,4,iSide,iEl)
-                      
-
-                  this % primitive % extBoundary % hostData(i,1,iSide,iEl) = &
-                          this % prescribedPrimitive % boundary % hostData(i,1,iSide,iEl)
-                  this % primitive % extBoundary % hostData(i,2,iSide,iEl) = &
-                          this % prescribedPrimitive % boundary % hostData(i,2,iSide,iEl)
-                  this % primitive % extBoundary % hostData(i,3,iSide,iEl) = &
-                          this % prescribedPrimitive % boundary % hostData(i,3,iSide,iEl)
-                  this % primitive % extBoundary % hostData(i,4,iSide,iEl) = &
-                          this % prescribedPrimitive % boundary % hostData(i,4,iSide,iEl)
-
-                  this % diagnostics % extBoundary % hostData(i,1:nDiagnostics,iSide,iEl) = &
-                    this % prescribedDiagnostics % boundary % hostData(i,1:nDiagnostics,iSide,iEl)
 
                 ENDDO
 
@@ -1338,6 +1333,177 @@ CONTAINS
         ENDDO
       ENDIF
 
+
+  END SUBROUTINE SetSolutionBoundaryCondition 
+  
+  SUBROUTINE SetPrimitiveBoundaryCondition(this)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, i
+    INTEGER :: bcid, e2
+    REAL(prec) :: u, v, nhat(1:2)
+
+
+      IF( this % gpuAccel )THEN
+      
+        PRINT*,"SetPrimitiveBoundaryCondition (gpu wrapper) : unset prodcedure"
+
+        !CALL SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(&
+        !  this % solution % boundary % deviceData, &
+        !  this % solution % extBoundary % deviceData, &
+        !  this % prescribedSolution % boundary % deviceData, &
+        !  this % primitive % boundary % deviceData, &
+        !  this % primitive % extBoundary % deviceData, &
+        !  this % prescribedPrimitive % boundary % deviceData, &
+        !  this % diagnostics % boundary % deviceData, &
+        !  this % diagnostics % extBoundary % deviceData, &
+        !  this % prescribedDiagnostics % boundary % deviceData, &
+        !  this % geometry % nHat % boundary % deviceData, &
+        !  this % mesh % sideInfo % deviceData, &
+        !  this % solution % interp % N, &
+        !  this % solution % nVar, &
+        !  this % diagnostics % nVar, &
+        !  this % solution % nElem )
+
+      ELSE
+
+        DO iEl = 1, this % solution % nElem
+          DO iSide = 1, 4
+            bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
+            e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+            IF( e2 == 0 )THEN
+              IF( bcid == SELF_BC_NONORMALFLOW )THEN
+
+                DO i = 0, this % solution % interp % N
+                  nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+                  u = this % primitive % boundary % hostData(i,1,iSide,iEl) 
+                  v = this % primitive % boundary % hostData(i,2,iSide,iEl) 
+                  this % primitive % extBoundary % hostData(i,1,iSide,iEl) = &
+                          (nhat(2)**2 - nhat(1)**2)*u - 2.0_prec*nhat(1)*nhat(2)*v
+                  this % primitive % extBoundary % hostData(i,2,iSide,iEl) = &
+                          (nhat(1)**2 - nhat(2)**2)*v - 2.0_prec*nhat(1)*nhat(2)*u
+                  this % primitive % extBoundary % hostData(i,3,iSide,iEl) = &
+                          this % primitive % boundary % hostData(i,3,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,4,iSide,iEl) = &
+                          this % primitive % boundary % hostData(i,4,iSide,iEl)
+
+                ENDDO
+             
+              ELSEIF( bcid == SELF_BC_PRESCRIBED .OR. bcid == SELF_BC_RADIATION )THEN
+
+                DO i = 0, this % solution % interp % N
+
+                  this % primitive % extBoundary % hostData(i,1,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,1,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,2,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,2,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,3,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,3,iSide,iEl)
+                  this % primitive % extBoundary % hostData(i,4,iSide,iEl) = &
+                          this % prescribedPrimitive % boundary % hostData(i,4,iSide,iEl)
+
+                ENDDO
+
+              ENDIF
+
+            ENDIF
+
+          ENDDO
+        ENDDO
+      ENDIF
+
+  END SUBROUTINE SetPrimitiveBoundaryCondition
+  
+  SUBROUTINE SetDiagnosticsBoundaryCondition(this)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, i, iVar
+    INTEGER :: bcid, e2
+    REAL(prec) :: u, v, nhat(1:2)
+
+
+      IF( this % gpuAccel )THEN
+
+        ! TO DO : 
+        PRINT*,"SetDiagnosticsBoundaryCondition (gpu wrapper) : unset prodcedure"
+        !CALL SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(&
+        !  this % solution % boundary % deviceData, &
+        !  this % solution % extBoundary % deviceData, &
+        !  this % prescribedSolution % boundary % deviceData, &
+        !  this % primitive % boundary % deviceData, &
+        !  this % primitive % extBoundary % deviceData, &
+        !  this % prescribedPrimitive % boundary % deviceData, &
+        !  this % diagnostics % boundary % deviceData, &
+        !  this % diagnostics % extBoundary % deviceData, &
+        !  this % prescribedDiagnostics % boundary % deviceData, &
+        !  this % geometry % nHat % boundary % deviceData, &
+        !  this % mesh % sideInfo % deviceData, &
+        !  this % solution % interp % N, &
+        !  this % solution % nVar, &
+        !  this % diagnostics % nVar, &
+        !  this % solution % nElem )
+
+      ELSE
+
+        DO iEl = 1, this % solution % nElem
+          DO iSide = 1, 4
+            bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
+            e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
+            IF( e2 == 0 )THEN
+              IF( bcid == SELF_BC_NONORMALFLOW )THEN
+
+                DO iVar = 1, nDiagnostics
+                  DO i = 0, this % solution % interp % N
+
+                    ! Prolong the diagnostic values to the external state
+                    this % diagnostics % extBoundary % hostData(i,iVar,iSide,iEl) = &
+                      this % diagnostics % boundary % hostData(i,iVar,iSide,iEl)
+                      
+                  ENDDO
+                ENDDO
+             
+              ELSEIF( bcid == SELF_BC_PRESCRIBED .OR. bcid == SELF_BC_RADIATION )THEN
+
+                DO iVar = 1, nDiagnostics
+                  DO i = 0, this % solution % interp % N
+                    this % diagnostics % extBoundary % hostData(i,iVar,iSide,iEl) = &
+                      this % prescribedDiagnostics % boundary % hostData(i,iVar,iSide,iEl)
+                  ENDDO
+                ENDDO
+
+              ENDIF
+
+            ENDIF
+
+          ENDDO
+        ENDDO
+      ENDIF
+
+
+  END SUBROUTINE SetDiagnosticsBoundaryCondition
+  
+  SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D(this)
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl, iSide, i
+    INTEGER :: bcid, e2
+    REAL(prec) :: u, v, nhat(1:2)
+
+      CALL this % SetSolutionBoundaryCondition()
+      CALL this % SetPrimitiveBoundaryCondition()
+      CALL this % SetDiagnosticsBoundaryCondition()
+      
+      ! Compute the gradient of the solution using the Bassi-Rebay Method
+      !CALL this % primitive % GradientBR( this % geometry, &
+      !                                   this % primitiveGradient, &
+      !                                   this % gpuAccel)
+      
+      !CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
+      !CALL this % primitiveGradient % SideExchange(this % gpuAccel)
+      !CALL this % SetPrimitiveGradientBoundaryCondition(this % gpuAccel)
 
   END SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D 
 
@@ -1504,7 +1670,7 @@ CONTAINS
       ENDIF
 
   END SUBROUTINE SinglePointFlux_CompressibleIdealGas2D
-
+  
   SUBROUTINE RiemannSolver_CompressibleIdealGas2D(this)
   !! This overridden method serves as a wrapper that calls
   !! the RiemannFlux procedure pointer. This design allows
@@ -1514,7 +1680,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
 
+      ! For hyperbolic terms
       CALL this % RiemannFlux()
+      
+      ! For parabolic terms
+      !CALL this % ParabolicFlux()
 
   END SUBROUTINE RiemannSolver_CompressibleIdealGas2D
 
@@ -1607,6 +1777,65 @@ CONTAINS
 
   END SUBROUTINE NaiveLLF_CompressibleIdealGas2D
 
+  !SUBROUTINE PrimitiveGradientBRFlux_CompressibleIdealGas2D(this)
+  !!! This method computes the gradient of the primitive variables
+  !!! and uses the primitive variables, their gradient, and the
+  !!! conservative variables (solution) to compute the 
+  !!! diffusive momentum and energy fluxes.
+  !!!
+  !!! Thie method assumes that the hyperbolic flux is computed before
+  !!! calling this method; we add to the boundaryNormal component
+  !!! of the flux.
+  !!!
+  !IMPLICIT NONE
+  !  CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+  !    
+  !    IF( this % gpuAccel )THEN
+
+  !    ! TO DO : GPU Accelerated flux
+  !    !CALL NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
+  !    !       this % solution % boundary % deviceData, &
+  !    !       this % solution % extBoundary % deviceData, &
+  !    !       this % primitive % boundary % deviceData, &
+  !    !       this % primitive % extBoundary % deviceData, &
+  !    !       this % diagnostics % boundary % deviceData, &
+  !    !       this % diagnostics % extBoundary % deviceData, &
+  !    !       this % geometry % nHat % boundary % deviceData, &
+  !    !       this % geometry % nScale % boundary % deviceData, &
+  !    !       this % solution % interp % N, &
+  !    !       this % solution % nVar, &
+  !    !       this % diagnostics % nVar, &
+  !    !       this % solution % nElem)
+
+  !  ELSE
+
+  !    DO iEl = 1, this % solution % nElem
+  !      DO iSide = 1, 4
+  !        DO i = 0, this % solution % interp % N
+
+  !           ! Get the boundary normals on cell edges from the mesh geometry
+  !           nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
+  !           nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
+  !           
+  !           ! average x-component of the stress tensor
+  !           tx(1) = this % primitiveGradient % boundary
+  !           
+  !           ! average y-component of the stress tensor
+
+  !           ! average temperature gradient normal to the edge
+
+  !            ! LEFT OFF : 5/29/2023 @ 12:31pm
+  !           ! Add to the boundaryNormal flux
+  !           this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) =  0.5_prec*(  )*nmag
+
+  !        ENDDO
+  !      ENDDO
+  !    ENDDO
+
+  !  ENDIF
+  !    
+  !END SUBROUTINE PrimitiveGradientBRFlux_CompressibleIdealGas2D
+  
   SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this, filename)
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D), INTENT(inout) :: this

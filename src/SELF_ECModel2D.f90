@@ -55,11 +55,7 @@ MODULE SELF_ECModel2D
     PROCEDURE,PRIVATE :: SetSolutionFromChar_ECModel2D
     PROCEDURE,PRIVATE :: SetSolutionFromEqn_ECModel2D
 
-!    GENERIC :: SetVelocityField => SetVelocityFieldFromChar_ECModel2D,&
-!                              SetVelocityFieldFromEqn_ECModel2D
-!    PROCEDURE,PRIVATE :: SetVelocityFieldFromChar_ECModel2D
-!    PROCEDURE,PRIVATE :: SetVelocityFieldFromEqn_ECModel2D
-
+    PROCEDURE :: UpdateBoundary => UpdateBoundary_ECModel2D
     PROCEDURE :: ReprojectFlux => ReprojectFlux_ECModel2D
 
     PROCEDURE :: ReadModel => Read_ECModel2D
@@ -804,16 +800,23 @@ CONTAINS
                                     this % gpuAccel)
 
   END SUBROUTINE CalculateFluxDivergence_ECModel2D
-
+  
+  SUBROUTINE UpdateBoundary_ECModel2D(this)
+    IMPLICIT NONE
+    CLASS(ECModel2D),INTENT(inout) :: this
+    
+    CALL this % solution % BoundaryInterp(this % gpuAccel)
+    CALL this % solution % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+  
+  END SUBROUTINE UpdateBoundary_ECModel2D
+  
   SUBROUTINE CalculateTendency_ECModel2D(this)
     IMPLICIT NONE
     CLASS(ECModel2D),INTENT(inout) :: this
-    ! Local
     INTEGER :: i, j, iVar, iEl
 
     CALL this % PreTendency()
-    CALL this % solution % BoundaryInterp(this % gpuAccel)
-    CALL this % solution % SideExchange(this % mesh, this % decomp, this % gpuAccel)
+    CALL this % UpdateBoundary()
     CALL this % SetBoundaryCondition()
     CALL this % SourceMethod()
     CALL this % RiemannSolver()

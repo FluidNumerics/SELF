@@ -129,6 +129,7 @@ MODULE SELF_Model
     PROCEDURE :: SourceMethod => Source_Model
     PROCEDURE :: FluxMethod => Flux_Model
     PROCEDURE :: RiemannSolver => RiemannSolver_Model
+    PROCEDURE :: UpdateBoundary => UpdateBoundary_Model
     PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Model
 
     PROCEDURE :: ReportEntropy => ReportEntropy_Model
@@ -280,6 +281,14 @@ CONTAINS
       RETURN
 
   END SUBROUTINE Flux_Model
+  
+  SUBROUTINE UpdateBoundary_Model(this)
+  !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+      RETURN
+  END SUBROUTINE UpdateBoundary_Model
 
   SUBROUTINE SetBoundaryCondition_Model(this)
     IMPLICIT NONE
