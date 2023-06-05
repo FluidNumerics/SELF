@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+jobs:
+  test:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: ${{ matrix.os_name }} - ${{ matrix.compiler }} - ${{ matrix.cuda_version }} - ${{ github.event_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - os: ubuntu-20.04
+            os_name: linux
+            compiler: gfortran-10
+            shell: bash
+            coverage: true
+            cuda_version: 11.8.0
+
+    # Set default shell as suggested here: https://github.community/t/setting-default-shell-or-other-step-metadata-conditionally-in-workflows/154055
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      # Install CUDA
+      - uses: Jimver/cuda-toolkit@v0.2.10
+        id: cuda-toolkit
+        with:
+          cuda: ${{ matrix.cuda_version }} 
+
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          ./util/install_dependencies.sh
+
+      - name: Show version information
+        run: |
+          ${{ matrix.compiler }} --version
+
+      - name: Build
+        run: |
+          ./util/install.sh
+
+      - name: Run tests for coverage
+        if: ${{ matrix.coverage }}
+        run: |
+          sudo apt-get install -y gcovr
+          ./util/coverage.sh
+
+      - uses: codecov/codecov-action@v3
+        if: ${{ matrix.coverage }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Coveralls
+        if: ${{ matrix.coverage }}
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          path-to-lcov: ./coverage.xml

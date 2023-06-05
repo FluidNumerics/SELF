@@ -1,0 +1,28 @@
+spack:
+  view: /opt/view/self
+  config:
+    install_tree: /opt/software/self
+  specs:
+  - hdf5@1.12.2+cxx+fortran+mpi
+  - hipfort@5.2.3
+  - json-fortran@8.3.0
+  - feq-parse@1.1.0
+  - flap@master
+  packages:
+    all:
+      compiler: [@COMPILER@]
+    cuda:
+      buildable: false
+      externals:
+      - spec: cuda@11.8.89
+        prefix: /usr/local/cuda
+    hip:
+      buildable: false
+      externals:
+      - spec: hip@5.2.3
+        prefix: /opt/rocm/
+    openssh:
+      buildable: false
+      externals:
+      - spec: openssh@7.4p1
+        prefix: /usr
