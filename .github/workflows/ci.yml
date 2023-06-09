@@ -21,7 +21,7 @@ env:
 
 jobs:
   build:
-    name: Docker login, build, and push
+    name: Docker build and push
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -45,7 +45,7 @@ jobs:
          --build-arg HIP_PLATFORM=$${{ matrix.hip_platform }} \
          --build-arg PREC=${{ matrix.precision }} \
          --build-arg FFLAGS="${{ matrix.fflags }}" \
-         --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}}:$GITHUB_SHA" \
+         --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
           .
     - id: 'auth'
       name: 'Authenticate to Google Cloud'
@@ -64,7 +64,7 @@ jobs:
     - name: 'Docker push'
       run: |-
         docker push \
-        "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}}:$GITHUB_SHA"
+        "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
 
   test:
     name: "amd-mi50-test"
