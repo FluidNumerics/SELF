@@ -38,6 +38,22 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: access_token
+        workload_identity_provider: projects/163522599797/locations/global/workloadIdentityPools/ghactions/providers/github
+        service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
+        access_token_lifetime: 7200s
+
+    - name: Login to Artifact Registry
+      uses: docker/login-action@v1
+      with:
+        registry: us-docker.pkg.dev
+        username: oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }}
+
     - name: 'Docker build'
       run: |-
         docker build \
@@ -47,19 +63,7 @@ jobs:
          --build-arg FFLAGS="${{ matrix.fflags }}" \
          --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
           .
-    - id: 'auth'
-      name: 'Authenticate to Google Cloud'
-      uses: 'google-github-actions/auth@v0.6.0'
-      with:
-        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
-        token_format: 'access_token'
 
-    - uses: 'docker/login-action@v1'
-      name: 'Docker login'
-      with:
-        registry: 'us-docker.pkg.dev'
-        username: 'oauth2accesstoken'
-        password: '${{ steps.auth.outputs.access_token }}'
 
     - name: 'Docker push'
       run: |-
