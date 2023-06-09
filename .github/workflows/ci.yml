@@ -44,7 +44,7 @@ jobs:
          --build-arg GPU_TARGET=${{ matrix.gpu_target }} \
          --build-arg HIP_PLATFORM=$${{ matrix.hip_platform }} \
          --build-arg PREC=${{ matrix.precision }} \
-         --build-arg FFLAGS=${{ matrix.fflags }} \
+         --build-arg FFLAGS="${{ matrix.fflags }}" \
          --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}}:$GITHUB_SHA" \
           .
     - id: 'auth'
