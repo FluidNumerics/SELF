@@ -1,13 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'AUTHORS.md'
-      - 'LICENSE.md'
-      - 'README.md'
   pull_request:
     paths-ignore:
       - 'AUTHORS.md'
@@ -15,46 +8,52 @@ on:
       - 'README.md'
 
 jobs:
+  build_images:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: Trigger Google Cloud Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+  
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+  
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v0'
+  
+    - name: 'Use gcloud CLI'
+      run: 'gcloud info'
+  
+    - name: 'Start Cloud Build'
+      run: |
+        export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+        gcloud builds submit . --config=ci/cloudbuild.yaml --substitutions "_PREC=double","_GPU_TARGET=gfx900","_HIP_PLATFORM=amd","_ROCM_VERSION=5.2.3"
+  
+  
   test:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
-    name: ${{ matrix.os_name }} - ${{ matrix.compiler }} - ${{ matrix.cuda_version }} - ${{ github.event_name }}
+    name: "amd-mi50-test"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           # Linux
-          - os: ubuntu-20.04
-            os_name: linux
-            compiler: gfortran-10
-            shell: bash
+          - os: self-hosted
             coverage: true
-            cuda_version: 11.8.0
 
     # Set default shell as suggested here: https://github.community/t/setting-default-shell-or-other-step-metadata-conditionally-in-workflows/154055
     defaults:
       run:
         shell: ${{ matrix.shell }}
     steps:
-      # Install CUDA
-      - uses: Jimver/cuda-toolkit@v0.2.10
-        id: cuda-toolkit
-        with:
-          cuda: ${{ matrix.cuda_version }} 
-
 
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: |
-          ./util/install_dependencies.sh
-
-      - name: Show version information
-        run: |
-          ${{ matrix.compiler }} --version
-
-      - name: Build
+      - name: Build Docker Container
         run: |
           ./util/install.sh
 

@@ -1,5 +1,8 @@
 FROM nvidia/cuda:11.8.0-devel-ubuntu20.04 as bootstrap
 
+ARG ROCM_VERSION=5.2.3
+ARG SPACK_VERSION=v0.19.2
+
 ENV SPACK_ROOT=/opt/spack \
     CURRENTLY_BUILDING_DOCKER_IMAGE=1 \
     container=docker
@@ -36,12 +39,12 @@ RUN apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2.3/ ubuntu main' | tee /etc/apt/sources.list.d/rocm.list &&\
+    echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/${ROCM_VERSION}/ ubuntu main" | tee /etc/apt/sources.list.d/rocm.list &&\
     apt-get -yqq update && \
     apt-get -yqq install rocm-dev
 
 RUN mkdir $SPACK_ROOT && cd $SPACK_ROOT && \
-    git clone https://github.com/spack/spack.git . && git checkout develop  && \
+    git clone https://github.com/spack/spack.git . && git checkout ${SPACK_VERSION}  && \
     mkdir -p $SPACK_ROOT/opt/spack
 
 RUN ln -s $SPACK_ROOT/share/spack/docker/entrypoint.bash \
@@ -75,13 +78,15 @@ CMD ["interactive-shell"]
 
 # Build stage with Spack pre-installed and ready to be used
 FROM bootstrap as builder
+ARG ROCM_VERSION=5.2.3
 
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
 RUN mkdir /opt/spack-environment \
+&&  export ROCM_VERSION=${ROCM_VERSION} \
 &&  (echo "spack:" \
 &&   echo "  specs:" \
-&&   echo "  - hipfort@5.2.3" \
+&&   echo "  - hipfort@${ROCM_VERSION}" \
 &&   echo "  - hdf5@1.12.0+cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
 &&   echo "  - feq-parse@1.1.0" \
@@ -95,7 +100,7 @@ RUN mkdir /opt/spack-environment \
 &&   echo "    hip:" \
 &&   echo "      buildable: false" \
 &&   echo "      externals:" \
-&&   echo "      - spec: hip@5.2.3" \
+&&   echo "      - spec: hip@${ROCM_VERSION}" \
 &&   echo "        prefix: /opt/rocm/" \
 &&   echo "  config:" \
 &&   echo "    install_tree: /opt/software" \
@@ -110,7 +115,7 @@ RUN cd /opt/spack-environment && \
 # Modifications to the environment that are necessary to run
 RUN cd /opt/spack-environment && \
     spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh && \
-    echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/view/lib" >> /etc/profile.d/z10_spack_environment.sh
+    echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/view/lib:/opt/view/lib64" >> /etc/profile.d/z10_spack_environment.sh
 
 FROM builder as sbuild
 ARG GPU_TARGET=sm_72
