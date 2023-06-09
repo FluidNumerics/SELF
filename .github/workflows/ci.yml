@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+env:
+  PROJECT_ID: self-fluids
+  GAR_LOCATION: us-west1
+  REPOSITORY: self
+  IMAGE: main
+
+jobs:
+  build:
+    name: Docker login, build, and push
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rocm_version: '5.4.6'
+            precision: double
+            gpu_target: gfx906
+            hip_platform: amd
+            fflags: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
+
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: 'Docker build'
+      run: |-
+        docker build \
+         --build-arg GPU_TARGET=${{ matrix.gpu_target }} \
+         --build-arg HIP_PLATFORM=$${{ matrix.hip_platform }} \
+         --build-arg PREC=${{ matrix.precision }} \
+         --build-arg FFLAGS=${{ matrix.fflags }} \
+         --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}}:$GITHUB_SHA" \
+          .
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0.6.0'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+        token_format: 'access_token'
+
+    - uses: 'docker/login-action@v1'
+      name: 'Docker login'
+      with:
+        registry: 'us-docker.pkg.dev'
+        username: 'oauth2accesstoken'
+        password: '${{ steps.auth.outputs.access_token }}'
+
+    - name: 'Docker push'
+      run: |-
+        docker push \
+        "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}}:$GITHUB_SHA"
+
+  test:
+    name: "amd-mi50-test"
+    needs: "build"
+    runs-on: self-hosted
+  
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Pull Docker Container
+        run: |
+          apptainer pull docker://us-docker.pkg.dev/self-fluids/self/${{ inputs.selfDockerImage }} self.sif
+
+      - name: Run tests for coverage
+        run: |
+          apptainer exec --rocm --bind $(pwd):/build self.sif /opt/self/ci/test.sh
+
+      - uses: codecov/codecov-action@v3
+        if: ${{ matrix.coverage }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Coveralls
+        if: ${{ matrix.coverage }}
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          path-to-lcov: ./coverage.xml

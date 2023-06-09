@@ -52,6 +52,8 @@ ls $SELF_PREFIX/test/*
 
 for file in $(ls $SELF_PREFIX/test/*); do
 
+  covFile=$(echo $file | awk -F "/" '{print $NF}')
+
   echo "Running Test : $file"
   $file
   rc=$?
@@ -71,10 +73,9 @@ for file in $(ls $SELF_PREFIX/test/*); do
   moveGCDAFiles
 
   # Create a coverage file for this test.
-  covFile=$(echo $file | awk -F "/" '{print $NF}')
+  moveGCDAFiles
   gcovr -r ${SELF_BUILD_DIR} --json -o "${SELF_BUILD_DIR}/$covFile.json"
   tomerge+="-a ${SELF_BUILD_DIR}/$covFile.json "
-
   cleanupGCDAFiles
 
 done
