@@ -22,7 +22,7 @@ env:
 jobs:
   build:
     name: Docker build and push
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       fail-fast: false
       matrix:
@@ -32,6 +32,7 @@ jobs:
             gpu_target: gfx906
             hip_platform: amd
             fflags: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
+            coverage: true
 
     permissions:
       contents: 'read'
@@ -50,6 +51,29 @@ jobs:
          --build-arg FFLAGS="${{ matrix.fflags }}" \
          --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
           .
+
+    - name: Convert docker to singularity 
+      run: |
+        apptainer pull docker://us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
+
+    - name: Run tests for coverage
+      run: |
+        apptainer exec --rocm --bind $(pwd):/build self.sif /opt/self/ci/test.sh
+
+    - uses: codecov/codecov-action@v3
+      if: ${{ matrix.coverage }}
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Coveralls
+      if: ${{ matrix.coverage }}
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        path-to-lcov: ./coverage.xml
 
     - id: 'auth'
       name: 'Authenticate to Google Cloud'
@@ -71,36 +95,3 @@ jobs:
       run: |-
         docker push \
         "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
-
-  test:
-    name: "amd-mi50-test"
-    needs: "build"
-    runs-on: self-hosted
-  
-    steps:
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Pull Docker Container
-        run: |
-          apptainer pull docker://us-docker.pkg.dev/self-fluids/self/${{ inputs.selfDockerImage }} self.sif
-
-      - name: Run tests for coverage
-        run: |
-          apptainer exec --rocm --bind $(pwd):/build self.sif /opt/self/ci/test.sh
-
-      - uses: codecov/codecov-action@v3
-        if: ${{ matrix.coverage }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-
-      - name: Coveralls
-        if: ${{ matrix.coverage }}
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-          path-to-lcov: ./coverage.xml
