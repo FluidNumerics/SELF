@@ -32,7 +32,7 @@ jobs:
             gpu_target: gfx906
             hip_platform: amd
             fflags: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
-            
+
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -40,22 +40,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - id: 'auth'
-      name: 'Authenticate to Google Cloud'
-      uses: 'google-github-actions/auth@v0'
-      with:
-        token_format: access_token
-        workload_identity_provider: projects/163522599797/locations/global/workloadIdentityPools/ghactions/providers/github
-        service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
-        access_token_lifetime: 7200s
-
-    - name: Login to Artifact Registry
-      uses: docker/login-action@v1
-      with:
-        registry: us-docker.pkg.dev
-        username: oauth2accesstoken
-        password: ${{ steps.auth.outputs.access_token }}
 
     - name: 'Docker build'
       run: |-
@@ -67,8 +51,23 @@ jobs:
          --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
           .
 
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: access_token
+        workload_identity_provider: projects/163522599797/locations/global/workloadIdentityPools/ghactions/providers/github
+        service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
+        access_token_lifetime: 300s
 
-    - name: 'Docker push'
+    - name: Login to Artifact Registry
+      uses: docker/login-action@v1
+      with:
+        registry: us-docker.pkg.dev
+        username: oauth2accesstoken
+        password: ${{ steps.auth.outputs.access_token }}
+
+    - name: 'Push to artifact registry'
       run: |-
         docker push \
         "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
