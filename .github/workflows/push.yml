@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+jobs:
+  job:
+    name: Trigger Google Cloud Build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+  
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+  
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v0'
+  
+    - name: 'Use gcloud CLI'
+      run: 'gcloud info'
+  
+    - name: 'Start Google Cloud Build trigger'
+      run: |
+        export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+        gcloud builds submit . --config=ci/cloudbuild.yaml
+  
+  
+  test:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    name: "amd-mi50-test"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - os: self-hosted
+            coverage: true
+
+    # Set default shell as suggested here: https://github.community/t/setting-default-shell-or-other-step-metadata-conditionally-in-workflows/154055
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Docker Container
+        run: |
+          ./util/install.sh
+
+      - name: Run tests for coverage
+        if: ${{ matrix.coverage }}
+        run: |
+          sudo apt-get install -y gcovr
+          ./util/coverage.sh
+
+      - uses: codecov/codecov-action@v3
+        if: ${{ matrix.coverage }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Coveralls
+        if: ${{ matrix.coverage }}
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          path-to-lcov: ./coverage.xml
