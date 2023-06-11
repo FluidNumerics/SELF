@@ -59,7 +59,7 @@ jobs:
 
     - name: Run tests for coverage
       run: |
-        apptainer exec --rocm --bind $(pwd):/build self.sif /opt/self/ci/test.sh
+        apptainer exec --rocm --bind $(pwd):/build self.sif /opt/self/util/coverage.sh
 
     - uses: codecov/codecov-action@v3
       if: ${{ matrix.coverage }}

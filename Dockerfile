@@ -34,7 +34,7 @@ RUN apt-get clean \
         python3-setuptools \
         unzip \
         wget \
-        gcovr \
+        lcov \
  && locale-gen en_US.UTF-8 \
  && rm -rf /var/lib/apt/lists/*
 
@@ -135,9 +135,8 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     GPU_TARGET=${GPU_TARGET} \
     SELF_FFLAGS=${FFLAGS} \
     make && \
-    mkdir /opt/self/ci && \
-    cp /build/ci/test.sh /opt/self/ci/test.sh && \
-    chmod 755 /opt/self/ci/test.sh
+    mkdir /opt/self/util && \
+    cp -r /build/util /opt/self/util
 
 ENV SELF_PREFIX=/opt/self
 
