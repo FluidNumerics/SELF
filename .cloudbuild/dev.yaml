@@ -7,12 +7,18 @@ steps:
          '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
          '--build-arg','PREC=${_PREC}',
          '--build-arg','FFLAGS=${_FFLAGS}',
-         '--build-arg','ROCM_VERSION=${_ROCM_VERSION}',
          '-f',
          'Dockerfile',
          '.',
          '-t',
          'us-docker.pkg.dev/${PROJECT_ID}/self/base_rocm-${_ROCM_VERSION}_cuda-11.8.0_${_GPU_TARGET}_${_PREC}:dev']
+
+- id: Run Tests (Serial)
+  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/base_rocm-${_ROCM_VERSION}_cuda-11.8.0_${_GPU_TARGET}_${_PREC}:dev'
+  args: 
+  - '-c'
+  - | 
+      ./ci/test.sh
 
 images:
 - 'us-docker.pkg.dev/${PROJECT_ID}/self/base_rocm-${_ROCM_VERSION}_cuda-11.8.0_${_GPU_TARGET}_${_PREC}:dev'
@@ -25,7 +31,7 @@ timeout: 14400s
 
 substitutions:
   _PREC: 'double'
-  _GPU_TARGET: 'gfx900'
-  _HIP_PLATFORM: 'amd'
+  _GPU_TARGET: 'sm_72'
+  _HIP_PLATFORM: 'nvidia'
   _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
   _ROCM_VERSION: '5.2.3'

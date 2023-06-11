@@ -7,6 +7,7 @@ steps:
          '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
          '--build-arg','PREC=${_PREC}',
          '--build-arg','FFLAGS=${_FFLAGS}',
+         '--build-arg','ROCM_VERSION=${_ROCM_VERSION}',
          '-f',
          'Dockerfile',
          '.',
@@ -30,5 +31,6 @@ substitutions:
   _GPU_TARGET: 'sm_72'
   _HIP_PLATFORM: 'nvidia'
   _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
+  _ROCM_VERSION: '5.2.3'
 
 
