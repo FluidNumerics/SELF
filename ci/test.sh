@@ -46,13 +46,16 @@ cleanupGCDAFiles(){
 }
 
 moveGCNOFiles
-tomerge=""
 
 ls $SELF_PREFIX/test/*
 
+# Reset counters
+lcov --directory $SELF_BUILD_DIR --zerocounters
+lcov --no-external --capture --initial --directory $SELF_BUILD_DIR --output-file lcov_base.info
+
 for file in $(ls $SELF_PREFIX/test/*); do
 
-  covFile=$(echo $file | awk -F "/" '{print $NF}')
+  #covFile=$(echo $file | awk -F "/" '{print $NF}')
 
   echo "Running Test : $file"
   $file
@@ -61,6 +64,7 @@ for file in $(ls $SELF_PREFIX/test/*); do
     echo "$file failed!"
     exit $rc
   fi
+  lcov --directory $SELF_BUILD_DIR --capture --output-file lcov.info
 
   # GPU accelerated
   $file --gpu
@@ -69,18 +73,23 @@ for file in $(ls $SELF_PREFIX/test/*); do
     echo "$file failed!"
     exit $rc
   fi
+  lcov --directory $SELF_BUILD_DIR --capture --output-file lcov.info
+  
 
-  moveGCDAFiles
+  #moveGCDAFiles
 
   # Create a coverage file for this test.
-  moveGCDAFiles
-  gcovr -r ${SELF_BUILD_DIR} --json -o "${SELF_BUILD_DIR}/$covFile.json"
-  tomerge+="-a ${SELF_BUILD_DIR}/$covFile.json "
-  cleanupGCDAFiles
+  #moveGCDAFiles
+  #gcovr -r ${SELF_BUILD_DIR} --json -o "${SELF_BUILD_DIR}/$covFile.json"
+  #tomerge+="-a ${SELF_BUILD_DIR}/$covFile.json "
+  #cleanupGCDAFiles
+
+  
 
 done
 
-gcovr $tomerge
-gcovr $tomerge -x -o ${SELF_BUILD_DIR}/coverage.xml
+#gcovr $tomerge
+#gcovr $tomerge -x -o ${SELF_BUILD_DIR}/coverage.xml
+# Process coverage
 
-[ -d "/workspace" ] && cp ${SELF_BUILD_DIR}/coverage.xml /workspace
+[ -d "/workspace" ] && cp ${SELF_BUILD_DIR}/lcov.info /workspace

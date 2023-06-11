@@ -54,7 +54,8 @@ jobs:
 
     - name: Convert docker to singularity 
       run: |
-        apptainer pull docker://us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
+        apptainer pull self.sif \
+        docker-daemon:us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
 
     - name: Run tests for coverage
       run: |
@@ -64,7 +65,7 @@ jobs:
       if: ${{ matrix.coverage }}
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage.xml
+        files: ./lcov.info
         flags: unittests
         name: codecov-umbrella
 
@@ -73,7 +74,7 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        path-to-lcov: ./coverage.xml
+        path-to-lcov: ./lcov.info
 
     - id: 'auth'
       name: 'Authenticate to Google Cloud'
