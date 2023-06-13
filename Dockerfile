@@ -137,6 +137,10 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     make && \
     cp -r /build/util /opt/self/
 
+# Make input and output directories
+RUN mkdir /input && \
+    mkdir /output
+
 ENV SELF_PREFIX=/opt/self
 
 ## Bare OS image to run the installed executables
