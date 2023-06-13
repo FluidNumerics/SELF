@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-export SELF_BUILD_DIR=/build/self
+export SELF_BUILD_DIR=/build/
 export SELF_PREFIX=/opt/self
 
 lcov --no-external \
