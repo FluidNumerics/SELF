@@ -53,6 +53,10 @@ jobs:
          --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
           .
 
+    - name: Pull input decks
+      run: |
+        gsutil cp -r gs://self-fluids-data/input_decks /tmp/
+      
     - name: Convert docker to singularity 
       run: |
         apptainer pull self.sif \
@@ -60,7 +64,7 @@ jobs:
 
     - name: Run tests for coverage
       run: |
-        apptainer exec --rocm --bind $(pwd):/build self.sif /opt/self/util/coverage.sh
+        apptainer exec --rocm --bind $(pwd):/build --bind /tmp/input_decks:/input self.sif /opt/self/util/coverage.sh
 
     - uses: codecov/codecov-action@v3
       if: ${{ matrix.coverage }}
