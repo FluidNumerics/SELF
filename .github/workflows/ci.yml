@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    
+    branches: 
+      - main
     paths-ignore:
       - 'AUTHORS.md'
       - 'LICENSE.md'
@@ -27,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - rocm_version: '5.4.6'
+          - rocm_version: '5.3.0'
             precision: double
             gpu_target: gfx906
             hip_platform: amd
