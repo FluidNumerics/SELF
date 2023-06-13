@@ -1,0 +1,111 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "blank",
+    "title": "SELF Model Configuration",
+    "description": "Schema for conservation law solvers with the Spectral Element Library in Fortran",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "Version of SELF associated with this schema",
+            "type": "string"
+        },
+        "model_name": {
+            "description": "Name of the model to run with",
+            "type": "string",
+            "enum": [
+                "LinearShallowWater2D",
+                "CompressibleNavierStokes2D"
+            ]
+        },
+        "geometry": {
+            "description": "Configurations related to the mesh and quadrature",
+            "type": "object",
+            "properties": {
+                "mesh_file": {
+                    "description": "Fully qualified path to a mesh file.",
+                    "type": "string",
+                    "default": ""
+                },
+                "control_degree": {
+                    "description": "Polynomial degree for the control grid quadrature.",
+                    "type": "integer",
+                    "default": 7
+                },
+                "control_quadrature": {
+                    "description": "The quadrature type for the control points.",
+                    "type": "string",
+                    "enum": ["gauss","gauss-lobatto","chebyshev-gauss","chebyshev-gauss-lobatto"],
+                    "default": "gauss"
+                },
+                "target_degree": {
+                    "description": "Polynomial degree for the target grid quadrature.",
+                    "type": "integer",
+                    "default": 10
+                },
+                "target_quadrature": {
+                    "description": "The quadrature type for the target points.",
+                    "type": "string",
+                    "enum": ["uniform","gauss","gauss-lobatto","chebyshev-gauss","chebyshev-gauss-lobatto"],
+                    "default": "uniform"
+                }
+            }
+        },
+        "deployment_options": {
+            "description": "Properties to control deployment on hardware, including MPI parallelism and GPU acceleration",
+            "type": "object",
+            "properties": {
+                "gpu_accel": {
+                    "type": "boolean",
+                    "description": "Enable GPU acceleration. (GPU hardware required)",
+                    "default": false
+                },
+                "mpi": {
+                    "type": "boolean",
+                    "description": "Enable domain decomposition with MPI. Application must run under mpirun/mpiexec/srun for domain decomposition",
+                    "default": false
+                }
+            },
+            "time_integrator": {
+                "description": "Configuration  for the time integration.",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Type of time integrator to use to forward step the model.",
+                        "type": "string",
+                        "enum": [
+                            "euler",
+                            "rk2",
+                            "rk3",
+                            "rk4",
+                            "ab2",
+                            "ab3",
+                            "ab4"
+                        ],
+                        "default": "euler"
+                    },
+                    "dt": {
+                        "type": "float",
+                        "minimum": 0.0,
+                        "description": "The size of the time step for a time integrator expressed in time_units."
+                    },
+                    "cfl_max": {
+                        "type": "float",
+                        "minimum": 0.0,
+                        "description": "The maximum CFL number for time integration. If non-zero, dt will be calculated using cfl_max and the mesh."
+                    },
+                    "startTime": {
+                        "description": "The value for the initial time in time_units.",
+                        "type": "float",
+                        "minimum": 0.0
+                    },
+                    "time_units": {
+                        "description": "The units for time",
+                        "type": "string",
+                        "enum": ["ns, ms, s, Ks, Ms, Gs"],
+                        "default": "s"
+                    }
+                }
+            }
+        }
+    }
+}
