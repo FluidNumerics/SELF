@@ -880,9 +880,9 @@ CONTAINS
 
 
     IF ( decomp % mpiEnabled )THEN
-      CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId,decomp % mpiComm)
+      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId,decomp % mpiComm)
     ELSE
-      CALL Open_HDF5(meshFile,H5F_ACC_RDWR_F,fileId)
+      CALL Open_HDF5(meshFile,H5F_ACC_RDONLY_F,fileId)
     ENDIF
 
     CALL ReadAttribute_HDF5(fileId,'nElems',nGlobalElem)
