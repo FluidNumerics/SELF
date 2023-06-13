@@ -43,6 +43,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: access_token
+        workload_identity_provider: projects/163522599797/locations/global/workloadIdentityPools/ghactions/providers/github
+        service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
+        access_token_lifetime: 300s
+
     - name: 'Docker build'
       run: |-
         docker build \
@@ -80,15 +89,6 @@ jobs:
       with:
         github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
         path-to-lcov: ./lcov.info
-
-    - id: 'auth'
-      name: 'Authenticate to Google Cloud'
-      uses: 'google-github-actions/auth@v0'
-      with:
-        token_format: access_token
-        workload_identity_provider: projects/163522599797/locations/global/workloadIdentityPools/ghactions/providers/github
-        service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
-        access_token_lifetime: 300s
 
     - name: Login to Artifact Registry
       uses: docker/login-action@v1
