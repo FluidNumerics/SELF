@@ -135,8 +135,7 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
     GPU_TARGET=${GPU_TARGET} \
     SELF_FFLAGS=${FFLAGS} \
     make && \
-    mkdir /opt/self/util && \
-    cp -r /build/util /opt/self/util
+    cp -r /build/util /opt/self/
 
 ENV SELF_PREFIX=/opt/self
 
