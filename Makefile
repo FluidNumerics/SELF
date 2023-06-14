@@ -47,11 +47,17 @@ SELF_DIR ?= .
 
 # Build Target
 install: all
-	mkdir -p $(SELF_PREFIX)
-	mv -f $(SELF_DIR)/build/include $(SELF_DIR)/build/lib $(SELF_DIR)/build/bin $(SELF_DIR)/build/test $(SELF_PREFIX)
+	mkdir -p $(SELF_PREFIX)/bin
+	mkdir -p $(SELF_PREFIX)/lib
+	mkdir -p $(SELF_PREFIX)/include
+	mkdir -p $(SELF_PREFIX)/test
+	mkdir -p $(SELF_PREFIX)/util
+	mv -f $(SELF_DIR)/build/include/* $(SELF_PREFIX)/include/
+	mv -f $(SELF_DIR)/build/lib/* $(SELF_PREFIX)/lib/
+	mv -f $(SELF_DIR)/util/* $(SELF_PREFIX)/util/
 	cp -r $(SELF_DIR)/etc $(SELF_PREFIX)/etc
 
-all: self examples
+all: self 
 
 include ${SELF_DIR}/make.include
 

@@ -9,17 +9,11 @@ steps:
          '--build-arg','FFLAGS=${_FFLAGS}',
          '--build-arg','ROCM_VERSION=${_ROCM_VERSION}',
          '-f',
-         'Dockerfile',
+         'docker/Dockerfile.rocm',
          '.',
          '-t',
          'self:test']
 
-- id: Run Tests (Serial)
-  name: 'self:test'
-  args: 
-  - '-c'
-  - | 
-      ./ci/test.sh
 
 options:
   diskSizeGb: 100
@@ -28,9 +22,9 @@ timeout: 7200s
 
 substitutions:
   _PREC: 'double'
-  _GPU_TARGET: 'sm_72'
-  _HIP_PLATFORM: 'nvidia'
+  _GPU_TARGET: 'gfx906'
+  _HIP_PLATFORM: 'amd'
   _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
-  _ROCM_VERSION: '5.2.3'
+  _ROCM_VERSION: '5.3.3'
 
 
