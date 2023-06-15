@@ -13,6 +13,11 @@ MODULE SELF_Model
   USE SELF_HDF5
   USE HDF5
   USE FEQParse
+  USE SELF_Config
+
+IMPLICIT NONE
+
+#include "SELF_Macros.h"
 
 ! //////////////////////////////////////////////// !
 !   Time integration parameters

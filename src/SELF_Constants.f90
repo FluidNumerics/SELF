@@ -14,6 +14,8 @@ MODULE SELF_Constants
   IMPLICIT NONE
   INCLUDE "mpif.h"
 
+#include "SELF_Macros.h"
+
 #ifdef DOUBLE_PRECISION
   INTEGER,PARAMETER :: prec = real64
   INTEGER,PARAMETER :: c_prec = C_DOUBLE

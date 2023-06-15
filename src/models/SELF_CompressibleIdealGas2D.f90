@@ -11,7 +11,11 @@ MODULE SELF_CompressibleIdealGas2D
   USE SELF_MappedData
   USE SELF_ECModel2D
 
-  TYPE,EXTENDS(ECModel2D) :: CompressibleIdealGas2D
+  IMPLICIT NONE
+
+#include "../SELF_Macros.h"
+
+TYPE,EXTENDS(ECModel2D) :: CompressibleIdealGas2D
     !!
     !! For the solution attribute, we use the following convention
     !! iVar = 1 ~> rho*u (x-momentum)
@@ -266,6 +270,8 @@ MODULE SELF_CompressibleIdealGas2D
 CONTAINS
 
   SUBROUTINE Init_CompressibleIdealGas2D(this,nvar,mesh,geometry,decomp)
+#undef __FUNC__
+#define __FUNC__ "Init_CompressibleIdealGas2D"
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
@@ -278,6 +284,7 @@ CONTAINS
     CHARACTER(LEN=25) :: varname
     INTEGER :: nvarloc
 
+    INFO("Start")
     ! Ensure that the number of variables is 4
     ! nvar is unused in this class extension
     nvarloc = 4
@@ -366,6 +373,7 @@ CONTAINS
     CALL this % environmentals % SetName(1,"gp")
     CALL this % environmentals % SetUnits(1,"m^2/s^2")
     CALL this % environmentals % SetDescription(1,"Gravitational Potential")
+    INFO("Model initialized")
 
   END SUBROUTINE Init_CompressibleIdealGas2D
 

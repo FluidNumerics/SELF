@@ -54,10 +54,11 @@ install: all
 	mkdir -p $(SELF_PREFIX)/util
 	mv -f $(SELF_DIR)/build/include/* $(SELF_PREFIX)/include/
 	mv -f $(SELF_DIR)/build/lib/* $(SELF_PREFIX)/lib/
+	mv -f $(SELF_DIR)/build/bin/* $(SELF_PREFIX)/bin/
 	mv -f $(SELF_DIR)/util/* $(SELF_PREFIX)/util/
 	cp -r $(SELF_DIR)/etc $(SELF_PREFIX)/etc
 
-all: self 
+all: self libself
 
 include ${SELF_DIR}/make.include
 
