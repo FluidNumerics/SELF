@@ -4,39 +4,41 @@ The Spectral Element Library in Fortran can be built provided the following depe
 * Fortran 2008 compliant compiler
 * MPI, e.g. [OpenMPI](https://www.open-mpi.org/)
 * [GNU Make](https://www.gnu.org/software/make/)
-* [ROCm](https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html) ( >= 4.2 )
-* [HIPFort](https://github.com/ROCmSoftwarePlatform/hipfort) ( >= 4.2 ; Must be built with the Fortran compiler you will build SELF with. )
+* Fortran compiler ( `gfortran` recommended )
+* [ROCm](https://rocm.docs.amd.com/en/latest/deploy/linux/quick_start.html), specifically the `rocm-hip-libraries`.
+* (Optional) [CUDA Toolkit](), if you are building for Nvidia GPU hardware.
 * [HDF5](https://www.hdfgroup.org/solutions/hdf5/)
-* [FEQParse](https://github.com/FluidNumerics/feq-parse)
-* [FLAP](https://github.com/szaghi/FLAP)
-* [JSON-Fortran](https://github.com/jacobwilliams/json-fortran)
+* [FluidNumerics/FEQParse](https://github.com/FluidNumerics/feq-parse)
+* [jacobwilliams/JSON-Fortran](https://github.com/jacobwilliams/json-fortran)
+
+!!! note
+    Since ROCm is officially supported only on CentOS, RHEL, Ubuntu, and SLES operating systems, SELF currently can only be built on these operating systems. For deployment on Windows or MacOS systems, consider using the containerized builds.
+
+You can install SELF in two possible ways
+
+1. Bare Metal Installation
+2. Docker image
+
+A bare metal installation will require that you have a CentOS/RHEL 7 or 8, SLES, or Ubuntu 20.04 (focal) or 22.04 (jammy). You will also need to ensure that all of the dependencies are installed on your system before installing SELF.
+
+A Docker image installation uses the Ubuntu 22.04 Docker image as a base and takes care of installing all of the dependencies for you. The resulting Docker image can be run using Docker or Singularity/Apptainer. 
+
+This documentation will walk through steps to install SELF using bare metal installation and the Docker image approaches.
 
 
 ## Bare Metal Install
 
-### Install SELF Dependencies
-Before getting started, make sure that you the following installed on your system : 
+### Dependency installation
 
-* C++ Compiler (`g++` recommended)
-* Fortran Compiler (`gfortran` recommended)
-* GNU Make
-* [ROCm](https://rocmdocs.amd.com/en/latest/Installation_Guide/Installation-Guide.html)
+!!! note
+    A bare metal installation will require that you have a CentOS/RHEL 7 or 8, SLES, or Ubuntu 20.04 (focal) or 22.04 (jammy).
 
-Keep in mind that ROCm is officially supported only on CentOS, RHEL, Ubuntu, and SLES 15.
 
-On Ubuntu, you can install these dependencies using the following
+On your system, make sure that you have a 2008 standard compliant Fortran compiler and GNU Make installed. On Ubuntu,
 
 ```
-sudo apt-get update
-sudo apt-get install gcc g++ gfortran build-essential libnuma-dev
-sudo apt install wget gnupg2
-wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
-echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.2/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
-sudo apt update
-sudo apt install rocm-dev
-sudo reboot
+sudo apt-get install build-essential gcc gfortran
 ```
-
 
 To help install the remainder of SELF's dependencies, we recommend that you use [Spack](https://spack.io). SELF comes with a Spack environment file that can be used to create a spack environment on your system.
 
@@ -47,12 +49,20 @@ git clone https://github.com/spack/spack ~/spack
 source ~/spack/share/spack/setup-env.sh
 ```
 
+You can instruct Spack to use packages that are included with your operating system. This can help speed up the installation process.
+
+```
+spack external find --not-buildable
+```
+
 Download the SELF source code and activate the spack environment
 
 ```
 git clone https://github.com/fluidnumerics/SELF ~/SELF
 spack env activate -d ~/SELF/env
 ```
+
+**Describe the SELF environment file and some modifications folks may want to make**
 
 Once the environment is activated, show which packages will be installed and verify the output appears like what is shown below
 
@@ -65,17 +75,17 @@ feq-parse@1.1.0  flap@master  hdf5@1.12.0 +cxx+fortran+mpi  hipfort@4.5.2  json-
 ==> 0 installed packages
 ```
 
+
 Next, you can install the dependencies
 
 ```
 spack install
 ```
 
-Keep in mind, this installation process can take up to two hours.
 
 ### Install SELF
-SELF comes with a [simple bash script](https://github.com/FluidNumerics/SELF/blob/main/install.sh) that can be used to install SELF. Provided you followed the steps above to install SELF dependencies, you can simply run this script.
 
+**Switch to make commands here and document the variables that control the build**
 ```
 cd ~/SELF
 ./install.sh
@@ -99,7 +109,7 @@ To build a Docker container with SELF pre-installed, the SELF repository comes w
 Once installed, you can simply build SELF using the following command from the root of the SELF repository.
 
 ```
-cloud-build-local --config=ci/cloudbuild.local.yaml --dryrun=false .
+cloud-build-local --config=.cloudbuild/local.yaml --dryrun=false .
 ```
 
 By default, this will build SELF with double precision floating point arithmetic, no optimizations (debug build), and with GPU kernels offloaded to Nvidia V100 GPUs. You can customize the behavior of the build process by using build substitutions. The following build substitution variables are currently available

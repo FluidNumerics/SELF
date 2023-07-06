@@ -55,6 +55,7 @@ CONTAINS
       CALL config % Init()
 
       CALL config % Get("model_name", modelname)
+      INFO("Setting model to "//TRIM(modelname))
 
       ! Select the model
       SELECT CASE( TRIM(modelname) )

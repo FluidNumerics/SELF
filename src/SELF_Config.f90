@@ -16,7 +16,10 @@ MODULE SELF_Config
    ! External Modules
    USE json_module
    USE ISO_FORTRAN_ENV
-   
+
+   IMPLICIT NONE
+
+#include "SELF_Macros.h"
 
    INTEGER, PARAMETER :: SELF_FILE_DEFAULT_LENGTH=500
 
@@ -73,6 +76,8 @@ CONTAINS
    END SUBROUTINE Init_SELFConfig_FromFile
 
    SUBROUTINE Init_SELFConfig_FromCLI( this )
+#undef __FUNC__
+#define __FUNC__ "Init"
       IMPLICIT NONE
       CLASS(SELFConfig), INTENT(out) :: this
       ! Local
@@ -88,11 +93,12 @@ CONTAINS
       IF ( CommandLineArgumentIsPresent(argument = "-i") )     THEN
          concretizationFile = StringValueForArgument(argument = "-i")
       END IF
+      INFO("Using configuration file : "//TRIM(concretizationFile))
       INQUIRE(FILE=TRIM(concretizationFile), EXIST=fileExists )
       IF( fileExists )THEN
         CALL this % LoadConcretization( TRIM(concretizationFile) )
       ELSE
-         PRINT*,"ERROR: Configuration file does not exist : ", TRIM(concretizationFile)
+         ERROR("Configuration file does not exist : "//TRIM(concretizationFile))
          STOP 1
       ENDIF
 
