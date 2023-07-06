@@ -1,7 +1,8 @@
 # Compiler
 
-HIPFC ?= /opt/rocm/bin/hipfc
-HIPFORT_COMPILER ?= h5pfc
+H5PFC ?= h5pfc
+HIPCC ?= /opt/rocm/bin/hipcc
+
 HIP_PLATFORM ?= amd
 GPU_TARGET ?= gfx906
 ROCM_DIR ?= /opt/rocm
@@ -16,13 +17,12 @@ ifeq ($(PREC),double)
 endif
 
  
-FC = $(HIPFC) 
-CXX = $(HIPFC) 
+FC = $(H5PFC)
+CXX = $(HIPCC)
 AR = gcc-ar
-SELF_FFLAGS += -fbackslash -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET) -ffree-line-length-512
-SELF_CXXFLAGS += -v -hipfort-compiler $(HIPFORT_COMPILER) -rocm-path $(ROCM_DIR) --offload-arch=$(GPU_TARGET) -I$(ROCM_DIR)/include
+SELF_FFLAGS += -fbackslash -I$(ROCM_DIR)/include -ffree-line-length-512
+SELF_CXXFLAGS += -v --offload-arch=$(GPU_TARGET) -fPIC -I$(ROCM_DIR)/include
 
-
-$(info HIPFC : $(HIPFC))
-$(info Fortran Compiler : $(HIPFORT_COMPILER))
-$(GPU Target : $(HIPFORT_GPU))
+$(info Fortran Compiler : $(FC))
+$(info HIP Compiler : $(CXX))
+$(info GPU Target : $(HIPFORT_GPU))

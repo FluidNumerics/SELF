@@ -242,8 +242,17 @@ IMPLICIT NONE
     END SUBROUTINE WriteTecplot
   END INTERFACE
 
-
 CONTAINS
+
+  SUBROUTINE PrintType_Model(this)
+#undef __FUNC__
+#define __FUNC__ "PrintType"
+      IMPLICIT NONE
+      CLASS(Model), INTENT(in) :: this
+  
+      INFO("Model Type : None")
+  
+  END SUBROUTINE PrintType_Model
 
   SUBROUTINE PreTendency_Model(this)
     !! PreTendency is a template routine that is used to house any additional calculations

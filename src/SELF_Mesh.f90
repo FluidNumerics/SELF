@@ -7,15 +7,14 @@
 MODULE SELF_Mesh
 
   USE SELF_Constants
+  USE SELF_HIP
   USE SELF_Lagrange
   USE SELF_Data
   USE SELF_SupportRoutines
   USE SELF_HDF5
+  
   ! External Libs !
   USE HDF5
-
-  USE hipfort
-  USE hipfort_check
 
   USE ISO_C_BINDING
 

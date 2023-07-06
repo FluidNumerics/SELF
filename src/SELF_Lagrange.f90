@@ -16,9 +16,6 @@ MODULE SELF_Lagrange
   USE SELF_SupportRoutines
   USE SELF_Quadrature
 
-  USE hipfort
-  USE hipfort_check
-
   USE ISO_C_BINDING
   IMPLICIT NONE
 

@@ -46,19 +46,6 @@ RUN apt-get clean \
  && locale-gen en_US.UTF-8 \
  && rm -rf /var/lib/apt/lists/*
 
-# Install rocm
-RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/${ROCM_VERSION}/ focal main" | tee /etc/apt/sources.list.d/rocm.list &&\
-    apt-get -yqq update && \
-    apt-get -yqq install rocm-dev
-
-# Install hipfort
-RUN git clone https://github.com/ROCmSoftwarePlatform/hipfort.git /tmp/hipfort &&\
-    mkdir /tmp/hipfort/build &&\
-    cd /tmp/hipfort/build &&\
-    cmake -DHIPFORT_INSTALL_DIR=/opt/rocm/ /tmp/hipfort && \
-    make -j install
-
 RUN mkdir $SPACK_ROOT && cd $SPACK_ROOT && \
     git clone https://github.com/spack/spack.git . && git checkout ${SPACK_VERSION}  && \
     mkdir -p $SPACK_ROOT/opt/spack
@@ -85,6 +72,19 @@ RUN [ -f ~/.profile ]                                               \
 
 WORKDIR /root
 SHELL ["docker-shell"]
+
+# Install hip
+RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
+    echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/${ROCM_VERSION}/ focal main" | tee /etc/apt/sources.list.d/rocm.list &&\
+    apt-get -yqq update && \
+    apt-get -yqq install rocm-dev
+
+# # Install hipfort
+# RUN git clone https://github.com/ROCmSoftwarePlatform/hipfort.git /tmp/hipfort &&\
+#     mkdir /tmp/hipfort/build &&\
+#     cd /tmp/hipfort/build &&\
+#     cmake -DHIPFORT_INSTALL_DIR=/opt/rocm/ /tmp/hipfort && \
+#     make -j install
 
 # Identifies system packages and marks them not buildable
 # Creates the package cache

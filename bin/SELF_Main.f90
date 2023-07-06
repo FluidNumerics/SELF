@@ -23,10 +23,7 @@ MODULE SELF_Main
 
    IMPLICIT NONE
 
-#define __FUNC__
-#define INFO(msg) PRINT('("INFO : [",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
-#define WARNING(msg) PRINT('("WARNING : [",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
-#define ERROR(msg) PRINT('("ERROR : [",A,"](",A,") : ",A)'),__FILE__,__FUNC__,msg
+#include "../src/SELF_Macros.h"
 
    TYPE(SELFConfig) :: config
    TYPE(Lagrange),TARGET :: interp
@@ -36,12 +33,12 @@ MODULE SELF_Main
    CLASS(SEMMesh), POINTER :: selfMesh
    CLASS(SEMGeometry), POINTER :: selfGeometry
 
-   TYPE(CompressibleIdealGas2D), TARGET :: selfCompressibleIdealGas2D
-   TYPE(LinearShallowWater), TARGET :: selfLinearShallowWater2D
-   TYPE(Mesh1D), TARGET :: selfMesh1D
-   TYPE(Mesh2D), TARGET :: selfMesh2D
-   TYPE(Geometry1D), TARGET:: selfGeometry1D
-   TYPE(SEMQuad), TARGET:: selfGeometry2D
+   TYPE(CompressibleIdealGas2D), TARGET, PRIVATE :: selfCompressibleIdealGas2D
+   TYPE(LinearShallowWater), TARGET, PRIVATE :: selfLinearShallowWater2D
+   TYPE(Mesh1D), TARGET, PRIVATE :: selfMesh1D
+   TYPE(Mesh2D), TARGET, PRIVATE :: selfMesh2D
+   TYPE(Geometry1D), TARGET, PRIVATE :: selfGeometry1D
+   TYPE(SEMQuad), TARGET, PRIVATE :: selfGeometry2D
 
    INTEGER, PARAMETER :: MODEL_NAME_LENGTH=50
 
@@ -197,8 +194,6 @@ PROGRAM SELF
 
    IMPLICIT NONE
    ! Public
-
-
 
 
    CALL InitializeSimulation()
