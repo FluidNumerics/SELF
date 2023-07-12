@@ -500,8 +500,10 @@ CONTAINS
 
     ! Set the time integrator
     CALL config % Get("time_options.integrator",integrator)
-    CALL this % SetTimeIntegrator(TRIM(integrator))
-    CALL config % Get("time_options.dt",this % dt)
+    CALL this % SetTimeIntegrator(TRIM(integrator)) ! Set the integrator
+    CALL config % Get("time_options.dt",this % dt) ! Set the time step size
+    CALL config % Get("time_options.start_time",this % t) ! Set the initial time
+
 
     CALL this % CheckMinMax()
     CALL this % CalculateEntropy()
@@ -511,10 +513,11 @@ CONTAINS
 
       CALL this % HydrostaticAdjustment( 0.0001_prec )
       CALL this % CheckMinMax()
+      CALL this % CalculateEntropy()
+      CALL this % ReportEntropy()
+
     END IF
 
-    CALL this % CalculateEntropy()
-    CALL this % ReportEntropy()
 
     ! TO DO : Add Features, e.g. thermal bubble
 
@@ -1125,8 +1128,11 @@ CONTAINS
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
 
+    PRINT*, "PT : Diag"
     CALL this % CalculateDiagnostics()
+    PRINT*, "PT : Cons2Prim"
     CALL this % ConservativeToPrimitive()
+    PRINT*, "PT : Cons2Entr"
     CALL this % ConservativeToEntropy()
 
   END SUBROUTINE PreTendency_CompressibleIdealGas2D
