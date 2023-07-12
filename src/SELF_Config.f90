@@ -131,8 +131,10 @@ CONTAINS
 
       CALL this % concretization % load_file(filename = TRIM(concretizationFile))
 
-      CALL this % concretization % print_file()
-
+      !CALL get_environment_variable("SELF_DEBUG", SELF_DEBUG)
+      !IF (SELF_DEBUG == 1)THEN
+      !  CALL this % concretization % print_file()
+      !ENDIF
    END SUBROUTINE LoadConcretization_SELFConfig_FromFile
 
    SUBROUTINE Free_SELFConfig( this )
