@@ -10,6 +10,7 @@ MODULE SELF_CompressibleIdealGas2D
   USE SELF_Mesh
   USE SELF_MappedData
   USE SELF_ECModel2D
+  USE SELF_Config
 
   IMPLICIT NONE
 
@@ -67,6 +68,7 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: PrintType => PrintType_CompressibleIdealGas2D
     PROCEDURE :: PreTendency => PreTendency_CompressibleIdealGas2D
     PROCEDURE :: CalculateEntropy => CalculateEntropy_CompressibleIdealGas2D
+    PROCEDURE :: SetInitialConditions => SetInitialConditions_CompressibleIdealGas2D
 
     PROCEDURE :: WriteTecplot => WriteTecplot_CompressibleIdealGas2D
 
@@ -143,12 +145,12 @@ MODULE SELF_CompressibleIdealGas2D
   ! Static fluid state for "air" at stp
   !  > To do : move to json input file
   !
-  REAL(prec),PARAMETER :: Cp_stpAir = 1.005_PREC
-  REAL(prec),PARAMETER :: Cv_stpAir = 0.718_PREC
-  REAL(prec),PARAMETER :: R_stpAir = 287.0_PREC ! J/kg/K
-  REAL(prec),PARAMETER :: rho_stpAir = 1.2754_PREC ! kg/m^3
-  REAL(prec),PARAMETER :: T_stpAir = 273.0_PREC ! K
-  REAL(prec),PARAMETER :: e_stpAir = 1.5_PREC*R_stpAir*T_stpAir ! J/kg
+  REAL(prec),PRIVATE :: Cp_static != 1.005_PREC
+  REAL(prec),PRIVATE :: Cv_static != 0.718_PREC
+  REAL(prec),PRIVATE :: R_static != 287.0_PREC ! J/kg/K
+  REAL(prec),PRIVATE :: rho_static != 1.2754_PREC ! kg/m^3
+  REAL(prec),PRIVATE :: T_static != 273.0_PREC ! K
+  REAL(prec),PRIVATE :: e_static != 1.5_PREC*R_static*T_static ! J/kg
 
   INTERFACE
     SUBROUTINE RiemannFlux_CompressibleIdealGas2D(this)
@@ -285,7 +287,6 @@ CONTAINS
     CHARACTER(LEN=25) :: varname
     INTEGER :: nvarloc
 
-    INFO("Start")
     ! Ensure that the number of variables is 4
     ! nvar is unused in this class extension
     nvarloc = 4
@@ -373,7 +374,6 @@ CONTAINS
     CALL this % environmentals % SetName(1,"gp")
     CALL this % environmentals % SetUnits(1,"m^2/s^2")
     CALL this % environmentals % SetDescription(1,"Gravitational Potential")
-    INFO("Model initialized")
 
   END SUBROUTINE Init_CompressibleIdealGas2D
 
@@ -383,7 +383,7 @@ CONTAINS
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D), INTENT(in) :: this
 
-    INFO("Model Type : CompressibleIdealGas2D")
+    INFO("Compressible Ideal Gas (2D)")
 
   END SUBROUTINE PrintType_CompressibleIdealGas2D
 
@@ -409,6 +409,116 @@ CONTAINS
     CALL this % entropyVars % Free()
 
   END SUBROUTINE Free_CompressibleIdealGas2D
+
+  SUBROUTINE SetInitialConditions_CompressibleIdealGas2D(this, config)
+#undef __FUNC__
+#define __FUNC__ "SetInitialConditions"
+    IMPLICIT NONE
+    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    TYPE(SELFConfig), INTENT(inout) :: config
+    ! Local
+    LOGICAL :: setStaticState
+    LOGICAL :: hydrostaticAdjust
+    CHARACTER(LEN=self_EquationLength) :: u ! x-velocity component
+    CHARACTER(LEN=self_EquationLength) :: v ! y-velocity component
+    CHARACTER(LEN=self_EquationLength) :: rho ! density
+    CHARACTER(LEN=self_EquationLength) :: T  ! in-situ temperature
+    CHARACTER(LEN=self_EquationLength) :: gp ! gravitational potential
+    CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
+    CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocity(1:2)
+    INTEGER,PARAMETER :: ucs2 = SELECTED_CHAR_KIND('ISO_10646')
+    CHARACTER(KIND=ucs2,len=20) :: tUSC
+    CHARACTER(KIND=ucs2,len=20) :: rhoUSC
+    CHARACTER(KIND=ucs2,len=20) :: CpUSC
+    CHARACTER(KIND=ucs2,len=20) :: CvUSC
+    CHARACTER(KIND=ucs2,len=:),ALLOCATABLE :: str
+
+
+    ! Get static parameters
+    CALL config % Get("initial_conditions.static_state",setStaticState)
+    CALL config % Get("fluid.Cp",Cp_static)
+    CALL config % Get("fluid.Cv",Cv_static)
+    CALL config % Get("fluid.R",R_static)
+    CALL config % Get("fluid.rho",rho_static)
+    CALL config % Get("fluid.T",T_static)
+    CALL config % Get("fluid.energy",e_static)
+
+    IF( setStaticState )THEN 
+      ! INFO("Set fluid to static state")
+      ! WRITE (tUSC,"(ES16.7E3)") T_static
+      ! str = usc2_'T\u2070 = '//TRIM(tUSC)
+      ! INFO(str)
+  
+      ! WRITE (rhoUSC,"(ES16.7E3)") rho_static
+      ! str = usc2_'\u03C1\u2070 = '//TRIM(rhoUSC)
+      ! INFO(str)
+  
+      ! WRITE (CpUSC,"(ES16.7E3)") Cp_static
+      ! str = usc2_'C\u209A = '//TRIM(CpUSC)
+      ! INFO(str)
+  
+      ! WRITE (CvUSC,"(ES16.7E3)") Cv_static
+      ! str = usc2_'C\u1D65 = '//TRIM(CvUSC)
+      ! INFO(str)
+
+      CALL this % SetStatic() ! Set field and parameters to STP
+    END IF 
+
+    ! Get additional initial conditions (add to static state if provided)
+    CALL config % Get("initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
+    CALL config % Get("initial_conditions.u",u)
+    CALL config % Get("initial_conditions.v",v)
+    CALL config % Get("initial_conditions.rho",rho)
+    CALL config % Get("initial_conditions.T",T)
+
+    ! If the character is empty - default the velocity
+    ! components to zero 
+    IF( TRIM(u) == "" )THEN
+      u = "u = 0.0"
+    END IF 
+    IF( TRIM(u) == "" )THEN
+      v = "v = 0.0"
+    END IF
+
+    velocity = (/ u, v /)
+    CALL this % SetVelocity( velocity )
+
+    ! Uses the initial condition to set the prescribed state
+    ! for model boundary conditions
+    CALL this % SetPrescribedSolution()
+
+    ! Get environmental parameters
+    CALL config % Get("environment.potential",gp)
+
+    ! If the character is empty - default the gravitational
+    ! potential to 0
+    IF( TRIM(gp) == "" )THEN
+      gp = "p = 0.0"
+    END IF 
+    ! Configure environmentals
+    CALL this % SetGravity( gp )   
+
+    ! Set the time integrator
+    CALL config % Get("time_options.integrator",integrator)
+    CALL this % SetTimeIntegrator(TRIM(integrator))
+    CALL config % Get("time_options.dt",this % dt)
+
+    CALL this % CheckMinMax()
+    CALL this % CalculateEntropy()
+    CALL this % ReportEntropy()
+
+    IF( hydrostaticAdjust )THEN
+
+      CALL this % HydrostaticAdjustment( 0.0001_prec )
+      CALL this % CheckMinMax()
+    END IF
+
+    CALL this % CalculateEntropy()
+    CALL this % ReportEntropy()
+
+    ! TO DO : Add Features, e.g. thermal bubble
+
+  END SUBROUTINE SetInitialConditions_CompressibleIdealGas2D
 
   SUBROUTINE SetRiemannFlux_withInt(this,fluxMethod)
     IMPLICIT NONE
@@ -455,8 +565,8 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    CALL this % SetCv(Cv_stpAir)
-    CALL this % SetCp(Cp_stpAir)
+    CALL this % SetCv(Cv_static)
+    CALL this % SetCp(Cp_static)
     CALL this % SetGasConstant(1.0_PREC)
 
     DO iEl = 1,this % source % nElem
@@ -464,8 +574,8 @@ CONTAINS
         DO i = 0,this % source % interp % N
           this % solution % interior % hostData(i,j,1,iEl) = 0.0_PREC ! rho*u
           this % solution % interior % hostData(i,j,2,iEl) = 0.0_PREC ! rho*v
-          this % solution % interior % hostData(i,j,3,iEl) = rho_stpAir ! rho
-          this % solution % interior % hostData(i,j,4,iEl) = rho_stpAir*10.0_PREC ! rho*E
+          this % solution % interior % hostData(i,j,3,iEl) = rho_static ! rho
+          this % solution % interior % hostData(i,j,4,iEl) = rho_static*10.0_PREC ! rho*E
         END DO
       END DO
     END DO
@@ -550,17 +660,17 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    CALL this % SetCv(Cv_stpAir)
-    CALL this % SetCp(Cp_stpAir)
-    CALL this % SetGasConstant(R_stpAir)
+    CALL this % SetCv(Cv_static)
+    CALL this % SetCp(Cp_static)
+    CALL this % SetGasConstant(R_static)
 
     DO iEl = 1,this % source % nElem
       DO j = 0,this % source % interp % N
         DO i = 0,this % source % interp % N
           this % solution % interior % hostData(i,j,1,iEl) = 0.0_PREC ! rho*u
           this % solution % interior % hostData(i,j,2,iEl) = 0.0_PREC ! rho*v
-          this % solution % interior % hostData(i,j,3,iEl) = rho_stpAir ! rho
-          this % solution % interior % hostData(i,j,4,iEl) = rho_stpAir*e_stpAir ! rho*E
+          this % solution % interior % hostData(i,j,3,iEl) = rho_static ! rho
+          this % solution % interior % hostData(i,j,4,iEl) = rho_static*e_static ! rho*E
         END DO
       END DO
     END DO
