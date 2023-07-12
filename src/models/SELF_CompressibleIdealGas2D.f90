@@ -1128,11 +1128,8 @@ CONTAINS
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
 
-    PRINT*, "PT : Diag"
     CALL this % CalculateDiagnostics()
-    PRINT*, "PT : Cons2Prim"
     CALL this % ConservativeToPrimitive()
-    PRINT*, "PT : Cons2Entr"
     CALL this % ConservativeToEntropy()
 
   END SUBROUTINE PreTendency_CompressibleIdealGas2D

@@ -148,7 +148,6 @@ CONTAINS
 
     ! Initialize a domain decomposition
     CALL decomp % Init(enableMPI=mpiRequested)
-    PRINT*, decomp % mpiEnabled
 
     ! Create an interpolant
     CALL interp % Init(controlDegree, &
@@ -165,6 +164,8 @@ CONTAINS
     CALL selfGeometry2D % GenerateFromMesh(selfMesh2D)
     selfGeometry => selfGeometry2D
 
+        ! Reset the boundary condition to prescribed
+    
   END SUBROUTINE Init2DWorkspace
 
   SUBROUTINE InitCompressibleIdealGas2D()
@@ -173,6 +174,10 @@ CONTAINS
     IMPLICIT NONE
 
     INFO("Model set to CompressibleIdealGas2D")
+
+    ! For now - default all boundaries to prescribed
+    CALL selfMesh2D % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
+    
     CALL selfCompressibleIdealGas2D % Init(5, &
                                            selfMesh2D,selfGeometry2D,decomp)
 
@@ -219,7 +224,6 @@ CONTAINS
     SELECT TYPE (selfModel)
 
     TYPE IS (CompressibleIdealGas2D)
-      PRINT*, selfModel % decomp % mpiEnabled
       CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
     TYPE IS (LinearShallowWater)
       CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
