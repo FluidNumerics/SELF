@@ -40,6 +40,8 @@ MODULE SELF_Main
   TYPE(Geometry1D),TARGET,PRIVATE :: selfGeometry1D
   TYPE(SEMQuad),TARGET,PRIVATE :: selfGeometry2D
 
+  !REAL(prec),PUBLIC :: referenceEntropy
+
   INTEGER,PARAMETER :: MODEL_NAME_LENGTH = 50
 
 CONTAINS
@@ -130,6 +132,8 @@ CONTAINS
     CALL config % Get("deployment_options.mpi",mpiRequested)
     IF (mpiRequested) THEN
       INFO("MPI domain decomposition enabled")
+    ELSE 
+      INFO("MPI domain decomposition disabled")
     END IF
 
     CALL config % Get("geometry.control_degree",controlDegree)
@@ -144,6 +148,7 @@ CONTAINS
 
     ! Initialize a domain decomposition
     CALL decomp % Init(enableMPI=mpiRequested)
+    PRINT*, decomp % mpiEnabled
 
     ! Create an interpolant
     CALL interp % Init(controlDegree, &
@@ -175,6 +180,67 @@ CONTAINS
 
   END SUBROUTINE InitCompressibleIdealGas2D
 
+  SUBROUTINE FileIO()
+#undef __FUNC__
+#define __FUNC__ "FileIO"
+    IMPLICIT NONE
+
+    SELECT TYPE (selfModel)
+
+    TYPE IS (CompressibleIdealGas2D)
+      ! Write the initial condition to file
+      CALL selfModel % WriteModel()
+      CALL selfModel % WriteTecplot()
+    TYPE IS (LinearShallowWater)
+      CALL selfModel % WriteModel()
+      CALL selfModel % WriteTecplot()
+
+    END SELECT
+  END SUBROUTINE FileIO
+
+  SUBROUTINE MainLoop()
+#undef __FUNC__
+#define __FUNC__ "MainLoop"
+    IMPLICIT NONE
+    REAL(prec) :: startTime
+    REAL(prec) :: duration
+    REAL(prec) :: endTime
+    REAL(prec) :: ioInterval
+
+    INFO("Starting main loop")
+    CALL config % Get("time_options.start_time",startTime)
+    CALL config % Get("time_options.duration",duration)
+    endTime = startTime + duration
+    CALL config % Get("time_options.io_interval",ioInterval)
+
+!    referenceEntropy = selfModel % entropy
+
+   !! Forward step the selfModel and do the file io
+    SELECT TYPE (selfModel)
+
+    TYPE IS (CompressibleIdealGas2D)
+      PRINT*, selfModel % decomp % mpiEnabled
+      CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
+    TYPE IS (LinearShallowWater)
+      CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
+    END SELECT
+
+    ! !! Manually write the last selfModel state
+    !  CALL selfModel % WriteModel('solution.pickup.h5')
+
+    !  ! Error checking !
+    !  IF (selfModel % entropy /= selfModel % entropy) THEN
+    !    PRINT *, "Model entropy is not a number"
+    !    STOP 2
+    !  END IF
+
+    !  IF (selfModel % entropy >= HUGE(1.0_PREC)) THEN
+    !    PRINT *, "Model entropy is infinite."
+    !    STOP 1
+    !  END IF
+
+  END SUBROUTINE MainLoop
+
 END MODULE SELF_Main
 
 PROGRAM SELF
@@ -201,5 +267,8 @@ PROGRAM SELF
   CALL InitializeSimulation()
   CALL selfModel % PrintType()
   CALL selfModel % SetInitialConditions(config)
+
+  CALL FileIO()
+  CALL MainLoop()
 
 END PROGRAM SELF
