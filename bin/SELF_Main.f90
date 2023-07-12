@@ -46,9 +46,9 @@ MODULE SELF_Main
 
 CONTAINS
 
-  SUBROUTINE InitializeSimulation()
+  SUBROUTINE InitializeSELF()
 #undef __FUNC__
-#define __FUNC__ "InitializeSimulation"
+#define __FUNC__ "InitializeSELF"
     IMPLICIT NONE
 
     ! Local
@@ -76,7 +76,7 @@ CONTAINS
 
     CALL InitGPUAcceleration()
 
-  END SUBROUTINE InitializeSimulation
+  END SUBROUTINE InitializeSELF
 
   SUBROUTINE InitGPUAcceleration()
 #undef __FUNC__
@@ -264,11 +264,21 @@ PROGRAM SELF
   IMPLICIT NONE
   ! Public
 
-  CALL InitializeSimulation()
+  CALL InitializeSELF()
+
+  ! Show us which model we're running
   CALL selfModel % PrintType()
+
+  ! Set the model initial conditions
   CALL selfModel % SetInitialConditions(config)
 
+  ! Do the initial file IO
   CALL FileIO()
+  ! Main time integration loop
   CALL MainLoop()
+  ! Do the last file IO
+  CALL FileIO()
+
+  ! Clean up [TO DO]
 
 END PROGRAM SELF
