@@ -161,28 +161,36 @@ MODULE SELF_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(solution, &
-                                                                extSolution,prescribedSolution,primitive,extPrimitive, &
-                                                                       prescribedPrimitive,diagnostics,extDiagnostics, &
-                                                                 prescribedDiagnostics,nHat,sideInfo,N,nVar,nDiag,nEl) &
-      BIND(c,name="SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
+    SUBROUTINE SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(scalar, &
+                                                                extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
+      BIND(c,name="SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
-      TYPE(C_PTR) :: solution
-      TYPE(C_PTR) :: extSolution
-      TYPE(C_PTR) :: prescribedSolution
-      TYPE(C_PTR) :: primitive
-      TYPE(C_PTR) :: extPrimitive
-      TYPE(C_PTR) :: prescribedPrimitive
-      TYPE(C_PTR) :: diagnostics
-      TYPE(C_PTR) :: extDiagnostics
-      TYPE(C_PTR) :: prescribedDiagnostics
+      TYPE(C_PTR) :: scalar
+      TYPE(C_PTR) :: extScalar
+      TYPE(C_PTR) :: prescribedScalar
       TYPE(C_PTR) :: nHat
       TYPE(C_PTR) :: sideInfo
-      INTEGER(C_INT),VALUE :: N,nVar,nDiag,nEl
-    END SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper
   END INTERFACE
+
+  INTERFACE
+  SUBROUTINE SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(scalar, &
+                                                              extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
+    BIND(c,name="SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
+    USE ISO_C_BINDING
+    USE SELF_Constants
+    IMPLICIT NONE
+    TYPE(C_PTR) :: scalar
+    TYPE(C_PTR) :: extScalar
+    TYPE(C_PTR) :: prescribedScalar
+    TYPE(C_PTR) :: nHat
+    TYPE(C_PTR) :: sideInfo
+    INTEGER(C_INT),VALUE :: N,nVar,nEl
+  END SUBROUTINE SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper
+END INTERFACE
 
   INTERFACE
     SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper(source,solution,environmentalsGradient,N,nVar,nEl) &
@@ -1397,21 +1405,14 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
         this % solution % boundary % deviceData, &
         this % solution % extBoundary % deviceData, &
         this % prescribedSolution % boundary % deviceData, &
-        this % primitive % boundary % deviceData, &
-        this % primitive % extBoundary % deviceData, &
-        this % prescribedPrimitive % boundary % deviceData, &
-        this % diagnostics % boundary % deviceData, &
-        this % diagnostics % extBoundary % deviceData, &
-        this % prescribedDiagnostics % boundary % deviceData, &
         this % geometry % nHat % boundary % deviceData, &
         this % mesh % sideInfo % deviceData, &
         this % solution % interp % N, &
         this % solution % nVar, &
-        this % diagnostics % nVar, &
         this % solution % nElem)
 
     ELSE
@@ -1474,24 +1475,16 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      PRINT *, "SetPrimitiveBoundaryCondition (gpu wrapper) : unset prodcedure"
+      CALL SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
+      this % primitive % boundary % deviceData, &
+      this % primitive % extBoundary % deviceData, &
+      this % prescribedPrimitive % boundary % deviceData, &
+      this % geometry % nHat % boundary % deviceData, &
+      this % mesh % sideInfo % deviceData, &
+      this % primitive % interp % N, &
+      this % primitive % nVar, &
+      this % primitive % nElem)
 
-      !CALL SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(&
-      !  this % solution % boundary % deviceData, &
-      !  this % solution % extBoundary % deviceData, &
-      !  this % prescribedSolution % boundary % deviceData, &
-      !  this % primitive % boundary % deviceData, &
-      !  this % primitive % extBoundary % deviceData, &
-      !  this % prescribedPrimitive % boundary % deviceData, &
-      !  this % diagnostics % boundary % deviceData, &
-      !  this % diagnostics % extBoundary % deviceData, &
-      !  this % prescribedDiagnostics % boundary % deviceData, &
-      !  this % geometry % nHat % boundary % deviceData, &
-      !  this % mesh % sideInfo % deviceData, &
-      !  this % solution % interp % N, &
-      !  this % solution % nVar, &
-      !  this % diagnostics % nVar, &
-      !  this % solution % nElem )
 
     ELSE
 
@@ -1552,8 +1545,16 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      ! TO DO :
-      PRINT *, "SetDiagnosticsBoundaryCondition (gpu wrapper) : unset prodcedure"
+      
+      CALL SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
+      this % diagnostics % boundary % deviceData, &
+      this % diagnostics % extBoundary % deviceData, &
+      this % prescribedDiagnostics % boundary % deviceData, &
+      this % geometry % nHat % boundary % deviceData, &
+      this % mesh % sideInfo % deviceData, &
+      this % diagnostics % interp % N, &
+      this % diagnostics % nVar, &
+      this % diagnostics % nElem)
       !CALL SetBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(&
       !  this % solution % boundary % deviceData, &
       !  this % solution % extBoundary % deviceData, &
