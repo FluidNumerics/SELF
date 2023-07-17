@@ -394,7 +394,7 @@ extern "C"
 {
   void ScalarBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  ScalarBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+	  ScalarBoundaryInterp_2D_gpu<<<dim3(nEl,1,1), dim3(N+1,nVar,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 

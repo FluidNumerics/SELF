@@ -773,6 +773,22 @@ CONTAINS
                                                scalar % nElem)
       END IF
 
+    ELSEIF (dForm == selfWeakBRForm) THEN
+
+        IF (gpuAccel) THEN
+          CALL scalar % interp % DGDerivative_1D(scalar % interior % deviceData, &
+                                                 scalar % avgBoundary % deviceData, &
+                                                 df % interior % deviceData, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
+        ELSE
+          CALL scalar % interp % DGDerivative_1D(scalar % interior % hostData, &
+                                                 scalar % avgBoundary % hostData, &
+                                                 df % interior % hostData, &
+                                                 scalar % nVar, &
+                                                 scalar % nElem)
+        END IF
+        
     ELSEIF (dForm == selfStrongForm) THEN
 
       IF (gpuAccel) THEN

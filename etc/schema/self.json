@@ -14,8 +14,9 @@
             "description": "Name of the model to run with",
             "type": "string",
             "enum": [
-                "LinearShallowWater2D",
-                "CompressibleIdealGas2D"
+                "burgers1d",
+                "lsw2d",
+                "cns2d"
             ]
         },
         "geometry": {
@@ -35,7 +36,12 @@
                 "control_quadrature": {
                     "description": "The quadrature type for the control points.",
                     "type": "string",
-                    "enum": ["gauss","gauss-lobatto","chebyshev-gauss","chebyshev-gauss-lobatto"],
+                    "enum": [
+                        "gauss",
+                        "gauss-lobatto",
+                        "chebyshev-gauss",
+                        "chebyshev-gauss-lobatto"
+                    ],
                     "default": "gauss"
                 },
                 "target_degree": {
@@ -46,8 +52,44 @@
                 "target_quadrature": {
                     "description": "The quadrature type for the target points.",
                     "type": "string",
-                    "enum": ["uniform","gauss","gauss-lobatto","chebyshev-gauss","chebyshev-gauss-lobatto"],
+                    "enum": [
+                        "uniform",
+                        "gauss",
+                        "gauss-lobatto",
+                        "chebyshev-gauss",
+                        "chebyshev-gauss-lobatto"
+                    ],
                     "default": "uniform"
+                },
+                "nX": {
+                    "description": "Number of points in the x-direction for structured grid generation.",
+                    "type": "integer",
+                    "default": 3
+                },
+                "nY": {
+                    "description": "Number of points in the y-direction for structured grid generation.",
+                    "type": "integer",
+                    "default": 3
+                },
+                "x0": {
+                    "description": "First point in the x-direction for structured grid generation.",
+                    "type": "float",
+                    "default": 0.0
+                },
+                "xN": {
+                    "description": "Last point in the x-direction for structured grid generation.",
+                    "type": "float",
+                    "default": 1.0
+                },
+                "y0": {
+                    "description": "First point in the y-direction for structured grid generation.",
+                    "type": "float",
+                    "default": 0.0
+                },
+                "yN": {
+                    "description": "Last point in the y-direction for structured grid generation.",
+                    "type": "float",
+                    "default": 0.0
                 }
             }
         },
@@ -109,29 +151,249 @@
                         "type": "number",
                         "minimum": 0.0
                     }
-                } 
+                }
             },
-            "units":{
-                "description":"",
+            "units": {
+                "description": "",
                 "type": "object",
-                "properties":{
+                "properties": {
                     "time": {
                         "description": "The units for time",
                         "type": "string",
-                        "enum": ["ns, ms, s, Ks, Ms, Gs"],
+                        "enum": [
+                            "ns, ms, s, Ks, Ms, Gs"
+                        ],
                         "default": "s"
                     },
                     "length": {
                         "description": "The units for length",
                         "type": "string",
-                        "enum": ["nm", "mm", "cm", "m", "Km"],
+                        "enum": [
+                            "nm",
+                            "mm",
+                            "cm",
+                            "m",
+                            "Km"
+                        ],
                         "default": "m"
                     },
                     "mass": {
                         "description": "The units for mass",
                         "type": "string",
-                        "enum": ["mg", "g", "kg"],
+                        "enum": [
+                            "mg",
+                            "g",
+                            "kg"
+                        ],
                         "default": "kg"
+                    }
+                }
+            }
+        },
+        "brg1d":{
+            "description": "Parameters for the burgers 1d solver",
+            "type": "object",
+            "properties": {
+                "u0": {
+                    "type": "string",
+                    "description": "Initial condition.",
+                    "default": "u=0"
+                },
+                "uL": {
+                    "type": "float",
+                    "description": "Left boundary condition.",
+                    "default": 0.0
+                },
+                "uR": {
+                    "type": "float",
+                    "description": "Right boundary condition.",
+                    "default": 0.0
+                }
+            }
+        },
+        "cns2d": {
+            "description": "Parameters for the compressible navier-stokes (2d) solver",
+            "type": "object",
+            "properties": {
+                "sgs_closure": {
+                    "description": "Parameters for sub-grid scale closure",
+                    "type": "object",
+                    "properties": {
+                        "model": {
+                            "description": "The SGS model to use for closure",
+                            "type": "string",
+                            "enum": [
+                                "none",
+                                "constant_del2"
+                            ],
+                            "default": "constant_del2"
+                        },
+                        "gradient_variables": {
+                            "description": "The type of variables to use for gradient calculations for SGS fluxes",
+                            "type": "string",
+                            "enum": [
+                                "conservative",
+                                "primitive",
+                                "entropy"
+                            ],
+                            "default": "primitive"
+                        }
+                    }
+                },
+                "split_form": {
+                    "description": "The formulation of the hyperbolic fluxes to use",
+                    "type": "string",
+                    "enum": [
+                        "conservative"
+                    ],
+                    "default": "conservative"
+                },
+                "environment": {
+                    "description": "Settings for environmental parameters",
+                    "type": "object",
+                    "properties": {
+                        "potential": {
+                            "description": "An equation that describes the potential force. The gradient of this field is the potential force in the momentum equations",
+                            "type": "string",
+                            "default": ""
+                        }
+                    }
+                },
+                "fluid": {
+                    "description": "Settings for fluid parameters",
+                    "type": "object",
+                    "properties": {
+                        "Cp": {
+                            "description": "Heat capacity at constant pressure",
+                            "type": "number",
+                            "default": 1.005
+                        },
+                        "Cv": {
+                            "description": "Heat capacity at constant volume",
+                            "type": "number",
+                            "default": 0.718
+                        },
+                        "R": {
+                            "description": "Ideal gas constant",
+                            "type": "number",
+                            "default": 287.0
+                        },
+                        "rho": {
+                            "description": "Default density",
+                            "type": "number",
+                            "default": 1.2754
+                        },
+                        "T": {
+                            "description": "Default temperature",
+                            "type": "number",
+                            "default": 273.0
+                        },
+                        "energy": {
+                            "description": "Default internal energy",
+                            "type": "number",
+                            "default": 117526.5
+                        },
+                        "equation_of_state": {
+                            "description": "Equation of state",
+                            "type": "string",
+                            "enum": [
+                                "ideal_gas",
+                                "linear_gibbs_seawater"
+                            ],
+                            "default": "ideal_gas"
+                        },
+                        "viscosity": {
+                            "description": "The constant value of the dynamic viscosity expressed using units consistent with units attributes",
+                            "type": "number",
+                            "default": 0.0
+                        },
+                        "thermal_diffusivity": {
+                            "description": "The constant value of the thermal diffusivity expressed using units consistent with units attributes",
+                            "type": "number",
+                            "default": 0.0
+                        }
+                    }
+                },
+                "initial_conditions": {
+                    "description": "Settings for the fluid initial conditions. Assumes primitive variables are set.",
+                    "type": "object",
+                    "properties": {
+                        "hydrostatic_adjustment": {
+                            "type": "boolean",
+                            "description": "Enable hydrostatic adjustment before starting forward integration.",
+                            "default": false
+                        },
+                        "static_state": {
+                            "type": "boolean",
+                            "description": "Set the fluid state to the static parameters in fluid attribute at the beginning. If set to true, supplied equations or fields from file are added to the static state.",
+                            "default": false
+                        },
+                        "file": {
+                            "type": "string",
+                            "description": "File to read initial conditions from. Assumes conservative variables are defined in the file.",
+                            "default": ""
+                        },
+                        "u": {
+                            "type": "string",
+                            "description": "Equation for the x-velocity component initial condition.",
+                            "default": "u=0"
+                        },
+                        "v": {
+                            "type": "string",
+                            "description": "Equation for the y-velocity component initial condition.",
+                            "default": "v=0"
+                        },
+                        "rho": {
+                            "type": "string",
+                            "description": "Equation for the density field initial condition.",
+                            "default": "r=0"
+                        },
+                        "T": {
+                            "type": "string",
+                            "description": "Equation for the temperature field initial condition.",
+                            "default": "u=0"
+                        }
+                    }
+                },
+                "boundary_conditions": {
+                    "description": "Settings for prescribed fluid boundary conditions. Assumes primitive variables are set.",
+                    "type": "object",
+                    "properties": {
+                        "time_dependent": {
+                            "type": "boolean",
+                            "description": "Enable time dependent boundary conditions.",
+                            "default": false
+                        },
+                        "dt": {
+                            "type": "number",
+                            "description": "The time interval at which the boundary conditions are re-evaluated. Linear interpolation is done in-between.",
+                            "default": 0.0
+                        },
+                        "from_initial_conditions": {
+                            "type": "boolean",
+                            "description": "Obtain the boundary conditions from the initial conditions.",
+                            "default": false
+                        },
+                        "u": {
+                            "type": "string",
+                            "description": "Equation for the x-velocity component.",
+                            "default": "u=0"
+                        },
+                        "v": {
+                            "type": "string",
+                            "description": "Equation for the y-velocity component.",
+                            "default": "v=0"
+                        },
+                        "rho": {
+                            "type": "string",
+                            "description": "Equation for the density field.",
+                            "default": "r=0"
+                        },
+                        "T": {
+                            "type": "string",
+                            "description": "Equation for the temperature field.",
+                            "default": "u=0"
+                        }
                     }
                 }
             }

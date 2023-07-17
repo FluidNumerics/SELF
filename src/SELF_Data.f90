@@ -301,6 +301,7 @@ MODULE SELF_Data
   INTEGER,PARAMETER :: selfStrongForm = 0
   INTEGER,PARAMETER :: selfWeakDGForm = 1
   INTEGER,PARAMETER :: selfWeakCGForm = 2
+  INTEGER,PARAMETER :: selfWeakBRForm = 3
 
   INTERFACE
     SUBROUTINE Determinant_Tensor2D_gpu_wrapper(tensor_dev,detTensor_dev,N,nVar,nEl) &

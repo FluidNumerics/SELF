@@ -443,13 +443,13 @@ CONTAINS
 
 
     ! Get static parameters
-    CALL config % Get("initial_conditions.static_state",setStaticState)
-    CALL config % Get("fluid.Cp",Cp_static)
-    CALL config % Get("fluid.Cv",Cv_static)
-    CALL config % Get("fluid.R",R_static)
-    CALL config % Get("fluid.rho",rho_static)
-    CALL config % Get("fluid.T",T_static)
-    CALL config % Get("fluid.energy",e_static)
+    CALL config % Get("cns2d.initial_conditions.static_state",setStaticState)
+    CALL config % Get("cns2d.fluid.Cp",Cp_static)
+    CALL config % Get("cns2d.fluid.Cv",Cv_static)
+    CALL config % Get("cns2d.fluid.R",R_static)
+    CALL config % Get("cns2d.fluid.rho",rho_static)
+    CALL config % Get("cns2d.fluid.T",T_static)
+    CALL config % Get("cns2d.fluid.energy",e_static)
 
     IF( setStaticState )THEN 
       ! INFO("Set fluid to static state")
@@ -473,11 +473,11 @@ CONTAINS
     END IF 
 
     ! Get additional initial conditions (add to static state if provided)
-    CALL config % Get("initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
-    CALL config % Get("initial_conditions.u",u)
-    CALL config % Get("initial_conditions.v",v)
-    CALL config % Get("initial_conditions.rho",rho)
-    CALL config % Get("initial_conditions.T",T)
+    CALL config % Get("cns2d.initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
+    CALL config % Get("cns2d.initial_conditions.u",u)
+    CALL config % Get("cns2d.initial_conditions.v",v)
+    CALL config % Get("cns2d.initial_conditions.rho",rho)
+    CALL config % Get("cns2d.initial_conditions.T",T)
 
     ! If the character is empty - default the velocity
     ! components to zero 
@@ -496,7 +496,7 @@ CONTAINS
     CALL this % SetPrescribedSolution()
 
     ! Get environmental parameters
-    CALL config % Get("environment.potential",gp)
+    CALL config % Get("cns2d.environment.potential",gp)
 
     ! If the character is empty - default the gravitational
     ! potential to 0
