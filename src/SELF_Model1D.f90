@@ -254,6 +254,7 @@ CONTAINS
     INTEGER :: iVar
 
     DO iVar = 1,this % solution % nVar
+      PRINT*, iVar, eqnChar(iVar)
       CALL this % solution % SetEquation(ivar,eqnChar(iVar))
     END DO
 
@@ -1048,7 +1049,7 @@ CONTAINS
 
     DO iVar = 1,this % solution % nVar
       !tecHeader = "#TIME "//TRIM(timeStampString)
-      WRITE (fUnit,*) TRIM(tecHeader)
+      !WRITE (fUnit,*) TRIM(tecHeader)
 
       tecHeader = "#"//TRIM(this % solution % meta(iVar) % name)//" vs position"
       WRITE (fUnit,*) TRIM(tecHeader)

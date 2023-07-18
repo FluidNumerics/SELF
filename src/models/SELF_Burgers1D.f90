@@ -12,7 +12,7 @@ MODULE SELF_Burgers1D
   USE SELF_Model1D
   USE SELF_Config
 
-IMPLICIT NONE
+  IMPLICIT NONE
 #include "../SELF_Macros.h"
 
   TYPE,EXTENDS(Model1D) :: Burgers1D
@@ -140,6 +140,7 @@ CONTAINS
     CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
     CHARACTER(LEN=self_EquationLength) :: u
 
+    INFO("Setting initial conditions")
     ! Set the time integrator
     CALL config % Get("time_options.integrator",integrator)
     CALL this % SetTimeIntegrator(TRIM(integrator)) ! Set the integrator
@@ -151,26 +152,28 @@ CONTAINS
 
     ! Get initial conditions
     CALL config % Get("brg1d.u0",u)
-
-    ! Get additional initial conditions (add to static state if provided)
-    CALL config % Get("brg1d.uL",uLEqn)
-    CALL config % Get("brg1d.uR",uREqn)
-
-    this % uLEqn = EquationParser( TRIM(uLEqn),(/'x','t'/) )
-    this % uREqn = EquationParser( TRIM(uREqn),(/'x','t'/) )
-
-    this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1), this % t/))
-    this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
-
     ! If the character is empty - default the velocity
     ! to zero
     IF (TRIM(u) == "") THEN
       u = "u = 0.0"
     END IF
+    INFO(TRIM(u))
+    CALL this % solution % SetEquation(1,u)
 
-    CALL this % solution % SetInteriorFromEquation(this % geometry,0.0_prec)
+    CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
+    CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
 
-    !CALL this % CheckMinMax()
+    ! Get additional initial conditions (add to static state if provided)
+    CALL config % Get("brg1d.uL",uLEqn)
+    CALL config % Get("brg1d.uR",uREqn)
+
+    this % uLEqn = EquationParser(TRIM(uLEqn), (/'x','t'/))
+    this % uREqn = EquationParser(TRIM(uREqn), (/'x','t'/))
+
+    this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
+    this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
+
+!    CALL this % CheckMinMax()
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
@@ -233,48 +236,8 @@ CONTAINS
     INTEGER :: iEl
 
     ! Evaluate the boundary conditions at this time level
-    this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1), this % t/))
+    this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
     this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
-    
-    ! Calculate the solution % avgBoundary attribute
-    DO iEl = 1,this % solution % nElem
-
-      IF (iEl == 1) THEN ! Left-most element
-
-        ! Left side - set the boundary condition
-        this % solution % avgBoundary % hostData(1,1,iEl) = 0.5_prec*( this % solution % boundary % hostData(1,1,iEl) + this % uL ) !this % prescribedSolution % boundary % hostData(1,1,iEl)
-
-        ! Right side - interior side
-          this % solution % avgBoundary % hostData(1,2,iEl) = 0.5_prec*( this % solution % boundary % hostData(1,2,iEl) + this % solution % boundary % hostData(1,1,iEl+1) )
-
-      ELSEIF (iEl == this % solution % nElem) THEN ! Right-most element
-
-        ! Left side - interior side
-          this % solution % avgBoundary % hostData(1,1,iEl) = 0.5_prec*( this % solution % boundary % hostData(1,1,iEl) + this % solution % boundary % hostData(1,2,iEl-1) )
-
-        ! Right side - set the boundary condition
-        this % solution % avgBoundary % hostData(1,2,iEl) = 0.5_prec*( this % solution % boundary % hostData(1,2,iEl) + this % uR ) ! this % prescribedSolution % boundary % hostData(1,2,iEl)
-
-      ELSE ! Interior
-
-        ! Left side - interior side
-          this % solution % avgBoundary % hostData(1,1,iEl) = 0.5_prec*( this % solution % boundary % hostData(1,1,iEl) + this % solution % boundary % hostData(1,2,iEl-1) )
-
-        ! Right side - interior side
-          this % solution % avgBoundary % hostData(1,2,iEl) = 0.5_prec*( this % solution % boundary % hostData(1,2,iEl) + this % solution % boundary % hostData(1,1,iEl+1) )
-
-      END IF
-    END DO
-
-    ! Calculate the BR gradient
-    CALL this % solution % Derivative(this % geometry, &
-                                      this % solutionGradient, &
-                                      selfWeakBRForm, &
-                                      this % gpuAccel)
-
-    ! Boundary interp the BR gradient
-    CALL this % solutionGradient % BoundaryInterp(this % gpuAccel)
-    CALL this % solutionGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
 
   END SUBROUTINE PreTendency_Burgers1D
 
@@ -287,15 +250,28 @@ CONTAINS
     REAL(prec) :: u,v,nhat(1:2)
 
     ! Ths uL and uR attributes are set in the pre-tendency
-    ! Left most boundary
-    this % solution % extBoundary % hostData(1,1,1) = this % uL
+    this % solution % extBoundary % hostData(1,1,1) = this % uL     ! Left most boundary
+    this % solution % extBoundary % hostData(1,2,this % solution % nElem) = this % uR     ! Right most boundary
 
-    ! Right most boundary
-    this % solution % extBoundary % hostData(1,2,this % solution % nElem) = this % uR
+    ! Calculate the average value on the sides
+    CALL this % solution % BassiRebaySides(this % gpuAccel)
+
+    ! Calculate the BR gradient
+    CALL this % solution % Derivative(this % geometry, &
+                                      this % solutionGradient, &
+                                      selfWeakBRForm, &
+                                      this % gpuAccel)
+
+    ! Boundary interp the BR gradient
+    CALL this % solutionGradient % BoundaryInterp(this % gpuAccel)
+    CALL this % solutionGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+
+    ! Calculate the average value on the sides
+    CALL this % solutionGradient % BassiRebaySides(this % gpuAccel)
 
     ! Set the external gradient values so that no-flux for viscous fluxes holds
-    this % solutionGradient % avgBoundary % hostData(1,1,1) = 0.0_prec ! -this % solutionGradient % boundary % hostData(1,1,1)
-    this % solutionGradient % avgBoundary % hostData(1,2,this % solution % nElem) = 0.0_prec!-this % solutionGradient % boundary % hostData(1,2,this % solution % nElem)
+    this % solutionGradient % avgBoundary % hostData(1,1,1) = 0.0_PREC ! ! left most boundary
+    this % solutionGradient % avgBoundary % hostData(1,2,this % solution % nElem) = 0.0_PREC !
 
   END SUBROUTINE SetBoundaryCondition_Burgers1D
 
@@ -305,17 +281,6 @@ CONTAINS
     ! Local
     INTEGER :: i,j,iEl,iVar
 
-    !IF( this % gpuAccel )THEN
-
-    ! CALL Source_Burgers1D_gpu_wrapper(this % source % interior % deviceData, &
-    !                                        this % solution % interior % deviceData, &
-    !                                        this % gradH % interior % deviceData, &
-    !                                        this % g, &
-    !                                        this % source % interp % N, &
-    !                                        this % solution % nVar, &
-    !                                        this % solution % nElem )
-
-    !ELSE
     DO iEl = 1,this % source % nElem
       DO i = 0,this % source % interp % N
 
@@ -323,7 +288,6 @@ CONTAINS
 
       END DO
     END DO
-    !ENDIF
 
   END SUBROUTINE Source_Burgers1D
 
@@ -368,13 +332,9 @@ CONTAINS
           nhat = 1.0_PREC
         END IF
 
-        ! Calculate the normal velocity at the cell edges
+        ! Get the internal and external solution states
         unL = this % solution % boundary % hostData(1,iSide,iEl)
         unR = this % solution % extBoundary % hostData(1,iSide,iEl)
-
-        ! Gradient at the boundaries
-        dun = this % solutionGradient % avgBoundary % hostData(1,iSide,iEl) ! use the average gradient value
-        !dunR = this % solutionGradient % avgBoundary % hostData(1,iSide,iEl)
 
         fluxL = (0.5_PREC*unL*unL)*nHat
         fluxR = (0.5_PREC*unR*unR)*nHat
@@ -385,8 +345,11 @@ CONTAINS
         this % flux % boundary % hostData(1,iSide,iEl) = 0.5_PREC*( &
                                                          fluxL + fluxR + alpha*(unL - unR))
 
-        ! Add the viscous flux
-        this % flux % boundary % hostData(1,iSide,iEl) = -this % viscosity*dun*nHat
+        ! Add the viscous flux - nhat is not needed, since avgBoundary accounts for normal direction
+        ! Gradient at the boundaries
+        dun = this % solutionGradient % avgBoundary % hostData(1,iSide,iEl)
+        this % flux % boundary % hostData(1,iSide,iEl) = this % flux % boundary % hostData(1,iSide,iEl) - &
+                                                         this % viscosity*dun
 
       END DO
     END DO

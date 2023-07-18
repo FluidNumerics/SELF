@@ -26,6 +26,7 @@ MODULE SELF_MappedData
 
   CONTAINS
     PROCEDURE,PUBLIC :: SideExchange => SideExchange_MappedScalar1D
+    PROCEDURE,PUBLIC :: BassiRebaySides => BassiRebaySides_MappedScalar1D
     GENERIC,PUBLIC :: Derivative => Derivative_MappedScalar1D
     PROCEDURE,PRIVATE :: Derivative_MappedScalar1D
     PROCEDURE,PUBLIC :: JacobianWeight => JacobianWeight_MappedScalar1D
@@ -740,6 +741,33 @@ CONTAINS
   !  END IF
 
   END SUBROUTINE SideExchange_MappedScalar1D
+
+  SUBROUTINE BassiRebaySides_MappedScalar1D(scalar,gpuAccel)
+    IMPLICIT NONE
+    CLASS(MappedScalar1D),INTENT(inout) :: scalar
+    LOGICAL,INTENT(in) :: gpuAccel
+    ! Local
+    INTEGER :: iel
+    INTEGER :: iside
+    INTEGER :: ivar
+    INTEGER :: i
+
+      DO iel = 1,scalar % nElem
+          DO ivar = 1,scalar % nVar
+
+              ! Left side - we account for the -\hat{x} normal
+              scalar % avgBoundary % hostData(ivar,1,iel) = -0.5_prec*( &
+                                                               scalar % boundary % hostData(ivar,1,iel) + &
+                                                               scalar % extBoundary % hostData(ivar,1,iel))
+
+              ! Right side - we account for the +\hat{x} normal
+              scalar % avgBoundary % hostData(ivar,2,iel) = 0.5_prec*( &
+                                                               scalar % boundary % hostData(ivar,2,iel) + &
+                                                               scalar % extBoundary % hostData(ivar,2,iel))
+          END DO
+      END DO
+
+  END SUBROUTINE BassiRebaySides_MappedScalar1D
 
   SUBROUTINE Derivative_MappedScalar1D(scalar,geometry,dF,dForm,gpuAccel)
     ! Strong Form Operator
