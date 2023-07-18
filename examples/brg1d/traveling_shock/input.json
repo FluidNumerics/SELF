@@ -1,0 +1,36 @@
+{
+    "version": "v0.0.0",
+    "model_name": "brg1d",
+    "geometry": {
+        "control_degree": 7,
+        "control_quadrature": "gauss",
+        "target_degree": 10,
+        "target_quadrature": "uniform",
+        "nX": 5,
+        "x0": 0.0,
+        "xN": 1e6
+    },
+    "deployment_options": {
+        "gpu_accel": false,
+        "mpi": false
+    },
+    "time_options": {
+        "integrator": "rk3",
+        "dt": 10.0,
+        "cfl_max": 0.0,
+        "start_time": 0.0,
+        "duration": 1.0e6,
+        "io_interval": 1.0e4
+    },
+    "units": {
+        "time": "s",
+        "length": "m",
+        "mass": "kg"
+    },
+    "brg1d": {
+        "u0": "u = 0.5*(1.0 - tanh((x - 250000 - 0.5*r)/100000))",
+        "uL": "u = 0.5*(1.0 + tanh((250000 + 0.5*r)/100000))",
+        "uR": "u = 0.5*(1.0 - tanh((750000 - 0.5*r)/100000))",
+        "viscosity": 2.5e4
+    }
+}

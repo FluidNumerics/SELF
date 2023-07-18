@@ -89,6 +89,7 @@ MODULE SELF_Model
     PROCEDURE(SELF_timeIntegrator),POINTER :: timeIntegrator => Euler_timeIntegrator
     REAL(prec) :: dt
     REAL(prec) :: t
+    INTEGER :: ioIterate = 0
 
     ! Standard Diagnostics
     REAL(prec) :: entropy ! Mathematical entropy function for the model

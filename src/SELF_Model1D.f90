@@ -801,7 +801,7 @@ CONTAINS
     IF (PRESENT(filename)) THEN
       pickupFile = filename
     ELSE
-      timeStampString = TimeStamp(this % t,'s')
+      WRITE(timeStampString,'(I13.13)') this % ioIterate
       pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 
@@ -1012,17 +1012,21 @@ CONTAINS
     IF (PRESENT(filename)) THEN
       tecFile = filename
     ELSE
-      timeStampString = TimeStamp(this % t,'s')
-      IF (this % decomp % mpiEnabled) THEN
-        WRITE (rankString,'(I5.5)') this % decomp % rankId
-        tecFile = 'solution.'//rankString//'.'//timeStampString//'.curve'
-      ELSE
-        tecFile = 'solution.'//timeStampString//'.curve'
-      END IF
+      ! Create a 0-padded integer for the output iterate
+      WRITE(timeStampString,'(I13.13)') this % ioIterate
+      ! Increment the ioIterate
+      this % ioIterate = this % ioIterate + 1
+      !timeStampString = TimeStamp(this % t,'s')
+      ! IF (this % decomp % mpiEnabled) THEN
+      !   WRITE (rankString,'(I5.5)') this % decomp % rankId
+      !   tecFile = 'solution.'//rankString//'.'//timeStampString//'.curve'
+      ! ELSE
+         tecFile = 'solution.'//timeStampString//'.curve'
+      ! END IF
 
     END IF
 
-    !WRITE (timeStampString,'(E15.6)') this % t
+    
     ! Create an interpolant for the uniform grid
     CALL interp % Init(this % solution % interp % M, &
                        this % solution % interp % targetNodeType, &
@@ -1048,8 +1052,9 @@ CONTAINS
           STATUS='replace')
 
     DO iVar = 1,this % solution % nVar
-      !tecHeader = "#TIME "//TRIM(timeStampString)
-      !WRITE (fUnit,*) TRIM(tecHeader)
+      WRITE (tecHeader,'(E15.6)') this % t
+      tecHeader = "#TIME "//TRIM(tecHeader)
+      WRITE (fUnit,*) TRIM(tecHeader)
 
       tecHeader = "#"//TRIM(this % solution % meta(iVar) % name)//" vs position"
       WRITE (fUnit,*) TRIM(tecHeader)

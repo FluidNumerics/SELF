@@ -158,7 +158,15 @@ CONTAINS
       u = "u = 0.0"
     END IF
     INFO(TRIM(u))
-    CALL this % solution % SetEquation(1,u)
+    
+    ! joe@fluidnumerics.com 7/18/2023
+    ! This workaround is needed - feq-parse currently
+    ! trips up when we use "t" as an independent variable
+    ! with the functions that start with "t". Big problem 
+    ! here, for sure.
+    !CALL this % solution % SetEquation(1,u)
+    this % solution % eqn(1) = EquationParser( TRIM(u), &
+                                               (/'x','r'/) )
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
     CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
@@ -167,8 +175,8 @@ CONTAINS
     CALL config % Get("brg1d.uL",uLEqn)
     CALL config % Get("brg1d.uR",uREqn)
 
-    this % uLEqn = EquationParser(TRIM(uLEqn), (/'x','t'/))
-    this % uREqn = EquationParser(TRIM(uREqn), (/'x','t'/))
+    this % uLEqn = EquationParser(TRIM(uLEqn), (/'x','r'/))
+    this % uREqn = EquationParser(TRIM(uREqn), (/'x','r'/))
 
     this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
     this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
@@ -234,10 +242,14 @@ CONTAINS
     CLASS(Burgers1D),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl
+    REAL(prec) :: x
 
     ! Evaluate the boundary conditions at this time level
-    this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
-    this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
+    x = this % geometry % x % boundary % hostData(1,1,1) ! Left most x-point
+    this % uL = this % uLEqn % Evaluate((/x,this % t/))
+
+    x = this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem) ! right most x-point
+    this % uR = this % uREqn % Evaluate((/x, this % t/))
 
   END SUBROUTINE PreTendency_Burgers1D
 
