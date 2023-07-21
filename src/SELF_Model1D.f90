@@ -254,7 +254,7 @@ CONTAINS
     INTEGER :: iVar
 
     DO iVar = 1,this % solution % nVar
-      PRINT*, iVar, eqnChar(iVar)
+      PRINT *, iVar,eqnChar(iVar)
       CALL this % solution % SetEquation(ivar,eqnChar(iVar))
     END DO
 
@@ -793,6 +793,9 @@ CONTAINS
     INTEGER(HID_T) :: xGlobalDims(1:3)
     INTEGER(HID_T) :: bGlobalDims(1:3)
     INTEGER(HID_T) :: bxGlobalDims(1:3)
+    TYPE(Scalar1D) :: solution
+    TYPE(Scalar1D) :: x
+    TYPE(Lagrange),TARGET :: interp
     INTEGER :: firstElem
     ! Local
     CHARACTER(LEN=self_FileNameLength) :: pickupFile
@@ -801,7 +804,7 @@ CONTAINS
     IF (PRESENT(filename)) THEN
       pickupFile = filename
     ELSE
-      WRITE(timeStampString,'(I13.13)') this % ioIterate
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
       pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 
@@ -897,6 +900,44 @@ CONTAINS
       CALL WriteArray_HDF5(fileId,'/mesh/boundary/x', &
                            this % geometry % x % boundary,bxOffset,bxGlobalDims)
 
+      ! Write data on plotting mesh
+      solOffset(1:3) = (/0,1,firstElem/)
+      solGlobalDims(1:3) = (/this % solution % interp % M, &
+                             this % solution % nVar, &
+                             this % decomp % nElem/)
+
+      xOffset(1:3) = (/0,1,firstElem/)
+      xGlobalDims(1:3) = (/this % solution % interp % M, &
+                           this % solution % nVar, &
+                           this % decomp % nElem/)
+
+      ! Create an interpolant for the uniform grid
+      CALL interp % Init(this % solution % interp % M, &
+                         this % solution % interp % targetNodeType, &
+                         this % solution % interp % N, &
+                         this % solution % interp % controlNodeType)
+
+      CALL solution % Init(interp, &
+                           this % solution % nVar,this % solution % nElem)
+
+      CALL x % Init(interp,1,this % solution % nElem)
+
+      ! Map the mesh positions to the target grid
+      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+      ! Map the solution to the target grid
+      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+      CALL CreateGroup_HDF5(fileId,'/plot')
+
+      CALL CreateGroup_HDF5(fileId,'/plot/interior')
+
+      CALL WriteArray_HDF5(fileId,'/plot/interior/x', &
+                           x % interior,xOffset,xGlobalDims)
+
+      CALL WriteArray_HDF5(fileId,'/plot/interior/solution', &
+                           solution % interior,solOffset,solGlobalDims)
+
       CALL Close_HDF5(fileId)
 
     ELSE
@@ -953,9 +994,40 @@ CONTAINS
 
       CALL WriteArray_HDF5(fileId,'/mesh/boundary/x',this % geometry % x % boundary)
 
+      ! Write data on plotting mesh
+
+      ! Create an interpolant for the uniform grid
+      CALL interp % Init(this % solution % interp % M, &
+                         this % solution % interp % targetNodeType, &
+                         this % solution % interp % N, &
+                         this % solution % interp % controlNodeType)
+
+      CALL solution % Init(interp, &
+                           this % solution % nVar,this % solution % nElem)
+
+      CALL x % Init(interp,1,this % solution % nElem)
+
+      ! Map the mesh positions to the target grid
+      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+      ! Map the solution to the target grid
+      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+      CALL CreateGroup_HDF5(fileId,'/plot')
+
+      CALL CreateGroup_HDF5(fileId,'/plot/interior')
+
+      CALL WriteArray_HDF5(fileId,'/plot/interior/x',x % interior)
+
+      CALL WriteArray_HDF5(fileId,'/plot/interior/solution',solution % interior)
+
       CALL Close_HDF5(fileId)
 
     END IF
+
+    CALL x % Free()
+    CALL solution % Free()
+    CALL interp % Free()
 
   END SUBROUTINE Write_Model1D
 
@@ -1019,7 +1091,7 @@ CONTAINS
       tecFile = filename
     ELSE
       ! Create a 0-padded integer for the output iterate
-      WRITE(timeStampString,'(I13.13)') this % ioIterate
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
       ! Increment the ioIterate
       this % ioIterate = this % ioIterate + 1
       !timeStampString = TimeStamp(this % t,'s')
@@ -1027,12 +1099,11 @@ CONTAINS
       !   WRITE (rankString,'(I5.5)') this % decomp % rankId
       !   tecFile = 'solution.'//rankString//'.'//timeStampString//'.curve'
       ! ELSE
-         tecFile = 'solution.'//timeStampString//'.curve'
+      tecFile = 'solution.'//timeStampString//'.curve'
       ! END IF
 
     END IF
 
-    
     ! Create an interpolant for the uniform grid
     CALL interp % Init(this % solution % interp % M, &
                        this % solution % interp % targetNodeType, &
