@@ -14,6 +14,7 @@ MODULE SELF_ECModel2D
   USE HDF5
   USE FEQParse
   USE SELF_Model
+  USE SELF_Model2D
 
   TYPE,EXTENDS(Model) :: ECModel2D
     TYPE(MappedScalar2D)   :: solution
@@ -64,72 +65,72 @@ MODULE SELF_ECModel2D
 
   END TYPE ECModel2D
 
-  INTERFACE
-    SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
-      bind(c,name="UpdateSolution_Model2D_gpu_wrapper")
-      USE iso_c_binding
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(c_ptr) :: solution, dSdt
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-      REAL(c_prec),VALUE :: dt
-    END SUBROUTINE UpdateSolution_Model2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
+  !     bind(c,name="UpdateSolution_Model2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     USE SELF_Constants
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: solution, dSdt
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !     REAL(c_prec),VALUE :: dt
+  !   END SUBROUTINE UpdateSolution_Model2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-      bind(c,name="UpdateGAB2_Model2D_gpu_wrapper")
-      USE iso_c_binding
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(c_ptr) :: prevsol, solution
-      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+  !     bind(c,name="UpdateGAB2_Model2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     USE SELF_Constants
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: prevsol, solution
+  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+  !   END SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-      bind(c,name="UpdateGAB3_Model2D_gpu_wrapper")
-      USE iso_c_binding
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(c_ptr) :: prevsol, solution
-      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+  !     bind(c,name="UpdateGAB3_Model2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     USE SELF_Constants
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: prevsol, solution
+  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+  !   END SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-      bind(c,name="UpdateGAB4_Model2D_gpu_wrapper")
-      USE iso_c_binding
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(c_ptr) :: prevsol, solution
-      INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-    END SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
+  !     bind(c,name="UpdateGAB4_Model2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     USE SELF_Constants
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: prevsol, solution
+  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
+  !   END SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
-      bind(c,name="UpdateGRK_Model2D_gpu_wrapper")
-      USE iso_c_binding
-      USE SELF_Constants
-      IMPLICIT NONE
-      TYPE(c_ptr) :: grk, solution, dSdt
-      INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
-      REAL(c_prec),VALUE :: rk_a, rk_g, dt
-    END SUBROUTINE UpdateGRK_Model2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
+  !     bind(c,name="UpdateGRK_Model2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     USE SELF_Constants
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: grk, solution, dSdt
+  !     INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
+  !     REAL(c_prec),VALUE :: rk_a, rk_g, dt
+  !   END SUBROUTINE UpdateGRK_Model2D_gpu_wrapper
+  ! END INTERFACE
 
-  INTERFACE
-    SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
-      bind(c,name="CalculateDSDt_Model2D_gpu_wrapper")
-      USE iso_c_binding
-      IMPLICIT NONE
-      TYPE(c_ptr) :: fluxDivergence, source, dSdt
-      INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper
-  END INTERFACE
+  ! INTERFACE
+  !   SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
+  !     bind(c,name="CalculateDSDt_Model2D_gpu_wrapper")
+  !     USE iso_c_binding
+  !     IMPLICIT NONE
+  !     TYPE(c_ptr) :: fluxDivergence, source, dSdt
+  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
+  !   END SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper
+  ! END INTERFACE
 
 CONTAINS
 
@@ -954,6 +955,9 @@ CONTAINS
       CALL WriteArray_HDF5(fileId,'/quadrature/bmatrix', &
                            this % solution % interp % bMatrix)
 
+      CALL WriteArray_HDF5(fileId,'/quadrature/imatrix', &
+                           this % solution % interp % iMatrix)
+
 
       CALL CreateGroup_HDF5(fileId,'/state')
 
@@ -1016,6 +1020,9 @@ CONTAINS
 
       CALL WriteArray_HDF5(fileId,'/quadrature/bmatrix', &
                            this % solution % interp % bMatrix)
+                           
+      CALL WriteArray_HDF5(fileId,'/quadrature/imatrix', &
+                           this % solution % interp % iMatrix)
 
       CALL CreateGroup_HDF5(fileId,'/state')
 
