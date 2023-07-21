@@ -1,7 +1,8 @@
-FROM ubuntu:20.04 as bootstrap
+FROM ubuntu:22.04 as bootstrap
 
-ARG ROCM_VERSION=5.2.3
-ARG SPACK_VERSION=v0.19.2
+ARG ROCM_VERSION=5.3
+ARG SPACK_VERSION=develop
+#ARG SPACK_VERSION=v0.19.2
 
 ENV SPACK_ROOT=/opt/spack \
     CURRENTLY_BUILDING_DOCKER_IMAGE=1 \
@@ -47,7 +48,7 @@ RUN apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir $SPACK_ROOT && cd $SPACK_ROOT && \
-    git clone https://github.com/spack/spack.git . && git checkout ${SPACK_VERSION}  && \
+    echo "hello" && git clone https://github.com/fluidnumerics-joe/spack.git . && git checkout ${SPACK_VERSION}  && \
     mkdir -p $SPACK_ROOT/opt/spack
 
 RUN ln -s $SPACK_ROOT/share/spack/docker/entrypoint.bash \
@@ -74,17 +75,14 @@ WORKDIR /root
 SHELL ["docker-shell"]
 
 # Install hip
-RUN wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | apt-key add - && \
-    echo "deb [arch=amd64] https://repo.radeon.com/rocm/apt/${ROCM_VERSION}/ focal main" | tee /etc/apt/sources.list.d/rocm.list &&\
+RUN mkdir --parents --mode=0755 /etc/apt/keyrings &&\
+    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
+    gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null &&\
+    echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VERSION}/ jammy main" | tee /etc/apt/sources.list.d/rocm.list &&\
+    echo -e 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600' \
+    | tee /etc/apt/preferences.d/rocm-pin-600 &&\
     apt-get -yqq update && \
     apt-get -yqq install rocm-dev
-
-# # Install hipfort
-# RUN git clone https://github.com/ROCmSoftwarePlatform/hipfort.git /tmp/hipfort &&\
-#     mkdir /tmp/hipfort/build &&\
-#     cd /tmp/hipfort/build &&\
-#     cmake -DHIPFORT_INSTALL_DIR=/opt/rocm/ /tmp/hipfort && \
-#     make -j install
 
 # Identifies system packages and marks them not buildable
 # Creates the package cache
@@ -96,7 +94,6 @@ CMD ["interactive-shell"]
 
 # Build stage with Spack pre-installed and ready to be used
 FROM bootstrap as builder
-ARG ROCM_VERSION=5.3.0
 
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
@@ -105,7 +102,7 @@ RUN mkdir /opt/env \
 &&   echo "  specs:" \
 &&   echo "  - hdf5@1.12.0~cxx+fortran+mpi" \
 &&   echo "  - json-fortran@7.1.0" \
-&&   echo "  - feq-parse@1.1.0" \
+&&   echo "  - feq-parse@2.0.1" \
 &&   echo "  config:" \
 &&   echo "    install_tree: /opt/self" \
 &&   echo "  view: /opt/view") > /opt/env/spack.yaml
@@ -129,7 +126,7 @@ ARG FFLAGS="-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe
 # Install SELF
 COPY . /build
 
-RUN . /etc/profile.d/z10_spack_environment.sh && \
+RUN ls /opt/view/lib && ls /opt/view/ && . /etc/profile.d/z10_spack_environment.sh && \
     cd /build && \
     HIP_PLATFORM=amd \
     SELF_DIR=/build/ \

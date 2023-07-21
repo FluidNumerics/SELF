@@ -166,7 +166,7 @@ CONTAINS
     ! here, for sure.
     !CALL this % solution % SetEquation(1,u)
     this % solution % eqn(1) = EquationParser( TRIM(u), &
-                                               (/'x','r'/) )
+                                               (/'x','t'/) )
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
     CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
@@ -174,10 +174,11 @@ CONTAINS
     ! Get additional initial conditions (add to static state if provided)
     CALL config % Get("brg1d.uL",uLEqn)
     CALL config % Get("brg1d.uR",uREqn)
-
-    this % uLEqn = EquationParser(TRIM(uLEqn), (/'x','r'/))
-    this % uREqn = EquationParser(TRIM(uREqn), (/'x','r'/))
-
+    INFO("uL : "//TRIM(uLEqn))
+    INFO("uR : "//TRIM(uREqn))
+    this % uLEqn = EquationParser(TRIM(uLEqn), (/'x','t'/))
+    this % uREqn = EquationParser(TRIM(uREqn), (/'x','t'/))
+ 
     this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
     this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
 
@@ -281,8 +282,8 @@ CONTAINS
     ! Calculate the average value on the sides
     CALL this % solutionGradient % BassiRebaySides(this % gpuAccel)
 
-    ! Set the external gradient values so that no-flux for viscous fluxes holds
-    this % solutionGradient % avgBoundary % hostData(1,1,1) = 0.0_PREC ! ! left most boundary
+    ! Set the external gradient values so that no-flux for viscous fluxes holds 
+    this % solutionGradient % avgBoundary % hostData(1,1,1) =  0.0_PREC ! ! left most boundary
     this % solutionGradient % avgBoundary % hostData(1,2,this % solution % nElem) = 0.0_PREC !
 
   END SUBROUTINE SetBoundaryCondition_Burgers1D
