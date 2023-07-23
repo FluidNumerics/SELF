@@ -1,3 +1,9 @@
+# HDF5 Dependencies 
+SELF_HDF5_LIBS ?= -L/opt/view/lib -lhdf5_fortran -lhdf5
+SELF_HDF5_INC ?= -I/opt/view/include/shared
+SELF_FLIBS += $(SELF_HDF5_LIBS)
+SELF_FFLAGS += $(SELF_HDF5_INC)
+
 # HIP Dependencies
 SELF_HIP_LIBS ?=  -L/opt/rocm/lib -lamdhip64
 SELF_HIP_INC ?= -I/opt/rocm/include
@@ -19,7 +25,7 @@ SELF_FLIBS += $(SELF_JSONF_LIBS)
 SELF_FFLAGS += $(SELF_JSONF_INC)
 
 # HDF5
-SELF_HDF5_LIBS ?= -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm
+SELF_HDF5_LIBS ?= -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm -lmpi
 SELF_HDF5_INC ?= -I/opt/view/include/shared
 
 SELF_FLIBS += $(SELF_HDF5_LIBS)

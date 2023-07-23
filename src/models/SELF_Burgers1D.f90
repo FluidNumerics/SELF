@@ -23,6 +23,11 @@ MODULE SELF_Burgers1D
     REAL(prec) :: uL = 0.0_PREC
     REAL(prec) :: uR = 0.0_PREC
 
+    TYPE(EquationParser) :: uxLEqn
+    TYPE(EquationParser) :: uxREqn
+    REAL(prec) :: uxL = 0.0_PREC
+    REAL(prec) :: uxR = 0.0_PREC
+
   CONTAINS
 
     ! Overridden Methods
@@ -171,7 +176,7 @@ CONTAINS
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)
     CALL this % solution % BoundaryInterp(gpuAccel=.FALSE.)
 
-    ! Get additional initial conditions (add to static state if provided)
+    ! Get boundary conditions for "u"
     CALL config % Get("brg1d.uL",uLEqn)
     CALL config % Get("brg1d.uR",uREqn)
     INFO("uL : "//TRIM(uLEqn))
@@ -181,6 +186,18 @@ CONTAINS
  
     this % uL = this % uLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
     this % uR = this % uREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
+
+    ! Get boundary conditions for du/dx
+    CALL config % Get("brg1d.uxL",uLEqn)
+    CALL config % Get("brg1d.uxR",uREqn)
+    INFO("uxL : "//TRIM(uLEqn))
+    INFO("uxR : "//TRIM(uREqn))
+    this % uxLEqn = EquationParser(TRIM(uLEqn), (/'x','t'/))
+    this % uxREqn = EquationParser(TRIM(uREqn), (/'x','t'/))
+ 
+    this % uxL = this % uxLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
+    this % uxR = this % uxREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
+
 
 !    CALL this % CheckMinMax()
     CALL this % CalculateEntropy()
@@ -248,9 +265,11 @@ CONTAINS
     ! Evaluate the boundary conditions at this time level
     x = this % geometry % x % boundary % hostData(1,1,1) ! Left most x-point
     this % uL = this % uLEqn % Evaluate((/x,this % t/))
+    this % uxL = this % uxLEqn % Evaluate((/x,this % t/))
 
     x = this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem) ! right most x-point
     this % uR = this % uREqn % Evaluate((/x, this % t/))
+    this % uxR = this % uxREqn % Evaluate((/x, this % t/))
 
   END SUBROUTINE PreTendency_Burgers1D
 
@@ -283,8 +302,8 @@ CONTAINS
     CALL this % solutionGradient % BassiRebaySides(this % gpuAccel)
 
     ! Set the external gradient values so that no-flux for viscous fluxes holds 
-    this % solutionGradient % avgBoundary % hostData(1,1,1) =  0.0_PREC ! ! left most boundary
-    this % solutionGradient % avgBoundary % hostData(1,2,this % solution % nElem) = 0.0_PREC !
+    this % solutionGradient % avgBoundary % hostData(1,1,1) =  -this % uxL ! 0.0_PREC ! ! left most boundary
+    this % solutionGradient % avgBoundary % hostData(1,2,this % solution % nElem) = this % uxR !0.0_PREC !
 
   END SUBROUTINE SetBoundaryCondition_Burgers1D
 

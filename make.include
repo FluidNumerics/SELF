@@ -55,26 +55,13 @@ SELF_CPP_SRCS = SELF_Lagrange \
                 SELF_Model2D
                 
 SELF_F90_MODELS = SELF_LinearShallowWater \
-                  SELF_CompressibleIdealGas2D
+                  SELF_CompressibleIdealGas2D \
+                  SELF_Burgers1D
 
 SELF_CPP_MODELS = SELF_LinearShallowWater \
                   SELF_CompressibleIdealGas2D
 
 SELF_F90_BINS = SELF_Main
-
-SELF_TESTS = Model1D_Write \
-             GradientBR_Test \
-             GradientSF_Test \
-             CompressibleIdealGas2D_StaticFluid \
-             CompressibleIdealGas2D_StaticFluid_NoNormalFlow \
-             CompressibleIdealGas2D_ConstantVelocity \
-             CompressibleIdealGas2D_HydrostaticAdjustment \
-             CompressibleIdealGas2D_ThermalBubble \
-             LinearShallowWater2D_GravityWaveRelease \
-             LinearShallowWater2D_GravityWaveRelease_Reflecting \
-             LinearShallowWater2D_PlanetaryRossbyWave \
-             LinearShallowWater2D_PlanetaryRossbyWave_NoNormalFlow \
-             LinearShallowWater2D_TopographicRossbyWave
 
 
 SELF_LIBS = self
@@ -86,10 +73,9 @@ SELF_MODEL_OBJS = $(addprefix $(SELF_MODELDIR), $(addsuffix .o, $(SELF_F90_MODEL
 SELF_MODEL_OBJS += $(addprefix $(SELF_MODELHIPDIR), $(addsuffix .o, $(SELF_CPP_MODELS)))
 SELF_LIB_OBJS = $(addprefix $(SELF_LIBDIR)lib, $(addsuffix .a, $(SELF_LIBS)))
 SELF_BIN_OBJS = $(addprefix $(SELF_BINDIR), $(addsuffix .o, $(SELF_F90_BINS)))
-SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_BINDIR) $(SELF_EXADIR) $(SELF_TESTDIR)
+SELF_BUILDDIRS = $(SELF_INCDIR) $(SELF_LIBDIR) $(SELF_BINDIR) $(SELF_EXADIR)
 
-# Example programs
-SELF_EXAS = $(addprefix $(SELF_EXADIR), $(SELF_TESTS))
+# Application
 SELF_APP = $(addprefix $(SELF_BINDIR), self)
 
 # Recipes

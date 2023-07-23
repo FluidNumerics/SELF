@@ -1,6 +1,6 @@
 # Compiler
 
-H5PFC ?= h5pfc
+MPIFC ?= mpifort
 HIPCC ?= /opt/rocm/bin/hipcc
 
 HIP_PLATFORM ?= amd
@@ -17,7 +17,7 @@ ifeq ($(PREC),double)
 endif
 
  
-FC = $(H5PFC)
+FC = $(MPIFC)
 CXX = $(HIPCC)
 AR = gcc-ar
 SELF_FFLAGS += -fbackslash -I$(ROCM_DIR)/include -ffree-line-length-512

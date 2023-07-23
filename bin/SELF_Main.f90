@@ -344,11 +344,11 @@ END MODULE SELF_Main
 PROGRAM SELF
 
   ! Core
-  USE SELF_SupportRoutines
-  USE SELF_Mesh
-  USE SELF_Geometry
-  USE SELF_MappedData
-  USE SELF_Config
+  ! USE SELF_SupportRoutines
+  ! USE SELF_Mesh
+  ! USE SELF_Geometry
+  ! USE SELF_MappedData
+  ! USE SELF_Config
 
   ! Models
   ! USE SELF_Model
