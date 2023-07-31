@@ -244,6 +244,38 @@ MODULE SELF_Model
 
 CONTAINS
 
+FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
+  !! This method is used to return the integer flag from a char for boundary conditions
+  !!
+    IMPLICIT NONE
+    CHARACTER(*),INTENT(in) :: charFlag
+    INTEGER :: intFlag
+
+  
+    SELECT CASE( UpperCase(TRIM(charFlag)) )
+
+      CASE ("PRESCRIBED")
+        intFlag = SELF_BC_PRESCRIBED
+
+      CASE ("RADIATION")
+        intFlag = SELF_BC_RADIATION
+
+      CASE ("NO_NORMAL_FLOW")
+        intFlag = SELF_BC_NONORMALFLOW
+
+      CASE ("PRESCRIBED_STRESS")
+        intFlag = SELF_BC_PRESCRIBED_STRESS
+
+      CASE ("NO_STRESS")
+        intFlag = SELF_BC_NOSTRESS
+
+      CASE DEFAULT
+        intFlag = 0
+
+    END SELECT
+    
+  END FUNCTION GetBCFlagForChar
+
   SUBROUTINE PrintType_Model(this)
 #undef __FUNC__
 #define __FUNC__ "PrintType"

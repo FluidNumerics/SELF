@@ -1,0 +1,71 @@
+{
+    "version": "v0.0.0",
+    "model_name": "cns2d",
+    "geometry": {
+      "mesh_file": "/self/Block2D_mesh.h5",
+      "control_degree": 7,
+      "control_quadrature": "gauss",
+      "target_degree": 10,
+      "target_quadrature": "uniform",
+      "uniform_boundary_condition":"no_normal_flow"
+    },
+    "deployment_options": {
+      "gpu_accel": false,
+      "mpi": false
+    },
+    "time_options": {
+      "integrator": "rk3",
+      "dt": 1.0e-4,
+      "cfl_max": 0.0,
+      "start_time": 0.0,
+      "duration": 1e-2,
+      "io_interval": 1e-2
+    },
+    "units": {
+      "time": "s",
+      "length": "m",
+      "mass": "kg"
+    },
+    "cns2d": {
+      "sgs_closure": {
+        "model": "constant_del2",
+        "gradient_variables": "primitive"
+      },
+      "split_form": "conservative",
+      "environment": {
+        "potential": "p=0",
+        "momentum_drag_x": "d=0",
+        "momentum_drag_y": ""
+      },
+      "fluid": {
+        "Cp": 1.005,
+        "Cv": 0.718,
+        "R": 278.0,
+        "rho": 1.2754,
+        "T": 273.0,
+        "energy": 117526.5,
+        "equation_of_state": "ideal_gas",
+        "viscosity": 0.0,
+        "thermal_diffusivity": 0.0
+      },
+      "initial_conditions": {
+        "hydrostatic_adjustment": false,
+        "static_state": true,
+        "file": "",
+        "u": "",
+        "v": "",
+        "rho": "",
+        "T": ""
+      },
+      "boundary_conditions": {
+        "time_dependent": false,
+        "dt": 0.0,
+        "file": "",
+        "from_initial_conditions": false,
+        "u": "",
+        "v": "",
+        "rho": "",
+        "T": ""
+      }
+    }
+  }

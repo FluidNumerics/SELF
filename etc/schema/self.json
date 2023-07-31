@@ -61,6 +61,19 @@
                     ],
                     "default": "uniform"
                 },
+                "uniform_boundary_condition": {
+                    "description": "A boundary condition to override all domain boundaries with. If not defined or left blank, no changes to mesh file boundary conditions will be applied.",
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "prescribed",
+                        "radiation",
+                        "no_normal_flow",
+                        "prescribed_stress",
+                        "no_stress"
+                    ],
+                    "default": "uniform"
+                },
                 "nX": {
                     "description": "Number of points in the x-direction for structured grid generation.",
                     "type": "integer",
@@ -221,7 +234,7 @@
                     "properties": {
                         "model": {
                             "description": "The SGS model to use for closure",
-                            "type": "string",
+                            "type": "string", 
                             "enum": [
                                 "none",
                                 "constant_del2"
