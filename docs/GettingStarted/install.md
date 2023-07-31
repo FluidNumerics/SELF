@@ -169,15 +169,19 @@ make install
 [If you encounter any problems, feel free to open an new issue](https://github.com/FluidNumerics/SELF/issues/new/choose)
 
 ## Build a Docker Container
-SELF comes with a Dockerfile to create builds that target specific GPU platforms. To build Docker containers, you will need to install [Docker](https://www.docker.com/). 
-
-
-### Build with Docker
-SELF comes with Docker files defined under the `docker/` subdirectory. Currently, there are recipes for building container images for AMD GPUs (`Dockerfile.rocm`) and Nvidia GPUs (`Dockerfile.cuda`). The recipes will install all of SELF's dependencies and SELF in a container image based on the Ubuntu 22.04 image. To bake a SELF image,
+SELF comes with Docker files defined under the `docker/` subdirectory. Currently, there are recipes for building container images for AMD GPUs (`Dockerfile.rocm`) and Nvidia GPUs (`Dockerfile.cuda`). The recipes will install all of SELF's dependencies and SELF in a container image based on the Ubuntu 22.04 image. To bake a SELF image, first clone the SELF repository and navigate to the source code directory
 
 ```
-docker build -f docker/Dockerfile.rocm -t self:test
+git clone https://github.com/fluidnumerics/SELF ${HOME}/SELF
+cd ${HOME}/SELF
 ```
+
+In this example, SELF is cloned to `${HOME}/SELF`. From the main directory of the SELF repository, you can use `docker build` to build a container image.
+
+```
+docker build -f docker/Dockerfile.rocm -t self:test .
+```
+
 This command will create a Docker image for running SELF on AMD MI50 GPUs and the image is tagged `self:test`; this is the name of the image that you will reference when running SELF.
 
         
