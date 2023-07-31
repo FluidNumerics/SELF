@@ -23,22 +23,21 @@
 #     PREC                   Set the floating point precision in SELF. (Default: single | Options : single, double)
 #
 #   Compiler and Target Hardware Options
-#     HIPFC                  Set the full path to hipfc. (Default: hipfc)
-#     HIPFORT_COMPILER       Set the Fortran compiler used by hipfort. (Default: h5pfc | Options: h5pfc)
+#     MPIFC                  Set the full path to a MPI fortran compiler. (Default: mpifort)
 #     GPU_PLATFORM           Set the target GPU platform. (Default: gfx900 | Options gfx900, sm35, sm50, sm70) 
 #     HIP_PLATFORM           Set the target vendor. (Default: amd | Options amd, nvidia) 
-#     ROCM_DIR               Set the path to ROCm installation (Default: /opt/rocm)
-#     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if GPU_TARGET is an Nvidia GPU)
 #
 #   Dependency Options
+#     ROCM_DIR               Set the path to ROCm installation (Default: /opt/rocm)
+#     CUDA_PATH              Set the path to CUDA installation (Default: /usr/local/cuda) (Needed if GPU_TARGET is an Nvidia GPU)
 #     SELF_JSONF_LIBS        Set the linker flags for json-fortran (Default: -L/opt/view/lib -ljsonfortran)
 #     SELF_JSONF_INC         Set the includes flags for json-fortran (Default: -I/opt/view/include)
 #     SELF_FEQPARSE_LIBS     Set the linker flags for feq-parse (Default: -L/opt/view/lib -lfeqparse)
 #     SELF_FEQPARSE_INC      Set the includes flags for feq-parse (Default: -I/opt/view/include)
-#     SELF_FLAP_LIBS         Set the linker flags for FLAP (Default: -L/opt/view/lib/ -lFLAP -lFACE -lPENF) 
-#     SELF_FLAP_INC          Set the includes flags for FLAP (Default: -I/opt/view/include/FLAP -I/opt/view/include/PENF -I/opt/view/include/FACE)
 #     SELF_HDF5_LIBS         Set the linker flags for hdf5 (Default: -L/opt/view/lib -lhdf5_fortran -lhdf5 -lz -lm)
 #     SELF_HDF5_INC          Set the includes flags for hdf5 (Default: -I/opt/view/include/shared)
+#     SELF_GPU_LIBS          Set the linker flags for either HIP(Default) or CUDA (Default: -L/opt/rocm/lib -lamdhip64)
+#     SELF_GPU_INC           Set the includes flags for either HIP(Default) or CUDA (Default: -I/opt/rocm/include)
 #
 # ================================================================================================================================================= #
 

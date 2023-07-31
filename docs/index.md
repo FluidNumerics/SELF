@@ -1,12 +1,12 @@
 # Spectral Element Library in Fortran
 
 ## SELF
-The Spectral Element Library in Fortran (SELF) is an object oriented suite of Fortran modules that enable researchers to implement conservation law solvers using Spectral Element Methods. One goal of this project is to help dispel the notion that Fortran codes are ancient monoliths designed for a single (potentially unknown) purpose. SELF is written using an object-oriented approach to help scientists and researcher put together their own solvers and programs that can run on everything from personal workstations to HPC clusters with minimal effort.
+The Spectral Element Library in Fortran (SELF) is an object oriented suite of Fortran modules that enable researchers to implement conservation law solvers using Spectral Element Methods. One goal of this project is to help dispel the notion that Fortran codes are ancient monoliths designed for a single (potentially unknown) purpose. SELF is written using an object-oriented approach to help scientists and researcher put together their own solvers and programs that can run on everything from personal workstations to HPC clusters with minimal effort. A main program (`self`) is able to digest JSON input files to select and drive ready-to-go conservation law solvers, including Burger's equation, Shallow Water Equations, and Compressible Navier Stokes.
 
-SELF is built with modern compute architecture in mind. Our intention is to enable scientific software developers to build SELF for personal workstations, GPU and multi-GPU accelerated platforms, and HPC clusters. Portable GPU acceleration in SELF is enabled by [HIPFort](https://github.com/ROCmSoftwarePlatform/hipfort) and additional coarse-grained parallelism is implemented through domain decomposition with MPI.
+SELF is built with modern compute architecture in mind. Our intention is to enable scientific software developers to build SELF for personal workstations, GPU and multi-GPU accelerated platforms, and HPC clusters. Portable GPU acceleration in SELF is enabled by AMD's HIP and additional coarse-grained parallelism is implemented through domain decomposition with MPI.
 
 ## PySELF
-If you prefer working in Python, our team is actively working on building out a [Python interface for SELF](https://fluidnumerics.github.io/pyself). The goal of [PySELF](https://fluidnumerics.github.io/pyself) is to ultimately provide a python API for you to manage complete simulation workflows from Python. This project is currently in its infancy and is currently seeking feature requests and users.
+If you prefer working in Python, our team is actively working on building out a [Python interface for SELF](https://fluidnumerics.github.io/pyself). The goal of [PySELF](https://fluidnumerics.github.io/pyself) is to help you with post-processing SELF output, and ultimately to provide a python API for you to manage complete simulation workflows from Python. This project is currently in its infancy and is currently seeking feature requests and users.
 
 
 ## Support
