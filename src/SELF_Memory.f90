@@ -336,7 +336,7 @@ CONTAINS
     IMPLICIT NONE
     LOGICAL :: avail
     ! Local
-    INTEGER :: gpuCount
+    INTEGER(C_INT) :: gpuCount
     INTEGER(KIND(hipSuccess)) :: err
 
     err = hipGetDeviceCount(gpuCount)

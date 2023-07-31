@@ -1448,6 +1448,8 @@ CONTAINS
 
     ENDDO
 
+    CLOSE(fUnit)
+
     CALL x % Free()
     CALL mappedData % Free()
     CALL interp % Free()
