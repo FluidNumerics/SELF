@@ -195,7 +195,7 @@ By default, this will build SELF with double precision floating point arithmetic
 
 ### Test run the Docker container
 
-Running SELF often requires a JSON file and a mesh file; together, these are often referred to as the "input deck". Models that work in 1-D (e.g. viscous Burger's equation) do not require a mesh file. You can provide the input deck to a SELF container through a [bind mount](https://docs.docker.com/storage/bind-mounts/) that maps a directory from your host system that contains the input deck to a path inside the container. 
+Running SELF requires a JSON file and often requires mesh file; together, these are often referred to as the "input deck". Models that work in 1-D (e.g. viscous Burger's equation) do not require a mesh file. You can provide the input deck to a SELF container through a [bind mount](https://docs.docker.com/storage/bind-mounts/) that maps a directory from your host system that contains the input deck to a path inside the container. 
 
 The SELF repository comes with an `examples/` subdirectory which contains example input decks for various configurations of the available solvers. The subdirectories under `examples/` are
 
@@ -207,7 +207,7 @@ The SELF repository comes with an `examples/` subdirectory which contains exampl
 In this example, we will run the travelling shock example for the viscous Burger's equation in 1-D.
 
 !!!note
-   It is assumed that you have created a Docker image for SELF as described in the previous section of this documentation. Make sure that you have a Docker container image of SELF on your system before proceeding further
+    It is assumed that you have created a Docker image for SELF as described in the previous section of this documentation. Make sure that you have a Docker container image of SELF on your system before proceeding further
 
 
 First, navigate to the main directory of the SELF repository that is locally cloned on your system, e.g.
@@ -219,8 +219,10 @@ cd ${HOME}/SELF
 Next, you will use `docker run` with a bind mount to the `examples/brg1d/traveling_shock` subdirectory; this directory on your system will be mounted to the `/self` directory inside the Docker container.
 
 ```
-docker run --mount type=bind,source="$(pwd)/brg1d/traveling_shock",target="/self" \
+docker run --mount type=bind,source="$(pwd)/examples/brg1d/traveling_shock",target="/self" \
            self:test \
-           "/opt/self/bin/self -i /self/input.json"
+           "cd /self && /opt/self/bin/self -i /self/input.json"
 ```
+
+Note that the command being run inside the container is `/opt/self/bin/self` which is the full path to the main SELF program in the container image. This program takes `/self/input.json` as its main input. All of the model output for
 
