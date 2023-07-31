@@ -1101,6 +1101,9 @@ CONTAINS
       CALL solution % Init(interp, &
                            this % solution % nVar,this % solution % nElem)
 
+      CALL solutionGradient % Init(interp, &
+                                   this % solution % nVar,this % solution % nElem)
+
       CALL x % Init(interp,1,this % solution % nElem)
 
       ! Map the mesh positions to the target grid
@@ -1126,6 +1129,7 @@ CONTAINS
 
     CALL x % Free()
     CALL solution % Free()
+    CALL solutionGradient % Free()
     CALL interp % Free()
 
   END SUBROUTINE Write_ECModel2D
