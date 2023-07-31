@@ -28,10 +28,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - rocm_version: '5.3.0'
+          - rocm_version: '5.3.2'
             precision: double
             gpu_target: gfx906
             hip_platform: amd
+            partition: mi50
             fflags: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
             coverage: true
 
@@ -52,28 +53,29 @@ jobs:
         service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
         access_token_lifetime: 300s
 
-    - name: 'Docker build'
+    - name: 'Docker build (AMD GPU)'
+      if: ${{ matrix.hip_platform == 'amd' }}
       run: |-
         docker build \
          --build-arg GPU_TARGET=${{ matrix.gpu_target }} \
-         --build-arg HIP_PLATFORM=$${{ matrix.hip_platform }} \
          --build-arg PREC=${{ matrix.precision }} \
          --build-arg FFLAGS="${{ matrix.fflags }}" \
-         --tag "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
+         --file="docker/Dockerfile.rocm"
+         --tag "us-docker.pkg.dev/self-fluids/self/rocm-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
           .
 
     - name: Pull input decks
       run: |
         gsutil cp -r gs://self-fluids-data/input_decks /tmp/
-      
-    - name: Convert docker to singularity 
-      run: |
-        apptainer pull self.sif \
-        docker-daemon:us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA
 
-    - name: Run tests for coverage
+    - name: Run tests for coverage (AMD)
+      if: ${{ matrix.hip_platform == 'amd' }}
       run: |
-        apptainer exec --rocm --bind $(pwd):/build --bind /tmp/input_decks:/input self.sif /opt/self/util/coverage.sh
+       docker run --device=/dev/kfd --device /dev/dri \
+                  --mount type=bind,source="/tmp/input_decks",target="/self" \
+                  --mount type=bind,source="$(pwd)",target="/build" \
+                  "us-docker.pkg.dev/self-fluids/self/rocm-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
+                  "/opt/self/bin/self -i /self/input.json
 
     - uses: codecov/codecov-action@v3
       if: ${{ matrix.coverage }}
