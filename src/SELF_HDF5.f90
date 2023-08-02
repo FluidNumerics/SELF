@@ -84,6 +84,10 @@ MODULE SELF_HDF5
     MODULE PROCEDURE :: ReadArray_HDF5_int64_r7_parallel
   END INTERFACE
 
+  INTERFACE WriteCharacter_HDF5
+    MODULE PROCEDURE :: WriteCharacter_HDF5_serial 
+  END INTERFACE WriteCharacter_HDF5
+
   INTERFACE WriteArray_HDF5
     MODULE PROCEDURE :: WriteArray_HDF5_real_r1_serial
     MODULE PROCEDURE :: WriteArray_HDF5_real_r2_serial
@@ -143,6 +147,7 @@ MODULE SELF_HDF5
   PUBLIC :: WriteAttribute_HDF5
   PUBLIC :: ReadArray_HDF5
   PUBLIC :: WriteArray_HDF5
+  PUBLIC :: WriteCharacter_HDF5
 
 CONTAINS
 
@@ -1904,6 +1909,37 @@ CONTAINS
     CALL h5sclose_f(memspace,error)
 
   END SUBROUTINE WriteArray_HDF5_int64_r7_parallel
+
+  subroutine WriteCharacter_HDF5_serial(fileid, name, hfField)
+    ! adapted from https://forum.hdfgroup.org/t/writing-a-string-array-as-attribute-in-fortran/8503/6
+    IMPLICIT NONE
+    INTEGER(HID_T),INTENT(in) :: fileId
+    character (len=*), intent(in) :: name
+    character (len=*), intent(in) :: hfField
+    ! Local
+    integer(HID_T) :: h5_strtype, h5_dspace, h5_dset
+    integer(HSIZE_T), dimension(2) :: size
+    character (len=len(hfField)+1), dimension(1) :: str_data
+    integer(SIZE_T), dimension(1) :: str_len
+    INTEGER :: error
+  
+    ! string output requires to open a file local = non-parallel
+  
+    str_len(1) = len_trim (hfField)
+    size(1) = str_len(1)
+    size(2) = 1
+    str_data(1) = hfField//char(0)
+  
+    ! create data space
+    call H5Tcopy_f (H5T_STRING, h5_strtype, error)
+    call H5Tset_strpad_f (h5_strtype, H5T_STR_NULLPAD_F, error)
+    call h5screate_simple_f (1, size(2), h5_dspace, error)
+    call h5dcreate_f (fileid, trim (name), h5_strtype, h5_dspace, h5_dset, error)
+    call h5dwrite_vl_f (h5_dset, h5_strtype, str_data, size, str_len, error, h5_dspace)
+    call h5dclose_f (h5_dset, error)
+    call h5sclose_f (h5_dspace, error)
+
+  end subroutine WriteCharacter_HDF5_serial 
 
   SUBROUTINE ReadArray_HDF5_real_r1_serial(fileId,arrayName,hfArray)
     IMPLICIT NONE

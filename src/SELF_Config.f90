@@ -46,6 +46,8 @@ MODULE SELF_Config
          Get_SELFConfig_int64, &
          Get_SELFConfig_real32, &
          Get_SELFConfig_real64, &
+         Get_SELFConfig_real32_array, &
+         Get_SELFConfig_real64_array, &
          Get_SELFConfig_logical, &
          Get_SELFConfig_char
 
@@ -53,6 +55,8 @@ MODULE SELF_Config
       PROCEDURE, PRIVATE :: Get_SELFConfig_int64
       PROCEDURE, PRIVATE :: Get_SELFConfig_real32
       PROCEDURE, PRIVATE :: Get_SELFConfig_real64
+      PROCEDURE, PRIVATE :: Get_SELFConfig_real32_array
+      PROCEDURE, PRIVATE :: Get_SELFConfig_real64_array
       PROCEDURE, PRIVATE :: Get_SELFConfig_logical
       PROCEDURE, PRIVATE :: Get_SELFConfig_char
       
@@ -215,6 +219,55 @@ CONTAINS
 
    END SUBROUTINE Get_SELFConfig_real64
 
+   SUBROUTINE Get_SELFConfig_real32_array( this, jsonKey, res )
+      IMPLICIT NONE
+      CLASS(SELFConfig), INTENT(inout) :: this
+      CHARACTER(*), INTENT(in) :: jsonKey
+      REAL(real32), INTENT(out) :: res(:)
+      ! Local
+      LOGICAL :: found
+      REAL(real32),ALLOCATABLE :: resLoc(:)
+      INTEGER :: N
+      
+      CALL this % concretization % get( TRIM(jsonKey), resLoc, found )
+      IF( .NOT. found )THEN
+         PRINT*, "JSON key not found : "//TRIM(jsonKey)
+         STOP 1
+      ENDIF
+      N = SIZE(res)
+      res(1:N) = resLoc(1:N)
+
+      IF(ALLOCATED(resLoc))THEN
+         DEALLOCATE(resLoc)
+      ENDIF
+
+   END SUBROUTINE Get_SELFConfig_real32_array
+
+   SUBROUTINE Get_SELFConfig_real64_array( this, jsonKey, res )
+      IMPLICIT NONE
+      CLASS(SELFConfig), INTENT(inout) :: this
+      CHARACTER(*), INTENT(in) :: jsonKey
+      REAL(real64), INTENT(out) :: res(:)
+      ! Local
+      LOGICAL :: found
+      REAL(real64),ALLOCATABLE :: resLoc(:)
+      INTEGER :: N
+      
+      CALL this % concretization % get( TRIM(jsonKey), resLoc, found )
+      IF( .NOT. found )THEN
+         PRINT*, "JSON key not found : "//TRIM(jsonKey)
+         STOP 1
+      ENDIF
+      N = SIZE(res)
+      res(1:N) = resLoc(1:N)
+
+      IF(ALLOCATED(resLoc))THEN
+         DEALLOCATE(resLoc)
+      ENDIF
+
+   END SUBROUTINE Get_SELFConfig_real64_array
+
+
    SUBROUTINE Get_SELFConfig_logical( this, jsonKey, res )
       IMPLICIT NONE
       CLASS(SELFConfig), INTENT(inout) :: this
@@ -246,6 +299,10 @@ CONTAINS
          STOP 1
       ENDIF
       res = TRIM(resLoc)
+
+      IF(ALLOCATED(resLoc))THEN
+         DEALLOCATE(resLoc)
+      ENDIF
 
    END SUBROUTINE Get_SELFConfig_char
 

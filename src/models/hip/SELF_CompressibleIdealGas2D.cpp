@@ -31,7 +31,7 @@ extern "C"
   }
 }
 
-__global__ void SinglePointFlux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real *primitive, int N, int nVar)
+__global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real *primitive, int N, int nVar)
 {
 
   // Get the array indices from the GPU thread IDs
@@ -163,13 +163,13 @@ __global__ void SinglePointFlux_CompressibleIdealGas2D_gpu(real *flux, real *sol
 
 extern "C"
 {
-  void SinglePointFlux_CompressibleIdealGas2D_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
+  void ConservativeFlux_CompressibleIdealGas2D_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
   {
-    SinglePointFlux_CompressibleIdealGas2D_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
+    ConservativeFlux_CompressibleIdealGas2D_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
   }
 }
 
-__global__ void NaiveLLF_CompressibleIdealGas2D_gpu(real *flux,
+__global__ void LocalLaxFriedrichs_CompressibleIdealGas2D_gpu(real *flux,
                                                     real *solution,
                                                     real *extSolution,
                                                     real *primitive,
@@ -256,7 +256,7 @@ __global__ void NaiveLLF_CompressibleIdealGas2D_gpu(real *flux,
 
 extern "C"
 {
-  void NaiveLLF_CompressibleIdealGas2D_gpu_wrapper(real **flux,
+  void LocalLaxFriedrichs_CompressibleIdealGas2D_gpu_wrapper(real **flux,
                                                    real **solution,
                                                    real **extSolution,
                                                    real **primitive,
@@ -270,7 +270,7 @@ extern "C"
                                                    int nDiag,
                                                    int nEl)
   {
-    NaiveLLF_CompressibleIdealGas2D_gpu<<<dim3(nVar, 4, nEl), dim3(N + 1, 1, 1), 0, 0>>>(*flux, *solution, *extSolution, *primitive, *extPrimitive, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
+    LocalLaxFriedrichs_CompressibleIdealGas2D_gpu<<<dim3(nVar, 4, nEl), dim3(N + 1, 1, 1), 0, 0>>>(*flux, *solution, *extSolution, *primitive, *extPrimitive, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
   }
 }
 
