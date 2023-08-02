@@ -59,7 +59,6 @@ jobs:
         docker build --build-arg GPU_TARGET="${{ matrix.gpu_target }}" \
                      --build-arg PREC="${{ matrix.precision }}" \
                      --build-arg FFLAGS="${{ matrix.fflags }}" \
-                     -f "docker/Dockerfile.rocm"
+                     -f "docker/Dockerfile.rocm" \
                      -t "self-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" .
 
-   
