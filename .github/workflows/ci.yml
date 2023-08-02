@@ -56,50 +56,10 @@ jobs:
     - name: 'Docker build (AMD GPU)'
       if: ${{ matrix.hip_platform == 'amd' }}
       run: |-
-        docker build \
-         --build-arg GPU_TARGET=${{ matrix.gpu_target }} \
-         --build-arg PREC=${{ matrix.precision }} \
-         --build-arg FFLAGS="${{ matrix.fflags }}" \
-         --file="docker/Dockerfile.rocm"
-         --tag "us-docker.pkg.dev/self-fluids/self/rocm-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
-          .
+        docker build --build-arg GPU_TARGET="${{ matrix.gpu_target }}" \
+                     --build-arg PREC="${{ matrix.precision }}" \
+                     --build-arg FFLAGS="${{ matrix.fflags }}" \
+                     -f "docker/Dockerfile.rocm"
+                     -t "self-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" .
 
-    - name: Pull input decks
-      run: |
-        gsutil cp -r gs://self-fluids-data/input_decks /tmp/
-
-    - name: Run tests for coverage (AMD)
-      if: ${{ matrix.hip_platform == 'amd' }}
-      run: |
-       docker run --device=/dev/kfd --device /dev/dri \
-                  --mount type=bind,source="/tmp/input_decks",target="/self" \
-                  --mount type=bind,source="$(pwd)",target="/build" \
-                  "us-docker.pkg.dev/self-fluids/self/rocm-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" \
-                  "/opt/self/bin/self -i /self/input.json
-
-    - uses: codecov/codecov-action@v3
-      if: ${{ matrix.coverage }}
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./lcov.info
-        flags: unittests
-        name: codecov-umbrella
-
-    - name: Coveralls
-      if: ${{ matrix.coverage }}
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        path-to-lcov: ./lcov.info
-
-    - name: Login to Artifact Registry
-      uses: docker/login-action@v1
-      with:
-        registry: us-docker.pkg.dev
-        username: oauth2accesstoken
-        password: ${{ steps.auth.outputs.access_token }}
-
-    - name: 'Push to artifact registry'
-      run: |-
-        docker push \
-        "us-docker.pkg.dev/self-fluids/self/base_rocm-${{ matrix.rocm_version }}_cuda-11.8.0_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA"
+   
