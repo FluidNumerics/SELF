@@ -61,19 +61,6 @@
                     ],
                     "default": "uniform"
                 },
-                "uniform_boundary_condition": {
-                    "description": "A boundary condition to override all domain boundaries with. If not defined or left blank, no changes to mesh file boundary conditions will be applied.",
-                    "type": "string",
-                    "enum": [
-                        "",
-                        "prescribed",
-                        "radiation",
-                        "no_normal_flow",
-                        "prescribed_stress",
-                        "no_stress"
-                    ],
-                    "default": "uniform"
-                },
                 "nX": {
                     "description": "Number of points in the x-direction for structured grid generation.",
                     "type": "integer",
@@ -86,23 +73,23 @@
                 },
                 "x0": {
                     "description": "First point in the x-direction for structured grid generation.",
-                    "type": "float",
-                    "default": 0.0
+                    "type": "number",
+                    "default": 0
                 },
                 "xN": {
                     "description": "Last point in the x-direction for structured grid generation.",
-                    "type": "float",
-                    "default": 1.0
+                    "type": "number",
+                    "default": 1
                 },
                 "y0": {
                     "description": "First point in the y-direction for structured grid generation.",
-                    "type": "float",
-                    "default": 0.0
+                    "type": "number",
+                    "default": 0
                 },
                 "yN": {
                     "description": "Last point in the y-direction for structured grid generation.",
-                    "type": "float",
-                    "default": 0.0
+                    "type": "number",
+                    "default": 0
                 }
             }
         },
@@ -120,90 +107,95 @@
                     "description": "Enable domain decomposition with MPI. Application must run under mpirun/mpiexec/srun for domain decomposition",
                     "default": false
                 }
-            },
-            "time_options": {
-                "description": "Configuration  for the time integration.",
-                "type": "object",
-                "properties": {
-                    "integrator": {
-                        "description": "Type of time integrator to use to forward step the model.",
-                        "type": "string",
-                        "enum": [
-                            "euler",
-                            "rk2",
-                            "rk3",
-                            "rk4",
-                            "ab2",
-                            "ab3",
-                            "ab4"
-                        ],
-                        "default": "euler"
-                    },
-                    "dt": {
-                        "type": "number",
-                        "minimum": 0.0,
-                        "description": "The size of the time step for a time integrator expressed in units.time ."
-                    },
-                    "cfl_max": {
-                        "type": "number",
-                        "minimum": 0.0,
-                        "description": "The maximum CFL number for time integration. If non-zero, dt will be calculated using cfl_max and the mesh."
-                    },
-                    "start_time": {
-                        "description": "The value for the initial time in units.time .",
-                        "type": "number",
-                        "minimum": 0.0
-                    },
-                    "duration": {
-                        "description": "The length of the simulation in units.time .",
-                        "type": "number",
-                        "minimum": 0.0
-                    },
-                    "io_interval": {
-                        "description": "The amount of time between model state ouput in units.time . If set to 0, only the first and last state will be output.",
-                        "type": "number",
-                        "minimum": 0.0
-                    }
-                }
-            },
-            "units": {
-                "description": "",
-                "type": "object",
-                "properties": {
-                    "time": {
-                        "description": "The units for time",
-                        "type": "string",
-                        "enum": [
-                            "ns, ms, s, Ks, Ms, Gs"
-                        ],
-                        "default": "s"
-                    },
-                    "length": {
-                        "description": "The units for length",
-                        "type": "string",
-                        "enum": [
-                            "nm",
-                            "mm",
-                            "cm",
-                            "m",
-                            "Km"
-                        ],
-                        "default": "m"
-                    },
-                    "mass": {
-                        "description": "The units for mass",
-                        "type": "string",
-                        "enum": [
-                            "mg",
-                            "g",
-                            "kg"
-                        ],
-                        "default": "kg"
-                    }
+            }
+        },
+        "time_options": {
+            "description": "Configuration  for the time integration.",
+            "type": "object",
+            "properties": {
+                "integrator": {
+                    "description": "Type of time integrator to use to forward step the model.",
+                    "type": "string",
+                    "enum": [
+                        "euler",
+                        "rk2",
+                        "rk3",
+                        "rk4",
+                        "ab2",
+                        "ab3",
+                        "ab4"
+                    ],
+                    "default": "euler"
+                },
+                "dt": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "The size of the time step for a time integrator expressed in units.time ."
+                },
+                "cfl_max": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "The maximum CFL number for time integration. If non-zero, dt will be calculated using cfl_max and the mesh."
+                },
+                "start_time": {
+                    "description": "The value for the initial time in units.time .",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "duration": {
+                    "description": "The length of the simulation in units.time .",
+                    "type": "number",
+                    "minimum": 0
+                },
+                "io_interval": {
+                    "description": "The amount of time between model state ouput in units.time . If set to 0, only the first and last state will be output.",
+                    "type": "number",
+                    "minimum": 0
                 }
             }
         },
-        "brg1d":{
+        "units": {
+            "description": "",
+            "type": "object",
+            "properties": {
+                "time": {
+                    "description": "The units for time",
+                    "type": "string",
+                    "enum": [
+                        "ns",
+                        "ms",
+                        "s",
+                        "Ks",
+                        "Ms",
+                        "Gs"
+                    ],
+                    "default": "s"
+                },
+                "length": {
+                    "description": "The units for length",
+                    "type": "string",
+                    "enum": [
+                        "nm",
+                        "mm",
+                        "cm",
+                        "m",
+                        "Km"
+                    ],
+                    "default": "m"
+                },
+                "mass": {
+                    "description": "The units for mass",
+                    "type": "string",
+                    "enum": [
+                        "mg",
+                        "g",
+                        "kg"
+                    ],
+                    "default": "kg"
+                }
+            }
+        },
+        "brg1d": {
             "description": "Parameters for the burgers 1d solver",
             "type": "object",
             "properties": {
@@ -213,14 +205,29 @@
                     "default": "u=0"
                 },
                 "uL": {
-                    "type": "float",
+                    "type": "string",
                     "description": "Left boundary condition.",
-                    "default": 0.0
+                    "default": "u=0"
                 },
                 "uR": {
-                    "type": "float",
+                    "type": "string",
                     "description": "Right boundary condition.",
-                    "default": 0.0
+                    "default": "u=0"
+                },
+                "uxL": {
+                    "type": "string",
+                    "description": "Left boundary condition for the gradient.",
+                    "default": "u=0"
+                },
+                "uxR": {
+                    "type": "string",
+                    "description": "Right boundary condition for the gradient.",
+                    "default": "u=0"
+                },
+                "viscosity": {
+                    "type": "number",
+                    "description": "Viscosity of the fluid.",
+                    "default": "u=0"
                 }
             }
         },
@@ -234,7 +241,7 @@
                     "properties": {
                         "model": {
                             "description": "The SGS model to use for closure",
-                            "type": "string", 
+                            "type": "string",
                             "enum": [
                                 "none",
                                 "constant_del2"
@@ -289,7 +296,7 @@
                         "R": {
                             "description": "Ideal gas constant",
                             "type": "number",
-                            "default": 287.0
+                            "default": 287
                         },
                         "rho": {
                             "description": "Default density",
@@ -299,7 +306,7 @@
                         "T": {
                             "description": "Default temperature",
                             "type": "number",
-                            "default": 273.0
+                            "default": 273
                         },
                         "energy": {
                             "description": "Default internal energy",
@@ -318,12 +325,12 @@
                         "viscosity": {
                             "description": "The constant value of the dynamic viscosity expressed using units consistent with units attributes",
                             "type": "number",
-                            "default": 0.0
+                            "default": 0
                         },
                         "thermal_diffusivity": {
                             "description": "The constant value of the thermal diffusivity expressed using units consistent with units attributes",
                             "type": "number",
-                            "default": 0.0
+                            "default": 0
                         }
                     }
                 },
@@ -336,11 +343,6 @@
                             "description": "Enable hydrostatic adjustment before starting forward integration.",
                             "default": false
                         },
-                        "hydrostatic_momentum_max": {
-                            "description": "Target maximum momentum for the whole grid to consider the fluid hydrostatically adjusted.",
-                            "type": "number",
-                            "default": 1e-6
-                        }, 
                         "static_state": {
                             "type": "boolean",
                             "description": "Set the fluid state to the static parameters in fluid attribute at the beginning. If set to true, supplied equations or fields from file are added to the static state.",
@@ -385,7 +387,7 @@
                         "dt": {
                             "type": "number",
                             "description": "The time interval at which the boundary conditions are re-evaluated. Linear interpolation is done in-between.",
-                            "default": 0.0
+                            "default": 0
                         },
                         "from_initial_conditions": {
                             "type": "boolean",
@@ -416,5 +418,13 @@
                 }
             }
         }
-    }
+    },
+    "required": [
+        "version",
+        "model_name",
+        "geometry",
+        "deployment_options",
+        "time_options",
+        "units"
+    ]
 }
