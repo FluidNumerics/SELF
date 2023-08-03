@@ -198,8 +198,6 @@ CONTAINS
     this % uxL = this % uxLEqn % Evaluate((/this % geometry % x % boundary % hostData(1,1,1),this % t/))
     this % uxR = this % uxREqn % Evaluate((/this % geometry % x % boundary % hostData(1,2,this % geometry % x % nElem), this % t/))
 
-
-!    CALL this % CheckMinMax()
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
@@ -240,7 +238,7 @@ CONTAINS
         ! Solution
         u = this % solution % interior % hostData(i,1,iEl)
 
-        this % entropy = this % entropy + (0.5_PREC*u*u)
+        this % entropy = this % entropy + (0.5_PREC*u*u)*wi*Jacobian
 
       END DO
     END DO
