@@ -240,7 +240,7 @@ contains
 
     ! Reset the boundary conditions, if requested
     if (bcFlag > 0) then
-      call selfMesh2D % ResetBoundaryConditionType(SELF_BC_PRESCRIBED)
+      call selfMesh2D % ResetBoundaryConditionType(bcFlag)
     end if
     selfGeometry => selfGeometry2D
 
