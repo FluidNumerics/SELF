@@ -64,13 +64,13 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
   if (iVar == 0)
   { // rho*u
 
-    for (int n = 0; n <= N; n++)
+    for (int n = 0; n <= N; n++) 
     {
       // rho*u*u + p
       flux[P2PVE_2D_INDEX(1, 1, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(n, j, 0, iEl, N, nVar)] *       // u
               solution[SC_2D_INDEX(n, j, iVar, iEl, N, nVar)] + // rho*u
-          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)]; // pressure
 
       // rho*u*v
       flux[P2PVE_2D_INDEX(2, 1, n, i, j, iVar, iEl, N, nVar)] =
@@ -81,7 +81,7 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
       flux[P2PVE_2D_INDEX(1, 2, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(i, n, 0, iEl, N, nVar)] *       // u
               solution[SC_2D_INDEX(i, n, iVar, iEl, N, nVar)] + // rho*u
-          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(i, n, 3, iEl, N, nVar)]; // pressure
 
       // rho*u*v
       flux[P2PVE_2D_INDEX(2, 2, n, i, j, iVar, iEl, N, nVar)] =
@@ -102,7 +102,7 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
       flux[P2PVE_2D_INDEX(2, 1, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(n, j, 1, iEl, N, nVar)] *       // v
               solution[SC_2D_INDEX(n, j, iVar, iEl, N, nVar)] + // rho*v
-          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)]; //pressure
 
       // rho*v*u
       flux[P2PVE_2D_INDEX(1, 2, n, i, j, iVar, iEl, N, nVar)] =
@@ -113,7 +113,7 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
       flux[P2PVE_2D_INDEX(2, 2, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(i, n, 1, iEl, N, nVar)] *       // v
               solution[SC_2D_INDEX(i, n, iVar, iEl, N, nVar)] + // rho*v
-          primitive[SC_2D_INDEX(i, n, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(i, n, 3, iEl, N, nVar)]; // pressure
     }
   }
   else if (iVar == 2)
@@ -330,7 +330,6 @@ extern "C"
                                                                int **sideInfo,
                                                                int N,
                                                                int nVar,
-                                                               int nDiag,
                                                                int nEl)
   {
     SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu<<<dim3(4, nEl, 1), dim3(N + 1, 1, 1), 0, 0>>>(*solution,

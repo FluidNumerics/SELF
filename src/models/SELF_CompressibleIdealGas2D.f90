@@ -40,8 +40,8 @@ MODULE SELF_CompressibleIdealGas2D
     !!  iVar = 1 ~> gravitational potential
     !!  iVar = 2 ~> Linear momentum drag
     !!
-    PROCEDURE(RiemannFlux_CompressibleIdealGas2D),POINTER :: RiemannFlux => LocalLaxFriedrichs
-    PROCEDURE(P2Flux_CompressibleIdealGas2D),POINTER :: P2Flux => ConservativeFlux
+    PROCEDURE(HyperbolicBoundaryFlux_CompressibleIdealGas2D),POINTER :: HyperbolicBoundaryFlux => LocalLaxFriedrichs
+    PROCEDURE(HyperbolicInteriorFlux_CompressibleIdealGas2D),POINTER :: HyperbolicInteriorFlux => ConservativeFlux
 
     TYPE(MappedScalar2D) :: primitive ! Contains primitive variables
     TYPE(MappedScalar2D) :: entropyVars ! Contains entropy variables
@@ -124,7 +124,6 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: SetCv => SetCv_CompressibleIdealGas2D
     PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
     PROCEDURE :: SetStatic => SetStatic_CompressibleIdealGas2D
-    PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
 
     PROCEDURE, PRIVATE :: AddThermalBubble
 
@@ -161,19 +160,19 @@ MODULE SELF_CompressibleIdealGas2D
   REAL(prec),PRIVATE :: e_static != 1.5_PREC*R_static*T_static ! J/kg
 
   INTERFACE
-    SUBROUTINE RiemannFlux_CompressibleIdealGas2D(this)
+    SUBROUTINE HyperbolicBoundaryFlux_CompressibleIdealGas2D(this)
       IMPORT CompressibleIdealGas2D
       IMPLICIT NONE
       CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    END SUBROUTINE RiemannFlux_CompressibleIdealGas2D
+    END SUBROUTINE HyperbolicBoundaryFlux_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE P2Flux_CompressibleIdealGas2D(this)
+    SUBROUTINE HyperbolicInteriorFlux_CompressibleIdealGas2D(this)
       IMPORT CompressibleIdealGas2D
       IMPLICIT NONE
       CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    END SUBROUTINE P2Flux_CompressibleIdealGas2D
+    END SUBROUTINE HyperbolicInteriorFlux_CompressibleIdealGas2D
   END INTERFACE
 
   INTERFACE
@@ -318,8 +317,8 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
-    this % RiemannFlux => LocalLaxFriedrichs
-    this % P2Flux => ConservativeFlux
+    this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
+    this % HyperbolicInteriorFlux => ConservativeFlux
     this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -561,8 +560,6 @@ CONTAINS
             "].parameters"
             CALL config % Get( TRIM(jsonKey), featureParams(1:4) )
 
-            PRINT*, "Adding thermal bubble with parameters : ", featureParams(1:4)
-
             CALL this % AddThermalBubble((/featureParams(1), featureParams(2)/), &
                                        featureParams(3), featureParams(4))
         
@@ -571,9 +568,8 @@ CONTAINS
     ENDDO
           
     CALL this % SetPrescribedSolution( )
-    
 
-    CALL this % CheckMinMax()    
+  !  CALL this % CheckMinMax()    
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
@@ -588,9 +584,9 @@ CONTAINS
     SELECT CASE (fluxMethod)
 
     CASE (SELF_NLLF_CIG2D)
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
     CASE DEFAULT
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
 
     END SELECT
 
@@ -608,52 +604,13 @@ CONTAINS
     SELECT CASE (TRIM(upperCaseInt))
 
     CASE ("NAIVELLF")
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
     CASE DEFAULT
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
 
     END SELECT
 
   END SUBROUTINE SetFluxMethod_withChar
-
-  SUBROUTINE SetStatic_CompressibleIdealGas2D(this)
-  !! Sets the default fluid state with uniform
-  !! density and temperature and no motion with
-  !! speed of sound as ~ 2 m/s
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: i,j,iEl,iVar
-
-    CALL this % SetCv(Cv_static)
-    CALL this % SetCp(Cp_static)
-    CALL this % SetGasConstant(1.0_PREC)
-
-    DO iEl = 1,this % source % nElem
-      DO j = 0,this % source % interp % N
-        DO i = 0,this % source % interp % N
-          this % solution % interior % hostData(i,j,1,iEl) = 0.0_PREC ! rho*u
-          this % solution % interior % hostData(i,j,2,iEl) = 0.0_PREC ! rho*v
-          this % solution % interior % hostData(i,j,3,iEl) = rho_static ! rho
-          this % solution % interior % hostData(i,j,4,iEl) = rho_static*10.0_PREC ! rho*E
-        END DO
-      END DO
-    END DO
-
-    IF (this % gpuAccel) THEN
-      CALL this % solution % UpdateDevice()
-    END IF
-
-    CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
-
-    IF (this % gpuAccel) THEN
-      CALL this % solution % UpdateHost()
-      CALL this % primitive % UpdateHost()
-      CALL this % diagnostics % UpdateHost()
-    END IF
-
-  END SUBROUTINE SetStatic_CompressibleIdealGas2D
 
   SUBROUTINE AddThermalBubble(this,xc,R,Tmax)
     !! Adds a temperature anomaly to the fluid state
@@ -699,10 +656,14 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateDevice()
+      CALL this % primitive % UpdateDevice()
+      CALL this % diagnostics % UpdateDevice()
     END IF
 
     CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateHost()
@@ -712,7 +673,7 @@ CONTAINS
 
   END SUBROUTINE AddThermalBubble
 
-  SUBROUTINE SetStaticSTP_CompressibleIdealGas2D(this)
+  SUBROUTINE SetStatic_CompressibleIdealGas2D(this)
   !! Sets the default fluid state as "air" at STP with
   !! no motion
     IMPLICIT NONE
@@ -740,7 +701,9 @@ CONTAINS
     END IF
 
     CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateHost()
@@ -748,7 +711,7 @@ CONTAINS
       CALL this % diagnostics % UpdateHost()
     END IF
 
-  END SUBROUTINE SetStaticSTP_CompressibleIdealGas2D
+  END SUBROUTINE SetStatic_CompressibleIdealGas2D
 
   SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D(this,eqnChar)
   !! Sets the fluid velocity field using the provided equation parser
@@ -769,7 +732,8 @@ CONTAINS
     END DO
 
     CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
-    CALL this % primitive % BoundaryInterp(gpuAccel=.FALSE.)
+    CALL this % primitive % UpdateDevice()
+    CALL this % primitive % BoundaryInterp(this % gpuAccel)
 
     DO iEl = 1,this % source % nElem
       DO j = 0,this % source % interp % N
@@ -793,7 +757,9 @@ CONTAINS
     END IF
 
     CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateHost()
@@ -986,10 +952,11 @@ CONTAINS
     REAL(prec) :: P,rho
     REAL(prec) :: entropy
 
-    IF (this % gpuAccel) THEN
-      CALL this % solution % interior % UpdateHost()
-      CALL this % diagnostics % interior % UpdateHost()
-    END IF
+    ! IF (this % gpuAccel) THEN
+    !   CALL this % solution % interior % UpdateHost()
+    !   CALL this % primitive % interior % UpdateHost()
+    ! END IF
+    CALL this % CheckMinMax() 
 
     entropy = 0.0_PREC
 
@@ -1006,7 +973,7 @@ CONTAINS
 
           rho = this % solution % interior % hostData(i,j,3,iEl)
           P = this % primitive % interior % hostData(i,j,4,iEl)
-
+        !  PRINT*, i, j ,iEl, P, rho
           entropy = entropy + &
                     rho*(LOG(P) - this % expansionFactor*LOG(rho))/ &
                     (this % expansionFactor - 1.0_PREC)*wi*wj*Jacobian
@@ -1184,7 +1151,7 @@ CONTAINS
     !!
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-
+ 
     CALL this % CalculateDiagnostics()
     CALL this % ConservativeToPrimitive()
     CALL this % ConservativeToEntropy()
@@ -1534,7 +1501,6 @@ CONTAINS
       this % primitive % nVar, &
       this % primitive % nElem)
 
-
     ELSE
 
       DO iEl = 1,this % solution % nElem
@@ -1656,14 +1622,14 @@ CONTAINS
 
     ! Compute the gradient of the solution using the Bassi-Rebay Method
     ! TO DO : IF (diffusiveVars == primitive)
-    CALL this % primitive % GradientBR( this % geometry, &
-                                       this % primitiveGradient, &
-                                       this % gpuAccel)
+    !CALL this % primitive % GradientBR( this % geometry, &
+    !                                   this % primitiveGradient, &
+    !                                   this % gpuAccel)
 
-    CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
-    CALL this % primitiveGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
-    CALL this % SetPrimitiveGradientBoundaryCondition()
-    CALL this % primitiveGradient % BassiRebaySides(this % gpuAccel)
+    !CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
+    !CALL this % primitiveGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+    !CALL this % SetPrimitiveGradientBoundaryCondition()
+    !CALL this % primitiveGradient % BassiRebaySides(this % gpuAccel)
 
   END SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D
 
@@ -1674,6 +1640,8 @@ CONTAINS
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2,ivar
     REAL(prec) :: u,v,nhat(1:2)
+
+    ! TO DO : GPU kernel !
 
     DO iEl = 1,this % solution % nElem
       DO iSide = 1,4
@@ -1748,12 +1716,12 @@ CONTAINS
     INTEGER :: i,j,n,iEl,iVar
 
     IF (this % gpuAccel) THEN
-      CALL ConservativeFlux_gpu_wrapper(this % flux % interior % deviceData, &
-                                                              this % solution % interior % deviceData, &
-                                                              this % primitive % interior % deviceData, &
-                                                              this % solution % interp % N, &
-                                                              this % solution % nVar, &
-                                                              this % solution % nElem)
+      CALL ConservativeFlux_gpu_wrapper(this % flux % physical % deviceData, &
+                                        this % solution % interior % deviceData, &
+                                        this % primitive % interior % deviceData, &
+                                        this % solution % interp % N, &
+                                        this % solution % nVar, &
+                                        this % solution % nElem)
 
     ELSE
 
@@ -1860,9 +1828,10 @@ CONTAINS
     END IF
 
   END SUBROUTINE ConservativeFlux
+
   SUBROUTINE FluxMethod_CompressibleIdealGas2D(this)
     !! This overridden method serves as a wrapper that calls
-    !! the P2Flux procedure pointer. This design allows
+    !! the HyperbolicInteriorFlux procedure pointer. This design allows
     !! users to dynamically select the type of Riemann solver
     !! to use
   
@@ -1870,7 +1839,7 @@ CONTAINS
       CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
   
       ! For hyperbolic terms
-      CALL this % P2Flux()
+      CALL this % HyperbolicInteriorFlux()
   
       ! For parabolic terms
       !CALL this % PIFlux()
@@ -1879,7 +1848,7 @@ CONTAINS
 
   SUBROUTINE RiemannSolver_CompressibleIdealGas2D(this)
   !! This overridden method serves as a wrapper that calls
-  !! the RiemannFlux procedure pointer. This design allows
+  !! the HyperbolicBoundaryFlux procedure pointer. This design allows
   !! users to dynamically select the type of Riemann solver
   !! to use
 
@@ -1887,7 +1856,7 @@ CONTAINS
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
 
     ! For hyperbolic terms
-    CALL this % RiemannFlux()
+    CALL this % HyperbolicBoundaryFlux()
 
     ! For parabolic terms
     !CALL this % PBFlux() ! Parabolic Boundary Flux

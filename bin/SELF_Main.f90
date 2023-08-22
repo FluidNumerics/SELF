@@ -71,7 +71,6 @@ contains
 
       call Init1DWorkspace()
       call InitBurgers1D()
-      !CALL InitLinearShallowWater2D()
 
     case ("cns2d")
 

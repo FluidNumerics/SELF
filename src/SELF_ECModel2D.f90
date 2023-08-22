@@ -65,73 +65,6 @@ MODULE SELF_ECModel2D
 
   END TYPE ECModel2D
 
-  ! INTERFACE
-  !   SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
-  !     bind(c,name="UpdateSolution_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: solution, dSdt
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !     REAL(c_prec),VALUE :: dt
-  !   END SUBROUTINE UpdateSolution_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-  !     bind(c,name="UpdateGAB2_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: prevsol, solution
-  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-  !   END SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-  !     bind(c,name="UpdateGAB3_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: prevsol, solution
-  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-  !   END SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-  !     bind(c,name="UpdateGAB4_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: prevsol, solution
-  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-  !   END SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
-  !     bind(c,name="UpdateGRK_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: grk, solution, dSdt
-  !     INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
-  !     REAL(c_prec),VALUE :: rk_a, rk_g, dt
-  !   END SUBROUTINE UpdateGRK_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
-  !     bind(c,name="CalculateDSDt_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: fluxDivergence, source, dSdt
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper
-  ! END INTERFACE
-
 CONTAINS
 
   SUBROUTINE Init_ECModel2D(this,nvar,mesh,geometry,decomp)
@@ -253,51 +186,6 @@ CONTAINS
     END IF
 
   END SUBROUTINE SetSolutionFromEqn_ECModel2D
-
-  ! SUBROUTINE SetVelocityFieldFromEqn_ECModel2D(this, eqn)
-  !   IMPLICIT NONE
-  !   CLASS(ECModel2D),INTENT(inout) :: this
-  !   TYPE(EquationParser),INTENT(in) :: eqn(1:2)
-
-  !     ! Copy the equation parser
-  !     ! Set the x-component of the velocity
-  !     CALL this % velocity % SetEquation(1,1,eqn(1) % equation)
-
-  !     ! Set the y-component of the velocity
-  !     CALL this % velocity % SetEquation(2,1,eqn(2) % equation)
-
-  !     ! Set the velocity values using the equation parser
-  !     CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-
-  !     CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
-
-  !     IF( this % gpuAccel )THEN
-  !       CALL this % velocity % UpdateDevice()
-  !     ENDIF
-
-  ! END SUBROUTINE SetVelocityFieldFromEqn_ECModel2D
-
-  ! SUBROUTINE SetVelocityFieldFromChar_ECModel2D(this, eqnChar)
-  !   IMPLICIT NONE
-  !   CLASS(ECModel2D),INTENT(inout) :: this
-  !   CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
-
-  !     ! Set the x-component of the velocity
-  !     CALL this % velocity % SetEquation(1,1,eqnChar(1))
-
-  !     ! Set the y-component of the velocity
-  !     CALL this % velocity % SetEquation(2,1,eqnChar(2))
-
-  !     ! Set the velocity values using the equation parser
-  !     CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-
-  !     CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
-
-  !     IF( this % gpuAccel )THEN
-  !       CALL this % velocity % UpdateDevice()
-  !     ENDIF
-
-  ! END SUBROUTINE SetVelocityFieldFromChar_ECModel2D
 
   SUBROUTINE SetSolutionFromChar_ECModel2D(this,eqnChar)
     IMPLICIT NONE

@@ -394,7 +394,7 @@ extern "C"
 {
   void ScalarBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
-	  ScalarBoundaryInterp_2D_gpu<<<dim3(nEl,1,1), dim3(N+1,nVar,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+	  ScalarBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
   } 
 }
 
@@ -839,9 +839,9 @@ __global__ void P2VectorDivergence_2D_gpu(real *dMatrix, real *f, real *df, int 
   size_t j = threadIdx.y;
 
   real dfloc = 0.0;
-  for (int ii=0; ii<N+1; ii++) {
-    dfloc += f[P2VE_2D_INDEX(1,ii,i,j,iVar,iEl,N,nVar)]*dMatrix[ii+i*(N+1)]+ 
-             f[P2VE_2D_INDEX(2,ii,i,j,iVar,iEl,N,nVar)]*dMatrix[ii+j*(N+1)];
+  for (int n=0; n<N+1; n++) {
+    dfloc += f[P2VE_2D_INDEX(1,n,i,j,iVar,iEl,N,nVar)]*dMatrix[n+i*(N+1)]+ 
+             f[P2VE_2D_INDEX(2,n,i,j,iVar,iEl,N,nVar)]*dMatrix[n+j*(N+1)];
   }
   df[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)] = dfloc; 
 
@@ -864,9 +864,9 @@ __global__ void P2VectorDGDivergence_2D_gpu(real *dgMatrix, real *bMatrix, real 
   size_t j = threadIdx.y;
 
   real dfloc = 0.0;
-  for (int ii =0; ii<N+1; ii++) {
-    dfloc += f[P2VE_2D_INDEX(1,ii,i,j,iVar,iEl,N,nVar)]*dgMatrix[ii+i*(N+1)]+
-             f[P2VE_2D_INDEX(2,ii,i,j,iVar,iEl,N,nVar)]*dgMatrix[ii+j*(N+1)];
+  for (int n =0; n<N+1; n++) {
+    dfloc += f[P2VE_2D_INDEX(1,n,i,j,iVar,iEl,N,nVar)]*dgMatrix[n+i*(N+1)]+
+             f[P2VE_2D_INDEX(2,n,i,j,iVar,iEl,N,nVar)]*dgMatrix[n+j*(N+1)];
   }
 
   dfloc += (bf[SCB_2D_INDEX(j,iVar,2,iEl,N,nVar)]*bMatrix[i+(N+1)] +

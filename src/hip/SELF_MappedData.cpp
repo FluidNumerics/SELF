@@ -434,7 +434,7 @@ __global__ void ContravariantProjection_MappedP2Vector2D_gpu(real *vector, real 
   size_t j = threadIdx.y;
 
 
-  for( int n = 0; n < N; n++){
+  for( int n = 0; n < N+1; n++){
 
     real Fx = physical[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)];
     real Fy = physical[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)];
@@ -982,7 +982,10 @@ extern "C"
 {
   void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    dim3 nblocks(4,nEl,1);
+    dim3 nthreads(N+1,nVar,1);
+    SideExchange_MappedScalar2D_gpu<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+
   }
 
 }
