@@ -48,6 +48,7 @@ extern "C"
   void SetBoundaryCondition_LinearShallowWater_gpu_wrapper( real **solution, real **extBoundary, real **nHat, int **sideInfo, int N, int nVar, int nEl)
   {
     SetBoundaryCondition_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*solution, *extBoundary, *nHat, *sideInfo, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -73,6 +74,7 @@ extern "C"
   void Source_LinearShallowWater_gpu_wrapper(real **source, real **solution, real **f, int N, int nVar, int nEl)
   {
     Source_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*source, *solution, *f, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -102,6 +104,7 @@ extern "C"
   void Flux_LinearShallowWater_gpu_wrapper(real **flux, real **solution, real **H, real g,int N, int nVar, int nEl)
   {
     Flux_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, *H, g, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -141,5 +144,6 @@ extern "C"
   void RiemannSolver_LinearShallowWater_gpu_wrapper( real **flux, real **solution, real **extBoundary, real **H, real **nHat, real **nScale, real g, int N, int nVar, int nEl)
   {
     RiemannSolver_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extBoundary, *H, *nHat, *nScale, g, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }

@@ -28,6 +28,7 @@ extern "C"
   void Source_CompressibleIdealGas2D_gpu_wrapper(real **source, real **solution, real **environmentalsGradient, int N, int nVar, int nEl)
   {
     Source_CompressibleIdealGas2D_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*source, *solution, *environmentalsGradient, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -166,6 +167,7 @@ extern "C"
   void ConservativeFlux_CompressibleIdealGas2D_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
   {
     ConservativeFlux_CompressibleIdealGas2D_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -271,6 +273,7 @@ extern "C"
                                                    int nEl)
   {
     LocalLaxFriedrichs_CompressibleIdealGas2D_gpu<<<dim3(nVar, 4, nEl), dim3(N + 1, 1, 1), 0, 0>>>(*flux, *solution, *extSolution, *primitive, *extPrimitive, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -338,6 +341,7 @@ extern "C"
                                                                                                   *nHat,
                                                                                                   *sideInfo,
                                                                                                   N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -388,6 +392,7 @@ extern "C"
                                                                                                                  *prescribedDiagnostics,
                                                                                                                  *sideInfo,
                                                                                                                  N, nDiag);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -440,6 +445,7 @@ extern "C"
                                                                int nEl)
   {
     CalculateDiagnostics_CompressibleIdealGas2D_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *diagnostics, expansionFactor, R, N, nVar, nDiag);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -477,6 +483,7 @@ extern "C"
                                                                   int nEl)
   {
     ConservativeToPrimitive_CompressibleIdealGas2D_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *primitive, expansionFactor, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -517,5 +524,6 @@ extern "C"
                                                                 int nEl)
   {
     ConservativeToEntropy_CompressibleIdealGas2D_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *entropy, expansionFactor, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }

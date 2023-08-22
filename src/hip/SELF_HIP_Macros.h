@@ -17,6 +17,15 @@
   typedef float real;
 #endif
 
+#define HIP_SAFE_CALL( call) {                                    \
+    hipError_t err = call;                                                    \
+    if( hipSuccess != err) {                                                \
+        fprintf(stderr, "Cuda error in file '%s' in line %i : %s.\n",        \
+                __FILE__, __LINE__, hipGetErrorString( err) );              \
+        exit(EXIT_FAILURE);                                                  \
+    } }
+
+
 #define INDEX(i,j,N) i+j*(N+1)
 #define INDEX3(i,j,k,Ni,Nj) i+Ni*(j+Nj*k)
 #define SC_1D_INDEX(i,iVar,iel,N,nVar) i+(N+1)*(iVar + nVar*iel)

@@ -569,7 +569,7 @@ CONTAINS
           
     CALL this % SetPrescribedSolution( )
 
-  !  CALL this % CheckMinMax()    
+    CALL this % CheckMinMax()    
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
@@ -952,11 +952,10 @@ CONTAINS
     REAL(prec) :: P,rho
     REAL(prec) :: entropy
 
-    ! IF (this % gpuAccel) THEN
-    !   CALL this % solution % interior % UpdateHost()
-    !   CALL this % primitive % interior % UpdateHost()
-    ! END IF
-    CALL this % CheckMinMax() 
+    IF (this % gpuAccel) THEN
+      CALL this % solution % interior % UpdateHost()
+      CALL this % primitive % interior % UpdateHost()
+    END IF
 
     entropy = 0.0_PREC
 

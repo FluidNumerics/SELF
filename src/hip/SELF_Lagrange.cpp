@@ -1,63 +1,6 @@
 #include <hip/hip_runtime.h>
 #include "SELF_HIP_Macros.h"
 
-/*
-// Template
-__global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar, int nEl){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
-
-
-  // How to access scalars 
-  f[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
-  f[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
-  f[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)];
-
-  // How to access vectors (2d)
-  f[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
-  f[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
-
-
-  // How to access vectors (3d)
-  f[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
-  f[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)];
-  f[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
-
-  // How to access tensors (2d)
-  f[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)];
-  f[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)];
-  f[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)];
-  f[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)];
-
-
-  // How to access tensors (3d)
-  f[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(3,3,i,j,k,iVar,iEl,N,nVar)];
-
-}
-
-extern "C"
-{
-  void Template_{1D|2D|3D}_gpu_wrapper(int N, int nVar, int nEl)
-  {
-	  hipLaunchKernelGGL((Template_{1D|2D|3D}_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0,  N, M, nVar);
-  } 
-}
-
-
-*/
-
 // ScalarGridInterp_1D //
 __global__ void ScalarGridInterp_1D_gpu(real *iMatrix, real *f, real *fInterp, int N, int M, int nVar){
 
@@ -78,6 +21,7 @@ extern "C"
   void ScalarGridInterp_1D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  ScalarGridInterp_1D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -107,6 +51,7 @@ extern "C"
   void ScalarGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  ScalarGridInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -140,6 +85,7 @@ extern "C"
   void VectorGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  VectorGridInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -181,6 +127,7 @@ extern "C"
   void TensorGridInterp_2D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  TensorGridInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -216,6 +163,7 @@ extern "C"
   void ScalarGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  ScalarGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -263,6 +211,7 @@ extern "C"
   void VectorGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  VectorGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -346,6 +295,7 @@ extern "C"
   void TensorGridInterp_3D_gpu_wrapper(real **iMatrix, real **f, real **fInterp, int N, int M, int nVar, int nEl)
   {
 	  TensorGridInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(M+1,M+1,M+1), 0, 0>>>(*iMatrix, *f, *fInterp, N, M, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -368,6 +318,7 @@ extern "C"
   void ScalarBoundaryInterp_1D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
 	  ScalarBoundaryInterp_1D_gpu<<<dim3(nVar,nEl,1), dim3(2,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 // ScalarBoundaryInterp_2D //
@@ -395,6 +346,7 @@ extern "C"
   void ScalarBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
 	  ScalarBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -424,6 +376,7 @@ extern "C"
   void VectorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
 	  VectorBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(2,N+1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -483,6 +436,7 @@ extern "C"
   void TensorBoundaryInterp_2D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
     TensorBoundaryInterp_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 // ScalarBoundaryInterp_3D //
@@ -515,6 +469,7 @@ extern "C"
   void ScalarBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
 	  ScalarBoundaryInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -549,6 +504,7 @@ extern "C"
   void VectorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
 	  VectorBoundaryInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(3,N+1,N+1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -590,6 +546,7 @@ extern "C"
   void TensorBoundaryInterp_3D_gpu_wrapper(real **bMatrix, real **f, real **fBound, int N, int nVar, int nEl)
   {
 	  TensorBoundaryInterp_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*bMatrix, *f, *fBound, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -613,6 +570,7 @@ extern "C"
   void Derivative_1D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  Derivative_1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -640,6 +598,7 @@ extern "C"
   void DGDerivative_1D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeight, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  DGDerivative_1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*dMatrix, *bMatrix, *qWeight, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -667,6 +626,7 @@ extern "C"
   void ScalarGradient_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  ScalarGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -700,6 +660,7 @@ extern "C"
   void ScalarDGGradient_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  ScalarDGGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -730,6 +691,7 @@ extern "C"
   void VectorGradient_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  VectorGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -770,6 +732,7 @@ extern "C"
   void VectorDGGradient_2D_gpu_wrapper(real **dMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  VectorDGGradient_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -795,6 +758,7 @@ extern "C"
   void VectorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  VectorDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -827,6 +791,7 @@ extern "C"
   void VectorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  VectorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -852,6 +817,7 @@ extern "C"
   void P2VectorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  P2VectorDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -885,6 +851,7 @@ extern "C"
   void P2VectorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  P2VectorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -911,6 +878,7 @@ extern "C"
   void VectorCurl_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  VectorCurl_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -941,6 +909,7 @@ extern "C"
   void TensorDivergence_2D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  TensorDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -979,6 +948,7 @@ extern "C"
   void TensorDGDivergence_2D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  TensorDGDivergence_2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -1007,6 +977,7 @@ extern "C"
   void ScalarGradient_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  ScalarGradient_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -1047,6 +1018,7 @@ extern "C"
   void VectorGradient_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  VectorGradient_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -1073,6 +1045,7 @@ extern "C"
   void VectorDivergence_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  VectorDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -1109,6 +1082,7 @@ extern "C"
   void VectorDGDivergence_3D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  VectorDGDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -1141,6 +1115,7 @@ extern "C"
   void VectorCurl_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  VectorCurl_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -1180,6 +1155,7 @@ extern "C"
   void TensorDivergence_3D_gpu_wrapper(real **dMatrix, real **f, real **df, int N, int nVar, int nEl)
   {
 	  TensorDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dMatrix, *f, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -1247,5 +1223,6 @@ extern "C"
   void TensorDGDivergence_3D_gpu_wrapper(real **dgMatrix, real **bMatrix, real **qWeights, real **f, real **bf, real **df, int N, int nVar, int nEl)
   {
 	  TensorDGDivergence_3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dgMatrix, *bMatrix, *qWeights, *f, *bf, *df, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
