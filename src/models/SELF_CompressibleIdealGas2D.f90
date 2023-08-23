@@ -73,7 +73,8 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE :: CalculateEntropy => CalculateEntropy_CompressibleIdealGas2D
     PROCEDURE :: SetInitialConditions => SetInitialConditions_CompressibleIdealGas2D
 
-    PROCEDURE :: WriteTecplot => WriteTecplot_CompressibleIdealGas2D
+    PROCEDURE :: WriteModel => Write_CompressibleIdealGas2D
+    !PROCEDURE :: WriteTecplot => WriteTecplot_CompressibleIdealGas2D
 
     ! Concretized Methods
     PROCEDURE :: SourceMethod => Source_CompressibleIdealGas2D
@@ -149,8 +150,6 @@ MODULE SELF_CompressibleIdealGas2D
   INTEGER,PARAMETER,PRIVATE :: hydrostaticAdjMaxIters = 1000
 
   ! ---------------------------------------- !
-  ! Static fluid state for "air" at stp
-  !  > To do : move to json input file
   !
   REAL(prec),PRIVATE :: Cp_static != 1.005_PREC
   REAL(prec),PRIVATE :: Cv_static != 0.718_PREC
@@ -2046,72 +2045,180 @@ CONTAINS
   
   END SUBROUTINE PrimitiveGradientBRFlux_CompressibleIdealGas2D
 
-  SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this,filename)
+  SUBROUTINE Write_CompressibleIdealGas2D(this,fileName)
+#undef __FUNC__
+#define __FUNC__ "Write_CompressibleIdealGas2D"
     IMPLICIT NONE
     CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in),OPTIONAL :: filename
+    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
-    CHARACTER(8) :: zoneID
-    INTEGER :: fUnit
-    INTEGER :: iEl,i,j,iVar
-    CHARACTER(LEN=self_FileNameLength) :: tecFile
-    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
-    CHARACTER(LEN=self_FormatLength) :: fmat
+    INTEGER(HID_T) :: fileId
+    TYPE(Scalar2D) :: solution
+    TYPE(Vector2D) :: x
+    TYPE(Lagrange),TARGET :: interp
+    CHARACTER(LEN=self_FileNameLength) :: pickupFile
     CHARACTER(13) :: timeStampString
-    CHARACTER(5) :: rankString
 
     IF (PRESENT(filename)) THEN
-      tecFile = filename
+      pickupFile = filename
     ELSE
-      timeStampString = TimeStamp(this % t,'s')
-
-      IF (this % decomp % mpiEnabled) THEN
-        WRITE (rankString,'(I5.5)') this % decomp % rankId
-        tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
-      ELSE
-        tecFile = 'solution.'//timeStampString//'.tec'
-      END IF
-
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
+      pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 
     IF (this % gpuAccel) THEN
-      CALL this % solution % interior % UpdateHost()
+      CALL this % solution % UpdateHost()
+      CALL this % solutionGradient % UpdateHost()
     END IF
 
-    CALL this % solution % WriteTecplot(this % geometry, &
-                                        this % decomp, &
-                                        tecFile)
+    INFO("Writing pickup file : "//TRIM(pickupFile))
 
     IF (this % decomp % mpiEnabled) THEN
-      WRITE (rankString,'(I5.5)') this % decomp % rankId
-      tecFile = 'diagnostics.'//rankString//'.'//timeStampString//'.tec'
+
+      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
+
+      ! Write the interpolant to the file
+      INFO("Writing interpolant data to file")
+      CALL this % solution % interp % WriteHDF5( fileId )
+
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+      ! Write the model state to file
+      INFO("Writing control grid conservative variables to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid')
+      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      INFO("Writing control grid entropy variables to file")
+      CALL this % entropyVars % WriteHDF5( fileId, '/controlgrid/entropy', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      INFO("Writing control grid primitive variables to file")
+      CALL this % primitive % WriteHDF5( fileId, '/controlgrid/primitive', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! Write the geometry to file
+      INFO("Writing control grid geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! -- END : writing solution on control grid -- !
+
+      ! Interpolate the solution to a grid for plotting results
+      ! Create an interpolant for the uniform grid
+      CALL interp % Init(this % solution % interp % M, &
+                          this % solution % interp % targetNodeType, &
+                          this % solution % interp % N, &
+                          this % solution % interp % controlNodeType)
+
+      CALL solution % Init(interp, &
+                            this % solution % nVar,this % solution % nElem)
+
+      CALL x % Init(interp,1,this % solution % nElem)
+
+      ! Map the mesh positions to the target grid
+      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+      ! Map the solution to the target grid
+      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+      ! Write the model state to file
+      CALL CreateGroup_HDF5(fileId,'/targetgrid')
+      CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+
+      ! Map the entropy variables to the target grid
+      CALL this % entropyVars % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5( fileId, '/targetgrid/entropy', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! Map the entropy variables to the target grid
+      CALL this % primitive % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5( fileId, '/targetgrid/primitive', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! Write the geometry to file
+      CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
+      CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      CALL Close_HDF5(fileId)
+
     ELSE
-      tecFile = 'diagnostics.'//timeStampString//'.tec'
+
+      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+
+      ! Write the interpolant to the file
+      INFO("Writing interpolant data to file")
+      CALL this % solution % interp % WriteHDF5( fileId )
+
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+
+      ! Write the model state to file
+      INFO("Writing control grid conservative to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid')
+      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution' )
+
+      INFO("Writing control grid entropy variables to file")
+      CALL this % entropyVars % WriteHDF5( fileId, '/controlgrid/entropy' )
+
+      INFO("Writing control grid primitive variables to file")
+      CALL this % primitive % WriteHDF5( fileId, '/controlgrid/primitive' )
+
+      ! Write the geometry to file
+      INFO("Writing control grid  geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      CALL this % geometry % x % WriteHDF5(fileId,'/controlgrid/geometry/x')
+      ! -- END : writing solution on control grid -- !
+
+      ! Interpolate the solution to a grid for plotting results
+      ! Create an interpolant for the uniform grid
+      CALL interp % Init(this % solution % interp % M, &
+                          this % solution % interp % targetNodeType, &
+                          this % solution % interp % N, &
+                          this % solution % interp % controlNodeType)
+
+      CALL solution % Init(interp, &
+                            this % solution % nVar,this % solution % nElem)
+
+      CALL x % Init(interp,1,this % solution % nElem)
+
+      ! Map the mesh positions to the target grid
+      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+      ! Map the solution to the target grid
+      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+      ! Write the model state to file
+      INFO("Writing target grid conservative variables to file")
+      CALL CreateGroup_HDF5(fileId,'/targetgrid')
+      CALL solution % WriteHDF5(fileId, '/targetgrid/solution')
+
+      INFO("Writing target grid entropy variables to file")
+      CALL this % entropyVars % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5(fileId, '/targetgrid/entropy')
+
+      INFO("Writing target grid primitive variables to file")
+      CALL this % primitive % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5(fileId, '/targetgrid/primitive')
+
+      ! Write the geometry to file
+      INFO("Writing target grid geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/targetgrid/geometry')
+      CALL x % WriteHDF5(fileId,'/targetgrid/geometry/x')
+
+      CALL Close_HDF5(fileId)
+
     END IF
 
-    IF (this % gpuAccel) THEN
-      CALL this % diagnostics % interior % UpdateHost()
-    END IF
+    CALL x % Free()
+    CALL solution % Free()
+    CALL interp % Free()
 
-    CALL this % diagnostics % WriteTecplot(this % geometry, &
-                                           this % decomp, &
-                                           tecFile)
-
-    IF (this % decomp % mpiEnabled) THEN
-      WRITE (rankString,'(I5.5)') this % decomp % rankId
-      tecFile = 'primitive.'//rankString//'.'//timeStampString//'.tec'
-    ELSE
-      tecFile = 'primitive.'//timeStampString//'.tec'
-    END IF
-
-    IF (this % gpuAccel) THEN
-      CALL this % primitive % interior % UpdateHost()
-    END IF
-
-    CALL this % primitive % WriteTecplot(this % geometry, &
-                                         this % decomp, &
-                                         tecFile)
-
-  END SUBROUTINE WriteTecplot_CompressibleIdealGas2D
+  END SUBROUTINE Write_CompressibleIdealGas2D
+ 
 
 END MODULE SELF_CompressibleIdealGas2D
