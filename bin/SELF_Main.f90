@@ -14,7 +14,7 @@ module SELF_Main
   use SELF_Model2D
   use SELF_ECModel2D
   use SELF_Burgers1D
-  use SELF_CompressibleIdealGas2D
+  use SELF_cns2d
   use SELF_LinearShallowWater
 
   ! External
@@ -35,7 +35,7 @@ module SELF_Main
   class(SEMGeometry),pointer :: selfGeometry
 
   type(Burgers1D),target,private :: selfBurgers1D
-  type(CompressibleIdealGas2D),target,private :: selfCompressibleIdealGas2D
+  type(cns2d),target,private :: selfcns2d
   type(LinearShallowWater),target,private :: selfLinearShallowWater2D
   type(Mesh1D),target,private :: selfMesh1D
   type(Mesh2D),target,private :: selfMesh2D
@@ -75,7 +75,7 @@ contains
     case ("cns2d")
 
       call Init2DWorkspace()
-      call InitCompressibleIdealGas2D()
+      call Initcns2d()
 
     case ("lsw2d")
 
@@ -114,7 +114,7 @@ contains
           !CALL selfModel % UpdateDevice()
           WARNING("GPU acceleration not implemented yet")
 
-        type is (CompressibleIdealGas2D)
+        type is (cns2d)
           call selfModel % UpdateDevice()
 
         type is (LinearShallowWater)
@@ -258,19 +258,19 @@ contains
 
   end subroutine InitBurgers1D
 
-  subroutine InitCompressibleIdealGas2D()
+  subroutine Initcns2d()
 #undef __FUNC__
 #define __FUNC__ "Init"
     implicit none
 
-    INFO("Model set to CompressibleIdealGas2D")
+    INFO("Model set to cns2d")
 
-    call selfCompressibleIdealGas2D % Init(5, &
+    call selfcns2d % Init(5, &
                                            selfMesh2D,selfGeometry2D,decomp)
 
-    selfModel => selfCompressibleIdealGas2D
+    selfModel => selfcns2d
 
-  end subroutine InitCompressibleIdealGas2D
+  end subroutine Initcns2d
 
   subroutine FileIO()
 #undef __FUNC__
@@ -282,16 +282,13 @@ contains
     type is (Burgers1D)
       ! Write the initial condition to file
       call selfModel % WriteModel()
-      call selfModel % WriteTecplot()
 
-    type is (CompressibleIdealGas2D)
+    type is (cns2d)
       ! Write the initial condition to file
       call selfModel % WriteModel()
-      call selfModel % WriteTecplot()
 
     type is (LinearShallowWater)
       call selfModel % WriteModel()
-      call selfModel % WriteTecplot()
 
     end select
   end subroutine FileIO
@@ -317,7 +314,7 @@ contains
     !  !! Forward step the selfModel and do the file io
     !   SELECT TYPE (selfModel)
 
-    !   TYPE is (CompressibleIdealGas2D)
+    !   TYPE is (cns2d)
     !     CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
     !   TYPE is (LinearShallowWater)
     !     CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
