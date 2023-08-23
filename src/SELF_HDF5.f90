@@ -231,26 +231,26 @@ CONTAINS
 
     CALL h5lexists_f(fileId, TRIM(groupName), groupExists, error)
     IF( error /= 0 )THEN
-      ERROR( "Link check failure for : "//TRIM(groupName) )
+      ERROR( "Link check failure for "//TRIM(groupName) )
     ELSE
 
       IF( .NOT. groupExists )THEN
-        INFO("Creating group : "//TRIM(groupName))
+        INFO("Creating group "//TRIM(groupName))
         ! Create groups
         CALL h5gcreate_f(fileId,TRIM(groupName),groupId,error)
     
         IF( error /= 0 )THEN
-          ERROR( "Failed to create group: "//TRIM(groupName) )
+          ERROR( "Failed to create group "//TRIM(groupName) )
         ENDIF
 
         CALL h5gclose_f(groupId,error)
 
         IF( error /= 0 )THEN
-          ERROR( "Failed to close group: "//TRIM(groupName) )
+          ERROR( "Failed to close group "//TRIM(groupName) )
         ENDIF
 
       ENDIF
-      
+
     ENDIF
 
   END SUBROUTINE CreateGroup_HDF5

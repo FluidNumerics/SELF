@@ -762,6 +762,8 @@ CONTAINS
       CALL this % solutionGradient % UpdateHost()
     END IF
 
+    INFO("Writing pickup file : "//TRIM(pickupFile))
+
     IF (this % decomp % mpiEnabled) THEN
 
       CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)

@@ -14,7 +14,7 @@ MODULE SELF_Model1D
   USE HDF5
   USE FEQParse
   USE SELF_Model
-  
+
   IMPLICIT NONE
 
 #include "SELF_Macros.h"
@@ -808,6 +808,8 @@ CONTAINS
       CALL this % solution % UpdateHost()
       CALL this % solutionGradient % UpdateHost()
     END IF
+
+    INFO("Writing pickup file : "//TRIM(pickupFile))
 
     IF (this % decomp % mpiEnabled) THEN
 
