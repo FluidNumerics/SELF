@@ -382,7 +382,6 @@ extern "C"
                                                                real **nHat,
                                                                int **sideInfo,
                                                                int N,
-                                                               int nVar,
                                                                int nDiag,
                                                                int nEl)
   {

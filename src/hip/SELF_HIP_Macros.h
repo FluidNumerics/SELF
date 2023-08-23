@@ -20,7 +20,7 @@
 #define HIP_SAFE_CALL( call) {                                    \
     hipError_t err = call;                                                    \
     if( hipSuccess != err) {                                                \
-        fprintf(stderr, "Cuda error in file '%s' in line %i : %s.\n",        \
+        fprintf(stderr, "HIP error in file '%s' in line %i : %s.\n",        \
                 __FILE__, __LINE__, hipGetErrorString( err) );              \
         exit(EXIT_FAILURE);                                                  \
     } }

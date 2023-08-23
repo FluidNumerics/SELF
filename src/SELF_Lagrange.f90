@@ -15,6 +15,8 @@ MODULE SELF_Lagrange
   USE SELF_Memory
   USE SELF_SupportRoutines
   USE SELF_Quadrature
+  USE SELF_HDF5
+  USE HDF5
 
   USE ISO_C_BINDING
   IMPLICIT NONE
@@ -187,6 +189,7 @@ MODULE SELF_Lagrange
     GENERIC,PUBLIC :: TensorDGDivergence_3D => TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
     PROCEDURE,PRIVATE :: TensorDGDivergence_3D_cpu,TensorDGDivergence_3D_gpu
 
+    PROCEDURE,PUBLIC :: WriteHDF5 => WriteHDF5_Lagrange
     PROCEDURE,PRIVATE :: CalculateBarycentricWeights
     PROCEDURE,PRIVATE :: CalculateInterpolationMatrix
     PROCEDURE,PRIVATE :: CalculateDerivativeMatrix
@@ -2892,5 +2895,32 @@ CONTAINS
     END DO
 
   END FUNCTION CalculateLagrangePolynomials
+ 
+  SUBROUTINE WriteHDF5_Lagrange(this, fileId)
+    IMPLICIT NONE
+    CLASS(Lagrange), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+
+    CALL CreateGroup_HDF5(fileId,'/interp')
+
+    CALL WriteArray_HDF5(fileId,'/interp/controlpoints', &
+                         this % controlPoints)
+
+    CALL WriteArray_HDF5(fileId,'/interp/qweights', &
+                         this % qWeights)
+
+    CALL WriteArray_HDF5(fileId,'/interp/dgmatrix', &
+                         this % dgMatrix)
+
+    CALL WriteArray_HDF5(fileId,'/interp/dmatrix', &
+                         this % dMatrix)
+
+    CALL WriteArray_HDF5(fileId,'/interp/bmatrix', &
+                         this % bMatrix)
+
+    CALL WriteArray_HDF5(fileId,'/interp/imatrix', &
+                         this % iMatrix)
+
+  END SUBROUTINE WriteHDF5_Lagrange
 
 END MODULE SELF_Lagrange

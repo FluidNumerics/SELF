@@ -684,7 +684,6 @@ CONTAINS
     CALL this % SetCv(Cv_static)
     CALL this % SetCp(Cp_static)
     CALL this % SetGasConstant(R_static)
-
     DO iEl = 1,this % source % nElem
       DO j = 0,this % source % interp % N
         DO i = 0,this % source % interp % N
@@ -732,7 +731,9 @@ CONTAINS
     END DO
 
     CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
-    CALL this % primitive % UpdateDevice()
+    IF (this % gpuAccel) THEN
+      CALL this % primitive % UpdateDevice()
+    ENDIF
     CALL this % primitive % BoundaryInterp(this % gpuAccel)
 
     DO iEl = 1,this % source % nElem
@@ -972,7 +973,7 @@ CONTAINS
 
           rho = this % solution % interior % hostData(i,j,3,iEl)
           P = this % primitive % interior % hostData(i,j,4,iEl)
-        !  PRINT*, i, j ,iEl, P, rho
+        
           entropy = entropy + &
                     rho*(LOG(P) - this % expansionFactor*LOG(rho))/ &
                     (this % expansionFactor - 1.0_PREC)*wi*wj*Jacobian
@@ -1568,6 +1569,7 @@ CONTAINS
       this % diagnostics % interp % N, &
       this % diagnostics % nVar, &
       this % diagnostics % nElem)
+      
 
     ELSE
 
