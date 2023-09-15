@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_LinearShallowWater
+MODULE SELF_lsw
 
   USE SELF_Metadata
   USE SELF_Mesh
@@ -14,7 +14,7 @@ MODULE SELF_LinearShallowWater
   IMPLICIT NONE
 #include "../SELF_Macros.h"
 
-  TYPE,EXTENDS(Model2D) :: LinearShallowWater
+  TYPE,EXTENDS(Model2D) :: lsw
     !! iVar = 1 ~> u velocity component
     !! iVar = 2 ~> v velocity component
     !! iVar = 3 ~> free surface height
@@ -25,85 +25,87 @@ MODULE SELF_LinearShallowWater
   CONTAINS
 
     ! Overridden Methods
-    PROCEDURE :: Init => Init_LinearShallowWater
-    PROCEDURE :: Free => Free_LinearShallowWater
-    PROCEDURE :: PrintType => PrintType_LinearShallowWater
-    PROCEDURE :: CalculateEntropy => CalculateEntropy_LinearShallowWater
+    PROCEDURE :: Init => Init_lsw
+    PROCEDURE :: Free => Free_lsw
+    PROCEDURE :: PrintType => PrintType_lsw
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_lsw
 
     ! Concretized Methods
-    PROCEDURE :: SourceMethod => Source_LinearShallowWater
-    PROCEDURE :: FluxMethod => Flux_LinearShallowWater
-    PROCEDURE :: RiemannSolver => RiemannSolver_LinearShallowWater
-    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_LinearShallowWater
+    PROCEDURE :: SourceMethod => Source_lsw
+    PROCEDURE :: FluxMethod => Flux_lsw
+    PROCEDURE :: RiemannSolver => RiemannSolver_lsw
+    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_lsw
 
     ! New Methods
-    GENERIC :: SetCoriolis => SetCoriolisFromChar_LinearShallowWater, &
-      SetCoriolisFromEqn_LinearShallowWater
-    PROCEDURE,PRIVATE :: SetCoriolisFromChar_LinearShallowWater
-    PROCEDURE,PRIVATE :: SetCoriolisFromEqn_LinearShallowWater
+    PROCEDURE :: SetInitialConditions => SetInitialConditions_lsw
 
-    GENERIC :: SetBathymetry => SetBathymetryFromChar_LinearShallowWater, &
-      SetBathymetryFromEqn_LinearShallowWater, &
-      SetBathymetryFromConstant_LinearShallowWater
-    PROCEDURE,PRIVATE :: SetBathymetryFromChar_LinearShallowWater
-    PROCEDURE,PRIVATE :: SetBathymetryFromEqn_LinearShallowWater
-    PROCEDURE,PRIVATE :: SetBathymetryFromConstant_LinearShallowWater
+    GENERIC :: SetCoriolis => SetCoriolisFromChar_lsw, &
+      SetCoriolisFromEqn_lsw
+    PROCEDURE,PRIVATE :: SetCoriolisFromChar_lsw
+    PROCEDURE,PRIVATE :: SetCoriolisFromEqn_lsw
 
-    PROCEDURE :: DiagnoseGeostrophicVelocity => DiagnoseGeostrophicVelocity_LinearShallowWater
+    GENERIC :: SetBathymetry => SetBathymetryFromChar_lsw, &
+      SetBathymetryFromEqn_lsw, &
+      SetBathymetryFromConstant_lsw
+    PROCEDURE,PRIVATE :: SetBathymetryFromChar_lsw
+    PROCEDURE,PRIVATE :: SetBathymetryFromEqn_lsw
+    PROCEDURE,PRIVATE :: SetBathymetryFromConstant_lsw
 
-  END TYPE LinearShallowWater
+    PROCEDURE :: DiagnoseGeostrophicVelocity => DiagnoseGeostrophicVelocity_lsw
+
+  END TYPE lsw
 
   INTERFACE
-    SUBROUTINE SetBoundaryCondition_LinearShallowWater_gpu_wrapper(solution,extBoundary,nHat,sideInfo,N,nVar,nEl) &
-      BIND(c,name="SetBoundaryCondition_LinearShallowWater_gpu_wrapper")
+    SUBROUTINE SetBoundaryCondition_lsw_gpu_wrapper(solution,extBoundary,nHat,sideInfo,N,nVar,nEl) &
+      BIND(c,name="SetBoundaryCondition_lsw_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: solution,extBoundary,nHat,sideInfo
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE SetBoundaryCondition_LinearShallowWater_gpu_wrapper
+    END SUBROUTINE SetBoundaryCondition_lsw_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Source_LinearShallowWater_gpu_wrapper(source,solution,f,N,nVar,nEl) &
-      BIND(c,name="Source_LinearShallowWater_gpu_wrapper")
+    SUBROUTINE Source_lsw_gpu_wrapper(source,solution,f,N,nVar,nEl) &
+      BIND(c,name="Source_lsw_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: source,solution,f
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE Source_LinearShallowWater_gpu_wrapper
+    END SUBROUTINE Source_lsw_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE Flux_LinearShallowWater_gpu_wrapper(flux,solution,H,g,N,nVar,nEl) &
-      BIND(c,name="Flux_LinearShallowWater_gpu_wrapper")
+    SUBROUTINE Flux_lsw_gpu_wrapper(flux,solution,H,g,N,nVar,nEl) &
+      BIND(c,name="Flux_lsw_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: flux,solution,H
       INTEGER(C_INT),VALUE :: N,nVar,nEl
       REAL(c_prec),VALUE :: g
-    END SUBROUTINE Flux_LinearShallowWater_gpu_wrapper
+    END SUBROUTINE Flux_lsw_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper(flux,solution,extBoundary,H,nHat,nScale,g,N,nVar,nEl) &
-      BIND(c,name="RiemannSolver_LinearShallowWater_gpu_wrapper")
+    SUBROUTINE RiemannSolver_lsw_gpu_wrapper(flux,solution,extBoundary,H,nHat,nScale,g,N,nVar,nEl) &
+      BIND(c,name="RiemannSolver_lsw_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: flux,solution,extBoundary,H,nHat,nScale
       INTEGER(C_INT),VALUE :: N,nVar,nEl
       REAL(c_prec),VALUE :: g
-    END SUBROUTINE RiemannSolver_LinearShallowWater_gpu_wrapper
+    END SUBROUTINE RiemannSolver_lsw_gpu_wrapper
   END INTERFACE
 
 CONTAINS
 
-  SUBROUTINE Init_LinearShallowWater(this,nvar,mesh,geometry,decomp)
+  SUBROUTINE Init_lsw(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(out) :: this
+    CLASS(lsw),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
     TYPE(Mesh2D),INTENT(in),TARGET :: mesh
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
@@ -149,21 +151,21 @@ CONTAINS
     CALL this % solution % SetUnits(3,"m")
     CALL this % solution % SetDescription(3,"Free surface height anomaly")
 
-  END SUBROUTINE Init_LinearShallowWater
+  END SUBROUTINE Init_lsw
 
-  SUBROUTINE PrintType_LinearShallowWater(this)
+  SUBROUTINE PrintType_lsw(this)
 #undef __FUNC__
 #define __FUNC__ "Init"
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(in) :: this
+    CLASS(lsw),INTENT(in) :: this
 
     INFO("Model : Linear Shallow Water")
 
-  END SUBROUTINE PrintType_LinearShallowWater
+  END SUBROUTINE PrintType_lsw
 
-  SUBROUTINE Free_LinearShallowWater(this)
+  SUBROUTINE Free_lsw(this)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
 
     CALL this % solution % Free()
     CALL this % fCori % Free()
@@ -175,14 +177,73 @@ CONTAINS
     CALL this % source % Free()
     CALL this % fluxDivergence % Free()
 
-  END SUBROUTINE Free_LinearShallowWater
+  END SUBROUTINE Free_lsw
 
-  SUBROUTINE CalculateEntropy_LinearShallowWater(this)
+  SUBROUTINE SetInitialConditions_lsw(this, config)
+#undef __FUNC__
+#define __FUNC__ "SetInitialConditions"
+    IMPLICIT NONE
+    CLASS(lsw),INTENT(inout) :: this
+    TYPE(SELFConfig), INTENT(inout) :: config
+    ! Local
+    LOGICAL :: setStaticState
+    LOGICAL :: hydrostaticAdjust
+    LOGICAL :: found
+    CHARACTER(LEN=self_EquationLength) :: u, v, eta
+    CHARACTER(LEN=self_EquationLength) :: fcori ! coriolis parameter
+    CHARACTER(LEN=self_EquationLength) :: bathymetry ! bathymetry (bottom topography)
+    CHARACTER(LEN=self_EquationLength) :: initialCondition(1:3)
+    CHARACTER(LEN=self_QuadratureTypeCharLength) :: integrator
+    CHARACTER(LEN=SELF_EQUATION_LENGTH) :: velocity(1:2)
+    INTEGER,PARAMETER :: ucs2 = SELECTED_CHAR_KIND('ISO_10646')
+    CHARACTER(KIND=ucs2,len=20) :: tUSC
+    CHARACTER(KIND=ucs2,len=20) :: rhoUSC
+    CHARACTER(KIND=ucs2,len=20) :: CpUSC
+    CHARACTER(KIND=ucs2,len=20) :: CvUSC
+    CHARACTER(KIND=ucs2,len=:),ALLOCATABLE :: str
+    CHARACTER(4) :: arrayCount
+    REAL(prec) :: momentumMax
+    INTEGER :: i, nfeatures
+    REAL(prec) :: featureParams(1:10)
+
+
+
+    ! Get environmental parameters
+    CALL config % Get("lsw.environment.g",this % g)
+
+    CALL config % Get("lsw.environment.coriolis",fcori)
+    CALL this % SetCoriolis( fcori )
+
+    CALL config % Get("lsw.environment.bathymetry",bathymetry)
+    CALL this % SetBathymetry( bathymetry )   
+
+    ! Get initial conditions 
+    CALL config % Get("lsw.initial_conditions.u",u)
+    CALL config % Get("lsw.initial_conditions.v",v)
+    CALL config % Get("lsw.initial_conditions.eta",eta)
+
+    ! Set the initial condition 
+    CALL this % SetSolution( (/u,v,eta/) )
+
+    ! Set the time integrator
+    CALL config % Get("time_options.integrator",integrator)
+    CALL this % SetTimeIntegrator(TRIM(integrator)) ! Set the integrator
+    CALL config % Get("time_options.dt",this % dt) ! Set the time step size
+    CALL config % Get("time_options.start_time",this % t) ! Set the initial time
+
+  
+    CALL this % CalculateEntropy()
+    CALL this % ReportEntropy()
+
+
+  END SUBROUTINE SetInitialConditions_lsw
+
+  SUBROUTINE CalculateEntropy_lsw(this)
   !! Base method for calculating entropy of a model
   !! Calculates the entropy as the integration of the
   !! squared tracer over the domain
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iVar,iEl
     REAL(prec) :: Jacobian,u,v,eta,H
@@ -222,11 +283,11 @@ CONTAINS
 
     CALL this % decomp % GlobalReduce(entropy,this % entropy)
 
-  END SUBROUTINE CalculateEntropy_LinearShallowWater
+  END SUBROUTINE CalculateEntropy_lsw
 
-  SUBROUTINE SetCoriolisFromEqn_LinearShallowWater(this,eqn)
+  SUBROUTINE SetCoriolisFromEqn_lsw(this,eqn)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     TYPE(EquationParser),INTENT(in) :: eqn
 
     ! Copy the equation parser
@@ -239,14 +300,14 @@ CONTAINS
       CALL this % fCori % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetCoriolisFromEqn_LinearShallowWater
+  END SUBROUTINE SetCoriolisFromEqn_lsw
 
-  SUBROUTINE SetCoriolisFromChar_LinearShallowWater(this,eqnChar)
+  SUBROUTINE SetCoriolisFromChar_lsw(this,eqnChar)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
-    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
+    CLASS(lsw),INTENT(inout) :: this
+    CHARACTER(*),INTENT(in) :: eqnChar
 
-    CALL this % fCori % SetEquation(1,eqnChar)
+    CALL this % fCori % SetEquation(1,TRIM(eqnChar))
 
     CALL this % fCori % SetInteriorFromEquation(this % geometry,this % t)
     CALL this % fCori % BoundaryInterp(gpuAccel=.FALSE.)
@@ -255,11 +316,11 @@ CONTAINS
       CALL this % fCori % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetCoriolisFromChar_LinearShallowWater
+  END SUBROUTINE SetCoriolisFromChar_lsw
 
-  SUBROUTINE SetBathymetryFromEqn_LinearShallowWater(this,eqn)
+  SUBROUTINE SetBathymetryFromEqn_lsw(this,eqn)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     TYPE(EquationParser),INTENT(in) :: eqn
 
     ! Copy the equation parser
@@ -272,14 +333,14 @@ CONTAINS
       CALL this % H % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetBathymetryFromEqn_LinearShallowWater
+  END SUBROUTINE SetBathymetryFromEqn_lsw
 
-  SUBROUTINE SetBathymetryFromChar_LinearShallowWater(this,eqnChar)
+  SUBROUTINE SetBathymetryFromChar_lsw(this,eqnChar)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
-    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar
+    CLASS(lsw),INTENT(inout) :: this
+    CHARACTER(*),INTENT(in) :: eqnChar
 
-    CALL this % H % SetEquation(1,eqnChar)
+    CALL this % H % SetEquation(1,TRIM(eqnChar))
 
     CALL this % H % SetInteriorFromEquation(this % geometry,this % t)
     CALL this % H % BoundaryInterp(gpuAccel=.FALSE.)
@@ -288,11 +349,11 @@ CONTAINS
       CALL this % H % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetBathymetryFromChar_LinearShallowWater
+  END SUBROUTINE SetBathymetryFromChar_lsw
 
-  SUBROUTINE SetBathymetryFromConstant_LinearShallowWater(this,H)
+  SUBROUTINE SetBathymetryFromConstant_lsw(this,H)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: H
 
     this % H % interior % hostData = H
@@ -302,11 +363,11 @@ CONTAINS
       CALL this % H % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetBathymetryFromConstant_LinearShallowWater
+  END SUBROUTINE SetBathymetryFromConstant_lsw
 
-  SUBROUTINE SetBoundaryCondition_LinearShallowWater(this)
+  SUBROUTINE SetBoundaryCondition_lsw(this)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2
@@ -314,7 +375,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL SetBoundaryCondition_LinearShallowWater_gpu_wrapper(this % solution % boundary % deviceData, &
+      CALL SetBoundaryCondition_lsw_gpu_wrapper(this % solution % boundary % deviceData, &
                                                                this % solution % extBoundary % deviceData, &
                                                                this % geometry % nHat % boundary % deviceData, &
                                                                this % mesh % sideInfo % deviceData, &
@@ -342,9 +403,9 @@ CONTAINS
                 nhat(1:2) = this % geometry % nHat % boundary % hostData(1:2,i,1,iSide,iEl)
                 u = this % solution % boundary % hostData(i,1,iSide,iEl)
                 v = this % solution % boundary % hostData(i,2,iSide,iEl)
-      this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_PREC*nhat(1)*nhat(2)*v
-      this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_PREC*nhat(1)*nhat(2)*u
-          this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
+                this % solution % extBoundary % hostData(i,1,iSide,iEl) = (nhat(2)**2 - nhat(1)**2)*u - 2.0_PREC*nhat(1)*nhat(2)*v
+                this % solution % extBoundary % hostData(i,2,iSide,iEl) = (nhat(1)**2 - nhat(2)**2)*v - 2.0_PREC*nhat(1)*nhat(2)*u
+                this % solution % extBoundary % hostData(i,3,iSide,iEl) = this % solution % boundary % hostData(i,3,iSide,iEl)
 
               ELSE ! Default boundary condition is radiation
 
@@ -361,14 +422,14 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE SetBoundaryCondition_LinearShallowWater
+  END SUBROUTINE SetBoundaryCondition_lsw
 
-  SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater(this)
+  SUBROUTINE DiagnoseGeostrophicVelocity_lsw(this)
   !! Sets the velocity components (solution 1-2) to 0 and then diagnoses the
   !! the velocity field using a balance of the pressure gradient force
   !! and the coriolis force
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
@@ -417,17 +478,17 @@ CONTAINS
       CALL this % solution % interior % UpdateDevice()
     END IF
 
-  END SUBROUTINE DiagnoseGeostrophicVelocity_LinearShallowWater
+  END SUBROUTINE DiagnoseGeostrophicVelocity_lsw
 
-  SUBROUTINE Source_LinearShallowWater(this)
+  SUBROUTINE Source_lsw(this)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
     IF (this % gpuAccel) THEN
 
-      CALL Source_LinearShallowWater_gpu_wrapper(this % source % interior % deviceData, &
+      CALL Source_lsw_gpu_wrapper(this % source % interior % deviceData, &
                                                  this % solution % interior % deviceData, &
                                                  this % fCori % interior % deviceData, &
                                                  this % source % interp % N, &
@@ -452,17 +513,17 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE Source_LinearShallowWater
+  END SUBROUTINE Source_lsw
 
-  SUBROUTINE Flux_LinearShallowWater(this)
+  SUBROUTINE Flux_lsw(this)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
     IF (this % gpuAccel) THEN
 
-      CALL Flux_LinearShallowWater_gpu_wrapper(this % flux % interior % deviceData, &
+      CALL Flux_lsw_gpu_wrapper(this % flux % interior % deviceData, &
                                                this % solution % interior % deviceData, &
                                                this % H % interior % deviceData, &
                                                this % g,this % solution % interp % N, &
@@ -503,11 +564,11 @@ CONTAINS
       END DO
     END IF
 
-  END SUBROUTINE Flux_LinearShallowWater
+  END SUBROUTINE Flux_lsw
 
-  SUBROUTINE RiemannSolver_LinearShallowWater(this)
+  SUBROUTINE RiemannSolver_lsw(this)
     IMPLICIT NONE
-    CLASS(LinearShallowWater),INTENT(inout) :: this
+    CLASS(lsw),INTENT(inout) :: this
     ! Local
     INTEGER :: i,iSide,iEl
     REAL(prec) :: nhat(1:2),nmag
@@ -515,7 +576,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL RiemannSolver_LinearShallowWater_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
+      CALL RiemannSolver_lsw_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
                                                         this % solution % boundary % deviceData, &
                                                         this % solution % extBoundary % deviceData, &
                                                         this % H % boundary % deviceData, &
@@ -561,6 +622,6 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE RiemannSolver_LinearShallowWater
+  END SUBROUTINE RiemannSolver_lsw
 
-END MODULE SELF_LinearShallowWater
+END MODULE SELF_lsw

@@ -988,13 +988,7 @@ CONTAINS
       WRITE (timeStampString,'(I13.13)') this % ioIterate
       ! Increment the ioIterate
       this % ioIterate = this % ioIterate + 1
-      !timeStampString = TimeStamp(this % t,'s')
-      ! IF (this % decomp % mpiEnabled) THEN
-      !   WRITE (rankString,'(I5.5)') this % decomp % rankId
-      !   tecFile = 'solution.'//rankString//'.'//timeStampString//'.curve'
-      ! ELSE
       tecFile = 'solution.'//timeStampString//'.curve'
-      ! END IF
 
     END IF
 

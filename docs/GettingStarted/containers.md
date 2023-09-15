@@ -1,12 +1,17 @@
-# SELF Container Images
+# SELF Docker Images
 
+
+## Build your own images
+
+
+## Fluid Numerics Supported Docker Images
 SELF is distributed as Docker images from a registry hosted on Google Cloud. You can download and deploy SELF using Docker or Apptainer.
 
 !!! note
     Currently access is granted to the Docker image registry is granted on a case-by-case basis. Email [support@fluidnumerics.com](mailto:support@fluidnumerics.com) to request access.
 
 
-## Prerequisites
+### Prerequisites
 
 Fluid Numerics' Docker image registry for SELF is hosted on Google Cloud. Access is granted using a GMail or Google Workspace email address. To download Docker images from the registry, you will need to have the following installed on your workstation
 
@@ -21,7 +26,7 @@ gcloud auth configure-docker \
     us-docker.pkg.dev
 ```
 
-## Selecting an image
+### Selecting an image
 
 SELF is able to run on both Nvidia and AMD GPUs. This capability is enabled by AMD's open source HIPFort and HIP projects. Due to the nature of HIP and HIPFort, the target GPU architecture is determined at compile time. Additionally, container images need to have matching CUDA or ROCm versions as the host system they will be deployed on. 
 
@@ -47,12 +52,71 @@ will pull the latest version of SELF that was built with ROCm 5.4.6, targeting t
 [Browse available images](https://console.cloud.google.com/artifacts/docker/self-fluids/us/self?project=self-fluids){ .md-button .md-button--primary }
 </center>
 
-### Selecting a specific version
+#### Selecting a specific version
 Each of the SELF images posted to the registry are tagged with the corresponding Git SHA. This allows you to pinpoint a specific version of SELF, if you so desire. You can reference a specific version by using the `:{git_sha}` suffix on the image. For example
 
 ```
 apptainer pull self.sif docker://us-docker.pkg.dev/self-fluids/self/base_rocm-5.4.6_cuda-11.8.0_gfx906_double:
 ```
+
+
+## Running with Docker
+When the SELF Docker images are built, the default entrypoint is set to the SELF main program with an input file if `/self/input.json` (inside the container) and the model output directory set to `/self`. This configuration implies that you will need to create a directory on your host system that contains an input file for SELF called `input.json`. Additionally, you will need to supply your input mesh file within the same directory, so that it can be supplied to the SELF container when deployed. The directory on your host system that contains the `input.json` file and your mesh file is referred to as the input deck. 
+
+Your model input deck directory must be attached to the SELF container through a [bind mount](); for example,
+
+```
+docker run --mount type=bind,source="/path/to/input/deck",target="/self" self:latest
+```
+
+In this example (and all of the examples shown below), the input deck directory that contains your `input.json` and mesh file is referenced as `/path/to/input/deck`; adjust this path accordingly.
+
+
+### Serial CPU Only
+
+```
+docker run --mount type=bind,source="$(pwd)/input",target="/self" \
+           self:test
+```
+
+### Parallel (MPI) CPU Only
+
+```
+docker run --mount type=bind,source="$(pwd)/input",target="/self" \
+           self:test
+```
+
+### Single GPU (AMD)
+
+```
+docker run --mount type=bind,source="$(pwd)/input",target="/self" \
+           self:test
+```
+
+### Single GPU (Nvidia)
+
+```
+docker run --mount type=bind,source="$(pwd)/input",target="/self" \
+           self:test
+```
+
+
+### Multi-GPU (AMD)
+
+```
+docker run --mount type=bind,source="$(pwd)/input",target="/self" \
+           self:test
+```
+
+
+### Multi-GPU (Nvidia)
+
+```
+docker run --mount type=bind,source="$(pwd)/input",target="/self" \
+           self:test
+```
+
+
 
 ## GPU Architectures Reference
 
@@ -67,11 +131,3 @@ apptainer pull self.sif docker://us-docker.pkg.dev/self-fluids/self/base_rocm-5.
   Nvidia   |    P100      |     sm_62           |
   Nvidia   |    V100      |     sm_72           |
   Nvidia   |    A100      |     sm_86           |
-
-## Running with Docker
-
-```
-docker run --mount type=bind,source="$(pwd)/input",target="/self" \
-           self:test \
-           "/opt/self/bin/self -i /opt/self/etc/schema/defaults/CompressibleIdealGas2D.json"
-```

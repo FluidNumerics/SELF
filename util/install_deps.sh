@@ -22,9 +22,6 @@ elif [[ $OS == "debian" ]];then
 
    echo "ERROR : ROCm dependency not supported on Debian OS"
    exit 1
-#   PKGMGR=apt-get
-#   export DEBIAN_FRONTEND=noninteractive
-#   apt-get remove -y unattended-upgrades
 
 elif [[ $OS == "ubuntu" ]];then
 
@@ -34,9 +31,9 @@ elif [[ $OS == "ubuntu" ]];then
 
 elif [[ $OS == "pop" ]];then
 
-   PKGMGR=apt-get
-   export DEBIAN_FRONTEND=noninteractive
-   apt-get remove -y unattended-upgrades
+   echo "ERROR : ROCm dependency not supported on POP! OS"
+   exit 1
+
 fi
 
 $PKGMGR update -y
@@ -72,7 +69,7 @@ EOL
 
    yum clean all -y
    yum update -y
-   yum install -y rocm-hip-sdk
+   yum install -y rocm-dev
 
    cat > /etc/profile.d/z11_rocm.sh <<EOL
 #!/bin/bash

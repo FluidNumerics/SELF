@@ -265,60 +265,15 @@ CONTAINS
 
   END SUBROUTINE SetSolutionFromEqn_Model2D
 
-  ! SUBROUTINE SetVelocityFieldFromEqn_Model2D(this, eqn)
-  !   IMPLICIT NONE
-  !   CLASS(Model2D),INTENT(inout) :: this
-  !   TYPE(EquationParser),INTENT(in) :: eqn(1:2)
-
-  !     ! Copy the equation parser
-  !     ! Set the x-component of the velocity
-  !     CALL this % velocity % SetEquation(1,1,eqn(1) % equation)
-
-  !     ! Set the y-component of the velocity
-  !     CALL this % velocity % SetEquation(2,1,eqn(2) % equation)
-
-  !     ! Set the velocity values using the equation parser
-  !     CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-
-  !     CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
-
-  !     IF( this % gpuAccel )THEN
-  !       CALL this % velocity % UpdateDevice()
-  !     ENDIF
-
-  ! END SUBROUTINE SetVelocityFieldFromEqn_Model2D
-
-  ! SUBROUTINE SetVelocityFieldFromChar_Model2D(this, eqnChar)
-  !   IMPLICIT NONE
-  !   CLASS(Model2D),INTENT(inout) :: this
-  !   CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
-
-  !     ! Set the x-component of the velocity
-  !     CALL this % velocity % SetEquation(1,1,eqnChar(1))
-
-  !     ! Set the y-component of the velocity
-  !     CALL this % velocity % SetEquation(2,1,eqnChar(2))
-
-  !     ! Set the velocity values using the equation parser
-  !     CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-
-  !     CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
-
-  !     IF( this % gpuAccel )THEN
-  !       CALL this % velocity % UpdateDevice()
-  !     ENDIF
-
-  ! END SUBROUTINE SetVelocityFieldFromChar_Model2D
-
   SUBROUTINE SetSolutionFromChar_Model2D(this,eqnChar)
     IMPLICIT NONE
     CLASS(Model2D),INTENT(inout) :: this
-    CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % solution % nVar)
+    CHARACTER(*),INTENT(in) :: eqnChar(1:this % solution % nVar)
     ! Local
     INTEGER :: iVar
 
     DO iVar = 1,this % solution % nVar
-      CALL this % solution % SetEquation(ivar,eqnChar(iVar))
+      CALL this % solution % SetEquation(ivar,TRIM(eqnChar(iVar)))
     END DO
 
     CALL this % solution % SetInteriorFromEquation(this % geometry,this % t)

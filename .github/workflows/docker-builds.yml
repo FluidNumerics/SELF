@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: 
+      - main
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'AUTHORS.md'
+      - 'LICENSE.md'
+      - 'README.md'
+
+env:
+  PROJECT_ID: self-fluids
+  GAR_LOCATION: us-west1
+  REPOSITORY: self
+  IMAGE: main
+
+jobs:
+  build:
+    name: Docker builds
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rocm_version: '5.3.2'
+            precision: double
+            gpu_target: gfx906
+            hip_platform: amd
+            partition: mi50
+            fflags: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
+            coverage: true
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: access_token
+        workload_identity_provider: projects/163522599797/locations/global/workloadIdentityPools/ghactions/providers/github
+        service_account: github-cloudbuild@self-fluids.iam.gserviceaccount.com	
+        access_token_lifetime: 300s
+
+    - name: 'Docker build (AMD GPU)'
+      if: ${{ matrix.hip_platform == 'amd' }}
+      run: |-
+        docker build --build-arg GPU_TARGET="${{ matrix.gpu_target }}" \
+                     --build-arg PREC="${{ matrix.precision }}" \
+                     --build-arg FFLAGS="${{ matrix.fflags }}" \
+                     -f "docker/Dockerfile.rocm" \
+                     -t "self-${{ matrix.rocm_version }}_${{ matrix.gpu_target }}_${{ matrix.precision }}:$GITHUB_SHA" .
+
