@@ -12,7 +12,7 @@ MODULE SELF_lsw
   USE SELF_Model2D
 
   IMPLICIT NONE
-#include "../SELF_Macros.h"
+#include "SELF_Macros.h"
 
   TYPE,EXTENDS(Model2D) :: lsw
     !! iVar = 1 ~> u velocity component

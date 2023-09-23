@@ -1,0 +1,27 @@
+
+file(GLOB SELF_FSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.f*")
+file(GLOB SELF_HIPSRC "${CMAKE_CURRENT_SOURCE_DIR}/*.hip")
+
+# Enable pre-processing for source code
+set_source_files_properties(
+  ${SELF_FSRC}
+  PROPERTIES Fortran_PREPROCESS ON
+)
+
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+
+#add_library(self SHARED ${SELF_FSRC} ${SELF_HIPSRC})
+#target_link_libraries(self PRIVATE ${libjsonfortran} ${libfeqparse} ${HDF5_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+#target_include_directories(self PRIVATE ${incjsonfortran} ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
+
+add_library(self-static STATIC ${SELF_FSRC} ${SELF_HIPSRC})
+target_link_libraries(self-static PRIVATE ${libjsonfortran} ${libfeqparse} ${HDF5_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+target_include_directories(self-static PRIVATE ${incjsonfortran} ${incfeqparse} ${HDF5_INCLUDE_DIRS} ${MPI_Fortran_INCLUDE_DIRS})
+
+install(TARGETS self-static
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib)
+
+set_target_properties(self-static PROPERTIES LINKER_LANGUAGE Fortran)
+
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)

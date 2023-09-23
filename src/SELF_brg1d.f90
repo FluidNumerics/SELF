@@ -13,7 +13,7 @@ MODULE SELF_brg1d
   USE SELF_Config
 
   IMPLICIT NONE
-#include "../SELF_Macros.h"
+#include "SELF_Macros.h"
 
   TYPE,EXTENDS(Model1D) :: brg1d
 

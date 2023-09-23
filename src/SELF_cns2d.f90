@@ -14,7 +14,7 @@ MODULE SELF_cns2d
 
   IMPLICIT NONE
 
-#include "../SELF_Macros.h"
+#include "SELF_Macros.h"
 
   TYPE,EXTENDS(ECModel2D) :: cns2d
     !!
