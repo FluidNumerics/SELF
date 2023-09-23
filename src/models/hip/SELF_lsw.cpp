@@ -3,7 +3,7 @@
 #include <cstdio>
 
 
-__global__ void SetBoundaryCondition_LinearShallowWater_gpu( real *solution, real *extBoundary, real *nHat, int *sideInfo, int N, int nVar ){
+__global__ void SetBoundaryCondition_lsw_gpu( real *solution, real *extBoundary, real *nHat, int *sideInfo, int N, int nVar ){
 
   size_t iSide = blockIdx.x+1;
   size_t iEl = blockIdx.y;
@@ -45,13 +45,14 @@ __global__ void SetBoundaryCondition_LinearShallowWater_gpu( real *solution, rea
 
 extern "C"
 {
-  void SetBoundaryCondition_LinearShallowWater_gpu_wrapper( real **solution, real **extBoundary, real **nHat, int **sideInfo, int N, int nVar, int nEl)
+  void SetBoundaryCondition_lsw_gpu_wrapper( real **solution, real **extBoundary, real **nHat, int **sideInfo, int N, int nVar, int nEl)
   {
-    SetBoundaryCondition_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*solution, *extBoundary, *nHat, *sideInfo, N, nVar);
+    SetBoundaryCondition_lsw_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*solution, *extBoundary, *nHat, *sideInfo, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void Source_LinearShallowWater_gpu(real *source, real *solution, real *f, int N, int nVar){
+__global__ void Source_lsw_gpu(real *source, real *solution, real *f, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs
   size_t iVar = blockIdx.x;
@@ -70,14 +71,15 @@ __global__ void Source_LinearShallowWater_gpu(real *source, real *solution, real
 
 extern "C"
 {
-  void Source_LinearShallowWater_gpu_wrapper(real **source, real **solution, real **f, int N, int nVar, int nEl)
+  void Source_lsw_gpu_wrapper(real **source, real **solution, real **f, int N, int nVar, int nEl)
   {
-    Source_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*source, *solution, *f, N, nVar);
+    Source_lsw_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*source, *solution, *f, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
 
-__global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real *H, real g, int N, int nVar){
+__global__ void Flux_lsw_gpu(real *flux, real *solution, real *H, real g, int N, int nVar){
 
   // Get the array indices from the GPU thread IDs
   size_t iVar = blockIdx.x;
@@ -99,13 +101,14 @@ __global__ void Flux_LinearShallowWater_gpu(real *flux, real *solution, real *H,
 
 extern "C"
 {
-  void Flux_LinearShallowWater_gpu_wrapper(real **flux, real **solution, real **H, real g,int N, int nVar, int nEl)
+  void Flux_lsw_gpu_wrapper(real **flux, real **solution, real **H, real g,int N, int nVar, int nEl)
   {
-    Flux_LinearShallowWater_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, *H, g, N, nVar);
+    Flux_lsw_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*flux, *solution, *H, g, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void RiemannSolver_LinearShallowWater_gpu( real *flux, real *solution, real *extBoundary, real *H, real *nHat, real *nScale, real g, int N, int nVar ){
+__global__ void RiemannSolver_lsw_gpu( real *flux, real *solution, real *extBoundary, real *H, real *nHat, real *nScale, real g, int N, int nVar ){
 
   size_t iSide = blockIdx.x+1;
   size_t iEl = blockIdx.y;
@@ -138,8 +141,9 @@ __global__ void RiemannSolver_LinearShallowWater_gpu( real *flux, real *solution
 
 extern "C"
 {
-  void RiemannSolver_LinearShallowWater_gpu_wrapper( real **flux, real **solution, real **extBoundary, real **H, real **nHat, real **nScale, real g, int N, int nVar, int nEl)
+  void RiemannSolver_lsw_gpu_wrapper( real **flux, real **solution, real **extBoundary, real **H, real **nHat, real **nScale, real g, int N, int nVar, int nEl)
   {
-    RiemannSolver_LinearShallowWater_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extBoundary, *H, *nHat, *nScale, g, N, nVar);
+    RiemannSolver_lsw_gpu<<<dim3(4,nEl,1), dim3(N+1,1,1), 0, 0>>>(*flux, *solution, *extBoundary, *H, *nHat, *nScale, g, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }

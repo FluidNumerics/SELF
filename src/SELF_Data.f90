@@ -80,6 +80,10 @@ MODULE SELF_Data
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar1D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar1D
 
+    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar1D, WriteHDF5_Scalar1D
+    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar1D
+    PROCEDURE, PRIVATE :: WriteHDF5_Scalar1D
+
 
   END TYPE Scalar1D
 
@@ -108,6 +112,10 @@ MODULE SELF_Data
 
     GENERIC,PUBLIC :: ASSIGNMENT(=) => Equals_Scalar2D
     PROCEDURE,PRIVATE,PASS(SELFOut) :: Equals_Scalar2D
+
+    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Scalar2D, WriteHDF5_Scalar2D
+    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Scalar2D
+    PROCEDURE, PRIVATE :: WriteHDF5_Scalar2D
 
   END TYPE Scalar2D
 
@@ -174,6 +182,10 @@ MODULE SELF_Data
 
     GENERIC,PUBLIC :: SetEquation => SetEquation_Vector2D
     PROCEDURE,PRIVATE :: SetEquation_Vector2D
+
+    GENERIC,PUBLIC :: WriteHDF5 => WriteHDF5_MPI_Vector2D, WriteHDF5_Vector2D
+    PROCEDURE, PRIVATE :: WriteHDF5_MPI_Vector2D
+    PROCEDURE, PRIVATE :: WriteHDF5_Vector2D
 
   END TYPE Vector2D
 
@@ -573,6 +585,68 @@ CONTAINS
 
   END SUBROUTINE Equals_Scalar1D
 
+  SUBROUTINE WriteHDF5_MPI_Scalar1D(this,fileId,group,elemoffset,nglobalelem)
+    IMPLICIT NONE
+    CLASS(Scalar1D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: group
+    INTEGER(HID_T), INTENT(in) :: fileId
+    INTEGER, INTENT(in) :: elemoffset
+    INTEGER, INTENT(in) :: nglobalelem
+    ! Local
+    INTEGER(HID_T) :: offset(1:3)
+    INTEGER(HID_T) :: bOffset(1:3)
+    INTEGER(HID_T) :: globalDims(1:3)
+    INTEGER(HID_T) :: bGlobalDims(1:3)
+    INTEGER :: ivar
+
+      offset(1:3) = (/0,0,elemoffset/)
+      globalDims(1:3) = (/this % interp % N + 1, &
+                          this % nVar, &
+                          nGlobalElem/)
+
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:3) = (/0,0,elemoffset/)
+      bGlobalDims(1:3) = (/this % nVar, &
+                           2, &
+                           nGlobalElem/)
+  
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
+
+
+  END SUBROUTINE WriteHDF5_MPI_Scalar1D
+
+  SUBROUTINE WriteHDF5_Scalar1D(this,fileId,group)
+    IMPLICIT NONE
+    CLASS(Scalar1D), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+    CHARACTER(*), INTENT(in) :: group
+    ! Local
+    INTEGER :: ivar
+
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
+
+  END SUBROUTINE WriteHDF5_Scalar1D
+
 ! -- Scalar2D -- !
 
   SUBROUTINE Init_Scalar2D(SELFStorage,interp,nVar,nElem)
@@ -757,6 +831,70 @@ CONTAINS
     SELFOut % boundary % hostData = SELFin % boundary % hostData
 
   END SUBROUTINE Equals_Scalar2D
+
+  SUBROUTINE WriteHDF5_MPI_Scalar2D(this,fileId,group,elemoffset,nglobalelem)
+    IMPLICIT NONE
+    CLASS(Scalar2D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: group
+    INTEGER(HID_T), INTENT(in) :: fileId
+    INTEGER, INTENT(in) :: elemoffset
+    INTEGER, INTENT(in) :: nglobalelem
+    ! Local
+    INTEGER(HID_T) :: offset(1:4)
+    INTEGER(HID_T) :: bOffset(1:4)
+    INTEGER(HID_T) :: globalDims(1:4)
+    INTEGER(HID_T) :: bGlobalDims(1:4)
+    INTEGER :: ivar
+
+      offset(1:4) = (/0,0,0,elemoffset/)
+      globalDims(1:4) = (/this % interp % N + 1, &
+                          this % interp % N + 1, &
+                          this % nVar, &
+                          nglobalelem/)
+
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:4) = (/0,0,0,elemoffset/)
+      bGlobalDims(1:4) = (/this % interp % N + 1, &
+                           this % nVar, &
+                           4, &
+                           nglobalelem/)
+  
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
+
+
+  END SUBROUTINE WriteHDF5_MPI_Scalar2D
+
+  SUBROUTINE WriteHDF5_Scalar2D(this,fileId,group)
+    IMPLICIT NONE
+    CLASS(Scalar2D), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+    CHARACTER(*), INTENT(in) :: group   
+    ! Local
+    INTEGER :: ivar
+
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
+
+  END SUBROUTINE WriteHDF5_Scalar2D
 
 ! -- Scalar3D -- !
 
@@ -1207,6 +1345,72 @@ CONTAINS
     END DO
 
   END FUNCTION AbsMaxBoundary_Vector2D
+
+  SUBROUTINE WriteHDF5_MPI_Vector2D(this,fileId,group,elemoffset,nglobalelem)
+    IMPLICIT NONE
+    CLASS(Vector2D), INTENT(in) :: this
+    CHARACTER(*), INTENT(in) :: group
+    INTEGER(HID_T), INTENT(in) :: fileId
+    INTEGER, INTENT(in) :: elemoffset
+    INTEGER, INTENT(in) :: nglobalelem
+    ! Local
+    INTEGER(HID_T) :: offset(1:5)
+    INTEGER(HID_T) :: bOffset(1:5)
+    INTEGER(HID_T) :: globalDims(1:5)
+    INTEGER(HID_T) :: bGlobalDims(1:5)
+    INTEGER :: ivar
+
+      offset(1:5) = (/0,0,0,0,elemoffset/)
+      globalDims(1:5) = (/2, &
+                          this % interp % N + 1, &
+                          this % interp % N + 1, &
+                          this % nVar, &
+                          nglobalelem/)
+
+      ! Offsets and dimensions for element boundary data
+      bOffset(1:5) = (/0,0,0,0,elemoffset/)
+      bGlobalDims(1:5) = (/2, &
+                           this % interp % N + 1, &
+                           this % nVar, &
+                           4, &
+                           nglobalelem/)
+  
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior,offset,globalDims)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary,bOffset,bGlobalDims)
+
+
+  END SUBROUTINE WriteHDF5_MPI_Vector2D
+
+  SUBROUTINE WriteHDF5_Vector2D(this,fileId,group)
+    IMPLICIT NONE
+    CLASS(Vector2D), INTENT(in) :: this
+    INTEGER(HID_T), INTENT(in) :: fileId
+    CHARACTER(*), INTENT(in) :: group
+    ! Local
+    INTEGER :: ivar
+
+      CALL CreateGroup_HDF5(fileId,TRIM(group))
+
+      DO ivar = 1, this % nVar
+        CALL this % meta(ivar) % WriteHDF5( group, ivar, fileId )
+      ENDDO 
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/interior", &
+                           this % interior)
+
+      CALL WriteArray_HDF5(fileId,TRIM(group)//"/boundary", &
+                           this % boundary)
+
+  END SUBROUTINE WriteHDF5_Vector2D
 
 ! -- Vector3D -- !
 

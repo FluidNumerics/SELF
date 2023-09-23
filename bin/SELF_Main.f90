@@ -1,6 +1,6 @@
 module SELF_Main
 
-  ! Core
+  ! SELF Core
   use SELF_Constants
   use SELF_SupportRoutines
   use SELF_Mesh
@@ -8,14 +8,16 @@ module SELF_Main
   use SELF_MappedData
   use SELF_Config
 
-  ! Models
+  ! Model cores
   use SELF_Model
   use SELF_Model1D
   use SELF_Model2D
   use SELF_ECModel2D
-  use SELF_Burgers1D
-  use SELF_CompressibleIdealGas2D
-  use SELF_LinearShallowWater
+
+  ! Models
+  use SELF_brg1d
+  use SELF_cns2d
+  use SELF_lsw
 
   ! External
   use iso_fortran_env
@@ -34,9 +36,9 @@ module SELF_Main
   class(SEMMesh),pointer :: selfMesh
   class(SEMGeometry),pointer :: selfGeometry
 
-  type(Burgers1D),target,private :: selfBurgers1D
-  type(CompressibleIdealGas2D),target,private :: selfCompressibleIdealGas2D
-  type(LinearShallowWater),target,private :: selfLinearShallowWater2D
+  type(brg1d),target,private :: selfbrg1d
+  type(cns2d),target,private :: selfcns2d
+  type(lsw),target,private :: selflsw
   type(Mesh1D),target,private :: selfMesh1D
   type(Mesh2D),target,private :: selfMesh2D
   type(Geometry1D),target,private :: selfGeometry1D
@@ -52,13 +54,8 @@ contains
 #undef __FUNC__
 #define __FUNC__ "InitializeSELF"
     implicit none
-
     ! Local
     character(LEN=MODEL_NAME_LENGTH) :: modelname
-
-    ! TO DO : Check for --test flag
-    ! IF( test ) testing=TRUE; return
-    ! ELSE
 
     call config % Init()
 
@@ -70,20 +67,20 @@ contains
     case ("brg1d")
 
       call Init1DWorkspace()
-      call InitBurgers1D()
-      !CALL InitLinearShallowWater2D()
+      call Initbrg1d()
 
     case ("cns2d")
 
       call Init2DWorkspace()
-      call InitCompressibleIdealGas2D()
+      call Initcns2d()
 
-    case ("lsw2d")
+    case ("lsw")
 
       call Init2DWorkspace()
-      !CALL InitLinearShallowWater2D()
+      call Initlsw()
 
-    case DEFAULT
+    case default
+      
     end select
 
     call InitGPUAcceleration()
@@ -111,14 +108,14 @@ contains
 
         select type (selfModel)
 
-        type is (Burgers1D)
+        type is (brg1d)
           !CALL selfModel % UpdateDevice()
           WARNING("GPU acceleration not implemented yet")
 
-        type is (CompressibleIdealGas2D)
+        type is (cns2d)
           call selfModel % UpdateDevice()
 
-        type is (LinearShallowWater)
+        type is (lsw)
           call selfModel % UpdateDevice()
 
         end select
@@ -183,8 +180,6 @@ contains
     call selfGeometry1D % GenerateFromMesh(selfMesh1D)
     selfGeometry => selfGeometry1D
 
-    ! Reset the boundary condition to prescribed
-
   end subroutine Init1DWorkspace
 
   subroutine Init2DWorkspace()
@@ -246,32 +241,43 @@ contains
 
   end subroutine Init2DWorkspace
 
-  subroutine InitBurgers1D()
+  subroutine Initbrg1d()
 #undef __FUNC__
 #define __FUNC__ "Init"
     implicit none
 
-    INFO("Model set to Burgers1D")
-    call selfBurgers1D % Init(1, &
-                              selfMesh1D,selfGeometry1D,decomp)
+    INFO("Model set to brg1d")
+    call selfbrg1d % Init(1, selfMesh1D,selfGeometry1D,decomp)
 
-    selfModel => selfBurgers1D
+    selfModel => selfbrg1d
 
-  end subroutine InitBurgers1D
+  end subroutine Initbrg1d
 
-  subroutine InitCompressibleIdealGas2D()
+  subroutine Initcns2d()
 #undef __FUNC__
 #define __FUNC__ "Init"
     implicit none
 
-    INFO("Model set to CompressibleIdealGas2D")
+    INFO("Model set to cns2d")
 
-    call selfCompressibleIdealGas2D % Init(5, &
-                                           selfMesh2D,selfGeometry2D,decomp)
+    call selfcns2d % Init(5,selfMesh2D,selfGeometry2D,decomp)
 
-    selfModel => selfCompressibleIdealGas2D
+    selfModel => selfcns2d
 
-  end subroutine InitCompressibleIdealGas2D
+  end subroutine Initcns2d
+
+  subroutine Initlsw()
+#undef __FUNC__
+#define __FUNC__ "Init"
+    implicit none
+
+    INFO("Model set to lsw")
+
+    call selflsw % Init(3,selfMesh2D,selfGeometry2D,decomp)
+
+    selfModel => selflsw
+
+  end subroutine Initlsw
 
   subroutine FileIO()
 #undef __FUNC__
@@ -280,21 +286,19 @@ contains
 
     select type (selfModel)
 
-    type is (Burgers1D)
-      ! Write the initial condition to file
+    type is (brg1d)
       call selfModel % WriteModel()
-      call selfModel % WriteTecplot()
 
-    type is (CompressibleIdealGas2D)
-      ! Write the initial condition to file
+    type is (cns2d)
       call selfModel % WriteModel()
-      call selfModel % WriteTecplot()
 
-    type is (LinearShallowWater)
+    type is (lsw)
       call selfModel % WriteModel()
-      call selfModel % WriteTecplot()
 
     end select
+
+    CALL selfModel % IncrementIOCounter()
+    
   end subroutine FileIO
 
   subroutine MainLoop()
@@ -313,30 +317,6 @@ contains
     call config % Get("time_options.io_interval",ioInterval)
 
     call selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
-!    referenceEntropy = selfModel % entropy
-
-    !  !! Forward step the selfModel and do the file io
-    !   SELECT TYPE (selfModel)
-
-    !   TYPE is (CompressibleIdealGas2D)
-    !     CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
-    !   TYPE is (LinearShallowWater)
-    !     CALL selfModel % ForwardStep(tn=endTime,ioInterval=ioInterval)
-    !   END SELECT
-
-    ! !! Manually write the last selfModel state
-    !  CALL selfModel % WriteModel('solution.pickup.h5')
-
-    !  ! Error checking !
-    !  IF (selfModel % entropy /= selfModel % entropy) THEN
-    !    PRINT *, "Model entropy is not a number"
-    !    STOP 2
-    !  END IF
-
-    !  IF (selfModel % entropy >= HUGE(1.0_PREC)) THEN
-    !    PRINT *, "Model entropy is infinite."
-    !    STOP 1
-    !  END IF
 
   end subroutine MainLoop
 

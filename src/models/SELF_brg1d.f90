@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_Burgers1D
+MODULE SELF_brg1d
 
   USE SELF_Metadata
   USE SELF_Mesh
@@ -15,7 +15,7 @@ MODULE SELF_Burgers1D
   IMPLICIT NONE
 #include "../SELF_Macros.h"
 
-  TYPE,EXTENDS(Model1D) :: Burgers1D
+  TYPE,EXTENDS(Model1D) :: brg1d
 
     REAL(prec) :: viscosity = 0.0_PREC
     TYPE(EquationParser) :: uLEqn
@@ -31,73 +31,73 @@ MODULE SELF_Burgers1D
   CONTAINS
 
     ! Overridden Methods
-    PROCEDURE :: Init => Init_Burgers1D
-    PROCEDURE :: PrintType => PrintType_Burgers1D
-    PROCEDURE :: CalculateEntropy => CalculateEntropy_Burgers1D
-    PROCEDURE :: SetInitialConditions => SetInitialConditions_Burgers1D
+    PROCEDURE :: Init => Init_brg1d
+    PROCEDURE :: PrintType => PrintType_brg1d
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_brg1d
+    PROCEDURE :: SetInitialConditions => SetInitialConditions_brg1d
 
     ! Concretized Methods
 
-    PROCEDURE :: PreTendency => PreTendency_Burgers1D
-    PROCEDURE :: SourceMethod => Source_Burgers1D
-    PROCEDURE :: FluxMethod => Flux_Burgers1D
-    PROCEDURE :: RiemannSolver => RiemannSolver_Burgers1D
-    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_Burgers1D
+    PROCEDURE :: PreTendency => PreTendency_brg1d
+    PROCEDURE :: SourceMethod => Source_brg1d
+    PROCEDURE :: FluxMethod => Flux_brg1d
+    PROCEDURE :: RiemannSolver => RiemannSolver_brg1d
+    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_brg1d
 
-  END TYPE Burgers1D
+  END TYPE brg1d
 
 !  INTERFACE
-!    SUBROUTINE SetBoundaryCondition_Burgers1D_gpu_wrapper(solution, extBoundary, nHat, sideInfo, N, nVar, nEl) &
-!      bind(c,name="SetBoundaryCondition_Burgers1D_gpu_wrapper")
+!    SUBROUTINE SetBoundaryCondition_brg1d_gpu_wrapper(solution, extBoundary, nHat, sideInfo, N, nVar, nEl) &
+!      bind(c,name="SetBoundaryCondition_brg1d_gpu_wrapper")
 !      USE iso_c_binding
 !      USE SELF_Constants
 !      IMPLICIT NONE
 !      TYPE(c_ptr) :: solution, extBoundary, nHat, sideInfo
 !      INTEGER(C_INT),VALUE :: N,nVar,nEl
-!    END SUBROUTINE SetBoundaryCondition_Burgers1D_gpu_wrapper
+!    END SUBROUTINE SetBoundaryCondition_brg1d_gpu_wrapper
 !  END INTERFACE
 !
 !  INTERFACE
-!    SUBROUTINE Source_Burgers1D_gpu_wrapper(source, solution, gradH, g, N, nVar, nEl) &
-!      bind(c,name="Source_Burgers1D_gpu_wrapper")
+!    SUBROUTINE Source_brg1d_gpu_wrapper(source, solution, gradH, g, N, nVar, nEl) &
+!      bind(c,name="Source_brg1d_gpu_wrapper")
 !      USE iso_c_binding
 !      USE SELF_Constants
 !      IMPLICIT NONE
 !      TYPE(c_ptr) :: source, solution, gradH
 !      INTEGER(C_INT),VALUE :: N,nVar,nEl
 !      REAL(c_prec),VALUE :: g
-!    END SUBROUTINE Source_Burgers1D_gpu_wrapper
+!    END SUBROUTINE Source_brg1d_gpu_wrapper
 !  END INTERFACE
 !
 !  INTERFACE
-!    SUBROUTINE Flux_Burgers1D_gpu_wrapper(flux, solution, g, H, N, nVar, nEl) &
-!      bind(c,name="Flux_Burgers1D_gpu_wrapper")
+!    SUBROUTINE Flux_brg1d_gpu_wrapper(flux, solution, g, H, N, nVar, nEl) &
+!      bind(c,name="Flux_brg1d_gpu_wrapper")
 !      USE iso_c_binding
 !      USE SELF_Constants
 !      IMPLICIT NONE
 !      TYPE(c_ptr) :: flux, solution
 !      INTEGER(C_INT),VALUE :: N,nVar,nEl
 !      REAL(c_prec),VALUE :: g, H
-!    END SUBROUTINE Flux_Burgers1D_gpu_wrapper
+!    END SUBROUTINE Flux_brg1d_gpu_wrapper
 !  END INTERFACE
 !
 !  INTERFACE
-!    SUBROUTINE RiemannSolver_Burgers1D_gpu_wrapper(flux, solution, extBoundary, nHat, nScale, g, H, N, nVar, nEl) &
-!      bind(c,name="RiemannSolver_Burgers1D_gpu_wrapper")
+!    SUBROUTINE RiemannSolver_brg1d_gpu_wrapper(flux, solution, extBoundary, nHat, nScale, g, H, N, nVar, nEl) &
+!      bind(c,name="RiemannSolver_brg1d_gpu_wrapper")
 !      USE iso_c_binding
 !      USE SELF_Constants
 !      IMPLICIT NONE
 !      TYPE(c_ptr) :: flux, solution, extBoundary, nHat, nScale
 !      INTEGER(C_INT),VALUE :: N,nVar,nEl
 !      REAL(c_prec),VALUE :: g, H
-!    END SUBROUTINE RiemannSolver_Burgers1D_gpu_wrapper
+!    END SUBROUTINE RiemannSolver_brg1d_gpu_wrapper
 !  END INTERFACE
 
 CONTAINS
 
-  SUBROUTINE Init_Burgers1D(this,nvar,mesh,geometry,decomp)
+  SUBROUTINE Init_brg1d(this,nvar,mesh,geometry,decomp)
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(out) :: this
+    CLASS(brg1d),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
     TYPE(Mesh1D),INTENT(in),TARGET :: mesh
     TYPE(Geometry1D),INTENT(in),TARGET :: geometry
@@ -131,13 +131,13 @@ CONTAINS
     CALL this % solution % SetUnits(1,"[]")
     CALL this % solution % SetDescription(1,"null")
 
-  END SUBROUTINE Init_Burgers1D
+  END SUBROUTINE Init_brg1d
 
-  SUBROUTINE SetInitialConditions_Burgers1D(this,config)
+  SUBROUTINE SetInitialConditions_brg1d(this,config)
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     TYPE(SELFConfig),INTENT(inout) :: config
     ! Local
     CHARACTER(LEN=self_EquationLength) ::uLEqn
@@ -201,24 +201,24 @@ CONTAINS
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
-  END SUBROUTINE SetInitialConditions_Burgers1D
+  END SUBROUTINE SetInitialConditions_brg1d
 
-  SUBROUTINE PrintType_Burgers1D(this)
+  SUBROUTINE PrintType_brg1d(this)
 #undef __FUNC__
 #define __FUNC__ "PrintType"
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(in) :: this
+    CLASS(brg1d),INTENT(in) :: this
 
-    INFO("Viscous Burgers (1D)")
+    INFO("Viscous brg1d (1D)")
 
-  END SUBROUTINE PrintType_Burgers1D
+  END SUBROUTINE PrintType_brg1d
 
-  SUBROUTINE CalculateEntropy_Burgers1D(this)
+  SUBROUTINE CalculateEntropy_brg1d(this)
   !! Base method for calculating entropy of a model
   !! Calculates the entropy as the integration of the
   !! squared tracer over the domain
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iVar,iEl
     REAL(prec) :: Jacobian,u
@@ -243,9 +243,9 @@ CONTAINS
       END DO
     END DO
 
-  END SUBROUTINE CalculateEntropy_Burgers1D
+  END SUBROUTINE CalculateEntropy_brg1d
 
-  SUBROUTINE PreTendency_Burgers1D(this)
+  SUBROUTINE PreTendency_brg1d(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
     !! PreTendency is a template routine that is used to house any additional calculations
     !! that you want to execute at the beginning of the tendency calculation routine.
@@ -255,7 +255,7 @@ CONTAINS
     !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
     !!
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl
     REAL(prec) :: x
@@ -269,11 +269,11 @@ CONTAINS
     this % uR = this % uREqn % Evaluate((/x, this % t/))
     this % uxR = this % uxREqn % Evaluate((/x, this % t/))
 
-  END SUBROUTINE PreTendency_Burgers1D
+  END SUBROUTINE PreTendency_brg1d
 
-  SUBROUTINE SetBoundaryCondition_Burgers1D(this)
+  SUBROUTINE SetBoundaryCondition_brg1d(this)
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2
@@ -303,11 +303,11 @@ CONTAINS
     this % solutionGradient % avgBoundary % hostData(1,1,1) =  -this % uxL ! 0.0_PREC ! ! left most boundary
     this % solutionGradient % avgBoundary % hostData(1,2,this % solution % nElem) = this % uxR !0.0_PREC !
 
-  END SUBROUTINE SetBoundaryCondition_Burgers1D
+  END SUBROUTINE SetBoundaryCondition_brg1d
 
-  SUBROUTINE Source_Burgers1D(this)
+  SUBROUTINE Source_brg1d(this)
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
@@ -319,11 +319,11 @@ CONTAINS
       END DO
     END DO
 
-  END SUBROUTINE Source_Burgers1D
+  END SUBROUTINE Source_brg1d
 
-  SUBROUTINE Flux_Burgers1D(this)
+  SUBROUTINE Flux_brg1d(this)
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl
 
@@ -339,11 +339,11 @@ CONTAINS
       END DO
     END DO
 
-  END SUBROUTINE Flux_Burgers1D
+  END SUBROUTINE Flux_brg1d
 
-  SUBROUTINE RiemannSolver_Burgers1D(this)
+  SUBROUTINE RiemannSolver_brg1d(this)
     IMPLICIT NONE
-    CLASS(Burgers1D),INTENT(inout) :: this
+    CLASS(brg1d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,iSide,iEl
     REAL(prec) :: unL,unR
@@ -384,6 +384,6 @@ CONTAINS
       END DO
     END DO
 
-  END SUBROUTINE RiemannSolver_Burgers1D
+  END SUBROUTINE RiemannSolver_brg1d
 
-END MODULE SELF_Burgers1D
+END MODULE SELF_brg1d

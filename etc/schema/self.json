@@ -15,7 +15,7 @@
             "type": "string",
             "enum": [
                 "brg1d",
-                "lsw2d",
+                "lsw",
                 "cns2d"
             ]
         },
@@ -414,6 +414,54 @@
                             "description": "Equation for the temperature field.",
                             "default": "u=0"
                         }
+                    }
+                }
+            }
+        }
+    },
+    "lsw": {
+        "description": "Parameters for the Linear Shallow Water (2D) solver",
+        "type": "object",
+        "properties": {
+            "environment": {
+                "description": "Settings for fluid parameters",
+                "type": "object",
+                "properties": {
+                    "g": {
+                        "description": "Gravitational acceleration in units of L^2 T^{-1}",
+                        "type": "number",
+                        "default": 1.0
+                    },
+                    "coriolis": {
+                        "description": "Equation for the coriolis parameter as a function of (x,y)",
+                        "type": "string",
+                        "default": "f = 0.0"
+                    },
+                    "bathymetry": {
+                        "description": "Equation for the bathymetry (bottom topography) as a function of (x,y). Must be > 0 everywhere in the domain.",
+                        "type": "string",
+                        "default": "h = 1.0"
+                    }
+                }
+            },
+            "initial_conditions": {
+                "description": "Settings for the fluid initial conditions. Assumes primitive variables are set.",
+                "type": "object",
+                "properties": {
+                    "u": {
+                        "type": "string",
+                        "description": "Equation for the x-velocity component initial condition.",
+                        "default": "u=0"
+                    },
+                    "v": {
+                        "type": "string",
+                        "description": "Equation for the y-velocity component initial condition.",
+                        "default": "v=0"
+                    },
+                    "eta": {
+                        "type": "string",
+                        "description": "Equation for the free surface height.",
+                        "default": "n=0"
                     }
                 }
             }

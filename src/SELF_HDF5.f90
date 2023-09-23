@@ -17,6 +17,10 @@ MODULE SELF_HDF5
 #define HDF5_IO_PREC H5T_IEEE_F32LE
 #endif
 
+IMPLICIT NONE
+
+#include "SELF_Macros.h"
+
   INTERFACE Open_HDF5
     MODULE PROCEDURE :: Open_HDF5_serial
     MODULE PROCEDURE :: Open_HDF5_parallel
@@ -215,16 +219,39 @@ CONTAINS
   END SUBROUTINE Close_HDF5
 
   SUBROUTINE CreateGroup_HDF5(fileId,groupName)
+#undef __FUNC__
+#define __FUNC__ "CreateGroup_HDF5"
     IMPLICIT NONE
     INTEGER(HID_T),INTENT(in) :: fileId
     CHARACTER(*),INTENT(in) :: groupName
     ! Local
     INTEGER(HID_T) :: groupId
+    LOGICAL :: groupExists
     INTEGER :: error
 
-    ! Create groups
-    CALL h5gcreate_f(fileId,TRIM(groupName),groupId,error)
-    CALL h5gclose_f(groupId,error)
+    CALL h5lexists_f(fileId, TRIM(groupName), groupExists, error)
+    IF( error /= 0 )THEN
+      ERROR( "Link check failure for "//TRIM(groupName) )
+    ELSE
+
+      IF( .NOT. groupExists )THEN
+        INFO("Creating group "//TRIM(groupName))
+        ! Create groups
+        CALL h5gcreate_f(fileId,TRIM(groupName),groupId,error)
+    
+        IF( error /= 0 )THEN
+          ERROR( "Failed to create group "//TRIM(groupName) )
+        ENDIF
+
+        CALL h5gclose_f(groupId,error)
+
+        IF( error /= 0 )THEN
+          ERROR( "Failed to close group "//TRIM(groupName) )
+        ENDIF
+
+      ENDIF
+
+    ENDIF
 
   END SUBROUTINE CreateGroup_HDF5
 

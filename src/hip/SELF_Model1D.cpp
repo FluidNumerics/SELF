@@ -16,6 +16,7 @@ extern "C"
   void UpdateSolution_Model1D_gpu_wrapper(real **solution, real **dSdt, real dt, int N, int nVar, int nEl)
   {
     UpdateSolution_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*solution, *dSdt, dt, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -53,6 +54,7 @@ extern "C"
   void UpdateGAB2_Model1D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
     UpdateGAB2_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -96,6 +98,7 @@ extern "C"
   void UpdateGAB3_Model1D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
     UpdateGAB3_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -148,6 +151,7 @@ extern "C"
   void UpdateGAB4_Model1D_gpu_wrapper(real **prevsol, real **solution, int m, int nPrev, int N, int nVar, int nEl)
   {
     UpdateGAB4_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*prevsol, *solution, m, nPrev, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -167,6 +171,7 @@ extern "C"
   void UpdateGRK_Model1D_gpu_wrapper(real **grk, real **solution, real **dSdt, real rk_a, real rk_g, real dt, int nWork, int N, int nVar, int nEl)
   {
     UpdateGRK_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*grk, *solution, *dSdt, rk_a, rk_g, dt, nWork, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -186,5 +191,6 @@ extern "C"
   void CalculateDSDt_Model1D_gpu_wrapper(real **fluxDivergence, real **source, real **dSdt, int N, int nVar, int nEl)
   {
     CalculateDSDt_Model1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*fluxDivergence, *source, *dSdt, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }

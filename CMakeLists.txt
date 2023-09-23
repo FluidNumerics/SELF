@@ -1,66 +1,35 @@
-# =========================================================================
-# SELF CMake configuration
-# =========================================================================
-# NOTE: use minimum CMake version required by tools/libs (Paraview, HDF5, FFTW)
-CMAKE_MINIMUM_REQUIRED(VERSION 3.5.2)
-PROJECT(SELF)
-ENABLE_LANGUAGE(Fortran)
+#cmake_minimum_required(VERSION 3.5)
+#cmake_policy(VERSION 3.5...3.27)
+#
+# Invoke with
+#  FC=gfortran \
+#  AMDDeviceLibs_DIR=/opt/rocm/lib/cmake/AMDDeviceLibs \
+#  amd_comgr_DIR=/opt/rocm/lib/cmake/amd_comgr/ \
+#  cmake ../
+#
+cmake_minimum_required(VERSION 3.21) # HIP language support requires 3.21
+cmake_policy(VERSION 3.21.3...3.27)
 
-# =========================================================================
-# Build type
-# =========================================================================
-# make sure that the default is a RELEASE
-IF (NOT CMAKE_BUILD_TYPE)
-  SET (CMAKE_BUILD_TYPE Release CACHE STRING
-      "Choose the type of build, options are: Debug Release Profile Coverage."
-      FORCE)
-  SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release Profile Coverage)
-ENDIF (NOT CMAKE_BUILD_TYPE)
+project(self VERSION 1.0.0
+	DESCRIPTION "Spectral Element Library in Fortran"
+	LANGUAGES Fortran HIP)
 
-IF (CMAKE_BUILD_TYPE MATCHES "Debug")
-  ADD_DEFINITIONS("-DDEBUG")
-ENDIF()
+# ------ dependencies ------ #
+# MPI
+find_package(MPI COMPONENTS Fortran REQUIRED)
 
-# =========================================================================
-# COMPILER FLAGS
-# =========================================================================
+# HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
+find_package(HDF5 COMPONENTS Fortran
+	HINTS HDF5_PREFER_PARALLEL REQUIRED)
 
-# FFLAGS depend on the compiler
-GET_FILENAME_COMPONENT (Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
+# JSON-Fortran
+find_package(json-fortran REQUIRED)
 
-IF (CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-  # set Flags
-  SET (CMAKE_Fortran_FLAGS         "${CMAKE_Fortran_FLAGS} -DGNU")
-  SET (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS} -O3 -march=native  -finline-functions")
-  SET (CMAKE_Fortran_FLAGS_PROFILE "${CMAKE_Fortran_FLAGS} -pg -O3 -march=native  -finline-functions")
-  SET (CMAKE_Fortran_FLAGS_DEBUG   "${CMAKE_Fortran_FLAGS} -g -O0 -ggdb3 -fbounds-check -finit-real=nan -fbacktrace  -Wall")
-  SET (CMAKE_Fortran_FLAGS_COVERAGE   "${CMAKE_Fortran_FLAGS} -g -O0 -fbounds-check -finit-real=nan -fbacktrace -coverage -Wall")
-  # add flags only for compiling not linking!
-  SET (SELF_COMPILE_FLAGS "")
+# FEQ-Parse
+find_package(feq-parse REQUIRED)
 
-ELSE()
-  MESSAGE(SEND_ERROR "Unknown compiler")
-ENDIF()
+# ----- end dependencies ----- #
 
-## ------- ROCm / GPU Related Settings ------- ##
-# Set the GPU to compile for
-set(GPU_TARGETS "gfx900" CACHE STRING "GPU targets to compile for")
-
-# Search for rocm in common locations
-list(APPEND CMAKE_PREFIX_PATH /opt/rocm/hip /opt/rocm)
-
-# Find hip
-find_package(hip REQUIRED)
-## ------- ROCm / GPU Related Settings ------- ##
-
-## --------- HDF5 Settings ----------- #
-## --------- HDF5 Settings ----------- #
-
-## --------- JSON-Fortran Settings ----------- #
-find_package ( jsonfortran-${CMAKE_Fortran_COMPILER_ID} 8.3.0 REQUIRED )
-## --------- JSON-Fortran Settings ----------- #
-
-# Create library
-add_library(self ...)
-# Link with HIP
-target_link_libraries(self hip::device)
+#add_executable(square square.hip)
+#add_library(self STATIC src/ src/hip src/models src/models/hip)
+#target_link_libraries(self PRIVATE hip::device)

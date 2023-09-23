@@ -15,6 +15,11 @@ MODULE SELF_ECModel2D
   USE FEQParse
   USE SELF_Model
   USE SELF_Model2D
+ 
+  IMPLICIT NONE
+
+#include "SELF_Macros.h"
+
 
   TYPE,EXTENDS(Model) :: ECModel2D
     TYPE(MappedScalar2D)   :: solution
@@ -65,72 +70,6 @@ MODULE SELF_ECModel2D
 
   END TYPE ECModel2D
 
-  ! INTERFACE
-  !   SUBROUTINE UpdateSolution_Model2D_gpu_wrapper(solution, dSdt, dt, N, nVar, nEl) &
-  !     bind(c,name="UpdateSolution_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: solution, dSdt
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !     REAL(c_prec),VALUE :: dt
-  !   END SUBROUTINE UpdateSolution_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-  !     bind(c,name="UpdateGAB2_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: prevsol, solution
-  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-  !   END SUBROUTINE UpdateGAB2_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-  !     bind(c,name="UpdateGAB3_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: prevsol, solution
-  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-  !   END SUBROUTINE UpdateGAB3_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper(prevsol, solution, m, nPrev, N, nVar, nEl) &
-  !     bind(c,name="UpdateGAB4_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: prevsol, solution
-  !     INTEGER(C_INT),VALUE :: m,nPrev,N,nVar,nEl
-  !   END SUBROUTINE UpdateGAB4_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE UpdateGRK_Model2D_gpu_wrapper(grk, solution, dSdt, rk_a, rk_g, dt, nWork, N, nVar, nEl) &
-  !     bind(c,name="UpdateGRK_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     USE SELF_Constants
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: grk, solution, dSdt
-  !     INTEGER(C_INT),VALUE :: nWork,N,nVar,nEl
-  !     REAL(c_prec),VALUE :: rk_a, rk_g, dt
-  !   END SUBROUTINE UpdateGRK_Model2D_gpu_wrapper
-  ! END INTERFACE
-
-  ! INTERFACE
-  !   SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper(fluxDivergence, source, dSdt, N, nVar, nEl) &
-  !     bind(c,name="CalculateDSDt_Model2D_gpu_wrapper")
-  !     USE iso_c_binding
-  !     IMPLICIT NONE
-  !     TYPE(c_ptr) :: fluxDivergence, source, dSdt
-  !     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  !   END SUBROUTINE CalculateDSDt_Model2D_gpu_wrapper
-  ! END INTERFACE
 
 CONTAINS
 
@@ -253,51 +192,6 @@ CONTAINS
     END IF
 
   END SUBROUTINE SetSolutionFromEqn_ECModel2D
-
-  ! SUBROUTINE SetVelocityFieldFromEqn_ECModel2D(this, eqn)
-  !   IMPLICIT NONE
-  !   CLASS(ECModel2D),INTENT(inout) :: this
-  !   TYPE(EquationParser),INTENT(in) :: eqn(1:2)
-
-  !     ! Copy the equation parser
-  !     ! Set the x-component of the velocity
-  !     CALL this % velocity % SetEquation(1,1,eqn(1) % equation)
-
-  !     ! Set the y-component of the velocity
-  !     CALL this % velocity % SetEquation(2,1,eqn(2) % equation)
-
-  !     ! Set the velocity values using the equation parser
-  !     CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-
-  !     CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
-
-  !     IF( this % gpuAccel )THEN
-  !       CALL this % velocity % UpdateDevice()
-  !     ENDIF
-
-  ! END SUBROUTINE SetVelocityFieldFromEqn_ECModel2D
-
-  ! SUBROUTINE SetVelocityFieldFromChar_ECModel2D(this, eqnChar)
-  !   IMPLICIT NONE
-  !   CLASS(ECModel2D),INTENT(inout) :: this
-  !   CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
-
-  !     ! Set the x-component of the velocity
-  !     CALL this % velocity % SetEquation(1,1,eqnChar(1))
-
-  !     ! Set the y-component of the velocity
-  !     CALL this % velocity % SetEquation(2,1,eqnChar(2))
-
-  !     ! Set the velocity values using the equation parser
-  !     CALL this % velocity % SetInteriorFromEquation( this % geometry, this % t )
-
-  !     CALL this % velocity % BoundaryInterp( gpuAccel = .FALSE. )
-
-  !     IF( this % gpuAccel )THEN
-  !       CALL this % velocity % UpdateDevice()
-  !     ENDIF
-
-  ! END SUBROUTINE SetVelocityFieldFromChar_ECModel2D
 
   SUBROUTINE SetSolutionFromChar_ECModel2D(this,eqnChar)
     IMPLICIT NONE
@@ -843,37 +737,23 @@ CONTAINS
   END SUBROUTINE CalculateTendency_ECModel2D
 
   SUBROUTINE Write_ECModel2D(this,fileName)
+#undef __FUNC__
+#define __FUNC__ "Write_ECModel2D"
     IMPLICIT NONE
     CLASS(ECModel2D),INTENT(inout) :: this
     CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
     INTEGER(HID_T) :: fileId
-    INTEGER(HID_T) :: solOffset(1:4)
-    INTEGER(HID_T) :: xOffset(1:5)
-    INTEGER(HID_T) :: vOffset(1:5)
-    INTEGER(HID_T) :: bOffset(1:4)
-    INTEGER(HID_T) :: bxOffset(1:5)
-    INTEGER(HID_T) :: bvOffset(1:5)
-    INTEGER(HID_T) :: solGlobalDims(1:4)
-    INTEGER(HID_T) :: xGlobalDims(1:5)
-    INTEGER(HID_T) :: vGlobalDims(1:5)
-    INTEGER(HID_T) :: bGlobalDims(1:4)
-    INTEGER(HID_T) :: bxGlobalDims(1:5)
-    INTEGER(HID_T) :: bvGlobalDims(1:5)
     TYPE(Scalar2D) :: solution
     TYPE(Vector2D) :: x
     TYPE(Lagrange),TARGET :: interp
-    INTEGER :: firstElem
-    INTEGER :: ivar
     CHARACTER(LEN=self_FileNameLength) :: pickupFile
     CHARACTER(13) :: timeStampString
-    CHARACTER(4) :: varNumber
-
 
     IF (PRESENT(filename)) THEN
       pickupFile = filename
     ELSE
-      timeStampString = TimeStamp(this % t,'s')
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
       pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 
@@ -882,120 +762,33 @@ CONTAINS
       CALL this % solutionGradient % UpdateHost()
     END IF
 
+    INFO("Writing pickup file : "//TRIM(pickupFile))
+
     IF (this % decomp % mpiEnabled) THEN
 
       CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
 
-      firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId)
-      solOffset(1:4) = (/0,0,0,firstElem/)
-      solGlobalDims(1:4) = (/this % solution % interp % N + 1, &
-                             this % solution % interp % N + 1, &
-                             this % solution % nVar, &
-                             this % decomp % nElem/)
+      ! Write the interpolant to the file
+      INFO("Writing interpolant data to file")
+      CALL this % solution % interp % WriteHDF5( fileId )
 
-      xOffset(1:5) = (/0,0,0,0,firstElem/)
-      xGlobalDims(1:5) = (/2, &
-                           this % solution % interp % N + 1, &
-                           this % solution % interp % N + 1, &
-                           1, &
-                           this % decomp % nElem/)
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+      ! Write the model state to file
+      INFO("Writing control grid solution to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid')
+      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
 
-      vOffset(1:5) = (/0,0,0,0,firstElem/)
-      vGlobalDims(1:5) = (/2, &
-                           this % solution % interp % N + 1, &
-                           this % solution % interp % N + 1, &
-                           this % solution % nVar, &
-                           this % decomp % nElem/)
+      ! Write the geometry to file
+      INFO("Writing control grid geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
 
-      ! Offsets and dimensions for element boundary data
-      bOffset(1:4) = (/0,0,0,firstElem/)
-      bGlobalDims(1:4) = (/this % solution % interp % N + 1, &
-                           this % solution % nVar, &
-                           4, &
-                           this % decomp % nElem/)
+      ! -- END : writing solution on control grid -- !
 
-      bxOffset(1:5) = (/0,0,0,0,firstElem/)
-      bxGlobalDims(1:5) = (/2, &
-                            this % solution % interp % N + 1, &
-                            1, &
-                            4, &
-                            this % decomp % nElem/)
-
-      bvOffset(1:5) = (/0,0,0,0,firstElem/)
-      bvGlobalDims(1:5) = (/2, &
-                            this % solution % interp % N + 1, &
-                            this % solution % nVar, &
-                            4, &
-                            this % decomp % nElem/)
-
-      CALL CreateGroup_HDF5(fileId,'/quadrature')
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                           this % solution % interp % controlPoints)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                           this % solution % interp % qWeights)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                           this % solution % interp % dgMatrix)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                           this % solution % interp % dMatrix)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/bmatrix', &
-                           this % solution % interp % bMatrix)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/imatrix', &
-                           this % solution % interp % iMatrix)
-
-! Add variable names to the file
-                           CALL CreateGroup_HDF5(fileId,'/metadata')
-                           CALL CreateGroup_HDF5(fileId,'/metadata/vars')
-                           DO ivar = 1, this % solution % nvar
-                             WRITE (varNumber,'(I0)') ivar
-                             CALL WriteCharacter_HDF5(fileId, "/metadata/vars/"//TRIM(varnumber), &
-                                     TRIM(this % solution % meta(ivar) % name))
-                           ENDDO
-                     
-      CALL CreateGroup_HDF5(fileId,'/state')
-      CALL CreateGroup_HDF5(fileId,'/state/solution')
-
-      CALL CreateGroup_HDF5(fileId,'/mesh')
-      CALL CreateGroup_HDF5(fileId,'/mesh/coords')
-
-      CALL WriteArray_HDF5(fileId,'/state/solution/interior', &
-                           this % solution % interior,solOffset,solGlobalDims)
-
-      CALL WriteArray_HDF5(fileId,'/state/solution/boundary', &
-                           this % solution % boundary,bOffset,bGlobalDims)
-
-      CALL WriteArray_HDF5(fileId,'/mesh/coords/interior', &
-                           this % geometry % x % interior,xOffset,xGlobalDims)
-
-      CALL WriteArray_HDF5(fileId,'/mesh/coords/boundary', &
-                           this % geometry % x % boundary,bxOffset,bxGlobalDims)
-
-      ! Write data on plotting mesh
-      solOffset(1:4) = (/0,0,0,firstElem/)
-      solGlobalDims(1:4) = (/this % solution % interp % M + 1, &
-                             this % solution % interp % M + 1, &
-                             this % solution % nVar, &
-                             this % decomp % nElem/)
-
-      xOffset(1:5) = (/0,0,0,0,firstElem/)
-      xGlobalDims(1:5) = (/2, &
-                           this % solution % interp % M + 1, &
-                           this % solution % interp % M + 1, &
-                           1, &
-                           this % decomp % nElem/)
-
-      vOffset(1:5) = (/0,0,0,0,firstElem/)
-      vGlobalDims(1:5) = (/2, &
-                           this % solution % interp % M + 1, &
-                           this % solution % interp % M + 1, &
-                           this % solution % nVar, &
-                           this % decomp % nElem/)
-
+      ! Interpolate the solution to a grid for plotting results
       ! Create an interpolant for the uniform grid
       CALL interp % Init(this % solution % interp % M, &
                          this % solution % interp % targetNodeType, &
@@ -1013,17 +806,15 @@ CONTAINS
       ! Map the solution to the target grid
       CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
 
-      CALL CreateGroup_HDF5(fileId,'/plot')
-      CALL CreateGroup_HDF5(fileId,'/plot/mesh')
-      CALL CreateGroup_HDF5(fileId,'/plot/mesh/coords')
-      CALL CreateGroup_HDF5(fileId,'/plot/state')
-      CALL CreateGroup_HDF5(fileId,'/plot/state/solution')
+      ! Write the model state to file
+      CALL CreateGroup_HDF5(fileId,'/targetgrid')
+      CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
 
-      CALL WriteArray_HDF5(fileId,'/plot/mesh/coords/interior', &
-                           x % interior,xOffset,xGlobalDims)
-
-      CALL WriteArray_HDF5(fileId,'/plot/state/solution/interior', &
-                           solution % interior,solOffset,solGlobalDims)
+      ! Write the geometry to file
+      CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
+      CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
 
       CALL Close_HDF5(fileId)
 
@@ -1031,57 +822,25 @@ CONTAINS
 
       CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
 
-      CALL CreateGroup_HDF5(fileId,'/quadrature')
+      ! Write the interpolant to the file
+      INFO("Writing interpolant data to file")
+      CALL this % solution % interp % WriteHDF5( fileId )
 
-      CALL WriteArray_HDF5(fileId,'/quadrature/xi', &
-                           this % solution % interp % controlPoints)
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
 
-      CALL WriteArray_HDF5(fileId,'/quadrature/weights', &
-                           this % solution % interp % qWeights)
+      ! Write the model state to file
+      INFO("Writing control grid solution to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid')
+      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution' )
 
-      CALL WriteArray_HDF5(fileId,'/quadrature/dgmatrix', &
-                           this % solution % interp % dgMatrix)
+      ! Write the geometry to file
+      INFO("Writing control grid  geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      CALL this % geometry % x % WriteHDF5(fileId,'/controlgrid/geometry/x')
+      ! -- END : writing solution on control grid -- !
 
-      CALL WriteArray_HDF5(fileId,'/quadrature/dmatrix', &
-                           this % solution % interp % dMatrix)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/bmatrix', &
-                           this % solution % interp % bMatrix)
-
-      CALL WriteArray_HDF5(fileId,'/quadrature/imatrix', &
-                           this % solution % interp % iMatrix)
-
-! Add variable names to the file
-                           CALL CreateGroup_HDF5(fileId,'/metadata')
-                           CALL CreateGroup_HDF5(fileId,'/metadata/vars')
-                           DO ivar = 1, this % solution % nvar
-                             WRITE (varNumber,'(I0)') ivar
-                             CALL WriteCharacter_HDF5(fileId, "/metadata/vars/"//TRIM(varnumber), &
-                                     TRIM(this % solution % meta(ivar) % name))
-                           ENDDO
-
-      CALL CreateGroup_HDF5(fileId,'/state')
-      CALL CreateGroup_HDF5(fileId,'/state/solution')
-
-      CALL CreateGroup_HDF5(fileId,'/mesh')
-      CALL CreateGroup_HDF5(fileId,'/mesh/coords')
-
-      CALL WriteArray_HDF5(fileId,'/state/solution/interior', &
-                           this % solution % interior)
-
-      CALL WriteArray_HDF5(fileId,'/state/solution/boundary', &
-                           this % solution % boundary)
-
-      CALL WriteArray_HDF5(fileId,'/mesh/coords/interior', &
-                           this % geometry % x % interior)
-
-      CALL WriteArray_HDF5(fileId,'/mesh/coords/boundary', &
-                           this % geometry % x % boundary)
-                     
-
-
-      ! Write data on plotting mesh
-
+      ! Interpolate the solution to a grid for plotting results
       ! Create an interpolant for the uniform grid
       CALL interp % Init(this % solution % interp % M, &
                          this % solution % interp % targetNodeType, &
@@ -1099,13 +858,15 @@ CONTAINS
       ! Map the solution to the target grid
       CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
 
-      CALL CreateGroup_HDF5(fileId,'/plot')
-      CALL CreateGroup_HDF5(fileId,'/plot/mesh')
-      CALL CreateGroup_HDF5(fileId,'/plot/mesh/coords')
-      CALL CreateGroup_HDF5(fileId,'/plot/state')
-      CALL CreateGroup_HDF5(fileId,'/plot/state/solution')
-      CALL WriteArray_HDF5(fileId,'/plot/mesh/coords/interior', x % interior)
-      CALL WriteArray_HDF5(fileId,'/plot/state/solution/interior',solution % interior)
+      ! Write the model state to file
+      INFO("Writing target grid solution to file")
+      CALL CreateGroup_HDF5(fileId,'/targetgrid')
+      CALL solution % WriteHDF5(fileId, '/targetgrid/solution')
+
+      ! Write the geometry to file
+      INFO("Writing target grid geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/targetgrid/geometry')
+      CALL x % WriteHDF5(fileId,'/targetgrid/geometry/x')
 
       CALL Close_HDF5(fileId)
 
@@ -1134,19 +895,19 @@ CONTAINS
       CALL Open_HDF5(fileName,H5F_ACC_RDWR_F,fileId)
     END IF
 
-    CALL ReadAttribute_HDF5(fileId,'N',N)
+    ! CALL ReadAttribute_HDF5(fileId,'N',N)
 
-    IF (this % solution % interp % N /= N) THEN
-      STOP 'Error : Solution polynomial degree does not match input file'
-    END IF
+    ! IF (this % solution % interp % N /= N) THEN
+    !   STOP 'Error : Solution polynomial degree does not match input file'
+    ! END IF
 
     IF (this % decomp % mpiEnabled) THEN
       firstElem = this % decomp % offsetElem % hostData(this % decomp % rankId) + 1
       solOffset(1:4) = (/0,0,1,firstElem/)
-      CALL ReadArray_HDF5(fileId,'/state/solution/interior', &
+      CALL ReadArray_HDF5(fileId,'/controlgrid/solution/interior', &
                           this % solution % interior,solOffset)
     ELSE
-      CALL ReadArray_HDF5(fileId,'/state/solution/interior',this % solution % interior)
+      CALL ReadArray_HDF5(fileId,'/controlgrid/solution/interior',this % solution % interior)
     END IF
 
     CALL Close_HDF5(fileId)

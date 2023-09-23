@@ -4,7 +4,7 @@
 ! Support : support@fluidnumerics.com
 !
 ! //////////////////////////////////////////////////////////////////////////////////////////////// !
-MODULE SELF_CompressibleIdealGas2D
+MODULE SELF_cns2d
 
   USE SELF_Metadata
   USE SELF_Mesh
@@ -16,7 +16,7 @@ MODULE SELF_CompressibleIdealGas2D
 
 #include "../SELF_Macros.h"
 
-  TYPE,EXTENDS(ECModel2D) :: CompressibleIdealGas2D
+  TYPE,EXTENDS(ECModel2D) :: cns2d
     !!
     !! For the solution attribute, we use the following convention
     !! iVar = 1 ~> rho*u (x-momentum)
@@ -40,8 +40,8 @@ MODULE SELF_CompressibleIdealGas2D
     !!  iVar = 1 ~> gravitational potential
     !!  iVar = 2 ~> Linear momentum drag
     !!
-    PROCEDURE(RiemannFlux_CompressibleIdealGas2D),POINTER :: RiemannFlux => LocalLaxFriedrichs
-    PROCEDURE(P2Flux_CompressibleIdealGas2D),POINTER :: P2Flux => ConservativeFlux
+    PROCEDURE(HyperbolicBoundaryFlux_cns2d),POINTER :: HyperbolicBoundaryFlux => LocalLaxFriedrichs
+    PROCEDURE(HyperbolicInteriorFlux_cns2d),POINTER :: HyperbolicInteriorFlux => ConservativeFlux
 
     TYPE(MappedScalar2D) :: primitive ! Contains primitive variables
     TYPE(MappedScalar2D) :: entropyVars ! Contains entropy variables
@@ -66,31 +66,32 @@ MODULE SELF_CompressibleIdealGas2D
   CONTAINS
 
     ! Overridden Methods
-    PROCEDURE :: Init => Init_CompressibleIdealGas2D
-    PROCEDURE :: Free => Free_CompressibleIdealGas2D
-    PROCEDURE :: PrintType => PrintType_CompressibleIdealGas2D
-    PROCEDURE :: PreTendency => PreTendency_CompressibleIdealGas2D
-    PROCEDURE :: CalculateEntropy => CalculateEntropy_CompressibleIdealGas2D
-    PROCEDURE :: SetInitialConditions => SetInitialConditions_CompressibleIdealGas2D
+    PROCEDURE :: Init => Init_cns2d
+    PROCEDURE :: Free => Free_cns2d
+    PROCEDURE :: PrintType => PrintType_cns2d
+    PROCEDURE :: PreTendency => PreTendency_cns2d
+    PROCEDURE :: CalculateEntropy => CalculateEntropy_cns2d
+    PROCEDURE :: SetInitialConditions => SetInitialConditions_cns2d
 
-    PROCEDURE :: WriteTecplot => WriteTecplot_CompressibleIdealGas2D
+    PROCEDURE :: WriteModel => Write_cns2d
+    !PROCEDURE :: WriteTecplot => WriteTecplot_cns2d
 
     ! Concretized Methods
-    PROCEDURE :: SourceMethod => Source_CompressibleIdealGas2D
-    PROCEDURE :: FluxMethod => FluxMethod_CompressibleIdealGas2D
-    PROCEDURE :: RiemannSolver => RiemannSolver_CompressibleIdealGas2D
-    PROCEDURE :: UpdateBoundary => UpdateBoundary_CompressibleIdealGas2D
+    PROCEDURE :: SourceMethod => Source_cns2d
+    PROCEDURE :: FluxMethod => FluxMethod_cns2d
+    PROCEDURE :: RiemannSolver => RiemannSolver_cns2d
+    PROCEDURE :: UpdateBoundary => UpdateBoundary_cns2d
 
-    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_CompressibleIdealGas2D
+    PROCEDURE :: SetBoundaryCondition => SetBoundaryCondition_cns2d
     PROCEDURE,PRIVATE :: SetSolutionBoundaryCondition
     PROCEDURE,PRIVATE :: SetPrimitiveBoundaryCondition
     PROCEDURE,PRIVATE :: SetPrimitiveGradientBoundaryCondition
     PROCEDURE,PRIVATE :: SetDiagnosticsBoundaryCondition
 
     ! New Methods
-    PROCEDURE :: CheckMinMax => CheckMinMax_CompressibleIdealGas2D
-    PROCEDURE :: SetMaxCFL => SetMaxCFL_CompressibleIdealGas2D
-    PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_CompressibleIdealGas2D
+    PROCEDURE :: CheckMinMax => CheckMinMax_cns2d
+    PROCEDURE :: SetMaxCFL => SetMaxCFL_cns2d
+    PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_cns2d
 
     ! Interior Flux methods
     PROCEDURE, PRIVATE :: ConservativeFlux
@@ -104,27 +105,26 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: SetFluxMethod_withInt
     PROCEDURE,PRIVATE :: SetFluxMethod_withChar
 
-    GENERIC :: SetVelocity => SetVelocityFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetVelocityFromChar_CompressibleIdealGas2D
+    GENERIC :: SetVelocity => SetVelocityFromChar_cns2d
+    PROCEDURE,PRIVATE :: SetVelocityFromChar_cns2d
 
-    GENERIC :: SetGravity => SetGravityFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetGravityFromChar_CompressibleIdealGas2D
+    GENERIC :: SetGravity => SetGravityFromChar_cns2d
+    PROCEDURE,PRIVATE :: SetGravityFromChar_cns2d
 
-    GENERIC :: SetDrag => SetDragFromChar_CompressibleIdealGas2D, &
-      SetDragFromConstant_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetDragFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetDragFromConstant_CompressibleIdealGas2D
+    GENERIC :: SetDrag => SetDragFromChar_cns2d, &
+      SetDragFromConstant_cns2d
+    PROCEDURE,PRIVATE :: SetDragFromChar_cns2d
+    PROCEDURE,PRIVATE :: SetDragFromConstant_cns2d
 
-    GENERIC :: SetPrescribedSolution => SetPrescribedSolutionFromChar_CompressibleIdealGas2D, &
-      SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromChar_CompressibleIdealGas2D
-    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
+    GENERIC :: SetPrescribedSolution => SetPrescribedSolutionFromChar_cns2d, &
+      SetPrescribedSolutionFromSolution_cns2d
+    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromChar_cns2d
+    PROCEDURE,PRIVATE :: SetPrescribedSolutionFromSolution_cns2d
 
-    PROCEDURE :: SetCp => SetCp_CompressibleIdealGas2D
-    PROCEDURE :: SetCv => SetCv_CompressibleIdealGas2D
-    PROCEDURE :: SetGasConstant => SetGasConstant_CompressibleIdealGas2D
-    PROCEDURE :: SetStatic => SetStatic_CompressibleIdealGas2D
-    PROCEDURE :: SetStaticSTP => SetStaticSTP_CompressibleIdealGas2D
+    PROCEDURE :: SetCp => SetCp_cns2d
+    PROCEDURE :: SetCv => SetCv_cns2d
+    PROCEDURE :: SetGasConstant => SetGasConstant_cns2d
+    PROCEDURE :: SetStatic => SetStatic_cns2d
 
     PROCEDURE, PRIVATE :: AddThermalBubble
 
@@ -132,7 +132,7 @@ MODULE SELF_CompressibleIdealGas2D
     PROCEDURE,PRIVATE :: ConservativeToPrimitive
     PROCEDURE,PRIVATE :: ConservativeToEntropy
 
-  END TYPE CompressibleIdealGas2D
+  END TYPE cns2d
 
   ! ---------------------------------------- !
   ! Riemann Flux integer flags
@@ -150,8 +150,6 @@ MODULE SELF_CompressibleIdealGas2D
   INTEGER,PARAMETER,PRIVATE :: hydrostaticAdjMaxIters = 1000
 
   ! ---------------------------------------- !
-  ! Static fluid state for "air" at stp
-  !  > To do : move to json input file
   !
   REAL(prec),PRIVATE :: Cp_static != 1.005_PREC
   REAL(prec),PRIVATE :: Cv_static != 0.718_PREC
@@ -161,25 +159,25 @@ MODULE SELF_CompressibleIdealGas2D
   REAL(prec),PRIVATE :: e_static != 1.5_PREC*R_static*T_static ! J/kg
 
   INTERFACE
-    SUBROUTINE RiemannFlux_CompressibleIdealGas2D(this)
-      IMPORT CompressibleIdealGas2D
+    SUBROUTINE HyperbolicBoundaryFlux_cns2d(this)
+      IMPORT cns2d
       IMPLICIT NONE
-      CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    END SUBROUTINE RiemannFlux_CompressibleIdealGas2D
+      CLASS(cns2d),INTENT(inout) :: this
+    END SUBROUTINE HyperbolicBoundaryFlux_cns2d
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE P2Flux_CompressibleIdealGas2D(this)
-      IMPORT CompressibleIdealGas2D
+    SUBROUTINE HyperbolicInteriorFlux_cns2d(this)
+      IMPORT cns2d
       IMPLICIT NONE
-      CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    END SUBROUTINE P2Flux_CompressibleIdealGas2D
+      CLASS(cns2d),INTENT(inout) :: this
+    END SUBROUTINE HyperbolicInteriorFlux_cns2d
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(scalar, &
+    SUBROUTINE SetSolutionBoundaryCondition_cns2d_gpu_wrapper(scalar, &
                                                                 extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
-      BIND(c,name="SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
+      BIND(c,name="SetSolutionBoundaryCondition_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
@@ -189,13 +187,13 @@ MODULE SELF_CompressibleIdealGas2D
       TYPE(C_PTR) :: nHat
       TYPE(C_PTR) :: sideInfo
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE SetSolutionBoundaryCondition_cns2d_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-  SUBROUTINE SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(scalar, &
+  SUBROUTINE SetDiagBoundaryCondition_cns2d_gpu_wrapper(scalar, &
                                                               extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
-    BIND(c,name="SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper")
+    BIND(c,name="SetDiagBoundaryCondition_cns2d_gpu_wrapper")
     USE ISO_C_BINDING
     USE SELF_Constants
     IMPLICIT NONE
@@ -205,23 +203,23 @@ MODULE SELF_CompressibleIdealGas2D
     TYPE(C_PTR) :: nHat
     TYPE(C_PTR) :: sideInfo
     INTEGER(C_INT),VALUE :: N,nVar,nEl
-  END SUBROUTINE SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper
+  END SUBROUTINE SetDiagBoundaryCondition_cns2d_gpu_wrapper
 END INTERFACE
 
   INTERFACE
-    SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper(source,solution,environmentalsGradient,N,nVar,nEl) &
-      BIND(c,name="Source_CompressibleIdealGas2D_gpu_wrapper")
+    SUBROUTINE Source_cns2d_gpu_wrapper(source,solution,environmentalsGradient,N,nVar,nEl) &
+      BIND(c,name="Source_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
       TYPE(C_PTR) :: source,solution,environmentalsGradient
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE Source_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE Source_cns2d_gpu_wrapper
   END INTERFACE
 
   INTERFACE
     SUBROUTINE ConservativeFlux_gpu_wrapper(flux,solution,primitive,N,nVar,nEl) &
-      BIND(c,name="ConservativeFlux_CompressibleIdealGas2D_gpu_wrapper")
+      BIND(c,name="ConservativeFlux_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
@@ -234,7 +232,7 @@ END INTERFACE
     SUBROUTINE LocalLaxFriedrichs_gpu_wrapper(flux, &
                                                            solution,extSolution,primitive,extPrimitive,diagnostics, &
                                                            extDiagnostics,nHat,nScale,N,nVar,nDiag,nEl) &
-      BIND(c,name="LocalLaxFriedrichs_CompressibleIdealGas2D_gpu_wrapper")
+      BIND(c,name="LocalLaxFriedrichs_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
@@ -252,10 +250,10 @@ END INTERFACE
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper(solution, &
+    SUBROUTINE CalculateDiagnostics_cns2d_gpu_wrapper(solution, &
                                                                        diagnostics,expansionFactor,R,N,nVar, &
                                                                        nDiag,nEl) &
-      BIND(c,name="CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper")
+      BIND(c,name="CalculateDiagnostics_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
@@ -263,13 +261,13 @@ END INTERFACE
       TYPE(C_PTR) :: diagnostics
       REAL(c_prec),VALUE :: expansionFactor,R
       INTEGER(C_INT),VALUE :: N,nVar,nDiag,nEl
-    END SUBROUTINE CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE CalculateDiagnostics_cns2d_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper(solution, &
+    SUBROUTINE ConservativeToPrimitive_cns2d_gpu_wrapper(solution, &
                                                                           primitive,expansionFactor,N,nVar,nEl) &
-      BIND(c,name="ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper")
+      BIND(c,name="ConservativeToPrimitive_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
@@ -277,13 +275,13 @@ END INTERFACE
       TYPE(C_PTR) :: primitive
       REAL(c_prec),VALUE :: expansionFactor
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE ConservativeToPrimitive_cns2d_gpu_wrapper
   END INTERFACE
 
   INTERFACE
-    SUBROUTINE ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper(solution, &
+    SUBROUTINE ConservativeToEntropy_cns2d_gpu_wrapper(solution, &
                                                                         entropy,expansionFactor,N,nVar,nEl) &
-      BIND(c,name="ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper")
+      BIND(c,name="ConservativeToEntropy_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
       IMPLICIT NONE
@@ -291,16 +289,16 @@ END INTERFACE
       TYPE(C_PTR) :: entropy
       REAL(c_prec),VALUE :: expansionFactor
       INTEGER(C_INT),VALUE :: N,nVar,nEl
-    END SUBROUTINE ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper
+    END SUBROUTINE ConservativeToEntropy_cns2d_gpu_wrapper
   END INTERFACE
 
 CONTAINS
 
-  SUBROUTINE Init_CompressibleIdealGas2D(this,nvar,mesh,geometry,decomp)
+  SUBROUTINE Init_cns2d(this,nvar,mesh,geometry,decomp)
 #undef __FUNC__
 #define __FUNC__ "Init"
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(out) :: this
+    CLASS(cns2d),INTENT(out) :: this
     INTEGER,INTENT(in) :: nvar
     TYPE(Mesh2D),INTENT(in),TARGET :: mesh
     TYPE(SEMQuad),INTENT(in),TARGET :: geometry
@@ -318,8 +316,8 @@ CONTAINS
     this % decomp => decomp
     this % mesh => mesh
     this % geometry => geometry
-    this % RiemannFlux => LocalLaxFriedrichs
-    this % P2Flux => ConservativeFlux
+    this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
+    this % HyperbolicInteriorFlux => ConservativeFlux
     this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -404,21 +402,21 @@ CONTAINS
     CALL this % environmentals % SetUnits(2,"m1/s")
     CALL this % environmentals % SetDescription(2,"Linear momentum drag")
 
-  END SUBROUTINE Init_CompressibleIdealGas2D
+  END SUBROUTINE Init_cns2d
 
-  SUBROUTINE PrintType_CompressibleIdealGas2D(this)
+  SUBROUTINE PrintType_cns2d(this)
 #undef __FUNC__
 #define __FUNC__ "PrintType"
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D), INTENT(in) :: this
+    CLASS(cns2d), INTENT(in) :: this
 
     INFO("Compressible Ideal Gas (2D)")
 
-  END SUBROUTINE PrintType_CompressibleIdealGas2D
+  END SUBROUTINE PrintType_cns2d
 
-  SUBROUTINE Free_CompressibleIdealGas2D(this)
+  SUBROUTINE Free_cns2d(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
 
     CALL this % solution % Free()
     CALL this % prescribedSolution % Free()
@@ -437,13 +435,13 @@ CONTAINS
     CALL this % prescribedPrimitive % Free()
     CALL this % entropyVars % Free()
 
-  END SUBROUTINE Free_CompressibleIdealGas2D
+  END SUBROUTINE Free_cns2d
 
-  SUBROUTINE SetInitialConditions_CompressibleIdealGas2D(this, config)
+  SUBROUTINE SetInitialConditions_cns2d(this, config)
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     TYPE(SELFConfig), INTENT(inout) :: config
     ! Local
     LOGICAL :: setStaticState
@@ -561,8 +559,6 @@ CONTAINS
             "].parameters"
             CALL config % Get( TRIM(jsonKey), featureParams(1:4) )
 
-            PRINT*, "Adding thermal bubble with parameters : ", featureParams(1:4)
-
             CALL this % AddThermalBubble((/featureParams(1), featureParams(2)/), &
                                        featureParams(3), featureParams(4))
         
@@ -571,26 +567,25 @@ CONTAINS
     ENDDO
           
     CALL this % SetPrescribedSolution( )
-    
 
     CALL this % CheckMinMax()    
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
 
 
-  END SUBROUTINE SetInitialConditions_CompressibleIdealGas2D
+  END SUBROUTINE SetInitialConditions_cns2d
 
   SUBROUTINE SetFluxMethod_withInt(this,fluxMethod)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     INTEGER,INTENT(in) :: fluxMethod
 
     SELECT CASE (fluxMethod)
 
     CASE (SELF_NLLF_CIG2D)
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
     CASE DEFAULT
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
 
     END SELECT
 
@@ -598,7 +593,7 @@ CONTAINS
 
   SUBROUTINE SetFluxMethod_withChar(this,fluxMethod)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     CHARACTER(*),INTENT(in) :: fluxMethod
     ! Local
     CHARACTER(SELF_INTEGRATOR_LENGTH) :: upperCaseInt
@@ -608,52 +603,13 @@ CONTAINS
     SELECT CASE (TRIM(upperCaseInt))
 
     CASE ("NAIVELLF")
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
     CASE DEFAULT
-      this % RiemannFlux => LocalLaxFriedrichs
+      this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
 
     END SELECT
 
   END SUBROUTINE SetFluxMethod_withChar
-
-  SUBROUTINE SetStatic_CompressibleIdealGas2D(this)
-  !! Sets the default fluid state with uniform
-  !! density and temperature and no motion with
-  !! speed of sound as ~ 2 m/s
-    IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    ! Local
-    INTEGER :: i,j,iEl,iVar
-
-    CALL this % SetCv(Cv_static)
-    CALL this % SetCp(Cp_static)
-    CALL this % SetGasConstant(1.0_PREC)
-
-    DO iEl = 1,this % source % nElem
-      DO j = 0,this % source % interp % N
-        DO i = 0,this % source % interp % N
-          this % solution % interior % hostData(i,j,1,iEl) = 0.0_PREC ! rho*u
-          this % solution % interior % hostData(i,j,2,iEl) = 0.0_PREC ! rho*v
-          this % solution % interior % hostData(i,j,3,iEl) = rho_static ! rho
-          this % solution % interior % hostData(i,j,4,iEl) = rho_static*10.0_PREC ! rho*E
-        END DO
-      END DO
-    END DO
-
-    IF (this % gpuAccel) THEN
-      CALL this % solution % UpdateDevice()
-    END IF
-
-    CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
-
-    IF (this % gpuAccel) THEN
-      CALL this % solution % UpdateHost()
-      CALL this % primitive % UpdateHost()
-      CALL this % diagnostics % UpdateHost()
-    END IF
-
-  END SUBROUTINE SetStatic_CompressibleIdealGas2D
 
   SUBROUTINE AddThermalBubble(this,xc,R,Tmax)
     !! Adds a temperature anomaly to the fluid state
@@ -664,7 +620,7 @@ CONTAINS
     !! background pressure field remains undisturbed
     !!
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: xc(1:2)
     REAL(prec),INTENT(in) :: R
     REAL(prec),INTENT(in) :: Tmax
@@ -699,10 +655,14 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateDevice()
+      CALL this % primitive % UpdateDevice()
+      CALL this % diagnostics % UpdateDevice()
     END IF
 
     CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateHost()
@@ -712,18 +672,17 @@ CONTAINS
 
   END SUBROUTINE AddThermalBubble
 
-  SUBROUTINE SetStaticSTP_CompressibleIdealGas2D(this)
+  SUBROUTINE SetStatic_cns2d(this)
   !! Sets the default fluid state as "air" at STP with
   !! no motion
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
     CALL this % SetCv(Cv_static)
     CALL this % SetCp(Cp_static)
     CALL this % SetGasConstant(R_static)
-
     DO iEl = 1,this % source % nElem
       DO j = 0,this % source % interp % N
         DO i = 0,this % source % interp % N
@@ -740,7 +699,9 @@ CONTAINS
     END IF
 
     CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateHost()
@@ -748,9 +709,9 @@ CONTAINS
       CALL this % diagnostics % UpdateHost()
     END IF
 
-  END SUBROUTINE SetStaticSTP_CompressibleIdealGas2D
+  END SUBROUTINE SetStatic_cns2d
 
-  SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D(this,eqnChar)
+  SUBROUTINE SetVelocityFromChar_cns2d(this,eqnChar)
   !! Sets the fluid velocity field using the provided equation parser
   !! The momentum is then updated using the current fluid density field.
   !! From here, the PreTendency method is called to set other diagnostics
@@ -758,7 +719,7 @@ CONTAINS
   !! The total energy field is calculated using the internal energy (diagnosed from the
   !! in-situ temperature) and the new kinetic energy field.
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:2)
     ! Local
     INTEGER :: i,j,iEl,iVar
@@ -769,7 +730,10 @@ CONTAINS
     END DO
 
     CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
-    CALL this % primitive % BoundaryInterp(gpuAccel=.FALSE.)
+    IF (this % gpuAccel) THEN
+      CALL this % primitive % UpdateDevice()
+    ENDIF
+    CALL this % primitive % BoundaryInterp(this % gpuAccel)
 
     DO iEl = 1,this % source % nElem
       DO j = 0,this % source % interp % N
@@ -793,7 +757,9 @@ CONTAINS
     END IF
 
     CALL this % solution % BoundaryInterp(gpuAccel=this % gpuAccel)
-    CALL this % PreTendency()
+    CALL this % CalculateDiagnostics()
+    CALL this % ConservativeToPrimitive()
+    CALL this % ConservativeToEntropy()
 
     IF (this % gpuAccel) THEN
       CALL this % solution % UpdateHost()
@@ -801,15 +767,15 @@ CONTAINS
       CALL this % diagnostics % UpdateHost()
     END IF
 
-  END SUBROUTINE SetVelocityFromChar_CompressibleIdealGas2D
+  END SUBROUTINE SetVelocityFromChar_cns2d
 
-  SUBROUTINE SetGravityFromChar_CompressibleIdealGas2D(this,eqnChar)
+  SUBROUTINE SetGravityFromChar_cns2d(this,eqnChar)
     !! Sets the gravitational acceleration from an equation input as a character
     !! The interior points are set and then the strong form of the gradient is used
     !! to calculate the gradient. After, environmentals and environmentalsGradient
     !! fields are copied to device memory (if an accelerator device is present)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     CHARACTER(LEN=*),INTENT(in) :: eqnChar
 
     CALL this % environmentals % SetEquation(1,eqnChar)
@@ -825,13 +791,13 @@ CONTAINS
       CALL this % environmentalsGradient % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetGravityFromChar_CompressibleIdealGas2D
+  END SUBROUTINE SetGravityFromChar_cns2d
 
-  SUBROUTINE SetDragFromChar_CompressibleIdealGas2D(this,eqnChar)
+  SUBROUTINE SetDragFromChar_cns2d(this,eqnChar)
     !! Sets the momentum drag from an equation input as a character
     !! The interior points are set and then copied to the device
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     CHARACTER(LEN=*),INTENT(in) :: eqnChar
 
     CALL this % environmentals % SetEquation(2,eqnChar)
@@ -841,13 +807,13 @@ CONTAINS
       CALL this % environmentals % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetDragFromChar_CompressibleIdealGas2D
+  END SUBROUTINE SetDragFromChar_cns2d
 
-  SUBROUTINE SetDragFromConstant_CompressibleIdealGas2D(this,Cd)
+  SUBROUTINE SetDragFromConstant_cns2d(this,Cd)
     !! Sets the momentum drag from an equation input as a character
     !! The interior points are set and then copied to the device
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: Cd
     ! Local
     INTEGER :: i,j,iEl,iVar
@@ -866,11 +832,11 @@ CONTAINS
       CALL this % environmentals % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetDragFromConstant_CompressibleIdealGas2D
+  END SUBROUTINE SetDragFromConstant_cns2d
 
-  SUBROUTINE SetPrescribedSolutionFromChar_CompressibleIdealGas2D(this,eqnChar)
+  SUBROUTINE SetPrescribedSolutionFromChar_cns2d(this,eqnChar)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     CHARACTER(LEN=SELF_EQUATION_LENGTH),INTENT(in) :: eqnChar(1:this % prescribedSolution % nVar)
     ! Local
     INTEGER :: iVar
@@ -886,15 +852,15 @@ CONTAINS
       CALL this % prescribedSolution % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetPrescribedSolutionFromChar_CompressibleIdealGas2D
+  END SUBROUTINE SetPrescribedSolutionFromChar_cns2d
 
-  SUBROUTINE SetPrescribedSolutionFromSolution_CompressibleIdealGas2D(this)
+  SUBROUTINE SetPrescribedSolutionFromSolution_cns2d(this)
   !! Sets the prescribed solution using the current solution attribute
   !! This can be useful for situations where you want to set the
   !! boundary conditions and initial conditions to be identical
   !!
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
 
@@ -937,13 +903,13 @@ CONTAINS
       CALL this % prescribedDiagnostics % UpdateDevice()
     END IF
 
-  END SUBROUTINE SetPrescribedSolutionFromSolution_CompressibleIdealGas2D
+  END SUBROUTINE SetPrescribedSolutionFromSolution_cns2d
 
-  SUBROUTINE SetCp_CompressibleIdealGas2D(this,Cp)
+  SUBROUTINE SetCp_cns2d(this,Cp)
   !! Accessor routine to set the heat capacity at constant pressure
   !! Also updates the expansionFactor attribute when called.
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: Cp
 
     this % Cp = Cp
@@ -952,34 +918,34 @@ CONTAINS
     END IF
     this % expansionFactor = this % Cp/this % Cv
 
-  END SUBROUTINE SetCp_CompressibleIdealGas2D
+  END SUBROUTINE SetCp_cns2d
 
-  SUBROUTINE SetCv_CompressibleIdealGas2D(this,Cv)
+  SUBROUTINE SetCv_cns2d(this,Cv)
   !! Accessor routine to set the heat capacity at constant volume
   !! Also updates the expansionFactor attribute when called.
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: Cv
 
     this % Cv = Cv
     this % expansionFactor = this % Cp/this % Cv
 
-  END SUBROUTINE SetCv_CompressibleIdealGas2D
+  END SUBROUTINE SetCv_cns2d
 
-  SUBROUTINE SetGasConstant_CompressibleIdealGas2D(this,R)
+  SUBROUTINE SetGasConstant_cns2d(this,R)
   !! Accessor routine to set the ideal gas constant
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: R
 
     this % R = R
 
-  END SUBROUTINE SetGasConstant_CompressibleIdealGas2D
+  END SUBROUTINE SetGasConstant_cns2d
 
-  SUBROUTINE CalculateEntropy_CompressibleIdealGas2D(this)
+  SUBROUTINE CalculateEntropy_cns2d(this)
   !!
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,j,i
     REAL(prec) :: Jacobian,wi,wj
@@ -988,7 +954,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
       CALL this % solution % interior % UpdateHost()
-      CALL this % diagnostics % interior % UpdateHost()
+      CALL this % primitive % interior % UpdateHost()
     END IF
 
     entropy = 0.0_PREC
@@ -1006,7 +972,7 @@ CONTAINS
 
           rho = this % solution % interior % hostData(i,j,3,iEl)
           P = this % primitive % interior % hostData(i,j,4,iEl)
-
+        
           entropy = entropy + &
                     rho*(LOG(P) - this % expansionFactor*LOG(rho))/ &
                     (this % expansionFactor - 1.0_PREC)*wi*wj*Jacobian
@@ -1017,11 +983,11 @@ CONTAINS
 
     CALL this % decomp % GlobalReduce(entropy,this % entropy)
 
-  END SUBROUTINE CalculateEntropy_CompressibleIdealGas2D
+  END SUBROUTINE CalculateEntropy_cns2d
 
-  SUBROUTINE CheckMinMax_CompressibleIdealGas2D(this)
+  SUBROUTINE CheckMinMax_cns2d(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iVar
 
@@ -1063,14 +1029,14 @@ CONTAINS
 
     PRINT *, '---------------------'
 
-  END SUBROUTINE CheckMinMax_CompressibleIdealGas2D
+  END SUBROUTINE CheckMinMax_cns2d
 
-  SUBROUTINE SetMaxCFL_CompressibleIdealGas2D(this,cfl)
+  SUBROUTINE SetMaxCFL_cns2d(this,cfl)
     !! This method uses the model grid and sound speed
     !! to set the time step size so that the desired
     !! maximum cfl number fixed.
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: cfl
     REAL(prec) :: dxMin
     REAL(prec) :: diagMax(nDiagnostics)
@@ -1092,11 +1058,11 @@ CONTAINS
 
     PRINT *, "Adjusted time step size : ",this % dt
 
-  END SUBROUTINE SetMaxCFL_CompressibleIdealGas2D
+  END SUBROUTINE SetMaxCFL_cns2d
 
-  SUBROUTINE HydrostaticAdjustment_CompressibleIdealGas2D(this,tolerance)
+  SUBROUTINE HydrostaticAdjustment_cns2d(this,tolerance)
     !! This method can be used to adjust a compressible fluid
-    !! to hydrostatic equilibrium. On input, the CompressibleIdealGas2D
+    !! to hydrostatic equilibrium. On input, the cns2d
     !! object is expected to have the gravitational potential set to
     !! a non-zero field, the density and temperature fields are
     !! assumed uniform, and the velocity field corresponds to a motionless
@@ -1121,7 +1087,7 @@ CONTAINS
     !!
     !! After adjustment, the
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     REAL(prec),INTENT(in) :: tolerance
     ! Local
     INTEGER :: i
@@ -1171,9 +1137,9 @@ CONTAINS
     this % dt = currentDt
     this % t = currentTime
 
-  END SUBROUTINE HydrostaticAdjustment_CompressibleIdealGas2D
+  END SUBROUTINE HydrostaticAdjustment_cns2d
 
-  SUBROUTINE PreTendency_CompressibleIdealGas2D(this)
+  SUBROUTINE PreTendency_cns2d(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
     !! PreTendency is a template routine that is used to house any additional calculations
     !! that you want to execute at the beginning of the tendency calculation routine.
@@ -1183,13 +1149,13 @@ CONTAINS
     !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
     !!
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-
+    CLASS(cns2d),INTENT(inout) :: this
+ 
     CALL this % CalculateDiagnostics()
     CALL this % ConservativeToPrimitive()
     CALL this % ConservativeToEntropy()
 
-  END SUBROUTINE PreTendency_CompressibleIdealGas2D
+  END SUBROUTINE PreTendency_cns2d
 
   SUBROUTINE CalculateDiagnostics(this)
     !! Calculates
@@ -1282,14 +1248,14 @@ CONTAINS
     !!
 
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,j,i
     REAL(prec) :: rho,rhoU,rhoV,u,v,rhoE,rhoKE,p
 
     IF (this % gpuAccel) THEN
 
-      CALL CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL CalculateDiagnostics_cns2d_gpu_wrapper( &
         this % solution % interior % deviceData, &
         this % diagnostics % interior % deviceData, &
         this % expansionFactor, &
@@ -1338,14 +1304,14 @@ CONTAINS
 
   SUBROUTINE ConservativeToPrimitive(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,j,i
     REAL(prec) :: rhoU,rhoV,rho,u,v,rhoE,rhoKE,p
 
     IF (this % gpuAccel) THEN
 
-      CALL ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL ConservativeToPrimitive_cns2d_gpu_wrapper( &
         this % solution % interior % deviceData, &
         this % primitive % interior % deviceData, &
         this % expansionFactor, &
@@ -1381,14 +1347,14 @@ CONTAINS
 
   SUBROUTINE ConservativeToEntropy(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,j,i
     REAL(prec) :: rhoU,rhoV,rho,u,v,E,KE,p,s
 
     IF (this % gpuAccel) THEN
 
-      CALL ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL ConservativeToEntropy_cns2d_gpu_wrapper( &
         this % solution % interior % deviceData, &
         this % entropyVars % interior % deviceData, &
         this % expansionFactor, &
@@ -1424,10 +1390,10 @@ CONTAINS
 
   END SUBROUTINE ConservativeToEntropy
 
-  SUBROUTINE UpdateBoundary_CompressibleIdealGas2D(this)
+  SUBROUTINE UpdateBoundary_cns2d(this)
   !! Interpolates the solution to element boundaries and performs the sideExchange
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
 
     ! Interpolate velocity and required diagnostics to the element boundaries
     CALL this % solution % BoundaryInterp(this % gpuAccel)
@@ -1442,11 +1408,11 @@ CONTAINS
     CALL this % diagnostics % SideExchange(this % mesh,this % decomp,this % gpuAccel)
     CALL this % entropyVars % SideExchange(this % mesh,this % decomp,this % gpuAccel)
 
-  END SUBROUTINE UpdateBoundary_CompressibleIdealGas2D
+  END SUBROUTINE UpdateBoundary_cns2d
 
   SUBROUTINE SetSolutionBoundaryCondition(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2
@@ -1454,7 +1420,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL SetSolutionBoundaryCondition_cns2d_gpu_wrapper( &
         this % solution % boundary % deviceData, &
         this % solution % extBoundary % deviceData, &
         this % prescribedSolution % boundary % deviceData, &
@@ -1516,7 +1482,7 @@ CONTAINS
 
   SUBROUTINE SetPrimitiveBoundaryCondition(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2
@@ -1524,7 +1490,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
 
-      CALL SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL SetSolutionBoundaryCondition_cns2d_gpu_wrapper( &
       this % primitive % boundary % deviceData, &
       this % primitive % extBoundary % deviceData, &
       this % prescribedPrimitive % boundary % deviceData, &
@@ -1533,7 +1499,6 @@ CONTAINS
       this % primitive % interp % N, &
       this % primitive % nVar, &
       this % primitive % nElem)
-
 
     ELSE
 
@@ -1586,7 +1551,7 @@ CONTAINS
 
   SUBROUTINE SetDiagnosticsBoundaryCondition(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i,iVar
     INTEGER :: bcid,e2
@@ -1594,7 +1559,7 @@ CONTAINS
 
     IF (this % gpuAccel) THEN
       
-      CALL SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper( &
+      CALL SetDiagBoundaryCondition_cns2d_gpu_wrapper( &
       this % diagnostics % boundary % deviceData, &
       this % diagnostics % extBoundary % deviceData, &
       this % prescribedDiagnostics % boundary % deviceData, &
@@ -1603,6 +1568,7 @@ CONTAINS
       this % diagnostics % interp % N, &
       this % diagnostics % nVar, &
       this % diagnostics % nElem)
+      
 
     ELSE
 
@@ -1642,9 +1608,9 @@ CONTAINS
 
   END SUBROUTINE SetDiagnosticsBoundaryCondition
 
-  SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D(this)
+  SUBROUTINE SetBoundaryCondition_cns2d(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2
@@ -1656,24 +1622,26 @@ CONTAINS
 
     ! Compute the gradient of the solution using the Bassi-Rebay Method
     ! TO DO : IF (diffusiveVars == primitive)
-    CALL this % primitive % GradientBR( this % geometry, &
-                                       this % primitiveGradient, &
-                                       this % gpuAccel)
+    !CALL this % primitive % GradientBR( this % geometry, &
+    !                                   this % primitiveGradient, &
+    !                                   this % gpuAccel)
 
-    CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
-    CALL this % primitiveGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
-    CALL this % SetPrimitiveGradientBoundaryCondition()
-    CALL this % primitiveGradient % BassiRebaySides(this % gpuAccel)
+    !CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
+    !CALL this % primitiveGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+    !CALL this % SetPrimitiveGradientBoundaryCondition()
+    !CALL this % primitiveGradient % BassiRebaySides(this % gpuAccel)
 
-  END SUBROUTINE SetBoundaryCondition_CompressibleIdealGas2D
+  END SUBROUTINE SetBoundaryCondition_cns2d
 
   SUBROUTINE SetPrimitiveGradientBoundaryCondition(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: iEl,iSide,i
     INTEGER :: bcid,e2,ivar
     REAL(prec) :: u,v,nhat(1:2)
+
+    ! TO DO : GPU kernel !
 
     DO iEl = 1,this % solution % nElem
       DO iSide = 1,4
@@ -1698,16 +1666,16 @@ CONTAINS
 
   END SUBROUTINE SetPrimitiveGradientBoundaryCondition
 
-  SUBROUTINE Source_CompressibleIdealGas2D(this)
+  SUBROUTINE Source_cns2d(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,iEl,iVar
     REAL(prec) :: rhou,rhov,rho,gx,gy,Cd
 
     IF (this % gpuAccel) THEN
 
-      CALL Source_CompressibleIdealGas2D_gpu_wrapper(this % source % interior % deviceData, &
+      CALL Source_cns2d_gpu_wrapper(this % source % interior % deviceData, &
                                                      this % solution % interior % deviceData, &
                                                      this % environmentalsGradient % interior % deviceData, &
                                                      this % source % interp % N, &
@@ -1739,21 +1707,21 @@ CONTAINS
 
     END IF
 
-  END SUBROUTINE Source_CompressibleIdealGas2D
+  END SUBROUTINE Source_cns2d
 
   SUBROUTINE ConservativeFlux(this)
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,j,n,iEl,iVar
 
     IF (this % gpuAccel) THEN
-      CALL ConservativeFlux_gpu_wrapper(this % flux % interior % deviceData, &
-                                                              this % solution % interior % deviceData, &
-                                                              this % primitive % interior % deviceData, &
-                                                              this % solution % interp % N, &
-                                                              this % solution % nVar, &
-                                                              this % solution % nElem)
+      CALL ConservativeFlux_gpu_wrapper(this % flux % physical % deviceData, &
+                                        this % solution % interior % deviceData, &
+                                        this % primitive % interior % deviceData, &
+                                        this % solution % interp % N, &
+                                        this % solution % nVar, &
+                                        this % solution % nElem)
 
     ELSE
 
@@ -1860,45 +1828,46 @@ CONTAINS
     END IF
 
   END SUBROUTINE ConservativeFlux
-  SUBROUTINE FluxMethod_CompressibleIdealGas2D(this)
+
+  SUBROUTINE FluxMethod_cns2d(this)
     !! This overridden method serves as a wrapper that calls
-    !! the P2Flux procedure pointer. This design allows
+    !! the HyperbolicInteriorFlux procedure pointer. This design allows
     !! users to dynamically select the type of Riemann solver
     !! to use
   
       IMPLICIT NONE
-      CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+      CLASS(cns2d),INTENT(inout) :: this
   
       ! For hyperbolic terms
-      CALL this % P2Flux()
+      CALL this % HyperbolicInteriorFlux()
   
       ! For parabolic terms
       !CALL this % PIFlux()
   
-  END SUBROUTINE FluxMethod_CompressibleIdealGas2D
+  END SUBROUTINE FluxMethod_cns2d
 
-  SUBROUTINE RiemannSolver_CompressibleIdealGas2D(this)
+  SUBROUTINE RiemannSolver_cns2d(this)
   !! This overridden method serves as a wrapper that calls
-  !! the RiemannFlux procedure pointer. This design allows
+  !! the HyperbolicBoundaryFlux procedure pointer. This design allows
   !! users to dynamically select the type of Riemann solver
   !! to use
 
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
 
     ! For hyperbolic terms
-    CALL this % RiemannFlux()
+    CALL this % HyperbolicBoundaryFlux()
 
     ! For parabolic terms
     !CALL this % PBFlux() ! Parabolic Boundary Flux
 
-  END SUBROUTINE RiemannSolver_CompressibleIdealGas2D
+  END SUBROUTINE RiemannSolver_cns2d
 
   SUBROUTINE LocalLaxFriedrichs(this)
   !! Approximate Riemann Solver for the Compressible Navier-Stokes equations
   !! The Riemann Solver implemented here is the Local Lax-Friedrichs.
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+    CLASS(cns2d),INTENT(inout) :: this
     ! Local
     INTEGER :: i,iSide,iEl
     REAL(prec) :: nhat(1:2),nmag
@@ -1982,7 +1951,7 @@ CONTAINS
 
   END SUBROUTINE LocalLaxFriedrichs
 
-  SUBROUTINE PrimitiveGradientBRFlux_CompressibleIdealGas2D(this)
+  SUBROUTINE PrimitiveGradientBRFlux_cns2d(this)
   !! This method computes the gradient of the primitive variables
   !! and uses the primitive variables, their gradient, and the
   !! conservative variables (solution) to compute the
@@ -1993,7 +1962,7 @@ CONTAINS
   !! of the flux.
   !!
   IMPLICIT NONE
-   CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
+   CLASS(cns2d),INTENT(inout) :: this
    ! Local
    INTEGER :: iEl, iSide, i
    REAL(prec) :: u, v
@@ -2074,74 +2043,182 @@ CONTAINS
 
 !   ENDIF
   
-  END SUBROUTINE PrimitiveGradientBRFlux_CompressibleIdealGas2D
+  END SUBROUTINE PrimitiveGradientBRFlux_cns2d
 
-  SUBROUTINE WriteTecplot_CompressibleIdealGas2D(this,filename)
+  SUBROUTINE Write_cns2d(this,fileName)
+#undef __FUNC__
+#define __FUNC__ "Write_cns2d"
     IMPLICIT NONE
-    CLASS(CompressibleIdealGas2D),INTENT(inout) :: this
-    CHARACTER(*),INTENT(in),OPTIONAL :: filename
+    CLASS(cns2d),INTENT(inout) :: this
+    CHARACTER(*),OPTIONAL,INTENT(in) :: fileName
     ! Local
-    CHARACTER(8) :: zoneID
-    INTEGER :: fUnit
-    INTEGER :: iEl,i,j,iVar
-    CHARACTER(LEN=self_FileNameLength) :: tecFile
-    CHARACTER(LEN=self_TecplotHeaderLength) :: tecHeader
-    CHARACTER(LEN=self_FormatLength) :: fmat
+    INTEGER(HID_T) :: fileId
+    TYPE(Scalar2D) :: solution
+    TYPE(Vector2D) :: x
+    TYPE(Lagrange),TARGET :: interp
+    CHARACTER(LEN=self_FileNameLength) :: pickupFile
     CHARACTER(13) :: timeStampString
-    CHARACTER(5) :: rankString
 
     IF (PRESENT(filename)) THEN
-      tecFile = filename
+      pickupFile = filename
     ELSE
-      timeStampString = TimeStamp(this % t,'s')
-
-      IF (this % decomp % mpiEnabled) THEN
-        WRITE (rankString,'(I5.5)') this % decomp % rankId
-        tecFile = 'solution.'//rankString//'.'//timeStampString//'.tec'
-      ELSE
-        tecFile = 'solution.'//timeStampString//'.tec'
-      END IF
-
+      WRITE (timeStampString,'(I13.13)') this % ioIterate
+      pickupFile = 'solution.'//timeStampString//'.h5'
     END IF
 
     IF (this % gpuAccel) THEN
-      CALL this % solution % interior % UpdateHost()
+      CALL this % solution % UpdateHost()
+      CALL this % solutionGradient % UpdateHost()
     END IF
 
-    CALL this % solution % WriteTecplot(this % geometry, &
-                                        this % decomp, &
-                                        tecFile)
+    INFO("Writing pickup file : "//TRIM(pickupFile))
 
     IF (this % decomp % mpiEnabled) THEN
-      WRITE (rankString,'(I5.5)') this % decomp % rankId
-      tecFile = 'diagnostics.'//rankString//'.'//timeStampString//'.tec'
+
+      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId,this % decomp % mpiComm)
+
+      ! Write the interpolant to the file
+      INFO("Writing interpolant data to file")
+      CALL this % solution % interp % WriteHDF5( fileId )
+
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+      ! Write the model state to file
+      INFO("Writing control grid conservative variables to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid')
+      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      INFO("Writing control grid entropy variables to file")
+      CALL this % entropyVars % WriteHDF5( fileId, '/controlgrid/entropy', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      INFO("Writing control grid primitive variables to file")
+      CALL this % primitive % WriteHDF5( fileId, '/controlgrid/primitive', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! Write the geometry to file
+      INFO("Writing control grid geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! -- END : writing solution on control grid -- !
+
+      ! Interpolate the solution to a grid for plotting results
+      ! Create an interpolant for the uniform grid
+      CALL interp % Init(this % solution % interp % M, &
+                          this % solution % interp % targetNodeType, &
+                          this % solution % interp % N, &
+                          this % solution % interp % controlNodeType)
+
+      CALL solution % Init(interp, &
+                            this % solution % nVar,this % solution % nElem)
+
+      CALL x % Init(interp,1,this % solution % nElem)
+
+      ! Map the mesh positions to the target grid
+      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+      ! Map the solution to the target grid
+      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+      ! Write the model state to file
+      CALL CreateGroup_HDF5(fileId,'/targetgrid')
+      CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+
+      ! Map the entropy variables to the target grid
+      CALL this % entropyVars % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5( fileId, '/targetgrid/entropy', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! Map the entropy variables to the target grid
+      CALL this % primitive % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5( fileId, '/targetgrid/primitive', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      ! Write the geometry to file
+      CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
+      CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
+      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+
+      CALL Close_HDF5(fileId)
+
     ELSE
-      tecFile = 'diagnostics.'//timeStampString//'.tec'
+
+      CALL Open_HDF5(pickupFile,H5F_ACC_TRUNC_F,fileId)
+
+      ! Write the interpolant to the file
+      INFO("Writing interpolant data to file")
+      CALL this % solution % interp % WriteHDF5( fileId )
+
+      ! In this section, we write the solution and geometry on the control (quadrature) grid
+      ! which can be used for model pickup runs or post-processing
+
+      ! Write the model state to file
+      INFO("Writing control grid conservative to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid')
+      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution' )
+
+      INFO("Writing control grid entropy variables to file")
+      CALL this % entropyVars % WriteHDF5( fileId, '/controlgrid/entropy' )
+
+      INFO("Writing control grid primitive variables to file")
+      CALL this % primitive % WriteHDF5( fileId, '/controlgrid/primitive' )
+
+      ! Write the geometry to file
+      INFO("Writing control grid  geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
+      CALL this % geometry % x % WriteHDF5(fileId,'/controlgrid/geometry/x')
+      ! -- END : writing solution on control grid -- !
+
+      ! Interpolate the solution to a grid for plotting results
+      ! Create an interpolant for the uniform grid
+      CALL interp % Init(this % solution % interp % M, &
+                          this % solution % interp % targetNodeType, &
+                          this % solution % interp % N, &
+                          this % solution % interp % controlNodeType)
+
+      CALL solution % Init(interp, &
+                            this % solution % nVar,this % solution % nElem)
+
+      CALL x % Init(interp,1,this % solution % nElem)
+
+      ! Map the mesh positions to the target grid
+      CALL this % geometry % x % GridInterp(x,gpuAccel=.FALSE.)
+
+      ! Map the solution to the target grid
+      CALL this % solution % GridInterp(solution,gpuAccel=.FALSE.)
+
+      ! Write the model state to file
+      INFO("Writing target grid conservative variables to file")
+      CALL CreateGroup_HDF5(fileId,'/targetgrid')
+      CALL solution % WriteHDF5(fileId, '/targetgrid/solution')
+
+      INFO("Writing target grid entropy variables to file")
+      CALL this % entropyVars % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5(fileId, '/targetgrid/entropy')
+
+      INFO("Writing target grid primitive variables to file")
+      CALL this % primitive % GridInterp(solution,gpuAccel=.FALSE.)
+      CALL solution % WriteHDF5(fileId, '/targetgrid/primitive')
+
+      ! Write the geometry to file
+      INFO("Writing target grid geometry to file")
+      CALL CreateGroup_HDF5(fileId,'/targetgrid/geometry')
+      CALL x % WriteHDF5(fileId,'/targetgrid/geometry/x')
+
+      CALL Close_HDF5(fileId)
+
     END IF
 
-    IF (this % gpuAccel) THEN
-      CALL this % diagnostics % interior % UpdateHost()
-    END IF
+    CALL x % Free()
+    CALL solution % Free()
+    CALL interp % Free()
 
-    CALL this % diagnostics % WriteTecplot(this % geometry, &
-                                           this % decomp, &
-                                           tecFile)
+  END SUBROUTINE Write_cns2d
+ 
 
-    IF (this % decomp % mpiEnabled) THEN
-      WRITE (rankString,'(I5.5)') this % decomp % rankId
-      tecFile = 'primitive.'//rankString//'.'//timeStampString//'.tec'
-    ELSE
-      tecFile = 'primitive.'//timeStampString//'.tec'
-    END IF
-
-    IF (this % gpuAccel) THEN
-      CALL this % primitive % interior % UpdateHost()
-    END IF
-
-    CALL this % primitive % WriteTecplot(this % geometry, &
-                                         this % decomp, &
-                                         tecFile)
-
-  END SUBROUTINE WriteTecplot_CompressibleIdealGas2D
-
-END MODULE SELF_CompressibleIdealGas2D
+END MODULE SELF_cns2d

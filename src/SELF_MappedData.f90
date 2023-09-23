@@ -13,6 +13,8 @@ MODULE SELF_MappedData
   USE SELF_Data
   USE SELF_Mesh
   USE SELF_Geometry
+  USE SELF_HDF5
+  USE HDF5
 
   USE FEQParse
 
@@ -100,6 +102,7 @@ MODULE SELF_MappedData
     PROCEDURE,PRIVATE :: ApplyFlip => ApplyFlip_MappedVector2D
 
     PROCEDURE,PUBLIC :: SetInteriorFromEquation => SetInteriorFromEquation_MappedVector2D
+
 
   END TYPE MappedVector2D
 
@@ -1415,26 +1418,26 @@ CONTAINS
 
     OPEN( UNIT=NEWUNIT(fUnit), &
       FILE= TRIM(filename), &
-      FORM='formatted', &
-      STATUS='replace')
+      FORM="formatted", &
+      STATUS="replace")
 
     tecHeader = 'VARIABLES = "X", "Y"'
     DO iVar = 1, this % nVar
-      tecHeader = TRIM(tecHeader)//', "'//TRIM(this % meta(iVar) % name)//'"'
+      tecHeader = TRIM(tecHeader)//'", "//TRIM(this % meta(iVar) % name)//"'
     ENDDO
 
     WRITE(fUnit,*) TRIM(tecHeader) 
 
     ! Create format statement
     WRITE(fmat,*) this % nvar+2
-    fmat = '('//TRIM(fmat)//'(ES16.7E3,1x))'
+    fmat = "("//TRIM(fmat)//"(ES16.7E3,1x))"
 
     DO iEl = 1, this % nElem
 
       eid = decomp % offSetElem % hostData( decomp % rankId ) + iEl
-      WRITE(zoneID,'(I8.8)') eid 
-      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I=',this % interp % M+1,&
-                                                 ', J=',this % interp % M+1
+      WRITE(zoneID,"(I8.8)") eid 
+      WRITE(fUnit,*) 'ZONE T="el'//trim(zoneID)//'", I="',this % interp % M+1,&
+                                                 '", J="',this % interp % M+1
 
       DO j = 0, this % interp % M
         DO i = 0, this % interp % M

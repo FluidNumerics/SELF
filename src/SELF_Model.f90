@@ -99,6 +99,8 @@ MODULE SELF_Model
 
   CONTAINS
 
+    PROCEDURE :: IncrementIOCounter
+
     PROCEDURE :: PrintType => PrintType_Model
 
     PROCEDURE :: SetInitialConditions => SetInitialConditions_Model
@@ -243,6 +245,15 @@ MODULE SELF_Model
   END INTERFACE
 
 CONTAINS
+
+SUBROUTINE IncrementIOCounter(this)
+  IMPLICIT NONE
+  CLASS(Model), intent(inout) :: this
+
+  ! Increment the ioIterate
+  this % ioIterate = this % ioIterate + 1
+
+END SUBROUTINE IncrementIOCounter
 
 FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
   !! This method is used to return the integer flag from a char for boundary conditions
@@ -505,6 +516,8 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
   END SUBROUTINE CalculateEntropy_Model
 
   SUBROUTINE ReportEntropy_Model(this)
+#undef __FUNC__
+#define __FUNC__ "ReportEntropy"
   !! Base method for reporting the entropy of a model
   !! to stdout. Only override this procedure if additional
   !! reporting is needed. Alternatively, if you think
@@ -527,6 +540,7 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
 
       ! Write the output to STDOUT
       OPEN (OUTPUT_UNIT,ENCODING='utf-8')
+      WRITE(OUTPUT_UNIT,'("INFO : [",A,"] : ")',ADVANCE='no')__FUNC__
       str = ucs2_'t\u1D62 ='//TRIM(modelTime)
       WRITE (OUTPUT_UNIT,'(A)',ADVANCE='no') str
       str = ucs2_'  |  e\u1D62 ='//TRIM(entropy)
@@ -575,7 +589,7 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
         CALL this % timeIntegrator(tNext)
         this % t = tNext
         CALL this % WriteModel()
-        CALL this % WriteTecplot()
+        CALL this % IncrementIOCounter()
         CALL this % CalculateEntropy()
         CALL this % ReportEntropy()
       END DO

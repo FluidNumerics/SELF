@@ -181,5 +181,8 @@ ENV PATH=$PATH:/opt/self/bin:/opt/self/test
 # && rm -rf /var/lib/apt/lists/*
 
 
-ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c"]
+# Set the entrypoint to the main self program with the input file set to /self/input.json
+ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c", "/opt/self/bin/self -i /self/input.json"]
+
+WORKDIR /self
 

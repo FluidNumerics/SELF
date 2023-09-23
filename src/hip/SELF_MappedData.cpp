@@ -1,62 +1,6 @@
 #include <hip/hip_runtime.h>
 #include "SELF_HIP_Macros.h"
 
-/*
-// Template
-__global__ void Template_{1D|2D|3D}_gpu( , int N, int nVar){
-
-  size_t iVar = blockIdx.x;
-  size_t iEl = blockIdx.y;
-  size_t i = threadIdx.x;
-  size_t j = threadIdx.y;
-  size_t k = threadIdx.z;
-
-
-  // How to access scalars 
-  f[SC_1D_INDEX(i,iVar,iEl,N,nVar)];
-  f[SC_2D_INDEX(i,j,iVar,iEl,N,nVar)];
-  f[SC_3D_INDEX(i,j,k,iVar,iEl,N,nVar)];
-
-  // How to access vectors (2d)
-  f[VE_2D_INDEX(1,i,j,iVar,iEl,N,nVar)];
-  f[VE_2D_INDEX(2,i,j,iVar,iEl,N,nVar)];
-
-
-  // How to access vectors (3d)
-  f[VE_3D_INDEX(1,i,j,k,iVar,iEl,N,nVar)];
-  f[VE_3D_INDEX(2,i,j,k,iVar,iEl,N,nVar)];
-  f[VE_3D_INDEX(3,i,j,k,iVar,iEl,N,nVar)];
-
-  // How to access tensors (2d)
-  f[TE_2D_INDEX(1,1,i,j,iVar,iEl,N,nVar)];
-  f[TE_2D_INDEX(2,1,i,j,iVar,iEl,N,nVar)];
-  f[TE_2D_INDEX(1,2,i,j,iVar,iEl,N,nVar)];
-  f[TE_2D_INDEX(2,2,i,j,iVar,iEl,N,nVar)];
-
-
-  // How to access tensors (3d)
-  f[TE_3D_INDEX(1,1,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(2,1,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(3,1,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(1,2,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(2,2,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(3,2,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(1,3,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(2,3,i,j,k,iVar,iEl,N,nVar)];
-  f[TE_3D_INDEX(3,3,i,j,k,iVar,iEl,N,nVar)];
-
-}
-
-extern "C"
-{
-  void Template_{1D|2D|3D}_gpu_wrapper(int N, int nVar)
-  {
-	  hipLaunchKernelGGL((Template_{1D|2D|3D}_gpu), dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0,  N, M, nVar);
-  } 
-}
-
-*/
-
 // JacobianWeight_MappedScalar1D_gpu
 __global__ void JacobianWeight_MappedScalar1D_gpu(real *scalar, real *dxds, int N, int nVar){
 
@@ -73,6 +17,7 @@ extern "C"
   void JacobianWeight_MappedScalar1D_gpu_wrapper(real **scalar, real **dxds, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedScalar1D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,1,1), 0, 0>>>(*scalar, *dxds, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -164,6 +109,7 @@ extern "C"
   void GradientBR_MappedScalar2D_gpu_wrapper(real **scalar, real **avgBoundary, real **dsdx, real **jacobian, real **nHat, real **nScale, real **gradF, real **dgMatrix, real **bMatrix, real **qWeights, int N, int nVar, int nEl)
   {
     GradientBR_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *avgBoundary, *dsdx, *jacobian, *nHat, *nScale, *gradF, *dgMatrix, *bMatrix, *qWeights, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -203,6 +149,7 @@ extern "C"
   void GradientSF_MappedScalar2D_gpu_wrapper(real **scalar, real **dsdx, real **jacobian, real **gradF, real **dMatrix, int N, int nVar, int nEl)
   {
     GradientSF_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *dsdx, *jacobian, *gradF, *dMatrix, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -223,6 +170,7 @@ extern "C"
   void JacobianWeight_MappedScalar2D_gpu_wrapper(real **scalar, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -244,6 +192,7 @@ extern "C"
   void JacobianWeight_MappedScalar3D_gpu_wrapper(real **scalar, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -273,6 +222,7 @@ extern "C"
   void ContravariantWeight_MappedScalar2D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantWeight_MappedScalar2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -302,6 +252,7 @@ extern "C"
   void ContravariantWeightBoundary_MappedScalar2D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantWeightBoundary_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -348,6 +299,7 @@ extern "C"
   void ContravariantWeight_MappedScalar3D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantWeight_MappedScalar3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -394,6 +346,7 @@ extern "C"
   void ContravariantWeightBoundary_MappedScalar3D_gpu_wrapper(real **scalar, real **workTensor, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantWeightBoundary_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*scalar, *workTensor, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -422,6 +375,7 @@ extern "C"
   void ContravariantProjection_MappedVector2D_gpu_wrapper(real **vector, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantProjection_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -434,7 +388,7 @@ __global__ void ContravariantProjection_MappedP2Vector2D_gpu(real *vector, real 
   size_t j = threadIdx.y;
 
 
-  for( int n = 0; n < N; n++){
+  for( int n = 0; n < N+1; n++){
 
     real Fx = physical[P2PVE_2D_INDEX(1,1,n,i,j,iVar,iEl,N,nVar)];
     real Fy = physical[P2PVE_2D_INDEX(2,1,n,i,j,iVar,iEl,N,nVar)];
@@ -462,6 +416,7 @@ extern "C"
   void ContravariantProjection_MappedP2Vector2D_gpu_wrapper(real **vector, real **physical, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantProjection_MappedP2Vector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *physical, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -483,6 +438,7 @@ extern "C"
   void ContravariantProjectionBoundary_MappedVector2D_gpu_wrapper(real **physVector, real **boundaryNormal, real **nhat, int N, int nVar, int nEl)
   {
     ContravariantProjectionBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*physVector, *boundaryNormal, *nhat, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -506,6 +462,7 @@ extern "C"
   void JacobianWeight_MappedVector2D_gpu_wrapper(real **vector, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*vector, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -541,6 +498,7 @@ extern "C"
   void ContravariantProjection_MappedVector3D_gpu_wrapper(real **physVector, real **compVector, real **dsdx, int N, int nVar, int nEl)
   {
     ContravariantProjection_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*physVector, *compVector, *dsdx, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -566,6 +524,7 @@ extern "C"
   void ContravariantProjectionBoundary_MappedVector3D_gpu_wrapper(real **physVector, real **boundaryNormal, real **nHat, int N, int nVar, int nEl)
   {
     ContravariantProjectionBoundary_MappedVector3D_gpu<<<dim3(6,nVar,nEl), dim3(N+1,N+1,1), 0, 0>>>(*physVector, *boundaryNormal, *nHat, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   } 
 }
 
@@ -593,6 +552,7 @@ extern "C"
   void JacobianWeight_MappedVector3D_gpu_wrapper(real **vector, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*vector, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -622,6 +582,7 @@ extern "C"
   void JacobianWeight_MappedTensor2D_gpu_wrapper(real **tensor, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedTensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -667,6 +628,7 @@ extern "C"
   void JacobianWeight_MappedTensor3D_gpu_wrapper(real **tensor, real **jacobian, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedTensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *jacobian, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -687,6 +649,7 @@ extern "C"
   void CalculateCurl_MappedTensor2D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedTensor2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*dfdx, *curlf, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -714,6 +677,7 @@ extern "C"
   void CalculateCurl_MappedTensor3D_gpu_wrapper(real **dfdx, real **curlf, int N, int nVar, int nEl)
   {
     JacobianWeight_MappedTensor3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*dfdx, *curlf, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -738,6 +702,7 @@ extern "C"
   void MapToScalar_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
     MapToScalar_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*scalar, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -761,6 +726,7 @@ extern "C"
   void MapToScalarBoundary_MappedVector2D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
     MapToScalarBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*scalar, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -788,6 +754,7 @@ extern "C"
   void MapToTensor_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
     MapToTensor_MappedVector2D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,1), 0, 0>>>(*tensor, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -815,6 +782,7 @@ extern "C"
   void MapToTensorBoundary_MappedVector2D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
     MapToTensorBoundary_MappedVector2D_gpu<<<dim3(4,nVar,nEl), dim3(N+1,1,1), 0, 0>>>(*tensor, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -842,6 +810,7 @@ extern "C"
   void MapToScalar_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
     MapToScalar_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*scalar, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -869,6 +838,7 @@ extern "C"
   void MapToScalarBoundary_MappedVector3D_gpu_wrapper(real **scalar, real **vector, int N, int nVar, int nEl)
   {
     MapToScalarBoundary_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*scalar, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -908,6 +878,7 @@ extern "C"
   void MapToTensor_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
     MapToTensor_MappedVector3D_gpu<<<dim3(nVar,nEl,1), dim3(N+1,N+1,N+1), 0, 0>>>(*tensor, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -947,6 +918,7 @@ extern "C"
   void MapToTensorBoundary_MappedVector3D_gpu_wrapper(real **tensor, real **vector, int N, int nVar, int nEl)
   {
     MapToTensorBoundary_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*tensor, *vector, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
@@ -982,7 +954,10 @@ extern "C"
 {
   void SideExchange_MappedScalar2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
-    SideExchange_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    dim3 nblocks(4,nEl,1);
+    dim3 nthreads(N+1,nVar,1);
+    SideExchange_MappedScalar2D_gpu<<<nblocks,nthreads>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1022,6 +997,7 @@ extern "C"
   void SideExchange_MappedVector2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     SideExchange_MappedVector2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1065,6 +1041,7 @@ extern "C"
   void SideExchange_MappedTensor2D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     SideExchange_MappedTensor2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1119,6 +1096,7 @@ extern "C"
   void SideExchange_MappedScalar3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     SideExchange_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1183,6 +1161,7 @@ extern "C"
   void SideExchange_MappedVector3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     SideExchange_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1274,6 +1253,7 @@ extern "C"
   void SideExchange_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int **sideInfo, int **elemToRank, int rankId, int offset, int N, int nVar, int nEl)
   {
     SideExchange_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, *sideInfo, *elemToRank, rankId, offset, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1295,6 +1275,7 @@ extern "C"
   void BassiRebaySides_MappedScalar2D_gpu_wrapper(real **avgBoundary, real **boundary, real **extBoundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedScalar2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*avgBoundary, *boundary, *extBoundary, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1318,6 +1299,7 @@ extern "C"
   void BassiRebaySides_MappedVector2D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedVector2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1345,6 +1327,7 @@ extern "C"
   void BassiRebaySides_MappedTensor2D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedTensor2D_gpu<<<dim3(4,nEl,1), dim3(N+1,nVar,1), 0, 0>>>(*extBoundary, *boundary, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1367,6 +1350,7 @@ extern "C"
   void BassiRebaySides_MappedScalar3D_gpu_wrapper(real **avgBoundary, real **boundary, real **extBoundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedScalar3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*avgBoundary, *boundary, *extBoundary, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1393,6 +1377,7 @@ extern "C"
   void BassiRebaySides_MappedVector3D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedVector3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1431,6 +1416,7 @@ extern "C"
   void BassiRebaySides_MappedTensor3D_gpu_wrapper(real **extBoundary, real **boundary, int N, int nVar, int nEl)
   {
     BassiRebaySides_MappedTensor3D_gpu<<<dim3(6,nEl,1), dim3(N+1,N+1,nVar), 0, 0>>>(*extBoundary, *boundary, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1469,6 +1455,7 @@ extern "C"
   void ApplyFlip_MappedScalar2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedScalar2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1514,6 +1501,7 @@ extern "C"
   void ApplyFlip_MappedVector2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedVector2D_gpu<<<dim3(nVar,4,nEl), dim3(N+1,1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1555,6 +1543,7 @@ extern "C"
   void ApplyFlip_MappedTensor2D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedTensor2D_gpu<<<dim3(nVar,4,nEl), dim3(2,2,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1610,6 +1599,7 @@ extern "C"
   void ApplyFlip_MappedScalar3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedScalar3D_gpu<<<dim3(nVar,6,nEl), dim3(N+1,N+1,1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1667,6 +1657,7 @@ extern "C"
   void ApplyFlip_MappedVector3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedVector3D_gpu<<<dim3(nVar,6,nEl), dim3(3,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }
@@ -1726,6 +1717,7 @@ extern "C"
   void ApplyFlip_MappedTensor3D_gpu_wrapper(real **extBoundary, int **sideInfo, int **elemToRank, int rankId, int N, int nVar, int nEl)
   {
     ApplyFlip_MappedTensor3D_gpu<<<dim3(nVar,6,nEl), dim3(9,N+1,N+1), 0, 0>>>(*extBoundary, *sideInfo, *elemToRank, rankId, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 
 }

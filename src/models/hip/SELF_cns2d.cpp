@@ -2,7 +2,7 @@
 #include "SELF_HIP_Macros.h"
 #include <cstdio>
 
-__global__ void Source_CompressibleIdealGas2D_gpu(real *source, real *solution, real *environmentalsGradient, int N, int nVar)
+__global__ void Source_cns2d_gpu(real *source, real *solution, real *environmentalsGradient, int N, int nVar)
 {
 
   // Get the array indices from the GPU thread IDs
@@ -25,13 +25,14 @@ __global__ void Source_CompressibleIdealGas2D_gpu(real *source, real *solution, 
 
 extern "C"
 {
-  void Source_CompressibleIdealGas2D_gpu_wrapper(real **source, real **solution, real **environmentalsGradient, int N, int nVar, int nEl)
+  void Source_cns2d_gpu_wrapper(real **source, real **solution, real **environmentalsGradient, int N, int nVar, int nEl)
   {
-    Source_CompressibleIdealGas2D_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*source, *solution, *environmentalsGradient, N, nVar);
+    Source_cns2d_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*source, *solution, *environmentalsGradient, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *solution, real *primitive, int N, int nVar)
+__global__ void ConservativeFlux_cns2d_gpu(real *flux, real *solution, real *primitive, int N, int nVar)
 {
 
   // Get the array indices from the GPU thread IDs
@@ -64,13 +65,13 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
   if (iVar == 0)
   { // rho*u
 
-    for (int n = 0; n <= N; n++)
+    for (int n = 0; n <= N; n++) 
     {
       // rho*u*u + p
       flux[P2PVE_2D_INDEX(1, 1, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(n, j, 0, iEl, N, nVar)] *       // u
               solution[SC_2D_INDEX(n, j, iVar, iEl, N, nVar)] + // rho*u
-          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)]; // pressure
 
       // rho*u*v
       flux[P2PVE_2D_INDEX(2, 1, n, i, j, iVar, iEl, N, nVar)] =
@@ -81,7 +82,7 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
       flux[P2PVE_2D_INDEX(1, 2, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(i, n, 0, iEl, N, nVar)] *       // u
               solution[SC_2D_INDEX(i, n, iVar, iEl, N, nVar)] + // rho*u
-          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(i, n, 3, iEl, N, nVar)]; // pressure
 
       // rho*u*v
       flux[P2PVE_2D_INDEX(2, 2, n, i, j, iVar, iEl, N, nVar)] =
@@ -102,7 +103,7 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
       flux[P2PVE_2D_INDEX(2, 1, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(n, j, 1, iEl, N, nVar)] *       // v
               solution[SC_2D_INDEX(n, j, iVar, iEl, N, nVar)] + // rho*v
-          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(n, j, 3, iEl, N, nVar)]; //pressure
 
       // rho*v*u
       flux[P2PVE_2D_INDEX(1, 2, n, i, j, iVar, iEl, N, nVar)] =
@@ -113,7 +114,7 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
       flux[P2PVE_2D_INDEX(2, 2, n, i, j, iVar, iEl, N, nVar)] =
           primitive[SC_2D_INDEX(i, n, 1, iEl, N, nVar)] *       // v
               solution[SC_2D_INDEX(i, n, iVar, iEl, N, nVar)] + // rho*v
-          primitive[SC_2D_INDEX(i, n, 3, iEl, N, nVar)];
+          primitive[SC_2D_INDEX(i, n, 3, iEl, N, nVar)]; // pressure
     }
   }
   else if (iVar == 2)
@@ -163,13 +164,14 @@ __global__ void ConservativeFlux_CompressibleIdealGas2D_gpu(real *flux, real *so
 
 extern "C"
 {
-  void ConservativeFlux_CompressibleIdealGas2D_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
+  void ConservativeFlux_cns2d_gpu_wrapper(real **flux, real **solution, real **primitive, int N, int nVar, int nEl)
   {
-    ConservativeFlux_CompressibleIdealGas2D_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
+    ConservativeFlux_cns2d_gpu<<<dim3(nVar, nEl, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*flux, *solution, *primitive, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void LocalLaxFriedrichs_CompressibleIdealGas2D_gpu(real *flux,
+__global__ void LocalLaxFriedrichs_cns2d_gpu(real *flux,
                                                     real *solution,
                                                     real *extSolution,
                                                     real *primitive,
@@ -256,7 +258,7 @@ __global__ void LocalLaxFriedrichs_CompressibleIdealGas2D_gpu(real *flux,
 
 extern "C"
 {
-  void LocalLaxFriedrichs_CompressibleIdealGas2D_gpu_wrapper(real **flux,
+  void LocalLaxFriedrichs_cns2d_gpu_wrapper(real **flux,
                                                    real **solution,
                                                    real **extSolution,
                                                    real **primitive,
@@ -270,11 +272,12 @@ extern "C"
                                                    int nDiag,
                                                    int nEl)
   {
-    LocalLaxFriedrichs_CompressibleIdealGas2D_gpu<<<dim3(nVar, 4, nEl), dim3(N + 1, 1, 1), 0, 0>>>(*flux, *solution, *extSolution, *primitive, *extPrimitive, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
+    LocalLaxFriedrichs_cns2d_gpu<<<dim3(nVar, 4, nEl), dim3(N + 1, 1, 1), 0, 0>>>(*flux, *solution, *extSolution, *primitive, *extPrimitive, *diagnostics, *extDiagnostics, *nHat, *nScale, N, nVar, nDiag);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu(real *solution,
+__global__ void SetSolutionBoundaryCondition_cns2d_gpu(real *solution,
                                                                 real *extSolution,
                                                                 real *prescribedSolution,
                                                                 real *nHat,
@@ -323,27 +326,27 @@ __global__ void SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu(real *so
 
 extern "C"
 {
-  void SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(real **solution,
+  void SetSolutionBoundaryCondition_cns2d_gpu_wrapper(real **solution,
                                                                real **extSolution,
                                                                real **prescribedSolution,
                                                                real **nHat,
                                                                int **sideInfo,
                                                                int N,
                                                                int nVar,
-                                                               int nDiag,
                                                                int nEl)
   {
-    SetSolutionBoundaryCondition_CompressibleIdealGas2D_gpu<<<dim3(4, nEl, 1), dim3(N + 1, 1, 1), 0, 0>>>(*solution,
+    SetSolutionBoundaryCondition_cns2d_gpu<<<dim3(4, nEl, 1), dim3(N + 1, 1, 1), 0, 0>>>(*solution,
                                                                                                   *extSolution,
                                                                                                   *prescribedSolution,
                                                                                                   *nHat,
                                                                                                   *sideInfo,
                                                                                                   N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
 
-__global__ void SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu(real *diagnostics, real *extDiagnostics, real *prescribedDiagnostics, int *sideInfo, int N, int nDiag)
+__global__ void SetDiagBoundaryCondition_cns2d_gpu(real *diagnostics, real *extDiagnostics, real *prescribedDiagnostics, int *sideInfo, int N, int nDiag)
 {
 
   // Get the array indices from the GPU thread IDs
@@ -373,26 +376,26 @@ __global__ void SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu(real *diagno
 
 extern "C"
 {
-  void SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu_wrapper(real **diagnostics,
+  void SetDiagBoundaryCondition_cns2d_gpu_wrapper(real **diagnostics,
                                                                real **extDiagnostics,
                                                                real **prescribedDiagnostics,
                                                                real **nHat,
                                                                int **sideInfo,
                                                                int N,
-                                                               int nVar,
                                                                int nDiag,
                                                                int nEl)
   {
 
-    SetDiagBoundaryCondition_CompressibleIdealGas2D_gpu<<<dim3(4, nEl, 1), dim3(N + 1, nDiag, 1), 0, 0>>>(*diagnostics,
+    SetDiagBoundaryCondition_cns2d_gpu<<<dim3(4, nEl, 1), dim3(N + 1, nDiag, 1), 0, 0>>>(*diagnostics,
                                                                                                                  *extDiagnostics,
                                                                                                                  *prescribedDiagnostics,
                                                                                                                  *sideInfo,
                                                                                                                  N, nDiag);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void CalculateDiagnostics_CompressibleIdealGas2D_gpu(real *solution,
+__global__ void CalculateDiagnostics_cns2d_gpu(real *solution,
                                                                 real *diagnostics,
                                                                 real expansionFactor,
                                                                 real R,
@@ -431,7 +434,7 @@ __global__ void CalculateDiagnostics_CompressibleIdealGas2D_gpu(real *solution,
 
 extern "C"
 {
-  void CalculateDiagnostics_CompressibleIdealGas2D_gpu_wrapper(real **solution,
+  void CalculateDiagnostics_cns2d_gpu_wrapper(real **solution,
                                                                real **diagnostics,
                                                                real expansionFactor,
                                                                real R,
@@ -440,11 +443,12 @@ extern "C"
                                                                int nDiag,
                                                                int nEl)
   {
-    CalculateDiagnostics_CompressibleIdealGas2D_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *diagnostics, expansionFactor, R, N, nVar, nDiag);
+    CalculateDiagnostics_cns2d_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *diagnostics, expansionFactor, R, N, nVar, nDiag);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void ConservativeToPrimitive_CompressibleIdealGas2D_gpu(real *solution,
+__global__ void ConservativeToPrimitive_cns2d_gpu(real *solution,
                                                                    real *primitive,
                                                                    real expansionFactor,
                                                                    int N,
@@ -470,18 +474,19 @@ __global__ void ConservativeToPrimitive_CompressibleIdealGas2D_gpu(real *solutio
 
 extern "C"
 {
-  void ConservativeToPrimitive_CompressibleIdealGas2D_gpu_wrapper(real **solution,
+  void ConservativeToPrimitive_cns2d_gpu_wrapper(real **solution,
                                                                   real **primitive,
                                                                   real expansionFactor,
                                                                   int N,
                                                                   int nVar,
                                                                   int nEl)
   {
-    ConservativeToPrimitive_CompressibleIdealGas2D_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *primitive, expansionFactor, N, nVar);
+    ConservativeToPrimitive_cns2d_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *primitive, expansionFactor, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
 
-__global__ void ConservativeToEntropy_CompressibleIdealGas2D_gpu(real *solution,
+__global__ void ConservativeToEntropy_cns2d_gpu(real *solution,
                                                                  real *entropy,
                                                                  real expansionFactor,
                                                                  int N,
@@ -510,13 +515,14 @@ __global__ void ConservativeToEntropy_CompressibleIdealGas2D_gpu(real *solution,
 
 extern "C"
 {
-  void ConservativeToEntropy_CompressibleIdealGas2D_gpu_wrapper(real **solution,
+  void ConservativeToEntropy_cns2d_gpu_wrapper(real **solution,
                                                                 real **entropy,
                                                                 real expansionFactor,
                                                                 int N,
                                                                 int nVar,
                                                                 int nEl)
   {
-    ConservativeToEntropy_CompressibleIdealGas2D_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *entropy, expansionFactor, N, nVar);
+    ConservativeToEntropy_cns2d_gpu<<<dim3(nEl, 1, 1), dim3(N + 1, N + 1, 1), 0, 0>>>(*solution, *entropy, expansionFactor, N, nVar);
+    HIP_SAFE_CALL(hipGetLastError());
   }
 }
