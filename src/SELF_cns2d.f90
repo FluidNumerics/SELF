@@ -40,8 +40,10 @@ MODULE SELF_cns2d
     !!  iVar = 1 ~> gravitational potential
     !!  iVar = 2 ~> Linear momentum drag
     !!
-    PROCEDURE(HyperbolicBoundaryFlux_cns2d),POINTER :: HyperbolicBoundaryFlux => LocalLaxFriedrichs
-    PROCEDURE(HyperbolicInteriorFlux_cns2d),POINTER :: HyperbolicInteriorFlux => ConservativeFlux
+    PROCEDURE(Flux_cns2d),POINTER :: HyperbolicBoundaryFlux => LocalLaxFriedrichs
+    PROCEDURE(Flux_cns2d),POINTER :: HyperbolicInteriorFlux => ConservativeFlux
+    PROCEDURE(Flux_cns2d),POINTER :: ParabolicInteriorFlux => PrimitiveDiffusiveInteriorFlux
+    PROCEDURE(Flux_cns2d),POINTER :: ParabolicBoundaryFlux => PrimitiveDiffusiveBoundaryFlux
 
     TYPE(MappedScalar2D) :: primitive ! Contains primitive variables
     TYPE(MappedScalar2D) :: entropyVars ! Contains entropy variables
@@ -70,6 +72,7 @@ MODULE SELF_cns2d
     PROCEDURE :: Free => Free_cns2d
     PROCEDURE :: PrintType => PrintType_cns2d
     PROCEDURE :: PreTendency => PreTendency_cns2d
+    PROCEDURE :: PreFlux => PreFlux_cns2d
     PROCEDURE :: CalculateEntropy => CalculateEntropy_cns2d
     PROCEDURE :: SetInitialConditions => SetInitialConditions_cns2d
 
@@ -93,12 +96,18 @@ MODULE SELF_cns2d
     PROCEDURE :: SetMaxCFL => SetMaxCFL_cns2d
     PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_cns2d
 
-    ! Interior Flux methods
-    PROCEDURE, PRIVATE :: ConservativeFlux
-    
-    ! Riemann Fluxes
-    PROCEDURE, PRIVATE :: LocalLaxFriedrichs
-    
+    ! Interior Hyperbolic Flux methods
+    PROCEDURE,PRIVATE :: ConservativeFlux
+
+    ! Riemann Fluxes for hyperbolic terms
+    PROCEDURE,PRIVATE :: LocalLaxFriedrichs
+
+    ! Interior parabolic (diffusive) flux methods
+    PROCEDURE,PRIVATE :: PrimitiveDiffusiveInteriorFlux
+
+    ! Boundary parabolic (diffusive) flux methods
+    PROCEDURE,PRIVATE :: PrimitiveDiffusiveBoundaryFlux
+
     ! Methods to set flux models
     GENERIC :: SetFluxMethod => SetFluxMethod_withInt, &
       SetFluxMethod_withChar
@@ -126,7 +135,7 @@ MODULE SELF_cns2d
     PROCEDURE :: SetGasConstant => SetGasConstant_cns2d
     PROCEDURE :: SetStatic => SetStatic_cns2d
 
-    PROCEDURE, PRIVATE :: AddThermalBubble
+    PROCEDURE,PRIVATE :: AddThermalBubble
 
     PROCEDURE,PRIVATE :: CalculateDiagnostics
     PROCEDURE,PRIVATE :: ConservativeToPrimitive
@@ -159,24 +168,16 @@ MODULE SELF_cns2d
   REAL(prec),PRIVATE :: e_static != 1.5_PREC*R_static*T_static ! J/kg
 
   INTERFACE
-    SUBROUTINE HyperbolicBoundaryFlux_cns2d(this)
+    SUBROUTINE Flux_cns2d(this)
       IMPORT cns2d
       IMPLICIT NONE
       CLASS(cns2d),INTENT(inout) :: this
-    END SUBROUTINE HyperbolicBoundaryFlux_cns2d
-  END INTERFACE
-
-  INTERFACE
-    SUBROUTINE HyperbolicInteriorFlux_cns2d(this)
-      IMPORT cns2d
-      IMPLICIT NONE
-      CLASS(cns2d),INTENT(inout) :: this
-    END SUBROUTINE HyperbolicInteriorFlux_cns2d
+    END SUBROUTINE Flux_cns2d
   END INTERFACE
 
   INTERFACE
     SUBROUTINE SetSolutionBoundaryCondition_cns2d_gpu_wrapper(scalar, &
-                                                                extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
+                                                              extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
       BIND(c,name="SetSolutionBoundaryCondition_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
@@ -191,20 +192,20 @@ MODULE SELF_cns2d
   END INTERFACE
 
   INTERFACE
-  SUBROUTINE SetDiagBoundaryCondition_cns2d_gpu_wrapper(scalar, &
-                                                              extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
-    BIND(c,name="SetDiagBoundaryCondition_cns2d_gpu_wrapper")
-    USE ISO_C_BINDING
-    USE SELF_Constants
-    IMPLICIT NONE
-    TYPE(C_PTR) :: scalar
-    TYPE(C_PTR) :: extScalar
-    TYPE(C_PTR) :: prescribedScalar
-    TYPE(C_PTR) :: nHat
-    TYPE(C_PTR) :: sideInfo
-    INTEGER(C_INT),VALUE :: N,nVar,nEl
-  END SUBROUTINE SetDiagBoundaryCondition_cns2d_gpu_wrapper
-END INTERFACE
+    SUBROUTINE SetDiagBoundaryCondition_cns2d_gpu_wrapper(scalar, &
+                                                          extScalar,prescribedScalar,nHat,sideInfo,N,nVar,nEl) &
+      BIND(c,name="SetDiagBoundaryCondition_cns2d_gpu_wrapper")
+      USE ISO_C_BINDING
+      USE SELF_Constants
+      IMPLICIT NONE
+      TYPE(C_PTR) :: scalar
+      TYPE(C_PTR) :: extScalar
+      TYPE(C_PTR) :: prescribedScalar
+      TYPE(C_PTR) :: nHat
+      TYPE(C_PTR) :: sideInfo
+      INTEGER(C_INT),VALUE :: N,nVar,nEl
+    END SUBROUTINE SetDiagBoundaryCondition_cns2d_gpu_wrapper
+  END INTERFACE
 
   INTERFACE
     SUBROUTINE Source_cns2d_gpu_wrapper(source,solution,environmentalsGradient,N,nVar,nEl) &
@@ -230,8 +231,8 @@ END INTERFACE
 
   INTERFACE
     SUBROUTINE LocalLaxFriedrichs_gpu_wrapper(flux, &
-                                                           solution,extSolution,primitive,extPrimitive,diagnostics, &
-                                                           extDiagnostics,nHat,nScale,N,nVar,nDiag,nEl) &
+                                              solution,extSolution,primitive,extPrimitive,diagnostics, &
+                                              extDiagnostics,nHat,nScale,N,nVar,nDiag,nEl) &
       BIND(c,name="LocalLaxFriedrichs_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
@@ -251,8 +252,8 @@ END INTERFACE
 
   INTERFACE
     SUBROUTINE CalculateDiagnostics_cns2d_gpu_wrapper(solution, &
-                                                                       diagnostics,expansionFactor,R,N,nVar, &
-                                                                       nDiag,nEl) &
+                                                      diagnostics,expansionFactor,R,N,nVar, &
+                                                      nDiag,nEl) &
       BIND(c,name="CalculateDiagnostics_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
@@ -266,7 +267,7 @@ END INTERFACE
 
   INTERFACE
     SUBROUTINE ConservativeToPrimitive_cns2d_gpu_wrapper(solution, &
-                                                                          primitive,expansionFactor,N,nVar,nEl) &
+                                                         primitive,expansionFactor,N,nVar,nEl) &
       BIND(c,name="ConservativeToPrimitive_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
@@ -280,7 +281,7 @@ END INTERFACE
 
   INTERFACE
     SUBROUTINE ConservativeToEntropy_cns2d_gpu_wrapper(solution, &
-                                                                        entropy,expansionFactor,N,nVar,nEl) &
+                                                       entropy,expansionFactor,N,nVar,nEl) &
       BIND(c,name="ConservativeToEntropy_cns2d_gpu_wrapper")
       USE ISO_C_BINDING
       USE SELF_Constants
@@ -318,6 +319,8 @@ CONTAINS
     this % geometry => geometry
     this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
     this % HyperbolicInteriorFlux => ConservativeFlux
+    this % ParabolicInteriorFlux => PrimitiveDiffusiveInteriorFlux
+    this % ParabolicBoundaryFlux => PrimitiveDiffusiveBoundaryFlux
     this % gpuAccel = .FALSE.
 
     CALL this % solution % Init(geometry % x % interp,nvarloc,this % mesh % nElem)
@@ -408,7 +411,7 @@ CONTAINS
 #undef __FUNC__
 #define __FUNC__ "PrintType"
     IMPLICIT NONE
-    CLASS(cns2d), INTENT(in) :: this
+    CLASS(cns2d),INTENT(in) :: this
 
     INFO("Compressible Ideal Gas (2D)")
 
@@ -437,12 +440,12 @@ CONTAINS
 
   END SUBROUTINE Free_cns2d
 
-  SUBROUTINE SetInitialConditions_cns2d(this, config)
+  SUBROUTINE SetInitialConditions_cns2d(this,config)
 #undef __FUNC__
 #define __FUNC__ "SetInitialConditions"
     IMPLICIT NONE
     CLASS(cns2d),INTENT(inout) :: this
-    TYPE(SELFConfig), INTENT(inout) :: config
+    TYPE(SELFConfig),INTENT(inout) :: config
     ! Local
     LOGICAL :: setStaticState
     LOGICAL :: hydrostaticAdjust
@@ -464,9 +467,8 @@ CONTAINS
     CHARACTER(KIND=ucs2,len=:),ALLOCATABLE :: str
     CHARACTER(4) :: arrayCount
     REAL(prec) :: momentumMax
-    INTEGER :: i, nfeatures
+    INTEGER :: i,nfeatures
     REAL(prec) :: featureParams(1:10)
-
 
     ! Get static parameters
     CALL config % Get("cns2d.initial_conditions.static_state",setStaticState)
@@ -479,42 +481,42 @@ CONTAINS
     CALL config % Get("cns2d.fluid.viscosity",this % viscosity)
     CALL config % Get("cns2d.fluid.diffusivity",this % diffusivity)
 
-    IF( setStaticState )THEN 
+    IF (setStaticState) THEN
       ! INFO("Set fluid to static state")
       ! WRITE (tUSC,"(ES16.7E3)") T_static
       ! str = usc2_'T\u2070 = '//TRIM(tUSC)
       ! INFO(str)
-  
+
       ! WRITE (rhoUSC,"(ES16.7E3)") rho_static
       ! str = usc2_'\u03C1\u2070 = '//TRIM(rhoUSC)
       ! INFO(str)
-  
+
       ! WRITE (CpUSC,"(ES16.7E3)") Cp_static
       ! str = usc2_'C\u209A = '//TRIM(CpUSC)
       ! INFO(str)
-  
+
       ! WRITE (CvUSC,"(ES16.7E3)") Cv_static
       ! str = usc2_'C\u1D65 = '//TRIM(CvUSC)
       ! INFO(str)
 
       CALL this % SetStatic() ! Set field and parameters to STP
-    END IF 
+    END IF
 
     ! Get environmental parameters
     CALL config % Get("cns2d.environment.potential",gp)
 
     ! If the character is empty - default the gravitational
     ! potential to 0
-    IF( TRIM(gp) == "" )THEN
+    IF (TRIM(gp) == "") THEN
       gp = "p = 0.0"
-    END IF 
+    END IF
     ! Configure environmentals
-    CALL this % SetGravity( gp )   
+    CALL this % SetGravity(gp)
 
     CALL config % Get("cns2d.initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
-    IF( hydrostaticAdjust )THEN
+    IF (hydrostaticAdjust) THEN
       CALL config % Get("cns2d.initial_conditions.hydrostatic_momentum_max",momentumMax)
-      CALL this % HydrostaticAdjustment( momentumMax )
+      CALL this % HydrostaticAdjustment(momentumMax)
 
     END IF
 
@@ -525,16 +527,16 @@ CONTAINS
     CALL config % Get("cns2d.initial_conditions.T",T)
 
     ! If the character is empty - default the velocity
-    ! components to zero 
-    IF( TRIM(u) == "" )THEN
+    ! components to zero
+    IF (TRIM(u) == "") THEN
       u = "u = 0.0"
-    END IF 
-    IF( TRIM(u) == "" )THEN
+    END IF
+    IF (TRIM(u) == "") THEN
       v = "v = 0.0"
     END IF
 
-    velocity = (/ u, v /)
-    CALL this % SetVelocity( velocity )
+    velocity = (/u,v/)
+    CALL this % SetVelocity(velocity)
 
     ! Set the time integrator
     CALL config % Get("time_options.integrator",integrator)
@@ -544,34 +546,33 @@ CONTAINS
 
     ! Add Features, e.g. thermal bubble
     CALL config % concretization % info('cns2d.initial_conditions.features',n_children=nfeatures)
-    DO i = 1, nfeatures
-      WRITE(arrayCount,"(I0)") i
+    DO i = 1,nfeatures
+      WRITE (arrayCount,"(I0)") i
 
-        jsonKey = "cns2d.initial_conditions.features["//&
-                  TRIM(arrayCount)//&
-                  "].type" 
-        CALL config % Get( TRIM(jsonKey), featureType )
+      jsonKey = "cns2d.initial_conditions.features["// &
+                TRIM(arrayCount)// &
+                "].type"
+      CALL config % Get(TRIM(jsonKey),featureType)
 
-        IF(UpperCase(TRIM(featureType)) == "THERMAL_BUBBLE")THEN
+      IF (UpperCase(TRIM(featureType)) == "THERMAL_BUBBLE") THEN
 
-            jsonKey = "cns2d.initial_conditions.features["//&
-            TRIM(arrayCount)//&
-            "].parameters"
-            CALL config % Get( TRIM(jsonKey), featureParams(1:4) )
+        jsonKey = "cns2d.initial_conditions.features["// &
+                  TRIM(arrayCount)// &
+                  "].parameters"
+        CALL config % Get(TRIM(jsonKey),featureParams(1:4))
 
-            CALL this % AddThermalBubble((/featureParams(1), featureParams(2)/), &
-                                       featureParams(3), featureParams(4))
-        
-        ENDIF
+        CALL this % AddThermalBubble((/featureParams(1),featureParams(2)/), &
+                                     featureParams(3),featureParams(4))
 
-    ENDDO
-          
-    CALL this % SetPrescribedSolution( )
+      END IF
 
-    CALL this % CheckMinMax()    
+    END DO
+
+    CALL this % SetPrescribedSolution()
+
+    CALL this % CheckMinMax()
     CALL this % CalculateEntropy()
     CALL this % ReportEntropy()
-
 
   END SUBROUTINE SetInitialConditions_cns2d
 
@@ -586,7 +587,6 @@ CONTAINS
       this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
     CASE DEFAULT
       this % HyperbolicBoundaryFlux => LocalLaxFriedrichs
-
     END SELECT
 
   END SUBROUTINE SetFluxMethod_withInt
@@ -732,7 +732,7 @@ CONTAINS
     CALL this % primitive % SetInteriorFromEquation(this % geometry,this % t)
     IF (this % gpuAccel) THEN
       CALL this % primitive % UpdateDevice()
-    ENDIF
+    END IF
     CALL this % primitive % BoundaryInterp(this % gpuAccel)
 
     DO iEl = 1,this % source % nElem
@@ -972,7 +972,7 @@ CONTAINS
 
           rho = this % solution % interior % hostData(i,j,3,iEl)
           P = this % primitive % interior % hostData(i,j,4,iEl)
-        
+
           entropy = entropy + &
                     rho*(LOG(P) - this % expansionFactor*LOG(rho))/ &
                     (this % expansionFactor - 1.0_PREC)*wi*wj*Jacobian
@@ -1075,15 +1075,16 @@ CONTAINS
     !!
     !! The drag coefficient size is chosen to be
     !!
-    !!  Cd = \frac{max(c)}{min(\Delta x)}
+    !!  Cd = rac{max(c)}{min(\Delta x)}
     !!
     !! In this subroutine, the time step is chosen so that the sound-wave
     !! maximum CFL number is 0.75
     !!
-    !!   CFL = \frac{max(c) \Delta t}{min(\Delta x)} = 0.75
+    !!   CFL = rac{max(c) \Delta t}{min(\Delta x)} = 0.75
     !!
     !!
-    !! \rightarrow\Delta t = 0.75\frac{MIN(\Delta x) }{\max{c}}
+    !!
+    !! ightarrow\Delta t = 0.75rac{MIN(\Delta x) }{\max{c}}
     !!
     !! After adjustment, the
     IMPLICIT NONE
@@ -1150,7 +1151,7 @@ CONTAINS
     !!
     IMPLICIT NONE
     CLASS(cns2d),INTENT(inout) :: this
- 
+
     CALL this % CalculateDiagnostics()
     CALL this % ConservativeToPrimitive()
     CALL this % ConservativeToEntropy()
@@ -1204,12 +1205,15 @@ CONTAINS
     !!
     !!  We use the Ideal Gas Law
     !!
-    !!     p = (\gamma-1)*\rho*e
+    !!     p = (\gamma-1)*
+    !! ho*e
     !!
-    !!  where $\gamma = \frac{C_p}{C_v}$ is the expansion coefficient,
-    !!  $\rho$ is the fluid density,and$is the internal energy.
+    !!  where $\gamma = rac{C_p}{C_v}$ is the expansion coefficient,
+    !!  $
+    !! ho$is the fluid density,and the internal energy.
     !!
-    !!  We calculate $\rho*e$ as
+    !!  We calculate $
+    !! ho*e$as
     !!
     !!    rho*e = (rho*E - 0.5_prec*rho*KE)
     !!
@@ -1220,7 +1224,8 @@ CONTAINS
     !!
     !!  The speed of sound is defined through the relation
     !!
-    !!    \frac{\partial P}{\partial \rho} = c^{2}
+    !!    rac{\partial P}{\partial
+    !! ho} = c^{2}
     !!
     !!  Then, we have that
     !!
@@ -1231,16 +1236,22 @@ CONTAINS
     !!
     !!  Using the equation of state,
     !!
-    !!   (\gamma-1)*e = p/\rho
+    !!   (\gamma-1)*e = p/
+    !! ho
     !!
     !!  We calculate $ as
     !!
-    !!    e = (\rho*E - 0.5_PREC*\rho*KE)/\rho
+    !!    e = (
+    !! ho*E - 0.5_PREC*
+    !! ho*KE)/
+    !! ho
     !!
     !!
     !!  where rho*E is the total energy, a prognostic variable, modelled
-    !!  by this class, $\rho*KE$is the kinetic energy(a required diagnostic)
-    !!  and, $\rho$is the density(a prognostic variable) .
+    !!  by this class, $
+    !! ho*KE the kinetic energy(a required diagnostic)
+    !!  and, $
+    !! ho the density(a prognostic variable) .
     !!
     !! In-Situ Temperature
     !!
@@ -1491,14 +1502,14 @@ CONTAINS
     IF (this % gpuAccel) THEN
 
       CALL SetSolutionBoundaryCondition_cns2d_gpu_wrapper( &
-      this % primitive % boundary % deviceData, &
-      this % primitive % extBoundary % deviceData, &
-      this % prescribedPrimitive % boundary % deviceData, &
-      this % geometry % nHat % boundary % deviceData, &
-      this % mesh % sideInfo % deviceData, &
-      this % primitive % interp % N, &
-      this % primitive % nVar, &
-      this % primitive % nElem)
+        this % primitive % boundary % deviceData, &
+        this % primitive % extBoundary % deviceData, &
+        this % prescribedPrimitive % boundary % deviceData, &
+        this % geometry % nHat % boundary % deviceData, &
+        this % mesh % sideInfo % deviceData, &
+        this % primitive % interp % N, &
+        this % primitive % nVar, &
+        this % primitive % nElem)
 
     ELSE
 
@@ -1558,17 +1569,16 @@ CONTAINS
     REAL(prec) :: u,v,nhat(1:2)
 
     IF (this % gpuAccel) THEN
-      
+
       CALL SetDiagBoundaryCondition_cns2d_gpu_wrapper( &
-      this % diagnostics % boundary % deviceData, &
-      this % diagnostics % extBoundary % deviceData, &
-      this % prescribedDiagnostics % boundary % deviceData, &
-      this % geometry % nHat % boundary % deviceData, &
-      this % mesh % sideInfo % deviceData, &
-      this % diagnostics % interp % N, &
-      this % diagnostics % nVar, &
-      this % diagnostics % nElem)
-      
+        this % diagnostics % boundary % deviceData, &
+        this % diagnostics % extBoundary % deviceData, &
+        this % prescribedDiagnostics % boundary % deviceData, &
+        this % geometry % nHat % boundary % deviceData, &
+        this % mesh % sideInfo % deviceData, &
+        this % diagnostics % interp % N, &
+        this % diagnostics % nVar, &
+        this % diagnostics % nElem)
 
     ELSE
 
@@ -1608,28 +1618,32 @@ CONTAINS
 
   END SUBROUTINE SetDiagnosticsBoundaryCondition
 
+  SUBROUTINE PreFlux_cns2d(this)
+    IMPLICIT NONE
+    CLASS(cns2d),INTENT(inout) :: this
+
+
+    ! Compute the gradient of the solution using the Bassi-Rebay Method
+    ! TO DO : IF (diffusiveVars == primitive)
+    CALL this % primitive % GradientBR(this % geometry, &
+                                       this % primitiveGradient, &
+                                       this % gpuAccel)
+
+    CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
+    CALL this % primitiveGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
+    CALL this % SetPrimitiveGradientBoundaryCondition()
+    CALL this % primitiveGradient % BassiRebaySides(this % gpuAccel)
+
+  END SUBROUTINE PreFlux_cns2d
+
   SUBROUTINE SetBoundaryCondition_cns2d(this)
     IMPLICIT NONE
     CLASS(cns2d),INTENT(inout) :: this
-    ! Local
-    INTEGER :: iEl,iSide,i
-    INTEGER :: bcid,e2
-    REAL(prec) :: u,v,nhat(1:2)
 
     CALL this % SetSolutionBoundaryCondition()
     CALL this % SetPrimitiveBoundaryCondition()
     CALL this % SetDiagnosticsBoundaryCondition()
 
-    ! Compute the gradient of the solution using the Bassi-Rebay Method
-    ! TO DO : IF (diffusiveVars == primitive)
-    !CALL this % primitive % GradientBR( this % geometry, &
-    !                                   this % primitiveGradient, &
-    !                                   this % gpuAccel)
-
-    !CALL this % primitiveGradient % BoundaryInterp(this % gpuAccel)
-    !CALL this % primitiveGradient % SideExchange(this % mesh,this % decomp,this % gpuAccel)
-    !CALL this % SetPrimitiveGradientBoundaryCondition()
-    !CALL this % primitiveGradient % BassiRebaySides(this % gpuAccel)
 
   END SUBROUTINE SetBoundaryCondition_cns2d
 
@@ -1648,16 +1662,16 @@ CONTAINS
         bcid = this % mesh % sideInfo % hostData(5,iSide,iEl) ! Boundary Condition ID
         e2 = this % mesh % sideInfo % hostData(3,iSide,iEl) ! Neighboring Element ID
         IF (e2 == 0) THEN
-          
-            DO ivar = 1, this % solution % nvar
-            DO i = 0,this % solution % interp % N
 
-              ! For now, prolong the gradient
-              this % solutionGradient % extBoundary % hostData(1:2,i,ivar,iSide,iEl) = &
-                this % solutionGradient % boundary % hostData(1:2,i,ivar,iSide,iEl)
+          DO ivar = 1,this % solution % nvar
+          DO i = 0,this % solution % interp % N
 
-            END DO
-            END DO
+            ! For now, prolong the gradient
+            this % solutionGradient % extBoundary % hostData(1:2,i,ivar,iSide,iEl) = &
+              this % solutionGradient % boundary % hostData(1:2,i,ivar,iSide,iEl)
+
+          END DO
+          END DO
 
         END IF
 
@@ -1676,11 +1690,11 @@ CONTAINS
     IF (this % gpuAccel) THEN
 
       CALL Source_cns2d_gpu_wrapper(this % source % interior % deviceData, &
-                                                     this % solution % interior % deviceData, &
-                                                     this % environmentalsGradient % interior % deviceData, &
-                                                     this % source % interp % N, &
-                                                     this % source % nVar, &
-                                                     this % source % nElem)
+                                    this % solution % interior % deviceData, &
+                                    this % environmentalsGradient % interior % deviceData, &
+                                    this % source % interp % N, &
+                                    this % source % nVar, &
+                                    this % source % nElem)
 
     ELSE
 
@@ -1695,11 +1709,11 @@ CONTAINS
             gy = this % environmentalsGradient % interior % hostData(2,i,j,1,iEl)
             Cd = this % environmentals % interior % hostData(i,j,2,iEl)
 
-            this % source % interior % hostData(i,j,1,iEl) = -rho*gx - Cd*rhou 
+            this % source % interior % hostData(i,j,1,iEl) = -rho*gx - Cd*rhou
             this % source % interior % hostData(i,j,2,iEl) = -rho*gy - Cd*rhov
-            this % source % interior % hostData(i,j,3,iEl) = 0.0_PREC 
-            this % source % interior % hostData(i,j,4,iEl) = -rhou*gx - rhou*gy -&
-                                                              Cd*(rhou*rhou + rhov*rhov)/rho
+            this % source % interior % hostData(i,j,3,iEl) = 0.0_PREC
+            this % source % interior % hostData(i,j,4,iEl) = -rhou*gx - rhou*gy - &
+                                                             Cd*(rhou*rhou + rhov*rhov)/rho
 
           END DO
         END DO
@@ -1834,16 +1848,16 @@ CONTAINS
     !! the HyperbolicInteriorFlux procedure pointer. This design allows
     !! users to dynamically select the type of Riemann solver
     !! to use
-  
-      IMPLICIT NONE
-      CLASS(cns2d),INTENT(inout) :: this
-  
-      ! For hyperbolic terms
-      CALL this % HyperbolicInteriorFlux()
-  
-      ! For parabolic terms
-      !CALL this % PIFlux()
-  
+
+    IMPLICIT NONE
+    CLASS(cns2d),INTENT(inout) :: this
+
+    ! For hyperbolic terms
+    CALL this % HyperbolicInteriorFlux()
+
+    ! For parabolic terms
+    CALL this % ParabolicInteriorFlux()
+
   END SUBROUTINE FluxMethod_cns2d
 
   SUBROUTINE RiemannSolver_cns2d(this)
@@ -1859,7 +1873,7 @@ CONTAINS
     CALL this % HyperbolicBoundaryFlux()
 
     ! For parabolic terms
-    !CALL this % PBFlux() ! Parabolic Boundary Flux
+    CALL this % ParabolicBoundaryFlux() ! Parabolic Boundary Flux
 
   END SUBROUTINE RiemannSolver_cns2d
 
@@ -1880,18 +1894,18 @@ CONTAINS
     IF (this % gpuAccel) THEN
 
       CALL LocalLaxFriedrichs_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
-                                                       this % solution % boundary % deviceData, &
-                                                       this % solution % extBoundary % deviceData, &
-                                                       this % primitive % boundary % deviceData, &
-                                                       this % primitive % extBoundary % deviceData, &
-                                                       this % diagnostics % boundary % deviceData, &
-                                                       this % diagnostics % extBoundary % deviceData, &
-                                                       this % geometry % nHat % boundary % deviceData, &
-                                                       this % geometry % nScale % boundary % deviceData, &
-                                                       this % solution % interp % N, &
-                                                       this % solution % nVar, &
-                                                       this % diagnostics % nVar, &
-                                                       this % solution % nElem)
+                                          this % solution % boundary % deviceData, &
+                                          this % solution % extBoundary % deviceData, &
+                                          this % primitive % boundary % deviceData, &
+                                          this % primitive % extBoundary % deviceData, &
+                                          this % diagnostics % boundary % deviceData, &
+                                          this % diagnostics % extBoundary % deviceData, &
+                                          this % geometry % nHat % boundary % deviceData, &
+                                          this % geometry % nScale % boundary % deviceData, &
+                                          this % solution % interp % N, &
+                                          this % solution % nVar, &
+                                          this % diagnostics % nVar, &
+                                          this % solution % nElem)
 
     ELSE
 
@@ -1941,7 +1955,7 @@ CONTAINS
             alpha = MAX(ABS(unL),ABS(unR)) + MAX(ABS(cL),ABS(cR))
 
             ! Pull external and internal state for the Riemann Solver (Lax-Friedrichs)
-            this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) = 0.5_PREC*(fluxL(1:4) + fluxR(1:4) + alpha*jump(1:4))*nmag
+    this % flux % boundaryNormal % hostData(i,1:4,iSide,iEl) = 0.5_PREC*(fluxL(1:4) + fluxR(1:4) + alpha*jump(1:4))*nmag
 
           END DO
         END DO
@@ -1951,99 +1965,254 @@ CONTAINS
 
   END SUBROUTINE LocalLaxFriedrichs
 
-  SUBROUTINE PrimitiveGradientBRFlux_cns2d(this)
-  !! This method computes the gradient of the primitive variables
-  !! and uses the primitive variables, their gradient, and the
-  !! conservative variables (solution) to compute the
+  SUBROUTINE PrimitiveDiffusiveInteriorFlux(this)
+    !! This method uses the primitive variables, their gradient,
+    !! and the conservative variables (solution) to compute the
+    !! diffusive momentum and energy fluxes.
+    !!
+    !! Thie method assumes that the hyperbolic flux is computed before
+    !! calling this method; we add to the boundaryNormal component
+    !! of the flux.
+    !!
+    IMPLICIT NONE
+    CLASS(cns2d),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl,i,j,n
+    REAL(prec) :: u,v
+    REAL(prec) :: dudx,dudy,dvdx,dvdy
+    REAL(prec) :: dTdx,dTdy
+    REAL(prec) :: tau11,tau12,tau22
+    REAL(prec) :: nx,ny,nmag
+    REAL(prec) :: viscosity
+    REAL(prec) :: diffusivity
+
+    !    IF( this % gpuAccel )THEN
+
+    !    ! TO DO : GPU Accelerated flux
+    !    !CALL LocalLaxFriedrichs_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
+    !    !       this % solution % boundary % deviceData, &
+    !    !       this % solution % extBoundary % deviceData, &
+    !    !       this % primitive % boundary % deviceData, &
+    !    !       this % primitive % extBoundary % deviceData, &
+    !    !       this % diagnostics % boundary % deviceData, &
+    !    !       this % diagnostics % extBoundary % deviceData, &
+    !    !       this % geometry % nHat % boundary % deviceData, &
+    !    !       this % geometry % nScale % boundary % deviceData, &
+    !    !       this % solution % interp % N, &
+    !    !       this % solution % nVar, &
+    !    !       this % diagnostics % nVar, &
+    !    !       this % solution % nElem)
+
+    !  ELSE
+
+    ! For now, viscosity and diffusivity are constant values
+    ! TO DO : Make spatially varying
+    diffusivity = this % diffusivity
+    viscosity = this % viscosity
+    DO iEl = 1,this % solution % nElem
+      DO j = 0,this % solution % interp % N
+        DO i = 0,this % solution % interp % N
+
+          DO n = 0,this % solution % interp % N
+
+            u = this % primitive % interior % hostData(n,j,1,iEl)
+            v = this % primitive % interior % hostData(n,j,2,iEl)
+
+            ! average x-component of the stress tensor
+            dudx = this % primitiveGradient % interior % hostData(1,n,j,1,iEl)
+            dudy = this % primitiveGradient % interior % hostData(2,n,j,1,iEl)
+            dvdx = this % primitiveGradient % interior % hostData(1,n,j,2,iEl)
+            dvdy = this % primitiveGradient % interior % hostData(2,n,j,2,iEl)
+
+            tau11 = 4.0_PREC/3.0_PREC*dudx - 2.0_PREC/3.0_PREC*dvdy
+            tau12 = dudy + dvdx ! = tau_21
+            tau22 = 4.0_PREC/3.0_PREC*dvdy - 2.0_PREC/3.0_PREC*dudx
+
+            dTdx = this % primitiveGradient % interior % hostData(1,n,j,4,iEl)
+            dTdy = this % primitiveGradient % boundary % hostData(2,n,j,4,iEl)
+
+            ! x-momentum
+            this % flux % physical % hostData(1,1,n,i,j,1,iEl) = &
+            this % flux % physical % hostData(1,1,n,i,j,1,iEl) &
+            - tau11*viscosity ! x-momentum (x-component)
+
+            this % flux % physical % hostData(2,1,n,i,j,1,iEl) = &
+            this % flux % physical % hostData(2,1,n,i,j,1,iEl) &
+            - tau12*viscosity ! x-momentum (y-component) 
+
+            ! y-momentum
+            this % flux % physical % hostData(1,1,n,i,j,2,iEl) = &
+            this % flux % physical % hostData(1,1,n,i,j,2,iEl) &
+            - tau12*viscosity ! y-momentum (x-component)
+
+            this % flux % physical % hostData(2,1,n,i,j,2,iEl) = &
+            this % flux % physical % hostData(2,1,n,i,j,2,iEl) &
+            - tau22*viscosity ! y-momentum (y-component)
+
+            ! Skip density
+
+            ! Total Energy
+            this % flux % physical % hostData(1,1,n,i,j,4,iEl) = &
+            this % flux % physical % hostData(1,1,n,i,j,4,iEl) &
+            - (u*tau11 + v*tau12 + diffusivity*dTdx)*viscosity ! total energy (x-component)
+
+            this % flux % physical % hostData(1,1,n,i,j,4,iEl) = &
+            this % flux % physical % hostData(2,1,n,i,j,4,iEl) &
+            - (u*tau12 + v*tau22 + diffusivity*dTdy)*viscosity ! total energy (y-component)
+              
+          END DO
+
+          ! Second part of two-point flux
+          DO n = 0,this % solution % interp % N
+
+            u = this % primitive % interior % hostData(i,n,1,iEl)
+            v = this % primitive % interior % hostData(i,n,2,iEl)
+
+            ! average x-component of the stress tensor
+            dudx = this % primitiveGradient % interior % hostData(1,i,n,1,iEl)
+            dudy = this % primitiveGradient % interior % hostData(2,i,n,1,iEl)
+            dvdx = this % primitiveGradient % interior % hostData(1,i,n,2,iEl)
+            dvdy = this % primitiveGradient % interior % hostData(2,i,n,2,iEl)
+
+            tau11 = 4.0_PREC/3.0_PREC*dudx - 2.0_PREC/3.0_PREC*dvdy
+            tau12 = dudy + dvdx ! = tau_21
+            tau22 = 4.0_PREC/3.0_PREC*dvdy - 2.0_PREC/3.0_PREC*dudx
+
+            dTdx = this % primitiveGradient % interior % hostData(1,i,n,4,iEl)
+            dTdy = this % primitiveGradient % boundary % hostData(2,i,n,4,iEl)
+
+            ! x-momentum
+            this % flux % physical % hostData(1,2,n,i,j,1,iEl) = &
+            this % flux % physical % hostData(1,2,n,i,j,1,iEl) &
+            - tau11*viscosity ! x-momentum (x-component)
+
+            this % flux % physical % hostData(2,2,n,i,j,1,iEl) = &
+            this % flux % physical % hostData(2,2,n,i,j,1,iEl) &
+            - tau12*viscosity ! x-momentum (y-component) 
+
+            ! y-momentum
+            this % flux % physical % hostData(1,2,n,i,j,2,iEl) = &
+            this % flux % physical % hostData(1,2,n,i,j,2,iEl) &
+            - tau12*viscosity ! y-momentum (x-component)
+
+            this % flux % physical % hostData(2,2,n,i,j,2,iEl) = &
+            this % flux % physical % hostData(2,2,n,i,j,2,iEl) &
+            - tau22*viscosity ! y-momentum (y-component)
+
+            ! Skip density
+
+            ! Total Energy
+            this % flux % physical % hostData(1,2,n,i,j,4,iEl) = &
+            this % flux % physical % hostData(1,2,n,i,j,4,iEl) &
+            - (u*tau11 + v*tau12 + diffusivity*dTdx)*viscosity ! total energy (x-component)
+
+            this % flux % physical % hostData(1,2,n,i,j,4,iEl) = &
+            this % flux % physical % hostData(2,2,n,i,j,4,iEl) &
+            - (u*tau12 + v*tau22 + diffusivity*dTdy)*viscosity ! total energy (y-component)
+              
+          END DO
+
+
+        END DO
+      END DO
+    END DO
+
+    !   ENDIF
+
+  END SUBROUTINE PrimitiveDiffusiveInteriorFlux
+
+  SUBROUTINE PrimitiveDiffusiveBoundaryFlux(this)
+  !! This method uses the primitive variables, their gradient,
+  !! and the conservative variables (solution) to compute the
   !! diffusive momentum and energy fluxes.
   !!
   !! Thie method assumes that the hyperbolic flux is computed before
   !! calling this method; we add to the boundaryNormal component
   !! of the flux.
   !!
-  IMPLICIT NONE
-   CLASS(cns2d),INTENT(inout) :: this
-   ! Local
-   INTEGER :: iEl, iSide, i
-   REAL(prec) :: u, v
-   REAL(prec) :: dudx, dudy, dvdx, dvdy
-   REAL(prec) :: dTdx, dTdy
-   REAL(prec) :: tau11, tau12, tau22
-   REAL(prec) :: nx, ny, nmag
-   REAL(prec) :: viscosity
-   REAL(prec) :: diffusivity
-  
-  !    IF( this % gpuAccel )THEN
+    IMPLICIT NONE
+    CLASS(cns2d),INTENT(inout) :: this
+    ! Local
+    INTEGER :: iEl,iSide,i
+    REAL(prec) :: u,v
+    REAL(prec) :: dudx,dudy,dvdx,dvdy
+    REAL(prec) :: dTdx,dTdy
+    REAL(prec) :: tau11,tau12,tau22
+    REAL(prec) :: nx,ny,nmag
+    REAL(prec) :: viscosity
+    REAL(prec) :: diffusivity
 
-  !    ! TO DO : GPU Accelerated flux
-  !    !CALL LocalLaxFriedrichs_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
-  !    !       this % solution % boundary % deviceData, &
-  !    !       this % solution % extBoundary % deviceData, &
-  !    !       this % primitive % boundary % deviceData, &
-  !    !       this % primitive % extBoundary % deviceData, &
-  !    !       this % diagnostics % boundary % deviceData, &
-  !    !       this % diagnostics % extBoundary % deviceData, &
-  !    !       this % geometry % nHat % boundary % deviceData, &
-  !    !       this % geometry % nScale % boundary % deviceData, &
-  !    !       this % solution % interp % N, &
-  !    !       this % solution % nVar, &
-  !    !       this % diagnostics % nVar, &
-  !    !       this % solution % nElem)
+    !    IF( this % gpuAccel )THEN
 
-  !  ELSE
-    
-     ! For now, viscosity and diffusivity are constant values
-     ! TO DO : Make spatially varying
-     diffusivity = this % diffusivity
-     viscosity = this % viscosity
-     DO iEl = 1, this % solution % nElem
-       DO iSide = 1, 4
-         DO i = 0, this % solution % interp % N
+    !    ! TO DO : GPU Accelerated flux
+    !    !CALL LocalLaxFriedrichs_gpu_wrapper(this % flux % boundaryNormal % deviceData, &
+    !    !       this % solution % boundary % deviceData, &
+    !    !       this % solution % extBoundary % deviceData, &
+    !    !       this % primitive % boundary % deviceData, &
+    !    !       this % primitive % extBoundary % deviceData, &
+    !    !       this % diagnostics % boundary % deviceData, &
+    !    !       this % diagnostics % extBoundary % deviceData, &
+    !    !       this % geometry % nHat % boundary % deviceData, &
+    !    !       this % geometry % nScale % boundary % deviceData, &
+    !    !       this % solution % interp % N, &
+    !    !       this % solution % nVar, &
+    !    !       this % diagnostics % nVar, &
+    !    !       this % solution % nElem)
 
-            ! Get the boundary normals on cell edges from the mesh geometry
-            nx = this % geometry % nHat % boundary % hostData(1,i,1,iSide,iEl)
-            ny = this % geometry % nHat % boundary % hostData(2,i,1,iSide,iEl)
-            nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
-  
-            ! average x-component of the stress tensor
-            dudx = 0.5_prec*(this % primitiveGradient % boundary % hostData(1,i,1,iSide,iEl)+&
-            this % primitiveGradient % extBoundary % hostData(1,i,1,iSide,iEl))
+    !  ELSE
 
-            dudy = 0.5_prec*(this % primitiveGradient % boundary % hostData(2,i,1,iSide,iEl)+&
-            this % primitiveGradient % boundary % hostData(2,i,1,iSide,iEl))
+    ! For now, viscosity and diffusivity are constant values
+    ! TO DO : Make spatially varying
+    diffusivity = this % diffusivity
+    viscosity = this % viscosity
+    DO iEl = 1,this % solution % nElem
+      DO iSide = 1,4
+        DO i = 0,this % solution % interp % N
 
-            dvdx = 0.5_prec*(this % primitiveGradient % boundary % hostData(1,i,2,iSide,iEl)+&
-            this % primitiveGradient % boundary % hostData(1,i,2,iSide,iEl))
+          ! Get the boundary normals on cell edges from the mesh geometry
+          nx = this % geometry % nHat % boundary % hostData(1,i,1,iSide,iEl)
+          ny = this % geometry % nHat % boundary % hostData(2,i,1,iSide,iEl)
+          nmag = this % geometry % nScale % boundary % hostData(i,1,iSide,iEl)
 
-            dvdy = 0.5_prec*(this % primitiveGradient % boundary % hostData(2,i,2,iSide,iEl)+&
-            this % primitiveGradient % boundary % hostData(2,i,2,iSide,iEl))
+          ! average x-component of the stress tensor
+          dudx = 0.5_PREC*(this % primitiveGradient % boundary % hostData(1,i,1,iSide,iEl) + &
+                           this % primitiveGradient % extBoundary % hostData(1,i,1,iSide,iEl))
 
-            tau11 = 4.0_prec / 3.0_prec * dudx - 2.0_prec / 3.0_prec * dvdy
-            tau12 = dudy + dvdx ! = tau_21
-            tau22 = 4.0_prec / 3.0_prec * dvdy - 2.0_prec / 3.0_prec * dudx
+          dudy = 0.5_PREC*(this % primitiveGradient % boundary % hostData(2,i,1,iSide,iEl) + &
+                           this % primitiveGradient % boundary % hostData(2,i,1,iSide,iEl))
 
-            dTdx = 0.5_prec*(this % primitiveGradient % boundary % hostData(1,i,4,iSide,iEl)+&
-            this % primitiveGradient % boundary % hostData(1,i,4,iSide,iEl))
+          dvdx = 0.5_PREC*(this % primitiveGradient % boundary % hostData(1,i,2,iSide,iEl) + &
+                           this % primitiveGradient % boundary % hostData(1,i,2,iSide,iEl))
 
-            dTdy = 0.5_prec*(this % primitiveGradient % boundary % hostData(2,i,4,iSide,iEl)+&
-            this % primitiveGradient % boundary % hostData(2,i,4,iSide,iEl))
+          dvdy = 0.5_PREC*(this % primitiveGradient % boundary % hostData(2,i,2,iSide,iEl) + &
+                           this % primitiveGradient % boundary % hostData(2,i,2,iSide,iEl))
 
+          tau11 = 4.0_PREC/3.0_PREC*dudx - 2.0_PREC/3.0_PREC*dvdy
+          tau12 = dudy + dvdx ! = tau_21
+          tau22 = 4.0_PREC/3.0_PREC*dvdy - 2.0_PREC/3.0_PREC*dudx
 
-             ! LEFT OFF : 5/29/2023 @ 12:31pm
-            ! Add to the boundaryNormal flux
-            this % flux % boundaryNormal % hostData(i,1,iSide,iEl) =  -viscosity*(tau11*nx + tau12*ny )*nmag ! rhou
-            this % flux % boundaryNormal % hostData(i,2,iSide,iEl) =  -viscosity*(tau12*nx + tau22*ny )*nmag ! rhov
-            this % flux % boundaryNormal % hostData(i,3,iSide,iEl) =  0.0_prec ! rho
-            this % flux % boundaryNormal % hostData(i,4,iSide,iEl) =  -( viscosity*( (tau11*u + tau12*v )*nx +&
-                                                                             (tau12*u + tau22*v)*ny ) +&
-                                                                         diffusivity*(dTdx*nx + dTdy*ny) )*nmag ! rho*E
-         ENDDO
-       ENDDO
-     ENDDO
+          dTdx = 0.5_PREC*(this % primitiveGradient % boundary % hostData(1,i,4,iSide,iEl) + &
+                           this % primitiveGradient % boundary % hostData(1,i,4,iSide,iEl))
+
+          dTdy = 0.5_PREC*(this % primitiveGradient % boundary % hostData(2,i,4,iSide,iEl) + &
+                           this % primitiveGradient % boundary % hostData(2,i,4,iSide,iEl))
+
+          this % flux % boundaryNormal % hostData(i,1,iSide,iEl) = this % flux % boundaryNormal % hostData(i,1,iSide,iEl) - &
+                                                                   viscosity*(tau11*nx + tau12*ny)*nmag ! rhou
+          this % flux % boundaryNormal % hostData(i,2,iSide,iEl) = this % flux % boundaryNormal % hostData(i,2,iSide,iEl) - &
+                                                                   viscosity*(tau12*nx + tau22*ny)*nmag ! rhov
+          !this % flux % boundaryNormal % hostData(i,3,iSide,iEl) =  this % flux % boundaryNormal % hostData(i,3,iSide,iEl)+0.0_prec ! rho
+          this % flux % boundaryNormal % hostData(i,4,iSide,iEl) = this % flux % boundaryNormal % hostData(i,4,iSide,iEl) &
+                                                                   - (viscosity*((tau11*u + tau12*v)*nx + &
+                                                                                 (tau12*u + tau22*v)*ny) + &
+                                                                      diffusivity*(dTdx*nx + dTdy*ny))*nmag ! rho*E
+        END DO
+      END DO
+    END DO
 
 !   ENDIF
-  
-  END SUBROUTINE PrimitiveGradientBRFlux_cns2d
+
+  END SUBROUTINE PrimitiveDiffusiveBoundaryFlux
 
   SUBROUTINE Write_cns2d(this,fileName)
 #undef __FUNC__
@@ -2079,41 +2248,41 @@ CONTAINS
 
       ! Write the interpolant to the file
       INFO("Writing interpolant data to file")
-      CALL this % solution % interp % WriteHDF5( fileId )
+      CALL this % solution % interp % WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
       ! Write the model state to file
       INFO("Writing control grid conservative variables to file")
       CALL CreateGroup_HDF5(fileId,'/controlgrid')
-      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL this % solution % WriteHDF5(fileId,'/controlgrid/solution', &
+                                    this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       INFO("Writing control grid entropy variables to file")
-      CALL this % entropyVars % WriteHDF5( fileId, '/controlgrid/entropy', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL this % entropyVars % WriteHDF5(fileId,'/controlgrid/entropy', &
+                                    this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       INFO("Writing control grid primitive variables to file")
-      CALL this % primitive % WriteHDF5( fileId, '/controlgrid/primitive', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL this % primitive % WriteHDF5(fileId,'/controlgrid/primitive', &
+                                    this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       ! Write the geometry to file
       INFO("Writing control grid geometry to file")
       CALL CreateGroup_HDF5(fileId,'/controlgrid/geometry')
-      CALL this % geometry % x % WriteHDF5( fileId, '/controlgrid/geometry/x', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL this % geometry % x % WriteHDF5(fileId,'/controlgrid/geometry/x', &
+                                    this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       ! -- END : writing solution on control grid -- !
 
       ! Interpolate the solution to a grid for plotting results
       ! Create an interpolant for the uniform grid
       CALL interp % Init(this % solution % interp % M, &
-                          this % solution % interp % targetNodeType, &
-                          this % solution % interp % N, &
-                          this % solution % interp % controlNodeType)
+                         this % solution % interp % targetNodeType, &
+                         this % solution % interp % N, &
+                         this % solution % interp % controlNodeType)
 
       CALL solution % Init(interp, &
-                            this % solution % nVar,this % solution % nElem)
+                           this % solution % nVar,this % solution % nElem)
 
       CALL x % Init(interp,1,this % solution % nElem)
 
@@ -2125,24 +2294,23 @@ CONTAINS
 
       ! Write the model state to file
       CALL CreateGroup_HDF5(fileId,'/targetgrid')
-      CALL solution % WriteHDF5( fileId, '/targetgrid/solution', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
-
+      CALL solution % WriteHDF5(fileId,'/targetgrid/solution', &
+                                this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       ! Map the entropy variables to the target grid
       CALL this % entropyVars % GridInterp(solution,gpuAccel=.FALSE.)
-      CALL solution % WriteHDF5( fileId, '/targetgrid/entropy', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL solution % WriteHDF5(fileId,'/targetgrid/entropy', &
+                                this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       ! Map the entropy variables to the target grid
       CALL this % primitive % GridInterp(solution,gpuAccel=.FALSE.)
-      CALL solution % WriteHDF5( fileId, '/targetgrid/primitive', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL solution % WriteHDF5(fileId,'/targetgrid/primitive', &
+                                this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       ! Write the geometry to file
       CALL CreateGroup_HDF5(fileId,'/targetgrid/mesh')
-      CALL x % WriteHDF5( fileId, '/targetgrid/mesh/coords', &
-      this % decomp % offsetElem % hostData(this % decomp % rankId), this % decomp % nElem )
+      CALL x % WriteHDF5(fileId,'/targetgrid/mesh/coords', &
+                         this % decomp % offsetElem % hostData(this % decomp % rankId),this % decomp % nElem)
 
       CALL Close_HDF5(fileId)
 
@@ -2152,7 +2320,7 @@ CONTAINS
 
       ! Write the interpolant to the file
       INFO("Writing interpolant data to file")
-      CALL this % solution % interp % WriteHDF5( fileId )
+      CALL this % solution % interp % WriteHDF5(fileId)
 
       ! In this section, we write the solution and geometry on the control (quadrature) grid
       ! which can be used for model pickup runs or post-processing
@@ -2160,13 +2328,13 @@ CONTAINS
       ! Write the model state to file
       INFO("Writing control grid conservative to file")
       CALL CreateGroup_HDF5(fileId,'/controlgrid')
-      CALL this % solution % WriteHDF5( fileId, '/controlgrid/solution' )
+      CALL this % solution % WriteHDF5(fileId,'/controlgrid/solution')
 
       INFO("Writing control grid entropy variables to file")
-      CALL this % entropyVars % WriteHDF5( fileId, '/controlgrid/entropy' )
+      CALL this % entropyVars % WriteHDF5(fileId,'/controlgrid/entropy')
 
       INFO("Writing control grid primitive variables to file")
-      CALL this % primitive % WriteHDF5( fileId, '/controlgrid/primitive' )
+      CALL this % primitive % WriteHDF5(fileId,'/controlgrid/primitive')
 
       ! Write the geometry to file
       INFO("Writing control grid  geometry to file")
@@ -2177,12 +2345,12 @@ CONTAINS
       ! Interpolate the solution to a grid for plotting results
       ! Create an interpolant for the uniform grid
       CALL interp % Init(this % solution % interp % M, &
-                          this % solution % interp % targetNodeType, &
-                          this % solution % interp % N, &
-                          this % solution % interp % controlNodeType)
+                         this % solution % interp % targetNodeType, &
+                         this % solution % interp % N, &
+                         this % solution % interp % controlNodeType)
 
       CALL solution % Init(interp, &
-                            this % solution % nVar,this % solution % nElem)
+                           this % solution % nVar,this % solution % nElem)
 
       CALL x % Init(interp,1,this % solution % nElem)
 
@@ -2195,15 +2363,15 @@ CONTAINS
       ! Write the model state to file
       INFO("Writing target grid conservative variables to file")
       CALL CreateGroup_HDF5(fileId,'/targetgrid')
-      CALL solution % WriteHDF5(fileId, '/targetgrid/solution')
+      CALL solution % WriteHDF5(fileId,'/targetgrid/solution')
 
       INFO("Writing target grid entropy variables to file")
       CALL this % entropyVars % GridInterp(solution,gpuAccel=.FALSE.)
-      CALL solution % WriteHDF5(fileId, '/targetgrid/entropy')
+      CALL solution % WriteHDF5(fileId,'/targetgrid/entropy')
 
       INFO("Writing target grid primitive variables to file")
       CALL this % primitive % GridInterp(solution,gpuAccel=.FALSE.)
-      CALL solution % WriteHDF5(fileId, '/targetgrid/primitive')
+      CALL solution % WriteHDF5(fileId,'/targetgrid/primitive')
 
       ! Write the geometry to file
       INFO("Writing target grid geometry to file")
@@ -2219,6 +2387,5 @@ CONTAINS
     CALL interp % Free()
 
   END SUBROUTINE Write_cns2d
- 
 
 END MODULE SELF_cns2d

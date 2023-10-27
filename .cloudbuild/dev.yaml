@@ -8,20 +8,14 @@ steps:
          '--build-arg','PREC=${_PREC}',
          '--build-arg','FFLAGS=${_FFLAGS}',
          '-f',
-         'Dockerfile',
+         'docker/Dockerfile.rocm',
          '.',
          '-t',
-         'us-docker.pkg.dev/${PROJECT_ID}/self/base_rocm-${_ROCM_VERSION}_cuda-11.8.0_${_GPU_TARGET}_${_PREC}:dev']
+         'us-docker.pkg.dev/${PROJECT_ID}/self/rocm-${_ROCM_VERSION}_${_GPU_TARGET}_${_PREC}:dev']
 
-- id: Run Tests (Serial)
-  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/base_rocm-${_ROCM_VERSION}_cuda-11.8.0_${_GPU_TARGET}_${_PREC}:dev'
-  args: 
-  - '-c'
-  - | 
-      ./ci/test.sh
 
 images:
-- 'us-docker.pkg.dev/${PROJECT_ID}/self/base_rocm-${_ROCM_VERSION}_cuda-11.8.0_${_GPU_TARGET}_${_PREC}:dev'
+- 'us-docker.pkg.dev/${PROJECT_ID}/self/rocm-${_ROCM_VERSION}_${_GPU_TARGET}_${_PREC}:dev'
 
 options:
   diskSizeGb: 100
@@ -31,7 +25,7 @@ timeout: 14400s
 
 substitutions:
   _PREC: 'double'
-  _GPU_TARGET: 'sm_72'
-  _HIP_PLATFORM: 'nvidia'
+  _GPU_TARGET: 'gfx906'
+  _HIP_PLATFORM: 'amd'
   _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
-  _ROCM_VERSION: '5.2.3'
+  _ROCM_VERSION: '5.3.0'

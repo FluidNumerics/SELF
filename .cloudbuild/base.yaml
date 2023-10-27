@@ -1,0 +1,21 @@
+
+steps:
+- id: Build Docker Image
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['build',
+         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
+         '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
+         '--build-arg','PREC=${_PREC}',
+         '--build-arg','FFLAGS=${_FFLAGS}',
+         '-f',
+         'docker/deps/rocm/5.6/Dockerfile.rocm',
+         '.',
+         '-t',
+         'us-docker.pkg.dev/${PROJECT_ID}/self/base-ubuntu2204-rocm-5.6:latest']
+
+
+images:
+- 'us-docker.pkg.dev/${PROJECT_ID}/self/base-ubuntu2204-rocm-5.6:latest'
+
+
+timeout: 14400s

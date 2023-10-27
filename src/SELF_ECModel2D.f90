@@ -515,9 +515,9 @@ CONTAINS
               DO i = 0,this % solution % interp % N
 
                 ! Bump the last two stored solutions
-   this % prevSol % interior % hostData(i,j,3*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl)
- this % prevSol % interior % hostData(i,j,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,nVar + iVar,iEl)
-          this % prevSol % interior % hostData(i,j,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
+                this % prevSol % interior % hostData(i,j,3*nVar+iVar,iEl) = this % prevSol % interior % hostData(i,j,2*nVar+iVar,iEl)
+                this % prevSol % interior % hostData(i,j,2*nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,nVar + iVar,iEl)
+                this % prevSol % interior % hostData(i,j,nVar + iVar,iEl) = this % prevSol % interior % hostData(i,j,iVar,iEl)
 
                 ! Store the new solution
                 this % prevSol % interior % hostData(i,j,iVar,iEl) = this % solution % interior % hostData(i,j,iVar,iEl)
@@ -699,12 +699,21 @@ CONTAINS
     INTEGER :: i,j,iVar,iEl
 
     CALL this % PreTendency()
+
     CALL this % UpdateBoundary()
+
     CALL this % SetBoundaryCondition()
+
     CALL this % SourceMethod()
+
+    CALL this % PreFlux()
+
     CALL this % RiemannSolver()
+
     CALL this % FluxMethod()
+
     CALL this % ReprojectFlux()
+
     CALL this % CalculateFluxDivergence()
 
     IF (this % gpuAccel) THEN

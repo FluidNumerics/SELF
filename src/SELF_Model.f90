@@ -134,6 +134,7 @@ MODULE SELF_Model
 !    PROCEDURE :: CrankNicholson_timeIntegrator
 
     PROCEDURE :: PreTendency => PreTendency_Model
+    PROCEDURE :: PreFlux => PreFlux_Model
     PROCEDURE :: SourceMethod => Source_Model
     PROCEDURE :: FluxMethod => Flux_Model
     PROCEDURE :: RiemannSolver => RiemannSolver_Model
@@ -311,6 +312,21 @@ FUNCTION GetBCFlagForChar(charFlag) RESULT(intFlag)
     RETURN
 
   END SUBROUTINE PreTendency_Model
+
+  SUBROUTINE PreFlux_Model(this)
+    !! PreFlux is a template routine that is used to house any additional calculations
+    !! that you want to execute just before the calculation of flux terms.
+    !! This default PreFlux simply returns back to the caller without executing any instructions
+    !!
+    !! The intention is to provide a method that can be overridden through type-extension, to handle
+    !! any steps that need to be executed before proceeding with the usual tendency calculation methods.
+    !!
+    IMPLICIT NONE
+    CLASS(Model),INTENT(inout) :: this
+
+    RETURN
+
+  END SUBROUTINE PreFlux_Model
 
   SUBROUTINE Source_Model(this)
     !!
