@@ -36,8 +36,7 @@ RUN mkdir --parents --mode=0755 /etc/apt/keyrings &&\
 
 # Build stage with Spack pre-installed and ready to be used
 FROM spack/ubuntu-jammy:latest as builder
-COPY --from=rocm /opt/rocm /opt/rocm
-COPY --from=rocm /opt/rocm /opt/rocm-5.6.0
+COPY --from=rocm /opt/ /opt/
 
 # 10/8/2023 - Check out fluidnumerics-joe/spack for updated feq-parse version
 # When https://github.com/spack/spack/pull/40230 is merged, we won't need this
