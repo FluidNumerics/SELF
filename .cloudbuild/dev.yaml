@@ -1,31 +1,27 @@
 
 steps:
-- id: Build Docker Image
+- id: Ubuntu 22.04
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
-         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
-         '--build-arg','HIP_PLATFORM=${_HIP_PLATFORM}',
-         '--build-arg','PREC=${_PREC}',
-         '--build-arg','FFLAGS=${_FFLAGS}',
+         '--build-arg','GPU_TARGET=gfx90a',
+         '--build-arg','BUILD_TYPE=Debug',
          '-f',
-         'docker/Dockerfile.rocm',
+         'docker/ubuntu2204/rocm-${_ROCM_VERSION}/${_HIP_PLATFORM}/Dockerfile.rocm',
          '.',
          '-t',
-         'us-docker.pkg.dev/${PROJECT_ID}/self/rocm-${_ROCM_VERSION}_${_GPU_TARGET}_${_PREC}:dev']
+         'us-docker.pkg.dev/${PROJECT_ID}/self/rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:dev']
 
 
 images:
-- 'us-docker.pkg.dev/${PROJECT_ID}/self/rocm-${_ROCM_VERSION}_${_GPU_TARGET}_${_PREC}:dev'
+- 'us-docker.pkg.dev/${PROJECT_ID}/self/rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:dev'
 
 options:
   diskSizeGb: 100
-  machineType: 'E2_HIGHCPU_8'
+  machineType: 'E2_HIGHCPU_32'
 
 timeout: 14400s
 
 substitutions:
-  _PREC: 'double'
-  _GPU_TARGET: 'gfx906'
+  _GPU_TARGET: 'gfx90a'
   _HIP_PLATFORM: 'amd'
-  _FFLAGS: '-cpp -pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow'
-  _ROCM_VERSION: '5.3.0'
+  _ROCM_VERSION: '5.7'
