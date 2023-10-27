@@ -1,4 +1,4 @@
-FROM us-docker.pkg.dev/self-fluids/self-base/ubuntu2204-rocm-dev-5.7
+FROM us-docker.pkg.dev/self-fluids/self-base/ubuntu2204-rocm-5.7:latest
 
 ARG GPU_TARGET=gfx90a
 ARG BUILD_TYPE=Debug
