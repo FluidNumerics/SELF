@@ -19,27 +19,11 @@ if(NOT DEFINED ROCM_PATH)
 endif()
 find_program(CMAKE_CXX_COMPILER "hipcc" PATHS ${ROCM_PATH})
 
-
+# C Language is needed in order to verify Fortran compiler is C-interoperable
+# CXX language is needed to properly find "hip" package
 project(self VERSION 1.0.0
 	DESCRIPTION "Spectral Element Library in Fortran"
 	LANGUAGES Fortran HIP C CXX)
-
-
-# set( CMAKE_CXX_COMPILER "${ROCM_PATH}/hip/bin/hipcc" )
-# if(NOT DEFINED CUDA_PATH)
-#     if(NOT DEFINED ENV{CUDA_PATH})
-#         set(CUDA_PATH "/usr/local/cuda" CACHE PATH "Path to which CUDA has been installed")
-#     else()
-#         set(CUDA_PATH $ENV{CUDA_PATH} CACHE PATH "Path to which CUDA has been installed")
-#     endif()
-# endif()
-
-# conditional on GPU target
-# if nvidia
-# "-L$CUDA_PATH/targets/x86_64-linux/lib -lcudart"
-# if amd
-# -L$ROCM_PATH/lib -lamdhip64 -Wl,-rpath=$ROCM_PATH/lib 
-#set( HIP_Fortran_LFLAGS "-L${ROCM_PATH}/lib -lamdhip64 -Wl,-rpath=${ROCM_PATH}/lib")
 
 # Fortran compiler requirements
 INCLUDE(FortranCInterface)
@@ -56,7 +40,9 @@ ENDIF(NOT CMAKE_Fortran_COMPILER_SUPPORTS_F90)
 # Fortran compiler flags
 if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
     set( CMAKE_Fortran_FLAGS "-cpp -ffree-line-length-512" )
-    set( CMAKE_Fortran_FLAGS_DEBUG "-pg -g -O0 -C -Wall -fbounds-check -fbacktrace --coverage -ffpe-trap=invalid,zero,overflow" )
+    set( CMAKE_Fortran_FLAGS_DEBUG "-g -O0 -C -Wall -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow" )
+    set( CMAKE_Fortran_FLAGS_COVERAGE "-g -O0 --coverage")
+    set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
     set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
 endif()
 
@@ -66,14 +52,9 @@ find_package(hip REQUIRED)
 
 # MPI
 find_package(MPI COMPONENTS Fortran REQUIRED)
-# add_definitions(${MPI_Fortran_COMPILE_DEFINITIONS})
-# include_directories(${MPI_Fortran_INCLUDE_PATH})
-# link_directories(${MPI_Fortran_LIBRARIES})
 
 # HDF5 : See https://cmake.org/cmake/help/latest/module/FindHDF5.html
 find_package(HDF5 REQUIRED Fortran)
-# add_definitions(${HDF5_Fortran_DEFINITIONS})
-# include_directories(${HDF5_INCLUDE_DIRS})
 
 # JSON-Fortran
 find_library(JSONFORTRAN_LIBRARIES NAMES jsonfortran REQUIRED)
