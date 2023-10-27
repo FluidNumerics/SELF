@@ -44,6 +44,9 @@ if( "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU" )
     set( CMAKE_Fortran_FLAGS_COVERAGE "-g -O0 --coverage")
     set( CMAKE_Fortran_FLAGS_PROFILE "-pg -O3")
     set( CMAKE_Fortran_FLAGS_RELEASE "-O3" )
+
+    set( CMAKE_C_FLAGS_COVERAGE "-g -O0 --coverage")
+    
 endif()
 
 # ------ dependencies ------ #
@@ -73,3 +76,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 # Driver programs
 add_subdirectory(${CMAKE_SOURCE_DIR}/bin)
+
+# Tests
+add_subdirectory(${CMAKE_SOURCE_DIR}/test)

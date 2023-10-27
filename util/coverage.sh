@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 
 export SELF_BUILD_DIR=/build/
 export SELF_PREFIX=/opt/self
@@ -10,25 +10,17 @@ lcov --no-external \
      --directory ${SELF_BUILD_DIR} \
      --output-file /tmp/lcov_base.info
 
-for file in $(ls $SELF_PREFIX/test/*); do
+# Load dependency packages
+. /etc/profile.d/z10_spack.sh
 
-  echo "Running Test : $file"
-  $file
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "$file failed!"
-    exit $rc
-  fi
+# Run the tests
+ctest --test-dir ${SELF_BUILD_DIR}/build/test
 
-  # GPU accelerated
-  $file --gpu
-  rc=$?
-  if [ $rc -ne 0 ]; then
-    echo "$file failed!"
-    exit $rc
-  fi
-
-done
+rc=$?
+if [ $rc -ne 0 ]; then
+  echo "SELF tests failed!"
+  exit $rc
+fi
 
 lcov --no-external \
      --capture \
