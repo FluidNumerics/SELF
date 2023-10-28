@@ -3,8 +3,8 @@ steps:
 - id: Build Image
   name: 'gcr.io/cloud-builders/docker'
   args: ['build',
-         '--build-arg','GPU_TARGET=gfx90a',
-         '--build-arg','BUILD_TYPE=Debug',
+         '--build-arg','GPU_TARGET=${_GPU_TARGET}',
+         '--build-arg','BUILD_TYPE=Coverage',
          '-f',
          'docker/${_OS}/rocm-${_ROCM_VERSION}/${_HIP_PLATFORM}/Dockerfile',
          '.',
