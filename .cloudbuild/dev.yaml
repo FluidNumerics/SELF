@@ -11,14 +11,33 @@ steps:
          '-t',
          'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:${SHORT_SHA}']
 
-- id: Run CTests
+- id: Run CTests with coverage
   name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:${SHORT_SHA}'
   entrypoint: '/bin/bash'
   args: 
   - '-c'
   - |
-     . /etc/profile.d/z10_spack_environment.sh
-     ctest --test-dir /build/build/test
+      apt-get update -y && apt-get install lcov
+      lcov --no-external \
+          --capture \
+          --initial \
+          --directory /build/build \
+          --output-file /tmp/lcov_base.info
+
+      # Load dependency packages
+      . /etc/profile.d/z10_spack.sh
+
+      # Run the tests
+      ctest --test-dir /build/build/test
+
+      lcov --no-external \
+          --capture \
+          --directory /build/build \
+          --output-file /tmp/lcov_test.info
+
+      lcov --add-tracefile /tmp/lcov_base.info \
+          --add-tracefile /tmp/lcov_test.info \ 
+          --output-file /workspace/lcov.info
 
 
 images:
