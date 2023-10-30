@@ -25,4 +25,5 @@ target_include_directories(self PRIVATE
                         ${HDF5_INCLUDE_DIRS}/shared
                         ${MPI_Fortran_INCLUDE_DIRS})
 
+install(TARGETS self DESTINATION bin)
 #target_compile_options(self PRIVATE)
