@@ -66,4 +66,5 @@ endfunction ()
 add_fortran_test_executable (
     testsuite
     "scalargridinterp_1d_cpu_constant.f90"
-    "scalarboundaryinterp_1d_cpu_constant.f90")
+    "scalarboundaryinterp_1d_cpu_constant.f90"
+    "scalarderivative_1d_cpu_constant.f90")
