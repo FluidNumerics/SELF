@@ -45,12 +45,14 @@ steps:
            --output-file /workspace/lcov.info
 
 - id: Upload coverage to codecov
-  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:${SHORT_SHA}'
+  name: gcr.io/cloud-builders/git
   secretEnv: ['CODECOV_TOKEN']
   entrypoint: "/bin/bash"
   args: 
   - "-c"
   - |
+     export DEBIAN_FRONTEND=noninteractive 
+     apt-get update -y && apt-get install -y wget
      wget --no-check-certificate https://github.com/codecov/uploader/releases/download/v0.3.2/codecov-linux
      chmod +x ./codecov-linux
      ./codecov-linux -t "$$CODECOV_TOKEN" \
@@ -60,7 +62,7 @@ steps:
 
 
 images:
-- 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:${SHORT_SHA}'
+- 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:${SHORT_SHA}'
 
 # options:
 #   diskSizeGb: 100
