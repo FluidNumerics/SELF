@@ -14,7 +14,7 @@ RUN . /etc/profile.d/z10_spack_environment.sh && \
           -DCMAKE_HIP_ARCHITECTURES=${GPU_TARGET} \
           -DCMAKE_INSTALL_PREFIX=/opt/self \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-          ../ && \
+          ./ && \
     make VERBOSE=1 && \
     make install
     
