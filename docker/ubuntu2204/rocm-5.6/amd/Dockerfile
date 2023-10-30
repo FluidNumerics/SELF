@@ -1,4 +1,4 @@
-FROM us-docker.pkg.dev/fluidnumerics-self/self-base/ubuntu2204-rocm-dev-5.6
+FROM us-docker.pkg.dev/fluidnumerics-self/self-base/ubuntu2204-rocm-5.6
 
 COPY --from=cuda /usr/local/cuda /usr/local/cuda
 ENV PATH=$PATH:/usr/local/cuda/bin

@@ -1,6 +1,6 @@
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04 as cuda
 
-FROM us-docker.pkg.dev/fluidnumerics-self/self-base/ubuntu2204-rocm-dev-5.7
+FROM us-docker.pkg.dev/fluidnumerics-self/self-base/ubuntu2204-rocm-5.7
 
 COPY --from=cuda /usr/local/cuda /usr/local/cuda
 ENV PATH=$PATH:/usr/local/cuda/bin
