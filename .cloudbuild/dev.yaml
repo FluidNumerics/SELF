@@ -9,45 +9,69 @@ steps:
          'docker/${_OS}/rocm-${_ROCM_VERSION}/${_HIP_PLATFORM}/Dockerfile',
          '.',
          '-t',
-         'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:${SHORT_SHA}']
+         'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:${SHORT_SHA}']
 
 - id: Run CTests with coverage
-  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:${SHORT_SHA}'
+  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:${SHORT_SHA}'
   entrypoint: '/bin/bash'
   args: 
   - '-c'
   - |
       apt-get update -y && apt-get install -y lcov
+
+      cd /self
+
       lcov --no-external \
           --capture \
           --initial \
-          --directory /build/build \
+          --directory . \
+          --exclude '*/test/*' \
           --output-file /tmp/lcov_base.info
 
       # Load dependency packages
       . /etc/profile.d/z10_spack_environment.sh
 
       # Run the tests
-      ctest --test-dir /build/build/test
+      ctest --test-dir /self/test
 
       lcov --no-external \
-          --capture \
-          --directory /build/build \
-          --output-file /tmp/lcov_test.info
+           --capture \
+           --directory . \
+           --exclude '*/test/*' \
+           --output-file /tmp/lcov_test.info
 
       lcov --add-tracefile /tmp/lcov_base.info \
-          --add-tracefile /tmp/lcov_test.info \ 
-          --output-file /workspace/lcov.info
+           --add-tracefile /tmp/lcov_test.info \
+           --output-file /workspace/lcov.info
+
+- id: Upload coverage to codecov
+  name: 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_GPU_TARGET}:${SHORT_SHA}'
+  secretEnv: ['CODECOV_TOKEN']
+  entrypoint: "/bin/bash"
+  args: 
+  - "-c"
+  - |
+     wget --no-check-certificate https://github.com/codecov/uploader/releases/download/v0.3.2/codecov-linux
+     chmod +x ./codecov-linux
+     ./codecov-linux -t "$$CODECOV_TOKEN" \
+                            --sha "${COMMIT_SHA}" \
+                            --branch "${BRANCH_NAME}" \
+                            --pr "${_PR_NUMBER}"
 
 
 images:
 - 'us-docker.pkg.dev/${PROJECT_ID}/self/${_OS}-rocm-${_ROCM_VERSION}_${_HIP_PLATFORM}:${SHORT_SHA}'
 
-options:
-  diskSizeGb: 100
-  machineType: 'E2_HIGHCPU_32'
+# options:
+#   diskSizeGb: 100
+#   machineType: 'E2_HIGHCPU_32'
 
 timeout: 14400s
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/fluidnumerics-self/secrets/codecov-token/versions/1
+      env: 'CODECOV_TOKEN'
 
 substitutions:
   _GPU_TARGET: 'gfx90a'
