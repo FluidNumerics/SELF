@@ -6,9 +6,9 @@
         "control_quadrature": "gauss",
         "target_degree": 10,
         "target_quadrature": "uniform",
-        "nX": 5,
+        "nX": 20,
         "x0": 0.0,
-        "xN": 1e6
+        "xN": 1.0
     },
     "deployment_options": {
         "gpu_accel": false,
@@ -16,11 +16,11 @@
     },
     "time_options": {
         "integrator": "rk3",
-        "dt": 10.0,
+        "dt": 1.0e-5,
         "cfl_max": 0.0,
         "start_time": 0.0,
-        "duration": 1.5e6,
-        "io_interval": 1.0e4
+        "duration": 1.0,
+        "io_interval": 1.0e-2
     },
     "units": {
         "time": "s",
@@ -28,11 +28,11 @@
         "mass": "kg"
     },
     "brg1d": {
-        "u0": "u = 0.5*(1.0 - \\tanh((x - (250000 + 0.5*t))/100000))",
-        "uL": "u = 0.5*(1.0 - \\tanh((x - (250000 + 0.5*t))/100000))",
-        "uR": "u = 0.5*(1.0 - \\tanh((x - (250000 + 0.5*t))/100000))",
-        "uxL": "ux = -(1.0/200000.0)*(\\sech((x - (250000 + 0.5*t))/100000))^2",
-        "uxR": "ux = -(1.0/200000.0)*(\\sech((x - (250000 + 0.5*t))/100000))^2",
-        "viscosity": 2.5e4
+        "u0": "u = 0.5*(1.0 - \\tanh( ( x - (0.5*t + 0.1) )/0.04 ) )",
+        "uL": "u = 0.5*(1.0 - \\tanh( ( x - (0.5*t + 0.1) )/0.04 ) )",
+        "uR": "u = 0.5*(1.0 - \\tanh( ( x - (0.5*t + 0.1) )/0.04 ) )",
+        "uxL": "ux = -(1.0/0.08)*(\\sech( ( x - (0.5*t + 0.1) )/0.04 ) )^2",
+        "uxR": "ux = -(1.0/0.08)*(\\sech( ( x - (0.5*t + 0.1) )/0.04 ) )^2",
+        "viscosity": 0.01
     }
 }

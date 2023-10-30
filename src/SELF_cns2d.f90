@@ -2029,7 +2029,7 @@ CONTAINS
             tau22 = 4.0_PREC/3.0_PREC*dvdy - 2.0_PREC/3.0_PREC*dudx
 
             dTdx = this % primitiveGradient % interior % hostData(1,n,j,4,iEl)
-            dTdy = this % primitiveGradient % boundary % hostData(2,n,j,4,iEl)
+            dTdy = this % primitiveGradient % interior % hostData(2,n,j,4,iEl)
 
             ! x-momentum
             this % flux % physical % hostData(1,1,n,i,j,1,iEl) = &
@@ -2079,7 +2079,7 @@ CONTAINS
             tau22 = 4.0_PREC/3.0_PREC*dvdy - 2.0_PREC/3.0_PREC*dudx
 
             dTdx = this % primitiveGradient % interior % hostData(1,i,n,4,iEl)
-            dTdy = this % primitiveGradient % boundary % hostData(2,i,n,4,iEl)
+            dTdy = this % primitiveGradient % interior % hostData(2,i,n,4,iEl)
 
             ! x-momentum
             this % flux % physical % hostData(1,2,n,i,j,1,iEl) = &
