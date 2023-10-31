@@ -94,7 +94,7 @@ MODULE SELF_cns2d
     ! New Methods
     PROCEDURE :: CheckMinMax => CheckMinMax_cns2d
     PROCEDURE :: SetMaxCFL => SetMaxCFL_cns2d
-    PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_cns2d
+  !  PROCEDURE :: HydrostaticAdjustment => HydrostaticAdjustment_cns2d
 
     ! Interior Hyperbolic Flux methods
     PROCEDURE,PRIVATE :: ConservativeFlux
@@ -513,12 +513,12 @@ CONTAINS
     ! Configure environmentals
     CALL this % SetGravity(gp)
 
-    CALL config % Get("cns2d.initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
-    IF (hydrostaticAdjust) THEN
-      CALL config % Get("cns2d.initial_conditions.hydrostatic_momentum_max",momentumMax)
-      CALL this % HydrostaticAdjustment(momentumMax)
+    ! CALL config % Get("cns2d.initial_conditions.hydrostatic_adjustment",hydrostaticAdjust)
+    ! IF (hydrostaticAdjust) THEN
+    !   CALL config % Get("cns2d.initial_conditions.hydrostatic_momentum_max",momentumMax)
+    !   CALL this % HydrostaticAdjustment(momentumMax)
 
-    END IF
+    ! END IF
 
     ! Get additional initial conditions (add to static state if provided)
     CALL config % Get("cns2d.initial_conditions.u",u)
@@ -1060,85 +1060,85 @@ CONTAINS
 
   END SUBROUTINE SetMaxCFL_cns2d
 
-  SUBROUTINE HydrostaticAdjustment_cns2d(this,tolerance)
-    !! This method can be used to adjust a compressible fluid
-    !! to hydrostatic equilibrium. On input, the cns2d
-    !! object is expected to have the gravitational potential set to
-    !! a non-zero field, the density and temperature fields are
-    !! assumed uniform, and the velocity field corresponds to a motionless
-    !! fluid.
-    !!
-    !! To adjust the fluid to hydrostatic equilibrium, an artificial
-    !! momentum drag term is introduced to the momentum equations. The model
-    !! is stepped forward until the fluid tendency absolute max value is
-    !! less than a specified tolerance (optional input).
-    !!
-    !! The drag coefficient size is chosen to be
-    !!
-    !!  Cd = rac{max(c)}{min(\Delta x)}
-    !!
-    !! In this subroutine, the time step is chosen so that the sound-wave
-    !! maximum CFL number is 0.75
-    !!
-    !!   CFL = rac{max(c) \Delta t}{min(\Delta x)} = 0.75
-    !!
-    !!
-    !!
-    !! ightarrow\Delta t = 0.75rac{MIN(\Delta x) }{\max{c}}
-    !!
-    !! After adjustment, the
-    IMPLICIT NONE
-    CLASS(cns2d),INTENT(inout) :: this
-    REAL(prec),INTENT(in) :: tolerance
-    ! Local
-    INTEGER :: i
-    REAL(prec) :: currentDt,currentTime,tn
-    REAL(prec) :: Cd
-    REAL(prec) :: dsdtMax(this % solution % nVar)
-    REAL(prec) :: sMax(this % solution % nVar)
-    REAL(prec) :: dxMin
-    REAL(prec) :: diagMax(nDiagnostics)
+  ! SUBROUTINE HydrostaticAdjustment_cns2d(this,tolerance)
+  !   !! This method can be used to adjust a compressible fluid
+  !   !! to hydrostatic equilibrium. On input, the cns2d
+  !   !! object is expected to have the gravitational potential set to
+  !   !! a non-zero field, the density and temperature fields are
+  !   !! assumed uniform, and the velocity field corresponds to a motionless
+  !   !! fluid.
+  !   !!
+  !   !! To adjust the fluid to hydrostatic equilibrium, an artificial
+  !   !! momentum drag term is introduced to the momentum equations. The model
+  !   !! is stepped forward until the fluid tendency absolute max value is
+  !   !! less than a specified tolerance (optional input).
+  !   !!
+  !   !! The drag coefficient size is chosen to be
+  !   !!
+  !   !!  Cd = rac{max(c)}{min(\Delta x)}
+  !   !!
+  !   !! In this subroutine, the time step is chosen so that the sound-wave
+  !   !! maximum CFL number is 0.75
+  !   !!
+  !   !!   CFL = rac{max(c) \Delta t}{min(\Delta x)} = 0.75
+  !   !!
+  !   !!
+  !   !!
+  !   !! ightarrow\Delta t = 0.75rac{MIN(\Delta x) }{\max{c}}
+  !   !!
+  !   !! After adjustment, the
+  !   IMPLICIT NONE
+  !   CLASS(cns2d),INTENT(inout) :: this
+  !   REAL(prec),INTENT(in) :: tolerance
+  !   ! Local
+  !   INTEGER :: i
+  !   REAL(prec) :: currentDt,currentTime,tn
+  !   REAL(prec) :: Cd
+  !   REAL(prec) :: dsdtMax(this % solution % nVar)
+  !   REAL(prec) :: sMax(this % solution % nVar)
+  !   REAL(prec) :: dxMin
+  !   REAL(prec) :: diagMax(nDiagnostics)
 
-    dxMin = this % geometry % CovariantArcMin()
-    diagMax = this % diagnostics % AbsMaxInterior() ! Get the absolute max of the diagnostics
+  !   dxMin = this % geometry % CovariantArcMin()
+  !   diagMax = this % diagnostics % AbsMaxInterior() ! Get the absolute max of the diagnostics
 
-    ! Reassign the time step for the hydrostatic adjustment
-    ! so that the max CFL number is 0.5
-    currentDt = this % dt
-    CALL this % SetMaxCFL(0.5_PREC)
+  !   ! Reassign the time step for the hydrostatic adjustment
+  !   ! so that the max CFL number is 0.5
+  !   currentDt = this % dt
+  !   CALL this % SetMaxCFL(0.5_PREC)
 
-    ! Calculate the drag coefficient
-    Cd = 0.3*diagMax(3)/dxMin
+  !   ! Calculate the drag coefficient
+  !   Cd = 0.3*diagMax(3)/dxMin
 
-    PRINT *, "Drag coefficient : ",Cd
+  !   PRINT *, "Drag coefficient : ",Cd
 
-    CALL this % SetDrag(Cd)
+  !   CALL this % SetDrag(Cd)
 
-    ! Save the current time
-    currentTime = this % t
+  !   ! Save the current time
+  !   currentTime = this % t
 
-    tn = 1000.0_PREC*this % dt
-    DO i = 1,hydrostaticAdjMaxIters
+  !   tn = 1000.0_PREC*this % dt
+  !   DO i = 1,hydrostaticAdjMaxIters
 
-      this % t = 0.0_PREC
-      CALL this % ForwardStep(tn)
+  !     this % t = 0.0_PREC
+  !     CALL this % ForwardStep(tn)
 
-      sMax = this % solution % AbsMaxInterior()
+  !     sMax = this % solution % AbsMaxInterior()
 
-      PRINT *, "Momentum Max : ",SQRT(sMax(1)**2 + sMax(2)**2)
+  !     PRINT *, "Momentum Max : ",SQRT(sMax(1)**2 + sMax(2)**2)
 
-      ! Check if momentum max is small in comparison to tolerance
-      IF (SQRT(sMax(1)**2 + sMax(2)**2) <= tolerance) THEN
-        PRINT *, "Reached hydrostatic equilibrium in ",i," iterations"
-        EXIT
-      END IF
-    END DO
+  !     ! Check if momentum max is small in comparison to tolerance
+  !     IF (SQRT(sMax(1)**2 + sMax(2)**2) <= tolerance) THEN
+  !       PRINT *, "Reached hydrostatic equilibrium in ",i," iterations"
+  !       EXIT
+  !     END IF
+  !   END DO
 
-    ! Reset delta t and time
-    this % dt = currentDt
-    this % t = currentTime
+  !   ! Reset delta t and time
+  !   this % dt = currentDt
+  !   this % t = currentTime
 
-  END SUBROUTINE HydrostaticAdjustment_cns2d
+  ! END SUBROUTINE HydrostaticAdjustment_cns2d
 
   SUBROUTINE PreTendency_cns2d(this)
     !! Calculate the velocity and density weighted enthalpy at element interior and element boundaries
@@ -1856,7 +1856,7 @@ CONTAINS
     CALL this % HyperbolicInteriorFlux()
 
     ! For parabolic terms
-    CALL this % ParabolicInteriorFlux()
+    !CALL this % ParabolicInteriorFlux()
 
   END SUBROUTINE FluxMethod_cns2d
 
@@ -1873,7 +1873,7 @@ CONTAINS
     CALL this % HyperbolicBoundaryFlux()
 
     ! For parabolic terms
-    CALL this % ParabolicBoundaryFlux() ! Parabolic Boundary Flux
+    !CALL this % ParabolicBoundaryFlux() ! Parabolic Boundary Flux
 
   END SUBROUTINE RiemannSolver_cns2d
 
